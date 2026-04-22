@@ -601,6 +601,62 @@ app.include_router(pro_reunions_router,   prefix="/api/v1/pro/reunions",    tags
 app.include_router(pro_marketing_router,  prefix="/api/v1/pro/marketing",   tags=["Plateforme Pro — Agent Marketing Visuel"])
 app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes & Études qualitatives/quantitatives"])
 
+# ─── Endpoint setup initial (création admin si aucun n'existe) ────────────────
+from fastapi import Body as _Body
+
+@app.post("/api/v1/setup/admin", tags=["Setup"], include_in_schema=False)
+async def setup_admin(
+    email: str = _Body(...),
+    password: str = _Body(...),
+    setup_key: str = _Body(...),
+):
+    """
+    Crée le premier super_admin si aucun n'existe encore.
+    Protégé par setup_key = valeur de ADMIN_SETUP_KEY (env var) ou 'yukpo-setup-2024'.
+    Une fois l'admin créé, cet endpoint renvoie une erreur 409.
+    """
+    import os as _os_s
+    from sqlalchemy.ext.asyncio import create_async_engine as _cae_s, AsyncSession as _AS_s
+    from sqlalchemy.orm import sessionmaker as _sm_s
+    from sqlalchemy import select as _sel_s
+    from passlib.context import CryptContext as _CC_s
+    from datetime import datetime as _dtt_s
+    from fastapi import HTTPException as _HE
+    from core.database import UtilisateurDB as _UDB_s
+
+    expected_key = _os_s.environ.get("ADMIN_SETUP_KEY", "yukpo-setup-2024")
+    if setup_key != expected_key:
+        raise _HE(403, "setup_key invalide")
+    if not email or "@" not in email:
+        raise _HE(400, "email invalide")
+    if len(password) < 8:
+        raise _HE(400, "password : 8 caractères minimum")
+
+    _eng = _cae_s(settings.DATABASE_URL, echo=False)
+    _Sess = _sm_s(_eng, class_=_AS_s, expire_on_commit=False)
+
+    try:
+        async with _Sess() as _sess:
+            existing = (await _sess.execute(
+                _sel_s(_UDB_s).where(_UDB_s.role.in_(["super_admin", "yukpo_owner"]))
+            )).scalars().first()
+
+            if existing:
+                raise _HE(409, f"Admin déjà existant : {existing.email}. Utilisez /auth/login.")
+
+            _ctx = _CC_s(schemes=["bcrypt"], deprecated="auto")
+            _u = _UDB_s(
+                username=email.split("@")[0], email=email,
+                nom="Yukpo Admin", hashed_password=_ctx.hash(password),
+                role="super_admin", compagnie_id=None,
+                actif=True, cree_le=_dtt_s.utcnow(), cree_par=0,
+            )
+            _sess.add(_u)
+            await _sess.commit()
+            return {"message": f"Compte super_admin créé : {email}", "role": "super_admin"}
+    finally:
+        await _eng.dispose()
+
 # ─── YukpoSecrétariat ─────────────────────────────────────────────────────────
 app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction",   tags=["Secrétariat — Rédaction IA"])
 app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
