@@ -6,13 +6,14 @@ FROM python:3.11-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
-# Copier uniquement les requirements pour profiter du cache Docker
-COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+# requirements-cloud.txt exclut cx_Oracle et pyodbc (non compatibles cloud sans clients natifs)
+COPY requirements-cloud.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements-cloud.txt
 
 
 # ─── Stage 2 : Production ─────────────────────────────────────────────────────
