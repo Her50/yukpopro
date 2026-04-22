@@ -1,0 +1,27 @@
+name: Deploy Backend → Railway
+
+on:
+  push:
+    branches: [yukpopro-main]
+    paths:
+      - 'yukpo_assurance/**'
+      - '.github/workflows/deploy-railway.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yukpo_assurance
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service yukpopro-backend --detach
