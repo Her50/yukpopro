@@ -1,0 +1,26 @@
+name: Deploy Backend → Fly.io
+
+on:
+  push:
+    branches: [yukpopro-main]
+    paths:
+      - 'yukpo_assurance/**'
+      - '.github/workflows/deploy-fly.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yukpo_assurance
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only
