@@ -27,7 +27,7 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
     soft_limit = 25
 
 [[vm]]
-  memory = "512mb"
+  memory = "1gb"
   cpu_kind = "shared"
   cpus = 1
 
