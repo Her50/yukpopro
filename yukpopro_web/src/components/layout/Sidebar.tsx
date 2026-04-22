@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import {
   LayoutDashboard, MessageSquare, User, LogOut,
   ChevronLeft, ChevronRight, Sparkles, Shield, CreditCard,
-  Users, Languages, FileText, FolderOpen, Briefcase, Gavel,
+  Users, Languages, FileText, FolderOpen, Briefcase, Gavel, ClipboardList,
 } from "lucide-react";
 import { cn, YukpoLogo, Badge } from "@/components/ui";
 import { useAuthStore, useProfilStore, useUIStore } from "@/store";
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { path: "/reunions",      icon: Users,           label: "Réunions",         badge: null,  adminOnly: false },
   { path: "/emploi",        icon: Briefcase,       label: "Offres d'emploi",  badge: null,  adminOnly: false },
   { path: "/marches",       icon: Gavel,           label: "Appels d'offres",  badge: null,  adminOnly: false },
+  { path: "/enquetes",      icon: ClipboardList,   label: "Enquêtes",         badge: null,  adminOnly: false },
   { path: "/dashboard",     icon: LayoutDashboard, label: "Tableau de bord",  badge: null,  adminOnly: false },
   { path: "/profil",        icon: User,            label: "Mon Profil",       badge: null,  adminOnly: false },
   { path: "/abonnement",    icon: CreditCard,      label: "Abonnement",       badge: null,  adminOnly: false },

@@ -13,6 +13,7 @@ import { GenerateursPage } from "@/pages/GenerateursPage";
 import { HistoriqueDocumentsPage } from "@/pages/HistoriqueDocumentsPage";
 import { EmploiPage } from "@/pages/EmploiPage";
 import { MarchesPage } from "@/pages/MarchesPage";
+import { EnquetesPage } from "@/pages/EnquetesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +31,7 @@ export default function App() {
 
           {/* Protected */}
           <Route element={<AppLayout />}>
-            {/* Yukpo IA est la page principale */}
+            {/* YukpoPro est la page principale */}
             <Route path="/"            element={<Navigate to="/chat" replace />} />
             <Route path="/chat"        element={<ChatPage />} />
             <Route path="/reunions"    element={<ReunionsPage />} />
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/mes-documents"  element={<HistoriqueDocumentsPage />} />
             <Route path="/emploi"         element={<EmploiPage />} />
             <Route path="/marches"        element={<MarchesPage />} />
+            <Route path="/enquetes"       element={<EnquetesPage />} />
             {/* Redirections legacy */}
             <Route path="/copilote"    element={<Navigate to="/chat" replace />} />
             <Route path="/agents"      element={<Navigate to="/chat" replace />} />

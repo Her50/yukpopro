@@ -79,7 +79,7 @@ export const CopilotePage = () => {
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs text-slate-400">
-                {profil?.metier ? `Assistant ${profil.metier} · ${profil.pays}` : "Assistant IA disponible"}
+                {profil?.metier ? `Yukpo ${profil.metier} · ${profil.pays}` : "Yukpo disponible"}
               </span>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const CopilotePage = () => {
             <div>
               <h2 className="text-xl font-display font-bold text-white">Bonjour ! Je suis Yukpo Assistant</h2>
               <p className="text-slate-400 mt-2 leading-relaxed">
-                Votre assistant IA professionnel. Je réponds à toutes vos questions —
+                Votre assistant YukpoPro. Je réponds à toutes vos questions —
                 métier, calculs, réglementation africaine, rédaction, traduction, ou simplement pour discuter.
               </p>
             </div>

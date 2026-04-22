@@ -593,7 +593,7 @@ const OffreCard = ({ offre, expanded, onToggle }: {
       {isSimule && (
         <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1 bg-amber-500/15 border border-amber-500/25 rounded-lg w-fit">
           <AlertCircle size={12} className="text-amber-400" />
-          <span className="text-amber-400 text-xs font-medium">Suggestion IA — aucune offre réelle trouvée</span>
+          <span className="text-amber-400 text-xs font-medium">Suggestion YukpoPro — aucune offre réelle trouvée</span>
         </div>
       )}
 
@@ -650,7 +650,7 @@ const OffreCard = ({ offre, expanded, onToggle }: {
           )}
           {isSimule && (
             <p className="text-amber-500/80 text-xs">
-              Ces suggestions sont générées par l'IA car les sources d'emploi (Google Jobs, Adzuna, Jooble…) étaient indisponibles lors de la dernière recherche. Relancez une recherche pour obtenir de vraies offres.
+              Ces suggestions sont générées par YukpoPro car les sources d'emploi (Google Jobs, Adzuna, Jooble…) étaient indisponibles lors de la dernière recherche. Relancez une recherche pour obtenir de vraies offres.
             </p>
           )}
           <div className="flex items-center gap-3">

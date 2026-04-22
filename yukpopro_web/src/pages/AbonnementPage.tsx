@@ -153,7 +153,7 @@ export const AbonnementPage = () => {
       <div>
         <h1 className="text-2xl font-display font-bold text-white">Abonnement & Paiement</h1>
         <p className="text-slate-400 text-sm mt-1">
-          Tous les 13 agents IA sont accessibles à tous les utilisateurs. Seul le quota de crédits varie selon le plan.
+          Tous les 13 agents Yukpo sont accessibles à tous les utilisateurs. Seul le quota de crédits varie selon le plan.
         </p>
         <div className="mt-3 flex items-start gap-2 bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3 max-w-2xl">
           <span className="text-yukpo-400 text-sm">💡</span>
@@ -278,7 +278,7 @@ export const AbonnementPage = () => {
                 {operateursFiltres.map((op) => (
                   <button key={op.id} onClick={() => setOperateurR(op.id)}
                     className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${operateurR === op.id ? "border-yukpo-500 bg-yukpo-500/10 text-white" : "border-slate-700 text-slate-300 hover:border-slate-600"}`}>
-                    <span className="text-2xl">{op.logo}</span>
+                    <img src={op.logo} alt={op.label} className="w-8 h-8 rounded-full object-contain bg-white p-0.5" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     <span className="text-sm font-medium">{op.label}</span>
                   </button>
                 ))}

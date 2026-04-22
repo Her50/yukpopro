@@ -1,6 +1,6 @@
 /**
  * Réunions IA — Yukpo Pro
- * Enregistrement audio réel + transcription multilingue (Whisper) + rapport IA automatique
+ * Enregistrement audio réel + transcription IA multilingue + rapport automatique
  * Identifie les participants, décisions, actions et suivi recommandations.
  */
 import { useState, useRef, useEffect } from "react";
@@ -37,7 +37,7 @@ interface Reunion {
   langueDetectee?: string;
 }
 
-// ── Langues supportées par Whisper ────────────────────────────────────────────
+// ── Langues supportées ────────────────────────────────────────────────────────
 
 const LANGUES = [
   { code: "auto", label: "Détection auto" },
@@ -117,7 +117,7 @@ function useAudioRecorder() {
         echoCancellation: { ideal: true },
         noiseSuppression: { ideal: true },
         autoGainControl: { ideal: true },   // amplifie les voix lointaines
-        sampleRate: { ideal: 48000 },        // 48kHz — qualité Whisper optimale
+        sampleRate: { ideal: 48000 },        // 48kHz — qualité audio optimale
         channelCount: { ideal: 2 },          // stéréo pour capter toute la salle
         // Désactiver les contraintes trop strictes qui bloquent sur certains navigateurs
         ...(navigator.userAgent.includes("Chrome") ? {
@@ -300,7 +300,7 @@ const FormulaireReunion = ({
         setNotes(prev => (prev.trim() ? prev + "\n\n--- Notes live ---\n" + liveSpeech : liveSpeech));
         toast("Transcription Yukpo indisponible — notes live utilisées", { icon: "⚠️" });
       } else {
-        toast.error("Erreur de transcription. Vérifiez la clé API OpenAI.");
+        toast.error("Erreur de transcription. Le service YukpoPro est temporairement indisponible.");
       }
       setLiveSpeech("");
     } finally {
@@ -974,9 +974,8 @@ export const ReunionsPage = () => {
     const langue = (reunion.langue && reunion.langue !== "auto") ? reunion.langue : "fr";
 
     try {
-      // Contexte enrichi
+      // Contexte additionnel (hors date — déjà dans le titre/rapport)
       const contexteParties = [
-        reunion.date ? `Date : ${reunion.date}` : null,
         reunion.langueDetectee ? `Langue détectée : ${reunion.langueDetectee}` : null,
       ].filter(Boolean);
 
@@ -986,6 +985,7 @@ export const ReunionsPage = () => {
         participants: participantsStr,
         langue,
         contexte: contexteParties.length > 0 ? contexteParties.join(" | ") : undefined,
+        duree_secondes: reunion.dureeEnregistrement || undefined,
       });
       const updated2 = (notesOverride
         ? reunions.map(r => r.id === id ? { ...r, notes: notesFinales } : r)

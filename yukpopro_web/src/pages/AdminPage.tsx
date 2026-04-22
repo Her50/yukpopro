@@ -267,7 +267,7 @@ export const AdminPage = () => {
           <div>
             <p className="text-red-400 font-semibold text-sm">Compte Administrateur</p>
             <p className="text-slate-400 text-sm mt-1">
-              En tant qu'administrateur, vous avez accès à tous les agents IA (quelque soit votre métier configuré).
+              En tant qu'administrateur, vous avez accès à tous les agents Yukpo (quelque soit votre métier configuré).
               Pour vous connecter : utilisez le nom d'utilisateur <code className="bg-slate-800 px-1 rounded">admin</code> avec le mot de passe <code className="bg-slate-800 px-1 rounded">Admin123!</code> ou <code className="bg-slate-800 px-1 rounded">yukpo2025</code>.
             </p>
           </div>

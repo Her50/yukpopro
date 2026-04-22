@@ -1,5 +1,5 @@
 /**
- * Yukpo IA — Interface de chat unifiée
+ * YukpoPro — Interface de chat unifiée
  * Remplace CopilotePage, AgentsPage, GenerateursPage, AnalysePage, TraductionPage
  * Un seul chat intelligent qui orchestre tous les agents et outils.
  */
@@ -141,9 +141,18 @@ export const ChatPage = () => {
         });
       }
     } catch (err: any) {
-      const detail = err?.response?.data?.detail || "Erreur de connexion. Réessayez.";
-      updateLastAssistantMessage(`⚠️ ${detail}`, null);
-      toast.error("Erreur Yukpo IA");
+      const detail = err?.response?.data?.detail;
+      if (detail && typeof detail === "object" && detail.code === "CREDITS_EPUISES") {
+        updateLastAssistantMessage(
+          `⚠️ **${detail.message}** ${detail.action}\n\n[→ Recharger mes crédits / Changer de plan](/abonnement)`,
+          null,
+        );
+        toast.error("Crédits épuisés");
+      } else {
+        const msg = typeof detail === "string" ? detail : "Erreur de connexion. Réessayez.";
+        updateLastAssistantMessage(`⚠️ ${msg}`, null);
+        toast.error("Erreur YukpoPro");
+      }
     } finally {
       setLoading(false);
     }
@@ -675,7 +684,7 @@ export const ChatPage = () => {
             onSaved={(updated) => {
               useProfilStore.getState().setProfil(updated);
               setProfilModalOpen(false);
-              toast.success("Profil mis à jour ! L'IA s'adapte à votre nouveau profil.");
+              toast.success("Profil mis à jour ! Yukpo s'adapte à votre nouveau profil.");
             }}
           />
         )}
@@ -913,7 +922,7 @@ const ProfilModal = ({
         </div>
 
         <p className="px-5 py-3 text-xs text-slate-400 border-b border-slate-800 flex-shrink-0">
-          Votre profil configure l'IA : plus il est précis, plus les réponses sont adaptées à votre contexte.
+          Votre profil configure Yukpo : plus il est précis, plus les réponses sont adaptées à votre contexte.
         </p>
 
         {/* Formulaire */}

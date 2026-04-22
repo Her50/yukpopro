@@ -19,7 +19,7 @@ import type {
 
 const http: AxiosInstance = axios.create({
   baseURL: "/api/v1",
-  timeout: 120_000,  // 2 min — agents IA peuvent être lents
+  timeout: 120_000,  // 2 min — agents Yukpo peuvent être lents
   headers: { "Content-Type": "application/json" },
 });
 
@@ -86,7 +86,7 @@ export const profilApi = {
   },
 };
 
-// ── Chat unifié (Yukpo IA) — orchestrateur principal ─────────────────────────
+// ── Chat unifié (YukpoPro) — orchestrateur principal ─────────────────────────
 
 export interface UploadedFile {
   nom: string;
@@ -496,6 +496,7 @@ export const reunionsApi = {
     participants?: string;
     langue?: string;
     contexte?: string;
+    duree_secondes?: number;
   }): Promise<{ rapport: string; titre: string; langue: string; fichier?: string; sauvegarde_mes_documents?: boolean }> => {
     const { data } = await http.post("/pro/reunions/generer-rapport", payload);
     return data;
@@ -575,6 +576,63 @@ export const marketingApi = {
     themes: string[];
   }> => {
     const { data } = await http.get("/pro/marketing/types");
+    return data;
+  },
+};
+
+// ── Enquêtes & Études ────────────────────────────────────────────────────────
+
+export const enquetesApi = {
+  lister: async (): Promise<{ etudes: any[] }> => {
+    const { data } = await http.get("/enquetes/");
+    return data;
+  },
+
+  creer: async (payload: {
+    titre: string; contexte: string; methodologie: string; mode: string;
+    population_cible?: string; terrain?: string; questions_recherche?: string[];
+  }): Promise<any> => {
+    const { data } = await http.post("/enquetes/", payload);
+    return data;
+  },
+
+  getEtude: async (id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${id}`);
+    return data;
+  },
+
+  uploaderAudio: async (etude_id: string, file: File, locuteur = "Répondant"): Promise<any> => {
+    const fd = new FormData();
+    fd.append("audio", file, file.name);
+    fd.append("locuteur", locuteur);
+    const { data } = await http.post(`/enquetes/${etude_id}/audio`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 180_000,
+    });
+    return data;
+  },
+
+  analyser: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/analyser`, {}, { timeout: 180_000 });
+    return data;
+  },
+
+  genererRapport: async (etude_id: string, format = "json"): Promise<any> => {
+    const { data } = await http.post(
+      `/enquetes/${etude_id}/rapport`,
+      null,
+      { params: { format_rapport: format }, timeout: 180_000 }
+    );
+    return data;
+  },
+
+  getRapport: async (etude_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${etude_id}/rapport`);
+    return data;
+  },
+
+  analyserIntelligent: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/analyser-intelligent`, {}, { timeout: 180_000 });
     return data;
   },
 };

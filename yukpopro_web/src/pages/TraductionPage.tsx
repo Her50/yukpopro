@@ -324,7 +324,7 @@ export const TraductionPage = () => {
                   ))}
                 </div>
                 <p className="text-slate-500 text-xs mt-2">
-                  Les images sont traitées par OCR (Claude Vision). Le texte extrait est traduit et retourné.
+                  Les images sont analysées par reconnaissance intelligente (OCR). Le texte extrait est traduit et retourné.
                 </p>
               </Card>
 
