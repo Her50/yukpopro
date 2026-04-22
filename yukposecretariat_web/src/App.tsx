@@ -11,6 +11,8 @@ import KanbanPage from './pages/KanbanPage'
 import DevisPage from './pages/DevisPage'
 import CaissePage from './pages/CaissePage'
 import ClientsPage from './pages/ClientsPage'
+import TraductionPage from './pages/TraductionPage'
+import MesDocumentsPage from './pages/MesDocumentsPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -30,6 +32,8 @@ function AppRoutes() {
         <Route path="ocr" element={<OcrPage />} />
         <Route path="audio" element={<AudioPage />} />
         <Route path="infographie" element={<InfographiePage />} />
+        <Route path="traduction" element={<TraductionPage />} />
+        <Route path="documents" element={<MesDocumentsPage />} />
         <Route path="kanban" element={<KanbanPage />} />
         <Route path="devis" element={<DevisPage />} />
         <Route path="caisse" element={<CaissePage />} />

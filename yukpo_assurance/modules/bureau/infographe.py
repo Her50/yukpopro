@@ -135,6 +135,122 @@ GABARITS: dict[str, dict] = {
         "description": "Flyer promotion/ouverture A5",
         "prix_fcfa": 3000,
     },
+    # ── Formats paysage ──────────────────────────────────────────────────────
+    "a4_paysage": {
+        "label": "A4 Paysage",
+        "width_mm": 297, "height_mm": 210,
+        "bleed_mm": 3,
+        "categorie": "print",
+        "description": "Format A4 paysage universel",
+        "prix_fcfa": 4000,
+    },
+    "a5_paysage": {
+        "label": "A5 Paysage",
+        "width_mm": 210, "height_mm": 148,
+        "bleed_mm": 3,
+        "categorie": "print",
+        "description": "Format A5 paysage",
+        "prix_fcfa": 3000,
+    },
+    # ── Formats grand format ─────────────────────────────────────────────────
+    "rollup_85x200": {
+        "label": "Roll-up 85×200 cm",
+        "width_mm": 850, "height_mm": 2000,
+        "bleed_mm": 10,
+        "categorie": "grand_format",
+        "description": "Roll-up standard 85×200cm + bleed 10mm",
+        "prix_fcfa": 10000,
+    },
+    "kakemono_80x200": {
+        "label": "Kakémono 80×200 cm",
+        "width_mm": 800, "height_mm": 2000,
+        "bleed_mm": 10,
+        "categorie": "grand_format",
+        "description": "Kakémono vertical 80×200cm",
+        "prix_fcfa": 10000,
+    },
+    "bache_3x1": {
+        "label": "Bâche 3×1 m",
+        "width_mm": 3000, "height_mm": 1000,
+        "bleed_mm": 20,
+        "categorie": "grand_format",
+        "description": "Bâche imprimée 3m×1m",
+        "prix_fcfa": 12000,
+    },
+    "bache_6x1": {
+        "label": "Bâche 6×1 m",
+        "width_mm": 6000, "height_mm": 1000,
+        "bleed_mm": 20,
+        "categorie": "grand_format",
+        "description": "Grande bâche 6m×1m",
+        "prix_fcfa": 18000,
+    },
+    # ── Réseaux sociaux ──────────────────────────────────────────────────────
+    "instagram_post": {
+        "label": "Instagram Post (carré)",
+        "width_mm": 105, "height_mm": 105,
+        "bleed_mm": 0,
+        "categorie": "social_media",
+        "description": "Post Instagram carré 1080×1080px",
+        "prix_fcfa": 2500,
+    },
+    "instagram_story": {
+        "label": "Instagram / WhatsApp Story",
+        "width_mm": 90, "height_mm": 160,
+        "bleed_mm": 0,
+        "categorie": "social_media",
+        "description": "Story verticale 9:16 (1080×1920px)",
+        "prix_fcfa": 2500,
+    },
+    "facebook_cover": {
+        "label": "Couverture Facebook",
+        "width_mm": 228, "height_mm": 84,
+        "bleed_mm": 0,
+        "categorie": "social_media",
+        "description": "Bannière Facebook 820×312px",
+        "prix_fcfa": 2000,
+    },
+    "linkedin_banner": {
+        "label": "Bannière LinkedIn",
+        "width_mm": 228, "height_mm": 60,
+        "bleed_mm": 0,
+        "categorie": "social_media",
+        "description": "Bannière LinkedIn 1584×396px",
+        "prix_fcfa": 2000,
+    },
+    "youtube_thumbnail": {
+        "label": "Miniature YouTube",
+        "width_mm": 178, "height_mm": 100,
+        "bleed_mm": 0,
+        "categorie": "social_media",
+        "description": "Thumbnail YouTube 1280×720px",
+        "prix_fcfa": 2000,
+    },
+    # ── Papeterie & courrier ─────────────────────────────────────────────────
+    "enveloppe_c5": {
+        "label": "Enveloppe C5",
+        "width_mm": 229, "height_mm": 162,
+        "bleed_mm": 3,
+        "categorie": "corporate",
+        "description": "Enveloppe format C5",
+        "prix_fcfa": 2500,
+    },
+    "badge_conference": {
+        "label": "Badge de conférence",
+        "width_mm": 90, "height_mm": 120,
+        "bleed_mm": 3,
+        "categorie": "evenement",
+        "description": "Badge nominatif conférence/salon",
+        "prix_fcfa": 1500,
+    },
+    "menu_restaurant": {
+        "label": "Menu de restaurant",
+        "width_mm": 210, "height_mm": 297,
+        "bleed_mm": 3,
+        "categorie": "commercial",
+        "description": "Carte/menu restaurant format A4",
+        "prix_fcfa": 4000,
+    },
 }
 
 # Palettes de couleurs africaines locales
@@ -268,10 +384,11 @@ Retourne UNIQUEMENT le JSON, sans commentaire."""
     )
 
 
-def generer_pdf(spec: SpecificationInfographie) -> bytes:
+def generer_pdf(spec: SpecificationInfographie, gabarit_info: Optional[dict] = None) -> bytes:
     """
     Génère un PDF print-ready avec ReportLab.
     Bleed 3mm, polices incorporées, résolution 300 DPI pour éléments raster.
+    gabarit_info permet de passer un gabarit custom sans modifier GABARITS global.
     """
     from reportlab.lib.pagesizes import mm
     from reportlab.lib.colors import HexColor, Color
@@ -280,7 +397,7 @@ def generer_pdf(spec: SpecificationInfographie) -> bytes:
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
-    gabarit = GABARITS.get(spec.type_gabarit, GABARITS["flyer_a5"])
+    gabarit = gabarit_info or GABARITS.get(spec.type_gabarit, GABARITS["flyer_a5"])
     palette = PALETTES.get(spec.palette, PALETTES["classique"])
 
     w_mm = gabarit["width_mm"] + gabarit["bleed_mm"] * 2
@@ -421,20 +538,23 @@ async def generer_infographie(
     type_gabarit: str,
     pays: str = "CM",
     spec_override: Optional[SpecificationInfographie] = None,
+    gabarits_override: Optional[dict] = None,
 ) -> ResultatInfographie:
     """
     Pipeline complet : brief → spec IA → PDF print-ready + PNG preview.
+    gabarits_override permet d'injecter des gabarits customs sans modifier le dict global.
     """
-    gabarit = GABARITS.get(type_gabarit)
+    _gabarits = gabarits_override or GABARITS
+    gabarit = _gabarits.get(type_gabarit)
     if not gabarit:
-        raise ValueError(f"Gabarit inconnu : {type_gabarit}. Disponibles : {list(GABARITS.keys())}")
+        raise ValueError(f"Gabarit inconnu : {type_gabarit}. Disponibles : {list(_gabarits.keys())}")
 
     spec = spec_override or await generer_specification_depuis_brief(brief, type_gabarit, pays)
 
     # Génération PDF
     pdf_bytes: Optional[bytes] = None
     try:
-        pdf_bytes = generer_pdf(spec)
+        pdf_bytes = generer_pdf(spec, gabarit_info=gabarit)
     except Exception as e:
         logger.error(f"[Infographe] Génération PDF échouée : {e}")
         raise RuntimeError(f"Génération PDF échouée : {e}")
@@ -456,5 +576,56 @@ async def generer_infographie(
         png_bytes=png_bytes,
         specification=spec,
         gabarit=type_gabarit,
-        meta={"gabarit_label": gabarit["label"], "prix_fcfa": gabarit["prix_fcfa"]},
+        meta={"gabarit_label": gabarit["label"], "prix_fcfa": gabarit.get("prix_fcfa", 5000)},
     )
+
+
+async def analyser_modele_image(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
+    """
+    Analyse une image modèle uploadée par l'utilisateur et retourne une description
+    du style graphique pour inspirer la génération IA.
+    """
+    import base64
+    from core.ia_client import ia_client, ModeIA
+
+    b64 = base64.b64encode(image_bytes).decode()
+    prompt_sys = (
+        "Tu es directeur artistique expert. Analyse cette image de référence et décris "
+        "précisément son style graphique pour guider la création d'une infographie similaire."
+    )
+    prompt_user = (
+        "Décris ce modèle graphique en JSON :\n"
+        "{\n"
+        '  "style_general": "moderne|classique|minimaliste|coloré|élégant|audacieux",\n'
+        '  "palette_dominante": ["couleur1_hex", "couleur2_hex", "couleur3_hex"],\n'
+        '  "disposition": "description du layout (centré, colonnes, header/footer, etc.)",\n'
+        '  "typographie": "description des polices et tailles perçues",\n'
+        '  "elements_visuels": ["logo", "photo", "icônes", etc.],\n'
+        '  "ambiance": "description de l\'atmosphère générale",\n'
+        '  "points_forts": "ce qui rend ce design efficace"\n'
+        "}\n"
+        "Retourne UNIQUEMENT le JSON."
+    )
+    try:
+        reponse = await ia_client.appeler_ia_vision(
+            prompt_sys + "\n" + prompt_user,
+            b64, mime_type,
+            mode=ModeIA.CLAUDE_VISION,
+        )
+        return reponse
+    except Exception as e:
+        logger.warning(f"[Infographe] Analyse modèle image : {e}")
+        return "{}"
+
+
+def creer_gabarit_custom(width_mm: float, height_mm: float, bleed_mm: float = 3) -> dict:
+    """Crée un gabarit personnalisé à partir de dimensions saisies."""
+    return {
+        "label": f"Format personnalisé {width_mm}×{height_mm}mm",
+        "width_mm": width_mm,
+        "height_mm": height_mm,
+        "bleed_mm": bleed_mm,
+        "categorie": "custom",
+        "description": f"Format sur mesure {width_mm}mm × {height_mm}mm",
+        "prix_fcfa": 5000,
+    }

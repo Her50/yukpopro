@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, FileText, Scan, Mic, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
+  Languages, FolderOpen,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
@@ -13,6 +14,8 @@ const NAV = [
   { to: '/ocr',         label: 'Scan → Texte',    icon: Scan },
   { to: '/audio',       label: 'Audio → Doc',     icon: Mic },
   { to: '/infographie', label: 'Infographie',      icon: Image },
+  { to: '/traduction',  label: 'Traduction IA',    icon: Languages },
+  { to: '/documents',   label: 'Mes Documents',    icon: FolderOpen },
   { to: '/kanban',      label: 'File de travaux',  icon: KanbanSquare },
   { to: '/devis',       label: 'Devis & Factures', icon: Receipt },
   { to: '/caisse',      label: 'Caisse',           icon: Wallet },

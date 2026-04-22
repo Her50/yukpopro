@@ -69,6 +69,28 @@ export const infographieAPI = {
   gabarits: () => api.get('/infographie/gabarits'),
   generer: (data: { brief: string; type_gabarit: string; pays?: string }) =>
     api.post('/infographie/generer', data),
+  genererDepuisModele: (formData: FormData) =>
+    api.post('/infographie/generer-depuis-modele', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120_000,
+    }),
+  genererCustom: (data: { width_mm: number; height_mm: number; bleed_mm?: number; brief: string; pays?: string }) =>
+    api.post('/infographie/generer-custom', data),
+}
+
+// ─── Traduction ───────────────────────────────────────────────────────────────
+export const traductionAPI = {
+  traduireTexte: (data: { contenu: string; langue_source: string; langue_cible: string; contexte_metier?: string }) =>
+    api.post('/traduction/texte', data),
+  traduireFichier: (formData: FormData) =>
+    api.post('/traduction/fichier', formData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120_000 }),
+}
+
+// ─── Mes Documents ────────────────────────────────────────────────────────────
+export const documentsAPI = {
+  lister: () => api.get('/documents/'),
+  supprimer: (fichier_id: string) => api.delete(`/documents/${fichier_id}`),
+  urlTelechargement: (fichier_id: string) => `${BASE_URL}/documents/${fichier_id}`,
 }
 
 // ─── Gestion ──────────────────────────────────────────────────────────────────

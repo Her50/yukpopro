@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
@@ -43,6 +43,14 @@ class DemandeManuelle(BaseModel):
     slogan: Optional[str] = None
     date_evenement: Optional[str] = None
     lieu: Optional[str] = None
+
+
+class DemandeCustom(BaseModel):
+    width_mm: float = Field(..., gt=0, le=3000, description="Largeur en mm")
+    height_mm: float = Field(..., gt=0, le=3000, description="Hauteur en mm")
+    bleed_mm: float = Field(default=3, ge=0, le=20, description="Fond perdu en mm")
+    brief: str = Field(..., min_length=10)
+    pays: str = Field(default="CM")
 
 
 @router.get("/gabarits", tags=["Bureau — Infographie"])
@@ -180,6 +188,158 @@ async def generer_manuel(
         "pdf_id": pdf_id,
         "pdf_base64": base64.b64encode(pdf_bytes).decode(),
         "prix_fcfa": GABARITS[demande.type_gabarit]["prix_fcfa"],
+    }
+
+
+@router.post("/generer-depuis-modele", tags=["Bureau — Infographie"])
+async def generer_depuis_modele_image(
+    modele: UploadFile = File(...),
+    brief: str = Form(...),
+    type_gabarit: str = Form(...),
+    pays: str = Form(default="CM"),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Upload ou scan d'une image modèle → analyse de style via IA → génération d'infographie inspirée.
+    Formats acceptés : PNG, JPG, JPEG, WEBP (max 10 MB).
+    """
+    from modules.bureau.infographe import generer_infographie, analyser_modele_image, GABARITS
+
+    if type_gabarit not in GABARITS:
+        raise HTTPException(status_code=400, detail=f"Gabarit inconnu : {type_gabarit}")
+
+    if modele.size and modele.size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image trop volumineuse (max 10 MB)")
+
+    ext = (modele.filename or "").lower().rsplit(".", 1)[-1]
+    if ext not in ("png", "jpg", "jpeg", "webp"):
+        raise HTTPException(status_code=400, detail="Format image non supporté (PNG/JPG/JPEG/WEBP)")
+
+    image_bytes = await modele.read()
+    mime_type = "image/png" if ext == "png" else "image/jpeg"
+
+    try:
+        analyse_style = await analyser_modele_image(image_bytes, mime_type)
+    except Exception as e:
+        logger.warning(f"[Infographie] Analyse modèle échouée : {e} — génération sans analyse")
+        analyse_style = ""
+
+    brief_enrichi = brief
+    if analyse_style:
+        brief_enrichi = (
+            f"{brief}\n\n"
+            f"[STYLE DÉTECTÉ SUR L'IMAGE MODÈLE]\n{analyse_style}\n"
+            "Inspire-toi de ce style pour la mise en page, les couleurs et la typographie."
+        )
+
+    try:
+        resultat = await generer_infographie(
+            brief=brief_enrichi,
+            type_gabarit=type_gabarit,
+            pays=pays,
+        )
+    except Exception as e:
+        logger.error(f"[Bureau Infographie Modèle] Génération échouée : {e}")
+        raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
+
+    ts = int(__import__("time").time())
+    import base64 as _b64
+    pdf_id = png_id = pdf_b64 = png_b64 = None
+
+    if resultat.pdf_bytes:
+        pdf_id = f"bureau_infog_{current_user.user_id}_{type_gabarit}_{ts}.pdf"
+        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
+        pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
+
+    if resultat.png_bytes:
+        png_id = f"bureau_infog_{current_user.user_id}_{type_gabarit}_{ts}.png"
+        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
+        png_b64 = _b64.b64encode(resultat.png_bytes).decode()
+
+    spec = resultat.specification
+    return {
+        "gabarit": type_gabarit,
+        "analyse_modele": analyse_style,
+        "specification": {
+            "titre": spec.titre,
+            "sous_titre": spec.sous_titre,
+            "corps": spec.corps,
+            "details": spec.details,
+            "palette": spec.palette,
+            "nom_organisation": spec.nom_organisation,
+            "contact": spec.contact,
+            "slogan": spec.slogan,
+            "date_evenement": spec.date_evenement,
+            "lieu": spec.lieu,
+        } if spec else None,
+        "pdf_id": pdf_id,
+        "png_id": png_id,
+        "pdf_base64": pdf_b64,
+        "png_base64": png_b64,
+        "prix_fcfa": resultat.meta.get("prix_fcfa", 0),
+        "meta": resultat.meta,
+    }
+
+
+@router.post("/generer-custom", tags=["Bureau — Infographie"])
+async def generer_format_custom(
+    demande: DemandeCustom,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Génère une infographie avec un format entièrement personnalisé (dimensions libres en mm)."""
+    from modules.bureau.infographe import generer_infographie, creer_gabarit_custom, GABARITS as _GABARITS
+    import copy
+
+    gabarit_custom = creer_gabarit_custom(
+        width_mm=demande.width_mm,
+        height_mm=demande.height_mm,
+        bleed_mm=demande.bleed_mm,
+    )
+    gabarit_key = f"custom_{int(demande.width_mm)}x{int(demande.height_mm)}"
+
+    _GABARITS_PATCHED = {**_GABARITS, gabarit_key: gabarit_custom}
+
+    try:
+        resultat = await generer_infographie(
+            brief=demande.brief,
+            type_gabarit=gabarit_key,
+            pays=demande.pays,
+            gabarits_override=_GABARITS_PATCHED,
+        )
+    except Exception as e:
+        logger.error(f"[Bureau Infographie Custom] Génération échouée : {e}")
+        raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
+
+    ts = int(__import__("time").time())
+    import base64 as _b64
+    pdf_id = png_id = pdf_b64 = png_b64 = None
+
+    if resultat.pdf_bytes:
+        pdf_id = f"bureau_infog_{current_user.user_id}_custom_{ts}.pdf"
+        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
+        pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
+
+    if resultat.png_bytes:
+        png_id = f"bureau_infog_{current_user.user_id}_custom_{ts}.png"
+        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
+        png_b64 = _b64.b64encode(resultat.png_bytes).decode()
+
+    spec = resultat.specification
+    return {
+        "gabarit": gabarit_key,
+        "dimensions_mm": {"width": demande.width_mm, "height": demande.height_mm, "bleed": demande.bleed_mm},
+        "specification": {
+            "titre": spec.titre,
+            "sous_titre": spec.sous_titre,
+            "corps": spec.corps,
+            "details": spec.details,
+            "palette": spec.palette,
+        } if spec else None,
+        "pdf_id": pdf_id,
+        "png_id": png_id,
+        "pdf_base64": pdf_b64,
+        "png_base64": png_b64,
+        "meta": resultat.meta,
     }
 
 

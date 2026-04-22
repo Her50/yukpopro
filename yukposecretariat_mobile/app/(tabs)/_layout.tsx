@@ -52,6 +52,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="traduction"
+        options={{
+          title: 'Traduction',
+          tabBarIcon: ({ color, size }) => <TabIcon name="globe-outline" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="documents"
+        options={{
+          title: 'Documents',
+          tabBarIcon: ({ color, size }) => <TabIcon name="folder-open-outline" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="gestion"
         options={{
           title: 'Gestion',
