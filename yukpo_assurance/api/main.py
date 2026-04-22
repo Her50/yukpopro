@@ -241,7 +241,7 @@ async def lifespan(app: FastAPI):
         logger.warning(f"  [DB] Init DB non critique: {e}")
 
     # ── Création automatique du compte super_admin au premier démarrage ─────────
-    try:
+    async def _creer_super_admin():
         import os as _os, secrets as _sec
         from sqlalchemy.ext.asyncio import create_async_engine as _cae, AsyncSession as _AS
         from sqlalchemy.orm import sessionmaker as _sm
@@ -256,28 +256,34 @@ async def lifespan(app: FastAPI):
 
         _engine = _cae(settings.DATABASE_URL, echo=False)
         _Session = _sm(_engine, class_=_AS, expire_on_commit=False)
+        try:
+            async with _Session() as _sess:
+                _existing = (await _sess.execute(
+                    _sel(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+                )).scalars().first()
 
-        async with _Session() as _sess:
-            _existing = (await _sess.execute(
-                _sel(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
-            )).scalars().first()
+                if not _existing:
+                    _pwd = _admin_pwd or _sec.token_urlsafe(16)
+                    _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
+                    _uname = _admin_email.split("@")[0]
+                    _u = _UDB(
+                        username=_uname, email=_admin_email, nom=_admin_nom,
+                        hashed_password=_ctx.hash(_pwd), role="super_admin",
+                        compagnie_id=1, actif=True, cree_le=_dtt.utcnow(), cree_par=0,
+                    )
+                    _sess.add(_u)
+                    await _sess.commit()
+                    logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
+                else:
+                    logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
+        finally:
+            await _engine.dispose()
 
-            if not _existing:
-                _pwd = _admin_pwd or _sec.token_urlsafe(16)
-                _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
-                _uname = _admin_email.split("@")[0]
-                _u = _UDB(
-                    username=_uname, email=_admin_email, nom=_admin_nom,
-                    hashed_password=_ctx.hash(_pwd), role="super_admin",
-                    compagnie_id=None, actif=True, cree_le=_dtt.utcnow(), cree_par=0,
-                )
-                _sess.add(_u)
-                await _sess.commit()
-                logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
-            else:
-                logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
-
-        await _engine.dispose()
+    try:
+        import asyncio as _aio
+        await _aio.wait_for(_creer_super_admin(), timeout=10.0)
+    except _aio.TimeoutError:
+        logger.warning("  [Admin] Création super_admin ignorée — timeout 10s (DB indisponible au démarrage)")
     except Exception as _e:
         logger.warning(f"  [Admin] Création auto super_admin : {_e}")
 
