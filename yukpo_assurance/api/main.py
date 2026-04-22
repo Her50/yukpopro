@@ -240,6 +240,47 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"  [DB] Init DB non critique: {e}")
 
+    # ── Création automatique du compte super_admin au premier démarrage ─────────
+    try:
+        import os as _os, secrets as _sec
+        from sqlalchemy.ext.asyncio import create_async_engine as _cae, AsyncSession as _AS
+        from sqlalchemy.orm import sessionmaker as _sm
+        from sqlalchemy import select as _sel
+        from passlib.context import CryptContext as _CC
+        from datetime import datetime as _dtt
+        from core.database import UtilisateurDB as _UDB
+
+        _admin_email = _os.environ.get("SUPER_ADMIN_EMAIL", "admin@yukpopro.cm")
+        _admin_pwd   = _os.environ.get("SUPER_ADMIN_PASSWORD", "")
+        _admin_nom   = _os.environ.get("SUPER_ADMIN_NOM",      "Yukpo Admin")
+
+        _engine = _cae(settings.DATABASE_URL, echo=False)
+        _Session = _sm(_engine, class_=_AS, expire_on_commit=False)
+
+        async with _Session() as _sess:
+            _existing = (await _sess.execute(
+                _sel(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+            )).scalars().first()
+
+            if not _existing:
+                _pwd = _admin_pwd or _sec.token_urlsafe(16)
+                _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
+                _uname = _admin_email.split("@")[0]
+                _u = _UDB(
+                    username=_uname, email=_admin_email, nom=_admin_nom,
+                    hashed_password=_ctx.hash(_pwd), role="super_admin",
+                    compagnie_id=None, actif=True, cree_le=_dtt.utcnow(), cree_par=0,
+                )
+                _sess.add(_u)
+                await _sess.commit()
+                logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
+            else:
+                logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
+
+        await _engine.dispose()
+    except Exception as _e:
+        logger.warning(f"  [Admin] Création auto super_admin : {_e}")
+
     # Pre-chauffe de l'index sémantique CIMA — timeout court pour ne pas bloquer
     try:
         import asyncio

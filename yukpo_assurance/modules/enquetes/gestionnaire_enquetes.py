@@ -8,6 +8,7 @@ import base64
 import io
 import json
 import logging
+import re
 import uuid
 from collections import Counter
 from dataclasses import dataclass, field
@@ -44,10 +45,27 @@ class ThemeQualitatif:
 class QuestionFormulaire:
     question_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     libelle: str = ""
-    type_question: str = "text"  # text | number | select_one | select_multiple | rating | likert | date | oui_non
-    options: list[str] = field(default_factory=list)  # pour select_one/multiple/likert
+    type_question: str = "text"
+    # text | number | select_one | select_multiple | rating | likert | date | oui_non
+    # geopoint | image | note | calculate | begin_group | end_group | begin_repeat | end_repeat
+    options: list[str] = field(default_factory=list)
     obligatoire: bool = True
     ordre: int = 0
+    # ── Champs XLSForm étendus ──────────────────────────────────────────────────
+    hint: str = ""                  # Aide pour l'enquêteur
+    section_id: str = ""            # Identifiant du groupe/section parent
+    section_label: str = ""         # Label de la section (pour begin_group)
+    relevant: str = ""              # Logique conditionnelle: "${sexe} = 'feminin'"
+    constraint: str = ""            # Validation: ". > 0 and . < 120"
+    constraint_message: str = ""    # Message d'erreur personnalisé
+    appearance: str = ""            # "likert" | "minimal" | "horizontal" | "field-list" | "table-list"
+    parameters: str = ""            # Pour range: "start=1 end=5 step=1"
+    is_repeat_group: bool = False   # True si begin_repeat/end_repeat
+    repeat_count: str = ""          # "${nb_membres}" ou entier fixe
+    calculation: str = ""           # Pour type calculate
+    is_matrix_row: bool = False     # Question dans une matrice table-list
+    matrix_list_name: str = ""      # Liste de choix partagée dans une matrice
+    name_xlsform: str = ""          # Nom ODK court (slug) pour les références ${...} dans relevant
 
 
 @dataclass
@@ -56,6 +74,8 @@ class Formulaire:
     titre: str = ""
     description: str = ""
     questions: list[QuestionFormulaire] = field(default_factory=list)
+    sections: list[dict] = field(default_factory=list)   # structure complète avec imbrication
+    metadata_auto: bool = True      # Ajouter start/end/deviceid automatiquement
     actif: bool = True
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     reponses: list[dict] = field(default_factory=list)
@@ -741,24 +761,45 @@ def creer_formulaire(
     titre: str,
     description: str,
     questions: list[dict],
+    sections: Optional[list[dict]] = None,
 ) -> Formulaire:
     etude = _etudes.get(etude_id)
     if not etude:
         raise ValueError(f"Étude {etude_id} introuvable")
 
+    questions_obj = []
+    for i, q in enumerate(questions):
+        section_id = q.get("section_id", "")
+        if not section_id:
+            raw = q.get("section", "") or q.get("section_label", "")
+            if raw:
+                section_id = re.sub(r"[^a-z0-9_]", "_", raw.lower().strip())[:30].strip("_") or f"s{i}"
+
+        questions_obj.append(QuestionFormulaire(
+            libelle=q.get("libelle", ""),
+            type_question=q.get("type_question", "text"),
+            options=q.get("options", []),
+            obligatoire=q.get("obligatoire", True),
+            ordre=q.get("ordre", i),
+            hint=q.get("hint", ""),
+            section_id=section_id,
+            section_label=q.get("section_label", q.get("section", "")),
+            relevant=q.get("relevant", ""),
+            constraint=q.get("constraint", ""),
+            constraint_message=q.get("constraint_message", ""),
+            appearance=q.get("appearance", ""),
+            parameters=q.get("parameters", ""),
+            is_repeat_group=q.get("is_repeat_group", False),
+            repeat_count=q.get("repeat_count", ""),
+            calculation=q.get("calculation", ""),
+            name_xlsform=q.get("name", "") or q.get("name_xlsform", ""),
+        ))
+
     form = Formulaire(
         titre=titre,
         description=description,
-        questions=[
-            QuestionFormulaire(
-                libelle=q.get("libelle", ""),
-                type_question=q.get("type_question", "text"),
-                options=q.get("options", []),
-                obligatoire=q.get("obligatoire", True),
-                ordre=i,
-            )
-            for i, q in enumerate(questions)
-        ],
+        questions=questions_obj,
+        sections=sections or [],
     )
     etude.formulaire = form
     _formulaires_publics[form.formulaire_id] = etude_id
@@ -824,17 +865,34 @@ _XLSFORM_TYPE_MAP: dict[str, str] = {
     "note":             "note",
 }
 
+def _to_slug(s: str) -> str:
+    """Convertit une chaîne en identifiant XLSForm valide (lettres/chiffres/_)."""
+    for fr, en in [("à","a"),("â","a"),("ä","a"),("é","e"),("è","e"),("ê","e"),("ë","e"),
+                   ("î","i"),("ï","i"),("ô","o"),("ö","o"),("ù","u"),("ú","u"),("û","u"),
+                   ("ü","u"),("ç","c"),("œ","oe"),("æ","ae")]:
+        s = s.replace(fr, en)
+    s = re.sub(r"[^a-z0-9_]", "_", s.lower().strip())
+    s = re.sub(r"_+", "_", s).strip("_")
+    if s and s[0].isdigit():
+        s = "v_" + s
+    return s[:30] or "opt"
+
+
 def generer_xlsform_bytes(etude_id: str) -> bytes:
     """
-    Génère un fichier XLSForm (.xlsx) conforme à la norme ODK/KoBoCollect.
-    Importable directement dans : KoBoCollect, KoBoToolbox, ODK Central,
-    SurveyCTO, CommCare, Ona, Enketo.
+    Génère un fichier XLSForm (.xlsx) ODK complet :
+    - Métadonnées automatiques (start / end / deviceid)
+    - begin_group / end_group par section (field-list)
+    - begin_repeat / end_repeat pour données répétées (ménages, incidents…)
+    - Logique de saut (relevant), contraintes, apparences adaptées au type
+    - Feuilles survey / choices / settings / README
+    Importable dans KoBoCollect, ODK Central, SurveyCTO, Enketo.
     """
     etude = _etudes.get(etude_id)
     if not etude:
         raise ValueError(f"Étude {etude_id} introuvable")
     if not etude.formulaire:
-        raise ValueError("Aucun formulaire créé — créez d'abord un formulaire via POST /formulaire")
+        raise ValueError("Aucun formulaire créé — POST /formulaire d'abord")
 
     try:
         import openpyxl
@@ -847,140 +905,211 @@ def generer_xlsform_bytes(etude_id: str) -> bytes:
     form = etude.formulaire
 
     # ── Styles ──────────────────────────────────────────────────────────────────
-    HDR_FILL   = PatternFill("solid", fgColor="1F3864")  # bleu marine ODK
-    HDR_FONT   = Font(color="FFFFFF", bold=True, size=11)
-    ALT_FILL   = PatternFill("solid", fgColor="EBF3FB")
-    BORDER_THIN = Border(
-        left=Side(style="thin", color="CCCCCC"),
-        right=Side(style="thin", color="CCCCCC"),
-        top=Side(style="thin", color="CCCCCC"),
-        bottom=Side(style="thin", color="CCCCCC"),
-    )
+    HDR_FILL = PatternFill("solid", fgColor="1F3864")
+    HDR_FONT = Font(color="FFFFFF", bold=True, size=11)
+    ALT_FILL = PatternFill("solid", fgColor="EBF3FB")
+    GRP_FILL = PatternFill("solid", fgColor="D6E4F0")
+    RPT_FILL = PatternFill("solid", fgColor="D5F5E3")
+    THIN     = Side(style="thin", color="CCCCCC")
+    BORDER   = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
-    def _style_header(ws, row_num: int, n_cols: int):
-        for col in range(1, n_cols + 1):
-            cell = ws.cell(row=row_num, column=col)
-            cell.fill = HDR_FILL
-            cell.font = HDR_FONT
+    def _hdr(ws, rn, nc):
+        for c in range(1, nc + 1):
+            cell = ws.cell(row=rn, column=c)
+            cell.fill, cell.font = HDR_FILL, HDR_FONT
             cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = BORDER_THIN
+            cell.border = BORDER
 
-    def _style_row(ws, row_num: int, n_cols: int, alt: bool = False):
-        for col in range(1, n_cols + 1):
-            cell = ws.cell(row=row_num, column=col)
-            if alt:
+    def _row_style(ws, rn, nc, alt=False, is_group=False, is_repeat=False):
+        for c in range(1, nc + 1):
+            cell = ws.cell(row=rn, column=c)
+            if is_repeat:
+                cell.fill = RPT_FILL
+            elif is_group:
+                cell.fill = GRP_FILL
+            elif alt:
                 cell.fill = ALT_FILL
-            cell.border = BORDER_THIN
+            cell.border = BORDER
             cell.alignment = Alignment(vertical="center", wrap_text=True)
 
-    def _autofit(ws, min_w=12, max_w=60):
+    def _autofit(ws, mn=10, mx=55):
         for col in ws.columns:
-            max_len = max((len(str(c.value or "")) for c in col), default=0)
-            ws.column_dimensions[get_column_letter(col[0].column)].width = min(max(max_len + 2, min_w), max_w)
+            w = max((len(str(c.value or "")) for c in col), default=0)
+            ws.column_dimensions[get_column_letter(col[0].column)].width = min(max(w + 2, mn), mx)
 
     # ── Feuille SURVEY ──────────────────────────────────────────────────────────
-    ws_survey = wb.active
-    ws_survey.title = "survey"
-    ws_survey.row_dimensions[1].height = 22
+    ws = wb.active
+    ws.title = "survey"
+    ws.row_dimensions[1].height = 22
 
-    survey_cols = ["type", "name", "label::French (fr)", "hint::French (fr)",
-                   "required", "relevant", "constraint", "constraint_message",
-                   "appearance", "parameters"]
-    ws_survey.append(survey_cols)
-    _style_header(ws_survey, 1, len(survey_cols))
+    cols = ["type", "name", "label::French (fr)", "hint::French (fr)",
+            "required", "relevant", "constraint", "constraint_message",
+            "appearance", "parameters", "calculation", "repeat_count"]
+    N = len(cols)
+    ws.append(cols)
+    _hdr(ws, 1, N)
 
-    choices_rows: list[tuple] = []   # (list_name, name, label)
+    choices_rows: list[tuple] = []
     oui_non_added = False
 
-    for q in sorted(form.questions, key=lambda x: x.ordre):
-        xlstype_base = _XLSFORM_TYPE_MAP.get(q.type_question, "text")
-        list_name = f"list_{q.question_id[:8]}"
-        parameters = ""
+    def _add_row(data: list, is_group=False, is_repeat=False):
+        while len(data) < N:
+            data.append("")
+        rn = ws.max_row + 1
+        ws.append(data[:N])
+        _row_style(ws, rn, N, alt=(rn % 2 == 0), is_group=is_group, is_repeat=is_repeat)
 
-        # Construire le type XLSForm complet
-        if q.type_question in ("select_one", "likert"):
+    # Métadonnées automatiques (timestamp + device)
+    if form.metadata_auto:
+        for meta in ["start", "end", "deviceid"]:
+            _add_row([meta, meta, "", "", "", "", "", "", "", "", "", ""])
+
+    def _emit_q(q: QuestionFormulaire):
+        nonlocal oui_non_added
+        list_name = f"l_{q.question_id[:8]}"
+        xlstype   = _XLSFORM_TYPE_MAP.get(q.type_question, "text")
+        params    = q.parameters or ""
+        appear    = q.appearance or ""
+
+        if q.type_question == "select_one":
             xlstype = f"select_one {list_name}"
+            if not appear:
+                appear = "horizontal" if len(q.options) <= 4 else "minimal"
             for opt in q.options:
-                slug = opt.lower().replace(" ", "_").replace("'", "")[:30]
-                choices_rows.append((list_name, slug, opt))
+                choices_rows.append((list_name, _to_slug(opt), opt))
+
+        elif q.type_question == "likert":
+            xlstype = f"select_one {list_name}"
+            if not appear:
+                appear = "likert"
+            for opt in q.options:
+                choices_rows.append((list_name, _to_slug(opt), opt))
+
         elif q.type_question == "select_multiple":
             xlstype = f"select_multiple {list_name}"
+            if not appear:
+                appear = "horizontal" if len(q.options) <= 4 else "minimal"
             for opt in q.options:
-                slug = opt.lower().replace(" ", "_").replace("'", "")[:30]
-                choices_rows.append((list_name, slug, opt))
+                choices_rows.append((list_name, _to_slug(opt), opt))
+
         elif q.type_question == "oui_non":
             xlstype = "select_one oui_non"
+            if not appear:
+                appear = "horizontal"
             if not oui_non_added:
                 choices_rows.append(("oui_non", "oui", "Oui"))
                 choices_rows.append(("oui_non", "non", "Non"))
                 oui_non_added = True
+
         elif q.type_question == "rating":
             xlstype = "range"
-            parameters = "start=1 end=5 step=1"
+            if not params:
+                params = "start=1 end=5 step=1"
+
+        elif q.type_question == "calculate":
+            xlstype = "calculate"
+
+        name = q.name_xlsform or f"q_{q.question_id[:8]}"
+        req  = "yes" if q.obligatoire else ""
+
+        _add_row([
+            xlstype, name, q.libelle, q.hint,
+            req, q.relevant, q.constraint, q.constraint_message,
+            appear, params, q.calculation, ""
+        ])
+
+    # ── Grouper les questions par section ────────────────────────────────────────
+    questions_sorted = sorted(form.questions, key=lambda x: x.ordre)
+    sections_meta = {s["section_id"]: s for s in (form.sections or [])}
+
+    from collections import OrderedDict as _OD
+    section_order: list[str] = []
+    qs_by_section: dict[str, list] = _OD()
+    no_section: list[QuestionFormulaire] = []
+
+    for q in questions_sorted:
+        sid = q.section_id or ""
+        if sid:
+            if sid not in qs_by_section:
+                section_order.append(sid)
+                qs_by_section[sid] = []
+            qs_by_section[sid].append(q)
         else:
-            xlstype = xlstype_base
+            no_section.append(q)
 
-        name = f"q_{q.question_id[:8]}"
-        required = "yes" if q.obligatoire else "no"
+    # ── Émettre les sections (begin_group ou begin_repeat) ───────────────────────
+    for sid in section_order:
+        meta      = sections_meta.get(sid, {})
+        qs        = qs_by_section[sid]
+        sect_lbl  = meta.get("label") or (qs[0].section_label if qs else sid)
+        is_rpt    = meta.get("is_repeat", False)
+        rpt_cnt   = meta.get("repeat_count", "")
+        sect_app  = meta.get("appearance", "" if is_rpt else "field-list")
 
-        row = [xlstype, name, q.libelle, "", required, "", "", "", "", parameters]
-        row_num = ws_survey.max_row + 1
-        ws_survey.append(row)
-        _style_row(ws_survey, row_num, len(survey_cols), alt=(row_num % 2 == 0))
+        gtype = "begin_repeat" if is_rpt else "begin_group"
+        etype = "end_repeat"   if is_rpt else "end_group"
 
-    _autofit(ws_survey)
+        _add_row([gtype, sid, sect_lbl, "", "", "", "", "", sect_app, "", "", rpt_cnt],
+                 is_group=not is_rpt, is_repeat=is_rpt)
+        for q in qs:
+            _emit_q(q)
+        _add_row([etype, sid, "", "", "", "", "", "", "", "", "", ""],
+                 is_group=not is_rpt, is_repeat=is_rpt)
+
+    for q in no_section:
+        _emit_q(q)
+
+    _autofit(ws)
 
     # ── Feuille CHOICES ─────────────────────────────────────────────────────────
-    ws_choices = wb.create_sheet("choices")
-    choices_cols = ["list_name", "name", "label::French (fr)"]
-    ws_choices.append(choices_cols)
-    _style_header(ws_choices, 1, len(choices_cols))
-
-    prev_list = None
-    for i, (lst, name, label) in enumerate(choices_rows, start=2):
-        ws_choices.append([lst, name, label])
-        alt = (lst == prev_list and i % 2 == 0) or (lst != prev_list and i % 2 == 1)
-        _style_row(ws_choices, i, len(choices_cols), alt=alt)
-        prev_list = lst
-
-    _autofit(ws_choices)
+    ws_c = wb.create_sheet("choices")
+    cc   = ["list_name", "name", "label::French (fr)"]
+    ws_c.append(cc)
+    _hdr(ws_c, 1, len(cc))
+    prev = None
+    for i, (lst, nm, lbl) in enumerate(choices_rows, start=2):
+        ws_c.append([lst, nm, lbl])
+        _row_style(ws_c, i, len(cc), alt=(lst != prev))
+        prev = lst
+    _autofit(ws_c)
 
     # ── Feuille SETTINGS ────────────────────────────────────────────────────────
-    ws_settings = wb.create_sheet("settings")
-    settings_cols = ["form_title", "form_id", "version", "default_language",
-                     "instance_name", "submission_url", "style"]
-    ws_settings.append(settings_cols)
-    _style_header(ws_settings, 1, len(settings_cols))
-
-    version = datetime.now().strftime("%Y%m%d%H%M")
-    form_id = f"yukpopro_{etude_id[:8]}"
-    instance_expr = f"concat('{etude.titre[:20]}_', format-date(today(), '%Y%m%d'))"
-    ws_settings.append([etude.titre, form_id, version, "French (fr)", instance_expr, "", "pages"])
-    _style_row(ws_settings, 2, len(settings_cols))
-    _autofit(ws_settings)
+    ws_s = wb.create_sheet("settings")
+    sc   = ["form_title", "form_id", "version", "default_language", "instance_name", "style"]
+    ws_s.append(sc)
+    _hdr(ws_s, 1, len(sc))
+    ver  = datetime.now().strftime("%Y%m%d%H%M")
+    fid  = f"yukpo_{etude_id[:8]}"
+    inst = f"concat('{etude.titre[:20]}_', format-date(today(), '%Y%m%d'))"
+    ws_s.append([etude.titre, fid, ver, "French (fr)", inst, "pages"])
+    _row_style(ws_s, 2, len(sc))
+    _autofit(ws_s)
 
     # ── Feuille README ──────────────────────────────────────────────────────────
-    ws_readme = wb.create_sheet("README")
-    ws_readme["A1"] = "YukpoPro — Formulaire XLSForm"
-    ws_readme["A1"].font = Font(bold=True, size=14, color="1F3864")
+    ws_r = wb.create_sheet("README")
+    ws_r["A1"] = "YukpoPro — Formulaire XLSForm"
+    ws_r["A1"].font = Font(bold=True, size=14, color="1F3864")
+    n_rpt = sum(1 for s in sections_meta.values() if s.get("is_repeat"))
     infos = [
-        ("Étude",        etude.titre),
-        ("Terrain",      etude.terrain),
-        ("Questions",    str(len(form.questions))),
-        ("Généré le",    datetime.now().strftime("%d/%m/%Y %H:%M")),
-        ("Version",      version),
-        ("",             ""),
-        ("Import",       "KoBoToolbox : Projects > New > Upload XLSForm"),
-        ("Import",       "ODK Central : Forms > Create Form > Upload"),
-        ("Import",       "SurveyCTO : Design > Upload Form"),
+        ("Étude",     etude.titre),
+        ("Terrain",   etude.terrain),
+        ("Questions", str(len(form.questions))),
+        ("Sections",  f"{len(section_order)} ({n_rpt} répétée(s))"),
+        ("Généré le", datetime.now().strftime("%d/%m/%Y %H:%M")),
+        ("Version",   ver),
+        ("",          ""),
+        ("KoBoToolbox",  "New Form > Upload XLSForm"),
+        ("ODK Central",  "Forms > Create Form > Upload"),
+        ("SurveyCTO",    "Design > Upload Form"),
+        ("Enketo",       "Upload survey form"),
     ]
-    for row_i, (k, v) in enumerate(infos, start=3):
-        ws_readme[f"A{row_i}"] = k
-        ws_readme[f"B{row_i}"] = v
+    for ri, (k, v) in enumerate(infos, start=3):
+        ws_r[f"A{ri}"] = k
+        ws_r[f"B{ri}"] = v
         if k:
-            ws_readme[f"A{row_i}"].font = Font(bold=True)
-    ws_readme.column_dimensions["A"].width = 20
-    ws_readme.column_dimensions["B"].width = 50
+            ws_r[f"A{ri}"].font = Font(bold=True)
+    ws_r.column_dimensions["A"].width = 20
+    ws_r.column_dimensions["B"].width = 55
 
     buf = io.BytesIO()
     wb.save(buf)
@@ -996,58 +1125,163 @@ async def generer_formulaire_ia(
     n_questions: int = 15,
 ) -> dict:
     """
-    Claude génère automatiquement un formulaire structuré à partir d'une description
-    en langage naturel, et retourne à la fois le JSON YukpoPro et le XLSForm.
+    Claude génère un formulaire ODK/KoBoCollect professionnel avec :
+    - Sections begin_group / begin_repeat
+    - Skip logic (relevant), contraintes, apparences automatiques
+    - Noms de variables courts pour références ${...}
+    Retourne questions plates + sections_metadata pour creer_formulaire.
     """
     from core.ia_client import ModeIA, ia_client
 
-    prompt = f"""Tu es un expert en ingénierie de formulaires de collecte de données pour la recherche en Afrique francophone.
+    prompt = f"""Tu es un expert en ingénierie de formulaires ODK/KoBoCollect pour la recherche en Afrique francophone.
 
-MISSION : Génère un formulaire de collecte professionnel complet.
+MISSION : Génère un formulaire de collecte professionnel avec sections, logique de saut et contraintes.
 
-Titre de l'étude : {titre}
+Titre : {titre}
 Objectif : {objectif}
-Population cible : {population}
-Description / contexte : {description}
-Nombre de questions souhaité : {n_questions}
+Population : {population}
+Contexte : {description}
+Nombre de questions : {n_questions}
 
-Génère un JSON structuré avec exactement ce format :
+Génère un JSON avec EXACTEMENT ce format (respecte chaque champ) :
 {{
   "titre_formulaire": "...",
   "description": "...",
   "sections": [
     {{
-      "titre_section": "SECTION 1 : Identification du répondant",
+      "section_id": "identification",
+      "label": "SECTION 1 : Identification du répondant",
+      "is_repeat": false,
+      "repeat_count": "",
+      "appearance": "field-list",
       "questions": [
         {{
+          "name": "sexe",
           "libelle": "Quel est votre sexe ?",
           "type_question": "select_one",
-          "options": ["Masculin", "Féminin", "Autre"],
+          "options": ["Masculin", "Féminin"],
           "obligatoire": true,
-          "hint": "Sélectionnez une seule réponse"
+          "hint": "Sélectionnez une option",
+          "appearance": "horizontal",
+          "relevant": "",
+          "constraint": "",
+          "constraint_message": ""
         }},
         {{
+          "name": "age",
           "libelle": "Quel est votre âge ?",
           "type_question": "number",
           "options": [],
           "obligatoire": true,
-          "hint": "En années révolues"
+          "hint": "En années révolues",
+          "appearance": "",
+          "relevant": "",
+          "constraint": ". >= 10 and . <= 99",
+          "constraint_message": "L'âge doit être entre 10 et 99 ans"
+        }},
+        {{
+          "name": "nb_membres",
+          "libelle": "Combien de personnes vivent dans votre ménage ?",
+          "type_question": "number",
+          "options": [],
+          "obligatoire": true,
+          "hint": "Incluez-vous",
+          "appearance": "",
+          "relevant": "",
+          "constraint": ". >= 1 and . <= 25",
+          "constraint_message": ""
+        }}
+      ]
+    }},
+    {{
+      "section_id": "situation_thematique",
+      "label": "SECTION 2 : Situation [thème central]",
+      "is_repeat": false,
+      "repeat_count": "",
+      "appearance": "field-list",
+      "questions": [
+        {{
+          "name": "acces_service",
+          "libelle": "Avez-vous accès à [service principal] ?",
+          "type_question": "oui_non",
+          "options": [],
+          "obligatoire": true,
+          "hint": "",
+          "appearance": "horizontal",
+          "relevant": "",
+          "constraint": "",
+          "constraint_message": ""
+        }},
+        {{
+          "name": "raison_non_acces",
+          "libelle": "Quelle est la principale raison du non-accès ?",
+          "type_question": "select_one",
+          "options": ["Coût trop élevé", "Distance trop grande", "Manque d'information", "Autre"],
+          "obligatoire": false,
+          "hint": "",
+          "appearance": "minimal",
+          "relevant": "${{acces_service}} = 'non'",
+          "constraint": "",
+          "constraint_message": ""
+        }}
+      ]
+    }},
+    {{
+      "section_id": "membres_menage",
+      "label": "Détail des membres du ménage",
+      "is_repeat": true,
+      "repeat_count": "${{nb_membres}}",
+      "appearance": "",
+      "questions": [
+        {{
+          "name": "prenom_membre",
+          "libelle": "Prénom du membre",
+          "type_question": "text",
+          "options": [],
+          "obligatoire": true,
+          "hint": "",
+          "appearance": "",
+          "relevant": "",
+          "constraint": "",
+          "constraint_message": ""
+        }},
+        {{
+          "name": "age_membre",
+          "libelle": "Âge de ce membre",
+          "type_question": "number",
+          "options": [],
+          "obligatoire": true,
+          "hint": "",
+          "appearance": "",
+          "relevant": "",
+          "constraint": ". >= 0 and . <= 120",
+          "constraint_message": ""
         }}
       ]
     }}
   ],
-  "conseils_terrain": ["Conseil pratique 1 pour la collecte", "Conseil 2"],
-  "duree_estimee_minutes": 20
+  "conseils_terrain": ["Conseil pratique 1", "Conseil 2"],
+  "duree_estimee_minutes": 25
 }}
 
-Types disponibles : text, number, select_one, select_multiple, rating (1-5), likert, date, oui_non, geopoint
-- Pour select_one/select_multiple/likert : fournis toujours des options pertinentes
-- Pour rating : pas besoin d'options (1 à 5 automatique)
-- Pour oui_non : pas besoin d'options
-- Adapte les questions au contexte africain francophone (terminologie locale, réalités terrain)
-- Structure en 2-4 sections logiques
-- Inclus des questions démographiques, des questions thématiques, et des questions ouvertes
-- Assure la triangulation des données (croise plusieurs angles sur les mêmes thèmes)
+RÈGLES OBLIGATOIRES :
+1. `section_id` : identifiant court sans espaces (ex: identification, sante, menage)
+2. `name` : nom court unique par question, snake_case, sans accents (ex: sexe, age, revenu_mensuel)
+   - Ce nom est utilisé dans `relevant` des questions suivantes : ${{nom_question}}
+3. `relevant` pour skip logic : ex `${{acces_soins}} = 'non'` ou `${{sexe}} = 'feminin'`
+   - Utilise les slugs des options (ex: option "Masculin" → slug "masculin")
+   - Utilise les noms exacts du champ `name` des questions précédentes
+4. `is_repeat: true` UNIQUEMENT si le contexte demande des données répétées (membres ménage, visites, incidents multiples)
+   - `repeat_count` : référence la question nombre Ex: `${{nb_membres}}`
+5. Apparences :
+   - select_one 2-4 options → "horizontal"
+   - select_one 5+ options → "minimal" (dropdown)
+   - likert → "likert"
+   - select_multiple ≤4 → "horizontal", sinon "minimal"
+   - Sections ≤6 questions → appearance "field-list" (1 écran)
+6. Contraintes numériques obligatoires pour âge, quantités, scores
+7. Terminer par une section "Commentaires" avec 1 question ouverte (text)
+8. Vocabulaire africain francophone : "localité", "quartier", "chef de ménage", "groupement", etc.
 
 Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
 
@@ -1060,13 +1294,24 @@ Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
     except Exception:
         raise ValueError("Impossible de parser la réponse IA — réessayez")
 
-    # Aplatir les sections en liste de questions
+    # Convertir sections imbriquées → metadata plate + questions plates
+    sections_metadata: list[dict] = []
     questions_plates: list[dict] = []
     ordre = 0
-    for section in data.get("sections", []):
-        for q in section.get("questions", []):
+
+    for sect in data.get("sections", []):
+        sid = sect.get("section_id") or _to_slug(sect.get("label", f"section_{ordre}"))
+        sections_metadata.append({
+            "section_id": sid,
+            "label": sect.get("label", ""),
+            "is_repeat": sect.get("is_repeat", False),
+            "repeat_count": sect.get("repeat_count", ""),
+            "appearance": sect.get("appearance", "" if sect.get("is_repeat") else "field-list"),
+        })
+        for q in sect.get("questions", []):
+            q["section_id"] = sid
+            q["section_label"] = sect.get("label", "")
             q["ordre"] = ordre
-            q["section"] = section.get("titre_section", "")
             questions_plates.append(q)
             ordre += 1
 
@@ -1076,6 +1321,7 @@ Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
         "questions": questions_plates,
         "n_questions": len(questions_plates),
         "sections": data.get("sections", []),
+        "sections_metadata": sections_metadata,
         "conseils_terrain": data.get("conseils_terrain", []),
         "duree_estimee_minutes": data.get("duree_estimee_minutes", 20),
     }
@@ -1268,3 +1514,160 @@ def _analyser_tableaux_croises(df, questions_cat: list) -> tuple[list[dict], dic
             continue
 
     return resultats, graphiques
+
+
+# ─── Analyse quantitative intelligente (guidée par LLM) ───────────────────────
+
+async def analyser_quantitatif_intelligent(etude_id: str) -> dict:
+    """
+    Claude lit le contexte de l'étude et décide QUELS croisements faire,
+    puis exécute uniquement les analyses pertinentes.
+    Évite le croisement mécanique de toutes les paires.
+    """
+    etude = _etudes.get(etude_id)
+    if not etude:
+        raise ValueError(f"Étude {etude_id} introuvable")
+    if not etude.formulaire or not etude.formulaire.reponses:
+        raise ValueError("Aucune donnée collectée — le formulaire doit avoir des réponses")
+
+    try:
+        import pandas as pd
+    except ImportError:
+        raise RuntimeError("pandas non disponible")
+
+    form = etude.formulaire
+    df   = pd.DataFrame(form.reponses)
+    n    = len(df)
+
+    # Résumé des questions pour le prompt
+    q_summary = []
+    for q in sorted(form.questions, key=lambda x: x.ordre):
+        qid = q.question_id
+        info: dict[str, Any] = {"id": qid, "libelle": q.libelle, "type": q.type_question}
+        if qid in df.columns:
+            serie = df[qid].dropna()
+            if q.type_question in ("select_one", "oui_non", "likert"):
+                info["modalites"] = list(serie.value_counts().head(8).index)
+            elif q.type_question in ("number", "rating"):
+                vals = pd.to_numeric(serie, errors="coerce").dropna()
+                if len(vals):
+                    info["min"], info["max"] = float(vals.min()), float(vals.max())
+        q_summary.append(info)
+
+    from core.ia_client import ModeIA, ia_client
+
+    prompt = f"""Tu es un statisticien expert en analyses d'enquêtes sociales en Afrique francophone.
+
+CONTEXTE DE L'ÉTUDE :
+Titre : {etude.titre}
+Objectif : {etude.contexte}
+Questions de recherche : {json.dumps(etude.questions_recherche, ensure_ascii=False)}
+Population : {etude.population_cible} | Terrain : {etude.terrain}
+N répondants : {n}
+
+VARIABLES DU FORMULAIRE :
+{json.dumps(q_summary, ensure_ascii=False, indent=2)}
+
+MISSION : Propose un plan d'analyse CIBLÉ qui répond aux questions de recherche.
+Ne croise pas toutes les variables mécaniquement — sélectionne uniquement les croisements analytiquement pertinents.
+
+Retourne un JSON :
+{{
+  "variables_dependantes": ["id_var1", "id_var2"],
+  "variables_independantes": ["id_var3", "id_var4"],
+  "croisements_cibles": [
+    {{
+      "var1": "id_variable_1",
+      "var2": "id_variable_2",
+      "hypothese": "Les femmes ont moins accès aux soins que les hommes",
+      "test": "chi2"
+    }}
+  ],
+  "descriptives_prioritaires": ["id_var1", "id_var3"],
+  "hypotheses": ["H1 : ...", "H2 : ..."],
+  "note_methodologique": "..."
+}}
+
+Limite : maximum 6 croisements ciblés. Retourne UNIQUEMENT le JSON."""
+
+    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_STANDARD)
+
+    try:
+        debut = reponse.find("{")
+        fin   = reponse.rfind("}") + 1
+        plan  = json.loads(reponse[debut:fin])
+    except Exception:
+        raise ValueError("Plan d'analyse IA non parseable — réessayez")
+
+    questions_dict = {q.question_id: q for q in form.questions}
+    graphiques: dict[str, str] = {}
+
+    # ── Croisements ciblés ────────────────────────────────────────────────────
+    resultats_croises: list[dict] = []
+    for croix in plan.get("croisements_cibles", [])[:6]:
+        id1 = croix.get("var1", "")
+        id2 = croix.get("var2", "")
+        q1  = questions_dict.get(id1)
+        q2  = questions_dict.get(id2)
+        if not q1 or not q2 or id1 not in df.columns or id2 not in df.columns:
+            continue
+        try:
+            res, gfx = _analyser_tableaux_croises(df, [q1, q2])
+            if res:
+                res[0]["hypothese"] = croix.get("hypothese", "")
+                resultats_croises.extend(res)
+                graphiques.update(gfx)
+        except Exception as e:
+            logger.warning(f"Croisement ciblé {id1}×{id2} : {e}")
+
+    # ── Descriptives prioritaires ─────────────────────────────────────────────
+    resultats_desc: list[dict] = []
+    for qid in plan.get("descriptives_prioritaires", [])[:8]:
+        if qid not in df.columns:
+            continue
+        q = questions_dict.get(qid)
+        if not q:
+            continue
+        serie = df[qid].dropna()
+        res_q: dict[str, Any] = {
+            "question_id": qid,
+            "libelle": q.libelle,
+            "type": q.type_question,
+            "n_repondants": int(serie.count()),
+        }
+        if q.type_question in ("select_one", "oui_non", "likert"):
+            freq = serie.value_counts()
+            res_q["frequences"]   = {k: int(v) for k, v in freq.items()}
+            res_q["pourcentages"] = {k: float(v) for k, v in (serie.value_counts(normalize=True) * 100).round(1).items()}
+            g = _graphique_barres(freq.to_dict(), q.libelle)
+            if g:
+                graphiques[f"desc_{qid[:8]}"] = g
+        elif q.type_question in ("number", "rating"):
+            vals = pd.to_numeric(serie, errors="coerce").dropna()
+            if len(vals):
+                res_q.update({
+                    "moyenne":    round(float(vals.mean()), 2),
+                    "mediane":    round(float(vals.median()), 2),
+                    "ecart_type": round(float(vals.std()), 2),
+                    "min":        float(vals.min()),
+                    "max":        float(vals.max()),
+                })
+                g = _graphique_histogramme(vals.tolist(), q.libelle)
+                if g:
+                    graphiques[f"desc_{qid[:8]}"] = g
+        resultats_desc.append(res_q)
+
+    etude.graphiques.update(graphiques)
+    analyse = {
+        "n_reponses":           n,
+        "plan_analyse":         plan,
+        "croisements_cibles":   resultats_croises,
+        "analyses_descriptives": resultats_desc,
+        "graphiques":           list(graphiques.keys()),
+        "hypotheses":           plan.get("hypotheses", []),
+        "note_methodologique":  plan.get("note_methodologique", ""),
+    }
+    etude.analyse_quantitative = analyse
+    etude.statut     = "analyse"
+    etude.updated_at = datetime.now(timezone.utc).isoformat()
+    return analyse

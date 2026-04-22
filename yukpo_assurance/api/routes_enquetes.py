@@ -370,6 +370,7 @@ async def generer_formulaire_ia(
                     titre=resultat["titre_formulaire"],
                     description=resultat["description"],
                     questions=resultat["questions"],
+                    sections=resultat.get("sections_metadata", []),
                 )
                 formulaire_id = form.formulaire_id
             except Exception as e:
@@ -406,3 +407,39 @@ async def analyser_commentaires(etude_id: str, current_user: TokenData = Depends
         raise HTTPException(400, str(e))
     except Exception as e:
         raise HTTPException(500, f"Erreur analyse commentaires : {e}")
+
+
+# ─── Analyse quantitative intelligente (guidée par LLM) ───────────────────────
+
+@router.post(
+    "/{etude_id}/analyser-intelligent",
+    summary="Claude décide quelles variables croiser selon le contexte analytique (pas de croisement mécanique)",
+)
+async def analyser_quantitatif_intelligent(
+    etude_id: str,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Claude lit l'objectif de l'étude, les questions de recherche et les données,
+    puis sélectionne les croisements et analyses les plus pertinents.
+    Résultats : croisements ciblés + Chi² + descriptives prioritaires + graphiques.
+    """
+    try:
+        resultats = await ge.analyser_quantitatif_intelligent(etude_id)
+        return {
+            "statut": "analyse_intelligente_terminee",
+            "n_reponses": resultats["n_reponses"],
+            "n_croisements": len(resultats["croisements_cibles"]),
+            "n_descriptives": len(resultats["analyses_descriptives"]),
+            "hypotheses": resultats["hypotheses"],
+            "note_methodologique": resultats["note_methodologique"],
+            "graphiques": resultats["graphiques"],
+            "croisements_cibles": resultats["croisements_cibles"],
+            "analyses_descriptives": resultats["analyses_descriptives"],
+            "plan_analyse": resultats["plan_analyse"],
+            "message": "Analyse ciblée terminée. Générez le rapport pour la synthèse complète.",
+        }
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Erreur analyse intelligente : {e}")
