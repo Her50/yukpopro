@@ -1,9 +1,11 @@
 """
 YukpoAssurance — Configuration centrale
 """
+import json
 import os
 import secrets
 from pathlib import Path
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -184,6 +186,16 @@ class Settings(BaseSettings):
 
     # ─── Sécurité ─────────────────────────────────────────────────
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_origins(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                return json.loads(v)
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480      # 8 heures
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
