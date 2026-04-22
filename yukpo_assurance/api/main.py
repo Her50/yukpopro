@@ -654,8 +654,8 @@ async def setup_admin(
             _u = _UDB_s(
                 username=email.split("@")[0], email=email,
                 nom="Yukpo Admin", hashed_password=_ctx.hash(password),
-                role="super_admin", compagnie_id=None,
-                actif=True, cree_le=_dtt_s.utcnow(), cree_par=0,
+                role="super_admin", compagnie_id=1,
+                actif=True, cree_le=_dtt_s.utcnow(), cree_par=None,
             )
             _sess.add(_u)
             await _sess.commit()
