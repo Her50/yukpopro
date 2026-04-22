@@ -1,0 +1,525 @@
+{
+  "doc_id": "normes_iso_27001_securite_info",
+  "metadata": {
+    "doc_id": "normes_iso_27001_securite_info",
+    "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+    "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "risk_manager",
+      "auditeur",
+      "assureur",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+    "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+    "indexe_le": "2026-04-17T03:11:40.182225"
+  },
+  "nb_chars": 15404,
+  "nb_chunks": 20,
+  "chunks": [
+    {
+      "texte": "ISO/CEI 27001 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\nCet article peut contenir un\ntravail inédit\nou des déclarations\nnon vérifiées\n(\ndécembre 2018\n).\nVous pouvez aider en ajoutant des références ou en supprimant le contenu inédit. Voir la\npage de discussion\npour plus de détails.\nL'\nISO/CEI 27001\nest une norme internationale de\nsécurité des systèmes d'information\nde l'\nISO\net la\nCEI\n. Publiée en octobre",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 0,
+        "chunk_total": 20,
+        "nb_chars": 523
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nISO/CEI 27001 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\nCet article peut contenir un\ntravail inédit\nou des déclarations\nnon vérifiées\n(\ndécembre 2018\n).\nVous pouvez aider en ajoutant des références ou en supprimant le contenu inédit. Voir la\npage de discussion\npour plus de détails.\nL'\nISO/CEI 27001\nest une norme internationale de\nsécurité des systèmes d'information\nde l'\nISO\net la\nCEI\n. Publiée en octobre"
+    },
+    {
+      "texte": "et révisée en 2013 et 2022, son titre est\n\"Technologies de l'information - Techniques de sécurité - Systèmes de gestion de sécurité de l'information - Exigences\"\n. Elle fait partie de la\nsuite ISO/CEI 27000\net permet de\ncertifier\ndes organisations.\nObjectifs\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO/CEI 27001, publiée en\noctobre 2005\net révisée en 2013 et 2022, succède à la norme BS 7799-2 de\nBSI\n(\nBritish Standards Institution\n)\n[\n\n]\n\n. Elle s’adresse à tous les types d’organismes (entreprises commerciales, ONG, administrations…) et définit les exigences pour la mise en place d'un\n\nsystème de management de la sécurité de l'information\n\n(\n\nSMSI",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 1,
+        "chunk_total": 20,
+        "nb_chars": 655
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\net révisée en 2013 et 2022, son titre est\n\"Technologies de l'information - Techniques de sécurité - Systèmes de gestion de sécurité de l'information - Exigences\"\n. Elle fait partie de la\nsuite ISO/CEI 27000\net permet de\ncertifier\ndes organisations.\nObjectifs\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO/CEI 27001, publiée en\noctobre 2005\net révisée en 2013 et 2022, succède à la norme BS 7799-2 de\nBSI\n(\nBritish Standards Institution\n)\n[\n\n]\n\n. Elle s’adresse à tous les types d’organismes (entreprises commerciales, ONG, administrations…) et définit les exigences pour la mise en place d'un\n\nsystème de management de la sécurité de l'information\n\n(\n\nSMSI"
+    },
+    {
+      "texte": "). Le SMSI recense les mesures de sécurité, dans un périmètre défini, afin de garantir la protection des actifs de l'organisme. L’objectif est de protéger les fonctions et informations de toute perte, vol ou altération, et les systèmes informatiques de toute intrusion et sinistre informatique. Cela apportera la confiance des parties prenantes.\n\nLa norme précise que les exigences en matière de mesures de sécurité doivent être adéquates et proportionnées aux risques encourus donc n'être ni trop laxistes ni trop sévères.\n\nL'ISO/CEI 27001 énumère un ensemble de points de contrôles à respecter pour s'assurer de la pertinence du SMSI, permettre de l'exploiter et de le faire évoluer. Plus précisément, l'annexe A de la norme est composée des 114 mesures de sécurité de la norme\n\nISO/CEI 27002\n\n(anciennement ISO/CEI 17799), classées dans 14 sections. Comme pour les normes\n\nISO 9001\n\net\n\nISO 14001",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 2,
+        "chunk_total": 20,
+        "nb_chars": 899
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n). Le SMSI recense les mesures de sécurité, dans un périmètre défini, afin de garantir la protection des actifs de l'organisme. L’objectif est de protéger les fonctions et informations de toute perte, vol ou altération, et les systèmes informatiques de toute intrusion et sinistre informatique. Cela apportera la confiance des parties prenantes.\n\nLa norme précise que les exigences en matière de mesures de sécurité doivent être adéquates et proportionnées aux risques encourus donc n'être ni trop laxistes ni trop sévères.\n\nL'ISO/CEI 27001 énumère un ensemble de points de contrôles à respecter pour s'assurer de la pertinence du SMSI, permettre de l'exploiter et de le faire évoluer. Plus précisément, l'annexe A de la norme est composée des 114 mesures de sécurité de la norme\n\nISO/CEI 27002\n\n(anciennement ISO/CEI 17799), classées dans 14 sections. Comme pour les normes\n\nISO 9001\n\net\n\nISO 14001"
+    },
+    {
+      "texte": ", il est possible de faire certifier un organisme ISO/CEI 27001.\n\nDes points ont disparu par rapport à la norme BS 7799-2 : l’ISO 27001 n’incorpore plus l’amélioration de la compétitivité, des cash flow, de la profitabilité, le respect de la réglementation et l’image de marque.\n\nLa structure de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nDans sa version 2013, la norme est conforme à la nouvelle structure commune des normes de management de l'ISO, l'HLS\n\n[\n\n]\n. Elle ne fait plus explicitement allusion au PDCA ou\nroue de Deming\nmais utilise à la place la formulation « établir, implémenter, maintenir, améliorer »\n[\n\n]\n\n.\n\nLa norme 27001 comporte 10 chapitres et une annexe ; les exigences qu'ils contiennent doivent être respectées pour obtenir une certification.\n\nPhase d'établissement (Plan)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 3,
+        "chunk_total": 20,
+        "nb_chars": 838
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n, il est possible de faire certifier un organisme ISO/CEI 27001.\n\nDes points ont disparu par rapport à la norme BS 7799-2 : l’ISO 27001 n’incorpore plus l’amélioration de la compétitivité, des cash flow, de la profitabilité, le respect de la réglementation et l’image de marque.\n\nLa structure de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nDans sa version 2013, la norme est conforme à la nouvelle structure commune des normes de management de l'ISO, l'HLS\n\n[\n\n]\n. Elle ne fait plus explicitement allusion au PDCA ou\nroue de Deming\nmais utilise à la place la formulation « établir, implémenter, maintenir, améliorer »\n[\n\n]\n\n.\n\nLa norme 27001 comporte 10 chapitres et une annexe ; les exigences qu'ils contiennent doivent être respectées pour obtenir une certification.\n\nPhase d'établissement (Plan)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "On y détermine les objectifs du SMSI. Cette phase d'établissement du SMSI comprend 4 étapes :\n\nÉtape 1 : Définir la politique et le périmètre du SMSI\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPérimètre : domaine d’application du SMSI. Son choix est libre, mais il est essentiel, car il figure ensuite le périmètre de certification. Il doit comprendre tous les actifs métiers (actifs primordiaux au sens de la norme\n\nISO/CEI 27005\n\n) et les actifs support à ces activités qui sont impliquées dans le SMSI.\n\nPolitique : niveau de sécurité (intégrité, confidentialité, disponibilité de l’information) qui sera pratiqué au sein de l’entreprise. La norme n’impose pas de niveau minimum de sécurité à atteindre dans le SMSI. Son niveau devant être proportionné aux risques évalués.",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 4,
+        "chunk_total": 20,
+        "nb_chars": 771
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nOn y détermine les objectifs du SMSI. Cette phase d'établissement du SMSI comprend 4 étapes :\n\nÉtape 1 : Définir la politique et le périmètre du SMSI\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPérimètre : domaine d’application du SMSI. Son choix est libre, mais il est essentiel, car il figure ensuite le périmètre de certification. Il doit comprendre tous les actifs métiers (actifs primordiaux au sens de la norme\n\nISO/CEI 27005\n\n) et les actifs support à ces activités qui sont impliquées dans le SMSI.\n\nPolitique : niveau de sécurité (intégrité, confidentialité, disponibilité de l’information) qui sera pratiqué au sein de l’entreprise. La norme n’impose pas de niveau minimum de sécurité à atteindre dans le SMSI. Son niveau devant être proportionné aux risques évalués."
+    },
+    {
+      "texte": "Le choix du périmètre et de la politique étant libre, ces deux éléments sont des « leviers de souveraineté » pour l’entreprise. Ainsi, une entreprise peut être certifiée ISO 27001 tout en définissant un périmètre très réduit et une politique de sécurité peu stricte et sans répondre aux exigences de ses clients en matière de sécurité.\n\nÉtape 2 : Identifier et évaluer les risques liés à la sécurité et élaborer la politique de sécurité\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme ISO 27001 ne donne pas de directives sur la méthode d’appréciation des risques à adopter. Les entreprises peuvent donc en inventer une en veillant à bien respecter le cahier des charges ou en choisir une parmi les plus courantes notamment la méthode\n\nEBIOS\n\n(Expression des Besoins et Identification des Objectifs de Sécurité) mise en place en France par l'\n\nANSSI",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 5,
+        "chunk_total": 20,
+        "nb_chars": 848
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nLe choix du périmètre et de la politique étant libre, ces deux éléments sont des « leviers de souveraineté » pour l’entreprise. Ainsi, une entreprise peut être certifiée ISO 27001 tout en définissant un périmètre très réduit et une politique de sécurité peu stricte et sans répondre aux exigences de ses clients en matière de sécurité.\n\nÉtape 2 : Identifier et évaluer les risques liés à la sécurité et élaborer la politique de sécurité\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme ISO 27001 ne donne pas de directives sur la méthode d’appréciation des risques à adopter. Les entreprises peuvent donc en inventer une en veillant à bien respecter le cahier des charges ou en choisir une parmi les plus courantes notamment la méthode\n\nEBIOS\n\n(Expression des Besoins et Identification des Objectifs de Sécurité) mise en place en France par l'\n\nANSSI"
+    },
+    {
+      "texte": "(Agence Nationale de la Sécurité des Systèmes d’Information).\n\nLe cahier des charges relatif à l’appréciation des risques se développe en 7 points :\n\nIdentifier les actifs;\n\nIdentifier les personnes responsables;\n\nIdentifier les vulnérabilités;\n\nIdentifier les menaces;\n\nIdentifier leurs impacts sur les actifs à défendre;\n\nÉvaluer la vraisemblance ou potentialité du risque;\n\nEstimer les niveaux de risque, fonction de leur potentialité et de leur impact.\n\nÉtape 3 : Traiter le risque et identifier le risque résiduel par un plan de gestion\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nIl existe quatre traitements possibles de chacun des risques identifiés, présentés par ordre décroissant d'intérêt pour l'organisme :",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 6,
+        "chunk_total": 20,
+        "nb_chars": 713
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n(Agence Nationale de la Sécurité des Systèmes d’Information).\n\nLe cahier des charges relatif à l’appréciation des risques se développe en 7 points :\n\nIdentifier les actifs;\n\nIdentifier les personnes responsables;\n\nIdentifier les vulnérabilités;\n\nIdentifier les menaces;\n\nIdentifier leurs impacts sur les actifs à défendre;\n\nÉvaluer la vraisemblance ou potentialité du risque;\n\nEstimer les niveaux de risque, fonction de leur potentialité et de leur impact.\n\nÉtape 3 : Traiter le risque et identifier le risque résiduel par un plan de gestion\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nIl existe quatre traitements possibles de chacun des risques identifiés, présentés par ordre décroissant d'intérêt pour l'organisme :"
+    },
+    {
+      "texte": "L’évitement : politique mise en place si l’incident est jugé inacceptable ou si les mesures sont aisément accessibles. Il s'agit de réorganiser le système d'information à protéger de façon à éliminer totalement la potentialité du risque.\n\nLa réduction : on ramène la potentialité et/ou l'impact du risque à un niveau acceptable par la mise en œuvre de mesures techniques et organisationnelles. C'est la solution la plus utilisée.\n\nLe transfert (ou partage) : la part de risque qui ne peut pas être évitée ou réduite est dénommée risque résiduel. L'organisme peut transférer la responsabilité technique de tout ou partie de ce risque résiduel en recourant à une solution d'\n\nexternalisation\n\nde sécurité. Il peut aussi souscrire une assurance pour diminuer l'impact financier du risque.",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 7,
+        "chunk_total": 20,
+        "nb_chars": 785
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nL’évitement : politique mise en place si l’incident est jugé inacceptable ou si les mesures sont aisément accessibles. Il s'agit de réorganiser le système d'information à protéger de façon à éliminer totalement la potentialité du risque.\n\nLa réduction : on ramène la potentialité et/ou l'impact du risque à un niveau acceptable par la mise en œuvre de mesures techniques et organisationnelles. C'est la solution la plus utilisée.\n\nLe transfert (ou partage) : la part de risque qui ne peut pas être évitée ou réduite est dénommée risque résiduel. L'organisme peut transférer la responsabilité technique de tout ou partie de ce risque résiduel en recourant à une solution d'\n\nexternalisation\n\nde sécurité. Il peut aussi souscrire une assurance pour diminuer l'impact financier du risque."
+    },
+    {
+      "texte": "L’acceptation (ou maintien) : ne mettre en place aucune mesure de sécurité supplémentaire car les conséquences du risque résiduel non transférable sont acceptables. Par exemple, le vol d’un ordinateur portable ne comportant pas de données primordiales pour l’entreprise est sans grand impact. Cette solution peut n'être que ponctuelle.\n\nLorsque la décision de traitement du risque est prise, l’entreprise doit identifier les risques résiduels c’est-à-dire ceux qui persistent après la mise en place des mesures de sécurité. S'ils sont jugés inacceptables, il faut définir des mesures de sécurité supplémentaires. Cette phase d'acceptation formelle des risques résiduels s'inscrit souvent dans un processus d'homologation. Le système étant homologué en tenant compte de ces risques résiduels.\n\nÉtape 4 : Choisir les mesures de sécurité à mettre en place\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 8,
+        "chunk_total": 20,
+        "nb_chars": 889
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nL’acceptation (ou maintien) : ne mettre en place aucune mesure de sécurité supplémentaire car les conséquences du risque résiduel non transférable sont acceptables. Par exemple, le vol d’un ordinateur portable ne comportant pas de données primordiales pour l’entreprise est sans grand impact. Cette solution peut n'être que ponctuelle.\n\nLorsque la décision de traitement du risque est prise, l’entreprise doit identifier les risques résiduels c’est-à-dire ceux qui persistent après la mise en place des mesures de sécurité. S'ils sont jugés inacceptables, il faut définir des mesures de sécurité supplémentaires. Cette phase d'acceptation formelle des risques résiduels s'inscrit souvent dans un processus d'homologation. Le système étant homologué en tenant compte de ces risques résiduels.\n\nÉtape 4 : Choisir les mesures de sécurité à mettre en place\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "La norme ISO 27001 contient une annexe A qui propose 114 mesures de sécurité classées en 14 catégories (politique de sécurité, sécurité du personnel, contrôle des accès…) Cette annexe normative, n'est qu’une liste qui ne donne aucun conseil de mise en œuvre au sein de l’entreprise. Les mesures sont présentées dans la norme ISO 27002.\n\nPhase d'implémentation (Do)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMet en place les objectifs. Elle comporte plusieurs étapes :\n\nÉtablir un plan de traitement des risques\n\nDéployer les mesures de sécurité\n\nGénérer des indicateurs\n\nDe performance pour savoir si les mesures de sécurité sont efficaces\n\nDe conformité qui permettent de savoir si le SMSI est conforme à ses spécifications\n\nFormer et sensibiliser le personnel\n\nPhase de maintien (Check)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 9,
+        "chunk_total": 20,
+        "nb_chars": 821
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nLa norme ISO 27001 contient une annexe A qui propose 114 mesures de sécurité classées en 14 catégories (politique de sécurité, sécurité du personnel, contrôle des accès…) Cette annexe normative, n'est qu’une liste qui ne donne aucun conseil de mise en œuvre au sein de l’entreprise. Les mesures sont présentées dans la norme ISO 27002.\n\nPhase d'implémentation (Do)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMet en place les objectifs. Elle comporte plusieurs étapes :\n\nÉtablir un plan de traitement des risques\n\nDéployer les mesures de sécurité\n\nGénérer des indicateurs\n\nDe performance pour savoir si les mesures de sécurité sont efficaces\n\nDe conformité qui permettent de savoir si le SMSI est conforme à ses spécifications\n\nFormer et sensibiliser le personnel\n\nPhase de maintien (Check)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "Consiste à gérer le SMSI au quotidien et à détecter les incidents en permanence pour y réagir rapidement. Trois outils peuvent être mis en place pour détecter ces incidents :\n\nLe contrôle interne qui consiste à s’assurer en permanence que les processus fonctionnent normalement.\n\nLes audits internes qui vérifient la conformité et l’efficacité du système de management. Ces audits sont ponctuels et planifiés.\n\nLes revues (ou réexamens) qui garantissent périodiquement l’adéquation du SMSI avec son environnement.\n\nPhase d'amélioration (Act)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMettre en place des actions correctives, préventives ou d’amélioration pour les incidents et écarts constatés lors de la phase\n\nCheck\n\nActions correctives : agir sur les effets pour corriger les écarts puis sur les causes pour éviter que les incidents ne se reproduisent",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 10,
+        "chunk_total": 20,
+        "nb_chars": 850
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nConsiste à gérer le SMSI au quotidien et à détecter les incidents en permanence pour y réagir rapidement. Trois outils peuvent être mis en place pour détecter ces incidents :\n\nLe contrôle interne qui consiste à s’assurer en permanence que les processus fonctionnent normalement.\n\nLes audits internes qui vérifient la conformité et l’efficacité du système de management. Ces audits sont ponctuels et planifiés.\n\nLes revues (ou réexamens) qui garantissent périodiquement l’adéquation du SMSI avec son environnement.\n\nPhase d'amélioration (Act)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMettre en place des actions correctives, préventives ou d’amélioration pour les incidents et écarts constatés lors de la phase\n\nCheck\n\nActions correctives : agir sur les effets pour corriger les écarts puis sur les causes pour éviter que les incidents ne se reproduisent"
+    },
+    {
+      "texte": "Actions préventives : agir sur les causes avant que l’incident ne se produise\n\nActions d’amélioration : améliorer la performance d’un processus du SMSI.\n\nProcessus de certification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa certification ISO/CEI 27001 se déroule sur un cycle de trois ans jalonné par l’audit initial, les audits de surveillance et l’audit de renouvellement.\n\nL’audit initial porte sur l’ensemble du SMSI. Sa durée est déterminée dans l’annexe C de la norme\n\nISO/CEI 27006",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 11,
+        "chunk_total": 20,
+        "nb_chars": 486
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nActions préventives : agir sur les causes avant que l’incident ne se produise\n\nActions d’amélioration : améliorer la performance d’un processus du SMSI.\n\nProcessus de certification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa certification ISO/CEI 27001 se déroule sur un cycle de trois ans jalonné par l’audit initial, les audits de surveillance et l’audit de renouvellement.\n\nL’audit initial porte sur l’ensemble du SMSI. Sa durée est déterminée dans l’annexe C de la norme\n\nISO/CEI 27006"
+    },
+    {
+      "texte": ". L’auditeur ne donne pas la certification, il donne juste un avis qui sera étudié par un comité de validation technique, puis par un comité de certification. Ce n’est qu’après cela que le certificat initial est délivré pour une durée de trois ans. Dans le cas contraire, il y a un audit complémentaire dans le délai maximum de trois mois. L’organisme devra, durant ce délai, corriger les problèmes décelés lors de l’audit initial pour obtenir le certificat.\n\nL’audit de surveillance, annuel, a lieu pendant la période de validité du certificat (3 ans) afin de s’assurer que le SMSI est toujours valable. L’audit porte notamment sur les écarts ou non-conformités relevés lors de l’audit initial ainsi que sur d’autres points :\n\nle traitement des plaintes ;\n\nl’état d’avancement des activités planifiées ;\n\nla viabilité du SMSI ;\n\nl’utilisation de la marque de l’organisation certificatrice ;",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 12,
+        "chunk_total": 20,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n. L’auditeur ne donne pas la certification, il donne juste un avis qui sera étudié par un comité de validation technique, puis par un comité de certification. Ce n’est qu’après cela que le certificat initial est délivré pour une durée de trois ans. Dans le cas contraire, il y a un audit complémentaire dans le délai maximum de trois mois. L’organisme devra, durant ce délai, corriger les problèmes décelés lors de l’audit initial pour obtenir le certificat.\n\nL’audit de surveillance, annuel, a lieu pendant la période de validité du certificat (3 ans) afin de s’assurer que le SMSI est toujours valable. L’audit porte notamment sur les écarts ou non-conformités relevés lors de l’audit initial ainsi que sur d’autres points :\n\nle traitement des plaintes ;\n\nl’état d’avancement des activités planifiées ;\n\nla viabilité du SMSI ;\n\nl’utilisation de la marque de l’organisation certificatrice ;"
+    },
+    {
+      "texte": "différentes clauses choisies par l’auditeur.\n\nSi l’auditeur relève des non-conformités, le certificat sera suspendu, voire annulé. L’organisme doit donc être perpétuellement mobilisé.\n\nL’audit de renouvellement se déroule à l’échéance du certificat. Il porte sur les non-conformités du dernier audit de surveillance ainsi que sur la revue des rapports des audits de surveillance précédents et la revue des performances du SMSI sur la période.\n\nCritique du standard\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAvantages\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUne description pratique et détaillée de la mise en œuvre des objectifs et mesures de sécurité.\n\nUn audit régulier qui permet le suivi entre les risques initialement identifiés, les mesures prises et les risques nouveaux ou mis à jour, afin de mesurer l’efficacité des mesures prises.\n\nSécurité :",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 13,
+        "chunk_total": 20,
+        "nb_chars": 847
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\ndifférentes clauses choisies par l’auditeur.\n\nSi l’auditeur relève des non-conformités, le certificat sera suspendu, voire annulé. L’organisme doit donc être perpétuellement mobilisé.\n\nL’audit de renouvellement se déroule à l’échéance du certificat. Il porte sur les non-conformités du dernier audit de surveillance ainsi que sur la revue des rapports des audits de surveillance précédents et la revue des performances du SMSI sur la période.\n\nCritique du standard\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAvantages\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUne description pratique et détaillée de la mise en œuvre des objectifs et mesures de sécurité.\n\nUn audit régulier qui permet le suivi entre les risques initialement identifiés, les mesures prises et les risques nouveaux ou mis à jour, afin de mesurer l’efficacité des mesures prises.\n\nSécurité :"
+    },
+    {
+      "texte": "Processus d'amélioration continue de la sécurité, donc le niveau de sécurité a plutôt tendance à croître.\n\nMeilleure maîtrise des risques\n\nDiminution de l'usage des mesures de sécurité qui ne servent pas.\n\nUne certification qui améliore la confiance avec les parties prenantes.\n\nHomogénéisation : c’est un référentiel international. Cela facilite les échanges, surtout pour les entreprises qui possèdent plusieurs sites.\n\nProcessus simple et peu coûteux : réduction des coûts grâce à la diminution d'usage de mesures de sécurité inutiles et à la mutualisation des audits (baisse du nombre et de la durée des audits quand on obtient la certification).\n\nLa norme fournit des indicateurs clairs et fiables ainsi que des éléments de pilotage financier aux directions générales.\n\nLa norme permet d'identifier plus efficacement les risques et les coûts associés.\n\nLimites\n\n[\n\nmodifier\n\n|\n\nmodifier le code",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 14,
+        "chunk_total": 20,
+        "nb_chars": 899
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nProcessus d'amélioration continue de la sécurité, donc le niveau de sécurité a plutôt tendance à croître.\n\nMeilleure maîtrise des risques\n\nDiminution de l'usage des mesures de sécurité qui ne servent pas.\n\nUne certification qui améliore la confiance avec les parties prenantes.\n\nHomogénéisation : c’est un référentiel international. Cela facilite les échanges, surtout pour les entreprises qui possèdent plusieurs sites.\n\nProcessus simple et peu coûteux : réduction des coûts grâce à la diminution d'usage de mesures de sécurité inutiles et à la mutualisation des audits (baisse du nombre et de la durée des audits quand on obtient la certification).\n\nLa norme fournit des indicateurs clairs et fiables ainsi que des éléments de pilotage financier aux directions générales.\n\nLa norme permet d'identifier plus efficacement les risques et les coûts associés.\n\nLimites\n\n[\n\nmodifier\n\n|\n\nmodifier le code"
+    },
+    {
+      "texte": "]\n\nParfois, faible expérience des organismes d'accréditation par rapport aux spécificités des enjeux en sécurité des systèmes d'information. La norme\n\nISO/CEI 27006\n\npermet de certifier ces organismes certificateurs.\n\nRelations commerciales prépondérantes (achat de certification, de conseil, de produits, de services), ce qui conduit à une dévalorisation du processus de certification.\n\nDurée courte pour les audits.\n\nLa définition et la mise en place d'une méthodologie sont des tâches lourdes.\n\nL'application de cette norme ne réduit pas forcément de manière notable le risque en matière de piratage et de vols d'informations confidentielles. Les intervenants, notamment internes, connaissent les règles et peuvent ainsi plus aisément les contourner. Les normes sont inopérantes dans ce domaine.\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\nNorme ISO 27001",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 15,
+        "chunk_total": 20,
+        "nb_chars": 876
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n]\n\nParfois, faible expérience des organismes d'accréditation par rapport aux spécificités des enjeux en sécurité des systèmes d'information. La norme\n\nISO/CEI 27006\n\npermet de certifier ces organismes certificateurs.\n\nRelations commerciales prépondérantes (achat de certification, de conseil, de produits, de services), ce qui conduit à une dévalorisation du processus de certification.\n\nDurée courte pour les audits.\n\nLa définition et la mise en place d'une méthodologie sont des tâches lourdes.\n\nL'application de cette norme ne réduit pas forcément de manière notable le risque en matière de piratage et de vols d'informations confidentielles. Les intervenants, notamment internes, connaissent les règles et peuvent ainsi plus aisément les contourner. Les normes sont inopérantes dans ce domaine.\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\nNorme ISO 27001"
+    },
+    {
+      "texte": "sur le site de BSI Group\n\n↑\n\n«\n\nHLS: La structure universelle des normes de management\n\n»,\n\n18 novembre 2014\n\n↑\n\n«\n\nISO 27001:2013, comparatif avec la version 2005\n\n»\n\n[PDF]\n\n, sur\n\nclub-27001.fr\n\n,\n\np.\n\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nBibliographie\n[\nmodifier\n|\nmodifier le code\n]\nAlexandre Fernandez-Toro,\nManagement de la sécurité de l'information : implémentation ISO 27001 : mise en place d'un SMSI et audit de certification\n, Paris, Eyrolles,\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nListe de normes ISO par domaines\n\nListe des normes ISO de la suite ISO/CEI 27000\n\nISO/CEI 17799\n\nExigences\n\nITSEC\n\nSécurité de l'information\n\nEBIOS\n\n, méthode de gestion des risques développée par l'\n\nAgence nationale de la sécurité des systèmes d'information\n\n(ANSSI)\n\nMÉHARI\n\ndéveloppé par le\n\nClub de la Sécurité de l'Information Français\n\n(\n\nCLUSIF",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 16,
+        "chunk_total": 20,
+        "nb_chars": 869
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nsur le site de BSI Group\n\n↑\n\n«\n\nHLS: La structure universelle des normes de management\n\n»,\n\n18 novembre 2014\n\n↑\n\n«\n\nISO 27001:2013, comparatif avec la version 2005\n\n»\n\n[PDF]\n\n, sur\n\nclub-27001.fr\n\n,\n\np.\n\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nBibliographie\n[\nmodifier\n|\nmodifier le code\n]\nAlexandre Fernandez-Toro,\nManagement de la sécurité de l'information : implémentation ISO 27001 : mise en place d'un SMSI et audit de certification\n, Paris, Eyrolles,\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nListe de normes ISO par domaines\n\nListe des normes ISO de la suite ISO/CEI 27000\n\nISO/CEI 17799\n\nExigences\n\nITSEC\n\nSécurité de l'information\n\nEBIOS\n\n, méthode de gestion des risques développée par l'\n\nAgence nationale de la sécurité des systèmes d'information\n\n(ANSSI)\n\nMÉHARI\n\ndéveloppé par le\n\nClub de la Sécurité de l'Information Français\n\n(\n\nCLUSIF"
+    },
+    {
+      "texte": "), méthode de management de la sécurité de l'information par le risque\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nConsultation en ligne de la norme 27001\n\n», sur\n\niso.org\n\n(consulté le\n\n10 novembre 2017\n\n)\n\n(accès restreint).\n\n«\n\nAudit norme 27001\n\n»\n\n(consulté le\n\n23 décembre 2023\n\n)\n\n.\n\nv\n\n·\n\nm\n\nAudit de sécurité\n\ninformatique\n\nTest\n\nTest\n\nGénie logiciel\n\nPrise d'empreinte de la pile TCP/IP\n\nOutils\n\nFuzzing\n\nRétro-ingénierie\n\nBoîte blanche\n\nBoîte noire\n\nCryptanalyse\n\nAttaque\n\nDépassement de tampon\n\nAttaque de l'homme du milieu\n\nProtection\n\nSécurité par l'obscurité\n\nNormes ISO/CEI",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 17,
+        "chunk_total": 20,
+        "nb_chars": 602
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\n), méthode de management de la sécurité de l'information par le risque\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nConsultation en ligne de la norme 27001\n\n», sur\n\niso.org\n\n(consulté le\n\n10 novembre 2017\n\n)\n\n(accès restreint).\n\n«\n\nAudit norme 27001\n\n»\n\n(consulté le\n\n23 décembre 2023\n\n)\n\n.\n\nv\n\n·\n\nm\n\nAudit de sécurité\n\ninformatique\n\nTest\n\nTest\n\nGénie logiciel\n\nPrise d'empreinte de la pile TCP/IP\n\nOutils\n\nFuzzing\n\nRétro-ingénierie\n\nBoîte blanche\n\nBoîte noire\n\nCryptanalyse\n\nAttaque\n\nDépassement de tampon\n\nAttaque de l'homme du milieu\n\nProtection\n\nSécurité par l'obscurité\n\nNormes ISO/CEI"
+    },
+    {
+      "texte": "v\n·\nm\nSuite ISO/CEI 27000\nISO/CEI 27000\n:2018\nISO/CEI 27001\n:2022\nISO/CEI 27002\n:2022\nISO/CEI 27003\n:2017\nISO/CEI 27004\n:2016\nISO/CEI 27005\n:2022\nISO/CEI 27006\n:2024\nISO/CEI 27007\n:2020\nISO/CEI TS 27008\n:2019\nISO/CEI 27011\n:2024\nISO/CEI 27013\n:2021\nISO/CEI 27017\n:2015\nISO/CEI 27018\n:2019\nISO/CEI TR 27019\n:2024\nISO/CEI 27799\n:2016\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 18,
+        "chunk_total": 20,
+        "nb_chars": 886
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nv\n·\nm\nSuite ISO/CEI 27000\nISO/CEI 27000\n:2018\nISO/CEI 27001\n:2022\nISO/CEI 27002\n:2022\nISO/CEI 27003\n:2017\nISO/CEI 27004\n:2016\nISO/CEI 27005\n:2022\nISO/CEI 27006\n:2024\nISO/CEI 27007\n:2020\nISO/CEI TS 27008\n:2019\nISO/CEI 27011\n:2024\nISO/CEI 27013\n:2021\nISO/CEI 27017\n:2015\nISO/CEI 27018\n:2019\nISO/CEI TR 27019\n:2024\nISO/CEI 27799\n:2016\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001"
+    },
+    {
+      "texte": "Chaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de la sécurité de l’information\n\nPortail de la sécurité des systèmes d'information\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO/CEI_27001&oldid=231320593\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nNorme CEI\n\nStandard en sécurité de l'information\n\nStandard en sécurité informatique\n\nCatégories cachées :\n\nArticle pouvant contenir un travail inédit\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Sécurité de l'information/Articles liés\n\nPortail:Sécurité informatique/Articles liés\n\nPortail:Informatique/Articles liés\n\nRechercher\n\nRechercher\n\nISO/CEI 27001\n\n29 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_27001_securite_info",
+        "nom_doc": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "nom": "ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+        "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+        "indexe_le": "2026-04-17T03:11:40.182225",
+        "chunk_index": 19,
+        "chunk_total": 20,
+        "nb_chars": 723
+      },
+      "texte_embed": "normes — ISO/CEI 27001 — Sécurité des systèmes d'information (Wikipedia FR)\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de la sécurité de l’information\n\nPortail de la sécurité des systèmes d'information\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO/CEI_27001&oldid=231320593\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nNorme CEI\n\nStandard en sécurité de l'information\n\nStandard en sécurité informatique\n\nCatégories cachées :\n\nArticle pouvant contenir un travail inédit\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Sécurité de l'information/Articles liés\n\nPortail:Sécurité informatique/Articles liés\n\nPortail:Informatique/Articles liés\n\nRechercher\n\nRechercher\n\nISO/CEI 27001\n\n29 langues\n\nAjouter un sujet"
+    }
+  ]
+}

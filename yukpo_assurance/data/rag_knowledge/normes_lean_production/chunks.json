@@ -1,0 +1,2175 @@
+{
+  "doc_id": "normes_lean_production",
+  "metadata": {
+    "doc_id": "normes_lean_production",
+    "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+    "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "commercial",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+    "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+    "indexe_le": "2026-04-17T03:12:01.800832"
+  },
+  "nb_chars": 27744,
+  "nb_chunks": 86,
+  "chunks": [
+    {
+      "texte": "Lean (production) — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nPour les articles homonymes, voir\nLean\n.\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\nCet article\nne cite pas suffisamment ses sources\n(\nmai 2015\n).\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\nréférences utiles à sa\nvérifiabilité\net en les liant à la section «\nNotes et références\n».\nEn pratique :\nQuelles sources sont attendues ?\nComment ajouter mes sources ?\nModèle du système «\nLean production\n».\nLe terme\nlean\n(de l'\nanglais\nlean\n, littéralement « maigre », « sans gras », « dégraissé ») sert à qualifier une méthode de\ngestion de la production\nqui se concentre sur la « gestion sans gaspillage »\n[\n\n]\n, ou « gestion allégée »\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 0,
+        "chunk_total": 86,
+        "nb_chars": 894
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nLean (production) — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nPour les articles homonymes, voir\nLean\n.\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\nCet article\nne cite pas suffisamment ses sources\n(\nmai 2015\n).\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\nréférences utiles à sa\nvérifiabilité\net en les liant à la section «\nNotes et références\n».\nEn pratique :\nQuelles sources sont attendues ?\nComment ajouter mes sources ?\nModèle du système «\nLean production\n».\nLe terme\nlean\n(de l'\nanglais\nlean\n, littéralement « maigre », « sans gras », « dégraissé ») sert à qualifier une méthode de\ngestion de la production\nqui se concentre sur la « gestion sans gaspillage »\n[\n\n]\n, ou « gestion allégée »\n["
+    },
+    {
+      "texte": "]\nou encore gestion « au plus juste »\n[\n\n]\n.\nL'école de gestion\nlean\ntrouve ses sources au\nJapon\ndans le\nsystème de production de Toyota\nou SPT (en anglais\nToyota Production System\nou TPS)\n[\n\n]\n.\nL'école de philosophie du\nlean\nest marquée (dans la lignée du\ntaylorisme\n) par la recherche de la\nperformance\n(en matière de\nproductivité\n, de\nqualité\n, de délais, et enfin de coûts), censée être plus facile à atteindre par l'amélioration continue et l'élimination des gaspillages (\nmuda\nen japonais), afin d'améliorer la valeur globale pour le client.\nLes\nmudas\nsont au nombre de sept\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 1,
+        "chunk_total": 86,
+        "nb_chars": 583
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\nou encore gestion « au plus juste »\n[\n\n]\n.\nL'école de gestion\nlean\ntrouve ses sources au\nJapon\ndans le\nsystème de production de Toyota\nou SPT (en anglais\nToyota Production System\nou TPS)\n[\n\n]\n.\nL'école de philosophie du\nlean\nest marquée (dans la lignée du\ntaylorisme\n) par la recherche de la\nperformance\n(en matière de\nproductivité\n, de\nqualité\n, de délais, et enfin de coûts), censée être plus facile à atteindre par l'amélioration continue et l'élimination des gaspillages (\nmuda\nen japonais), afin d'améliorer la valeur globale pour le client.\nLes\nmudas\nsont au nombre de sept\n["
+    },
+    {
+      "texte": "]\n: surproduction, attentes, transport, étapes inutiles, stocks, mouvements inutiles, corrections/retouches.\nFormalisée aux\nÉtats-Unis\ndans les\nannées 1990\n, adaptable à tous les\nsecteurs économiques\n, le\nlean\nest actuellement implanté principalement dans l'\nindustrie\net surtout l'\nindustrie automobile\n.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\nCette section\nne cite pas suffisamment ses sources\n(octobre 2020)\n.\nPour l'améliorer, ajoutez\ndes références de qualité et vérifiables\n(\ncomment faire ?\n) ou le modèle\n{{Référence nécessaire}}\nsur les passages nécessitant une source.\nEn 1988, l'ingénieur américain\nJohn Krafcik\n(en)\npublie un article intitulé «\nTriumph of the Lean Production System\n»\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 2,
+        "chunk_total": 86,
+        "nb_chars": 702
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\n: surproduction, attentes, transport, étapes inutiles, stocks, mouvements inutiles, corrections/retouches.\nFormalisée aux\nÉtats-Unis\ndans les\nannées 1990\n, adaptable à tous les\nsecteurs économiques\n, le\nlean\nest actuellement implanté principalement dans l'\nindustrie\net surtout l'\nindustrie automobile\n.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\nCette section\nne cite pas suffisamment ses sources\n(octobre 2020)\n.\nPour l'améliorer, ajoutez\ndes références de qualité et vérifiables\n(\ncomment faire ?\n) ou le modèle\n{{Référence nécessaire}}\nsur les passages nécessitant une source.\nEn 1988, l'ingénieur américain\nJohn Krafcik\n(en)\npublie un article intitulé «\nTriumph of the Lean Production System\n»\n["
+    },
+    {
+      "texte": "]\n, tiré de la thèse qu'il a soutenue à la\nSloan School of Management\ndu\nMassachusetts Institute of Technology\n(MIT). Auparavant, Krafcik était ingénieur qualité à l'usine NUMMI (New United Motor Manufacturing), une co-entreprise\nToyota\n–\nGeneral Motors\n, sise à\nFremont\nen\nCalifornie\n.\nAu\nMIT\n, les recherches de Krafcik sont poursuivies dans le cadre de l'\nInternational Motor Vehicle Program\n(en)\n(IMVP), programme qui débouche sur la publication, en 1990, du livre\nThe machine That Changed the World\n, co-écrit par\nJames Tim Womack\n(en)\n, Daniel T. Jones et Daniel Ross.\nLe succès de l'ouvrage est planétaire\n[\n\n]\n.\nL'école du\nlean\nse formalise aux\nÉtats-Unis\ndans les\nannées 1990\n, popularisée par le livre\nLean Thinking\n[\n\n]\n\n(1996) de Daniel T. Jones et James P. Womack (ce dernier formé selon les méthodes de Hajime Ohba dans le cadre de la cellule de support pour les\n\nfournisseurs\n\nde",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 3,
+        "chunk_total": 86,
+        "nb_chars": 894
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\n, tiré de la thèse qu'il a soutenue à la\nSloan School of Management\ndu\nMassachusetts Institute of Technology\n(MIT). Auparavant, Krafcik était ingénieur qualité à l'usine NUMMI (New United Motor Manufacturing), une co-entreprise\nToyota\n–\nGeneral Motors\n, sise à\nFremont\nen\nCalifornie\n.\nAu\nMIT\n, les recherches de Krafcik sont poursuivies dans le cadre de l'\nInternational Motor Vehicle Program\n(en)\n(IMVP), programme qui débouche sur la publication, en 1990, du livre\nThe machine That Changed the World\n, co-écrit par\nJames Tim Womack\n(en)\n, Daniel T. Jones et Daniel Ross.\nLe succès de l'ouvrage est planétaire\n[\n\n]\n.\nL'école du\nlean\nse formalise aux\nÉtats-Unis\ndans les\nannées 1990\n, popularisée par le livre\nLean Thinking\n[\n\n]\n\n(1996) de Daniel T. Jones et James P. Womack (ce dernier formé selon les méthodes de Hajime Ohba dans le cadre de la cellule de support pour les\n\nfournisseurs\n\nde"
+    },
+    {
+      "texte": "Toyota\n\naux\n\nÉtats-Unis\n\n).\n\nDe nombreux travaux suivent, parmi lesquels\n\nTeam Toyota\n\n(1996) de Terry L. Bresser et\n\nThe Toyota Way\n\n(2004) de Jeffrey K. Liker. Ces ouvrages permettent de clarifier les concepts et les pratiques\n\nlean\n\n, de mieux comprendre les fondements cognitifs et sociaux sur lesquels le système repose et de multiplier les exemples et études de cas. Désormais, les tenants du\n\nlean\n\ns'appliquent à l'enseigner, à appliquer et répandre ses règles au sein de la communauté industrielle.\n\nConcepts de base\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa pensée\n\nlean\n\nrepose sur deux concepts principaux : le\n\njuste-à-temps\n\net le\n\njidoka\n\n(« automatisation à visage humain »).\n\nLes principes du juste-à-temps sont :\n\nle temps TAKT\n\n;\n\nle lissage (\n\nheijunka\n\n) ;\n\nle flux continu en pièce à pièce (en anglais «\n\none-piece flow\n\n») ;",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 4,
+        "chunk_total": 86,
+        "nb_chars": 894
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nToyota\n\naux\n\nÉtats-Unis\n\n).\n\nDe nombreux travaux suivent, parmi lesquels\n\nTeam Toyota\n\n(1996) de Terry L. Bresser et\n\nThe Toyota Way\n\n(2004) de Jeffrey K. Liker. Ces ouvrages permettent de clarifier les concepts et les pratiques\n\nlean\n\n, de mieux comprendre les fondements cognitifs et sociaux sur lesquels le système repose et de multiplier les exemples et études de cas. Désormais, les tenants du\n\nlean\n\ns'appliquent à l'enseigner, à appliquer et répandre ses règles au sein de la communauté industrielle.\n\nConcepts de base\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa pensée\n\nlean\n\nrepose sur deux concepts principaux : le\n\njuste-à-temps\n\net le\n\njidoka\n\n(« automatisation à visage humain »).\n\nLes principes du juste-à-temps sont :\n\nle temps TAKT\n\n;\n\nle lissage (\n\nheijunka\n\n) ;\n\nle flux continu en pièce à pièce (en anglais «\n\none-piece flow\n\n») ;"
+    },
+    {
+      "texte": "le flux tiré ;\n\nle changement rapide d'outils (\n\nSMED\n\n) ;\n\nl'intégration de la logistique.\n\nLes principes du\n\njidoka\n\n(peu visibles chez\n\nToyota\n\n, et de ce fait moins connus en dehors de l'entreprise) sont :\n\nla séparation de l'homme et de la machine ;\n\nles outils d'arrêt de production au premier défaut (\n\nandon\n\n) ;\n\nles méthodes d'élimination des causes d'erreur (\n\npoka yoke\n\n) ;\n\nles méthodes d'analyse de problème («\n\ncinq pourquoi\n\n»,\n\nroue de Deming\n\n,\n\n8D\n\n) ;\n\nla ré-ingénierie des équipements de production.\n\nAu-delà de la gestion de la production\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nGestion d'entreprise\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAprès avoir dépassé son cadre initial, — l'organisation de la production —, l'école\n\nlean\n\nest aujourd'hui perçue comme une méthode pertinente pour combattre tous les types d’inefficacité : l'intérêt pour le\n\nlean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 5,
+        "chunk_total": 86,
+        "nb_chars": 872
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nle flux tiré ;\n\nle changement rapide d'outils (\n\nSMED\n\n) ;\n\nl'intégration de la logistique.\n\nLes principes du\n\njidoka\n\n(peu visibles chez\n\nToyota\n\n, et de ce fait moins connus en dehors de l'entreprise) sont :\n\nla séparation de l'homme et de la machine ;\n\nles outils d'arrêt de production au premier défaut (\n\nandon\n\n) ;\n\nles méthodes d'élimination des causes d'erreur (\n\npoka yoke\n\n) ;\n\nles méthodes d'analyse de problème («\n\ncinq pourquoi\n\n»,\n\nroue de Deming\n\n,\n\n8D\n\n) ;\n\nla ré-ingénierie des équipements de production.\n\nAu-delà de la gestion de la production\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nGestion d'entreprise\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAprès avoir dépassé son cadre initial, — l'organisation de la production —, l'école\n\nlean\n\nest aujourd'hui perçue comme une méthode pertinente pour combattre tous les types d’inefficacité : l'intérêt pour le\n\nlean"
+    },
+    {
+      "texte": "s'étend aux services administratifs (\n\nlean office\n\n), au développement de produits (\n\nlean development\n\n).\n\nDérivés\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLean management\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe\n\nlean management\n\nest un système d'\n\norganisation du travail\n\nqui, selon ses promoteurs, vise à éliminer les gaspillages qui réduisent l'\n\nefficacité\n\net la performance d'une\n\nentreprise\n\n, d'une\n\nunité de production\n\nou d'un\n\ndépartement\n\n.\n\nÀ cet effet, le\n\nlean\n\nse fixe comme objectif d’éradiquer trois « démons » de l’organisation du travail\n\n[\n\n]\n\n[source insuffisante]\n\n:\n\nle\n\nMuda\n\n: tout ce qui est sans\n\nvaleur\n\n:",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 6,
+        "chunk_total": 86,
+        "nb_chars": 683
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ns'étend aux services administratifs (\n\nlean office\n\n), au développement de produits (\n\nlean development\n\n).\n\nDérivés\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLean management\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe\n\nlean management\n\nest un système d'\n\norganisation du travail\n\nqui, selon ses promoteurs, vise à éliminer les gaspillages qui réduisent l'\n\nefficacité\n\net la performance d'une\n\nentreprise\n\n, d'une\n\nunité de production\n\nou d'un\n\ndépartement\n\n.\n\nÀ cet effet, le\n\nlean\n\nse fixe comme objectif d’éradiquer trois « démons » de l’organisation du travail\n\n[\n\n]\n\n[source insuffisante]\n\n:\n\nle\n\nMuda\n\n: tout ce qui est sans\n\nvaleur\n\n:"
+    },
+    {
+      "texte": "les gaspillages, ce qui n’ajoute pas de valeur au produit — c’est-à-dire ce qui finit à la poubelle, les pannes, les déplacements inutiles, les pertes de temps, les choses que l’on ajoute au produit, mais dont le client ne veut pas, etc. ;\n\nle\n\nMuri\n\n: l’excès, la surcharge de travail engendrée par des processus non adaptés :\n\nle personnel, lorsque la charge de travail n’est pas adaptée au nombre de travailleurs ;\n\nles installations, lorsque la charge est supérieure à ce qu’une installation peut faire (sa capacité) ;\n\nles stocks, lorsque des pièces ou des produits ne « tournent pas » ;\n\nle\n\nMura\n\n: la variabilité, ou l’irrégularité\n\ndes machines qui ne mettent pas toujours le même temps pour faire la même chose et dont la qualité varie ;\n\ndes opérateurs qui ne font pas tous et pas toujours le même travail lorsqu’ils sont affectés à un même poste ;",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 7,
+        "chunk_total": 86,
+        "nb_chars": 859
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nles gaspillages, ce qui n’ajoute pas de valeur au produit — c’est-à-dire ce qui finit à la poubelle, les pannes, les déplacements inutiles, les pertes de temps, les choses que l’on ajoute au produit, mais dont le client ne veut pas, etc. ;\n\nle\n\nMuri\n\n: l’excès, la surcharge de travail engendrée par des processus non adaptés :\n\nle personnel, lorsque la charge de travail n’est pas adaptée au nombre de travailleurs ;\n\nles installations, lorsque la charge est supérieure à ce qu’une installation peut faire (sa capacité) ;\n\nles stocks, lorsque des pièces ou des produits ne « tournent pas » ;\n\nle\n\nMura\n\n: la variabilité, ou l’irrégularité\n\ndes machines qui ne mettent pas toujours le même temps pour faire la même chose et dont la qualité varie ;\n\ndes opérateurs qui ne font pas tous et pas toujours le même travail lorsqu’ils sont affectés à un même poste ;"
+    },
+    {
+      "texte": "des fournisseurs qui ne livrent pas toujours les mêmes quantités de matière première.\n\nLe\n\nlean management\n\ns'attaque particulièrement à sept formes de gaspillage : la\n\nsurproduction\n\n, les attentes, les rebuts-retouches/corrections, les gammes et processus opératoires mal adaptés, les transports/ruptures de flux, les mouvements inutiles et les stocks (productifs ou administratifs), auxquels il faut ajouter un huitième gaspillage, qui est la non-utilisation des ressources intellectuelles du personnel.\n\nMéthodes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe\n\nlean management\n\nest fondé sur l' « amélioration continue », aussi appelée au\n\nJapon\n\nKaizen\n\n; la résolution des problèmes se passe sur le terrain avec les acteurs. Devenir une organisation apprenante fait partie des principes fondamentaux du\n\nlean management",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 8,
+        "chunk_total": 86,
+        "nb_chars": 819
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ndes fournisseurs qui ne livrent pas toujours les mêmes quantités de matière première.\n\nLe\n\nlean management\n\ns'attaque particulièrement à sept formes de gaspillage : la\n\nsurproduction\n\n, les attentes, les rebuts-retouches/corrections, les gammes et processus opératoires mal adaptés, les transports/ruptures de flux, les mouvements inutiles et les stocks (productifs ou administratifs), auxquels il faut ajouter un huitième gaspillage, qui est la non-utilisation des ressources intellectuelles du personnel.\n\nMéthodes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe\n\nlean management\n\nest fondé sur l' « amélioration continue », aussi appelée au\n\nJapon\n\nKaizen\n\n; la résolution des problèmes se passe sur le terrain avec les acteurs. Devenir une organisation apprenante fait partie des principes fondamentaux du\n\nlean management"
+    },
+    {
+      "texte": ". Il concerne tous les domaines de l'entreprise (productifs et non productifs). Un des outils de l'amélioration continue est la\n\nroue de Deming\n\nqui symbolise le cycle vertueux de l'amélioration.\n\nReprésentation\n\nheuristique\n\nde la théorie des\n\n5 S\n\n, souvent mobilisée par la théorie du «\n\nlean\n\n».\n\nQuelques exemples d'outils utilisés :\n\nle\n\n5S\n\n: Les premières lettres de cinq termes\n\njaponais\n\n(\n\nseiri\n\n: trier,\n\nseiton\n\n: ranger,\n\nseiso\n\n: nettoyer,\n\nseiketsu\n\n: standardiser,\n\nshitsuke\n\n: respecter) qui ont pour objectif d'éliminer les causes de nombreux petits problèmes, sources de perte d'efficacité. C'est l'une des premières méthodes à mettre en œuvre dans une démarche de\n\nlean management\n\n. Elle vise aussi à changer la mentalité des opérateurs et de l'encadrement ;\n\nla VSM (\n\nvalue stream mapping\n\n) : analyse de la chaîne de la\n\nvaleur",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 9,
+        "chunk_total": 86,
+        "nb_chars": 853
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n. Il concerne tous les domaines de l'entreprise (productifs et non productifs). Un des outils de l'amélioration continue est la\n\nroue de Deming\n\nqui symbolise le cycle vertueux de l'amélioration.\n\nReprésentation\n\nheuristique\n\nde la théorie des\n\n5 S\n\n, souvent mobilisée par la théorie du «\n\nlean\n\n».\n\nQuelques exemples d'outils utilisés :\n\nle\n\n5S\n\n: Les premières lettres de cinq termes\n\njaponais\n\n(\n\nseiri\n\n: trier,\n\nseiton\n\n: ranger,\n\nseiso\n\n: nettoyer,\n\nseiketsu\n\n: standardiser,\n\nshitsuke\n\n: respecter) qui ont pour objectif d'éliminer les causes de nombreux petits problèmes, sources de perte d'efficacité. C'est l'une des premières méthodes à mettre en œuvre dans une démarche de\n\nlean management\n\n. Elle vise aussi à changer la mentalité des opérateurs et de l'encadrement ;\n\nla VSM (\n\nvalue stream mapping\n\n) : analyse de la chaîne de la\n\nvaleur"
+    },
+    {
+      "texte": ", des flux physiques et des temps d'écoulement de la production (depuis l'entrée des\n\nmatières premières\n\njusqu'à l'expédition des\n\nproduits finis\n\nemballés). Cette analyse permet de définir les enjeux et les actions prioritaires d'un plan de mise en œuvre du\n\nlean management\n\n(aussi appelé\n\nroadmap\n\n, « feuille de route ») ;\n\nles\n\nindicateurs de performance\n\n(ou KPI pour\n\nkey performance indicators\n\n) : les critères de performance sont au cœur du\n\nlean management\n\net reposent sur la transparence des résultats en temps réel pour tenter d'améliorer la réactivité aux problèmes constatés. Chaque zone ou service doit disposer de ses propres indicateurs, affichés sur place. Les écarts significatifs par rapport aux objectifs fixés doivent donner lieu à une analyse et à un plan d'action correctif.\n\nLean services\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 10,
+        "chunk_total": 86,
+        "nb_chars": 853
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, des flux physiques et des temps d'écoulement de la production (depuis l'entrée des\n\nmatières premières\n\njusqu'à l'expédition des\n\nproduits finis\n\nemballés). Cette analyse permet de définir les enjeux et les actions prioritaires d'un plan de mise en œuvre du\n\nlean management\n\n(aussi appelé\n\nroadmap\n\n, « feuille de route ») ;\n\nles\n\nindicateurs de performance\n\n(ou KPI pour\n\nkey performance indicators\n\n) : les critères de performance sont au cœur du\n\nlean management\n\net reposent sur la transparence des résultats en temps réel pour tenter d'améliorer la réactivité aux problèmes constatés. Chaque zone ou service doit disposer de ses propres indicateurs, affichés sur place. Les écarts significatifs par rapport aux objectifs fixés doivent donner lieu à une analyse et à un plan d'action correctif.\n\nLean services\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "Cette section est vide, insuffisamment détaillée ou incomplète.\n\nVotre aide\n\nest la bienvenue !\n\nComment faire ?\n\nLean IT\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe terme\n\nlean IT\n\nest évoqué dans le contexte de l'industrie\n\ninformatique\n\nen 2003 par Mary et Tom Poppendieck dans leur ouvrage\n\nLean Software Development: An Agile Toolkit\n\n, où les auteurs proposent une application des pratiques du\n\nlean\n\npour le domaine des\n\nsystèmes d'information\n\n(\n\ndéveloppement\n\n, management de projets informatiques, infrastructures,\n\netc.\n\n).\n\nL’idée directrice, ici appliquée au monde des systèmes d'information, est l'élimination des « pertes ». On entend par pertes le travail qui n'apporte aucune « valeur métier » à un produit ou à un service.\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes cinq principes du\n\nLean\n\nénoncés par J.Womack et D. Jones dans\n\nLean Thinking",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 11,
+        "chunk_total": 86,
+        "nb_chars": 869
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nCette section est vide, insuffisamment détaillée ou incomplète.\n\nVotre aide\n\nest la bienvenue !\n\nComment faire ?\n\nLean IT\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe terme\n\nlean IT\n\nest évoqué dans le contexte de l'industrie\n\ninformatique\n\nen 2003 par Mary et Tom Poppendieck dans leur ouvrage\n\nLean Software Development: An Agile Toolkit\n\n, où les auteurs proposent une application des pratiques du\n\nlean\n\npour le domaine des\n\nsystèmes d'information\n\n(\n\ndéveloppement\n\n, management de projets informatiques, infrastructures,\n\netc.\n\n).\n\nL’idée directrice, ici appliquée au monde des systèmes d'information, est l'élimination des « pertes ». On entend par pertes le travail qui n'apporte aucune « valeur métier » à un produit ou à un service.\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes cinq principes du\n\nLean\n\nénoncés par J.Womack et D. Jones dans\n\nLean Thinking"
+    },
+    {
+      "texte": "peuvent se décliner dans le domaine\n\nIT\n\n:\n\nIdentifier les processus IT (métiers, maîtrise d’ouvrage, conseil d’administration, clients finaux des produits et services de l’entreprise,\n\netc.\n\n) et détermination de la\n\nvaleur ajoutée\n\ndu point de vue des clients : réponse aux attentes et besoins explicites et implicites, critères de performances et de disponibilité, différenciation avec les nouvelles technologies, respect des contraintes réglementaires et environnementales,\n\netc.\n\nDéfinir la chaîne de valeur ajoutée, appelée\n\nValue Stream Mapping\n\n(VSM) : la description, qualification et quantification en performance de chacune des étapes de ce processus, sous la forme de chaîne de valeur (temps de traitement de chaque étape, délai entre deux étapes, taux de transformation,\n\netc.\n\n)",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 12,
+        "chunk_total": 86,
+        "nb_chars": 792
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\npeuvent se décliner dans le domaine\n\nIT\n\n:\n\nIdentifier les processus IT (métiers, maîtrise d’ouvrage, conseil d’administration, clients finaux des produits et services de l’entreprise,\n\netc.\n\n) et détermination de la\n\nvaleur ajoutée\n\ndu point de vue des clients : réponse aux attentes et besoins explicites et implicites, critères de performances et de disponibilité, différenciation avec les nouvelles technologies, respect des contraintes réglementaires et environnementales,\n\netc.\n\nDéfinir la chaîne de valeur ajoutée, appelée\n\nValue Stream Mapping\n\n(VSM) : la description, qualification et quantification en performance de chacune des étapes de ce processus, sous la forme de chaîne de valeur (temps de traitement de chaque étape, délai entre deux étapes, taux de transformation,\n\netc.\n\n)"
+    },
+    {
+      "texte": "Assurer le flux continu avec un mouvement continu des produits, services et informations, de bout en bout en éliminant tout gaspillage.\n\nPasser du « flux poussé » au « flux tiré » (ou\n\nPull\n\n) : le client devient demandeur, rien n’est fait en amont du processus tant que le client ne montre pas ses besoins en aval.\n\nMettre en œuvre une dynamique d’amélioration continue pérenne afin de tendre vers la perfection.\n\nDémarche\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUne démarche\n\nLean IT\n\npeut être déclinée sous deux formes, permettant la déclinaison de la\n\nstratégie\n\nde l’entreprise :\n\nSoit sous la forme d’un programme d’amélioration de l’efficacité cohérent, recouvrant la mise en œuvre d’un\n\nportefeuille\n\nde projets ou chantiers\n\nLean IT\n\nd’amélioration adressant des processus stratégiques.\n\nCes projets vont recourir à différents outils du Lean (SIPOC, VSM,\n\n5 pourquoi\n\n,\n\netc.",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 13,
+        "chunk_total": 86,
+        "nb_chars": 883
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nAssurer le flux continu avec un mouvement continu des produits, services et informations, de bout en bout en éliminant tout gaspillage.\n\nPasser du « flux poussé » au « flux tiré » (ou\n\nPull\n\n) : le client devient demandeur, rien n’est fait en amont du processus tant que le client ne montre pas ses besoins en aval.\n\nMettre en œuvre une dynamique d’amélioration continue pérenne afin de tendre vers la perfection.\n\nDémarche\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUne démarche\n\nLean IT\n\npeut être déclinée sous deux formes, permettant la déclinaison de la\n\nstratégie\n\nde l’entreprise :\n\nSoit sous la forme d’un programme d’amélioration de l’efficacité cohérent, recouvrant la mise en œuvre d’un\n\nportefeuille\n\nde projets ou chantiers\n\nLean IT\n\nd’amélioration adressant des processus stratégiques.\n\nCes projets vont recourir à différents outils du Lean (SIPOC, VSM,\n\n5 pourquoi\n\n,\n\netc."
+    },
+    {
+      "texte": "), ce qui compte le plus n’étant pas les outils en tant que tels, mais bien la déclinaison des principes dans le contexte de l’entreprise.\n\nSoit sous la forme d’une nouvelle\n\norganisation\n\nd’\n\namélioration continue\n\ntransverse, définissant les principales\n\nchaînes de valeur\n\net processus de la direction SI, identifiant un pilote de processus par processus stratégique, et conduisant des chantiers d’amélioration.\n\nSur la partie de gestion de projets de développement, cela peut se décliner par la mise en œuvre d’organisations agiles type\n\nScrum\n\n.\n\nDans le domaine de l’infrastructure, cela peut se traduire par la déclinaison de l’\n\nITIL\n\navec l'identification d'un responsable pour chacun des processus.\n\nLean IT\n\net changement dans les\n\norganisations\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'application des principes du\n\nlean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 14,
+        "chunk_total": 86,
+        "nb_chars": 831
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n), ce qui compte le plus n’étant pas les outils en tant que tels, mais bien la déclinaison des principes dans le contexte de l’entreprise.\n\nSoit sous la forme d’une nouvelle\n\norganisation\n\nd’\n\namélioration continue\n\ntransverse, définissant les principales\n\nchaînes de valeur\n\net processus de la direction SI, identifiant un pilote de processus par processus stratégique, et conduisant des chantiers d’amélioration.\n\nSur la partie de gestion de projets de développement, cela peut se décliner par la mise en œuvre d’organisations agiles type\n\nScrum\n\n.\n\nDans le domaine de l’infrastructure, cela peut se traduire par la déclinaison de l’\n\nITIL\n\navec l'identification d'un responsable pour chacun des processus.\n\nLean IT\n\net changement dans les\n\norganisations\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'application des principes du\n\nlean"
+    },
+    {
+      "texte": ", notamment l'amélioration continue du système, impose de profonds changements dans les organisations.\n\nLa résolution des problèmes au plus près du terrain, impliquant les opérationnels tout autant que les responsables, est un premier changement d'envergure, tant le changement est plutôt perçu dans les grandes organisations comme quelque chose de «\n\ntop-down\n\n», où peu d'\n\nautonomie\n\nest laissée au terrain dans la prise d'initiative.\n\nDans les organisations informatiques (\n\ndirection des systèmes d'information\n\n, DSI), déployer une démarche\n\nlean\n\nva également imposer le retour à des équipes pluri-disciplinaires (de la demande utilisateur à l'exploitation quotidienne du service), seul modèle capable de résoudre les problèmes en cycles courts\n\n[\n\n]",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 15,
+        "chunk_total": 86,
+        "nb_chars": 757
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, notamment l'amélioration continue du système, impose de profonds changements dans les organisations.\n\nLa résolution des problèmes au plus près du terrain, impliquant les opérationnels tout autant que les responsables, est un premier changement d'envergure, tant le changement est plutôt perçu dans les grandes organisations comme quelque chose de «\n\ntop-down\n\n», où peu d'\n\nautonomie\n\nest laissée au terrain dans la prise d'initiative.\n\nDans les organisations informatiques (\n\ndirection des systèmes d'information\n\n, DSI), déployer une démarche\n\nlean\n\nva également imposer le retour à des équipes pluri-disciplinaires (de la demande utilisateur à l'exploitation quotidienne du service), seul modèle capable de résoudre les problèmes en cycles courts\n\n[\n\n]"
+    },
+    {
+      "texte": ". Ce type d'organisation est en rupture avec l'organisation spécialisée du travail (recueil de besoins, spécifications, développement, intégration, qualification, exploitation) qui est la norme dans les DSI. Au-delà de ces premiers renversements, l'idée d'amélioration continue nécessite un pacte social restaurant la confiance dans l'entreprise : l'amélioration générant des gains de productivité , si les ventes ne croissent pas, l'entreprise va surproduire, et être tentée par la suppression de postes là où précisément les meilleurs résultats ont été obtenus. Ce paradoxe a été expliqué par la métaphore de la broken house : l'amélioration continue et le respect sont deux piliers indissociables de la Toyota way . Si l'on élude le respect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 16,
+        "chunk_total": 86,
+        "nb_chars": 880
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n. Ce type d'organisation est en rupture avec l'organisation spécialisée du travail (recueil de besoins, spécifications, développement, intégration, qualification, exploitation) qui est la norme dans les DSI. Au-delà de ces premiers renversements, l'idée d'amélioration continue nécessite un pacte social restaurant la confiance dans l'entreprise : l'amélioration générant des gains de productivité , si les ventes ne croissent pas, l'entreprise va surproduire, et être tentée par la suppression de postes là où précisément les meilleurs résultats ont été obtenus. Ce paradoxe a été expliqué par la métaphore de la broken house : l'amélioration continue et le respect sont deux piliers indissociables de la Toyota way . Si l'on élude le respect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "le respect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 17,
+        "chunk_total": 86,
+        "nb_chars": 147
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nle respect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "respect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 18,
+        "chunk_total": 86,
+        "nb_chars": 144
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nrespect , la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": ", la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 19,
+        "chunk_total": 86,
+        "nb_chars": 136
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "la maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 20,
+        "chunk_total": 86,
+        "nb_chars": 134
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nla maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "maison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 21,
+        "chunk_total": 86,
+        "nb_chars": 131
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nmaison est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "est cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 22,
+        "chunk_total": 86,
+        "nb_chars": 124
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nest cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "cassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 23,
+        "chunk_total": 86,
+        "nb_chars": 120
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ncassée. Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "Lean software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 24,
+        "chunk_total": 86,
+        "nb_chars": 112
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nLean software development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "software development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 25,
+        "chunk_total": 86,
+        "nb_chars": 107
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nsoftware development [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "development [ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 26,
+        "chunk_total": 86,
+        "nb_chars": 98
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ndevelopment [ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "[ modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 27,
+        "chunk_total": 86,
+        "nb_chars": 86
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n[ modifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "modifier | modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 28,
+        "chunk_total": 86,
+        "nb_chars": 84
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nmodifier | modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "| modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 29,
+        "chunk_total": 86,
+        "nb_chars": 75
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n| modifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "modifier le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 30,
+        "chunk_total": 86,
+        "nb_chars": 73
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nmodifier le code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "le code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 31,
+        "chunk_total": 86,
+        "nb_chars": 64
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nle code ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "code ] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 32,
+        "chunk_total": 86,
+        "nb_chars": 61
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ncode ] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "] Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 33,
+        "chunk_total": 86,
+        "nb_chars": 56
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n] Le lean software development est l'application du lean"
+    },
+    {
+      "texte": "Le lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 34,
+        "chunk_total": 86,
+        "nb_chars": 54
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nLe lean software development est l'application du lean"
+    },
+    {
+      "texte": "lean software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 35,
+        "chunk_total": 86,
+        "nb_chars": 51
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nlean software development est l'application du lean"
+    },
+    {
+      "texte": "software development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 36,
+        "chunk_total": 86,
+        "nb_chars": 46
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nsoftware development est l'application du lean"
+    },
+    {
+      "texte": "development est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 37,
+        "chunk_total": 86,
+        "nb_chars": 37
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ndevelopment est l'application du lean"
+    },
+    {
+      "texte": "est l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 38,
+        "chunk_total": 86,
+        "nb_chars": 25
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nest l'application du lean"
+    },
+    {
+      "texte": "l'application du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 39,
+        "chunk_total": 86,
+        "nb_chars": 21
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nl'application du lean"
+    },
+    {
+      "texte": "du lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 40,
+        "chunk_total": 86,
+        "nb_chars": 7
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ndu lean"
+    },
+    {
+      "texte": "lean",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 41,
+        "chunk_total": 86,
+        "nb_chars": 4
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nlean"
+    },
+    {
+      "texte": "au\n\ndéveloppement logiciel\n\npour une gestion au plus juste\n\n[\n\n]\n\n. Cette méthode est conceptualisée par Tom et Mary Poppendieck dans leur ouvrage\n\nLean software development : an agile toolkit\n\npublié en 2003.\n\nL'objectif est d'obtenir pour l'activité du développement\n\nlogiciel\n\ndes résultats équivalents à ceux obtenus par les diverses applications du\n\nlean\n\n(production industrielle, services, ingénierie, santé).\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe modèle, basé sur le développement itératif et les\n\nméthodes agiles\n\nmet en avant sept principes :\n\nÉliminer les gaspillages : comme pour le\n\nlean\n\n, le gaspillage est défini comme ce qui n'apporte pas de valeur au produit. La valeur étant définie du point de vue de l'utilisateur ;\n\nAméliorer l'apprentissage ;\n\nRetarder l'engagement ;\n\nLivrer aussi vite que possible ;\n\nDonner le pouvoir à l'équipe ;",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 42,
+        "chunk_total": 86,
+        "nb_chars": 870
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nau\n\ndéveloppement logiciel\n\npour une gestion au plus juste\n\n[\n\n]\n\n. Cette méthode est conceptualisée par Tom et Mary Poppendieck dans leur ouvrage\n\nLean software development : an agile toolkit\n\npublié en 2003.\n\nL'objectif est d'obtenir pour l'activité du développement\n\nlogiciel\n\ndes résultats équivalents à ceux obtenus par les diverses applications du\n\nlean\n\n(production industrielle, services, ingénierie, santé).\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe modèle, basé sur le développement itératif et les\n\nméthodes agiles\n\nmet en avant sept principes :\n\nÉliminer les gaspillages : comme pour le\n\nlean\n\n, le gaspillage est défini comme ce qui n'apporte pas de valeur au produit. La valeur étant définie du point de vue de l'utilisateur ;\n\nAméliorer l'apprentissage ;\n\nRetarder l'engagement ;\n\nLivrer aussi vite que possible ;\n\nDonner le pouvoir à l'équipe ;"
+    },
+    {
+      "texte": "Intégrer la qualité dès la conception ;\n\nConsidérer le produit dans sa globalité.\n\nCritiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'utilisation de signaux lumineux ou sonores fait partie des moyens utilisés pour optimiser la production, mais, au-delà d'un certain seuil, ils peuvent devenir stressants ou contre-productifs.\n\nUn rapport du\n\nCentre d'étude de l'emploi\n\nsur les conditions de travail et la santé au travail des salariés de l'\n\nUnion européenne\n\n(recherche réalisée par la Dares\n\n[\n\n]\n,\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 43,
+        "chunk_total": 86,
+        "nb_chars": 502
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nIntégrer la qualité dès la conception ;\n\nConsidérer le produit dans sa globalité.\n\nCritiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'utilisation de signaux lumineux ou sonores fait partie des moyens utilisés pour optimiser la production, mais, au-delà d'un certain seuil, ils peuvent devenir stressants ou contre-productifs.\n\nUn rapport du\n\nCentre d'étude de l'emploi\n\nsur les conditions de travail et la santé au travail des salariés de l'\n\nUnion européenne\n\n(recherche réalisée par la Dares\n\n[\n\n]\n,\n["
+    },
+    {
+      "texte": "]\nau\nMinistère du travail\n) fait le lien entre la santé (risques psychosociaux) et les quatre formes d'organisation du travail en\nEurope\n(\norganisation apprenante\n, organisation en\nlean production\n, organisation\ntaylorienne\n, organisation de structure simple) : les\nconditions de travail\net la santé au travail sont bien meilleures dans les organisations apprenantes que dans les organisations en\nlean production\nou tayloriennes, et souvent moins bonnes dans les organisations en\nlean production\nque dans les organisations tayloriennes, particulièrement en\nFrance\n[\n\n]\n,\n[\n\n]\n.\nSelon l'\nAgence nationale pour l'amélioration des conditions de travail\n(ANACT), qui a organisé une conférence\n[\n\n]\nsur le\nlean\nen",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 44,
+        "chunk_total": 86,
+        "nb_chars": 708
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\nau\nMinistère du travail\n) fait le lien entre la santé (risques psychosociaux) et les quatre formes d'organisation du travail en\nEurope\n(\norganisation apprenante\n, organisation en\nlean production\n, organisation\ntaylorienne\n, organisation de structure simple) : les\nconditions de travail\net la santé au travail sont bien meilleures dans les organisations apprenantes que dans les organisations en\nlean production\nou tayloriennes, et souvent moins bonnes dans les organisations en\nlean production\nque dans les organisations tayloriennes, particulièrement en\nFrance\n[\n\n]\n,\n[\n\n]\n.\nSelon l'\nAgence nationale pour l'amélioration des conditions de travail\n(ANACT), qui a organisé une conférence\n[\n\n]\nsur le\nlean\nen"
+    },
+    {
+      "texte": ", cette méthode ne fait pas\nconsensus\net est même contestée par certains acteurs ;\n« Plusieurs études et communications scientifiques questionnent l'atteinte même de ces objectifs, alertant même sur des\nrisques\nde dégradation des conditions de travail »\n[\n\n]\n,\n[\n\n]\n.\n[source insuffisante]\nUn article paru dans la\nrevue\nSanté & Travail\nfait état de la dégradation des conditions de travail associées au mode d'organisation en\nlean production\n, dégradation plus importante que dans les entreprises à organisation apprenante ou même taylorienne\n[\n\n]\n. L'article affirme qu'avec l'emballement du nombre de véhicules rappelés par\nToyota\nen 2009-2010\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 45,
+        "chunk_total": 86,
+        "nb_chars": 647
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, cette méthode ne fait pas\nconsensus\net est même contestée par certains acteurs ;\n« Plusieurs études et communications scientifiques questionnent l'atteinte même de ces objectifs, alertant même sur des\nrisques\nde dégradation des conditions de travail »\n[\n\n]\n,\n[\n\n]\n.\n[source insuffisante]\nUn article paru dans la\nrevue\nSanté & Travail\nfait état de la dégradation des conditions de travail associées au mode d'organisation en\nlean production\n, dégradation plus importante que dans les entreprises à organisation apprenante ou même taylorienne\n[\n\n]\n. L'article affirme qu'avec l'emballement du nombre de véhicules rappelés par\nToyota\nen 2009-2010\n["
+    },
+    {
+      "texte": "]\n, le\ntoyotisme\nsemble avoir atteint ses limites, et la « production sans gras » a des ratés en matière de qualité totale. Un débat sur les « contradictions entre la qualité pour ceux qui pensent l'organisation et la qualité pour ceux qui la font » serait opportun\n[\n\n]\n,\n[\n\n]\n. Néanmoins, aucun problème technique justifiant le rappel n'a pu être imputé à Toyota\n[\n\n]\n,\n[\n\n]\n.\nCertains auteurs expliquent ces résultats par la suppression de nombreuses activités de travail jugées comme des gaspillages dans une vision\nlean\n, mais qui se révéleraient à forte valeur ajoutée pour les\nconditions de travail\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 46,
+        "chunk_total": 86,
+        "nb_chars": 607
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\n, le\ntoyotisme\nsemble avoir atteint ses limites, et la « production sans gras » a des ratés en matière de qualité totale. Un débat sur les « contradictions entre la qualité pour ceux qui pensent l'organisation et la qualité pour ceux qui la font » serait opportun\n[\n\n]\n,\n[\n\n]\n. Néanmoins, aucun problème technique justifiant le rappel n'a pu être imputé à Toyota\n[\n\n]\n,\n[\n\n]\n.\nCertains auteurs expliquent ces résultats par la suppression de nombreuses activités de travail jugées comme des gaspillages dans une vision\nlean\n, mais qui se révéleraient à forte valeur ajoutée pour les\nconditions de travail\n["
+    },
+    {
+      "texte": "]\n.\nPar exemple :\nles mouvements : les déplacements et les changements de\nposture\nde l'opérateur participent à la prévention des\ntroubles musculosquelettiques\n;\nles éléments de coordination entre les professionnels : les temps d'échange ou les\nstocks\nintermédiaires entre deux postes facilitent la coopération entre les personnes.\nPar ailleurs, le\nlean\npourrait favoriser l'apparition d'inégalités dans les formes d'emploi avec, d'une part, une main d’œuvre\nflexible\nque la standardisation du travail promise par le\nlean\npermet de mobiliser rapidement pour des durées courtes afin d'adapter la capacité de production à la demande et, d'autre part, une main-d’œuvre qualifiée et stable, formée aux méthodes\nlean\n, qui pense, prescrit et contrôle le travail selon les normes de la méthode\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 47,
+        "chunk_total": 86,
+        "nb_chars": 788
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\n.\nPar exemple :\nles mouvements : les déplacements et les changements de\nposture\nde l'opérateur participent à la prévention des\ntroubles musculosquelettiques\n;\nles éléments de coordination entre les professionnels : les temps d'échange ou les\nstocks\nintermédiaires entre deux postes facilitent la coopération entre les personnes.\nPar ailleurs, le\nlean\npourrait favoriser l'apparition d'inégalités dans les formes d'emploi avec, d'une part, une main d’œuvre\nflexible\nque la standardisation du travail promise par le\nlean\npermet de mobiliser rapidement pour des durées courtes afin d'adapter la capacité de production à la demande et, d'autre part, une main-d’œuvre qualifiée et stable, formée aux méthodes\nlean\n, qui pense, prescrit et contrôle le travail selon les normes de la méthode\n["
+    },
+    {
+      "texte": "]\n.\nUne dégradation des conditions de travail dans une entreprise introduisant des méthodes\nlean\npeut être due à un mauvais choix des outils ou à une adaptation insuffisante au modèle de la société\n[\n\n]\n,\n[\n\n]\n.\nDes\nergonomes\n,\npsychologues\net spécialistes du travail alertent sur le fait que la recherche poussée du profit par la réduction des gaspillages peut aussi\n« s’avérer dangereuse pour la santé »\ndes travailleurs\n[\n\n]\n(source pathogène de\nstress\nexcessif et de\ntroubles musculosquelettiques\n)\n[\n\n]\n,\n[",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 48,
+        "chunk_total": 86,
+        "nb_chars": 511
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\n.\nUne dégradation des conditions de travail dans une entreprise introduisant des méthodes\nlean\npeut être due à un mauvais choix des outils ou à une adaptation insuffisante au modèle de la société\n[\n\n]\n,\n[\n\n]\n.\nDes\nergonomes\n,\npsychologues\net spécialistes du travail alertent sur le fait que la recherche poussée du profit par la réduction des gaspillages peut aussi\n« s’avérer dangereuse pour la santé »\ndes travailleurs\n[\n\n]\n(source pathogène de\nstress\nexcessif et de\ntroubles musculosquelettiques\n)\n[\n\n]\n,\n["
+    },
+    {
+      "texte": "]\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\nPréparez-vous à la gestion sans gaspillage\n, sur le site\nFluid World\n:\n« une gestion sans gaspillage, appelée aussi\nlean\n»\n).\n↑\nOQLF\n.\n↑\nInterActive Terminology for Europe\n.\n↑\n« La dernière lettre : En déconstruisant la Tour de Babel »\n, traduction d'une lettre de\nJim Womack\nmise en ligne sur le site\nProjet Lean Entreprise\n, 8 octobre 2004.\n↑\nMarie-Pia Ignace, Christian Ignace, Antoine Contal, Régis Médina,\nLa pratique du lean management dans l'IT : agilité et amélioration continue\n(\nlire en ligne\n)\n.\n↑\n(en)\nKrafcik, John F., «\nTriumph of the Lean Production System\n»,\nSloan Management Review\n, 1988, 30 (1): 41–52.\n↑\nTommaso Pardi, «\nQuand une mode managériale s'institutionnalise: Le rôle de la marchandisation de la recherche universitaire aux États-Unis\n»,",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 49,
+        "chunk_total": 86,
+        "nb_chars": 822
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n]\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\nPréparez-vous à la gestion sans gaspillage\n, sur le site\nFluid World\n:\n« une gestion sans gaspillage, appelée aussi\nlean\n»\n).\n↑\nOQLF\n.\n↑\nInterActive Terminology for Europe\n.\n↑\n« La dernière lettre : En déconstruisant la Tour de Babel »\n, traduction d'une lettre de\nJim Womack\nmise en ligne sur le site\nProjet Lean Entreprise\n, 8 octobre 2004.\n↑\nMarie-Pia Ignace, Christian Ignace, Antoine Contal, Régis Médina,\nLa pratique du lean management dans l'IT : agilité et amélioration continue\n(\nlire en ligne\n)\n.\n↑\n(en)\nKrafcik, John F., «\nTriumph of the Lean Production System\n»,\nSloan Management Review\n, 1988, 30 (1): 41–52.\n↑\nTommaso Pardi, «\nQuand une mode managériale s'institutionnalise: Le rôle de la marchandisation de la recherche universitaire aux États-Unis\n»,"
+    },
+    {
+      "texte": "↑\nLittéralement, « penser maigre ».\n↑\nBertrand\nJacquier\n,\nDu lean au management maigre\n, Paris, B. Jacquier,\n\n, 168\np.\n(\nISBN\n978-1-291-61339-1\n,\nOCLC\n\n,\nlire en ligne\n)\n↑\n«\nDéveloppement agile ?\n»\n[PDF]\n, sur\nAfdit.fr\n(consulté le\n16 février 2016\n)\n↑\n(en)\n«\nInterActive Terminology for Europe\n»\n, sur\nEuropa.eu\n.\n↑\n«\ntravail-emploi.gouv.fr/etudes-…\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n.\n↑\n«\ntravail-emploi.gouv.fr/etudes-…\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n.\n↑\nAntoine Valeyre,\nConditions de travail et santé au travail des salariés de l'Union européenne : des situations contrastées selon les formes d'organisation\n, Centre d'études de l'emploi, document de travail No 73, novembre 2006.\n↑\nAract Poitou-Charentes,\nPourquoi le lean peut faire mal\n, vidéo, durée : 01:02:23, Colloque Poitiers (septembre 2012)\n↑\n\ne",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 50,
+        "chunk_total": 86,
+        "nb_chars": 846
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n↑\nLittéralement, « penser maigre ».\n↑\nBertrand\nJacquier\n,\nDu lean au management maigre\n, Paris, B. Jacquier,\n\n, 168\np.\n(\nISBN\n978-1-291-61339-1\n,\nOCLC\n\n,\nlire en ligne\n)\n↑\n«\nDéveloppement agile ?\n»\n[PDF]\n, sur\nAfdit.fr\n(consulté le\n16 février 2016\n)\n↑\n(en)\n«\nInterActive Terminology for Europe\n»\n, sur\nEuropa.eu\n.\n↑\n«\ntravail-emploi.gouv.fr/etudes-…\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n.\n↑\n«\ntravail-emploi.gouv.fr/etudes-…\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n.\n↑\nAntoine Valeyre,\nConditions de travail et santé au travail des salariés de l'Union européenne : des situations contrastées selon les formes d'organisation\n, Centre d'études de l'emploi, document de travail No 73, novembre 2006.\n↑\nAract Poitou-Charentes,\nPourquoi le lean peut faire mal\n, vidéo, durée : 01:02:23, Colloque Poitiers (septembre 2012)\n↑\n\ne"
+    },
+    {
+      "texte": "édition des \"Rendez-vous des conditions de travail\" de l'ANACT, organisé le 13 septembre 2012 à\n\nPoitiers\n\n, avec des acteurs de la\n\nprévention\n\n, des entreprises et des territoires, des représentants des salariés, des\n\néconomistes\n\net des\n\nsociologues\n\nsur le thème \"Quels\n\nimpacts\n\ndu lean sur la performance des entreprises et la santé des salariés ?\"\n\n↑\n\n«\n\nLean. La performance visée s'obtiendrait-elle au détriment des conditions de travail ? | Agence nationale pour l'amélioration des conditions de travail (Anact)\n\n», sur\n\nwww.anact.fr\n\n(consulté le\n\n9 février 2016\n\n)\n\n↑\n\nLean. La performance visée s'obtiendrait-elle au détriment des conditions de travail ? Publié le 23/11/12 par ANACT\n\n↑\n\na\n\net\n\nb\n\n« Toyota : rappels à la pelle »\n\n, Laurence Théry,\n\nSanté & Travail\n\nn\n\no\n\n71, juillet 2010 :",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 51,
+        "chunk_total": 86,
+        "nb_chars": 804
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nédition des \"Rendez-vous des conditions de travail\" de l'ANACT, organisé le 13 septembre 2012 à\n\nPoitiers\n\n, avec des acteurs de la\n\nprévention\n\n, des entreprises et des territoires, des représentants des salariés, des\n\néconomistes\n\net des\n\nsociologues\n\nsur le thème \"Quels\n\nimpacts\n\ndu lean sur la performance des entreprises et la santé des salariés ?\"\n\n↑\n\n«\n\nLean. La performance visée s'obtiendrait-elle au détriment des conditions de travail ? | Agence nationale pour l'amélioration des conditions de travail (Anact)\n\n», sur\n\nwww.anact.fr\n\n(consulté le\n\n9 février 2016\n\n)\n\n↑\n\nLean. La performance visée s'obtiendrait-elle au détriment des conditions de travail ? Publié le 23/11/12 par ANACT\n\n↑\n\na\n\net\n\nb\n\n« Toyota : rappels à la pelle »\n\n, Laurence Théry,\n\nSanté & Travail\n\nn\n\no\n\n71, juillet 2010 :"
+    },
+    {
+      "texte": "« Mais en général, on ne « rappelle » pas les travailleurs exclus de l'entreprise à cause d'un trouble musculo-squelettique ! Bien réelle aussi est la souffrance psychique liée à ce système de production. Comment les salariés, placés dans l'impossibilité de faire un travail de qualité, peuvent-ils \"se reconnaître\" dans ces voitures, malgré leur acharnement à bien faire ? »\n\n↑\n\n«\n\nToyota rappelle (encore) plus de 400.000 voitures hybrides\n\n», sur\n\nL’Humanité\n\n.fr\n\n,\n\n9 février 2010\n\n(consulté le\n\n15 août 2012\n\n)\n\n↑\n\nLaurence Théry,\n\nToyota : Rappels à la pelle\n\n,\n\nop. cit.\n\n:",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 52,
+        "chunk_total": 86,
+        "nb_chars": 581
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n« Mais en général, on ne « rappelle » pas les travailleurs exclus de l'entreprise à cause d'un trouble musculo-squelettique ! Bien réelle aussi est la souffrance psychique liée à ce système de production. Comment les salariés, placés dans l'impossibilité de faire un travail de qualité, peuvent-ils \"se reconnaître\" dans ces voitures, malgré leur acharnement à bien faire ? »\n\n↑\n\n«\n\nToyota rappelle (encore) plus de 400.000 voitures hybrides\n\n», sur\n\nL’Humanité\n\n.fr\n\n,\n\n9 février 2010\n\n(consulté le\n\n15 août 2012\n\n)\n\n↑\n\nLaurence Théry,\n\nToyota : Rappels à la pelle\n\n,\n\nop. cit.\n\n:"
+    },
+    {
+      "texte": "« Toyota aurait rappelé de 8 à 9 millions de véhicules dans le monde depuis l'automne dernier. Un chiffre qui s'était élevé à \"seulement\" 5 millions entre 2000 et 2005. (...) Le toyotisme (...) semble avoir atteint ses limites. Le fameux principe de la lean production (littéralement \"production sans gras\") - zéro stock, zéro délai, qualité totale, implication des salariés dans l'amélioration de la productivité par la réduction drastique des coûts - a apparemment des ratés dans le moteur. En tout cas, pour la qualité totale, c'est maintenant une évidence : ça ne fonctionne pas… (...) Assurément, il est temps de changer de modèle, en commençant peut-être par engager un débat sur les contradictions entre la qualité pour ceux qui pensent l'organisation et la qualité pour ceux qui la font ? »\n\n↑\n\n(en)\n\n«\n\nToyota and Sudden Acceleration: Facts from the NASA Report\n\n», sur\n\nwww.lean.org",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 53,
+        "chunk_total": 86,
+        "nb_chars": 892
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n« Toyota aurait rappelé de 8 à 9 millions de véhicules dans le monde depuis l'automne dernier. Un chiffre qui s'était élevé à \"seulement\" 5 millions entre 2000 et 2005. (...) Le toyotisme (...) semble avoir atteint ses limites. Le fameux principe de la lean production (littéralement \"production sans gras\") - zéro stock, zéro délai, qualité totale, implication des salariés dans l'amélioration de la productivité par la réduction drastique des coûts - a apparemment des ratés dans le moteur. En tout cas, pour la qualité totale, c'est maintenant une évidence : ça ne fonctionne pas… (...) Assurément, il est temps de changer de modèle, en commençant peut-être par engager un débat sur les contradictions entre la qualité pour ceux qui pensent l'organisation et la qualité pour ceux qui la font ? »\n\n↑\n\n(en)\n\n«\n\nToyota and Sudden Acceleration: Facts from the NASA Report\n\n», sur\n\nwww.lean.org"
+    },
+    {
+      "texte": ", John Shook, 17 février 2011 (consulté le 2 mai 2013 ) . ↑ (en) « NASA's Toyota Study Released by Dept. of Transportation », sur www.nasa.gov , NASA , 8 février 2011 (consulté le 2 mai 2013 ) . ↑ a et b B. Jacquier, Du lean au management maigre , Collectif Travail Réel, 2013 ( ISBN 978-1-291-61339-1 ) ↑ Sébastien Lechevalier, « Suicides sur le lieu de travail : la faute au toyotisme ? », Le Monde .fr ,‎ 21 avril 2008 ( ISSN 1950-6244 , lire en ligne , consulté le 9 février 2016 ) ↑ « Ce qu'il faut savoir sur le lean management », sur L'Express .fr (consulté le 9 février 2016 ) ↑ a et b [PDF] « Le lean et ses effets sur la santé » , Marel Lepetit, dossier Le travail en chantier , sur le site dseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 54,
+        "chunk_total": 86,
+        "nb_chars": 827
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, John Shook, 17 février 2011 (consulté le 2 mai 2013 ) . ↑ (en) « NASA's Toyota Study Released by Dept. of Transportation », sur www.nasa.gov , NASA , 8 février 2011 (consulté le 2 mai 2013 ) . ↑ a et b B. Jacquier, Du lean au management maigre , Collectif Travail Réel, 2013 ( ISBN 978-1-291-61339-1 ) ↑ Sébastien Lechevalier, « Suicides sur le lieu de travail : la faute au toyotisme ? », Le Monde .fr ,‎ 21 avril 2008 ( ISSN 1950-6244 , lire en ligne , consulté le 9 février 2016 ) ↑ « Ce qu'il faut savoir sur le lean management », sur L'Express .fr (consulté le 9 février 2016 ) ↑ a et b [PDF] « Le lean et ses effets sur la santé » , Marel Lepetit, dossier Le travail en chantier , sur le site dseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "site dseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 55,
+        "chunk_total": 86,
+        "nb_chars": 131
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nsite dseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "dseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 56,
+        "chunk_total": 86,
+        "nb_chars": 126
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ndseto.com , 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": ", 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 57,
+        "chunk_total": 86,
+        "nb_chars": 116
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n, 2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 58,
+        "chunk_total": 86,
+        "nb_chars": 114
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n2011. ↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 59,
+        "chunk_total": 86,
+        "nb_chars": 108
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n↑ « Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "« Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 60,
+        "chunk_total": 86,
+        "nb_chars": 106
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n« Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "Lean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 61,
+        "chunk_total": 86,
+        "nb_chars": 104
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nLean management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "management. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 62,
+        "chunk_total": 86,
+        "nb_chars": 99
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nmanagement. Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "Ce qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 63,
+        "chunk_total": 86,
+        "nb_chars": 87
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nCe qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "qu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 64,
+        "chunk_total": 86,
+        "nb_chars": 84
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nqu'il faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "faut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 65,
+        "chunk_total": 86,
+        "nb_chars": 78
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nfaut retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "retenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 66,
+        "chunk_total": 86,
+        "nb_chars": 73
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nretenir - Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "- Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 67,
+        "chunk_total": 86,
+        "nb_chars": 65
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n- Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "Risques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 68,
+        "chunk_total": 86,
+        "nb_chars": 63
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nRisques - INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "- INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 69,
+        "chunk_total": 86,
+        "nb_chars": 55
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n- INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "INRS », sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 70,
+        "chunk_total": 86,
+        "nb_chars": 53
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nINRS », sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "», sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 71,
+        "chunk_total": 86,
+        "nb_chars": 48
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n», sur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "sur www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 72,
+        "chunk_total": 86,
+        "nb_chars": 45
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nsur www.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "www.inrs.fr (consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 73,
+        "chunk_total": 86,
+        "nb_chars": 41
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nwww.inrs.fr (consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "(consulté le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 74,
+        "chunk_total": 86,
+        "nb_chars": 29
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n(consulté le 4 juillet 2018 )"
+    },
+    {
+      "texte": "le 4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 75,
+        "chunk_total": 86,
+        "nb_chars": 19
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nle 4 juillet 2018 )"
+    },
+    {
+      "texte": "4 juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 76,
+        "chunk_total": 86,
+        "nb_chars": 16
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n4 juillet 2018 )"
+    },
+    {
+      "texte": "juillet 2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 77,
+        "chunk_total": 86,
+        "nb_chars": 14
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\njuillet 2018 )"
+    },
+    {
+      "texte": "2018 )",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 78,
+        "chunk_total": 86,
+        "nb_chars": 6
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n2018 )"
+    },
+    {
+      "texte": ")",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 79,
+        "chunk_total": 86,
+        "nb_chars": 1
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\n)"
+    },
+    {
+      "texte": "Annexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nJ. Drew, B. McCallum & S. Roggenhofer,\n\nObjectif Lean : réussir l'entreprise au plus juste\n\n, Eyrolles - Éditions d'Organisation, Paris, 2004\n\n(\n\nISBN\n\n978-2708131446\n\n)\n\nJ. P. Womack, D. T. Jones & D. Roos,\n\nThe Machine That Changed The World: How Lean Production Revolutionized the Global Car Wars\n\n, S. &. Schuster, London, 1990\n\n(\n\nISBN\n\n978-0743299794\n\n)\n\nE. Morvan, M. François et F. bourgeois, Les systèmes productifs au plus juste ; quelle place pour l'activité et la santé ?, in\n\nActes du",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 80,
+        "chunk_total": 86,
+        "nb_chars": 595
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nAnnexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nJ. Drew, B. McCallum & S. Roggenhofer,\n\nObjectif Lean : réussir l'entreprise au plus juste\n\n, Eyrolles - Éditions d'Organisation, Paris, 2004\n\n(\n\nISBN\n\n978-2708131446\n\n)\n\nJ. P. Womack, D. T. Jones & D. Roos,\n\nThe Machine That Changed The World: How Lean Production Revolutionized the Global Car Wars\n\n, S. &. Schuster, London, 1990\n\n(\n\nISBN\n\n978-0743299794\n\n)\n\nE. Morvan, M. François et F. bourgeois, Les systèmes productifs au plus juste ; quelle place pour l'activité et la santé ?, in\n\nActes du"
+    },
+    {
+      "texte": "e\ncongrès de la SELF (Ajaccio)\n, 2008\nJ. P. Womack, D. T. Jones, M. Ballé & G. Beauvallet,\nSystème Lean : penser l'entreprise au plus juste\n, Pearson Éducation, Paris, 2009\n(\nISBN\n978-2744065552\n)\nBertrand Jacquier,\nDu lean au management maigre\n, Collectif Travail Réel, 2013\n(\nISBN\n978-1291613391\n)\nPhilippe Rouzaud,\nSalariés, le lean tisse sa toile et vous entoure...\n,\nÉditions L'Harmattan\n, 2011\n(\nISBN\n978-2296561038\n)\nJeffrey K. Liker,\nLe modèle Toyota\n, Collection Management en Action,\nPearson education\n(\n5 décembre 2008\n), 415 p.\n(\nISBN\n\n)\n\nJeffrey\n\nLiker\n\n, Michael\n\nBallé\n\net Godefroy\n\nBeauvallet\n\n(\n\ntrad.\n\nde l'anglais),\n\nLe modèle Toyota.\n\n, Paris, Pearson education, 391\n\np.\n\n(\n\nISBN\n\n978-2-7440-7390-8\n\n)\n\n.\n\nLes méthodes d’organisation du travail ; le Lean en question\n\n,\n\nTravail et changement\n\n,\n\nRevue de la qualité de vie au travail\n\n,\n\nn\n\no\n\n351 (Bimestriel, Anact), 09/09/13",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 81,
+        "chunk_total": 86,
+        "nb_chars": 898
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\ne\ncongrès de la SELF (Ajaccio)\n, 2008\nJ. P. Womack, D. T. Jones, M. Ballé & G. Beauvallet,\nSystème Lean : penser l'entreprise au plus juste\n, Pearson Éducation, Paris, 2009\n(\nISBN\n978-2744065552\n)\nBertrand Jacquier,\nDu lean au management maigre\n, Collectif Travail Réel, 2013\n(\nISBN\n978-1291613391\n)\nPhilippe Rouzaud,\nSalariés, le lean tisse sa toile et vous entoure...\n,\nÉditions L'Harmattan\n, 2011\n(\nISBN\n978-2296561038\n)\nJeffrey K. Liker,\nLe modèle Toyota\n, Collection Management en Action,\nPearson education\n(\n5 décembre 2008\n), 415 p.\n(\nISBN\n\n)\n\nJeffrey\n\nLiker\n\n, Michael\n\nBallé\n\net Godefroy\n\nBeauvallet\n\n(\n\ntrad.\n\nde l'anglais),\n\nLe modèle Toyota.\n\n, Paris, Pearson education, 391\n\np.\n\n(\n\nISBN\n\n978-2-7440-7390-8\n\n)\n\n.\n\nLes méthodes d’organisation du travail ; le Lean en question\n\n,\n\nTravail et changement\n\n,\n\nRevue de la qualité de vie au travail\n\n,\n\nn\n\no\n\n351 (Bimestriel, Anact), 09/09/13"
+    },
+    {
+      "texte": "Michael Ballé\n\n& Godefroy Beauvallet,\n\nLe Management Lean\n\n, Pearson, 2013\n\n(\n\nISBN\n\n978-2744065521\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nLeading Lean Software Development: Results Are not the Point\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321620705\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nImplementing Lean Software Development: From Concept to Cash\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321437389\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nLean Software Development: An Agile Toolkit\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321150783\n\n)\n\n(en)\n\nNiklas Modig, Pär Åhlström,\n\nThis is Lean: Resolving the Efficiency Paradox\n\n, Rheologica Publishing, 2012\n\n(\n\nISBN\n\n978-9198039306\n\n)\n\n(en)\n\nMichael George,\n\nLean Six Sigma for Service : How to Use Lean Speed and Six Sigma Quality to Improve Services and Transactions\n\n,",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 82,
+        "chunk_total": 86,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nMichael Ballé\n\n& Godefroy Beauvallet,\n\nLe Management Lean\n\n, Pearson, 2013\n\n(\n\nISBN\n\n978-2744065521\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nLeading Lean Software Development: Results Are not the Point\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321620705\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nImplementing Lean Software Development: From Concept to Cash\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321437389\n\n)\n\n(en)\n\nMary Poppendieck, Tom Poppendieck,\n\nLean Software Development: An Agile Toolkit\n\n, Addison-Wesley Educational Publishers Inc\n\n(\n\nISBN\n\n978-0321150783\n\n)\n\n(en)\n\nNiklas Modig, Pär Åhlström,\n\nThis is Lean: Resolving the Efficiency Paradox\n\n, Rheologica Publishing, 2012\n\n(\n\nISBN\n\n978-9198039306\n\n)\n\n(en)\n\nMichael George,\n\nLean Six Sigma for Service : How to Use Lean Speed and Six Sigma Quality to Improve Services and Transactions\n\n,"
+    },
+    {
+      "texte": "McGraw-Hill Education\n\n, 2003\n\n(\n\nISBN\n\n978-0071418218\n\n)\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nOrganisation\n\nManagement\n\nOrganisation scientifique du travail\n\nDrop shipping\n\nGestion de la production\n\nGestion de la qualité\n\nLean Six Sigma\n\nLogistique\n\nKanban\n\nEntreprise étendue\n\nTaylorisme\n\nToyotisme\n\nFlexibilité du travail\n\nRéactivité industrielle\n\nFordisme\n\nMéthode SMED\n\nStock\n\nFlux tendu\n\nLean Startup\n\n3P\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nBritannica\n\nDen Store Danske Encyklopædi\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nGND\n\nIsraël\n\nLettonie\n\nv\n\n·\n\nm\n\nGestion de projet\n\nOrganisation\n\nChef de projet\n\nCommanditaire\n\nComité de pilotage\n\nPartie prenante\n\nProjet\n\nPlanification\n\nDiagramme de Gantt\n\nJalon\n\nrevue de projet\n\nLot\n\nPERT\n\nchemin critique\n\nméthode de la chaîne critique",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 83,
+        "chunk_total": 86,
+        "nb_chars": 898
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nMcGraw-Hill Education\n\n, 2003\n\n(\n\nISBN\n\n978-0071418218\n\n)\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nOrganisation\n\nManagement\n\nOrganisation scientifique du travail\n\nDrop shipping\n\nGestion de la production\n\nGestion de la qualité\n\nLean Six Sigma\n\nLogistique\n\nKanban\n\nEntreprise étendue\n\nTaylorisme\n\nToyotisme\n\nFlexibilité du travail\n\nRéactivité industrielle\n\nFordisme\n\nMéthode SMED\n\nStock\n\nFlux tendu\n\nLean Startup\n\n3P\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nBritannica\n\nDen Store Danske Encyklopædi\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nGND\n\nIsraël\n\nLettonie\n\nv\n\n·\n\nm\n\nGestion de projet\n\nOrganisation\n\nChef de projet\n\nCommanditaire\n\nComité de pilotage\n\nPartie prenante\n\nProjet\n\nPlanification\n\nDiagramme de Gantt\n\nJalon\n\nrevue de projet\n\nLot\n\nPERT\n\nchemin critique\n\nméthode de la chaîne critique"
+    },
+    {
+      "texte": "Rétroplanification\n\nMéthodes\n\nEn cascade\n\nEn V\n\nAgile\n\nScrum\n\nLean\n\nKanban\n\nPRINCE2\n\nAutres outils\n\nBudget\n\nCahier des charges fonctionnel\n\nDiagramme de causes et effets\n\nÉtude de faisabilité\n\nInitiation de projet\n\nLogiciel de gestion de projets\n\nRACI\n\nOrganigramme des tâches\n\nQCDA\n\nRéunion de coup d'envoi\n\nRoue de Deming\n\nStructure organisationnelle\n\nDivers\n\nGestion de portefeuille de projets\n\nGestion des risques d'un projet\n\nLivrable\n\nObjectif\n\nProgramme\n\nProjet pilote\n\nPortail du management\n\nPortail de l'industrie\n\nPortail de l’informatique\n\nPortail du génie mécanique\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Lean_(production)&oldid=229392695\n\n».\n\nCatégories\n\n:\n\nLean\n\nManagement du système d'information\n\nGestion de projet\n\nCatégories cachées :\n\nArticle contenant un lien mort\n\nPage utilisant le modèle op. cit.\n\nArticle manquant de références depuis mai 2015",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 84,
+        "chunk_total": 86,
+        "nb_chars": 900
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nRétroplanification\n\nMéthodes\n\nEn cascade\n\nEn V\n\nAgile\n\nScrum\n\nLean\n\nKanban\n\nPRINCE2\n\nAutres outils\n\nBudget\n\nCahier des charges fonctionnel\n\nDiagramme de causes et effets\n\nÉtude de faisabilité\n\nInitiation de projet\n\nLogiciel de gestion de projets\n\nRACI\n\nOrganigramme des tâches\n\nQCDA\n\nRéunion de coup d'envoi\n\nRoue de Deming\n\nStructure organisationnelle\n\nDivers\n\nGestion de portefeuille de projets\n\nGestion des risques d'un projet\n\nLivrable\n\nObjectif\n\nProgramme\n\nProjet pilote\n\nPortail du management\n\nPortail de l'industrie\n\nPortail de l’informatique\n\nPortail du génie mécanique\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Lean_(production)&oldid=229392695\n\n».\n\nCatégories\n\n:\n\nLean\n\nManagement du système d'information\n\nGestion de projet\n\nCatégories cachées :\n\nArticle contenant un lien mort\n\nPage utilisant le modèle op. cit.\n\nArticle manquant de références depuis mai 2015"
+    },
+    {
+      "texte": "Article manquant de références/Liste complète\n\nArticle manquant de références depuis octobre 2020\n\nArticle contenant un appel à traduction en anglais\n\nArticle à référence insuffisante\n\nArticle avec une section vide ou incomplète\n\nPage utilisant un modèle Bases inactif\n\nPage utilisant P1417\n\nPage utilisant P8313\n\nPage pointant vers des bases externes\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Industrie/Articles liés\n\nPortail:Technologies/Articles liés\n\nPortail:Informatique/Articles liés\n\nPortail:Génie mécanique/Articles liés\n\nRechercher\n\nRechercher\n\nLean\n\n(production)\n\n39 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_lean_production",
+        "nom_doc": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "nom": "Lean Manufacturing — Production allégée Toyota (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Lean_(production)",
+        "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+        "indexe_le": "2026-04-17T03:12:01.800832",
+        "chunk_index": 85,
+        "chunk_total": 86,
+        "nb_chars": 832
+      },
+      "texte_embed": "normes — Lean Manufacturing — Production allégée Toyota (Wikipedia FR)\nArticle manquant de références/Liste complète\n\nArticle manquant de références depuis octobre 2020\n\nArticle contenant un appel à traduction en anglais\n\nArticle à référence insuffisante\n\nArticle avec une section vide ou incomplète\n\nPage utilisant un modèle Bases inactif\n\nPage utilisant P1417\n\nPage utilisant P8313\n\nPage pointant vers des bases externes\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Industrie/Articles liés\n\nPortail:Technologies/Articles liés\n\nPortail:Informatique/Articles liés\n\nPortail:Génie mécanique/Articles liés\n\nRechercher\n\nRechercher\n\nLean\n\n(production)\n\n39 langues\n\nAjouter un sujet"
+    }
+  ]
+}

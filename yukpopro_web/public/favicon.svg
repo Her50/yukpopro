@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Yukpo Y logo — violet #7B3FE4 -->
+  <rect width="64" height="64" rx="12" fill="#7B3FE4"/>
+  <!-- Left arm -->
+  <rect x="8" y="8" width="14" height="28" rx="4" transform="rotate(40 15 22)" fill="white"/>
+  <!-- Right arm -->
+  <rect x="38" y="8" width="14" height="28" rx="4" transform="rotate(-40 49 22)" fill="white"/>
+  <!-- Stem -->
+  <rect x="25" y="28" width="14" height="28" rx="4" fill="white"/>
+</svg>

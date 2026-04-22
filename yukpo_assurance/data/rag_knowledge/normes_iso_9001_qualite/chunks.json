@@ -1,0 +1,925 @@
+{
+  "doc_id": "normes_iso_9001_qualite",
+  "metadata": {
+    "doc_id": "normes_iso_9001_qualite",
+    "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+    "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "assureur",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+    "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+    "indexe_le": "2026-04-17T02:48:49.969683"
+  },
+  "nb_chars": 26685,
+  "nb_chunks": 36,
+  "chunks": [
+    {
+      "texte": "ISO 9001 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nLogo de la norme ISO 9001, version 2015\nLa norme\nISO 9001\nest une\nnorme\ninternationale publiée par le sous-comité 2 (SC 2) du comité technique 176 (TC 176) de l'ISO (\nOrganisation internationale de normalisation\n)\n[\n\n]\n\n.\n\nCette norme définit des exigences pour la mise en place d'un\n\nsystème de management de la qualité\n\npour les organismes souhaitant améliorer en permanence la satisfaction de leurs clients et fournir des produits et services conformes. La norme\n\nISO 9001\n\ns'adresse à tous les organismes, quels que soient leur taille et leur secteur d'activité. Elle fait partie de la\n\nsérie des normes ISO 9000\n\n(\n\nISO 9000\n\n,\n\nISO 9001\n\net\n\nISO 9004\n\n).",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 0,
+        "chunk_total": 36,
+        "nb_chars": 745
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nISO 9001 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nLogo de la norme ISO 9001, version 2015\nLa norme\nISO 9001\nest une\nnorme\ninternationale publiée par le sous-comité 2 (SC 2) du comité technique 176 (TC 176) de l'ISO (\nOrganisation internationale de normalisation\n)\n[\n\n]\n\n.\n\nCette norme définit des exigences pour la mise en place d'un\n\nsystème de management de la qualité\n\npour les organismes souhaitant améliorer en permanence la satisfaction de leurs clients et fournir des produits et services conformes. La norme\n\nISO 9001\n\ns'adresse à tous les organismes, quels que soient leur taille et leur secteur d'activité. Elle fait partie de la\n\nsérie des normes ISO 9000\n\n(\n\nISO 9000\n\n,\n\nISO 9001\n\net\n\nISO 9004\n\n)."
+    },
+    {
+      "texte": "La norme ISO 9001 a été publiée pour la première fois en 1987 et est régulièrement révisée depuis. Sa première révision date de 1994, la suivante de 2000, les suivantes ont eu lieu en 2008 et enfin, en 2015.\n\nL'ISO 9001 est un référentiel\n\ncertifiable\n\npar une tierce partie appelée organisme de certification. Actuellement, un organisme peut demander une certification ISO 9001 selon la version 2015.\n\nContenu de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nComme d'autres normes ISO récentes (notamment ISO 45001 et\n\nISO 14001\n\n), l'ISO 9001 adopte le schéma «\n\nISO High Structure Level\n\n(HSL) » en 10 chapitres commun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n\n[\n\n]\n\n.\n\nLa norme comporte, dans sa version 2015, dix articles :\n\nDomaine d’application ;\n\nRéférences normatives ;\n\nTermes et définitions ;",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 1,
+        "chunk_total": 36,
+        "nb_chars": 875
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nLa norme ISO 9001 a été publiée pour la première fois en 1987 et est régulièrement révisée depuis. Sa première révision date de 1994, la suivante de 2000, les suivantes ont eu lieu en 2008 et enfin, en 2015.\n\nL'ISO 9001 est un référentiel\n\ncertifiable\n\npar une tierce partie appelée organisme de certification. Actuellement, un organisme peut demander une certification ISO 9001 selon la version 2015.\n\nContenu de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nComme d'autres normes ISO récentes (notamment ISO 45001 et\n\nISO 14001\n\n), l'ISO 9001 adopte le schéma «\n\nISO High Structure Level\n\n(HSL) » en 10 chapitres commun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n\n[\n\n]\n\n.\n\nLa norme comporte, dans sa version 2015, dix articles :\n\nDomaine d’application ;\n\nRéférences normatives ;\n\nTermes et définitions ;"
+    },
+    {
+      "texte": "Contexte de l’organisme ;\n\nLeadership ;\n\nPlanification ;\n\nSupport ;\n\nRéalisation des activités opérationnelles ;\n\nÉvaluation de la performance ;\n\nAmélioration.\n\nSeuls les articles 4 à 10 sont prescriptifs. La norme contient environ 300 exigences, dont les principales sont énumérées dans le tableau suivant.\n\nThème\n\nParagraphe ISO 9001 v2015\n\nArticles détaillés\n\nProcessus\n\n4.4 Système de management de la qualité et ses processus\n\nArticle détaillé :\n\nProcessus\n\n.\n\nPolitique qualité\n\n5.2 Politique\n\nArticle détaillé :\n\nPolitique qualité\n\n.\n\nEquipements de contrôle, de  mesure et d’essais\n\n7.1.5 Ressources pour la surveillance et la mesure\n\nArticle détaillé :\n\nMesurage (métrologie)\n\n.\n\nMaîtrise des documents\n\n7.5 Informations documentées\n\nArticle détaillé :\n\nMaîtrise des documents\n\n.\n\nRevue des exigences\n\n8.2.3 Revue des exigences relatives aux produits et services\n\nArticle détaillé :",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 2,
+        "chunk_total": 36,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nContexte de l’organisme ;\n\nLeadership ;\n\nPlanification ;\n\nSupport ;\n\nRéalisation des activités opérationnelles ;\n\nÉvaluation de la performance ;\n\nAmélioration.\n\nSeuls les articles 4 à 10 sont prescriptifs. La norme contient environ 300 exigences, dont les principales sont énumérées dans le tableau suivant.\n\nThème\n\nParagraphe ISO 9001 v2015\n\nArticles détaillés\n\nProcessus\n\n4.4 Système de management de la qualité et ses processus\n\nArticle détaillé :\n\nProcessus\n\n.\n\nPolitique qualité\n\n5.2 Politique\n\nArticle détaillé :\n\nPolitique qualité\n\n.\n\nEquipements de contrôle, de  mesure et d’essais\n\n7.1.5 Ressources pour la surveillance et la mesure\n\nArticle détaillé :\n\nMesurage (métrologie)\n\n.\n\nMaîtrise des documents\n\n7.5 Informations documentées\n\nArticle détaillé :\n\nMaîtrise des documents\n\n.\n\nRevue des exigences\n\n8.2.3 Revue des exigences relatives aux produits et services\n\nArticle détaillé :"
+    },
+    {
+      "texte": "Commande (commerce)\n\n.\n\nConception et développement\n\n8.3 Conception et développement de produits et services\n\nArticle détaillé :\n\nConception de produit\n\n.\n\nAchats\n\n8.4 Maîtrise des processus, produits et services fournis par des prestataires externes\n\nArticle détaillé :\n\nAchat\n\n.\n\nProduction / prestation de service\n\n8.5 Production et prestation de service\n\nArticle détaillé :\n\nProduit (économie)\n\n.\n\nArticle détaillé :\n\nService (économie)\n\n.\n\nIdentification et traçabilité\n\n8.5.2 Identification et traçabilité\n\nArticle détaillé :\n\nTraçabilité\n\n.\n\nNon-conformités\n\n8.7 Maîtrise des éléments de sortie non conformes\n\nArticle détaillé :\n\nMaîtrise du produit non conforme\n\n.\n\nAudits internes\n\n9.2 - Audit interne\n\nArticle détaillé :\n\nAudit interne\n\n.\n\nRevue de direction\n\n9.3 - Revue de direction\n\nArticle détaillé :\n\nRevue de direction\n\n.\n\nActions correctives\n\n10.2 Non-conformité et action corrective",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 3,
+        "chunk_total": 36,
+        "nb_chars": 900
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nCommande (commerce)\n\n.\n\nConception et développement\n\n8.3 Conception et développement de produits et services\n\nArticle détaillé :\n\nConception de produit\n\n.\n\nAchats\n\n8.4 Maîtrise des processus, produits et services fournis par des prestataires externes\n\nArticle détaillé :\n\nAchat\n\n.\n\nProduction / prestation de service\n\n8.5 Production et prestation de service\n\nArticle détaillé :\n\nProduit (économie)\n\n.\n\nArticle détaillé :\n\nService (économie)\n\n.\n\nIdentification et traçabilité\n\n8.5.2 Identification et traçabilité\n\nArticle détaillé :\n\nTraçabilité\n\n.\n\nNon-conformités\n\n8.7 Maîtrise des éléments de sortie non conformes\n\nArticle détaillé :\n\nMaîtrise du produit non conforme\n\n.\n\nAudits internes\n\n9.2 - Audit interne\n\nArticle détaillé :\n\nAudit interne\n\n.\n\nRevue de direction\n\n9.3 - Revue de direction\n\nArticle détaillé :\n\nRevue de direction\n\n.\n\nActions correctives\n\n10.2 Non-conformité et action corrective"
+    },
+    {
+      "texte": "Article détaillé :\n\nAction corrective\n\n.\n\nLe nombre et la formulation des exigences ont évolué au gré des révisions successives de la norme.\n\nLes différentes révisions de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAnnée\n\nÉdition\n\nre\n\ne\n\ne\n\ne\n\ne\n\nVersion 1987\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBritish Standards Institution\n\n(BSI) est le premier\n\norganisme de normalisation\n\nà avoir diffusé une norme commerciale relative à l'\n\nassurance qualité\n\n,\n\nBS 5750\n\n, en 1982.\n\nLa première version de la norme ISO 9001 est publiée par l’ISO en 1987. Il s’agit en réalité d’un ensemble de trois normes, communément appelé « Série des normes ISO 9000 ».\n\nISO 9001 v1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en conception/développement, production, installation et soutien après la vente",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 4,
+        "chunk_total": 36,
+        "nb_chars": 806
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nArticle détaillé :\n\nAction corrective\n\n.\n\nLe nombre et la formulation des exigences ont évolué au gré des révisions successives de la norme.\n\nLes différentes révisions de la norme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAnnée\n\nÉdition\n\nre\n\ne\n\ne\n\ne\n\ne\n\nVersion 1987\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBritish Standards Institution\n\n(BSI) est le premier\n\norganisme de normalisation\n\nà avoir diffusé une norme commerciale relative à l'\n\nassurance qualité\n\n,\n\nBS 5750\n\n, en 1982.\n\nLa première version de la norme ISO 9001 est publiée par l’ISO en 1987. Il s’agit en réalité d’un ensemble de trois normes, communément appelé « Série des normes ISO 9000 ».\n\nISO 9001 v1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en conception/développement, production, installation et soutien après la vente"
+    },
+    {
+      "texte": "ISO 9002 v 1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en production et installation\n\nISO 9003 v1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en contrôle et essais finals\n\nL’ISO s’inspira très fortement de la norme BS 5750, qui elle-même était la résultante des efforts d’harmonisation des multiples référentiels d’assurance qualité, mis au point par de grands donneurs d’ordre depuis les années 1960 (MIL-Q 9858, AQAP 1-4-9, …)\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 5,
+        "chunk_total": 36,
+        "nb_chars": 469
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nISO 9002 v 1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en production et installation\n\nISO 9003 v1987 : Systèmes qualité — Modèle pour l'assurance de la qualité en contrôle et essais finals\n\nL’ISO s’inspira très fortement de la norme BS 5750, qui elle-même était la résultante des efforts d’harmonisation des multiples référentiels d’assurance qualité, mis au point par de grands donneurs d’ordre depuis les années 1960 (MIL-Q 9858, AQAP 1-4-9, …)\n\n["
+    },
+    {
+      "texte": "]\n.\nLa norme ISO 9001 a été créée à la demande des industriels, sous-traitants de grands donneurs d'ordres, qui souhaitaient une reconnaissance officielle de leur système de gestion de la qualité sans devoir être audités individuellement par chaque client. En tant que modèle d’assurance qualité, certifiable par une tierce partie, la norme apportait un cadre contractuel aux donneurs d'ordre, qui visait à leur donner confiance dans le système qualité de leurs fournisseurs\n[\n\n]\n\n.\n\nEn pratique, ces trois normes avaient pour objectif la mise en place de procédures garantissant le respect des cahiers des charges des donneurs d'ordres. Avec la diffusion de ce système de certification au-delà du secteur industriel, voire dans des secteurs de grande consommation, ces normes ont plus tard trouvé leurs limites.\n\nVersion 1994\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 6,
+        "chunk_total": 36,
+        "nb_chars": 863
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nLa norme ISO 9001 a été créée à la demande des industriels, sous-traitants de grands donneurs d'ordres, qui souhaitaient une reconnaissance officielle de leur système de gestion de la qualité sans devoir être audités individuellement par chaque client. En tant que modèle d’assurance qualité, certifiable par une tierce partie, la norme apportait un cadre contractuel aux donneurs d'ordre, qui visait à leur donner confiance dans le système qualité de leurs fournisseurs\n[\n\n]\n\n.\n\nEn pratique, ces trois normes avaient pour objectif la mise en place de procédures garantissant le respect des cahiers des charges des donneurs d'ordres. Avec la diffusion de ce système de certification au-delà du secteur industriel, voire dans des secteurs de grande consommation, ces normes ont plus tard trouvé leurs limites.\n\nVersion 1994\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "En 1994 paraît la première révision de la série des normes ISO 9000. Il s’agit d’une mise à jour mineure. La norme requiert l’établissement de 17 procédures et la production d’un nombre élevé d’enregistrements qualité.\n\nA cette époque paraît la célèbre maxime : \"Écrire ce que l’on fait, faire ce que l’on a écrit, écrire ce que l’on a fait\".\n\nUne dérive bureaucratique s’installe, qui conduit à un amalgame entre qualité et documentation. Cette dérive sera notamment à l’origine de la transition opérée en 2000 avec la parution de la deuxième révision de la norme\n\n[\n\n]\n\n.\n\nVersion 2000\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nÀ partir de la version 2000, la norme se situe dans une approche plus globale de\n\nmanagement de la qualité\n\nqui comprend :\n\nla planification de la qualité ;\n\nla maîtrise de la qualité ;\n\nl'assurance qualité ;\n\nl'amélioration de la qualité.",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 7,
+        "chunk_total": 36,
+        "nb_chars": 865
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nEn 1994 paraît la première révision de la série des normes ISO 9000. Il s’agit d’une mise à jour mineure. La norme requiert l’établissement de 17 procédures et la production d’un nombre élevé d’enregistrements qualité.\n\nA cette époque paraît la célèbre maxime : \"Écrire ce que l’on fait, faire ce que l’on a écrit, écrire ce que l’on a fait\".\n\nUne dérive bureaucratique s’installe, qui conduit à un amalgame entre qualité et documentation. Cette dérive sera notamment à l’origine de la transition opérée en 2000 avec la parution de la deuxième révision de la norme\n\n[\n\n]\n\n.\n\nVersion 2000\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nÀ partir de la version 2000, la norme se situe dans une approche plus globale de\n\nmanagement de la qualité\n\nqui comprend :\n\nla planification de la qualité ;\n\nla maîtrise de la qualité ;\n\nl'assurance qualité ;\n\nl'amélioration de la qualité."
+    },
+    {
+      "texte": "Dans un sens, on peut dire qu'à partir de cette version, la norme s'attache plus au fond (orientation client, approche système, amélioration continue) qu'à la forme car elle ne met plus autant l'accent sur les exigences documentaires.\n\nPremièrement, la documentation obligatoire est réduite à :\n\nun manuel qualité (dont la politique qualité) ;\n\nsix procédures documentées (écrites) :\n\naudit interne\n\n,\n\nmaîtrise des documents\n\n, maîtrise des enregistrements,\n\nmaîtrise du produit non conforme\n\n,\n\nactions correctives\n\net actions préventives, que l'on retrouvera dans tous les systèmes documentaires des organismes certifiés ;\n\ntoutes les procédures jugées nécessaires par l'organisme pour le bon fonctionnement et la surveillance des processus\n\n[\n\n]\n\n.\n\nPar ailleurs, les organismes doivent penser leurs activités en termes de processus afin de mieux les gérer.",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 8,
+        "chunk_total": 36,
+        "nb_chars": 861
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nDans un sens, on peut dire qu'à partir de cette version, la norme s'attache plus au fond (orientation client, approche système, amélioration continue) qu'à la forme car elle ne met plus autant l'accent sur les exigences documentaires.\n\nPremièrement, la documentation obligatoire est réduite à :\n\nun manuel qualité (dont la politique qualité) ;\n\nsix procédures documentées (écrites) :\n\naudit interne\n\n,\n\nmaîtrise des documents\n\n, maîtrise des enregistrements,\n\nmaîtrise du produit non conforme\n\n,\n\nactions correctives\n\net actions préventives, que l'on retrouvera dans tous les systèmes documentaires des organismes certifiés ;\n\ntoutes les procédures jugées nécessaires par l'organisme pour le bon fonctionnement et la surveillance des processus\n\n[\n\n]\n\n.\n\nPar ailleurs, les organismes doivent penser leurs activités en termes de processus afin de mieux les gérer."
+    },
+    {
+      "texte": "Enfin, la version 2000 remet le client au sommet de la pyramide. Les versions 1987 et 1994 prenaient peu en compte la satisfaction réelle de l'utilisateur final. Pour résumer, la fourniture devait avoir été spécifiée avec le client et la production devait correspondre à la spécification prévue. Même si la norme parlait de satisfaction des besoins « exprimés et implicites » des clients, on ne se préoccupait pas de savoir si ce qui avait été demandé par le client correspondait bien à son besoin réel. Dorénavant, le fournisseur, du fait de la connaissance qu'il a de son métier et de son produit, a un devoir de conseil auprès de son client. Il doit donc l'aider à identifier son besoin réel et s'assurer que ce besoin a été satisfait en mesurant le niveau de satisfaction de son client. Implicitement, cela conduit l'organisme à définir précisément son rôle (quel est son «\n\nmétier",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 9,
+        "chunk_total": 36,
+        "nb_chars": 885
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nEnfin, la version 2000 remet le client au sommet de la pyramide. Les versions 1987 et 1994 prenaient peu en compte la satisfaction réelle de l'utilisateur final. Pour résumer, la fourniture devait avoir été spécifiée avec le client et la production devait correspondre à la spécification prévue. Même si la norme parlait de satisfaction des besoins « exprimés et implicites » des clients, on ne se préoccupait pas de savoir si ce qui avait été demandé par le client correspondait bien à son besoin réel. Dorénavant, le fournisseur, du fait de la connaissance qu'il a de son métier et de son produit, a un devoir de conseil auprès de son client. Il doit donc l'aider à identifier son besoin réel et s'assurer que ce besoin a été satisfait en mesurant le niveau de satisfaction de son client. Implicitement, cela conduit l'organisme à définir précisément son rôle (quel est son «\n\nmétier"
+    },
+    {
+      "texte": "» ?) pour identifier avec précision qui doivent être ses clients (et surtout qui ne doit pas être un client car on ne pourra pas le satisfaire) et pouvoir déterminer avec eux leurs besoins réels.\n\nVersion 2008\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMettre en œuvre un système de management de la qualité selon les exigences de la norme ISO 9001-Version 2008 consiste à :\n\ndémontrer l'aptitude à fournir régulièrement un produit conforme aux exigences du client et aux exigences réglementaires applicables ;\n\nchercher à accroître la satisfaction des clients par l'application efficace du système, et en particulier, mettre en œuvre un processus d'amélioration continue (selon le principe\n\nPDCA\n\nou\n\nroue de Deming\n\n).\n\nLe texte de la norme ISO 9001 aborde les quatre aspects principaux :\n\nresponsabilité de la direction\n\n: chapitre 5 ;\n\ngestion des ressources : chapitre 6 ;",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 10,
+        "chunk_total": 36,
+        "nb_chars": 872
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n» ?) pour identifier avec précision qui doivent être ses clients (et surtout qui ne doit pas être un client car on ne pourra pas le satisfaire) et pouvoir déterminer avec eux leurs besoins réels.\n\nVersion 2008\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMettre en œuvre un système de management de la qualité selon les exigences de la norme ISO 9001-Version 2008 consiste à :\n\ndémontrer l'aptitude à fournir régulièrement un produit conforme aux exigences du client et aux exigences réglementaires applicables ;\n\nchercher à accroître la satisfaction des clients par l'application efficace du système, et en particulier, mettre en œuvre un processus d'amélioration continue (selon le principe\n\nPDCA\n\nou\n\nroue de Deming\n\n).\n\nLe texte de la norme ISO 9001 aborde les quatre aspects principaux :\n\nresponsabilité de la direction\n\n: chapitre 5 ;\n\ngestion des ressources : chapitre 6 ;"
+    },
+    {
+      "texte": "réalisation du produit : chapitre 7 ;\n\nmesure, analyse et amélioration continue : chapitre 8.\n\nElle est basée sur huit principes de management\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 11,
+        "chunk_total": 36,
+        "nb_chars": 145
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nréalisation du produit : chapitre 7 ;\n\nmesure, analyse et amélioration continue : chapitre 8.\n\nElle est basée sur huit principes de management\n\n["
+    },
+    {
+      "texte": "]\n:\nL'orientation client (interne et externe) ;\nLe\nleadership\n;\nL'implication du personnel ;\nL'approche\nprocessus\n;\nLe management par\napproche système\n;\nL'\namélioration continue\n;\nL'approche factuelle pour la prise de décision ;\nLes relations mutuellement bénéfiques avec les fournisseurs.\nVersion 2015\n[\nmodifier\n|\nmodifier le code\n]\nLa version de l'ISO 9001 a été publiée en\nseptembre 2015\net permet désormais de prendre en compte les enjeux internes et externes d'un organisme et les risques associés.\nLes évolutions pour la version 2015 par rapport à la version 2008 sont majeures afin de pouvoir proposer un référentiel adapté au contexte économique actuel.\nLes sujets suivants ont été ajoutés ou remaniés en profondeur par rapport à la version précédente\n[\n\n]\n\n:",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 12,
+        "chunk_total": 36,
+        "nb_chars": 768
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n:\nL'orientation client (interne et externe) ;\nLe\nleadership\n;\nL'implication du personnel ;\nL'approche\nprocessus\n;\nLe management par\napproche système\n;\nL'\namélioration continue\n;\nL'approche factuelle pour la prise de décision ;\nLes relations mutuellement bénéfiques avec les fournisseurs.\nVersion 2015\n[\nmodifier\n|\nmodifier le code\n]\nLa version de l'ISO 9001 a été publiée en\nseptembre 2015\net permet désormais de prendre en compte les enjeux internes et externes d'un organisme et les risques associés.\nLes évolutions pour la version 2015 par rapport à la version 2008 sont majeures afin de pouvoir proposer un référentiel adapté au contexte économique actuel.\nLes sujets suivants ont été ajoutés ou remaniés en profondeur par rapport à la version précédente\n[\n\n]\n\n:"
+    },
+    {
+      "texte": "contexte et parties intéressées : un organisme doit définir les enjeux externes et internes pouvant avoir des conséquences sur la conformité du produit et la satisfaction du client. Les besoins et attentes des parties intéressées doivent être également pris en compte ;\n\nune notion d'autorité et de responsabilité a été induite au niveau des processus (cf. §4.4.1 v2015) pour renforcer le pilotage déconcentré de chaque processus ;\n\nl'approche par les risques ;\n\nles termes « manuel qualité », «\n\nplan qualité\n\n», « procédures documentées », « enregistrements » et « documents » sont remplacés par le terme générique « Information documentée ». Les informations documentées sont définies dans la norme, elles doivent être maîtrisées et conservées afin de prouver le bon fonctionnement des processus. Cependant, le niveau de détail dépend des besoins de l'organisme ;",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 13,
+        "chunk_total": 36,
+        "nb_chars": 866
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\ncontexte et parties intéressées : un organisme doit définir les enjeux externes et internes pouvant avoir des conséquences sur la conformité du produit et la satisfaction du client. Les besoins et attentes des parties intéressées doivent être également pris en compte ;\n\nune notion d'autorité et de responsabilité a été induite au niveau des processus (cf. §4.4.1 v2015) pour renforcer le pilotage déconcentré de chaque processus ;\n\nl'approche par les risques ;\n\nles termes « manuel qualité », «\n\nplan qualité\n\n», « procédures documentées », « enregistrements » et « documents » sont remplacés par le terme générique « Information documentée ». Les informations documentées sont définies dans la norme, elles doivent être maîtrisées et conservées afin de prouver le bon fonctionnement des processus. Cependant, le niveau de détail dépend des besoins de l'organisme ;"
+    },
+    {
+      "texte": "amélioration continue : exigences de mesure et enregistrement de la performance à tous les niveaux utiles ainsi que d'engagement d'actions de progrès efficaces.\n\nLa structure de la norme ISO 9001 version 2015 a été mise en cohérence avec les autres normes ISO, par l'adoption de la\n\nStructure de Niveau Supérieur (HLS)\n\n. Les rapprochements entre les multi-certifications sont facilités. Il y a dorénavant dix articles, contre huit dans la version 2008\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 14,
+        "chunk_total": 36,
+        "nb_chars": 455
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\namélioration continue : exigences de mesure et enregistrement de la performance à tous les niveaux utiles ainsi que d'engagement d'actions de progrès efficaces.\n\nLa structure de la norme ISO 9001 version 2015 a été mise en cohérence avec les autres normes ISO, par l'adoption de la\n\nStructure de Niveau Supérieur (HLS)\n\n. Les rapprochements entre les multi-certifications sont facilités. Il y a dorénavant dix articles, contre huit dans la version 2008\n\n["
+    },
+    {
+      "texte": "]\n.\nLa version 2015 de l'ISO 9001 a été l'occasion de modifier les huit principes de management qui servaient de guide à la version 2008. Ainsi ils sont passés à sept principes. Cela accompagne un changement de vocabulaire et une ouverture vers des considérations plus larges. Par exemple, le principe des « relations mutuellement bénéfiques avec les fournisseurs » est devenu le « management des relations avec les parties intéressées ».\nLes sept principes de management sont donc\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 15,
+        "chunk_total": 36,
+        "nb_chars": 483
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nLa version 2015 de l'ISO 9001 a été l'occasion de modifier les huit principes de management qui servaient de guide à la version 2008. Ainsi ils sont passés à sept principes. Cela accompagne un changement de vocabulaire et une ouverture vers des considérations plus larges. Par exemple, le principe des « relations mutuellement bénéfiques avec les fournisseurs » est devenu le « management des relations avec les parties intéressées ».\nLes sept principes de management sont donc\n["
+    },
+    {
+      "texte": "]\n:\nOrientation client ;\nLe leadership ;\nL'implication du personnel ;\nApproche processus\n;\nAmélioration ;\nPrise de décision fondée sur des preuves ;\nManagement des relations avec les\nparties intéressées\n.\nUn autre changement est la suppression du « management par approche système » qui se trouve inclus dans l'approche processus. Aussi l'approche factuelle change de formulation pour indiquer la notion de preuve.\nAmendement lié au changement climatique\n[\nmodifier\n|\nmodifier le code\n]\nEn\nfévrier 2024\n, un amendement a été publié pour plusieurs normes ISO de management, dont l’ISO 9001:2015, afin d’intégrer explicitement la prise en compte du changement climatique\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 16,
+        "chunk_total": 36,
+        "nb_chars": 670
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n:\nOrientation client ;\nLe leadership ;\nL'implication du personnel ;\nApproche processus\n;\nAmélioration ;\nPrise de décision fondée sur des preuves ;\nManagement des relations avec les\nparties intéressées\n.\nUn autre changement est la suppression du « management par approche système » qui se trouve inclus dans l'approche processus. Aussi l'approche factuelle change de formulation pour indiquer la notion de preuve.\nAmendement lié au changement climatique\n[\nmodifier\n|\nmodifier le code\n]\nEn\nfévrier 2024\n, un amendement a été publié pour plusieurs normes ISO de management, dont l’ISO 9001:2015, afin d’intégrer explicitement la prise en compte du changement climatique\n["
+    },
+    {
+      "texte": "]\n.\nCet ajout concerne les articles 4.1 (contexte de l’organisme) et 4.2 (besoins et attentes des parties intéressées), invitant les organismes à évaluer si le changement climatique est un enjeu pertinent pour leur système de management.\nIl ne crée pas de nouvelles obligations mais renforce le lien des normes ISO avec les objectifs de développement durable et les préoccupations environnementales mondiales.\nVersion 2026\n[\nmodifier\n|\nmodifier le code\n]\nISO 9001:2026 modernise le SMQ en intégrant l’éthique, le climat, la précision des risques et l’harmonisation avec les autres normes et améliore la clarté pour la mise en œuvre\n[\n\n]\n\n. Les amendements liés au changement climatique (notamment l’amendement ISO 9001/A1 de 2024) sont intégrés explicitement dans les clauses 4.1 et 4.2.",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 17,
+        "chunk_total": 36,
+        "nb_chars": 787
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nCet ajout concerne les articles 4.1 (contexte de l’organisme) et 4.2 (besoins et attentes des parties intéressées), invitant les organismes à évaluer si le changement climatique est un enjeu pertinent pour leur système de management.\nIl ne crée pas de nouvelles obligations mais renforce le lien des normes ISO avec les objectifs de développement durable et les préoccupations environnementales mondiales.\nVersion 2026\n[\nmodifier\n|\nmodifier le code\n]\nISO 9001:2026 modernise le SMQ en intégrant l’éthique, le climat, la précision des risques et l’harmonisation avec les autres normes et améliore la clarté pour la mise en œuvre\n[\n\n]\n\n. Les amendements liés au changement climatique (notamment l’amendement ISO 9001/A1 de 2024) sont intégrés explicitement dans les clauses 4.1 et 4.2."
+    },
+    {
+      "texte": "La nouvelle version met l’accent sur le rôle du leadership en intégrant explicitement les notions de culture qualité et de comportement éthique au sein des organisations. Les organismes devront formaliser ou démontrer davantage leur culture qualité interne.\n\nElle clarifie également la gestion des risques et opportunités grâce à une structure plus détaillée de la clause 6.1. On distingue mieux types de risques, enjeux internes/externes et opportunités. Ainsi une analyse de risques plus précise et justifiée sera nécessaire.\n\nL’annexe A de la norme reçoit des ajouts important, elle propose des orientations plus détaillées et clarifiées pour aider les organisations à interpréter différents chapitres. Ces éléments visent à rendre la norme plus pragmatique, en fournissant des exemples ou explications supplémentaire pour sa mise en œuvre\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 18,
+        "chunk_total": 36,
+        "nb_chars": 845
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nLa nouvelle version met l’accent sur le rôle du leadership en intégrant explicitement les notions de culture qualité et de comportement éthique au sein des organisations. Les organismes devront formaliser ou démontrer davantage leur culture qualité interne.\n\nElle clarifie également la gestion des risques et opportunités grâce à une structure plus détaillée de la clause 6.1. On distingue mieux types de risques, enjeux internes/externes et opportunités. Ainsi une analyse de risques plus précise et justifiée sera nécessaire.\n\nL’annexe A de la norme reçoit des ajouts important, elle propose des orientations plus détaillées et clarifiées pour aider les organisations à interpréter différents chapitres. Ces éléments visent à rendre la norme plus pragmatique, en fournissant des exemples ou explications supplémentaire pour sa mise en œuvre\n\n["
+    },
+    {
+      "texte": "]\n.\nControverses et points d’attention\n[\nmodifier\n|\nmodifier le code\n]\nCertains acteurs estiment que les modifications sont modérées et ne représentent pas une rupture aussi importante que le passage de la version 2008 à 2015.\nLa phase de consultation publique pourrait encore entraîner des ajustements dans le texte final, selon les retours des parties prenantes (entreprises, organismes de certification, experts) . Le calendrier (publication, transition) reste soumis à des décisions techniques : même si la publication est attendue en 2026, des retards ou ajustements restent possibles selon l’avancement des votes.\nCertification ISO 9001\n[\nmodifier\n|\nmodifier le code\n]\nEn 2009, une étude menée par l'ISO chiffrait que la norme ISO 9001 avait dépassé le million de certifications\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 19,
+        "chunk_total": 36,
+        "nb_chars": 786
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nControverses et points d’attention\n[\nmodifier\n|\nmodifier le code\n]\nCertains acteurs estiment que les modifications sont modérées et ne représentent pas une rupture aussi importante que le passage de la version 2008 à 2015.\nLa phase de consultation publique pourrait encore entraîner des ajustements dans le texte final, selon les retours des parties prenantes (entreprises, organismes de certification, experts) . Le calendrier (publication, transition) reste soumis à des décisions techniques : même si la publication est attendue en 2026, des retards ou ajustements restent possibles selon l’avancement des votes.\nCertification ISO 9001\n[\nmodifier\n|\nmodifier le code\n]\nEn 2009, une étude menée par l'ISO chiffrait que la norme ISO 9001 avait dépassé le million de certifications\n["
+    },
+    {
+      "texte": "]\n.\n« La hausse de 8 % constatée pour les certificats\nISO 9001\n, contre 3 % en 2008, confirme l’importance d’\nISO 9001\ndans les chaînes d’approvisionnement internationales et son rôle de modèle précurseur pour les autres normes de systèmes de management qui ont suivi et sont une réussite. Fin\ndécembre 2009\n, au moins 1 064 785 certificats ISO 9001 (éditions 2000 et 2008 confondues) avaient été délivrés dans 178 pays et économies. Le total de 2009 indique une augmentation de 81 953 certificats (+ 8 %) par rapport au total 2008, qui s'élevait à 982 832 certificats dans 176 pays et économies »\n, indique le communiqué de presse de l'ISO\n[\n\n]\n.\nEn 2014, plus de 1,1 million d'entreprises dans le monde sont certifiées ISO 9001\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 20,
+        "chunk_total": 36,
+        "nb_chars": 731
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\n« La hausse de 8 % constatée pour les certificats\nISO 9001\n, contre 3 % en 2008, confirme l’importance d’\nISO 9001\ndans les chaînes d’approvisionnement internationales et son rôle de modèle précurseur pour les autres normes de systèmes de management qui ont suivi et sont une réussite. Fin\ndécembre 2009\n, au moins 1 064 785 certificats ISO 9001 (éditions 2000 et 2008 confondues) avaient été délivrés dans 178 pays et économies. Le total de 2009 indique une augmentation de 81 953 certificats (+ 8 %) par rapport au total 2008, qui s'élevait à 982 832 certificats dans 176 pays et économies »\n, indique le communiqué de presse de l'ISO\n[\n\n]\n.\nEn 2014, plus de 1,1 million d'entreprises dans le monde sont certifiées ISO 9001\n["
+    },
+    {
+      "texte": "]\n.\nAvantages et inconvénients d'un management conforme\n[\nmodifier\n|\nmodifier le code\n]\nLes organismes estiment que les avantages d'un système de management de la qualité selon la norme ISO 9001 sont largement supérieurs aux inconvénients, ce qui explique son énorme succès mondial.\n[Lesquels ?]\nParmi ces avantages on peut citer l'amélioration des performances globales d'un organisme\n[\n\n]\n\navec notamment le renforcement du positionnement d'un organisme, la réduction des audits client, la préservation du savoir-faire et des pratiques et la facilitation du travail à l'international.\n\nOutre les aspects évoqués ci-dessus, les organismes s’accordent pour dire que l’adoption d’une démarche qualité leur a apporté d’autres bénéfices que leurs objectifs initiaux. Cela leur a permis notamment de :",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 21,
+        "chunk_total": 36,
+        "nb_chars": 797
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nAvantages et inconvénients d'un management conforme\n[\nmodifier\n|\nmodifier le code\n]\nLes organismes estiment que les avantages d'un système de management de la qualité selon la norme ISO 9001 sont largement supérieurs aux inconvénients, ce qui explique son énorme succès mondial.\n[Lesquels ?]\nParmi ces avantages on peut citer l'amélioration des performances globales d'un organisme\n[\n\n]\n\navec notamment le renforcement du positionnement d'un organisme, la réduction des audits client, la préservation du savoir-faire et des pratiques et la facilitation du travail à l'international.\n\nOutre les aspects évoqués ci-dessus, les organismes s’accordent pour dire que l’adoption d’une démarche qualité leur a apporté d’autres bénéfices que leurs objectifs initiaux. Cela leur a permis notamment de :"
+    },
+    {
+      "texte": "modifier leur façon de travailler de manière radicale tout en ayant une méthode pour le faire en douceur, d’harmoniser les méthodes de travail, de travailler mieux et plus vite ;\n\nfaire un état des lieux de leurs erreurs, dysfonctionnements, redondances, aberrations,\n\netc.\n\n, de se remettre en cause et d’y remédier ;\n\naméliorer leurs méthodes de travail ;\n\nétablir clairement les rôles, les responsabilités, les délégations de chacun ;\n\naméliorer la qualité des produits et des services et de réduire les coûts de la non qualité (réclamations, remises, pénalités, retours garantie,\n\netc.\n\n) ;\n\naméliorer la satisfaction de ses clients, savoir les écouter, parler un langage commun avec eux ;\n\nmotiver le personnel, mettre en place une culture de l’amélioration ;\n\nréduire les risques, saisir les opportunités de croissance\n\n[\n\n]\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 22,
+        "chunk_total": 36,
+        "nb_chars": 833
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nmodifier leur façon de travailler de manière radicale tout en ayant une méthode pour le faire en douceur, d’harmoniser les méthodes de travail, de travailler mieux et plus vite ;\n\nfaire un état des lieux de leurs erreurs, dysfonctionnements, redondances, aberrations,\n\netc.\n\n, de se remettre en cause et d’y remédier ;\n\naméliorer leurs méthodes de travail ;\n\nétablir clairement les rôles, les responsabilités, les délégations de chacun ;\n\naméliorer la qualité des produits et des services et de réduire les coûts de la non qualité (réclamations, remises, pénalités, retours garantie,\n\netc.\n\n) ;\n\naméliorer la satisfaction de ses clients, savoir les écouter, parler un langage commun avec eux ;\n\nmotiver le personnel, mettre en place une culture de l’amélioration ;\n\nréduire les risques, saisir les opportunités de croissance\n\n[\n\n]\n\n."
+    },
+    {
+      "texte": "Enfin, la dernière version de la norme ISO 9001 fournit un cadre pour les systèmes de management de la qualité encore plus robuste pour la compétitivité des organismes. Le leadership est devenu un thème central pour la réussite d'un organisme. La direction par son leadership, crée à tous les niveaux les conditions à l’implication du personnel, à la mise en place d’un système de management de la qualité (SMQ) et à une organisation orientés vers la finalité de l’organisme. Le SMQ porte ses valeurs et sa culture. Il prend en compte :\n\nles exigences de ses clients ;\n\nle contexte économique, financier, juridique,\n\netc.\n\n, interne et externe ;\n\nla satisfaction des besoins et attentes des parties intéressées pertinentes (banque, fournisseurs et\n\nsupply chain\n\n,\n\netc.\n\n).",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 23,
+        "chunk_total": 36,
+        "nb_chars": 774
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nEnfin, la dernière version de la norme ISO 9001 fournit un cadre pour les systèmes de management de la qualité encore plus robuste pour la compétitivité des organismes. Le leadership est devenu un thème central pour la réussite d'un organisme. La direction par son leadership, crée à tous les niveaux les conditions à l’implication du personnel, à la mise en place d’un système de management de la qualité (SMQ) et à une organisation orientés vers la finalité de l’organisme. Le SMQ porte ses valeurs et sa culture. Il prend en compte :\n\nles exigences de ses clients ;\n\nle contexte économique, financier, juridique,\n\netc.\n\n, interne et externe ;\n\nla satisfaction des besoins et attentes des parties intéressées pertinentes (banque, fournisseurs et\n\nsupply chain\n\n,\n\netc.\n\n)."
+    },
+    {
+      "texte": "Dans ces conditions, le SMQ fournit un cadre pertinent pour établir, revoir et améliorer une stratégie et des objectifs qualité.\n\nEn 2005, Dalgleish fait remarquer que si le management de la qualité a une incidence économique positive sur l'entreprise et sa compétitivité, le recours à une certification ISO ne comporte pas cette corrélation\n\n[\n\n]\n. Autrement dit, la norme ISO 9001 elle-même peut être utilisée comme un outil en dehors de toute velléité de certification\n[\n\n]\n.\nIl est d'ailleurs à ce titre nécessaire de prendre en compte la notion de maturité qui va bien au-delà de la certification à une norme ou référentiel\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 24,
+        "chunk_total": 36,
+        "nb_chars": 630
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nDans ces conditions, le SMQ fournit un cadre pertinent pour établir, revoir et améliorer une stratégie et des objectifs qualité.\n\nEn 2005, Dalgleish fait remarquer que si le management de la qualité a une incidence économique positive sur l'entreprise et sa compétitivité, le recours à une certification ISO ne comporte pas cette corrélation\n\n[\n\n]\n. Autrement dit, la norme ISO 9001 elle-même peut être utilisée comme un outil en dehors de toute velléité de certification\n[\n\n]\n.\nIl est d'ailleurs à ce titre nécessaire de prendre en compte la notion de maturité qui va bien au-delà de la certification à une norme ou référentiel\n["
+    },
+    {
+      "texte": "]\n.\nCritique\n[\nmodifier\n|\nmodifier le code\n]\nQuelques critiques ont été émises malgré le succès et la reconnaissance mondiale de la certification ISO 9001.\nLe principal inconvénient est l'investissement initial requis pour parvenir à la certification avant le retour sur investissement\n[\n\n]\n.\nComme dans tout système d'information, Scott Dalgleish y voit un risque par rapport à un volume de documents qui pourrait être engendré par la certification ISO\n[\n\n]\n. Il dit que des responsables qualité ressentent fréquemment qu'un amoncellement documentaire pourrait nuire à l'efficacité\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 25,
+        "chunk_total": 36,
+        "nb_chars": 584
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nCritique\n[\nmodifier\n|\nmodifier le code\n]\nQuelques critiques ont été émises malgré le succès et la reconnaissance mondiale de la certification ISO 9001.\nLe principal inconvénient est l'investissement initial requis pour parvenir à la certification avant le retour sur investissement\n[\n\n]\n.\nComme dans tout système d'information, Scott Dalgleish y voit un risque par rapport à un volume de documents qui pourrait être engendré par la certification ISO\n[\n\n]\n. Il dit que des responsables qualité ressentent fréquemment qu'un amoncellement documentaire pourrait nuire à l'efficacité\n["
+    },
+    {
+      "texte": "]\n.\nLes normes ISO 9001 avant leur révision de 2000 pouvaient être vues comme trop procédurales. Ainsi, selon Barnes,\n« les détracteurs expliquent que ce n'est que de la documentation tandis que les défenseurs pensent que si une entreprise a documenté son système qualité, la majeure partie des éditions-papier a déjà été effectuée »\n[\n\n]\n. Wilson, suggère que les standards ISO\n« […] font primer les inspections relatives aux procédures correctes sur des considérations plus vastes relatives à la qualité »\net dès lors,\n« le lieu de travail devient oppressant et la qualité n'est pas améliorée »\n[\n\n]\n.\nJohn Seddon\n, n'y voyait que la promotion de la spécification, du contrôle et des procédures plus que la compréhension et l'amélioration\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 26,
+        "chunk_total": 36,
+        "nb_chars": 742
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n.\nLes normes ISO 9001 avant leur révision de 2000 pouvaient être vues comme trop procédurales. Ainsi, selon Barnes,\n« les détracteurs expliquent que ce n'est que de la documentation tandis que les défenseurs pensent que si une entreprise a documenté son système qualité, la majeure partie des éditions-papier a déjà été effectuée »\n[\n\n]\n. Wilson, suggère que les standards ISO\n« […] font primer les inspections relatives aux procédures correctes sur des considérations plus vastes relatives à la qualité »\net dès lors,\n« le lieu de travail devient oppressant et la qualité n'est pas améliorée »\n[\n\n]\n.\nJohn Seddon\n, n'y voyait que la promotion de la spécification, du contrôle et des procédures plus que la compréhension et l'amélioration\n["
+    },
+    {
+      "texte": "]\n. Wade explique que\n« si l'ISO 9001 est effectivement une ligne de conduite »\n, promouvoir celle-ci en tant que standard\n« conduit les entreprises à se fourvoyer en pensant que la certification induit une meilleure qualité les dispensant d'accomplir leur propre démarche qualité »\n[\n\n]\n. Cet échec sera d'autant plus prégnant si l'entreprise vise tout d'abord la certification avant la qualité\n[\n\n]\n. Les certifications sont en fait basées sur la satisfaction du client contractuel et non sur un réel souci d'amélioration de la qualité\n[\n\n]\n,\n[\n\n]\n. Pour Roger Frost :\n« Si vous voulez uniquement un certificat sur un mur, il y a beaucoup de chance que la paperasserie engendrée n'ait pas grand-chose à voir avec la façon dont votre entreprise fonctionne réellement »\n[",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 27,
+        "chunk_total": 36,
+        "nb_chars": 771
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n. Wade explique que\n« si l'ISO 9001 est effectivement une ligne de conduite »\n, promouvoir celle-ci en tant que standard\n« conduit les entreprises à se fourvoyer en pensant que la certification induit une meilleure qualité les dispensant d'accomplir leur propre démarche qualité »\n[\n\n]\n. Cet échec sera d'autant plus prégnant si l'entreprise vise tout d'abord la certification avant la qualité\n[\n\n]\n. Les certifications sont en fait basées sur la satisfaction du client contractuel et non sur un réel souci d'amélioration de la qualité\n[\n\n]\n,\n[\n\n]\n. Pour Roger Frost :\n« Si vous voulez uniquement un certificat sur un mur, il y a beaucoup de chance que la paperasserie engendrée n'ait pas grand-chose à voir avec la façon dont votre entreprise fonctionne réellement »\n["
+    },
+    {
+      "texte": "]\n. Enfin, le recours à un auditeur externe est fréquemment envisagé comme la zone critique et implique le recours à une consultance privée\n[\n\n]\n.\nAbrahamson explique que le recours aux standards ISO dans les discours managériaux tend à suivre une\ncourbe en cloche\ndans le cycle de vie de l'entreprise\n[\n\n]\n.\nLes normes ISO s'inspirent des travaux du statisticien Deming. Elles appliquent notamment sa roue de la qualité « PDCA » (\nplan-do-check-act\n). Les processus ISO améliorent la qualité en planifiant, mettant en œuvre, vérifiant et en ajustant. L'interprétation de ces étapes mène souvent à des dérives dénoncées par Jean-Marie Gogue, élève et un proche collaborateur de W. Edwards Deming. Il critique l'interprétation du cycle PDCA en citant les\npages 86 à 90\nde\nOut of The Crisis\nde Deming\n[\n\n]\n. J.-M. Gogue affirme notamment\n[\n\n]\n\n:",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 28,
+        "chunk_total": 36,
+        "nb_chars": 843
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n]\n. Enfin, le recours à un auditeur externe est fréquemment envisagé comme la zone critique et implique le recours à une consultance privée\n[\n\n]\n.\nAbrahamson explique que le recours aux standards ISO dans les discours managériaux tend à suivre une\ncourbe en cloche\ndans le cycle de vie de l'entreprise\n[\n\n]\n.\nLes normes ISO s'inspirent des travaux du statisticien Deming. Elles appliquent notamment sa roue de la qualité « PDCA » (\nplan-do-check-act\n). Les processus ISO améliorent la qualité en planifiant, mettant en œuvre, vérifiant et en ajustant. L'interprétation de ces étapes mène souvent à des dérives dénoncées par Jean-Marie Gogue, élève et un proche collaborateur de W. Edwards Deming. Il critique l'interprétation du cycle PDCA en citant les\npages 86 à 90\nde\nOut of The Crisis\nde Deming\n[\n\n]\n. J.-M. Gogue affirme notamment\n[\n\n]\n\n:"
+    },
+    {
+      "texte": "la roue PDCA ne sert pas à gérer la qualité, mais à acquérir des connaissances en vérifiant une hypothèse ;\n\nISO est une démarche administrative qui utilise le cycle PDCA, alors que ce cycle a été pensé comme démarche pratique. Dans le langage ISO, le PDCA est traduit par « planifier-réaliser-vérifier-agir », alors que Deming préfère les verbes « préparer-développer-comprendre-agir » qui sous-entendent davantage que la démarche est provisoire, limitée, temporaire.\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nBlog qualité - ISO 9001 :2015 : vers un nouveau système de management de la qualité\n\n», sur\n\n8m-management.com\n\n(consulté le\n\n26 mars 2016\n\n)\n\n.\n\n↑\n\n«\n\nDirectives ISO/IEC, Partie 1 Supplément ISO consolidé\n\n», sur\n\nwww.iso.org\n\n(consulté le\n\n22 juillet 2025\n\n)\n\n↑\n\nJérôme Lérat-Pytlak,\n\nLe passage d'une certification ISO 9001 à un management par la qualité totale",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 29,
+        "chunk_total": 36,
+        "nb_chars": 898
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nla roue PDCA ne sert pas à gérer la qualité, mais à acquérir des connaissances en vérifiant une hypothèse ;\n\nISO est une démarche administrative qui utilise le cycle PDCA, alors que ce cycle a été pensé comme démarche pratique. Dans le langage ISO, le PDCA est traduit par « planifier-réaliser-vérifier-agir », alors que Deming préfère les verbes « préparer-développer-comprendre-agir » qui sous-entendent davantage que la démarche est provisoire, limitée, temporaire.\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nBlog qualité - ISO 9001 :2015 : vers un nouveau système de management de la qualité\n\n», sur\n\n8m-management.com\n\n(consulté le\n\n26 mars 2016\n\n)\n\n.\n\n↑\n\n«\n\nDirectives ISO/IEC, Partie 1 Supplément ISO consolidé\n\n», sur\n\nwww.iso.org\n\n(consulté le\n\n22 juillet 2025\n\n)\n\n↑\n\nJérôme Lérat-Pytlak,\n\nLe passage d'une certification ISO 9001 à un management par la qualité totale"
+    },
+    {
+      "texte": ", Gestion et management. Université des Sciences Sociales - Toulouse I. ⟨NNT : ⟩. ⟨tel-00011414⟩,\n\n,\n\np.\n\n27-30\n\n.\n\n↑\n\nJean-Marie Gogue,\n\nInterprétation de la norme ISO 9001 au regard de la philosophie de Deming\n\n, Association Française Edwards Deming,\n\n20 mai 2005\n\n(\n\nlire en ligne\n\n)\n\n.\n\n↑\n\nChristian Doucet,\n\nLa qualité\n\n(\n\nISBN\n\n978-2-13-061747-1\n\n)\n\n.\n\n↑\n\nClauses 4.1 d) et 4.2.1 d) de la norme ISO 9001.\n\n↑\n\nISO 9000:2005 Point 0.2.\n\n↑\n\nISO 9001 v2015, Annexe A.1\n\n↑\n\n«\n\nISO 9001 informations sur la norme et intérêt - Certification QSE\n\n»,\n\nCertification QSE\n\n,‎\n\n21 janvier 2017\n\n(\n\nlire en ligne\n\n, consulté le\n\n21 janvier 2017\n\n)\n\n.\n\n↑\n\n«\n\n7 principes de management de la qualité ISO 9001 v2015\n\n», sur\n\nCertification QSE\n\n,\n\n13 février 2017\n\n(consulté le\n\n18 janvier 2021\n\n)\n\n.\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nComment le changement climatique s’invite dans votre démarche qualité\n\n», sur",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 30,
+        "chunk_total": 36,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n, Gestion et management. Université des Sciences Sociales - Toulouse I. ⟨NNT : ⟩. ⟨tel-00011414⟩,\n\n,\n\np.\n\n27-30\n\n.\n\n↑\n\nJean-Marie Gogue,\n\nInterprétation de la norme ISO 9001 au regard de la philosophie de Deming\n\n, Association Française Edwards Deming,\n\n20 mai 2005\n\n(\n\nlire en ligne\n\n)\n\n.\n\n↑\n\nChristian Doucet,\n\nLa qualité\n\n(\n\nISBN\n\n978-2-13-061747-1\n\n)\n\n.\n\n↑\n\nClauses 4.1 d) et 4.2.1 d) de la norme ISO 9001.\n\n↑\n\nISO 9000:2005 Point 0.2.\n\n↑\n\nISO 9001 v2015, Annexe A.1\n\n↑\n\n«\n\nISO 9001 informations sur la norme et intérêt - Certification QSE\n\n»,\n\nCertification QSE\n\n,‎\n\n21 janvier 2017\n\n(\n\nlire en ligne\n\n, consulté le\n\n21 janvier 2017\n\n)\n\n.\n\n↑\n\n«\n\n7 principes de management de la qualité ISO 9001 v2015\n\n», sur\n\nCertification QSE\n\n,\n\n13 février 2017\n\n(consulté le\n\n18 janvier 2021\n\n)\n\n.\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nComment le changement climatique s’invite dans votre démarche qualité\n\n», sur"
+    },
+    {
+      "texte": "Groupe AFNOR\n\n,\n\n8 novembre 2024\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n↑\n\n(en-US)\n\nSébastien\n\nBaudet\n\n, «\n\nISO 9001 version 2026: time for public inquiry\n\n», sur\n\nGroupe AFNOR\n\n,\n\n26 août 2025\n\n(consulté le\n\n19 novembre 2025\n\n)\n\n↑\n\n«\n\nISO 9001:2026 – Version provisoire publiée\n\n», sur\n\nDNV\n\n,\n\n29 août 2025\n\n(consulté le\n\n19 novembre 2025\n\n)\n\n↑\n\nLes principaux résultats de l’étude ISO des certifications\n\n[PDF]\n\n, 2009.\n\n↑\n\nLa dernière Étude ISO révèle une forte augmentation de l’application des normes relatives à la sécurité alimentaire et à la sécurité de l’information\n\n, communiqué de presse de l'ISO, 7 décembre 2009.\n\n↑\n\n«\n\nISO 9001, plus qu’une norme\n\n», sur\n\nfedra.belgium.be\n\n,\n\n17 février 2014\n\n(consulté le\n\n6 avril 2016\n\n)\n\n.\n\n↑\n\n«\n\nBlog qualité - Pourquoi la norme ISO 9001:2015 peut améliorer la performance globale de votre organisation ?\n\n», sur\n\n8m-management.com\n\n(consulté le",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 31,
+        "chunk_total": 36,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nGroupe AFNOR\n\n,\n\n8 novembre 2024\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n↑\n\n(en-US)\n\nSébastien\n\nBaudet\n\n, «\n\nISO 9001 version 2026: time for public inquiry\n\n», sur\n\nGroupe AFNOR\n\n,\n\n26 août 2025\n\n(consulté le\n\n19 novembre 2025\n\n)\n\n↑\n\n«\n\nISO 9001:2026 – Version provisoire publiée\n\n», sur\n\nDNV\n\n,\n\n29 août 2025\n\n(consulté le\n\n19 novembre 2025\n\n)\n\n↑\n\nLes principaux résultats de l’étude ISO des certifications\n\n[PDF]\n\n, 2009.\n\n↑\n\nLa dernière Étude ISO révèle une forte augmentation de l’application des normes relatives à la sécurité alimentaire et à la sécurité de l’information\n\n, communiqué de presse de l'ISO, 7 décembre 2009.\n\n↑\n\n«\n\nISO 9001, plus qu’une norme\n\n», sur\n\nfedra.belgium.be\n\n,\n\n17 février 2014\n\n(consulté le\n\n6 avril 2016\n\n)\n\n.\n\n↑\n\n«\n\nBlog qualité - Pourquoi la norme ISO 9001:2015 peut améliorer la performance globale de votre organisation ?\n\n», sur\n\n8m-management.com\n\n(consulté le"
+    },
+    {
+      "texte": "27 mars 2016\n\n)\n\n.\n\n↑\n\n«\n\nBlog qualité - Quelle démarche qualité choisir ?\n\n»,\n\n8M Management\n\n,‎\n\n7 mars 2016\n\n(\n\nlire en ligne\n\n, consulté le\n\n17 octobre 2016\n\n)\n\n.\n\n↑\n\nScott Dalgleish,\n\nProbing the Limits: ISO 9001 Proves Ineffective\n\n,\n\nQuality Magazine\n\n,\n\ner\navril 2005\n.\n↑\nThe ISO Survey – 2005\n[PDF]\n, sur\niso.org\n, 2005.\n↑\n«\nÊtre lucide sur les certifications QHSE pour rendre l’organisation mature !\n», sur\nPrévenir c'est Changer\n,\n25 novembre 2019\n(consulté le\n21 septembre 2020\n)\n.\n↑\n(en)\nStephanie\nClifford\n, «\nSo many standards to follow, so little payoff\n»,\nInc.\n,‎",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 32,
+        "chunk_total": 36,
+        "nb_chars": 580
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n27 mars 2016\n\n)\n\n.\n\n↑\n\n«\n\nBlog qualité - Quelle démarche qualité choisir ?\n\n»,\n\n8M Management\n\n,‎\n\n7 mars 2016\n\n(\n\nlire en ligne\n\n, consulté le\n\n17 octobre 2016\n\n)\n\n.\n\n↑\n\nScott Dalgleish,\n\nProbing the Limits: ISO 9001 Proves Ineffective\n\n,\n\nQuality Magazine\n\n,\n\ner\navril 2005\n.\n↑\nThe ISO Survey – 2005\n[PDF]\n, sur\niso.org\n, 2005.\n↑\n«\nÊtre lucide sur les certifications QHSE pour rendre l’organisation mature !\n», sur\nPrévenir c'est Changer\n,\n25 novembre 2019\n(consulté le\n21 septembre 2020\n)\n.\n↑\n(en)\nStephanie\nClifford\n, «\nSo many standards to follow, so little payoff\n»,\nInc.\n,‎"
+    },
+    {
+      "texte": "er\nmai 2005\n(\nlire en ligne\n)\n.\n↑\nInordinate and often unnecessary paperwork burden\n.\n↑\nScott Dalgleish,\nISO 9000: More Hindrance than Help\n,\nQuality Magazine\n, 5 mai 2003.\n↑\na\nb\net\nc\nFrank Barnes,\nGood Business Sense Is the Key to Confronting ISO 9000\n,\nReview of Business\n, printemps 2000.\n↑\n(en)\nIan\nWilson\n, «\nIs ISO the way to go? Some say, Not So\n»,\n4 juin 2010\n[réf. à confirmer]\n.\n↑\na\net\nb\n(en)\nJohn\nSeddon\n, «\nThe 'quality' you can't feel\n»,\nThe Observer\n,‎\n19 novembre 2000\n(\nlire en ligne\n)\n.\n↑\nJim Wade,\n«\nIs ISO 9000 really a standard?\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n, ISO Management Systems,\nmai-juin 2002\n(consulté le\n12 avril 2013\n)\n.\n↑\na\net\nb\nMark Henricks,\nISO a GO-Go\n,\nEntrepreneur Magazine\n, décembre 2001.\n↑\n(en)\nE.\nAbrahamson\n, «\nManagement Fashion\n»,\nThe Academy of Management Review\n,\nvol.\n21,\nn\no\n1,‎\n\n,\np.\n254–285\n(\nJSTOR",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 33,
+        "chunk_total": 36,
+        "nb_chars": 868
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\ner\nmai 2005\n(\nlire en ligne\n)\n.\n↑\nInordinate and often unnecessary paperwork burden\n.\n↑\nScott Dalgleish,\nISO 9000: More Hindrance than Help\n,\nQuality Magazine\n, 5 mai 2003.\n↑\na\nb\net\nc\nFrank Barnes,\nGood Business Sense Is the Key to Confronting ISO 9000\n,\nReview of Business\n, printemps 2000.\n↑\n(en)\nIan\nWilson\n, «\nIs ISO the way to go? Some say, Not So\n»,\n4 juin 2010\n[réf. à confirmer]\n.\n↑\na\net\nb\n(en)\nJohn\nSeddon\n, «\nThe 'quality' you can't feel\n»,\nThe Observer\n,‎\n19 novembre 2000\n(\nlire en ligne\n)\n.\n↑\nJim Wade,\n«\nIs ISO 9000 really a standard?\n»\n(\nArchive.org\n•\nWikiwix\n•\nGoogle\n•\nQue faire ?\n)\n, ISO Management Systems,\nmai-juin 2002\n(consulté le\n12 avril 2013\n)\n.\n↑\na\net\nb\nMark Henricks,\nISO a GO-Go\n,\nEntrepreneur Magazine\n, décembre 2001.\n↑\n(en)\nE.\nAbrahamson\n, «\nManagement Fashion\n»,\nThe Academy of Management Review\n,\nvol.\n21,\nn\no\n1,‎\n\n,\np.\n254–285\n(\nJSTOR"
+    },
+    {
+      "texte": ")\n.\n↑\nJean-Marie Gogue,\n« La qualité, ça suffit ! »\n,\nLes Échos\n, 2013.\n↑\nJean-Marie Gogue,\nAFED\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nBureau Veritas Certification\nISO 9004\nISO 15378\nGestion de la qualité\nComparaison entre ISO 9001 et CMMI\nEN9100\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 34,
+        "chunk_total": 36,
+        "nb_chars": 896
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\n)\n.\n↑\nJean-Marie Gogue,\n« La qualité, ça suffit ! »\n,\nLes Échos\n, 2013.\n↑\nJean-Marie Gogue,\nAFED\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nBureau Veritas Certification\nISO 9004\nISO 15378\nGestion de la qualité\nComparaison entre ISO 9001 et CMMI\nEN9100\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001"
+    },
+    {
+      "texte": "Énergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l’économie\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_9001&oldid=235144951\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nManagement de la qualité\n\nCatégories cachées :\n\nArticle à référence à confirmer\n\nArticle contenant un lien mort\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Économie/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 9001\n\n18 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_9001_qualite",
+        "nom_doc": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "nom": "ISO 9001:2015 — Management de la qualité (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_9001",
+        "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+        "indexe_le": "2026-04-17T02:48:49.969683",
+        "chunk_index": 35,
+        "chunk_total": 36,
+        "nb_chars": 499
+      },
+      "texte_embed": "normes — ISO 9001:2015 — Management de la qualité (Wikipedia FR)\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l’économie\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_9001&oldid=235144951\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nManagement de la qualité\n\nCatégories cachées :\n\nArticle à référence à confirmer\n\nArticle contenant un lien mort\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Économie/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 9001\n\n18 langues\n\nAjouter un sujet"
+    }
+  ]
+}

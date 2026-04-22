@@ -1,0 +1,425 @@
+{
+  "doc_id": "normes_iso_14001_env",
+  "metadata": {
+    "doc_id": "normes_iso_14001_env",
+    "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+    "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "assureur",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+    "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+    "indexe_le": "2026-04-17T02:49:50.116824"
+  },
+  "nb_chars": 11363,
+  "nb_chunks": 16,
+  "chunks": [
+    {
+      "texte": "ISO 14001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article n’est pas rédigé dans un\n\nstyle encyclopédique\n\n(\n\ndécembre 2017\n\n).\n\nVous pouvez\n\naméliorer sa rédaction !\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article\n\nne cite pas suffisamment ses sources\n\n(\n\ndécembre 2017\n\n).\n\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\n\nréférences utiles à sa\n\nvérifiabilité\n\net en les liant à la section «\n\nNotes et références\n\n».\n\nEn pratique :\n\nQuelles sources sont attendues ?\n\nComment ajouter mes sources ?\n\nLogo de la norme ISO 14001.\n\nLa\n\nnorme ISO 14001",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 0,
+        "chunk_total": 16,
+        "nb_chars": 848
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nISO 14001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article n’est pas rédigé dans un\n\nstyle encyclopédique\n\n(\n\ndécembre 2017\n\n).\n\nVous pouvez\n\naméliorer sa rédaction !\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article\n\nne cite pas suffisamment ses sources\n\n(\n\ndécembre 2017\n\n).\n\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\n\nréférences utiles à sa\n\nvérifiabilité\n\net en les liant à la section «\n\nNotes et références\n\n».\n\nEn pratique :\n\nQuelles sources sont attendues ?\n\nComment ajouter mes sources ?\n\nLogo de la norme ISO 14001.\n\nLa\n\nnorme ISO 14001"
+    },
+    {
+      "texte": "est une norme internationale qui définit une série d'exigences que doit satisfaire le\n\nsystème de management environnemental\n\n(SME), d'une organisation pour que celle-ci puisse être certifiée — par un organisme extérieur et pour une durée limitée —. Ainsi, la certification est attribuée après un audit effectué par un organisme certificateur accrédité, comme AFNOR\n\n[\n\n]\n, Bureau Veritas\n[\n\n]\nou Socotec Certification\n[\n\n]\nen France. Elle s'intègre dans le cadre du\ndéveloppement durable\n[\n\n]\n\net repose sur une démarche volontaire d'amélioration continue.\n\nIntroduction\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme internationale ISO 14001 a été réalisée par l'\n\nOrganisation internationale de normalisation\n\net fait partie de la famille de\n\nnormes ISO 14000\n\nqui regroupe également des normes complémentaires relatives au\n\nmanagement environnemental\n\n. C'est un élément de la",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 1,
+        "chunk_total": 16,
+        "nb_chars": 880
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nest une norme internationale qui définit une série d'exigences que doit satisfaire le\n\nsystème de management environnemental\n\n(SME), d'une organisation pour que celle-ci puisse être certifiée — par un organisme extérieur et pour une durée limitée —. Ainsi, la certification est attribuée après un audit effectué par un organisme certificateur accrédité, comme AFNOR\n\n[\n\n]\n, Bureau Veritas\n[\n\n]\nou Socotec Certification\n[\n\n]\nen France. Elle s'intègre dans le cadre du\ndéveloppement durable\n[\n\n]\n\net repose sur une démarche volontaire d'amélioration continue.\n\nIntroduction\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme internationale ISO 14001 a été réalisée par l'\n\nOrganisation internationale de normalisation\n\net fait partie de la famille de\n\nnormes ISO 14000\n\nqui regroupe également des normes complémentaires relatives au\n\nmanagement environnemental\n\n. C'est un élément de la"
+    },
+    {
+      "texte": "triple certification qualité-sécurité-environnement\n\nISO 9001\n\n,\n\nISO 14001\n\net\n\nISO 45001\n\nqui permet aux entreprises d’avoir une politique globale de\n\nmanagement des risques\n\n.\n\nElle est également une des normes sur lesquelles s'appuie l'\n\nISO 26000\n\ndans laquelle elle s'imbrique et s'articule.\n\nNorme ISO 14001\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'ISO 14001 repose sur le principe de la\n\nroue de Deming\n\n.\n\nLa norme ISO 14001 donne un cadre pour maîtriser les\n\nimpacts environnementaux\n\nengendrés et entend conduire à une\n\namélioration continue\n\nde sa\n\nperformance environnementale\n\n.\n\nElle peut être utilisée par tout organisme quelle que soit sa taille et son implantation dans le monde. Cette norme concerne tous types d'activités industrielles (agroalimentaire, métallurgie, textile, mécanique, chimique, pharmaceutique,\n\netc.",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 2,
+        "chunk_total": 16,
+        "nb_chars": 837
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\ntriple certification qualité-sécurité-environnement\n\nISO 9001\n\n,\n\nISO 14001\n\net\n\nISO 45001\n\nqui permet aux entreprises d’avoir une politique globale de\n\nmanagement des risques\n\n.\n\nElle est également une des normes sur lesquelles s'appuie l'\n\nISO 26000\n\ndans laquelle elle s'imbrique et s'articule.\n\nNorme ISO 14001\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'ISO 14001 repose sur le principe de la\n\nroue de Deming\n\n.\n\nLa norme ISO 14001 donne un cadre pour maîtriser les\n\nimpacts environnementaux\n\nengendrés et entend conduire à une\n\namélioration continue\n\nde sa\n\nperformance environnementale\n\n.\n\nElle peut être utilisée par tout organisme quelle que soit sa taille et son implantation dans le monde. Cette norme concerne tous types d'activités industrielles (agroalimentaire, métallurgie, textile, mécanique, chimique, pharmaceutique,\n\netc."
+    },
+    {
+      "texte": ") mais aussi dans le service, les hôpitaux ou encore des collectivités territoriales.\n\nC'est un référentiel qui comprend la sensibilisation du personnel, mais aussi, le traitement des demandes externes et, dans une moindre mesure, la communication externe volontaire\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 3,
+        "chunk_total": 16,
+        "nb_chars": 269
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n) mais aussi dans le service, les hôpitaux ou encore des collectivités territoriales.\n\nC'est un référentiel qui comprend la sensibilisation du personnel, mais aussi, le traitement des demandes externes et, dans une moindre mesure, la communication externe volontaire\n\n["
+    },
+    {
+      "texte": "]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 14001 spécifie les exigences relatives au\nsystème de management environnemental\n. Cela permet à un organisme de développer et de mettre en œuvre une politique et des objectifs qui prennent en compte les exigences légales et réglementaires et autres exigences auxquelles l'organisme a décidé de se soumettre. Le périmètre s'applique principalement aux aspects environnementaux que l'organisme a identifiés comme étant significatifs et qu'il peut maîtriser ou influencer.\nLe degré d'application des exigences de la norme ISO 14001 dépend des choix faits par l'organisme.\nSelon le site officiel de l'ISO, plus de 500 000 certifications ISO 14001 ont été délivrées dans plus de 180 pays\n[",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 4,
+        "chunk_total": 16,
+        "nb_chars": 755
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 14001 spécifie les exigences relatives au\nsystème de management environnemental\n. Cela permet à un organisme de développer et de mettre en œuvre une politique et des objectifs qui prennent en compte les exigences légales et réglementaires et autres exigences auxquelles l'organisme a décidé de se soumettre. Le périmètre s'applique principalement aux aspects environnementaux que l'organisme a identifiés comme étant significatifs et qu'il peut maîtriser ou influencer.\nLe degré d'application des exigences de la norme ISO 14001 dépend des choix faits par l'organisme.\nSelon le site officiel de l'ISO, plus de 500 000 certifications ISO 14001 ont été délivrées dans plus de 180 pays\n["
+    },
+    {
+      "texte": "]\n. Au\n31 décembre 2021\n, 420 433 certificats étaient en vigueur dans le monde, la Chine, le Japon et l'Italie occupant les trois premières places\n[\n\n]\n. En France, la certification a progressé régulièrement, passant de 6 402 certificats en 2019 à 6 458 en 2020\n[\n\n]\n,\n[\n\n]\n.\nActeurs\n[\nmodifier\n|\nmodifier le code\n]\nLa norme internationale définit deux principaux acteurs\n[\n\n]\n:\nl'organisme et les différentes contraintes environnementales qui lui sont propres : les exigences de clients, pollutions, nuisances, consommations,\netc.\n;\nles\nparties intéressées\n(ou prenantes, selon la définition de l'ISO, est\n« une personne ou un organisme qui peut avoir une incidence ou être affecté par une décision ou activité de l’organisme »\n[",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 5,
+        "chunk_total": 16,
+        "nb_chars": 730
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n]\n. Au\n31 décembre 2021\n, 420 433 certificats étaient en vigueur dans le monde, la Chine, le Japon et l'Italie occupant les trois premières places\n[\n\n]\n. En France, la certification a progressé régulièrement, passant de 6 402 certificats en 2019 à 6 458 en 2020\n[\n\n]\n,\n[\n\n]\n.\nActeurs\n[\nmodifier\n|\nmodifier le code\n]\nLa norme internationale définit deux principaux acteurs\n[\n\n]\n:\nl'organisme et les différentes contraintes environnementales qui lui sont propres : les exigences de clients, pollutions, nuisances, consommations,\netc.\n;\nles\nparties intéressées\n(ou prenantes, selon la définition de l'ISO, est\n« une personne ou un organisme qui peut avoir une incidence ou être affecté par une décision ou activité de l’organisme »\n["
+    },
+    {
+      "texte": "]\n).\nPerception de la satisfaction des clients :\nles partenaires économiques : fournisseurs, sous-traitants, etc. ;\nles partenariats financiers : banques, investisseurs… ;\nles groupes de pression : associations locales, associations de consommateurs…\nPrincipes\n[\nmodifier\n|\nmodifier le code\n]\nLe principe fondamental de la norme ISO 14001 repose sur le cycle\nPDCA\n(Planifier - Développer - Contrôler - Agir)\n[\n\n]\n\n, appelé aussi roue de Deming qui guide\n\nl'amélioration continue\n\nde la performance environnementale. Quelle que soit l'activité de l'entreprise, les exigences d'un\n\nSME\n\nsont les mêmes, quel que soit son degré de maîtrise des questions liées à l'environnement.\n\nLa norme ISO 14001 représente dix-huit exigences réparties en six chapitres :\n\nles exigences générales ;\n\nla politique environnementale ;\n\nla planification ;",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 6,
+        "chunk_total": 16,
+        "nb_chars": 834
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n]\n).\nPerception de la satisfaction des clients :\nles partenaires économiques : fournisseurs, sous-traitants, etc. ;\nles partenariats financiers : banques, investisseurs… ;\nles groupes de pression : associations locales, associations de consommateurs…\nPrincipes\n[\nmodifier\n|\nmodifier le code\n]\nLe principe fondamental de la norme ISO 14001 repose sur le cycle\nPDCA\n(Planifier - Développer - Contrôler - Agir)\n[\n\n]\n\n, appelé aussi roue de Deming qui guide\n\nl'amélioration continue\n\nde la performance environnementale. Quelle que soit l'activité de l'entreprise, les exigences d'un\n\nSME\n\nsont les mêmes, quel que soit son degré de maîtrise des questions liées à l'environnement.\n\nLa norme ISO 14001 représente dix-huit exigences réparties en six chapitres :\n\nles exigences générales ;\n\nla politique environnementale ;\n\nla planification ;"
+    },
+    {
+      "texte": "la mise en œuvre des actions pour satisfaire à la politique environnementale ;\n\nles contrôles et les actions correctives ;\n\nla revue de la direction.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme ISO 14001 a été publiée pour la première fois en 1996, puis révisée en 2004 et 2015 pour s'adapter aux évolutions environnementales et managériales.\n\nÀ partir des\n\nannées 1980\n\n, le renforcement de la\n\nlégislation environnementale\n\net les pressions des\n\nparties prenantes\n\namènent les industries à s'équiper progressivement de\n\nsystèmes de management environnementaux\n\n. En parallèle, un nombre croissant de normes et de référentiels apparaissent, aux champs d'applications différents, et entraînent des risques de contradiction et de surenchère coûteux pour les entreprises\n\n[\n\n]\n.\nAu cours des discussions préparatoires au\nSommet de Rio\nde",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 7,
+        "chunk_total": 16,
+        "nb_chars": 850
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nla mise en œuvre des actions pour satisfaire à la politique environnementale ;\n\nles contrôles et les actions correctives ;\n\nla revue de la direction.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme ISO 14001 a été publiée pour la première fois en 1996, puis révisée en 2004 et 2015 pour s'adapter aux évolutions environnementales et managériales.\n\nÀ partir des\n\nannées 1980\n\n, le renforcement de la\n\nlégislation environnementale\n\net les pressions des\n\nparties prenantes\n\namènent les industries à s'équiper progressivement de\n\nsystèmes de management environnementaux\n\n. En parallèle, un nombre croissant de normes et de référentiels apparaissent, aux champs d'applications différents, et entraînent des risques de contradiction et de surenchère coûteux pour les entreprises\n\n[\n\n]\n.\nAu cours des discussions préparatoires au\nSommet de Rio\nde"
+    },
+    {
+      "texte": "sont débattues l'utilité et l'efficacité de normes de management environnemental\n[\n\n]\n. Dans ses conclusions, l'association industrielle\nBusiness Council for Sustainable Development\natteste la nécessité de normes internationales consensuelles et volontaires pour améliorer la performance environnementale des entreprises. Finalement, l'\nAgenda 21\nadopté au cours du Sommet encourage à « reconnaître le management environnemental comme l'une des priorités des entreprises » et à « adopter des codes de meilleures pratiques environnementales ».\nÀ la suite du Sommet, les normes environnementales nationales et régionales prennent une place de plus en plus importante\n[\n\n]\n. Au cours du\ncycle d'Uruguay\nrelatif aux négociations internationales sur l'\nAccord général sur les tarifs douaniers et le commerce\ncommencées en\n\net conclues en",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 8,
+        "chunk_total": 16,
+        "nb_chars": 832
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nsont débattues l'utilité et l'efficacité de normes de management environnemental\n[\n\n]\n. Dans ses conclusions, l'association industrielle\nBusiness Council for Sustainable Development\natteste la nécessité de normes internationales consensuelles et volontaires pour améliorer la performance environnementale des entreprises. Finalement, l'\nAgenda 21\nadopté au cours du Sommet encourage à « reconnaître le management environnemental comme l'une des priorités des entreprises » et à « adopter des codes de meilleures pratiques environnementales ».\nÀ la suite du Sommet, les normes environnementales nationales et régionales prennent une place de plus en plus importante\n[\n\n]\n. Au cours du\ncycle d'Uruguay\nrelatif aux négociations internationales sur l'\nAccord général sur les tarifs douaniers et le commerce\ncommencées en\n\net conclues en"
+    },
+    {
+      "texte": ", les normes internationales de l'\nOrganisation internationale de normalisation\n(ISO) sont explicitement citées\n[\n\n]\n.\nEn\n\n, le Groupe consultatif stratégique de l'ISO sur l'environnement ou SAGE (Strategic Advisory Group on the Environment) est lancé par l'ISO et la\nCEI\nafin de mener une réflexion sur le rôle que peuvent jouer les normes internationales dans le management environnemental en prévision du Sommet de Rio\n[\n\n]\n\n. Fin 1992, le SAGE dépose ses conclusions à l'ISO où il recommande la création d'un comité technique pour élaborer des normes environnementales dans plusieurs domaines. En\n\njanvier 1993\n\n, l'ISO s'appuie sur ces recommandations pour créer le comité technique ISO/TC 207 pour élaborer des normes dans les domaines recommandés par le SAGE.\n\nLa première version de la norme ISO 14001 est publiée en\n\nseptembre 1996\n\n. La norme a ensuite fait l'objet d'une révision en",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 9,
+        "chunk_total": 16,
+        "nb_chars": 893
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n, les normes internationales de l'\nOrganisation internationale de normalisation\n(ISO) sont explicitement citées\n[\n\n]\n.\nEn\n\n, le Groupe consultatif stratégique de l'ISO sur l'environnement ou SAGE (Strategic Advisory Group on the Environment) est lancé par l'ISO et la\nCEI\nafin de mener une réflexion sur le rôle que peuvent jouer les normes internationales dans le management environnemental en prévision du Sommet de Rio\n[\n\n]\n\n. Fin 1992, le SAGE dépose ses conclusions à l'ISO où il recommande la création d'un comité technique pour élaborer des normes environnementales dans plusieurs domaines. En\n\njanvier 1993\n\n, l'ISO s'appuie sur ces recommandations pour créer le comité technique ISO/TC 207 pour élaborer des normes dans les domaines recommandés par le SAGE.\n\nLa première version de la norme ISO 14001 est publiée en\n\nseptembre 1996\n\n. La norme a ensuite fait l'objet d'une révision en"
+    },
+    {
+      "texte": "décembre 2004\n\nqui apporte quelques modifications mineures pour la rendre plus claire et plus compatible avec les normes qualité\n\nISO 9000\n\n. En\n\noctobre 2015\n\nparait la dernière révision de la norme, qui renforce le rôle de la direction, propose de structurer la détermination des aspects environnementaux selon la perspective du cycle de vie. Celle-ci demande des résultats concrets aux organismes, contrairement aux dernières versions.\n\nAnnée\n\nÉdition\n\nre\n\ne",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 10,
+        "chunk_total": 16,
+        "nb_chars": 461
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\ndécembre 2004\n\nqui apporte quelques modifications mineures pour la rendre plus claire et plus compatible avec les normes qualité\n\nISO 9000\n\n. En\n\noctobre 2015\n\nparait la dernière révision de la norme, qui renforce le rôle de la direction, propose de structurer la détermination des aspects environnementaux selon la perspective du cycle de vie. Celle-ci demande des résultats concrets aux organismes, contrairement aux dernières versions.\n\nAnnée\n\nÉdition\n\nre\n\ne"
+    },
+    {
+      "texte": "e\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nAFAQ 14001 par étapes - AFNOR Certification\n», sur\ncertification.afnor.org\n(consulté le\n17 septembre 2025\n)\n↑\n«\nEnvironnement : norme ISO 14001 version 2015 – Bureau Veritas\n», sur\nwww.bureauveritas.fr\n(consulté le\n17 septembre 2025\n)\n↑\n«\nISO 14001 : Systèmes de management environnemental\n», sur\nsocotec.fr\n(consulté le\n2 avril 2026\n)\n↑\n«\nNorme ISO 14001 – management environnemental | Ministère de la Culture\n», sur\nwww.culture.gouv.fr\n,\n3 juin 2014\n(consulté le\n16 juillet 2025\n)\n↑\nValérie Baron,\nPratiquer le management de l'environnement\n, Paris, Afnor,\n\n, 141\np.\n,\np.",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 11,
+        "chunk_total": 16,
+        "nb_chars": 631
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\ne\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nAFAQ 14001 par étapes - AFNOR Certification\n», sur\ncertification.afnor.org\n(consulté le\n17 septembre 2025\n)\n↑\n«\nEnvironnement : norme ISO 14001 version 2015 – Bureau Veritas\n», sur\nwww.bureauveritas.fr\n(consulté le\n17 septembre 2025\n)\n↑\n«\nISO 14001 : Systèmes de management environnemental\n», sur\nsocotec.fr\n(consulté le\n2 avril 2026\n)\n↑\n«\nNorme ISO 14001 – management environnemental | Ministère de la Culture\n», sur\nwww.culture.gouv.fr\n,\n3 juin 2014\n(consulté le\n16 juillet 2025\n)\n↑\nValérie Baron,\nPratiquer le management de l'environnement\n, Paris, Afnor,\n\n, 141\np.\n,\np."
+    },
+    {
+      "texte": "↑\n«\nLa famille ISO 14000 – Management environnemental\n», sur\niso.org\n(consulté le\n2 avril 2026\n)\n↑\n«\nThe ISO Survey of Management System Standard Certifications\n», sur\niso.org\n,\nseptembre 2022\n(consulté le\n2 avril 2026\n)\n↑\n«\nSystèmes de management : les 6 certifications-stars de 2019\n», sur\nGroupe AFNOR\n,\n12 octobre 2020\n(consulté le\n2 avril 2026\n)\n↑\n«\nNouvelle ISO 14001 : verdict en décembre 2022\n», sur\nGroupe AFNOR\n,\n31 janvier 2022\n(consulté le\n2 avril 2026\n)\n↑\n«\nRelation avec\nles acteurs\nde l'environnement\n», sur\nwwwv1.agora21.org/entreprise/i21.htm\n(consulté le\n5 décembre 2017\n)\n↑\n«\nDéfinition : Partie prenante / Partie intéressée\n», sur\nCertification QSE\n,",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 12,
+        "chunk_total": 16,
+        "nb_chars": 670
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\n↑\n«\nLa famille ISO 14000 – Management environnemental\n», sur\niso.org\n(consulté le\n2 avril 2026\n)\n↑\n«\nThe ISO Survey of Management System Standard Certifications\n», sur\niso.org\n,\nseptembre 2022\n(consulté le\n2 avril 2026\n)\n↑\n«\nSystèmes de management : les 6 certifications-stars de 2019\n», sur\nGroupe AFNOR\n,\n12 octobre 2020\n(consulté le\n2 avril 2026\n)\n↑\n«\nNouvelle ISO 14001 : verdict en décembre 2022\n», sur\nGroupe AFNOR\n,\n31 janvier 2022\n(consulté le\n2 avril 2026\n)\n↑\n«\nRelation avec\nles acteurs\nde l'environnement\n», sur\nwwwv1.agora21.org/entreprise/i21.htm\n(consulté le\n5 décembre 2017\n)\n↑\n«\nDéfinition : Partie prenante / Partie intéressée\n», sur\nCertification QSE\n,"
+    },
+    {
+      "texte": "er\ndécembre 2016\n(consulté le\n5 février 2019\n)\n↑\n«\nLes avantages de la mise en œuvre d’un système de management environnemental pour votre entreprise\n», sur\nISO\n(consulté le\n16 juillet 2025\n)\n↑\na\net\nb\nMzoughi, N. et Grolleau, G., 2005,\np.\n8-9\n.\n↑\nBIR, 2006,\np.\n10.\n↑\na\net\nb\nMzoughi, N. et Grolleau, G., 2005,\np.\n10.\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nResponsabilité sociétale des entreprises\nOrganisation internationale de normalisation\nSérie des normes ISO 14000\nLiens externes\n[\nmodifier\n|\nmodifier le code\n]\nISO 14000 – Management environnemental\n, sur le site de l'ISO\n(en)\nSite officiel\nNotices d'autorité\n:\nGND\nTchéquie\nLettonie\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 13,
+        "chunk_total": 16,
+        "nb_chars": 892
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\ner\ndécembre 2016\n(consulté le\n5 février 2019\n)\n↑\n«\nLes avantages de la mise en œuvre d’un système de management environnemental pour votre entreprise\n», sur\nISO\n(consulté le\n16 juillet 2025\n)\n↑\na\net\nb\nMzoughi, N. et Grolleau, G., 2005,\np.\n8-9\n.\n↑\nBIR, 2006,\np.\n10.\n↑\na\net\nb\nMzoughi, N. et Grolleau, G., 2005,\np.\n10.\nVoir aussi\n[\nmodifier\n|\nmodifier le code\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nResponsabilité sociétale des entreprises\nOrganisation internationale de normalisation\nSérie des normes ISO 14000\nLiens externes\n[\nmodifier\n|\nmodifier le code\n]\nISO 14000 – Management environnemental\n, sur le site de l'ISO\n(en)\nSite officiel\nNotices d'autorité\n:\nGND\nTchéquie\nLettonie\nv\n·\nm\nNormes\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications"
+    },
+    {
+      "texte": "de systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l’environnement\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_14001&oldid=235144936\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nManagement environnemental\n\nCertification environnementale\n\nCatégories cachées :\n\nRédaction à améliorer\n\nArticle manquant de références depuis décembre 2017\n\nArticle manquant de références/Liste complète\n\nPage utilisant P856\n\nPage utilisant un modèle Bases inactif",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 14,
+        "chunk_total": 16,
+        "nb_chars": 873
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l’environnement\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_14001&oldid=235144936\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nManagement environnemental\n\nCertification environnementale\n\nCatégories cachées :\n\nRédaction à améliorer\n\nArticle manquant de références depuis décembre 2017\n\nArticle manquant de références/Liste complète\n\nPage utilisant P856\n\nPage utilisant un modèle Bases inactif"
+    },
+    {
+      "texte": "Article utilisant le modèle Dictionnaires inactif\n\nArticle de Wikipédia avec notice d'autorité\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Environnement/Articles liés\n\nRechercher\n\nRechercher\n\nISO 14001\n\n18 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_14001_env",
+        "nom_doc": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "nom": "ISO 14001:2015 — Management environnemental (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_14001",
+        "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+        "indexe_le": "2026-04-17T02:49:50.116824",
+        "chunk_index": 15,
+        "chunk_total": 16,
+        "nb_chars": 249
+      },
+      "texte_embed": "normes — ISO 14001:2015 — Management environnemental (Wikipedia FR)\nArticle utilisant le modèle Dictionnaires inactif\n\nArticle de Wikipédia avec notice d'autorité\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Environnement/Articles liés\n\nRechercher\n\nRechercher\n\nISO 14001\n\n18 langues\n\nAjouter un sujet"
+    }
+  ]
+}

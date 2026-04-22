@@ -1,0 +1,936 @@
+{
+  "doc_id": "commerce_cisg_vente_inter",
+  "metadata": {
+    "doc_id": "commerce_cisg_vente_inter",
+    "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+    "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "commercial",
+    "metier_tags": [
+      "juriste",
+      "commercial",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+    "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+    "indexe_le": "2026-04-17T03:11:02.476682"
+  },
+  "nb_chars": 10418,
+  "nb_chunks": 38,
+  "chunks": [
+    {
+      "texte": "Convention des Nations unies sur les contrats de vente internationale de marchandises — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nPour les articles homonymes, voir\nConvention de Vienne\n.\nCet article est une\nébauche\nconcernant le\ndroit\n.\nVous pouvez partager vos connaissances en l’améliorant (\ncomment ?\n) selon les recommandations des\nprojets correspondants\n.\nConvention des Nations unies sur les contrats de vente internationale de marchandises\nConvention des Nations Unies sur les contrats de vente internationale de marchandises (Vienne,1980)\nAbréviation\nCVIM\nAdoption\n11 avril 1980\nLieu d'adoption\nVienne\nEntrée en vigueur\n1er janvier 1988\nCondition\nSignature et\nratification\nSignataires",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 0,
+        "chunk_total": 38,
+        "nb_chars": 724
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nConvention des Nations unies sur les contrats de vente internationale de marchandises — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nPour les articles homonymes, voir\nConvention de Vienne\n.\nCet article est une\nébauche\nconcernant le\ndroit\n.\nVous pouvez partager vos connaissances en l’améliorant (\ncomment ?\n) selon les recommandations des\nprojets correspondants\n.\nConvention des Nations unies sur les contrats de vente internationale de marchandises\nConvention des Nations Unies sur les contrats de vente internationale de marchandises (Vienne,1980)\nAbréviation\nCVIM\nAdoption\n11 avril 1980\nLieu d'adoption\nVienne\nEntrée en vigueur\n1er janvier 1988\nCondition\nSignature et\nratification\nSignataires"
+    },
+    {
+      "texte": "Dépositaire\nCommission des Nations Unies pour le droit commercial international\nmodifier\nLa\nConvention des Nations unies sur les contrats de vente internationale de marchandises\n(\nCVIM\n) est un\ntraité international\nproposant un droit international des\ncontrats de vente\n, qui a été ratifiée par 89 pays\n[\n\n]\nqui représentent plus des trois-quarts des échanges internationaux. Cependant, le\nRoyaume-Uni\n, l'\nInde\n, le\nNigeria\net l'\nAfrique du Sud\nne sont pas parmi les pays qui ont ratifié la Convention, préférant laisser le choix du droit applicable aux contrats internationaux.\nLa Convention a été signée à\nVienne\nle\n\navril\n\n, dernier jour de la Conférence des Nations unies sur les contrats dans les ventes internationales de marchandises entamée le\n10 mars 1980\n, et on l'appelle parfois Convention de Vienne. C'est un traité multilatéral, qui est entré en vigueur le\n\ner\njanvier",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 1,
+        "chunk_total": 38,
+        "nb_chars": 883
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nDépositaire\nCommission des Nations Unies pour le droit commercial international\nmodifier\nLa\nConvention des Nations unies sur les contrats de vente internationale de marchandises\n(\nCVIM\n) est un\ntraité international\nproposant un droit international des\ncontrats de vente\n, qui a été ratifiée par 89 pays\n[\n\n]\nqui représentent plus des trois-quarts des échanges internationaux. Cependant, le\nRoyaume-Uni\n, l'\nInde\n, le\nNigeria\net l'\nAfrique du Sud\nne sont pas parmi les pays qui ont ratifié la Convention, préférant laisser le choix du droit applicable aux contrats internationaux.\nLa Convention a été signée à\nVienne\nle\n\navril\n\n, dernier jour de la Conférence des Nations unies sur les contrats dans les ventes internationales de marchandises entamée le\n10 mars 1980\n, et on l'appelle parfois Convention de Vienne. C'est un traité multilatéral, qui est entré en vigueur le\n\ner\njanvier"
+    },
+    {
+      "texte": ", après avoir été ratifié par 10 pays. À moins que cela soit expressément exclu dans une clause du contrat, la Convention des Nations unies sur les contrats de vente internationale de marchandises a vocation à supplanter tout droit national lors d'un échange international de biens entre des parties dépendant d'États qui ont ratifié la Convention\n[\n\n]\n.\nPays ayant ratifié la convention\n[\nmodifier\n|\nmodifier le code\n]\nLa liste mise à jour des pays parties à la Convention est disponible\nsur le site web\nde la Commission des Nations unies pour le droit commercial international (CNUDCI).\nAu\n\ner\ndécembre 2023\n, 97 pays se trouvent partie à la convention\n[\n\n]\n\n.\n\nAlbanie\n\n: 13 mai 2009\n\nArgentine\n\n: 19 juillet 1983\n\nArménie\n\n: 2 décembre 2008\n\nAustralie\n\n: 17 mars 1988\n\nAutriche\n\n: 11 avril 1980\n\nAzerbaijan\n\n: 3 mai 2016\n\nBahrain\n\n: 25 septembre 2013\n\nBelarus\n\n: 9 octobre 1989\n\nBelgique",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 2,
+        "chunk_total": 38,
+        "nb_chars": 891
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n, après avoir été ratifié par 10 pays. À moins que cela soit expressément exclu dans une clause du contrat, la Convention des Nations unies sur les contrats de vente internationale de marchandises a vocation à supplanter tout droit national lors d'un échange international de biens entre des parties dépendant d'États qui ont ratifié la Convention\n[\n\n]\n.\nPays ayant ratifié la convention\n[\nmodifier\n|\nmodifier le code\n]\nLa liste mise à jour des pays parties à la Convention est disponible\nsur le site web\nde la Commission des Nations unies pour le droit commercial international (CNUDCI).\nAu\n\ner\ndécembre 2023\n, 97 pays se trouvent partie à la convention\n[\n\n]\n\n.\n\nAlbanie\n\n: 13 mai 2009\n\nArgentine\n\n: 19 juillet 1983\n\nArménie\n\n: 2 décembre 2008\n\nAustralie\n\n: 17 mars 1988\n\nAutriche\n\n: 11 avril 1980\n\nAzerbaijan\n\n: 3 mai 2016\n\nBahrain\n\n: 25 septembre 2013\n\nBelarus\n\n: 9 octobre 1989\n\nBelgique"
+    },
+    {
+      "texte": ": 31 octobre 1996\n\nBenin\n\n: 29 juillet 2011\n\nBosnia and Herzegovina\n\n: 12 janvier 1994\n\nBrésil\n\n: 4 mars 2013\n\nBulgaria\n\n: 9 juillet 1990\n\nBurundi\n\n: 4 septembre 1998\n\nCameroon\n\n: 11 octobre 2017\n\nCanada\n\n: 23 avril 1991\n\nChile\n\n: 11 avril 1980\n\nChine\n\n: 31 septembre 1981\n\nColombie\n\n: 10 juillet 2001\n\nCongo\n\n: 11 juillet 2014\n\nCosta Rica\n\n: 12 juillet 2017\n\nCroatia\n\n: 8 juin 1998\n\nCuba\n\n: 2 novembre 1994\n\nChypre\n\n: 7 mars 2005\n\nCzech Republic\n\n: 30 septembre 1993\n\nDemocratic People's Republic of Korea\n\n: 27 mars 2019\n\nDanemark\n\n: 26 mai 1981\n\nDominican Republic\n\n: 7 juin 2010\n\nEcuador\n\n: 27 janvier 1992\n\nÉgypte\n\n: 6 décembre 1982\n\nEl Salvador\n\n: 27 novembre 2006\n\nEstonie\n\n: 20 septembre 1993\n\nFiji\n\n: 7 juin 2017\n\nFinlande\n\n: 26 mai 1981\n\nFrance\n\n: 27 août 1981\n\nGabon\n\n: 15 décembre 2004\n\nGeorgia\n\n: 16 août 1994\n\nAllemagne\n\n: 26 mai 1981\n\nEast-Germany\n\n: 13 août 1981\n\nGreece",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 3,
+        "chunk_total": 38,
+        "nb_chars": 886
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 31 octobre 1996\n\nBenin\n\n: 29 juillet 2011\n\nBosnia and Herzegovina\n\n: 12 janvier 1994\n\nBrésil\n\n: 4 mars 2013\n\nBulgaria\n\n: 9 juillet 1990\n\nBurundi\n\n: 4 septembre 1998\n\nCameroon\n\n: 11 octobre 2017\n\nCanada\n\n: 23 avril 1991\n\nChile\n\n: 11 avril 1980\n\nChine\n\n: 31 septembre 1981\n\nColombie\n\n: 10 juillet 2001\n\nCongo\n\n: 11 juillet 2014\n\nCosta Rica\n\n: 12 juillet 2017\n\nCroatia\n\n: 8 juin 1998\n\nCuba\n\n: 2 novembre 1994\n\nChypre\n\n: 7 mars 2005\n\nCzech Republic\n\n: 30 septembre 1993\n\nDemocratic People's Republic of Korea\n\n: 27 mars 2019\n\nDanemark\n\n: 26 mai 1981\n\nDominican Republic\n\n: 7 juin 2010\n\nEcuador\n\n: 27 janvier 1992\n\nÉgypte\n\n: 6 décembre 1982\n\nEl Salvador\n\n: 27 novembre 2006\n\nEstonie\n\n: 20 septembre 1993\n\nFiji\n\n: 7 juin 2017\n\nFinlande\n\n: 26 mai 1981\n\nFrance\n\n: 27 août 1981\n\nGabon\n\n: 15 décembre 2004\n\nGeorgia\n\n: 16 août 1994\n\nAllemagne\n\n: 26 mai 1981\n\nEast-Germany\n\n: 13 août 1981\n\nGreece"
+    },
+    {
+      "texte": ": 12 janvier 1998 Guatemala : 11 décembre 2019 Guinée : 23 janvier 1991 Guyana : 25 septembre 2014 Honduras : 10 octobre 2022 Hungary : 11 avril 1980 Iceland : 10 mai 2001 Iraq : 5 mars 1990 Israel : 22 janvier 2002 Italy : 30 septembre 1981 Japon : 1er juillet 2008 Kyrgyzstan : 11 mai 1999 Latvia : 31 juillet 1997 Laos : 24 septembre 2019 Liban : 21 novembre 2008 Lesotho : 18 juin 1981 Liberia : 16 septembre 2005 Liechtenstein : 30 avril 2019 Lithuania : 18 janvier 1995 Luxembourg : 30 janvier 1997 Madagascar : 24 septembre 2014 Mauritania : 20 août 1999 Mexico : 29 décembre 1987 Moldova : 13 octobre 1994 Mongolia : 31 décembre 1997 Montenegro : 23 octobre 2006 Netherlands (European territory and Aruba ) : 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 4,
+        "chunk_total": 38,
+        "nb_chars": 840
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 12 janvier 1998 Guatemala : 11 décembre 2019 Guinée : 23 janvier 1991 Guyana : 25 septembre 2014 Honduras : 10 octobre 2022 Hungary : 11 avril 1980 Iceland : 10 mai 2001 Iraq : 5 mars 1990 Israel : 22 janvier 2002 Italy : 30 septembre 1981 Japon : 1er juillet 2008 Kyrgyzstan : 11 mai 1999 Latvia : 31 juillet 1997 Laos : 24 septembre 2019 Liban : 21 novembre 2008 Lesotho : 18 juin 1981 Liberia : 16 septembre 2005 Liechtenstein : 30 avril 2019 Lithuania : 18 janvier 1995 Luxembourg : 30 janvier 1997 Madagascar : 24 septembre 2014 Mauritania : 20 août 1999 Mexico : 29 décembre 1987 Moldova : 13 octobre 1994 Mongolia : 31 décembre 1997 Montenegro : 23 octobre 2006 Netherlands (European territory and Aruba ) : 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": ") : 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 5,
+        "chunk_total": 38,
+        "nb_chars": 127
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n) : 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": ": 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 6,
+        "chunk_total": 38,
+        "nb_chars": 125
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 7,
+        "chunk_total": 38,
+        "nb_chars": 123
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n29 mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "mai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 8,
+        "chunk_total": 38,
+        "nb_chars": 120
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nmai 1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 9,
+        "chunk_total": 38,
+        "nb_chars": 116
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n1981 New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "New Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 10,
+        "chunk_total": 38,
+        "nb_chars": 111
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nNew Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "Zealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 11,
+        "chunk_total": 38,
+        "nb_chars": 107
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nZealand : 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": ": 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 12,
+        "chunk_total": 38,
+        "nb_chars": 99
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 13,
+        "chunk_total": 38,
+        "nb_chars": 97
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n22 septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "septembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 14,
+        "chunk_total": 38,
+        "nb_chars": 94
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nseptembre 1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 15,
+        "chunk_total": 38,
+        "nb_chars": 84
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n1994 North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "North Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 16,
+        "chunk_total": 38,
+        "nb_chars": 79
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nNorth Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "Macedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 17,
+        "chunk_total": 38,
+        "nb_chars": 73
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nMacedonia : 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": ": 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 18,
+        "chunk_total": 38,
+        "nb_chars": 63
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 19,
+        "chunk_total": 38,
+        "nb_chars": 61
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n22 novembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "novembre 2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 20,
+        "chunk_total": 38,
+        "nb_chars": 58
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nnovembre 2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "2006 Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 21,
+        "chunk_total": 38,
+        "nb_chars": 49
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n2006 Norvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "Norvège : 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 22,
+        "chunk_total": 38,
+        "nb_chars": 44
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nNorvège : 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": ": 20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 23,
+        "chunk_total": 38,
+        "nb_chars": 36
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "20 juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 24,
+        "chunk_total": 38,
+        "nb_chars": 34
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n20 juillet 1988 State of Palestine"
+    },
+    {
+      "texte": "juillet 1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 25,
+        "chunk_total": 38,
+        "nb_chars": 31
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\njuillet 1988 State of Palestine"
+    },
+    {
+      "texte": "1988 State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 26,
+        "chunk_total": 38,
+        "nb_chars": 23
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n1988 State of Palestine"
+    },
+    {
+      "texte": "State of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 27,
+        "chunk_total": 38,
+        "nb_chars": 18
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nState of Palestine"
+    },
+    {
+      "texte": "of Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 28,
+        "chunk_total": 38,
+        "nb_chars": 12
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nof Palestine"
+    },
+    {
+      "texte": "Palestine",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 29,
+        "chunk_total": 38,
+        "nb_chars": 9
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nPalestine"
+    },
+    {
+      "texte": ": 29 décembre 2017\n\nParaguay\n\n: 13 janvier 2008\n\nPérou\n\n: 25 mars 1999\n\nPologne\n\n: 28 septembre 1981\n\nPortugal\n\n: 23 septembre 2020\n\nRepublic of Korea\n\n: 17 février 2004\n\nRoumanie\n\n: 22 mai 1991\n\nRussian Federation\n\n: 16 août 1990\n\nSaint Vincent and the Grenadines\n\n: 12 septembre 2000\n\nSaint-Marin\n\n: 22 février 2012\n\nSaudi Arabia\n\n: 3 août 2023\n\nSerbia\n\n: 12 mars 2001\n\nSingapour\n\n: 16 février 1995\n\nSlovakia\n\n: 28 mai 1993\n\nSlovenia\n\n: 7 janvier 1994\n\nEspagne\n\n:24 juillet 1990\n\nSweden\n\n: 26 mai 1981\n\nSuisse\n\n: 21 février 1990\n\nSyrian Arab Republic\n\n: 19 octobre 1982\n\nTurquie\n\n: 7 juillet 2010\n\nTurkmenistan\n\n: 4 mai 2022\n\nUganda\n\n: 12 février 1992\n\nUkraine\n\n: 3 janvier 1990\n\nUnited States of America\n\n: 31 août 1981\n\nUruguay\n\n: 25 janvier 1999\n\nUzbekistan\n\n: 27 novembre 1996\n\nVietnam\n\n: 18 décembre 2015\n\nZambia\n\n: 6 juin 1986\n\nChamp d'application matériel de la Convention\n\n[\n\nmodifier\n\n|",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 30,
+        "chunk_total": 38,
+        "nb_chars": 897
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n: 29 décembre 2017\n\nParaguay\n\n: 13 janvier 2008\n\nPérou\n\n: 25 mars 1999\n\nPologne\n\n: 28 septembre 1981\n\nPortugal\n\n: 23 septembre 2020\n\nRepublic of Korea\n\n: 17 février 2004\n\nRoumanie\n\n: 22 mai 1991\n\nRussian Federation\n\n: 16 août 1990\n\nSaint Vincent and the Grenadines\n\n: 12 septembre 2000\n\nSaint-Marin\n\n: 22 février 2012\n\nSaudi Arabia\n\n: 3 août 2023\n\nSerbia\n\n: 12 mars 2001\n\nSingapour\n\n: 16 février 1995\n\nSlovakia\n\n: 28 mai 1993\n\nSlovenia\n\n: 7 janvier 1994\n\nEspagne\n\n:24 juillet 1990\n\nSweden\n\n: 26 mai 1981\n\nSuisse\n\n: 21 février 1990\n\nSyrian Arab Republic\n\n: 19 octobre 1982\n\nTurquie\n\n: 7 juillet 2010\n\nTurkmenistan\n\n: 4 mai 2022\n\nUganda\n\n: 12 février 1992\n\nUkraine\n\n: 3 janvier 1990\n\nUnited States of America\n\n: 31 août 1981\n\nUruguay\n\n: 25 janvier 1999\n\nUzbekistan\n\n: 27 novembre 1996\n\nVietnam\n\n: 18 décembre 2015\n\nZambia\n\n: 6 juin 1986\n\nChamp d'application matériel de la Convention\n\n[\n\nmodifier\n\n|"
+    },
+    {
+      "texte": "modifier le code\n\n]\n\n« Article 1: La présente Convention s’applique aux contrats de vente de marchandises entre des parties ayant leur établissement dans des États différents:\n\na) Lorsque ces États sont des États contractants; ou\n\nb) Lorsque les règles du droit international privé mènent à\n\nl’application de la loi d’un État contractant. »\n\n—\n\nArticle premier de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 2:\n\nLa présente Convention ne régit pas les ventes:\n\na) de marchandises achetées pour un usage personnel, familial ou\n\ndomestique, à moins que le vendeur, à un moment quelconque avant la\n\nconclusion ou lors de la conclusion du contrat, n’ait pas su et n’ait pas été\n\ncensé savoir que ces marchandises étaient achetées pour un tel usage;\n\nb) aux enchères;\n\nc) sur saisie ou de quelque autre manière par autorité de justice;",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 31,
+        "chunk_total": 38,
+        "nb_chars": 887
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nmodifier le code\n\n]\n\n« Article 1: La présente Convention s’applique aux contrats de vente de marchandises entre des parties ayant leur établissement dans des États différents:\n\na) Lorsque ces États sont des États contractants; ou\n\nb) Lorsque les règles du droit international privé mènent à\n\nl’application de la loi d’un État contractant. »\n\n—\n\nArticle premier de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 2:\n\nLa présente Convention ne régit pas les ventes:\n\na) de marchandises achetées pour un usage personnel, familial ou\n\ndomestique, à moins que le vendeur, à un moment quelconque avant la\n\nconclusion ou lors de la conclusion du contrat, n’ait pas su et n’ait pas été\n\ncensé savoir que ces marchandises étaient achetées pour un tel usage;\n\nb) aux enchères;\n\nc) sur saisie ou de quelque autre manière par autorité de justice;"
+    },
+    {
+      "texte": "d) de valeurs mobilières, effets de commerce et monnaies;\n\ne) de navires, bateaux, aéroglisseurs et aéronefs;\n\nf) d’électricité. »\n\n—\n\nArticle deux de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 3:\n\n1) Sont réputés ventes les contrats de fourniture de marchandises à\n\nfabriquer ou à produire, à moins que la partie qui commande celles-ci n’ait\n\nà fournir une part essentielle des éléments matériels nécessaires à cette\n\nfabrication ou production.\n\n2) La présente Convention ne s’applique pas aux contrats dans lesquels\n\nla part prépondérante de l’obligation de la partie qui fournit les marchandises\n\nconsiste en une fourniture de main-d’œuvre ou d’autres services. »\n\n—\n\nArticle trois de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 4:",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 32,
+        "chunk_total": 38,
+        "nb_chars": 849
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nd) de valeurs mobilières, effets de commerce et monnaies;\n\ne) de navires, bateaux, aéroglisseurs et aéronefs;\n\nf) d’électricité. »\n\n—\n\nArticle deux de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 3:\n\n1) Sont réputés ventes les contrats de fourniture de marchandises à\n\nfabriquer ou à produire, à moins que la partie qui commande celles-ci n’ait\n\nà fournir une part essentielle des éléments matériels nécessaires à cette\n\nfabrication ou production.\n\n2) La présente Convention ne s’applique pas aux contrats dans lesquels\n\nla part prépondérante de l’obligation de la partie qui fournit les marchandises\n\nconsiste en une fourniture de main-d’œuvre ou d’autres services. »\n\n—\n\nArticle trois de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 4:"
+    },
+    {
+      "texte": "La présente Convention régit exclusivement la formation du contrat de\n\nvente et les droits et obligations qu’un tel contrat fait naître entre le vendeur\n\net l’acheteur. En particulier, sauf disposition contraire expresse de la présente\n\nConvention, celle-ci ne concerne pas:\n\nI. Convention des Nations Unies sur les contrats de vente internationale de marchandises 3\n\na) La validité du contrat ni celle d’aucune de ses clauses non plus\n\nque celle des usages;\n\nb) Les effets que le contrat peut avoir sur la propriété des marchandises vendues. »\n\n—\n\nArticle quatre de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 5:\n\nLa présente Convention ne s’applique pas à la responsabilité du vendeur\n\npour décès ou lésions corporelles causés à quiconque par les marchandises. »\n\n—",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 33,
+        "chunk_total": 38,
+        "nb_chars": 824
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nLa présente Convention régit exclusivement la formation du contrat de\n\nvente et les droits et obligations qu’un tel contrat fait naître entre le vendeur\n\net l’acheteur. En particulier, sauf disposition contraire expresse de la présente\n\nConvention, celle-ci ne concerne pas:\n\nI. Convention des Nations Unies sur les contrats de vente internationale de marchandises 3\n\na) La validité du contrat ni celle d’aucune de ses clauses non plus\n\nque celle des usages;\n\nb) Les effets que le contrat peut avoir sur la propriété des marchandises vendues. »\n\n—\n\nArticle quatre de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 5:\n\nLa présente Convention ne s’applique pas à la responsabilité du vendeur\n\npour décès ou lésions corporelles causés à quiconque par les marchandises. »\n\n—"
+    },
+    {
+      "texte": "Article cinq de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 6:\n\nLes parties peuvent exclure l’application de la présente Convention ou,\n\nsous réserve des dispositions de l’article 12, déroger à l’une quelconque de\n\nses dispositions ou en modifier les effets. »\n\n—\n\nArticle six de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n(en)\n\nCet article est partiellement ou en totalité issu de l’article de Wikipédia en anglais intitulé\n\n«\n\nUnited Nations Convention on Contracts for the International Sale of Goods\n\n»\n\n(\n\nvoir la liste des auteurs\n\n)\n\n.\n\n↑\n\nCommission des Nations unies pour le droit commercial international\n\n↑\n\n«\n\nVente internationale de marchandises : appliquez-vous le bon droit?\n\n», sur\n\nlkd.ca\n\n,\n\n10 mars 2015\n\n(consulté le",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 34,
+        "chunk_total": 38,
+        "nb_chars": 899
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nArticle cinq de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\n« Article 6:\n\nLes parties peuvent exclure l’application de la présente Convention ou,\n\nsous réserve des dispositions de l’article 12, déroger à l’une quelconque de\n\nses dispositions ou en modifier les effets. »\n\n—\n\nArticle six de la Convention des Nations Unies sur les contrats de vente internationale\n\nde marchandises\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n(en)\n\nCet article est partiellement ou en totalité issu de l’article de Wikipédia en anglais intitulé\n\n«\n\nUnited Nations Convention on Contracts for the International Sale of Goods\n\n»\n\n(\n\nvoir la liste des auteurs\n\n)\n\n.\n\n↑\n\nCommission des Nations unies pour le droit commercial international\n\n↑\n\n«\n\nVente internationale de marchandises : appliquez-vous le bon droit?\n\n», sur\n\nlkd.ca\n\n,\n\n10 mars 2015\n\n(consulté le"
+    },
+    {
+      "texte": "29 aout 2015\n\n)\n\n.\n\n↑\n\n«\n\nUnited Nations Treaty collection\n\n»\n\n, sur\n\ntreaties.un.org\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPeter Schlechtriem et Claude Witz,\n\nConvention de Vienne sur les contrats de vente internationale de marchandises\n\n, Dalloz, Paris, 2008\n\n(\n\nISBN\n\n)\n\nLes principales revues juridiques offrent périodiquement un panorama de jurisprudence sur la Convention.\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nTexte de la convention et autre matériel sur la vente internationale de marchandises\n\nsur le site de la\n\nCommission des Nations unies pour le droit commercial international\n\nPrécis de jurisprudence de la CNUDCI concernant la Convention des Nations unies sur les contrats de vente internationale de marchandises\n\nCISG-France - Application de la Convention de Vienne par les juridictions françaises",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 35,
+        "chunk_total": 38,
+        "nb_chars": 896
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\n29 aout 2015\n\n)\n\n.\n\n↑\n\n«\n\nUnited Nations Treaty collection\n\n»\n\n, sur\n\ntreaties.un.org\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPeter Schlechtriem et Claude Witz,\n\nConvention de Vienne sur les contrats de vente internationale de marchandises\n\n, Dalloz, Paris, 2008\n\n(\n\nISBN\n\n)\n\nLes principales revues juridiques offrent périodiquement un panorama de jurisprudence sur la Convention.\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nTexte de la convention et autre matériel sur la vente internationale de marchandises\n\nsur le site de la\n\nCommission des Nations unies pour le droit commercial international\n\nPrécis de jurisprudence de la CNUDCI concernant la Convention des Nations unies sur les contrats de vente internationale de marchandises\n\nCISG-France - Application de la Convention de Vienne par les juridictions françaises"
+    },
+    {
+      "texte": "La Convention de Vienne (CVIM): Synopsis de textes sélectionnés\n\n/\n\nBulletin des textes\n\n(en)\n\nBase de données de la\n\nPace Law School\n\nsur la CISG et le droit commercial international\n\n(en)\n\nCommentaire des articles de la CISG\n\nPortail du droit\n\nPortail des relations internationales\n\nPortail des années 1980\n\nPortail de l’Organisation des Nations unies\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises&oldid=234775061\n\n».\n\nCatégories\n\n:\n\nTraité des Nations unies\n\nDroit des contrats spéciaux\n\nAccord économique\n\nTraité signé en 1980\n\nTraité entré en application en 1988\n\nAvril 1980\n\nTraité signé à Vienne (Autriche)\n\nCatégories cachées :\n\nWikipédia:ébauche droit\n\nArticle utilisant une Infobox\n\nPortail:Droit/Articles liés\n\nPortail:Société/Articles liés",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 36,
+        "chunk_total": 38,
+        "nb_chars": 862
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nLa Convention de Vienne (CVIM): Synopsis de textes sélectionnés\n\n/\n\nBulletin des textes\n\n(en)\n\nBase de données de la\n\nPace Law School\n\nsur la CISG et le droit commercial international\n\n(en)\n\nCommentaire des articles de la CISG\n\nPortail du droit\n\nPortail des relations internationales\n\nPortail des années 1980\n\nPortail de l’Organisation des Nations unies\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises&oldid=234775061\n\n».\n\nCatégories\n\n:\n\nTraité des Nations unies\n\nDroit des contrats spéciaux\n\nAccord économique\n\nTraité signé en 1980\n\nTraité entré en application en 1988\n\nAvril 1980\n\nTraité signé à Vienne (Autriche)\n\nCatégories cachées :\n\nWikipédia:ébauche droit\n\nArticle utilisant une Infobox\n\nPortail:Droit/Articles liés\n\nPortail:Société/Articles liés"
+    },
+    {
+      "texte": "Portail:Relations internationales/Articles liés\n\nPortail:Années 1980/Articles liés\n\nPortail:XXe siècle/Articles liés\n\nPortail:Époque contemporaine/Articles liés\n\nPortail:Histoire/Articles liés\n\nPortail:ONU/Articles liés\n\nRechercher\n\nRechercher\n\nConvention des Nations unies sur les contrats de vente internationale de marchandises\n\n26 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "commerce_cisg_vente_inter",
+        "nom_doc": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "nom": "CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "juriste",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+        "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+        "indexe_le": "2026-04-17T03:11:02.476682",
+        "chunk_index": 37,
+        "chunk_total": 38,
+        "nb_chars": 360
+      },
+      "texte_embed": "commercial — CISG — Convention de Vienne sur la vente internationale (Wikipedia FR)\nPortail:Relations internationales/Articles liés\n\nPortail:Années 1980/Articles liés\n\nPortail:XXe siècle/Articles liés\n\nPortail:Époque contemporaine/Articles liés\n\nPortail:Histoire/Articles liés\n\nPortail:ONU/Articles liés\n\nRechercher\n\nRechercher\n\nConvention des Nations unies sur les contrats de vente internationale de marchandises\n\n26 langues\n\nAjouter un sujet"
+    }
+  ]
+}

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Production — YukpoAssurance</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #070b14; color: #e2e8f0; min-height: 100vh; }
+
+.header { background: linear-gradient(135deg, #0f172a, #1c0a0a, #0f172a); border-bottom: 1px solid #2d1515; padding: 28px 40px; text-align: center; }
+.header-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; border-radius: 999px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.header h1 { font-size: 1.8rem; font-weight: 800; color: #f1f5f9; margin-bottom: 6px; }
+.header p { color: #64748b; font-size: 0.85rem; }
+
+.page { max-width: 1280px; margin: 0 auto; padding: 32px 24px 60px; }
+.section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #475569; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: #1e293b; }
+
+/* ── VERDICT BANNER ── */
+.verdict { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 32px; }
+.verdict-item { background: #0d1117; padding: 20px 24px; }
+.verdict-score { font-size: 3rem; font-weight: 900; letter-spacing: -2px; }
+.verdict-label { font-size: 0.72rem; color: #64748b; margin-top: 4px; }
+.verdict-sub { font-size: 0.78rem; color: #94a3b8; margin-top: 6px; }
+.score-red    { color: #ef4444; }
+.score-orange { color: #f97316; }
+.score-yellow { color: #eab308; }
+.score-green  { color: #22c55e; }
+
+/* ── MODULE RADAR ── */
+.module-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+.module-card { background: #0d1117; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
+.module-name { font-size: 0.78rem; font-weight: 700; margin-bottom: 10px; }
+.score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.score-label { font-size: 0.62rem; color: #64748b; width: 70px; flex-shrink: 0; }
+.score-bar-bg { flex: 1; height: 5px; background: #1e293b; border-radius: 3px; }
+.score-bar { height: 5px; border-radius: 3px; transition: width 0.3s; }
+.score-val { font-size: 0.65rem; font-weight: 700; width: 30px; text-align: right; }
+
+.bar-red    { background: #ef4444; }
+.bar-orange { background: #f97316; }
+.bar-yellow { background: #eab308; }
+.bar-green  { background: #22c55e; }
+.bar-blue   { background: #3b82f6; }
+.bar-purple { background: #8b5cf6; }
+
+.ready-badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 0.62rem; font-weight: 700; margin-top: 8px; }
+.rb-ok  { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.rb-warn{ background: rgba(234,179,8,0.15); color: #fde047; border: 1px solid rgba(234,179,8,0.3); }
+.rb-nok { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+/* ── PROMPT ASSESSMENT ── */
+.prompt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+.prompt-card { background: #0d1117; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
+.prompt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.prompt-name { font-size: 0.78rem; font-weight: 700; }
+.prompt-score-badge { font-size: 0.75rem; font-weight: 900; padding: 2px 10px; border-radius: 6px; }
+.ps-10 { background: rgba(34,197,94,0.2); color: #4ade80; }
+.ps-9  { background: rgba(34,197,94,0.15); color: #86efac; }
+.ps-8  { background: rgba(234,179,8,0.15); color: #fde047; }
+.ps-7  { background: rgba(249,115,22,0.15); color: #fdba74; }
+.ps-6  { background: rgba(239,68,68,0.15); color: #f87171; }
+.prompt-quality { font-size: 0.68rem; color: #94a3b8; line-height: 1.5; margin-bottom: 6px; }
+.prompt-good { font-size: 0.67rem; color: #4ade80; }
+.prompt-gap  { font-size: 0.67rem; color: #f87171; }
+.prompt-good::before { content: '✓ '; }
+.prompt-gap::before  { content: '✗ '; }
+
+/* ── GAPS TABLE ── */
+.gap-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin-bottom: 32px; }
+.gap-table th { text-align: left; padding: 10px 12px; color: #475569; font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #1e293b; }
+.gap-table td { padding: 10px 12px; border-bottom: 1px solid #0f1523; vertical-align: top; }
+.gap-table tr:hover td { background: #0d1117; }
+.sev-critical { color: #ef4444; font-weight: 700; font-size: 0.65rem; }
+.sev-high     { color: #f97316; font-weight: 700; font-size: 0.65rem; }
+.sev-medium   { color: #eab308; font-weight: 700; font-size: 0.65rem; }
+.sev-low      { color: #64748b; font-weight: 700; font-size: 0.65rem; }
+.gap-fix { font-size: 0.65rem; color: #3b82f6; font-style: italic; }
+
+/* ── ROADMAP ── */
+.roadmap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 32px; }
+.rm-phase { background: #0d1117; padding: 18px; border-right: 1px solid #1e293b; }
+.rm-phase:last-child { border-right: none; }
+.rm-header { margin-bottom: 12px; }
+.rm-week { font-size: 0.62rem; color: #475569; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.rm-title { font-size: 0.9rem; font-weight: 700; margin-top: 2px; }
+.rm-item { display: flex; gap: 8px; align-items: flex-start; font-size: 0.68rem; color: #94a3b8; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.rm-item:last-child { border-bottom: none; }
+.rm-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.dot-red    { background: #ef4444; }
+.dot-orange { background: #f97316; }
+.dot-yellow { background: #eab308; }
+.dot-green  { background: #22c55e; }
+
+/* ── CODE SNIPPET ── */
+.code-block { background: #0a0f1a; border: 1px solid #1e293b; border-radius: 8px; padding: 14px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.7rem; line-height: 1.6; margin-bottom: 8px; overflow-x: auto; }
+.c-comment { color: #475569; }
+.c-keyword { color: #a78bfa; }
+.c-string  { color: #86efac; }
+.c-func    { color: #60a5fa; }
+.c-class   { color: #fcd34d; }
+.c-num     { color: #fb923c; }
+.c-dec     { color: #2dd4bf; }
+
+/* ── WHAT MAKES IT UNIQUE ── */
+.unique-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+.unique-card { background: #0d1117; border-radius: 10px; padding: 16px; border-left: 3px solid; }
+.unique-card.uc1 { border-color: #6366f1; }
+.unique-card.uc2 { border-color: #06b6d4; }
+.unique-card.uc3 { border-color: #8b5cf6; }
+.unique-card.uc4 { border-color: #22c55e; }
+.unique-card.uc5 { border-color: #f97316; }
+.unique-card.uc6 { border-color: #ec4899; }
+.unique-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.unique-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; }
+.unique-desc { font-size: 0.7rem; color: #64748b; line-height: 1.5; }
+.unique-card.uc1 .unique-title { color: #818cf8; }
+.unique-card.uc2 .unique-title { color: #22d3ee; }
+.unique-card.uc3 .unique-title { color: #c4b5fd; }
+.unique-card.uc4 .unique-title { color: #4ade80; }
+.unique-card.uc5 .unique-title { color: #fb923c; }
+.unique-card.uc6 .unique-title { color: #f472b6; }
+.unique-tag { display: inline-block; background: rgba(255,255,255,0.05); border: 1px solid #1e293b; border-radius: 4px; padding: 1px 6px; font-size: 0.6rem; color: #475569; margin-top: 6px; margin-right: 3px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.card { background: #0d1117; border: 1px solid #1e293b; border-radius: 10px; padding: 18px; }
+.card-title { font-size: 0.78rem; font-weight: 700; margin-bottom: 12px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+
+@media (max-width: 900px) {
+  .module-grid, .prompt-grid, .unique-grid { grid-template-columns: 1fr 1fr; }
+  .roadmap, .verdict { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">⚠️ Diagnostic Production — Analyse Profonde</div>
+  <h1>YukpoAssurance — État de Maturité</h1>
+  <p>Audit complet : 49 fichiers Python · Qualité des prompts · Gaps production · Feuille de route</p>
+</div>
+
+<div class="page">
+
+  <!-- ══ VERDICT ════════════════════════════════════════════════ -->
+  <div class="section-label mb-16">Verdict Global</div>
+
+  <div class="verdict mb-32">
+    <div class="verdict-item">
+      <div class="verdict-score score-orange">4.2<span style="font-size:1.2rem;">/10</span></div>
+      <div class="verdict-label">Maturité Production Globale</div>
+      <div class="verdict-sub">⛔ NE PAS DÉPLOYER en l'état<br>Architecture solide, sécurité absente</div>
+    </div>
+    <div class="verdict-item">
+      <div class="verdict-score score-green">8.5<span style="font-size:1.2rem;">/10</span></div>
+      <div class="verdict-label">Qualité des Prompts IA</div>
+      <div class="verdict-sub">✅ Excellente expertise métier<br>CIMA, fraude, actuariat bien couverts</div>
+    </div>
+    <div class="verdict-item">
+      <div class="verdict-score score-red">0<span style="font-size:1.2rem;">/10</span></div>
+      <div class="verdict-label">Authentification & Sécurité</div>
+      <div class="verdict-sub">❌ Critique · Blocker absolu<br>Toute donnée accessible sans auth</div>
+    </div>
+  </div>
+
+  <!-- ══ MODULE SCORES ══════════════════════════════════════════ -->
+  <div class="section-label mb-16">Score de maturité par module</div>
+
+  <div class="module-grid mb-32">
+
+    <div class="module-card">
+      <div class="module-name" style="color:#a78bfa;">🧠 Orchestrateur IA</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:90%"></div></div><span class="score-val score-green">9/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:95%"></div></div><span class="score-val score-green">9.5/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-orange" style="width:60%"></div></div><span class="score-val score-yellow">6/10</span></div>
+      <div class="score-row"><span class="score-label">Auth</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:0%"></div></div><span class="score-val score-red">0/10</span></div>
+      <span class="ready-badge rb-warn">⚠ À CORRIGER</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#a5b4fc;">⚖️ Code CIMA Engine</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:95%"></div></div><span class="score-val score-green">9.5/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:50%"></div></div><span class="score-val score-orange">5/10</span></div>
+      <div class="score-row"><span class="score-label">Base CIMA</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:65%"></div></div><span class="score-val score-yellow">6.5/10</span></div>
+      <span class="ready-badge rb-warn">⚠ INCOMPLÈTE</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#fca5a5;">🚨 Sinistres & Fraude</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:90%"></div></div><span class="score-val score-green">9/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:60%"></div></div><span class="score-val score-yellow">6/10</span></div>
+      <div class="score-row"><span class="score-label">Validation</span><div class="score-bar-bg"><div class="score-bar bar-orange" style="width:40%"></div></div><span class="score-val score-red">4/10</span></div>
+      <span class="ready-badge rb-warn">⚠ VALIDATION MANQUANTE</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#86efac;">📒 Comptabilité OCR</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts OCR</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:90%"></div></div><span class="score-val score-green">9/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:50%"></div></div><span class="score-val score-orange">5/10</span></div>
+      <div class="score-row"><span class="score-label">Doublons</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:30%"></div></div><span class="score-val score-red">3/10</span></div>
+      <span class="ready-badge rb-warn">⚠ DOUBLONS PARTIEL</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#60a5fa;">💬 Chat IA</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:40%"></div></div><span class="score-val score-red">4/10</span></div>
+      <div class="score-row"><span class="score-label">Persistance</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:70%"></div></div><span class="score-val score-yellow">7/10</span></div>
+      <span class="ready-badge rb-nok">⛔ AUTH MANQUANTE</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#fcd34d;">📄 Génération Docs</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:80%"></div></div><span class="score-val score-green">8/10</span></div>
+      <div class="score-row"><span class="score-label">Script gen.</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:95%"></div></div><span class="score-val score-green">9.5/10</span></div>
+      <div class="score-row"><span class="score-label">Timeout</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:80%"></div></div><span class="score-val score-green">8/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:60%"></div></div><span class="score-val score-yellow">6/10</span></div>
+      <span class="ready-badge rb-warn">⚠ QUASI-PRÊT</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#e879f9;">🎙️ Réunions</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:80%"></div></div><span class="score-val score-green">8/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:85%"></div></div><span class="score-val score-green">8.5/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:40%"></div></div><span class="score-val score-red">4/10</span></div>
+      <div class="score-row"><span class="score-label">Persistance</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:30%"></div></div><span class="score-val score-red">3/10</span></div>
+      <span class="ready-badge rb-nok">⛔ PAS PRÊT</span>
+    </div>
+
+    <div class="module-card">
+      <div class="module-name" style="color:#fb923c;">📈 Analytics</div>
+      <div class="score-row"><span class="score-label">Code</span><div class="score-bar-bg"><div class="score-bar bar-yellow" style="width:75%"></div></div><span class="score-val score-yellow">7.5/10</span></div>
+      <div class="score-row"><span class="score-label">Prompts</span><div class="score-bar-bg"><div class="score-bar bar-green" style="width:80%"></div></div><span class="score-val score-green">8/10</span></div>
+      <div class="score-row"><span class="score-label">Erreurs</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:40%"></div></div><span class="score-val score-red">4/10</span></div>
+      <div class="score-row"><span class="score-label">Données réelles</span><div class="score-bar-bg"><div class="score-bar bar-red" style="width:10%"></div></div><span class="score-val score-red">1/10</span></div>
+      <span class="ready-badge rb-nok">⛔ SIMULATION SEUL.</span>
+    </div>
+
+  </div>
+
+  <!-- ══ QUALITÉ DES PROMPTS ════════════════════════════════════ -->
+  <div class="section-label mb-16">Qualité détaillée des prompts IA — par module</div>
+
+  <div class="prompt-grid mb-32">
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#a5b4fc;">Orchestrateur — 14 domaines</div>
+        <div class="prompt-score-badge ps-9">9.5/10</div>
+      </div>
+      <div class="prompt-quality">Chaque domaine a un prompt spécialisé (CIMA, sinistres, fraude...). Instructions détaillées avec articles, seuils, délais intégrés.</div>
+      <div class="prompt-good">Citations articles CIMA automatiques</div>
+      <div class="prompt-good">Tonalité professionnelle imposée</div>
+      <div class="prompt-good">Détection complexité pour routing Opus vs Haiku</div>
+      <div class="prompt-gap">14 domaines OK mais 3 scénarios d'erreur non couverts</div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#86efac;">OCR Comptable — 6 types</div>
+        <div class="prompt-score-badge ps-9">9/10</div>
+      </div>
+      <div class="prompt-quality">Prompts OCR hyper-spécifiques avec schemas JSON précis pour chaque type de pièce (facture, quittance, constat, relevé...)</div>
+      <div class="prompt-good">Schema JSON exact avec tous les champs attendus</div>
+      <div class="prompt-good">6 types de documents distincts</div>
+      <div class="prompt-good">Imputation PCSA automatique dans le prompt</div>
+      <div class="prompt-gap">Pas de fallback si champ obligatoire absent</div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#fca5a5;">Détection Fraude</div>
+        <div class="prompt-score-badge ps-9">9/10</div>
+      </div>
+      <div class="prompt-quality">Double analyse : règles déterministes (score points) + IA sémantique. Retourne score 0-100, signaux, observations, verdict.</div>
+      <div class="prompt-good">Score combiné règles + IA (robuste)</div>
+      <div class="prompt-good">5 indicateurs déterministes codés + analyse sémantique</div>
+      <div class="prompt-good">Niveaux : faible / modéré / élevé / critique</div>
+      <div class="prompt-gap">Pas d'analyse réseau (fraude organisée)</div>
+      <div class="prompt-gap">Score statique — pas d'apprentissage historique</div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#2dd4bf;">Copilote Quotidien — 8 types</div>
+        <div class="prompt-score-badge ps-9">9/10</div>
+      </div>
+      <div class="prompt-quality">8 types de courriers, analyse clauses, explication CIMA, calcul indemnité, formation adaptive (3 niveaux expertise)</div>
+      <div class="prompt-good">Courriers : 8 modèles métier distincts</div>
+      <div class="prompt-good">Formation : prompts adaptés débutant/inter/expert</div>
+      <div class="prompt-good">Calcul indemnité avec règle proportionnelle CIMA</div>
+      <div class="prompt-gap">Pas de vérification conformité CIMA sur les courriers</div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#e879f9;">Gestion Réunions</div>
+        <div class="prompt-score-badge ps-8">8.5/10</div>
+      </div>
+      <div class="prompt-quality">Analyse réunion structurée en 8 champs JSON (synthèse, décisions, actions avec responsable+écheance, points reportés)</div>
+      <div class="prompt-good">JSON structuré avec 8 champs obligatoires</div>
+      <div class="prompt-good">Extraction actions avec responsable et délai</div>
+      <div class="prompt-good">Agenda prochain basé sur échéances CIMA</div>
+      <div class="prompt-gap">Pas de détection conflits d'agenda / doublons d'actions</div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name" style="color:#fcd34d;">États CIMA C1-C20</div>
+        <div class="prompt-score-badge ps-7">6.5/10</div>
+      </div>
+      <div class="prompt-quality">C1, C3, C5, C7, C8, C9, C12 ont des générateurs spécialisés. C2, C4, C6, C10-C20 utilisent un fallback générique IA.</div>
+      <div class="prompt-good">7 états avec générateurs dédiés précis</div>
+      <div class="prompt-good">Formules CIMA correctes (PPNA 1/8, ratios)</div>
+      <div class="prompt-gap">13 états via prompt générique — risque d'erreur</div>
+      <div class="prompt-gap">C2 (vie) et C10 (stats sinistres vie) manquent de spécialisation</div>
+    </div>
+
+  </div>
+
+  <!-- ══ GAPS CRITIQUES ═════════════════════════════════════════ -->
+  <div class="section-label mb-16">Gaps critiques — Classés par priorité</div>
+
+  <table class="gap-table mb-32">
+    <thead>
+      <tr>
+        <th>Composant</th>
+        <th>Gap Identifié</th>
+        <th>Sévérité</th>
+        <th>Impact Métier</th>
+        <th>Correction requise</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:#60a5fa; font-weight:600;">Authentification</td>
+        <td>Zéro JWT, zéro RBAC sur les 10 modules. N'importe qui peut accéder à tous les dossiers.</td>
+        <td><span class="sev-critical">CRITIQUE</span></td>
+        <td>Violation RGPD, données clients exposées, pas de conformité CRCA</td>
+        <td class="gap-fix">→ core/auth.py avec JWT + rôles (agent/manager/daf/dg)</td>
+      </tr>
+      <tr>
+        <td style="color:#f87171; font-weight:600;">Gestion erreurs IA</td>
+        <td>ia_client.py ligne 196 : pas de vérification que response.content[0] existe. Crash si Claude retourne vide.</td>
+        <td><span class="sev-critical">CRITIQUE</span></td>
+        <td>Application crash en production → downtime total</td>
+        <td class="gap-fix">→ Validation réponse + fallback textuel d'urgence</td>
+      </tr>
+      <tr>
+        <td style="color:#f87171; font-weight:600;">Validation inputs</td>
+        <td>Aucun Pydantic validator sur les champs critiques (montant_declare, nature sinistre, numero_police)</td>
+        <td><span class="sev-critical">CRITIQUE</span></td>
+        <td>Données corrompues en DB, calculs erronés, injection</td>
+        <td class="gap-fix">→ field_validator() + Literal types sur tous les modèles</td>
+      </tr>
+      <tr>
+        <td style="color:#fb923c; font-weight:600;">ORASS Integration</td>
+        <td>100% simulation hardcodée. Mode direct_sql et api → NotImplementedError partout.</td>
+        <td><span class="sev-high">ÉLEVÉ</span></td>
+        <td>Aucune donnée réelle — outil inutilisable en production</td>
+        <td class="gap-fix">→ Connecteur SQL ORASS selon schéma DB réel</td>
+      </tr>
+      <tr>
+        <td style="color:#fb923c; font-weight:600;">États CIMA C10-C20</td>
+        <td>13 états sur 20 générés par prompt générique. Risque d'erreur sur états réglementaires officiels.</td>
+        <td><span class="sev-high">ÉLEVÉ</span></td>
+        <td>Non-conformité CRCA si états incorrects déposés</td>
+        <td class="gap-fix">→ Générateurs spécialisés pour C2, C10, C14, C15, C19, C20</td>
+      </tr>
+      <tr>
+        <td style="color:#fb923c; font-weight:600;">Base CIMA</td>
+        <td>Articles cités mais textes complets absents. Circulaires CRCA manquantes. Barèmes de primes absents.</td>
+        <td><span class="sev-high">ÉLEVÉ</span></td>
+        <td>IA répond sur mémoire pré-entraînée, pas sur texte officiel → erreurs</td>
+        <td class="gap-fix">→ code_cima_complet.json avec textes Art. + circulaires + barèmes</td>
+      </tr>
+      <tr>
+        <td style="color:#eab308; font-weight:600;">Fraude réseau</td>
+        <td>Détection individuelle OK mais pas d'analyse réseau (même expert + même sinistré + mêmes dommages)</td>
+        <td><span class="sev-medium">MOYEN</span></td>
+        <td>Fraudes organisées passent à travers le filet</td>
+        <td class="gap-fix">→ Graph analysis sur historique sinistres ORASS</td>
+      </tr>
+      <tr>
+        <td style="color:#eab308; font-weight:600;">WhatsApp</td>
+        <td>Twilio configuré en settings mais non implémenté. Assurés non notifiés automatiquement.</td>
+        <td><span class="sev-medium">MOYEN</span></td>
+        <td>Communication manuelle, délais Art.12 CIMA risqués</td>
+        <td class="gap-fix">→ core/notifications.py avec Twilio WhatsApp</td>
+      </tr>
+      <tr>
+        <td style="color:#eab308; font-weight:600;">Rate limiting</td>
+        <td>Aucune protection contre spam d'appels. 1000 appels IA/seconde = facture Claude catastrophique.</td>
+        <td><span class="sev-medium">MOYEN</span></td>
+        <td>Coût API incontrôlé + déni de service</td>
+        <td class="gap-fix">→ slowapi + Redis rate limiting (100 req/min/user)</td>
+      </tr>
+      <tr>
+        <td style="color:#64748b; font-weight:600;">Churn prediction</td>
+        <td>Analytics prédictif actuel = projection sinistralité seule. Pas de prédiction résiliation client.</td>
+        <td><span class="sev-low">FAIBLE</span></td>
+        <td>Perte silencieuse de clients sans alerte préalable</td>
+        <td class="gap-fix">→ Module analytics/churn.py (LTV, risque résiliation)</td>
+      </tr>
+      <tr>
+        <td style="color:#64748b; font-weight:600;">Multi-langue</td>
+        <td>100% français. Pas d'anglais ni pidgin pour zones anglophones Cameroun/Nigeria.</td>
+        <td><span class="sev-low">FAIBLE</span></td>
+        <td>Marché anglophone inaccessible</td>
+        <td class="gap-fix">→ settings LANGUAGE + prompt en-tête langue cible</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══ CE QUI REND L'OUTIL UNIQUE ════════════════════════════ -->
+  <div class="section-label mb-16">Ce qui rendra YukpoAssurance véritablement unique sur le marché</div>
+
+  <div class="unique-grid mb-32">
+
+    <div class="unique-card uc1">
+      <div class="unique-icon">⚖️</div>
+      <div class="unique-title">CIMA natif — pas de plugin</div>
+      <div class="unique-desc">La seule IA qui connaît le Code CIMA dans son intégralité (14 livres), cite les articles précis, génère les 20 états réglementaires et alerte en temps réel sur les ratios prudentiels. Aucun concurrent ne fait ça.</div>
+      <span class="unique-tag">Art. 337-1</span><span class="unique-tag">C1-C20</span><span class="unique-tag">CRCA</span>
+    </div>
+
+    <div class="unique-card uc2">
+      <div class="unique-icon">🔍</div>
+      <div class="unique-title">Contexte dossier automatique</div>
+      <div class="unique-desc">L'employé tape "SIN-2025-001" et l'IA charge automatiquement le sinistre, le contrat, l'assuré depuis ORASS. Plus besoin de copier-coller. La lettre générée a déjà les bonnes coordonnées, le bon montant, la bonne base légale.</div>
+      <span class="unique-tag">ORASS</span><span class="unique-tag">Auto-enrichissement</span>
+    </div>
+
+    <div class="unique-card uc3">
+      <div class="unique-icon">🎙️</div>
+      <div class="unique-title">Réunion → PV en 5 minutes</div>
+      <div class="unique-desc">Enregistrement audio → transcription Whisper → analyse Claude → PV officiel Word en 5 minutes. Agenda prochain généré automatiquement avec les points reportés et les échéances CIMA à venir.</div>
+      <span class="unique-tag">Whisper</span><span class="unique-tag">Claude Opus</span><span class="unique-tag">CIMA dates</span>
+    </div>
+
+    <div class="unique-card uc4">
+      <div class="unique-icon">🛡️</div>
+      <div class="unique-title">Fraude multicouche en temps réel</div>
+      <div class="unique-desc">Double analyse à la déclaration : règles déterministes (délai, montant, historique) + IA sémantique. Score 0-100 avec niveau de risque et recommandation. À terme : détection réseau de fraude (expert + garage + sinistré récurrents).</div>
+      <span class="unique-tag">Score 0-100</span><span class="unique-tag">Temps réel</span>
+    </div>
+
+    <div class="unique-card uc5">
+      <div class="unique-icon">📊</div>
+      <div class="unique-title">Narrative IA pour le CA</div>
+      <div class="unique-desc">Dashboard pas que des chiffres — l'IA génère un commentaire de direction en 4-5 phrases professionnelles, adapté au Conseil d'Administration. Rapport direction complet PDF en 30 secondes, pas en 1 semaine.</div>
+      <span class="unique-tag">Narrative</span><span class="unique-tag">PDF auto</span><span class="unique-tag">CA-ready</span>
+    </div>
+
+    <div class="unique-card uc6">
+      <div class="unique-icon">🤖</div>
+      <div class="unique-title">Mémoire longue durée par employé</div>
+      <div class="unique-desc">L'IA se souvient du département, des habitudes, du niveau expertise CIMA de chaque employé. Les réponses s'adaptent automatiquement. Résumé automatique toutes les 12 interactions. Apprentissage continu sans fine-tuning.</div>
+      <span class="unique-tag">Long-term memory</span><span class="unique-tag">Auto-résumé</span>
+    </div>
+
+  </div>
+
+  <!-- ══ FEUILLE DE ROUTE CORRECTIVE ════════════════════════════ -->
+  <div class="section-label mb-16">Feuille de route corrective — 4 semaines pour la production</div>
+
+  <div class="roadmap mb-32">
+    <div class="rm-phase">
+      <div class="rm-header">
+        <div class="rm-week" style="color:#ef4444;">SEMAINE 1 — CRITIQUE</div>
+        <div class="rm-title" style="color:#f87171;">Sécurité & Stabilité</div>
+      </div>
+      <div class="rm-item"><div class="rm-dot dot-red"></div>JWT + RBAC (agent/manager/daf/dg)</div>
+      <div class="rm-item"><div class="rm-dot dot-red"></div>Validation réponses IA (response.content guard)</div>
+      <div class="rm-item"><div class="rm-dot dot-red"></div>Pydantic validators sur tous les inputs critiques</div>
+      <div class="rm-item"><div class="rm-dot dot-red"></div>Rate limiting (slowapi + Redis)</div>
+      <div class="rm-item"><div class="rm-dot dot-red"></div>Tests de base (pytest) sur ia_client + orchestrateur</div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>Notifications WhatsApp (Twilio)</div>
+    </div>
+    <div class="rm-phase">
+      <div class="rm-header">
+        <div class="rm-week" style="color:#f97316;">SEMAINE 2 — ÉLEVÉ</div>
+        <div class="rm-title" style="color:#fdba74;">ORASS & CIMA Complet</div>
+      </div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>Connecteur ORASS direct_sql (schéma DB réel)</div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>Générateurs états C10, C14, C15, C19, C20</div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>code_cima_complet.json (textes articles + circulaires)</div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>Barèmes de primes auto/IRD par pays</div>
+      <div class="rm-item"><div class="rm-dot dot-orange"></div>Détection doublons compta (réelle)</div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Workflow approbation sinistres >X FCFA</div>
+    </div>
+    <div class="rm-phase">
+      <div class="rm-header">
+        <div class="rm-week" style="color:#eab308;">SEMAINE 3 — MOYEN</div>
+        <div class="rm-title" style="color:#fde047;">Fonctionnalités Avancées</div>
+      </div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Fraude réseau (analyse graph sinistres)</div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Churn prediction (score résiliation client)</div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Persistance réunions en DB (SQLAlchemy)</div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Versionning documents générés</div>
+      <div class="rm-item"><div class="rm-dot dot-yellow"></div>Alerte proactive ratio S/P dépassé</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Dashboard temps réel avec WebSocket</div>
+    </div>
+    <div class="rm-phase">
+      <div class="rm-header">
+        <div class="rm-week" style="color:#22c55e;">SEMAINE 4 — DÉPLOIEMENT</div>
+        <div class="rm-title" style="color:#4ade80;">Production Ready</div>
+      </div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Docker + docker-compose (API + PG + Redis)</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Tests d'intégration end-to-end</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Audit de sécurité (OWASP Top 10)</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Monitoring (Prometheus + Grafana)</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Formation utilisateurs (3 rôles)</div>
+      <div class="rm-item"><div class="rm-dot dot-green"></div>Go-live Phase 1 (Chat + Sinistres + CIMA)</div>
+    </div>
+  </div>
+
+  <!-- ══ PROMPTS À AJOUTER POUR L'EXCELLENCE ═══════════════════ -->
+  <div class="section-label mb-16">Prompts manquants — Ce qui ferait passer les prompts de 8.5 à 10/10</div>
+
+  <div class="grid-2">
+
+    <div class="card">
+      <div class="card-title" style="color:#ef4444;">🚨 Prompt manquant #1 — Analyse réseau de fraude</div>
+      <div class="code-block">
+<span class="c-comment"># modules/sinistres/fraude_detector.py — méthode à ajouter</span>
+
+<span class="c-keyword">async def</span> <span class="c-func">analyser_reseau_fraude</span>(self, sinistre_id: str) -> dict:
+    <span class="c-string">"""Détecte si ce sinistre fait partie d'un réseau organisé"""</span>
+
+    prompt = <span class="c-string">f"""Tu es expert en détection de fraude organisée en assurance CIMA.
+
+Analyse ce sinistre en cherchant des patterns de fraude réseau :
+Sinistre : {sinistre_id}
+Historique garage : {historique_garage}
+Historique expert : {historique_expert}
+Historique tiers : {historique_tiers}
+
+CHERCHE :
+1. Même garage + même expert + &gt;3 sinistres en 6 mois → réseau probable
+2. Même tiers impliqué dans &gt;2 sinistres distincts → tiers professionnel
+3. Montants identiques avec différents assurés → barème de prix frauduleux
+4. Géolocalisation improbable (sinistre à 500km du domicile)
+5. Déclarations en rafale (plusieurs en 72h dans même compagnie)
+
+Retourne JSON : {{
+  "reseau_detecte": true/false,
+  "score_reseau": 0-100,
+  "acteurs_suspects": [],
+  "pattern_identifie": "",
+  "recommandation": "bloquer|surveiller|passer"
+}}"""</span>
+
+      reponse = <span class="c-keyword">await</span> ia_client.appeler(
+          prompt=prompt, mode=ModeIA.PRECISION, json_attendu=<span class="c-keyword">True</span>
+      )
+      <span class="c-keyword">return</span> reponse.as_json()
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:#06b6d4;">🎯 Prompt manquant #2 — Vérificateur conformité CRCA</div>
+      <div class="code-block">
+<span class="c-comment"># modules/cima/verificateur_crca.py — nouveau module</span>
+
+PROMPT_INSPECTION_CRCA = <span class="c-string">"""Tu es inspecteur du CRCA (Conférence Régionale des Contrôles d'Assurance).
+Tu inspectes cette compagnie selon la grille officielle d'inspection CIMA.
+
+DONNÉES COMPAGNIE : {donnees}
+
+VÉRIFIE SYSTÉMATIQUEMENT :
+□ Marge de solvabilité ≥ 300M FCFA (Art. 337-1)
+□ Couverture provisions techniques ≥ 100% (Art. 335)
+□ Taux réassurance ≤ 50% branche auto (Art. 308)
+□ États C1-C20 déposés dans les délais légaux
+□ Délais de règlement sinistres &lt; 30 jours (Art. 231)
+□ Accusés réception &lt; 10 jours (Art. 12)
+□ Programme de réassurance conforme
+□ Provisions PSAP suffisantes (méthode dossier/dossier)
+□ Capital social ≥ minimum légal
+
+POUR CHAQUE POINT :
+- Statut : CONFORME / À RISQUE / NON CONFORME
+- Valeur actuelle vs valeur seuil
+- Mesure corrective si non conforme
+- Délai pour mise en conformité
+
+Génère le rapport comme si tu étais l'inspecteur du CRCA."""</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:#8b5cf6;">🧠 Prompt manquant #3 — Tarification actuarielle IA</div>
+      <div class="code-block">
+<span class="c-comment"># modules/souscription/tarificateur.py — à créer</span>
+
+PROMPT_TARIFICATION = <span class="c-string">"""Tu es actuaire certifié spécialisé en tarification non-vie CIMA.
+
+PROFIL RISQUE À TARIFER :
+{profil_risque}
+
+DONNÉES HISTORIQUES COMPAGNIE :
+- S/P branche auto : {sp_auto}%
+- Fréquence sinistres véhicule similaire : {frequence}%
+- Coût moyen sinistre : {cout_moyen} FCFA
+
+BARÈME DE BASE 2025 (Cameroun) :
+- RC seule : {bareme_rc} FCFA
+- Tous risques : {bareme_tr} FCFA
+
+CALCULE EN DÉTAILLANT :
+1. Prime de référence (barème officiel Cameroun)
+2. Coefficient bonus-malus (0.50 à 2.50 selon CRM)
+3. Majoration risque aggravé (jeune conducteur, usage commercial)
+4. Réduction fidélité si &gt;3 ans sans sinistre
+5. Prime nette recommandée
+6. Fourchette acceptable (min-max pour négociation courtier)
+7. Signaux d'alerte si risque refuse conditions normales
+
+FORMAT : Détail calcul + Prime TTC + Conditions particulières à stipuler"""</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:#22c55e;">📈 Prompt manquant #4 — Prediction churn client</div>
+      <div class="code-block">
+<span class="c-comment"># modules/analytics/churn_prediction.py — à créer</span>
+
+PROMPT_CHURN = <span class="c-string">"""Tu es expert en rétention client pour une compagnie d'assurance CIMA.
+
+HISTORIQUE CLIENT : {historique}
+- Ancienneté : {anciennete} ans
+- Nb sinistres 3 ans : {nb_sinistres}
+- Retards paiement : {retards}
+- Dernière interaction : {dernier_contact}
+- Variation prime N-1 vs N : +{hausse_prime}%
+- Comportement récent : {comportement}
+
+ANALYSE LE RISQUE DE RÉSILIATION :
+
+1. Score de risque résiliation (0-100)
+   - 0-30 : Client fidèle stable
+   - 30-60 : Surveiller, action préventive
+   - 60-80 : Risque élevé, contact urgent
+   - 80-100 : Résiliation imminente
+
+2. Facteurs déclencheurs identifiés
+
+3. Action recommandée :
+   - Offre de fidélisation (reduction X%)
+   - Appel commercial
+   - Restructuration du contrat
+   - Accepter la résiliation (client non profitable)
+
+4. Valeur client (LTV estimé sur 3 ans)
+5. Priorisation action (urgent/standard/faible)"""</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div style="text-align:center; color:#1e293b; font-size:0.7rem; margin-top:20px; padding: 20px;">
+  YukpoAssurance · Diagnostic Production · 49 fichiers analysés · Claude Opus 4.6 · Zone CIMA
+</div>
+
+</body>
+</html>

@@ -1,0 +1,2592 @@
+{
+  "doc_id": "normes_haccp_alimentaire",
+  "metadata": {
+    "doc_id": "normes_haccp_alimentaire",
+    "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+    "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "risk_manager",
+      "auditeur",
+      "assureur"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+    "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+    "indexe_le": "2026-04-17T03:11:51.987969"
+  },
+  "nb_chars": 42172,
+  "nb_chunks": 107,
+  "chunks": [
+    {
+      "texte": "Sécurité alimentaire — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\n(Redirigé depuis\nSécurité des aliments\n)\nPour les articles homonymes, voir\nLoi alimentation\n.\nNe doit pas être confondu avec\nSécurité sanitaire des aliments\n.\n« La\nsécurité alimentaire\nexiste lorsque tous les êtres humains ont, à tout moment, la possibilité physique, sociale et économique de se procurer une nourriture suffisante, saine et nutritive leur permettant de satisfaire leurs besoins et préférences alimentaires pour mener une vie saine et active »\n[\n\n]\n\nest la définition formelle du concept de sécurité alimentaire selon le Comité de la Sécurité alimentaire mondiale. Cette définition a été adoptée par un consensus international depuis la\n\nConférence mondiale de l'alimentation\n\ntenue à Rome en 1996.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 0,
+        "chunk_total": 107,
+        "nb_chars": 811
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nSécurité alimentaire — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\n(Redirigé depuis\nSécurité des aliments\n)\nPour les articles homonymes, voir\nLoi alimentation\n.\nNe doit pas être confondu avec\nSécurité sanitaire des aliments\n.\n« La\nsécurité alimentaire\nexiste lorsque tous les êtres humains ont, à tout moment, la possibilité physique, sociale et économique de se procurer une nourriture suffisante, saine et nutritive leur permettant de satisfaire leurs besoins et préférences alimentaires pour mener une vie saine et active »\n[\n\n]\n\nest la définition formelle du concept de sécurité alimentaire selon le Comité de la Sécurité alimentaire mondiale. Cette définition a été adoptée par un consensus international depuis la\n\nConférence mondiale de l'alimentation\n\ntenue à Rome en 1996."
+    },
+    {
+      "texte": "On considère classiquement que la sécurité alimentaire comporte quatre dimensions ou « piliers » :\n\naccès (capacité de produire sa propre alimentation et donc de disposer des moyens de le faire, ou capacité d'acheter sa nourriture et donc de disposer d'un pouvoir d'achat suffisant pour le faire) ;\n\ndisponibilité (quantités suffisantes d'aliments, qu'ils proviennent de la\n\nproduction intérieure\n\n, de stocks, d'importations ou d'aides) ;\n\nqualité (des aliments et des régimes alimentaires des points de vue\n\nnutritionnel\n\n,\n\nsanitaire\n\n, mais aussi\n\nsocioculturel\n\n) ;\n\nstabilité (des capacités d'accès et donc des prix et du pouvoir d'achat, des disponibilités et de la qualité des aliments et des régimes alimentaires).\n\nAinsi définie, la\n\nsécurité alimentaire\n\na une dimension plutôt technique. Elle se distingue de ce fait des notions d'autosuffisance alimentaire, de\n\nsouveraineté alimentaire",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 1,
+        "chunk_total": 107,
+        "nb_chars": 899
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nOn considère classiquement que la sécurité alimentaire comporte quatre dimensions ou « piliers » :\n\naccès (capacité de produire sa propre alimentation et donc de disposer des moyens de le faire, ou capacité d'acheter sa nourriture et donc de disposer d'un pouvoir d'achat suffisant pour le faire) ;\n\ndisponibilité (quantités suffisantes d'aliments, qu'ils proviennent de la\n\nproduction intérieure\n\n, de stocks, d'importations ou d'aides) ;\n\nqualité (des aliments et des régimes alimentaires des points de vue\n\nnutritionnel\n\n,\n\nsanitaire\n\n, mais aussi\n\nsocioculturel\n\n) ;\n\nstabilité (des capacités d'accès et donc des prix et du pouvoir d'achat, des disponibilités et de la qualité des aliments et des régimes alimentaires).\n\nAinsi définie, la\n\nsécurité alimentaire\n\na une dimension plutôt technique. Elle se distingue de ce fait des notions d'autosuffisance alimentaire, de\n\nsouveraineté alimentaire"
+    },
+    {
+      "texte": "et de\n\ndroit à l'alimentation\n\nqui apportent des dimensions plus politiques ou juridiques\n\n[\n\n]\n. La sécurité alimentaire intègre, dans le « pilier qualité », la sûreté alimentaire ou encore la\nsécurité sanitaire des aliments\n, qui a trait à l'\nhygiène\net à l'\ninnocuité\ndes aliments, ainsi qu'au maintien de leur\nsalubrité\n. Afin de faire suite au premier pilier mentionné plus-haut, la sécurité alimentaire est également intimement liée à l'accès à une alimentation saine. Cet accès comporte cinq dimensions distinctes : économique, offre et prestation de services,\nspatiotemporelle\n, sociale et personnelle. Ces cinq dimensions d'accès doivent être rassemblées afin d'assurer la sécurité alimentaire des individus\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 2,
+        "chunk_total": 107,
+        "nb_chars": 718
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\net de\n\ndroit à l'alimentation\n\nqui apportent des dimensions plus politiques ou juridiques\n\n[\n\n]\n. La sécurité alimentaire intègre, dans le « pilier qualité », la sûreté alimentaire ou encore la\nsécurité sanitaire des aliments\n, qui a trait à l'\nhygiène\net à l'\ninnocuité\ndes aliments, ainsi qu'au maintien de leur\nsalubrité\n. Afin de faire suite au premier pilier mentionné plus-haut, la sécurité alimentaire est également intimement liée à l'accès à une alimentation saine. Cet accès comporte cinq dimensions distinctes : économique, offre et prestation de services,\nspatiotemporelle\n, sociale et personnelle. Ces cinq dimensions d'accès doivent être rassemblées afin d'assurer la sécurité alimentaire des individus\n["
+    },
+    {
+      "texte": "]\n.\nLa\nprécarité alimentaire\n, appelée aussi\ninsécurité alimentaire\n, correspond au niveau le plus fragile de sécurité alimentaire.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\nLa sécurité alimentaire s'inscrit dans le contexte de l'émergence du\ndroit à l'alimentation\ntel que formulé dans la\nDéclaration universelle des droits de l'homme\net du concept de sécurité et remonte aux propositions de Franck Mc Dougall, représentant de l'Australie lors des négociations pour la création de la\nSociété des Nations\n[\n\n]\n.\nSelon le Comité de la sécurité alimentaire mondiale, le concept de sécurité alimentaire est apparu dans les années 1970, dans un contexte de flambée des prix des céréales sur les marchés internationaux liée à une succession de mauvaises récoltes, de diminution des stocks et de hausse des prix du pétrole\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 3,
+        "chunk_total": 107,
+        "nb_chars": 819
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nLa\nprécarité alimentaire\n, appelée aussi\ninsécurité alimentaire\n, correspond au niveau le plus fragile de sécurité alimentaire.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\nLa sécurité alimentaire s'inscrit dans le contexte de l'émergence du\ndroit à l'alimentation\ntel que formulé dans la\nDéclaration universelle des droits de l'homme\net du concept de sécurité et remonte aux propositions de Franck Mc Dougall, représentant de l'Australie lors des négociations pour la création de la\nSociété des Nations\n[\n\n]\n.\nSelon le Comité de la sécurité alimentaire mondiale, le concept de sécurité alimentaire est apparu dans les années 1970, dans un contexte de flambée des prix des céréales sur les marchés internationaux liée à une succession de mauvaises récoltes, de diminution des stocks et de hausse des prix du pétrole\n["
+    },
+    {
+      "texte": "]\n. À l'époque, plusieurs régions du monde souffraient d'insuffisance de productions alimentaires pour nourrir leur population et étaient particulièrement vulnérables aux accidents climatiques (sécheresses, inondations) ou aux attaques de prédateurs (sauterelles par exemple). Dans la lignée des analyses de\nThomas Malthus\n, les projections de production agricole et de population laissaient craindre un écart croissant qu'il serait difficile à combler sans un effort important. La définition adoptée par la\nConférence mondiale de l'alimentation\nen 1974 reflète ce contexte :\n« Disposer à chaque instant, d'un niveau adéquat de produits de base pour satisfaire la progression de la consommation et atténuer les fluctuations de la production et des prix. »\nDepuis, des travaux, en particulier ceux d'\nAmartya Sen\n[\n\n]",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 4,
+        "chunk_total": 107,
+        "nb_chars": 816
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n. À l'époque, plusieurs régions du monde souffraient d'insuffisance de productions alimentaires pour nourrir leur population et étaient particulièrement vulnérables aux accidents climatiques (sécheresses, inondations) ou aux attaques de prédateurs (sauterelles par exemple). Dans la lignée des analyses de\nThomas Malthus\n, les projections de production agricole et de population laissaient craindre un écart croissant qu'il serait difficile à combler sans un effort important. La définition adoptée par la\nConférence mondiale de l'alimentation\nen 1974 reflète ce contexte :\n« Disposer à chaque instant, d'un niveau adéquat de produits de base pour satisfaire la progression de la consommation et atténuer les fluctuations de la production et des prix. »\nDepuis, des travaux, en particulier ceux d'\nAmartya Sen\n[\n\n]"
+    },
+    {
+      "texte": ", ont montré qu'il ne suffit pas de produire suffisamment de nourriture dans un pays ou une région pour vaincre la faim. Des\n\npays\n\ncomme l'\n\nInde\n\n, le\n\nBrésil\n\nou la\n\nChine\n\nsont parvenus à produire suffisamment de nourriture pour nourrir toute leur population, voire à exporter des surplus, sans avoir fait disparaître pour autant la faim. À l'inverse, des pays comme ceux bénéficiant de rentes pétrolières peuvent ne produire que peu de nourriture mais permettre à toute la population de manger en important depuis les marchés internationaux. C'est ainsi qu'a été mise en avant, au cours des années 1980, la notion d'accès à l'alimentation comme déterminant majeur de la sécurité alimentaire. Dès 1986, la définition de la sécurité alimentaire proposée par la Banque mondiale dans son rapport\n\nLa Pauvreté et la Faim",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 5,
+        "chunk_total": 107,
+        "nb_chars": 820
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, ont montré qu'il ne suffit pas de produire suffisamment de nourriture dans un pays ou une région pour vaincre la faim. Des\n\npays\n\ncomme l'\n\nInde\n\n, le\n\nBrésil\n\nou la\n\nChine\n\nsont parvenus à produire suffisamment de nourriture pour nourrir toute leur population, voire à exporter des surplus, sans avoir fait disparaître pour autant la faim. À l'inverse, des pays comme ceux bénéficiant de rentes pétrolières peuvent ne produire que peu de nourriture mais permettre à toute la population de manger en important depuis les marchés internationaux. C'est ainsi qu'a été mise en avant, au cours des années 1980, la notion d'accès à l'alimentation comme déterminant majeur de la sécurité alimentaire. Dès 1986, la définition de la sécurité alimentaire proposée par la Banque mondiale dans son rapport\n\nLa Pauvreté et la Faim"
+    },
+    {
+      "texte": "place en priorité la question de l'accès et donc de la pauvreté dans la définition :\n\n« Accès par chaque individu, à tout instant, à des ressources alimentaires permettant de mener une vie saine et active. »\n\nCette définition a été reprise et enrichie lors de la Conférence mondiale de l'alimentation de 1996 et reste quasi inchangée depuis.\n\nÀ l'ordre du jour du Comité pour la sécurité alimentaire mondiale de 2012 figurait une proposition d'évolution de la définition de la sécurité alimentaire pour intégrer la notion de sécurité nutritionnelle\n\n[\n\n]\n\n. Une telle proposition avait pour but de prendre en compte les acquis des sciences de la nutrition qui montrent depuis des décennies que la\n\nmalnutrition",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 6,
+        "chunk_total": 107,
+        "nb_chars": 710
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nplace en priorité la question de l'accès et donc de la pauvreté dans la définition :\n\n« Accès par chaque individu, à tout instant, à des ressources alimentaires permettant de mener une vie saine et active. »\n\nCette définition a été reprise et enrichie lors de la Conférence mondiale de l'alimentation de 1996 et reste quasi inchangée depuis.\n\nÀ l'ordre du jour du Comité pour la sécurité alimentaire mondiale de 2012 figurait une proposition d'évolution de la définition de la sécurité alimentaire pour intégrer la notion de sécurité nutritionnelle\n\n[\n\n]\n\n. Une telle proposition avait pour but de prendre en compte les acquis des sciences de la nutrition qui montrent depuis des décennies que la\n\nmalnutrition"
+    },
+    {
+      "texte": ", notamment infantile, principale manifestation de l'insécurité alimentaire aujourd'hui, ne résulte pas seulement d'une insuffisante qualité voire quantité de nourriture, mais aussi et souvent d'un état de santé (diarrhées, paludisme, etc.) et de soins insuffisants (par méconnaissance ou incapacité). La proposition de parler désormais de « sécurité alimentaire et nutritionnelle », même si elle est déjà adoptée par divers pays, n'a pas encore fait l'objet d'un consensus international.\n\nEnfin, divers travaux\n\nsont en cours\n\n[Quand ?]\n\npour intégrer, dans la définition de la sécurité alimentaire, des préoccupations de\n\ndurabilité environnementale",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 7,
+        "chunk_total": 107,
+        "nb_chars": 651
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, notamment infantile, principale manifestation de l'insécurité alimentaire aujourd'hui, ne résulte pas seulement d'une insuffisante qualité voire quantité de nourriture, mais aussi et souvent d'un état de santé (diarrhées, paludisme, etc.) et de soins insuffisants (par méconnaissance ou incapacité). La proposition de parler désormais de « sécurité alimentaire et nutritionnelle », même si elle est déjà adoptée par divers pays, n'a pas encore fait l'objet d'un consensus international.\n\nEnfin, divers travaux\n\nsont en cours\n\n[Quand ?]\n\npour intégrer, dans la définition de la sécurité alimentaire, des préoccupations de\n\ndurabilité environnementale"
+    },
+    {
+      "texte": "et sociale des systèmes alimentaires et relatives aux nouvelles pathologies nutritionnelles notamment celles dites « de pléthore » (obésité et diabète associé, maladies cardiovasculaires, certains cancers, etc.) qui touchent désormais tous les pays du monde. Est ainsi proposée la notion de\n\n« sécurité alimentaire et nutritionnelle durable »\n\n[\n\n]\n.\nLe nombre de personnes touchées par une « insécurité alimentaire chronique » est en augmentation depuis 2015. En 2019, la\nFAO\nrecense 821 millions de personnes dans cette situation. Selon l'organisation : La faim « s’aggrave en\nAmérique du Sud\net dans la plupart des régions d’Afrique, et le recul de la sous-alimentation qui caractérisait l’\nAsie\njusqu’à une période récente, semble considérablement ralentir dans cette région »; Le pays le plus fortement touché au monde est le\nYémen\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 8,
+        "chunk_total": 107,
+        "nb_chars": 838
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\net sociale des systèmes alimentaires et relatives aux nouvelles pathologies nutritionnelles notamment celles dites « de pléthore » (obésité et diabète associé, maladies cardiovasculaires, certains cancers, etc.) qui touchent désormais tous les pays du monde. Est ainsi proposée la notion de\n\n« sécurité alimentaire et nutritionnelle durable »\n\n[\n\n]\n.\nLe nombre de personnes touchées par une « insécurité alimentaire chronique » est en augmentation depuis 2015. En 2019, la\nFAO\nrecense 821 millions de personnes dans cette situation. Selon l'organisation : La faim « s’aggrave en\nAmérique du Sud\net dans la plupart des régions d’Afrique, et le recul de la sous-alimentation qui caractérisait l’\nAsie\njusqu’à une période récente, semble considérablement ralentir dans cette région »; Le pays le plus fortement touché au monde est le\nYémen\n["
+    },
+    {
+      "texte": "]\n.\nQuantité suffisante et nécessaire\n[\nmodifier\n|\nmodifier le code\n]\nChamp de\ncéréales\n(\norge commune\n)\nAfin de vivre en bonne santé, chaque être humain a besoin de manger chaque jour une ration alimentaire composée de\n2 500\nkcal\net 65\ng\nde protéines\n[\n\n]\n. En 2004, l'\nOrganisation des Nations unies pour l'alimentation et l'agriculture\n(FAO) estime que les habitants des pays développés mangent\n3 500\ncal\npar jour, tandis que ceux des pays en développement sont à moins de\n2 400\ncal\npar jour. En moyenne, un habitant du tiers monde mange deux fois moins qu'un habitant d'un pays riche\n[\n\n]\n. La malnutrition touche environ 800 millions d'individus habitant en\nAfrique\n, en\nAsie\net en\nAmérique latine\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 9,
+        "chunk_total": 107,
+        "nb_chars": 704
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nQuantité suffisante et nécessaire\n[\nmodifier\n|\nmodifier le code\n]\nChamp de\ncéréales\n(\norge commune\n)\nAfin de vivre en bonne santé, chaque être humain a besoin de manger chaque jour une ration alimentaire composée de\n2 500\nkcal\net 65\ng\nde protéines\n[\n\n]\n. En 2004, l'\nOrganisation des Nations unies pour l'alimentation et l'agriculture\n(FAO) estime que les habitants des pays développés mangent\n3 500\ncal\npar jour, tandis que ceux des pays en développement sont à moins de\n2 400\ncal\npar jour. En moyenne, un habitant du tiers monde mange deux fois moins qu'un habitant d'un pays riche\n[\n\n]\n. La malnutrition touche environ 800 millions d'individus habitant en\nAfrique\n, en\nAsie\net en\nAmérique latine\n["
+    },
+    {
+      "texte": "] . Durant la deuxième moitié du XX e siècle, la production alimentaire mondiale par habitant a augmenté de 25 %, alors que les prix diminuaient d'environ 40 %. Par exemple, de 1960 à 1990, la production totale de céréales est passée de 420 à 1 176 millions de tonnes par an. La sécurité alimentaire demeure pourtant d'actualité au début du XXI e siècle. En dépit d'une moindre natalité dans la majorité des pays, certains estiment qu'il devrait y avoir environ 8,9 milliards d'habitants en 2050. Or, en 2010, 925 millions de personnes dans le monde souffraient encore de la faim [ ] . Les habitants de trente-trois pays consomment moins de 2 200 kcal par jour et une personne sur sept n'a pas accès à une quantité suffisante de protéines et d'énergie. La productivité des cultures et des pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 10,
+        "chunk_total": 107,
+        "nb_chars": 897
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n] . Durant la deuxième moitié du XX e siècle, la production alimentaire mondiale par habitant a augmenté de 25 %, alors que les prix diminuaient d'environ 40 %. Par exemple, de 1960 à 1990, la production totale de céréales est passée de 420 à 1 176 millions de tonnes par an. La sécurité alimentaire demeure pourtant d'actualité au début du XXI e siècle. En dépit d'une moindre natalité dans la majorité des pays, certains estiment qu'il devrait y avoir environ 8,9 milliards d'habitants en 2050. Or, en 2010, 925 millions de personnes dans le monde souffraient encore de la faim [ ] . Les habitants de trente-trois pays consomment moins de 2 200 kcal par jour et une personne sur sept n'a pas accès à une quantité suffisante de protéines et d'énergie. La productivité des cultures et des pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "et des pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 11,
+        "chunk_total": 107,
+        "nb_chars": 115
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\net des pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "des pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 12,
+        "chunk_total": 107,
+        "nb_chars": 112
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ndes pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "pâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 13,
+        "chunk_total": 107,
+        "nb_chars": 108
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\npâturages devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "devrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 14,
+        "chunk_total": 107,
+        "nb_chars": 98
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ndevrait progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "progresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 15,
+        "chunk_total": 107,
+        "nb_chars": 90
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nprogresser de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "de 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 16,
+        "chunk_total": 107,
+        "nb_chars": 79
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nde 70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 17,
+        "chunk_total": 107,
+        "nb_chars": 76
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n70 % à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "% à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 18,
+        "chunk_total": 107,
+        "nb_chars": 73
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n% à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "à 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 19,
+        "chunk_total": 107,
+        "nb_chars": 71
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nà 100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 20,
+        "chunk_total": 107,
+        "nb_chars": 69
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n100 % pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "% pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 21,
+        "chunk_total": 107,
+        "nb_chars": 65
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n% pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "pour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 22,
+        "chunk_total": 107,
+        "nb_chars": 63
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\npour pouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "pouvoir nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 23,
+        "chunk_total": 107,
+        "nb_chars": 58
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\npouvoir nourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "nourrir la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 24,
+        "chunk_total": 107,
+        "nb_chars": 50
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nnourrir la population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "la population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 25,
+        "chunk_total": 107,
+        "nb_chars": 42
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nla population mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "population mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 26,
+        "chunk_total": 107,
+        "nb_chars": 39
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\npopulation mondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "mondiale en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 27,
+        "chunk_total": 107,
+        "nb_chars": 28
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nmondiale en 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "en 2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 28,
+        "chunk_total": 107,
+        "nb_chars": 19
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nen 2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "2050 [ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 29,
+        "chunk_total": 107,
+        "nb_chars": 16
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n2050 [ ] , [ ] ."
+    },
+    {
+      "texte": "[ ] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 30,
+        "chunk_total": 107,
+        "nb_chars": 11
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n[ ] , [ ] ."
+    },
+    {
+      "texte": "] , [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 31,
+        "chunk_total": 107,
+        "nb_chars": 9
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n] , [ ] ."
+    },
+    {
+      "texte": ", [ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 32,
+        "chunk_total": 107,
+        "nb_chars": 7
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, [ ] ."
+    },
+    {
+      "texte": "[ ] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 33,
+        "chunk_total": 107,
+        "nb_chars": 5
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n[ ] ."
+    },
+    {
+      "texte": "] .",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 34,
+        "chunk_total": 107,
+        "nb_chars": 3
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n] ."
+    },
+    {
+      "texte": ".",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 35,
+        "chunk_total": 107,
+        "nb_chars": 1
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n."
+    },
+    {
+      "texte": "Les\n\nbesoins alimentaires\n\nmondiaux devraient augmenter dans les décennies à venir pour les raisons suivantes :\n\naugmentation de la population, ce qui implique une augmentation de la demande ;\n\naugmentation du\n\npouvoir d'achat\n\nde nombreux humains ;\n\naugmentation de l'\n\nurbanisation\n\n, souvent associée à d'autres\n\npratiques alimentaires\n\n, dont l'augmentation de la consommation de\n\nviande\n\n(on estime que 7\n\nkg\n\nde nourriture pour animaux sont nécessaires pour produire 1\n\nkg\n\nde\n\nbœuf\n\n, 4\n\nkg\n\npour produire un kilogramme de\n\nporc\n\net 2\n\nkg\n\npour un kilogramme de\n\nvolaille\n\n).\n\nUne offre suffisante et un moindre gaspillage sont deux conditions au recul de la\n\nfamine\n\net de la\n\nmalnutrition",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 36,
+        "chunk_total": 107,
+        "nb_chars": 697
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nLes\n\nbesoins alimentaires\n\nmondiaux devraient augmenter dans les décennies à venir pour les raisons suivantes :\n\naugmentation de la population, ce qui implique une augmentation de la demande ;\n\naugmentation du\n\npouvoir d'achat\n\nde nombreux humains ;\n\naugmentation de l'\n\nurbanisation\n\n, souvent associée à d'autres\n\npratiques alimentaires\n\n, dont l'augmentation de la consommation de\n\nviande\n\n(on estime que 7\n\nkg\n\nde nourriture pour animaux sont nécessaires pour produire 1\n\nkg\n\nde\n\nbœuf\n\n, 4\n\nkg\n\npour produire un kilogramme de\n\nporc\n\net 2\n\nkg\n\npour un kilogramme de\n\nvolaille\n\n).\n\nUne offre suffisante et un moindre gaspillage sont deux conditions au recul de la\n\nfamine\n\net de la\n\nmalnutrition"
+    },
+    {
+      "texte": ", mais cela ne suffit pas à établir la sécurité alimentaire pour tous. « Qui produit la nourriture et pour qui ? », « qui a accès aux informations nécessaires à la production agricole ? » « qui a un pouvoir d'achat suffisant pour acquérir la nourriture ? » « qui a un pouvoir d'achat suffisant pour acquérir les informations nécessaires à une bonne production ? » sont des questions cruciales en la matière.\n\nAinsi, les pauvres et les affamés ont besoin de semences, de technologies et de pratiques peu coûteuses et immédiatement disponibles pour répondre à leurs besoins vitaux. D'une façon générale, les femmes et les enfants sont ceux qui souffrent le plus de déficit alimentaire. En effet, un faible poids de naissance est une cause de décès prématuré et de malnutrition infantile. Le faible poids à la naissance est souvent dû à une\n\nsous-alimentation\n\nde la mère elle-même.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 37,
+        "chunk_total": 107,
+        "nb_chars": 879
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, mais cela ne suffit pas à établir la sécurité alimentaire pour tous. « Qui produit la nourriture et pour qui ? », « qui a accès aux informations nécessaires à la production agricole ? » « qui a un pouvoir d'achat suffisant pour acquérir la nourriture ? » « qui a un pouvoir d'achat suffisant pour acquérir les informations nécessaires à une bonne production ? » sont des questions cruciales en la matière.\n\nAinsi, les pauvres et les affamés ont besoin de semences, de technologies et de pratiques peu coûteuses et immédiatement disponibles pour répondre à leurs besoins vitaux. D'une façon générale, les femmes et les enfants sont ceux qui souffrent le plus de déficit alimentaire. En effet, un faible poids de naissance est une cause de décès prématuré et de malnutrition infantile. Le faible poids à la naissance est souvent dû à une\n\nsous-alimentation\n\nde la mère elle-même."
+    },
+    {
+      "texte": "En 2000, 27 % des enfants en âge préscolaire dans les\n\npays en développement\n\nétaient ainsi atteints de\n\nrachitisme\n\n(lié à une alimentation insuffisante et/ou peu variée et de faible qualité). Les femmes sont aussi souvent désavantagées, car elles possèdent peu de terres et bénéficient moins de conseils et de crédits pour l'amélioration des techniques.\n\nDifférentes options sont possibles pour augmenter la production\n\nagricole\n\n, par le biais d'adoption de\n\nsystèmes de production agricole\n\nspécifiques :\n\nAugmentation des\n\nsurfaces agricoles\n\net de jardinage (avec comme effet négatif la perte de\n\nsurfaces forestières\n\n, des\n\nprairies\n\n, et d'une façon générale, de lieux riches en\n\nbiodiversité\n\n) ;\n\nAugmentation de la productivité (quantité/hectare) dans les pays\n\nexportateurs\n\n(et exportation des surplus vers les pays déficitaires) ;",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 38,
+        "chunk_total": 107,
+        "nb_chars": 845
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nEn 2000, 27 % des enfants en âge préscolaire dans les\n\npays en développement\n\nétaient ainsi atteints de\n\nrachitisme\n\n(lié à une alimentation insuffisante et/ou peu variée et de faible qualité). Les femmes sont aussi souvent désavantagées, car elles possèdent peu de terres et bénéficient moins de conseils et de crédits pour l'amélioration des techniques.\n\nDifférentes options sont possibles pour augmenter la production\n\nagricole\n\n, par le biais d'adoption de\n\nsystèmes de production agricole\n\nspécifiques :\n\nAugmentation des\n\nsurfaces agricoles\n\net de jardinage (avec comme effet négatif la perte de\n\nsurfaces forestières\n\n, des\n\nprairies\n\n, et d'une façon générale, de lieux riches en\n\nbiodiversité\n\n) ;\n\nAugmentation de la productivité (quantité/hectare) dans les pays\n\nexportateurs\n\n(et exportation des surplus vers les pays déficitaires) ;"
+    },
+    {
+      "texte": "Augmentation de la productivité locale et globale dans les pays déficitaires, éventuellement en recherchant l'\n\nautosuffisance\n\n.\n\nL'\n\nagriculture péri-urbaine\n\nou l'\n\nagriculture urbaine\n\npeuvent également aider à résoudre le problème de la sécurité alimentaire, en permettant aux citadins à revenus limités de cultiver des légumes ou des\n\nfruits\n\nen pleine ville, par exemple. Nombre de déchets alimentaires peuvent aussi être recyclés/consommés par des volailles ou de petits élevages (chèvre, porcs…)\n\n[\n\n]\n.\nEn 2012, Deepak Ray, chercheur à l'\nInstitut de l'environnement\nde l'\nuniversité du Minnesota\npublie\n[\n\n]\ndans\nNature Communications\nune étude alarmante qui constate\n« que le rendement des\ncultures\nde blé et de riz — deux céréales qui fournissent près de la moitié de l’apport calorique alimentaire des populations mondiales — diminue\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 39,
+        "chunk_total": 107,
+        "nb_chars": 849
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nAugmentation de la productivité locale et globale dans les pays déficitaires, éventuellement en recherchant l'\n\nautosuffisance\n\n.\n\nL'\n\nagriculture péri-urbaine\n\nou l'\n\nagriculture urbaine\n\npeuvent également aider à résoudre le problème de la sécurité alimentaire, en permettant aux citadins à revenus limités de cultiver des légumes ou des\n\nfruits\n\nen pleine ville, par exemple. Nombre de déchets alimentaires peuvent aussi être recyclés/consommés par des volailles ou de petits élevages (chèvre, porcs…)\n\n[\n\n]\n.\nEn 2012, Deepak Ray, chercheur à l'\nInstitut de l'environnement\nde l'\nuniversité du Minnesota\npublie\n[\n\n]\ndans\nNature Communications\nune étude alarmante qui constate\n« que le rendement des\ncultures\nde blé et de riz — deux céréales qui fournissent près de la moitié de l’apport calorique alimentaire des populations mondiales — diminue\n["
+    },
+    {
+      "texte": "]\ndans un plus grand pourcentage de terres cultivées que celui des cultures de maïs et de soja, utilisés essentiellement pour engraisser des animaux et produire des\nbiocarburants\n»\n[\n\n]\n.\nThe Lancet\net la plateforme scientifique mondiale pour la transformation du système alimentaire\nEAT\n(une fondation internationale à but non lucratif créée par la\nPetter Stordalen\n, le\nStockholm Resilience Centre\net le\nWellcome Trust\n) publient le\n16 janvier 2019\nle rapport de synthèse de la commission EAT-Lancet\n[\n\n]\nsur le\nrégime planétaire\n, conçu afin de rendre l'alimentation compatible avec le développement durable\n[\n\n]\n\n.\n\nQualité des aliments et sécurité sanitaire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa qualité d'un aliment est, d'une part,\n\norganoleptique\n\n(qualités\n\ngustatives\n\n) et de présentation ou encore liée à sa bonne\n\nconservation\n\nainsi qu'à ses\n\nqualités nutritionnelles\n\n.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 40,
+        "chunk_total": 107,
+        "nb_chars": 887
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\ndans un plus grand pourcentage de terres cultivées que celui des cultures de maïs et de soja, utilisés essentiellement pour engraisser des animaux et produire des\nbiocarburants\n»\n[\n\n]\n.\nThe Lancet\net la plateforme scientifique mondiale pour la transformation du système alimentaire\nEAT\n(une fondation internationale à but non lucratif créée par la\nPetter Stordalen\n, le\nStockholm Resilience Centre\net le\nWellcome Trust\n) publient le\n16 janvier 2019\nle rapport de synthèse de la commission EAT-Lancet\n[\n\n]\nsur le\nrégime planétaire\n, conçu afin de rendre l'alimentation compatible avec le développement durable\n[\n\n]\n\n.\n\nQualité des aliments et sécurité sanitaire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa qualité d'un aliment est, d'une part,\n\norganoleptique\n\n(qualités\n\ngustatives\n\n) et de présentation ou encore liée à sa bonne\n\nconservation\n\nainsi qu'à ses\n\nqualités nutritionnelles\n\n."
+    },
+    {
+      "texte": "Elle est aussi\n\nsanitaire\n\n: un aliment sain ne doit pas contenir en quantité dangereuse des produits toxiques (absorbés par la plante, le champignon ou l'animal durant sa vie), ou des\n\ncontaminants\n\nindésirables acquis durant sa préparation, son transport ou son stockage (dont\n\nmétaux lourds\n\n,\n\nperturbateurs endocriniens\n\n,\n\nradionucléides\n\n, certains\n\nadditifs\n\n, ou des résidus de\n\npesticides\n\nou de\n\nbiocides\n\ntoxiques).\n\nLa\n\nqualité\n\nexige d'avoir identifié les risques et dangers, « de la fourche à la fourchette ». Cela inclut certains aspects comme la conservation, le\n\ncontact alimentaire\n\n, les impacts secondaires et différés des modes de cultures, de pêche ou d'élevage, de transport, stockage, préparation, cuisson et emballage des aliments, modes de cuisson… et de prendre les mesures de précaution et d'évaluation pour limiter l'expression des risques (par exemple, d'",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 41,
+        "chunk_total": 107,
+        "nb_chars": 886
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nElle est aussi\n\nsanitaire\n\n: un aliment sain ne doit pas contenir en quantité dangereuse des produits toxiques (absorbés par la plante, le champignon ou l'animal durant sa vie), ou des\n\ncontaminants\n\nindésirables acquis durant sa préparation, son transport ou son stockage (dont\n\nmétaux lourds\n\n,\n\nperturbateurs endocriniens\n\n,\n\nradionucléides\n\n, certains\n\nadditifs\n\n, ou des résidus de\n\npesticides\n\nou de\n\nbiocides\n\ntoxiques).\n\nLa\n\nqualité\n\nexige d'avoir identifié les risques et dangers, « de la fourche à la fourchette ». Cela inclut certains aspects comme la conservation, le\n\ncontact alimentaire\n\n, les impacts secondaires et différés des modes de cultures, de pêche ou d'élevage, de transport, stockage, préparation, cuisson et emballage des aliments, modes de cuisson… et de prendre les mesures de précaution et d'évaluation pour limiter l'expression des risques (par exemple, d'"
+    },
+    {
+      "texte": "intoxication alimentaire\n\n).\n\nEn Europe, à la suite de divers scandales alimentaires, la Directive 93/43/CE relative à l'\n\nhygiène\n\ndes denrées alimentaires préconise la méthode\n\nHACCP\n\n(Analyse des dangers et points critiques pour leur maîtrise) de manière à « identifier tout aspect déterminant pour la sécurité des aliments et pour veiller à ce que des procédures de sécurité appropriées soient établies, mises en œuvre, respectées et mises à jour ».\n\nLe\n\npaquet hygiène\n\nvise à\n\nprévenir\n\nles dangers alimentaires, avec une\n\nobligation de résultat\n\n, tout en laissant plus de liberté aux responsables d'établissements de transformation ou de restauration sur les moyens d'y arriver. Les « guides de bonnes pratiques » mis en place par les filières professionnelles, avec ou sans l'aide d'administrations, peuvent y contribuer aussi, de même que les normes et référentiels utilisés par l'",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 42,
+        "chunk_total": 107,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nintoxication alimentaire\n\n).\n\nEn Europe, à la suite de divers scandales alimentaires, la Directive 93/43/CE relative à l'\n\nhygiène\n\ndes denrées alimentaires préconise la méthode\n\nHACCP\n\n(Analyse des dangers et points critiques pour leur maîtrise) de manière à « identifier tout aspect déterminant pour la sécurité des aliments et pour veiller à ce que des procédures de sécurité appropriées soient établies, mises en œuvre, respectées et mises à jour ».\n\nLe\n\npaquet hygiène\n\nvise à\n\nprévenir\n\nles dangers alimentaires, avec une\n\nobligation de résultat\n\n, tout en laissant plus de liberté aux responsables d'établissements de transformation ou de restauration sur les moyens d'y arriver. Les « guides de bonnes pratiques » mis en place par les filières professionnelles, avec ou sans l'aide d'administrations, peuvent y contribuer aussi, de même que les normes et référentiels utilisés par l'"
+    },
+    {
+      "texte": "industrie agroalimentaire\n\n(BRC,\n\nIFS\n\n,\n\nISO 22000\n\n, Eurepgap\n\n[\n\n]\n, la norme NF V0 1-002 incluant un « Glossaire sur l’Hygiène des Aliments », ou encore la norme NF V01-006:2008 « Place de l'HACCP et application de ses principes pour la maîtrise de la sécurité des aliments et des aliments pour animaux »).\nBien que les conditions de sécurité alimentaire (alimentation diversifiée et abondante) atteignent un niveau inégalé dans les pays occidentaux et que la qualité des aliments n'a jamais été aussi bien contrôlée dans les\npays développés\n, les consommateurs expriment des sentiments qui vont du simple doute à la peur ou à la défiance totale envers certains aliments, sentiments à l'origine d'un paradoxe\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 43,
+        "chunk_total": 107,
+        "nb_chars": 714
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nindustrie agroalimentaire\n\n(BRC,\n\nIFS\n\n,\n\nISO 22000\n\n, Eurepgap\n\n[\n\n]\n, la norme NF V0 1-002 incluant un « Glossaire sur l’Hygiène des Aliments », ou encore la norme NF V01-006:2008 « Place de l'HACCP et application de ses principes pour la maîtrise de la sécurité des aliments et des aliments pour animaux »).\nBien que les conditions de sécurité alimentaire (alimentation diversifiée et abondante) atteignent un niveau inégalé dans les pays occidentaux et que la qualité des aliments n'a jamais été aussi bien contrôlée dans les\npays développés\n, les consommateurs expriment des sentiments qui vont du simple doute à la peur ou à la défiance totale envers certains aliments, sentiments à l'origine d'un paradoxe\n["
+    },
+    {
+      "texte": "] : les crises sanitaires (notamment celles de la vache folle , des fraudes et des intoxications alimentaires ), les attitudes orthorexiques (inquiétude liée à la malbouffe , aux organismes génétiquement modifiés , traque des éléments alimentaires négatifs tels que la consommation excessive de gras, sucré et salé responsable de l'épidémie d' obésité et d' hypertension artérielle ), la distanciation entre l'aliment et le mangeur (ce dernier n'étant plus le producteur de ce qu'il ingère), le développement d'une chaîne d'approvisionnement plus sûre mais plus fragile, font resurgir des peurs alimentaires [ ] . Selon l'ONG Foodwatch , un produit alimentaire sur huit serait contaminé par des hydrocarbures aromatiques d' huile minérale [ ] . Selon, Santé publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 44,
+        "chunk_total": 107,
+        "nb_chars": 899
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n] : les crises sanitaires (notamment celles de la vache folle , des fraudes et des intoxications alimentaires ), les attitudes orthorexiques (inquiétude liée à la malbouffe , aux organismes génétiquement modifiés , traque des éléments alimentaires négatifs tels que la consommation excessive de gras, sucré et salé responsable de l'épidémie d' obésité et d' hypertension artérielle ), la distanciation entre l'aliment et le mangeur (ce dernier n'étant plus le producteur de ce qu'il ingère), le développement d'une chaîne d'approvisionnement plus sûre mais plus fragile, font resurgir des peurs alimentaires [ ] . Selon l'ONG Foodwatch , un produit alimentaire sur huit serait contaminé par des hydrocarbures aromatiques d' huile minérale [ ] . Selon, Santé publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "Selon, Santé publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 45,
+        "chunk_total": 107,
+        "nb_chars": 154
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nSelon, Santé publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "Santé publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 46,
+        "chunk_total": 107,
+        "nb_chars": 147
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nSanté publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "publique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 47,
+        "chunk_total": 107,
+        "nb_chars": 141
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\npublique France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "France , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 48,
+        "chunk_total": 107,
+        "nb_chars": 132
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nFrance , 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": ", 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 49,
+        "chunk_total": 107,
+        "nb_chars": 125
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, 97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 50,
+        "chunk_total": 107,
+        "nb_chars": 123
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n97 à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "à 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 51,
+        "chunk_total": 107,
+        "nb_chars": 120
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nà 100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 52,
+        "chunk_total": 107,
+        "nb_chars": 118
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n100 % des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "% des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 53,
+        "chunk_total": 107,
+        "nb_chars": 114
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n% des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "des Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 54,
+        "chunk_total": 107,
+        "nb_chars": 112
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ndes Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "Français (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 55,
+        "chunk_total": 107,
+        "nb_chars": 108
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nFrançais (adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "(adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 56,
+        "chunk_total": 107,
+        "nb_chars": 99
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n(adultes et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "et enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 57,
+        "chunk_total": 107,
+        "nb_chars": 90
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\net enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "enfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 58,
+        "chunk_total": 107,
+        "nb_chars": 87
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nenfants) sont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "sont contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 59,
+        "chunk_total": 107,
+        "nb_chars": 78
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nsont contaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "contaminés aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 60,
+        "chunk_total": 107,
+        "nb_chars": 73
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ncontaminés aux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "aux éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 61,
+        "chunk_total": 107,
+        "nb_chars": 62
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\naux éléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "éléments-trace métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 62,
+        "chunk_total": 107,
+        "nb_chars": 58
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\néléments-trace métalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "métalliques avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 63,
+        "chunk_total": 107,
+        "nb_chars": 43
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nmétalliques avec des taux en augmentation ["
+    },
+    {
+      "texte": "avec des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 64,
+        "chunk_total": 107,
+        "nb_chars": 31
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\navec des taux en augmentation ["
+    },
+    {
+      "texte": "des taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 65,
+        "chunk_total": 107,
+        "nb_chars": 26
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ndes taux en augmentation ["
+    },
+    {
+      "texte": "taux en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 66,
+        "chunk_total": 107,
+        "nb_chars": 22
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ntaux en augmentation ["
+    },
+    {
+      "texte": "en augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 67,
+        "chunk_total": 107,
+        "nb_chars": 17
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nen augmentation ["
+    },
+    {
+      "texte": "augmentation [",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 68,
+        "chunk_total": 107,
+        "nb_chars": 14
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\naugmentation ["
+    },
+    {
+      "texte": "[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 69,
+        "chunk_total": 107,
+        "nb_chars": 1
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n["
+    },
+    {
+      "texte": "]\n\n.\n\nFacteurs d'insécurité alimentaire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nCette section ne s'appuie pas, ou pas assez, sur des\n\nsources secondaires ou tertiaires\n\nindépendantes du sujet.\n\nLe texte peut contenir des analyses inexactes ou inédites de sources primaires.\n\nPour l'améliorer,\n\najoutez-en\n\n, ou placez des modèles\n\n{{Source secondaire souhaitée}}\n\nou\n\n{{Source secondaire nécessaire}}\n\nsur les passages mal sourcés.\n\n(avril 2025)\n\nPlusieurs facteurs entrent en ligne de compte. Si on reprend la définition de la sécurité alimentaire et de ses quatre dimensions, les facteurs de risque d'une insécurité se situent au niveau de l'individu :",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 70,
+        "chunk_total": 107,
+        "nb_chars": 652
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n\n.\n\nFacteurs d'insécurité alimentaire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nCette section ne s'appuie pas, ou pas assez, sur des\n\nsources secondaires ou tertiaires\n\nindépendantes du sujet.\n\nLe texte peut contenir des analyses inexactes ou inédites de sources primaires.\n\nPour l'améliorer,\n\najoutez-en\n\n, ou placez des modèles\n\n{{Source secondaire souhaitée}}\n\nou\n\n{{Source secondaire nécessaire}}\n\nsur les passages mal sourcés.\n\n(avril 2025)\n\nPlusieurs facteurs entrent en ligne de compte. Si on reprend la définition de la sécurité alimentaire et de ses quatre dimensions, les facteurs de risque d'une insécurité se situent au niveau de l'individu :"
+    },
+    {
+      "texte": "manque de moyens financiers (non accès à des denrées de qualité à cause de leur prix mais aussi non accès car manque de moyens pour se payer les transports en commun permettant d'accéder à l'infrastructure qui propose des denrées de qualité en quantité suffisante) ;\n\nqualité/hygiène : manque d'hygiène et d'endroits de stockage adéquats pour les aliments (réfrigérateur ou congélateur aux normes de salubrité). Les aliments peuvent être de mauvaise qualité et rendre les personnes malades (date de péremption dépassée pour les aliments du commerce, aliments pourris…) ;\n\nisolement de l'individu dans un endroit peu desservi (pas d'infrastructure assez proche de chez lui) ;\n\nindisponibilité de terres agricoles pour l'individu.\n\nEt au niveau des infrastructures :\n\nmanque d’infrastructures capables de distribuer des aliments sains en quantité suffisante (risque de famine) ;",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 71,
+        "chunk_total": 107,
+        "nb_chars": 876
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nmanque de moyens financiers (non accès à des denrées de qualité à cause de leur prix mais aussi non accès car manque de moyens pour se payer les transports en commun permettant d'accéder à l'infrastructure qui propose des denrées de qualité en quantité suffisante) ;\n\nqualité/hygiène : manque d'hygiène et d'endroits de stockage adéquats pour les aliments (réfrigérateur ou congélateur aux normes de salubrité). Les aliments peuvent être de mauvaise qualité et rendre les personnes malades (date de péremption dépassée pour les aliments du commerce, aliments pourris…) ;\n\nisolement de l'individu dans un endroit peu desservi (pas d'infrastructure assez proche de chez lui) ;\n\nindisponibilité de terres agricoles pour l'individu.\n\nEt au niveau des infrastructures :\n\nmanque d’infrastructures capables de distribuer des aliments sains en quantité suffisante (risque de famine) ;"
+    },
+    {
+      "texte": "manque de moyens de transport disponibles pour aller vers ces infrastructures ;\n\nproblèmes au niveau de la stabilité des infrastructures (faillite, désert alimentaire), de leur capacité à stocker correctement (dans les règles d'hygiène et de salubrité) les denrées.\n\nAutre facteur :\n\nimpact du\n\nchangement climatique\n\net de la pollution sur les circuits alimentaires traditionnels pour plusieurs communautés autochtones\n\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 72,
+        "chunk_total": 107,
+        "nb_chars": 422
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nmanque de moyens de transport disponibles pour aller vers ces infrastructures ;\n\nproblèmes au niveau de la stabilité des infrastructures (faillite, désert alimentaire), de leur capacité à stocker correctement (dans les règles d'hygiène et de salubrité) les denrées.\n\nAutre facteur :\n\nimpact du\n\nchangement climatique\n\net de la pollution sur les circuits alimentaires traditionnels pour plusieurs communautés autochtones\n\n["
+    },
+    {
+      "texte": "]\n.\nTous ces facteurs peuvent créer de l'insécurité alimentaire chez certains individus.\nPénurie d'eau\n[\nmodifier\n|\nmodifier le code\n]\nArticle détaillé :\nStress hydrique (écologie)\n.\nL'agriculture étant de plus en plus\nirriguée\n(Griffon 2006 : 189) elle dépend de plus en plus de l'\neau douce\n. L'\nONU\nalerte régulièrement sur l'avancée des déserts et le recul des\nressources en eau\ndouce, et plus encore en\neau potable\nfacilement accessible.\nEn Europe, un\nRapport sur les risques de pénuries d’eau et les risques de sécheresse en Europe\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 73,
+        "chunk_total": 107,
+        "nb_chars": 539
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nTous ces facteurs peuvent créer de l'insécurité alimentaire chez certains individus.\nPénurie d'eau\n[\nmodifier\n|\nmodifier le code\n]\nArticle détaillé :\nStress hydrique (écologie)\n.\nL'agriculture étant de plus en plus\nirriguée\n(Griffon 2006 : 189) elle dépend de plus en plus de l'\neau douce\n. L'\nONU\nalerte régulièrement sur l'avancée des déserts et le recul des\nressources en eau\ndouce, et plus encore en\neau potable\nfacilement accessible.\nEn Europe, un\nRapport sur les risques de pénuries d’eau et les risques de sécheresse en Europe\n["
+    },
+    {
+      "texte": "]\n, de\nmars 2009\n, estime que cette menace grandit pour une partie importante de l'Union européenne, sachant qu'en moyenne 44 % de l’eau utilisée dans l’UE sert à la production d’énergie (à des fins de refroidissement essentiellement), 24 % sert pour l’agriculture, 21 % pour la fourniture en eau du public, et 11 % dans l’industrie. L'UE promeut une utilisation plus efficiente de l’eau, des politiques de tarification de l’eau, de sensibilisation et des plans de gestion des sécheresses et un meilleur contrôle des usages illégaux de l'eau. Les modèles climatiques prédisent un accroissement de la\npluviométrie\ndans le Nord-Ouest de l'Europe et une diminution dans le Sud où les habitants manquent déjà localement d'eau en été. Et globalement les canicules et sécheresses estivales devraient être plus intenses et plus nombreuses\n[\n\n]\n,\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 74,
+        "chunk_total": 107,
+        "nb_chars": 840
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n, de\nmars 2009\n, estime que cette menace grandit pour une partie importante de l'Union européenne, sachant qu'en moyenne 44 % de l’eau utilisée dans l’UE sert à la production d’énergie (à des fins de refroidissement essentiellement), 24 % sert pour l’agriculture, 21 % pour la fourniture en eau du public, et 11 % dans l’industrie. L'UE promeut une utilisation plus efficiente de l’eau, des politiques de tarification de l’eau, de sensibilisation et des plans de gestion des sécheresses et un meilleur contrôle des usages illégaux de l'eau. Les modèles climatiques prédisent un accroissement de la\npluviométrie\ndans le Nord-Ouest de l'Europe et une diminution dans le Sud où les habitants manquent déjà localement d'eau en été. Et globalement les canicules et sécheresses estivales devraient être plus intenses et plus nombreuses\n[\n\n]\n,\n["
+    },
+    {
+      "texte": "]\n.\nEn zone côtière des\npompages\nexcessifs peuvent entraîner la pénétration d'eaux salées dans les\nnappes phréatiques\n. De vastes zones\nlittorales\nméditerranéennes sont déjà affectées par l'intrusion d'eau salée à la suite des pompages qui ont fait baisser le niveau des nappes d'eau douce. En Grèce, environ 1 500\nkm\n\nd'aquifères seraient déjà impactés par l'intrusion d'eau de mer\n[\n\n]\net des problèmes de ce type apparaissent en Europe du Nord (carte 3.1 du rapport européen déjà cité, p. 23\n[\n\n]\n\n).\n\nDégradation des sols\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle connexe :\n\nsol (pédologie)\n\n.\n\nUne cause importante de la dégradation des sols est le bétonnage. Celui-ci est en augmentation constante et rend les terres imperméables (et inonde souvent les champs à proximité).\n\nLa\n\nmonoculture",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 75,
+        "chunk_total": 107,
+        "nb_chars": 800
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nEn zone côtière des\npompages\nexcessifs peuvent entraîner la pénétration d'eaux salées dans les\nnappes phréatiques\n. De vastes zones\nlittorales\nméditerranéennes sont déjà affectées par l'intrusion d'eau salée à la suite des pompages qui ont fait baisser le niveau des nappes d'eau douce. En Grèce, environ 1 500\nkm\n\nd'aquifères seraient déjà impactés par l'intrusion d'eau de mer\n[\n\n]\net des problèmes de ce type apparaissent en Europe du Nord (carte 3.1 du rapport européen déjà cité, p. 23\n[\n\n]\n\n).\n\nDégradation des sols\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle connexe :\n\nsol (pédologie)\n\n.\n\nUne cause importante de la dégradation des sols est le bétonnage. Celui-ci est en augmentation constante et rend les terres imperméables (et inonde souvent les champs à proximité).\n\nLa\n\nmonoculture"
+    },
+    {
+      "texte": "et l'agriculture intensive dégradent également la qualité du sol, en appauvrissant sa diversité et les nutriments que la terre contient. Ce type d'agriculture dépend d'un fort apport extérieur (intrants, mines d'azote, etc.) qui n'est pas éternel. Le problème de la dégradation des sols par ce genre d'agriculture pose la question du mode de production à favoriser pour garantir une alimentation durable aux humains. Le manque de jachère est aussi facteur de dégradation des sols car la terre n'est pas laissée au repos pendant plusieurs années et sans apport des éléments fertilisants.(à compléter)\n\nL'érosion est une autre dégradation du sol. Celle-ci est en partie naturelle et en partie causée par le type d'agriculture choisi. (à compléter)\n\nChangement climatique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'un des effets les plus notoires du\n\nchangement climatique",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 76,
+        "chunk_total": 107,
+        "nb_chars": 866
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\net l'agriculture intensive dégradent également la qualité du sol, en appauvrissant sa diversité et les nutriments que la terre contient. Ce type d'agriculture dépend d'un fort apport extérieur (intrants, mines d'azote, etc.) qui n'est pas éternel. Le problème de la dégradation des sols par ce genre d'agriculture pose la question du mode de production à favoriser pour garantir une alimentation durable aux humains. Le manque de jachère est aussi facteur de dégradation des sols car la terre n'est pas laissée au repos pendant plusieurs années et sans apport des éléments fertilisants.(à compléter)\n\nL'érosion est une autre dégradation du sol. Celle-ci est en partie naturelle et en partie causée par le type d'agriculture choisi. (à compléter)\n\nChangement climatique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'un des effets les plus notoires du\n\nchangement climatique"
+    },
+    {
+      "texte": "est de modifier la répartition de l'eau sous toutes ses formes sur terre. L'élévation du niveau des mers, due à l'\n\nexpansion thermique\n\nde l'eau ainsi qu'à la\n\nfonte des glaciers\n\némergés imbibe et salinise les côtes, alors que plus de la moitié de la population mondiale vit dans les\n\nzones côtières\n\n. D'autre part, les énormes masses d'eau en jeu, sous le coup d'une redistribution des températures, provoquent un changement important de la dynamique des\n\ncourants marins",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 77,
+        "chunk_total": 107,
+        "nb_chars": 475
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nest de modifier la répartition de l'eau sous toutes ses formes sur terre. L'élévation du niveau des mers, due à l'\n\nexpansion thermique\n\nde l'eau ainsi qu'à la\n\nfonte des glaciers\n\némergés imbibe et salinise les côtes, alors que plus de la moitié de la population mondiale vit dans les\n\nzones côtières\n\n. D'autre part, les énormes masses d'eau en jeu, sous le coup d'une redistribution des températures, provoquent un changement important de la dynamique des\n\ncourants marins"
+    },
+    {
+      "texte": ", qui sont, avec la répartition nord/sud des terres et la continentalité, les principaux facteurs déterminant le climat dans une zone donnée. La modélisation de ces facteurs est si complexe, et les changements climatiques encore si mal connus et imprévisibles qu'il est pour le moment impossible de déterminer de manière suffisamment fine quels changements climatiques apparaîtront où et quand, de même que la durée de stabilisation de ces changements est excessivement difficile à prévoir. Il résulte donc du changement climatique une imprévisibilité très importante des nouvelles conditions locales. Tout cela va affecter grandement l'agriculture :\n\ndifficulté de choisir les espèces à cultiver, avec risque de perte totale ou partielle des récoltes ;\n\nrisque accru de l'arrivée d'\n\nespèces envahissantes\n\nnuisibles ;",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 78,
+        "chunk_total": 107,
+        "nb_chars": 819
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, qui sont, avec la répartition nord/sud des terres et la continentalité, les principaux facteurs déterminant le climat dans une zone donnée. La modélisation de ces facteurs est si complexe, et les changements climatiques encore si mal connus et imprévisibles qu'il est pour le moment impossible de déterminer de manière suffisamment fine quels changements climatiques apparaîtront où et quand, de même que la durée de stabilisation de ces changements est excessivement difficile à prévoir. Il résulte donc du changement climatique une imprévisibilité très importante des nouvelles conditions locales. Tout cela va affecter grandement l'agriculture :\n\ndifficulté de choisir les espèces à cultiver, avec risque de perte totale ou partielle des récoltes ;\n\nrisque accru de l'arrivée d'\n\nespèces envahissantes\n\nnuisibles ;"
+    },
+    {
+      "texte": "risque accru de destruction des récoltes par des phénomènes climatiques extrêmes ;\n\nrisque accru que les paysans pauvres ne puissent pas cultiver, du fait de la précarité de leur situation ;\n\nrisque d'un recours massif aux\n\npesticides\n\n,\n\nherbicides\n\net engrais chimiques pour atténuer l'imprévisibilité du climat et les attaques de nuisibles ;\n\ndans les parties du monde exposées à de plus fortes\n\nprécipitations\n\n, accélération de l'\n\nérosion\n\n, et donc de la perte des\n\nsols cultivables\n\n.\n\nCes facteurs de risques se cumulent avec les conséquences de la\n\npollution chimique\n\n, de la\n\ndéforestation\n\n, des\n\nrégression et dégradation des sols\n\nsous toutes ses formes pour mettre en danger la sécurité alimentaire mondiale.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 79,
+        "chunk_total": 107,
+        "nb_chars": 724
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nrisque accru de destruction des récoltes par des phénomènes climatiques extrêmes ;\n\nrisque accru que les paysans pauvres ne puissent pas cultiver, du fait de la précarité de leur situation ;\n\nrisque d'un recours massif aux\n\npesticides\n\n,\n\nherbicides\n\net engrais chimiques pour atténuer l'imprévisibilité du climat et les attaques de nuisibles ;\n\ndans les parties du monde exposées à de plus fortes\n\nprécipitations\n\n, accélération de l'\n\nérosion\n\n, et donc de la perte des\n\nsols cultivables\n\n.\n\nCes facteurs de risques se cumulent avec les conséquences de la\n\npollution chimique\n\n, de la\n\ndéforestation\n\n, des\n\nrégression et dégradation des sols\n\nsous toutes ses formes pour mettre en danger la sécurité alimentaire mondiale."
+    },
+    {
+      "texte": "Il est à noter aussi que le changement climatique ne peut engendrer, à court et moyen terme, que des réactions qui l'aggravent de la part des agriculteurs, qui pour assurer leur subsistance immédiate et les besoins alimentaires de l'humanité, vont devoir recourir à des pratiques plus nocives.\n\nExplosion démographique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'explosion démographique, résultant de l'amélioration des conditions de vie et de l'accès à une médecine plus efficace, a permis à l'humanité de ne plus perdre ses enfants\n\nOn a moins d'enfants aujourd'hui, mais ils survivent\n\nEn deux cents ans, la population humaine a ainsi été multipliée par 7\n\nDans le même temps, les rendements agricoles ont eux aussi été multipliés, d'abord par la mécanisation, ensuite par les engrais et pesticides chimiques, et aussi par le recours aux sélections et modifications génétiques",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 80,
+        "chunk_total": 107,
+        "nb_chars": 875
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nIl est à noter aussi que le changement climatique ne peut engendrer, à court et moyen terme, que des réactions qui l'aggravent de la part des agriculteurs, qui pour assurer leur subsistance immédiate et les besoins alimentaires de l'humanité, vont devoir recourir à des pratiques plus nocives.\n\nExplosion démographique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'explosion démographique, résultant de l'amélioration des conditions de vie et de l'accès à une médecine plus efficace, a permis à l'humanité de ne plus perdre ses enfants\n\nOn a moins d'enfants aujourd'hui, mais ils survivent\n\nEn deux cents ans, la population humaine a ainsi été multipliée par 7\n\nDans le même temps, les rendements agricoles ont eux aussi été multipliés, d'abord par la mécanisation, ensuite par les engrais et pesticides chimiques, et aussi par le recours aux sélections et modifications génétiques"
+    },
+    {
+      "texte": "Cela a permis de nourrir la population humaine jusqu'à présent, même si l'humanité semble incapable de réduire significativement sa proportion de mal-nourris\n\nMais cela tient plutôt à une mauvaise répartition qu'à une impossibilité de produire assez pour tout le monde (cf\n\nSylvie Brunel, spécialiste de la question)\n\nCependant, l'agriculture mécanisée épuise la terre, la déforestation engendre une érosion qui appauvrit les sols, les produits chimiques et la pollution les empoisonnent et les ressources en eau (arrosage) vont bientôt manquer dans beaucoup de zones aujourd'hui fertiles (voir\n\nrégression et dégradation des sols",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 81,
+        "chunk_total": 107,
+        "nb_chars": 630
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nCela a permis de nourrir la population humaine jusqu'à présent, même si l'humanité semble incapable de réduire significativement sa proportion de mal-nourris\n\nMais cela tient plutôt à une mauvaise répartition qu'à une impossibilité de produire assez pour tout le monde (cf\n\nSylvie Brunel, spécialiste de la question)\n\nCependant, l'agriculture mécanisée épuise la terre, la déforestation engendre une érosion qui appauvrit les sols, les produits chimiques et la pollution les empoisonnent et les ressources en eau (arrosage) vont bientôt manquer dans beaucoup de zones aujourd'hui fertiles (voir\n\nrégression et dégradation des sols"
+    },
+    {
+      "texte": "). L'agriculture moderne est donc tout sauf durable, et ne permettra plus, d'ici quelques décennies, de nourrir une population qui continue d'augmenter. La nouvelle et artificielle aisance alimentaire dans des pays autrefois touchés par l'insécurité alimentaire semble en effet, par un effet d'optimisme social, conduire à une natalité énergique.\n\nÉpidémies\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe mot épidémie revêt deux sens ; elle qualifie « soit l'apparition d'un grand nombre de cas d'une nouvelle maladie, soit l'accroissement considérable du nombre de cas d'une maladie déjà existante, dans une région donnée, au sein d'une communauté ou d'une collectivité »\n\n[\n\n]\n. De ce fait, elle a un impact considérable sur les différents moteurs du développement et la sécurité alimentaire n’en est pas épargnée. Par exemple, l'épidémie Ebola dont l’OMS affiche un bilan d’environ « 7000 morts »\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 82,
+        "chunk_total": 107,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n). L'agriculture moderne est donc tout sauf durable, et ne permettra plus, d'ici quelques décennies, de nourrir une population qui continue d'augmenter. La nouvelle et artificielle aisance alimentaire dans des pays autrefois touchés par l'insécurité alimentaire semble en effet, par un effet d'optimisme social, conduire à une natalité énergique.\n\nÉpidémies\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe mot épidémie revêt deux sens ; elle qualifie « soit l'apparition d'un grand nombre de cas d'une nouvelle maladie, soit l'accroissement considérable du nombre de cas d'une maladie déjà existante, dans une région donnée, au sein d'une communauté ou d'une collectivité »\n\n[\n\n]\n. De ce fait, elle a un impact considérable sur les différents moteurs du développement et la sécurité alimentaire n’en est pas épargnée. Par exemple, l'épidémie Ebola dont l’OMS affiche un bilan d’environ « 7000 morts »\n["
+    },
+    {
+      "texte": "]\ndans les trois pays d'Afrique de l'Ouest les plus touchés : la Guinée, le Liberia et le Sierra Leone. Les conséquences d’une telle épidémie sont certes humaines, mais aussi alimentaires et agricoles. En effet, Ebola comme toutes les autres épidémies sont à l’origine d’une mise en quarantaine, d’une pénurie de la main-d'œuvre ; un abandon des exploitations agricoles du fait des restrictions de déplacement et la peur d’être contaminé ; une chute de la commercialisation des produits agricoles ; une flambée des prix des denrées alimentaires du fait de la fermeture des frontières. Avec Ebola, ce sont les récoltes de riz et de maïs qui seront touchées ; selon les résultats d’enquêtes d’évaluation réalisées par la FAO auprès des agriculteurs, 47 % d’entre eux par exemple en Sierra Leone ont indiqué que le virus Ebola perturbait considérablement leurs activités agricoles\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 83,
+        "chunk_total": 107,
+        "nb_chars": 879
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\ndans les trois pays d'Afrique de l'Ouest les plus touchés : la Guinée, le Liberia et le Sierra Leone. Les conséquences d’une telle épidémie sont certes humaines, mais aussi alimentaires et agricoles. En effet, Ebola comme toutes les autres épidémies sont à l’origine d’une mise en quarantaine, d’une pénurie de la main-d'œuvre ; un abandon des exploitations agricoles du fait des restrictions de déplacement et la peur d’être contaminé ; une chute de la commercialisation des produits agricoles ; une flambée des prix des denrées alimentaires du fait de la fermeture des frontières. Avec Ebola, ce sont les récoltes de riz et de maïs qui seront touchées ; selon les résultats d’enquêtes d’évaluation réalisées par la FAO auprès des agriculteurs, 47 % d’entre eux par exemple en Sierra Leone ont indiqué que le virus Ebola perturbait considérablement leurs activités agricoles\n["
+    },
+    {
+      "texte": "]\n[source insuffisante]\n. Les prix des denrées alimentaires comme le manioc par exemple, ont doublé ; au total, quelque 1,3 million de personnes pourraient être concernées par une situation d’insécurité alimentaire dans la région.\nGouvernance inappropriée\n[\nmodifier\n|\nmodifier le code\n]\nLa\nFAO\npublie un guide sur la bonne\ngouvernance\ndes régimes fonciers\n[\n\n]\n. Le\n11 mai 2012\nle\ncomité de la sécurité alimentaire mondiale\n(en)\nde la FAO adopte des directives\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 84,
+        "chunk_total": 107,
+        "nb_chars": 463
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n[source insuffisante]\n. Les prix des denrées alimentaires comme le manioc par exemple, ont doublé ; au total, quelque 1,3 million de personnes pourraient être concernées par une situation d’insécurité alimentaire dans la région.\nGouvernance inappropriée\n[\nmodifier\n|\nmodifier le code\n]\nLa\nFAO\npublie un guide sur la bonne\ngouvernance\ndes régimes fonciers\n[\n\n]\n. Le\n11 mai 2012\nle\ncomité de la sécurité alimentaire mondiale\n(en)\nde la FAO adopte des directives\n["
+    },
+    {
+      "texte": "]\npour une\n« gouvernance responsable des régimes fonciers applicables aux terres, aux pêches et aux forêts dans le contexte de la sécurité alimentaire nationale »\nqui a notamment pour but de protéger les producteurs locaux contre l'accaparement des terres, la\n«\ncolonisation\ndes sols »\n(expression de la ministre sud-africaine de l'agriculture,\nTina Joemat-Pettersson\n, pour souligner que ce phénomène est un héritage direct du\ncolonialisme\n) s'étant aggravée depuis la\ncrise alimentaire mondiale de 2007-2008\nmais aussi depuis la demande croissante en\nagrocarburants\n: entre 2000 et 2011,\n203 millions\nd'hectares dont\n134 millions\nen\nAfrique subsaharienne\nont fait l'objet de négociations entre investisseurs privés régionaux ou nationaux et principalement les États propriétaires des terres (selon le principe de\ndomanialité\npublic)\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 85,
+        "chunk_total": 107,
+        "nb_chars": 836
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\npour une\n« gouvernance responsable des régimes fonciers applicables aux terres, aux pêches et aux forêts dans le contexte de la sécurité alimentaire nationale »\nqui a notamment pour but de protéger les producteurs locaux contre l'accaparement des terres, la\n«\ncolonisation\ndes sols »\n(expression de la ministre sud-africaine de l'agriculture,\nTina Joemat-Pettersson\n, pour souligner que ce phénomène est un héritage direct du\ncolonialisme\n) s'étant aggravée depuis la\ncrise alimentaire mondiale de 2007-2008\nmais aussi depuis la demande croissante en\nagrocarburants\n: entre 2000 et 2011,\n203 millions\nd'hectares dont\n134 millions\nen\nAfrique subsaharienne\nont fait l'objet de négociations entre investisseurs privés régionaux ou nationaux et principalement les États propriétaires des terres (selon le principe de\ndomanialité\npublic)\n["
+    },
+    {
+      "texte": "]\n.\nTandis que des initiatives mondiales telles que l'Alliance Mondiale pour une Agriculture Intelligente Face au Climat ont été lancées, de nombreux syndicats agricoles et organisations de la société civile dénoncent une approche favorisant l'augmentation et la dépendance aux intrants agricoles, notamment aux\nengrais\nchimiques. Selon les recherches de l'ONG GRAIN, la promotion de l'\nagriculture paysanne\nà travers des politiques et des incitatifs adéquats pourrait ramener la qualité des sols à un niveau pré-industriel en 50 ans\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 86,
+        "chunk_total": 107,
+        "nb_chars": 535
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nTandis que des initiatives mondiales telles que l'Alliance Mondiale pour une Agriculture Intelligente Face au Climat ont été lancées, de nombreux syndicats agricoles et organisations de la société civile dénoncent une approche favorisant l'augmentation et la dépendance aux intrants agricoles, notamment aux\nengrais\nchimiques. Selon les recherches de l'ONG GRAIN, la promotion de l'\nagriculture paysanne\nà travers des politiques et des incitatifs adéquats pourrait ramener la qualité des sols à un niveau pré-industriel en 50 ans\n["
+    },
+    {
+      "texte": "]\n.\nIntervention et rôle de l'État dans l'agriculture en vue de la sécurité alimentaire\n[\nmodifier\n|\nmodifier le code\n]\nLes États membres de la FAO ont adopté en 2004 des directives volontaires visant à concrétiser\n« le droit de chaque être humain d'avoir accès à une nourriture saine et nutritive conformément au droit à une nourriture adéquate et au droit fondamental de chacun d'être à l'abri de la faim »\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 87,
+        "chunk_total": 107,
+        "nb_chars": 410
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nIntervention et rôle de l'État dans l'agriculture en vue de la sécurité alimentaire\n[\nmodifier\n|\nmodifier le code\n]\nLes États membres de la FAO ont adopté en 2004 des directives volontaires visant à concrétiser\n« le droit de chaque être humain d'avoir accès à une nourriture saine et nutritive conformément au droit à une nourriture adéquate et au droit fondamental de chacun d'être à l'abri de la faim »\n["
+    },
+    {
+      "texte": "]\n. Ces directives volontaires constituent un outil international définissant les responsabilités des États et des autres acteurs vis-à-vis de la réalisation du droit à une alimentation.\nLes politiques agricoles couvrent de multiples aspects de l’agriculture : l’innocuité des aliments, la santé des animaux et des plantes, la protection des sols et de l’environnement, l’amélioration et la stabilisation des revenus, le financement, la formation et la main-d’œuvre, la recherche et le développement, la vulgarisation et le transfert technologique, le soutien aux organisations agricoles, le remboursement de taxes foncières\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 88,
+        "chunk_total": 107,
+        "nb_chars": 626
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n. Ces directives volontaires constituent un outil international définissant les responsabilités des États et des autres acteurs vis-à-vis de la réalisation du droit à une alimentation.\nLes politiques agricoles couvrent de multiples aspects de l’agriculture : l’innocuité des aliments, la santé des animaux et des plantes, la protection des sols et de l’environnement, l’amélioration et la stabilisation des revenus, le financement, la formation et la main-d’œuvre, la recherche et le développement, la vulgarisation et le transfert technologique, le soutien aux organisations agricoles, le remboursement de taxes foncières\n["
+    },
+    {
+      "texte": "]\n.\nD’après Frédérick Clerson, enseignant en politique agroalimentaire à L’\nuniversité Laval\n, une des plus grandes interventions de l’État pour la sécurité alimentaire est le programme américain des\nfood stamps\n(\nSupplemental Nutrition Assistance Program\n[SNAP], c'est-à-dire « Programme d'aide à l'alimentation supplémentaire »). Il ajoute :\n« Le plus grand projet pour rendre l'alimentation moins chère pour les pays pauvres vient d'un pays développé »\n[\n\n]\n.\nInspection des denrées alimentaires\n[\nmodifier\n|\nmodifier le code\n]\nLes inspections des denrées alimentaires font partie de la protection des consommateurs. À titre d’exemple, dans le canton de Vaud (Suisse), il y a environ 7 500 entreprises qui produisent ou distribuent des produits alimentaires et elles sont toutes soumises à ces inspections\n[\n\n]\n.\nCes inspections comprennent généralement six étapes\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 89,
+        "chunk_total": 107,
+        "nb_chars": 869
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n.\nD’après Frédérick Clerson, enseignant en politique agroalimentaire à L’\nuniversité Laval\n, une des plus grandes interventions de l’État pour la sécurité alimentaire est le programme américain des\nfood stamps\n(\nSupplemental Nutrition Assistance Program\n[SNAP], c'est-à-dire « Programme d'aide à l'alimentation supplémentaire »). Il ajoute :\n« Le plus grand projet pour rendre l'alimentation moins chère pour les pays pauvres vient d'un pays développé »\n[\n\n]\n.\nInspection des denrées alimentaires\n[\nmodifier\n|\nmodifier le code\n]\nLes inspections des denrées alimentaires font partie de la protection des consommateurs. À titre d’exemple, dans le canton de Vaud (Suisse), il y a environ 7 500 entreprises qui produisent ou distribuent des produits alimentaires et elles sont toutes soumises à ces inspections\n[\n\n]\n.\nCes inspections comprennent généralement six étapes\n["
+    },
+    {
+      "texte": "]\nqui, séquentiellement, font diminuer le nombre de microorganismes. Voici un bref descriptif de la deuxième étape, l’enrichissement, car les salmonelles (entérobactéries, toutes considérées comme pathogènes pour l'homme\n[\n\n]\n) n'en sont pas influencées. Le but de cette étape est de les isoler grâce à des billes microscopiques et magnétiques, liées à des anticorps qui reconnaissent spécifiquement les salmonelles\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 90,
+        "chunk_total": 107,
+        "nb_chars": 417
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\nqui, séquentiellement, font diminuer le nombre de microorganismes. Voici un bref descriptif de la deuxième étape, l’enrichissement, car les salmonelles (entérobactéries, toutes considérées comme pathogènes pour l'homme\n[\n\n]\n) n'en sont pas influencées. Le but de cette étape est de les isoler grâce à des billes microscopiques et magnétiques, liées à des anticorps qui reconnaissent spécifiquement les salmonelles\n["
+    },
+    {
+      "texte": "]\n. En présence d'un champ magnétique, les autres bactéries sont « lavées ». Restent alors les salmonelles qui seront, à leur tour, éliminées à la troisième étape de l'inspection : l'étalement sur milieu indicateur, c'est-à-dire qui ne contient pas les nutriments permettant leur survie. La méthode de l'enrichissement est, par ailleurs, utile dans le cadre médical, où il s’agit par exemple de vérifier qu’un patient est atteint d’une infection dans le système gastro-intestinal : il faut séparer les salmonelles de toutes les autres bactéries\n[\n\n]\n.\nIntervention et rôle des ONG humanitaires dans la sécurité alimentaire\n[\nmodifier\n|\nmodifier le code\n]\nSoutenir les populations les plus vulnérables dans la lutte contre l'insécurité alimentaire fait partie intégrante des priorités de nombreuses organisations non gouvernementales (ONG) humanitaires\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 91,
+        "chunk_total": 107,
+        "nb_chars": 853
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n. En présence d'un champ magnétique, les autres bactéries sont « lavées ». Restent alors les salmonelles qui seront, à leur tour, éliminées à la troisième étape de l'inspection : l'étalement sur milieu indicateur, c'est-à-dire qui ne contient pas les nutriments permettant leur survie. La méthode de l'enrichissement est, par ailleurs, utile dans le cadre médical, où il s’agit par exemple de vérifier qu’un patient est atteint d’une infection dans le système gastro-intestinal : il faut séparer les salmonelles de toutes les autres bactéries\n[\n\n]\n.\nIntervention et rôle des ONG humanitaires dans la sécurité alimentaire\n[\nmodifier\n|\nmodifier le code\n]\nSoutenir les populations les plus vulnérables dans la lutte contre l'insécurité alimentaire fait partie intégrante des priorités de nombreuses organisations non gouvernementales (ONG) humanitaires\n["
+    },
+    {
+      "texte": "]\n. Conflits armés, inondations de grande ampleurs, tempêtes, sécheresses… Lors des crises, des interventions sont déployées en urgence pour assurer l'essentiel. Les ONG procèdent à des distributions alimentaire ou à des transferts monétaires pour permettre aux populations touchées de subvenir à leurs besoins essentiels le plus rapidement possible.\nLes ONG travaillent également sur le long terme pour éviter de rendre les populations vulnérables dépendantes de l'aide humanitaire et les aider à devenir autosuffisantes\n[",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 92,
+        "chunk_total": 107,
+        "nb_chars": 523
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n. Conflits armés, inondations de grande ampleurs, tempêtes, sécheresses… Lors des crises, des interventions sont déployées en urgence pour assurer l'essentiel. Les ONG procèdent à des distributions alimentaire ou à des transferts monétaires pour permettre aux populations touchées de subvenir à leurs besoins essentiels le plus rapidement possible.\nLes ONG travaillent également sur le long terme pour éviter de rendre les populations vulnérables dépendantes de l'aide humanitaire et les aider à devenir autosuffisantes\n["
+    },
+    {
+      "texte": "]\n. Ces associations travaillent donc sur les moyens de subsistance : projets de soutien de l'agriculture, de la culture maraîchère et de l'élevage, aide au développement d'activités génératrices de revenus, formation à l'adaptation aux conséquences du réchauffement climatique, etc.\nLe\nProgramme alimentaire mondial\ntravaille en collaboration avec des ONG internationales pour améliorer la sécurité alimentaire des populations au niveau mondial comme\nCare international\n,\nOxfam\n,\nAction contre la faim\n,\nSolidarités International\n,\nACTED\n[source secondaire souhaitée]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\na\net\nb\nComité de la Sécurité alimentaire mondiale,\nS'entendre sur la terminologie\n, CSA,\n\ne\nsession, 15-20 octobre 2012, 17\np.\n(\nlire en ligne\n)\n.\n↑\nN. Bricas,\nSécurité alimentaire In Poulain J.P. (Ed.) Dictionnaire des cultures alimentaires\n, Paris,\nPUF\n,",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 93,
+        "chunk_total": 107,
+        "nb_chars": 881
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n]\n. Ces associations travaillent donc sur les moyens de subsistance : projets de soutien de l'agriculture, de la culture maraîchère et de l'élevage, aide au développement d'activités génératrices de revenus, formation à l'adaptation aux conséquences du réchauffement climatique, etc.\nLe\nProgramme alimentaire mondial\ntravaille en collaboration avec des ONG internationales pour améliorer la sécurité alimentaire des populations au niveau mondial comme\nCare international\n,\nOxfam\n,\nAction contre la faim\n,\nSolidarités International\n,\nACTED\n[source secondaire souhaitée]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\na\net\nb\nComité de la Sécurité alimentaire mondiale,\nS'entendre sur la terminologie\n, CSA,\n\ne\nsession, 15-20 octobre 2012, 17\np.\n(\nlire en ligne\n)\n.\n↑\nN. Bricas,\nSécurité alimentaire In Poulain J.P. (Ed.) Dictionnaire des cultures alimentaires\n, Paris,\nPUF\n,"
+    },
+    {
+      "texte": ", 1226-1230\np.\n(\nISBN\n978-2-13-055875-0\n)\n↑\n(en)\nDarcy A.\nFreedman\n, Christine E.\nBlake\net Angela D.\nLiese\n, «\nDeveloping a Multicomponent Model of Nutritious Food Access and Related Implications for Community and Policy Practice\n»,\nJournal of Community Practice\n,\nvol.\n21,\nn\no\n4,‎\n\ner\noctobre 2013\n,\np.\n379–409\n(\nISSN\n1070-5422\n,\nPMID\n\n,\nPMCID\nPMC3930921\n,\nDOI\n10.1080/10705422.2013.842197\n,\nlire en ligne\n, consulté le\n17 janvier 2022\n)\n.\n↑\nFrançois Collart Dutilleul, «\nLe droit à l’alimentation à la lumière de son histoire\n»,\nColloque de l’Académie d’agriculture de France\n,‎\noctobre 2019\n(\nlire en ligne\n)\n.\n↑\n«\nÀ propos du CSA | Committee on World Food Security\n», sur\nfao.org\n(consulté le\n7 octobre 2020\n)\n.\n↑\n(en)\nAmartya Sen\n,\nPoverty and Famines. An Essay on Entitlement and Deprivation\n,\nOxford University Press\n,",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 94,
+        "chunk_total": 107,
+        "nb_chars": 825
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, 1226-1230\np.\n(\nISBN\n978-2-13-055875-0\n)\n↑\n(en)\nDarcy A.\nFreedman\n, Christine E.\nBlake\net Angela D.\nLiese\n, «\nDeveloping a Multicomponent Model of Nutritious Food Access and Related Implications for Community and Policy Practice\n»,\nJournal of Community Practice\n,\nvol.\n21,\nn\no\n4,‎\n\ner\noctobre 2013\n,\np.\n379–409\n(\nISSN\n1070-5422\n,\nPMID\n\n,\nPMCID\nPMC3930921\n,\nDOI\n10.1080/10705422.2013.842197\n,\nlire en ligne\n, consulté le\n17 janvier 2022\n)\n.\n↑\nFrançois Collart Dutilleul, «\nLe droit à l’alimentation à la lumière de son histoire\n»,\nColloque de l’Académie d’agriculture de France\n,‎\noctobre 2019\n(\nlire en ligne\n)\n.\n↑\n«\nÀ propos du CSA | Committee on World Food Security\n», sur\nfao.org\n(consulté le\n7 octobre 2020\n)\n.\n↑\n(en)\nAmartya Sen\n,\nPoverty and Famines. An Essay on Entitlement and Deprivation\n,\nOxford University Press\n,"
+    },
+    {
+      "texte": ".\n↑\n(en)\nB. Burlingame et S. Dernini (éd.),\nSustainable Diets and Biodiversity. Directions and Solutions for Policy, Research and Action : Proceedings of the International Scientific Symposium Biodiversity and Sustainable Diets United Against Hunger, 3–5 November 2010, FAO Headquarters, Rome\n, FAO,\n\n, 309\np.\n(\nlire en ligne\n)\n.\nSymposium scientifique international : \"Biodiversité et régimes soutenables, unis contre la faim\".\n↑\nhttps://www.ouest-france.fr/monde/organismes-internationaux/onu/la-faim-dans-le-monde-4-questions-cle-sur-une-catastrophe-qui-touche-821-millions-de-personnes-6411896\n↑\na\nb\net\nc\nBernard Jenner,\nEncyclo junior\n, Paris, Hachette,\n\n, 562\np.\n(\nISBN\n\n)\n,\np.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 95,
+        "chunk_total": 107,
+        "nb_chars": 683
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n.\n↑\n(en)\nB. Burlingame et S. Dernini (éd.),\nSustainable Diets and Biodiversity. Directions and Solutions for Policy, Research and Action : Proceedings of the International Scientific Symposium Biodiversity and Sustainable Diets United Against Hunger, 3–5 November 2010, FAO Headquarters, Rome\n, FAO,\n\n, 309\np.\n(\nlire en ligne\n)\n.\nSymposium scientifique international : \"Biodiversité et régimes soutenables, unis contre la faim\".\n↑\nhttps://www.ouest-france.fr/monde/organismes-internationaux/onu/la-faim-dans-le-monde-4-questions-cle-sur-une-catastrophe-qui-touche-821-millions-de-personnes-6411896\n↑\na\nb\net\nc\nBernard Jenner,\nEncyclo junior\n, Paris, Hachette,\n\n, 562\np.\n(\nISBN\n\n)\n,\np."
+    },
+    {
+      "texte": ".\n↑\n«\nLe nombre de personnes souffrant de la faim dans le monde a baissé en 2010\n»,\nLe Monde\n.fr\n,‎\n14 septembre 2010\n(\nlire en ligne\n)\n↑\n(en)\nH. C. J. Godfray et al., «\nFood security: the challenge of feeding 9 billion people\n»,\nScience\n,\nvol.\n327,\nn\no\n5697,‎\n\n,\np.\n812–818\n(\nDOI\n10.1126/science.1185383\n)\n.\n↑\n(en)\nL'Éducation pour les peuples et la planète : créer des avenirs durables pour tous\n, UNESCO Publishing,\n\n,\np.\n\n.\n↑\n(en)\nM. Herrero, D. Grace, J. Njuki, N. Johnson, D. Enahoro, S. Silvestri, M.C. Rufino, «\nThe roles of livestock in developing countries\n»,\nAnimal\n,\nn\no\n5,‎\nnovembre 2012\n,\np.\n1-16\n(\nPMID\n\n)\n.\n↑\n(en)\nDeepak K. Ray et al., «\nRecent patterns of crop yield growth and stagnation\n»,\nNature Communications\n,\nvol.\n3,\nn\no\n1293,‎",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 96,
+        "chunk_total": 107,
+        "nb_chars": 751
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n.\n↑\n«\nLe nombre de personnes souffrant de la faim dans le monde a baissé en 2010\n»,\nLe Monde\n.fr\n,‎\n14 septembre 2010\n(\nlire en ligne\n)\n↑\n(en)\nH. C. J. Godfray et al., «\nFood security: the challenge of feeding 9 billion people\n»,\nScience\n,\nvol.\n327,\nn\no\n5697,‎\n\n,\np.\n812–818\n(\nDOI\n10.1126/science.1185383\n)\n.\n↑\n(en)\nL'Éducation pour les peuples et la planète : créer des avenirs durables pour tous\n, UNESCO Publishing,\n\n,\np.\n\n.\n↑\n(en)\nM. Herrero, D. Grace, J. Njuki, N. Johnson, D. Enahoro, S. Silvestri, M.C. Rufino, «\nThe roles of livestock in developing countries\n»,\nAnimal\n,\nn\no\n5,‎\nnovembre 2012\n,\np.\n1-16\n(\nPMID\n\n)\n.\n↑\n(en)\nDeepak K. Ray et al., «\nRecent patterns of crop yield growth and stagnation\n»,\nNature Communications\n,\nvol.\n3,\nn\no\n1293,‎"
+    },
+    {
+      "texte": "(\nDOI\n10.1038/ncomms2296\n)\n.\n↑\nPlusieurs facteurs semblent être la cause de cette diminution : les pratiques culturales, les organismes nuisibles et la qualité des semences.\n↑\nChris Chipello, «\nLa Révolution verte s’essouffle\n», sur\nmcgill.ca\n,\n21 décembre 2012\n.\n↑\n«\nRapport de synthèse de la Commission EAT-Lancet\n», sur\nsf-nutrition.org\n↑\n(en)\n«\nFood in the Anthropocene: the EAT–Lancet Commission on healthy diets from sustainable food systems\n», sur\nthelancet.com\n,\n16 janvier 2019\n.\n↑\nEurepgap\n↑\nPaul Benkimoun,\nDémocratie et sécurité alimentaire. La peur aux ventres\n,\nÉditions Textuel\n,\n\n,\np.\n19-31\n↑\nGil Rivière-Wekstein,\nPanique dans l'assiette. Ils se nourrissent de nos peurs\n, Le Publieur,\n\n,\np.",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 97,
+        "chunk_total": 107,
+        "nb_chars": 708
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n(\nDOI\n10.1038/ncomms2296\n)\n.\n↑\nPlusieurs facteurs semblent être la cause de cette diminution : les pratiques culturales, les organismes nuisibles et la qualité des semences.\n↑\nChris Chipello, «\nLa Révolution verte s’essouffle\n», sur\nmcgill.ca\n,\n21 décembre 2012\n.\n↑\n«\nRapport de synthèse de la Commission EAT-Lancet\n», sur\nsf-nutrition.org\n↑\n(en)\n«\nFood in the Anthropocene: the EAT–Lancet Commission on healthy diets from sustainable food systems\n», sur\nthelancet.com\n,\n16 janvier 2019\n.\n↑\nEurepgap\n↑\nPaul Benkimoun,\nDémocratie et sécurité alimentaire. La peur aux ventres\n,\nÉditions Textuel\n,\n\n,\np.\n19-31\n↑\nGil Rivière-Wekstein,\nPanique dans l'assiette. Ils se nourrissent de nos peurs\n, Le Publieur,\n\n,\np."
+    },
+    {
+      "texte": "↑\n«\nUn produit alimentaire sur huit est contaminé par des hydrocarbures, alerte Foodwatch\n», sur\n20 Minutes\n,\n9 décembre 2021\n(consulté le\n10 décembre 2021\n)\n.\n↑\nExposition aux métaux de la population française : résultats de l’étude ESTEBAN\n,\nSanté publique France\n↑\n(en)\nElaine M.\nPower\n, «\nConceptualizing Food Security for Aboriginal People in Canada\n»,\nCanadian Journal of Public Health\n,\nvol.\n99,\nn\no\n2,‎",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 98,
+        "chunk_total": 107,
+        "nb_chars": 410
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n↑\n«\nUn produit alimentaire sur huit est contaminé par des hydrocarbures, alerte Foodwatch\n», sur\n20 Minutes\n,\n9 décembre 2021\n(consulté le\n10 décembre 2021\n)\n.\n↑\nExposition aux métaux de la population française : résultats de l’étude ESTEBAN\n,\nSanté publique France\n↑\n(en)\nElaine M.\nPower\n, «\nConceptualizing Food Security for Aboriginal People in Canada\n»,\nCanadian Journal of Public Health\n,\nvol.\n99,\nn\no\n2,‎"
+    },
+    {
+      "texte": "er\nmars 2008\n,\np.\n95–97\n(\nISSN\n1920-7476\n,\nDOI\n10.1007/BF03405452\n,\nlire en ligne\n, consulté le\n20 janvier 2020\n)\n↑\na\nb\net\nc\nWater resources across Europe — confronting water scarcity and drought (\nRapport sur les risques de pénuries d’eau et de sécheresse en Europe\n)\n, publié par l’\nAgence européenne de l'environnement\n(EEA Report No 2/2009)\n↑\n«\nBaromètre 2020 de l'eau, de l'hygiène & de l'assainissement\n», sur\nsolidarites.org\n,\nmars 2020\n↑\nDaskalaki et Voudouris, 2007\n↑\n«\népidémie\n», sur\nlarousse.fr\n↑\n«\nLe bilan de l'épidémie d'Ebola approche 7 000 morts en Afrique de l'Ouest\n»,\nFrancetv info\n,‎\n29 novembre 2014\n(\nlire en ligne\n)\n↑\n«\nEbola, l'agriculture et la sécurité alimentaire en 10 questions\n», sur\nwikiagri.fr\n,\n\n(consulté le\n25 novembre 2014\n)\n↑\nFAO,\nBonne gouvernance des régimes fonciers et de l'administration des terres\n,",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 99,
+        "chunk_total": 107,
+        "nb_chars": 843
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ner\nmars 2008\n,\np.\n95–97\n(\nISSN\n1920-7476\n,\nDOI\n10.1007/BF03405452\n,\nlire en ligne\n, consulté le\n20 janvier 2020\n)\n↑\na\nb\net\nc\nWater resources across Europe — confronting water scarcity and drought (\nRapport sur les risques de pénuries d’eau et de sécheresse en Europe\n)\n, publié par l’\nAgence européenne de l'environnement\n(EEA Report No 2/2009)\n↑\n«\nBaromètre 2020 de l'eau, de l'hygiène & de l'assainissement\n», sur\nsolidarites.org\n,\nmars 2020\n↑\nDaskalaki et Voudouris, 2007\n↑\n«\népidémie\n», sur\nlarousse.fr\n↑\n«\nLe bilan de l'épidémie d'Ebola approche 7 000 morts en Afrique de l'Ouest\n»,\nFrancetv info\n,‎\n29 novembre 2014\n(\nlire en ligne\n)\n↑\n«\nEbola, l'agriculture et la sécurité alimentaire en 10 questions\n», sur\nwikiagri.fr\n,\n\n(consulté le\n25 novembre 2014\n)\n↑\nFAO,\nBonne gouvernance des régimes fonciers et de l'administration des terres\n,"
+    },
+    {
+      "texte": ", 82\np.\n(\nISBN\n978-92-5-205753-6\n,\nlire en ligne\n)\n↑\n[PDF]\nDirectives volontaires pour une gouvernance responsable des régimes fonciers\n↑\nJean-Jacques Gabas, «\nInvestissements agricoles en Afrique\n»,\nAfrique contemporaine\n,\nn\no\n237,‎\n\n,\np.\n45-55\n↑\nHold-up sur le Climat : Comment le système alimentaire est responsable du changement climatique et ce que nous pouvons faire\n, GRAIN & CETIM,\n\n, 259\np.\n(\nISBN\n978-2-88053-113-3\n)\n↑\n«\nDirectives | Droit à l'alimentation | Organisation des Nations Unies pour l'alimentation et l'agriculture\n», sur\nfao.org\n(consulté le\n7 octobre 2020\n)\n.\n↑\nCommission sur l’avenir de l’agriculture et de l’agroalimentaire québécois,\nAgriculture et agroalimentaire : choisir l’avenir\n,",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 100,
+        "chunk_total": 107,
+        "nb_chars": 713
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, 82\np.\n(\nISBN\n978-92-5-205753-6\n,\nlire en ligne\n)\n↑\n[PDF]\nDirectives volontaires pour une gouvernance responsable des régimes fonciers\n↑\nJean-Jacques Gabas, «\nInvestissements agricoles en Afrique\n»,\nAfrique contemporaine\n,\nn\no\n237,‎\n\n,\np.\n45-55\n↑\nHold-up sur le Climat : Comment le système alimentaire est responsable du changement climatique et ce que nous pouvons faire\n, GRAIN & CETIM,\n\n, 259\np.\n(\nISBN\n978-2-88053-113-3\n)\n↑\n«\nDirectives | Droit à l'alimentation | Organisation des Nations Unies pour l'alimentation et l'agriculture\n», sur\nfao.org\n(consulté le\n7 octobre 2020\n)\n.\n↑\nCommission sur l’avenir de l’agriculture et de l’agroalimentaire québécois,\nAgriculture et agroalimentaire : choisir l’avenir\n,"
+    },
+    {
+      "texte": ", 48\np.\n(\nISBN\n978-2-550-48760-9\n,\nlire en ligne\n)\n.\n↑\n(en)\nTimothy Josling, «\nPolitique commerciale pour la sécurité alimentaire: Politiques agricoles des pays développés\n»,\nInternational Centre for Trade and Sustainable Development\n,\nvol.\n9,\nn\no\n5,‎\n15 juin 2010\n(\nlire en ligne\n, consulté le\n9 novembre 2014\n)\n.\n↑\n«\nInspection des denrées alimentaires\n», sur\nvd.ch\n(consulté le\n30 mai 2017\n)\n.\n↑\na\nb\net\nc\nDr. Christoph Keel, Dr. José Entenza,\nTravaux pratiques de Microbiologie des Procaryotes\n,\np.\n\n.\n↑\nInformation sur les bactéries indésirables dans les denrées alimentaires\n, Suisse, 2\np.\n(\nlire en ligne\n)\n,\np.\n\n.\n↑\n«\nSécurité alimentaire\n», sur\nsolidaire-info.org\n(consulté le\n\ner\noctobre 2022\n)\n.\n↑\n«\nObjectif 2 : Éliminer la faim, assurer la sécurité alimentaire, améliorer la nutrition et promouvoir l’agriculture durable\n», sur\nDéveloppement durable\n(consulté le",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 101,
+        "chunk_total": 107,
+        "nb_chars": 874
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\n, 48\np.\n(\nISBN\n978-2-550-48760-9\n,\nlire en ligne\n)\n.\n↑\n(en)\nTimothy Josling, «\nPolitique commerciale pour la sécurité alimentaire: Politiques agricoles des pays développés\n»,\nInternational Centre for Trade and Sustainable Development\n,\nvol.\n9,\nn\no\n5,‎\n15 juin 2010\n(\nlire en ligne\n, consulté le\n9 novembre 2014\n)\n.\n↑\n«\nInspection des denrées alimentaires\n», sur\nvd.ch\n(consulté le\n30 mai 2017\n)\n.\n↑\na\nb\net\nc\nDr. Christoph Keel, Dr. José Entenza,\nTravaux pratiques de Microbiologie des Procaryotes\n,\np.\n\n.\n↑\nInformation sur les bactéries indésirables dans les denrées alimentaires\n, Suisse, 2\np.\n(\nlire en ligne\n)\n,\np.\n\n.\n↑\n«\nSécurité alimentaire\n», sur\nsolidaire-info.org\n(consulté le\n\ner\noctobre 2022\n)\n.\n↑\n«\nObjectif 2 : Éliminer la faim, assurer la sécurité alimentaire, améliorer la nutrition et promouvoir l’agriculture durable\n», sur\nDéveloppement durable\n(consulté le"
+    },
+    {
+      "texte": "er\noctobre 2022\n)\n.\nAnnexes\n[\nmodifier\n|\nmodifier le code\n]\nSur les autres projets Wikimedia :\nSécurité alimentaire\n, sur\nWikimedia Commons\nSécurité alimentaire\n,\nsur\nWikiquote\nBibliographie\n[\nmodifier\n|\nmodifier le code\n]\nArnaud Orain\n,\nLe Monde confisqué. Essai sur le capitalisme de la finitude (XVIᵉ - XXIᵉ siècle)\n(2025), 368 p.\n(\nISBN\n978-2-0804-6657-0\n)\n[\n\n]\n, chez\nFlammarion\n[\n\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nListe des pays par taux d'autosuffisance alimentaire\nAgences, autorités\n[\nmodifier\n|\nmodifier le code\n]\nFAO\n(Nations Unies)\nAFSCA\n(Belgique)\nAFSSA\n, devenue l'ANSES au\n\ner\n\njuillet 2010\n\n(France)\n\nACIA\n\n(Canada)\n\nAgMES\n\nGlobal Crop Diversity Trust\n\nThèmes connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nSanté-environnement\n\nÉcotoxicologie\n\n,\n\nstockage des céréales\n\nHygiène des aliments\n\n,\n\ncontrôle de la sécurité sanitaire des aliments\n\nLabel «",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 102,
+        "chunk_total": 107,
+        "nb_chars": 885
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\ner\noctobre 2022\n)\n.\nAnnexes\n[\nmodifier\n|\nmodifier le code\n]\nSur les autres projets Wikimedia :\nSécurité alimentaire\n, sur\nWikimedia Commons\nSécurité alimentaire\n,\nsur\nWikiquote\nBibliographie\n[\nmodifier\n|\nmodifier le code\n]\nArnaud Orain\n,\nLe Monde confisqué. Essai sur le capitalisme de la finitude (XVIᵉ - XXIᵉ siècle)\n(2025), 368 p.\n(\nISBN\n978-2-0804-6657-0\n)\n[\n\n]\n, chez\nFlammarion\n[\n\n]\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nListe des pays par taux d'autosuffisance alimentaire\nAgences, autorités\n[\nmodifier\n|\nmodifier le code\n]\nFAO\n(Nations Unies)\nAFSCA\n(Belgique)\nAFSSA\n, devenue l'ANSES au\n\ner\n\njuillet 2010\n\n(France)\n\nACIA\n\n(Canada)\n\nAgMES\n\nGlobal Crop Diversity Trust\n\nThèmes connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nSanté-environnement\n\nÉcotoxicologie\n\n,\n\nstockage des céréales\n\nHygiène des aliments\n\n,\n\ncontrôle de la sécurité sanitaire des aliments\n\nLabel «"
+    },
+    {
+      "texte": "Contact alimentaire\n\n»\n\nRésidu de pesticides\n\n,\n\nQuEChERS\n\nTraçabilité agroalimentaire\n\nCrise alimentaire\n\n,\n\nliste de famines\n\nCrise alimentaire mondiale de 2007-2008\n\nCrise alimentaire due à la Covid-19\n\nCrise alimentaire de 2022\n\nAide humanitaire\n\nObjectifs du millénaire pour le développement\n\nDroit à l'alimentation\n\nMalnutrition\n\n,\n\nsous-alimentation\n\nTaux d'autosuffisance alimentaire\n\nJournée mondiale de l'alimentation\n\nTransition alimentaire\n\nSystème alimentaire\n\nRévolution verte\n\nStress hydrique (écologie)\n\n(\n\npénurie de l'eau\n\n)\n\nAccaparement des terres\n\nSouveraineté alimentaire\n\nNourriture contre carburant\n\nFéminisation de la faim\n\n(es)\n\nBourse de commerce de Chicago\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRessource relative à la santé\n\n:\n\nMedical Subject Headings\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nGran Enciclopèdia Catalana",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 103,
+        "chunk_total": 107,
+        "nb_chars": 890
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nContact alimentaire\n\n»\n\nRésidu de pesticides\n\n,\n\nQuEChERS\n\nTraçabilité agroalimentaire\n\nCrise alimentaire\n\n,\n\nliste de famines\n\nCrise alimentaire mondiale de 2007-2008\n\nCrise alimentaire due à la Covid-19\n\nCrise alimentaire de 2022\n\nAide humanitaire\n\nObjectifs du millénaire pour le développement\n\nDroit à l'alimentation\n\nMalnutrition\n\n,\n\nsous-alimentation\n\nTaux d'autosuffisance alimentaire\n\nJournée mondiale de l'alimentation\n\nTransition alimentaire\n\nSystème alimentaire\n\nRévolution verte\n\nStress hydrique (écologie)\n\n(\n\npénurie de l'eau\n\n)\n\nAccaparement des terres\n\nSouveraineté alimentaire\n\nNourriture contre carburant\n\nFéminisation de la faim\n\n(es)\n\nBourse de commerce de Chicago\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRessource relative à la santé\n\n:\n\nMedical Subject Headings\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nGran Enciclopèdia Catalana"
+    },
+    {
+      "texte": "Store norske leksikon\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nJapon\n\nIsraël\n\nTchéquie\n\n(en)\n\nSite officiel\n\ndu\n\nProgramme alimentaire mondial\n\n;\n\n(fr)\n\nSite du Réseau de Prévention des Crises Alimentaires\n\n;\n\nActivités du Cirad sur la sécurité alimentaire\n\nLes cours en ligne sur la sécurité alimentaire de la FAO\n\n«\n\nLes ressources agricoles face aux changements climatiques : enjeux de défense et de sécurité\n\n», sur\n\ndefenseclimat.fr\n\n,\n\n(consulté le\n\n11 novembre 2025\n\n)\n\nS. Drogué, C. Grandval, JC. Bureau, H. Guyomard, L. Roudart, «\n\nPanorama des analyses prospectives sur l'évolution de la sécurité alimentaire mondiale à l'horizon 2020-2030\n\n», sur\n\nhal.inrae.fr\n\n,\n\n16 février 2006\n\n(consulté le\n\n11 novembre 2025\n\n)\n\nAlimentation et gastronomie\n\n↑\n\n«\n\nEn est-ce fini du (néo)libéralisme ?\n\n», sur\n\nFrance Culture\n\n,\n\n30 janvier 2025\n\n(consulté le\n\n6 février 2025\n\n)\n\n↑\n\nArnaud",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 104,
+        "chunk_total": 107,
+        "nb_chars": 896
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nStore norske leksikon\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nJapon\n\nIsraël\n\nTchéquie\n\n(en)\n\nSite officiel\n\ndu\n\nProgramme alimentaire mondial\n\n;\n\n(fr)\n\nSite du Réseau de Prévention des Crises Alimentaires\n\n;\n\nActivités du Cirad sur la sécurité alimentaire\n\nLes cours en ligne sur la sécurité alimentaire de la FAO\n\n«\n\nLes ressources agricoles face aux changements climatiques : enjeux de défense et de sécurité\n\n», sur\n\ndefenseclimat.fr\n\n,\n\n(consulté le\n\n11 novembre 2025\n\n)\n\nS. Drogué, C. Grandval, JC. Bureau, H. Guyomard, L. Roudart, «\n\nPanorama des analyses prospectives sur l'évolution de la sécurité alimentaire mondiale à l'horizon 2020-2030\n\n», sur\n\nhal.inrae.fr\n\n,\n\n16 février 2006\n\n(consulté le\n\n11 novembre 2025\n\n)\n\nAlimentation et gastronomie\n\n↑\n\n«\n\nEn est-ce fini du (néo)libéralisme ?\n\n», sur\n\nFrance Culture\n\n,\n\n30 janvier 2025\n\n(consulté le\n\n6 février 2025\n\n)\n\n↑\n\nArnaud"
+    },
+    {
+      "texte": "Orain\n\n, «\n\nLe monde confisqué de Arnaud Orain - Editions Flammarion\n\n», sur\n\neditions.flammarion.com\n\n(consulté le\n\n6 février 2025\n\n)\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Sécurité_alimentaire&oldid=233512638\n\n».\n\nCatégorie\n\n:\n\nSécurité alimentaire\n\nCatégories cachées :\n\nArticle manquant de références depuis avril 2025\n\nArticle manquant de références/Liste complète\n\nArticle à référence insuffisante\n\nArticle contenant un appel à traduction en anglais\n\nArticle à référence souhaitée\n\nCatégorie Commons avec lien local identique sur Wikidata\n\nArticle contenant un appel à traduction en espagnol\n\nPage utilisant P486\n\nPage pointant vers des bases externes\n\nPage pointant vers des bases relatives à la santé\n\nPage utilisant P1296\n\nPage utilisant P4342\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 105,
+        "chunk_total": 107,
+        "nb_chars": 897
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nOrain\n\n, «\n\nLe monde confisqué de Arnaud Orain - Editions Flammarion\n\n», sur\n\neditions.flammarion.com\n\n(consulté le\n\n6 février 2025\n\n)\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Sécurité_alimentaire&oldid=233512638\n\n».\n\nCatégorie\n\n:\n\nSécurité alimentaire\n\nCatégories cachées :\n\nArticle manquant de références depuis avril 2025\n\nArticle manquant de références/Liste complète\n\nArticle à référence insuffisante\n\nArticle contenant un appel à traduction en anglais\n\nArticle à référence souhaitée\n\nCatégorie Commons avec lien local identique sur Wikidata\n\nArticle contenant un appel à traduction en espagnol\n\nPage utilisant P486\n\nPage pointant vers des bases externes\n\nPage pointant vers des bases relatives à la santé\n\nPage utilisant P1296\n\nPage utilisant P4342\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité"
+    },
+    {
+      "texte": "Portail:Alimentation et gastronomie/Articles liés\n\nPortail:Société/Articles liés\n\nBon article en indonésien\n\nRechercher\n\nRechercher\n\nSécurité alimentaire\n\n45 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_haccp_alimentaire",
+        "nom_doc": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "nom": "HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+        "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+        "indexe_le": "2026-04-17T03:11:51.987969",
+        "chunk_index": 106,
+        "chunk_total": 107,
+        "nb_chars": 183
+      },
+      "texte_embed": "normes — HACCP — Analyse des dangers et maîtrise des points critiques (Wikipedia FR)\nPortail:Alimentation et gastronomie/Articles liés\n\nPortail:Société/Articles liés\n\nBon article en indonésien\n\nRechercher\n\nRechercher\n\nSécurité alimentaire\n\n45 langues\n\nAjouter un sujet"
+    }
+  ]
+}

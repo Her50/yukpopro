@@ -1,0 +1,275 @@
+{
+  "doc_id": "normes_iso_45001_sst",
+  "metadata": {
+    "doc_id": "normes_iso_45001_sst",
+    "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+    "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "DRH",
+      "assureur"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+    "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+    "indexe_le": "2026-04-17T02:49:15.951250"
+  },
+  "nb_chars": 7632,
+  "nb_chunks": 10,
+  "chunks": [
+    {
+      "texte": "ISO 45001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article ne s'appuie pas, ou pas assez, sur des sources\n\nsecondaires ou tertiaires\n\n(\n\nfévrier 2023\n\n).\n\nL'article peut contenir des analyses et interprétations inexactes ou inédites de sources primaires. Pour améliorer la\n\nvérifiabilité\n\nde l'article ainsi que\n\nson intérêt encyclopédique\n\n, il est nécessaire, quand des\n\nsources primaires\n\nsont citées, de les associer à des analyses faites par des sources secondaires.\n\nLogo de la norme\n\nISO 45001\n\n.\n\nISO 45001\n\n« Systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation » (en\n\nanglais\n\n:\n\nOccupational health and safety management systems -- Requirements with guidance for use\n\n) est une\n\nnorme",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 0,
+        "chunk_total": 10,
+        "nb_chars": 886
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nISO 45001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article ne s'appuie pas, ou pas assez, sur des sources\n\nsecondaires ou tertiaires\n\n(\n\nfévrier 2023\n\n).\n\nL'article peut contenir des analyses et interprétations inexactes ou inédites de sources primaires. Pour améliorer la\n\nvérifiabilité\n\nde l'article ainsi que\n\nson intérêt encyclopédique\n\n, il est nécessaire, quand des\n\nsources primaires\n\nsont citées, de les associer à des analyses faites par des sources secondaires.\n\nLogo de la norme\n\nISO 45001\n\n.\n\nISO 45001\n\n« Systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation » (en\n\nanglais\n\n:\n\nOccupational health and safety management systems -- Requirements with guidance for use\n\n) est une\n\nnorme"
+    },
+    {
+      "texte": "internationale qui spécifie les exigences pour un système de management de la\n\nsanté et sécurité au travail\n\n(SST,\n\nanglais\n\n:\n\nOHS\n\n), publiée en\n\nmars 2018\n\npar l'\n\nOrganisation internationale de normalisation\n\n.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme a été développée par le comité ISO/TC 283\n\n[\n\n]\n, après un long processus de rédaction, comprenant plusieurs projets rejetés et retravaillés entre 2015 et 2017, la norme a finalement été publiée officiellement le\n12 mars 2018\n.\nLa perspective d’une norme ISO sur les Systèmes de Management de la Sécurité et Santé au Travail a été envisagée dès les années 2000 sous l’impulsion du\nBSI\n(les Britanniques ont publié une première norme de SMSST en 1996 : BS 8800, devenue OHSAS 18001\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 1,
+        "chunk_total": 10,
+        "nb_chars": 756
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\ninternationale qui spécifie les exigences pour un système de management de la\n\nsanté et sécurité au travail\n\n(SST,\n\nanglais\n\n:\n\nOHS\n\n), publiée en\n\nmars 2018\n\npar l'\n\nOrganisation internationale de normalisation\n\n.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme a été développée par le comité ISO/TC 283\n\n[\n\n]\n, après un long processus de rédaction, comprenant plusieurs projets rejetés et retravaillés entre 2015 et 2017, la norme a finalement été publiée officiellement le\n12 mars 2018\n.\nLa perspective d’une norme ISO sur les Systèmes de Management de la Sécurité et Santé au Travail a été envisagée dès les années 2000 sous l’impulsion du\nBSI\n(les Britanniques ont publié une première norme de SMSST en 1996 : BS 8800, devenue OHSAS 18001\n["
+    },
+    {
+      "texte": "]\n). Mais plusieurs votes au sein de l’ISO ont d’abord été négatifs (une des raisons était la disponibilité et la légitimité du référentiel international ILO-OSH\n[\n\n]\n\npublié par l’\n\nOrganisation internationale du travail\n\nen 2001).\n\nEn 2013 un nouveau vote est enfin positif et l’ISO s’engage dans l’élaboration de son propre référentiel de SMSST. Le projet fait même l’objet d’un accord de coopération entre l’\n\nOIT\n\net l’ISO (accord qui se terminera par une tension entre ces deux organismes, la norme ISO ne s'étant pas totalement alignée sur toutes les exigences minimum de l'ILO-OSH). La naissance de l’ISO 45001 est laborieuse mais arrive à terme début 2018.\n\nDe nombreux organismes nationaux de normalisation membres de l'ISO l'adoptent comme norme nationale (par exemple BSI qui en fait d'emblée sa norme ISO 45001 en annulant ses propres normes de SMSST, dont celle mondialement connue",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 2,
+        "chunk_total": 10,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n). Mais plusieurs votes au sein de l’ISO ont d’abord été négatifs (une des raisons était la disponibilité et la légitimité du référentiel international ILO-OSH\n[\n\n]\n\npublié par l’\n\nOrganisation internationale du travail\n\nen 2001).\n\nEn 2013 un nouveau vote est enfin positif et l’ISO s’engage dans l’élaboration de son propre référentiel de SMSST. Le projet fait même l’objet d’un accord de coopération entre l’\n\nOIT\n\net l’ISO (accord qui se terminera par une tension entre ces deux organismes, la norme ISO ne s'étant pas totalement alignée sur toutes les exigences minimum de l'ILO-OSH). La naissance de l’ISO 45001 est laborieuse mais arrive à terme début 2018.\n\nDe nombreux organismes nationaux de normalisation membres de l'ISO l'adoptent comme norme nationale (par exemple BSI qui en fait d'emblée sa norme ISO 45001 en annulant ses propres normes de SMSST, dont celle mondialement connue"
+    },
+    {
+      "texte": "OHSAS 18001\n\n) tandis que quelques pays ont décidé de ne pas en faire leur norme nationale (dont la France). Suite à sa parution, un délai de trois ans a été accordé pour la migration des entreprises certifiées selon OHSAS 18001 vers ISO 45001\n\n[\n\n]\n.\nL'ISO 45001 est diffusée en trois langues (anglais, espagnol et français) par l'ISO\n[\n\n]\nou via ses membres (les organismes nationaux de normalisation).\nEn France, l’AFNOR a annoncé en\nnovembre 2024\nle lancement d’une révision de la norme pour intégrer des évolutions telles que la prise en compte des enjeux climatiques\n[\n\n]\n,\n[\n\n]\nAnnée\nVersion / Étape\n\nOHSAS 18001:1999\n\nOHSAS 18001:2007\n\nCréation du comité ISO/TC 283\n2015-2017\nProjets de norme ISO 45001\n\nISO 45001:2018\n\nFin de la transition OHSAS 18001 → ISO 45001",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 3,
+        "chunk_total": 10,
+        "nb_chars": 772
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nOHSAS 18001\n\n) tandis que quelques pays ont décidé de ne pas en faire leur norme nationale (dont la France). Suite à sa parution, un délai de trois ans a été accordé pour la migration des entreprises certifiées selon OHSAS 18001 vers ISO 45001\n\n[\n\n]\n.\nL'ISO 45001 est diffusée en trois langues (anglais, espagnol et français) par l'ISO\n[\n\n]\nou via ses membres (les organismes nationaux de normalisation).\nEn France, l’AFNOR a annoncé en\nnovembre 2024\nle lancement d’une révision de la norme pour intégrer des évolutions telles que la prise en compte des enjeux climatiques\n[\n\n]\n,\n[\n\n]\nAnnée\nVersion / Étape\n\nOHSAS 18001:1999\n\nOHSAS 18001:2007\n\nCréation du comité ISO/TC 283\n2015-2017\nProjets de norme ISO 45001\n\nISO 45001:2018\n\nFin de la transition OHSAS 18001 → ISO 45001"
+    },
+    {
+      "texte": "Lancement de la révision ISO 45001\nStructure de la norme\n[\nmodifier\n|\nmodifier le code\n]\nComme d'autres normes ISO (notamment\nISO 9001\net\nISO 14001\n), l'ISO 45001 adopte le schéma «\nHigh Level Structure\n» (HSL) en dix chapitres\n[\n\n]\ncommun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n[\n\n]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 45001:2018 spécifie les exigences relatives à un système de management de la santé et de la sécurité au travail (SMSST). Elle s’applique à tout organisme, quelle que soit sa taille, son secteur d’activité ou sa forme juridique\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 4,
+        "chunk_total": 10,
+        "nb_chars": 654
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLancement de la révision ISO 45001\nStructure de la norme\n[\nmodifier\n|\nmodifier le code\n]\nComme d'autres normes ISO (notamment\nISO 9001\net\nISO 14001\n), l'ISO 45001 adopte le schéma «\nHigh Level Structure\n» (HSL) en dix chapitres\n[\n\n]\ncommun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n[\n\n]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 45001:2018 spécifie les exigences relatives à un système de management de la santé et de la sécurité au travail (SMSST). Elle s’applique à tout organisme, quelle que soit sa taille, son secteur d’activité ou sa forme juridique\n["
+    },
+    {
+      "texte": "]\n, souhaitant établir, mettre en œuvre et améliorer un cadre structuré pour gérer les risques professionnels.\nElle permet à l’organisme :\nde prendre en compte les exigences légales, réglementaires et autres exigences auxquelles il a choisi de se conformer ;\nde fournir un environnement de travail sûr et sain pour ses travailleurs ;\nde mettre en place l'amélioration continue de ses performances en matière de\nsécurité au travail\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 5,
+        "chunk_total": 10,
+        "nb_chars": 432
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n, souhaitant établir, mettre en œuvre et améliorer un cadre structuré pour gérer les risques professionnels.\nElle permet à l’organisme :\nde prendre en compte les exigences légales, réglementaires et autres exigences auxquelles il a choisi de se conformer ;\nde fournir un environnement de travail sûr et sain pour ses travailleurs ;\nde mettre en place l'amélioration continue de ses performances en matière de\nsécurité au travail\n["
+    },
+    {
+      "texte": "]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nISO/TC 283 - Management de la santé et de la sécurité au travail\n», sur\nOrganisation internationale de normalisation\n(consulté le\n17 juillet 2025\n)\n↑\n«\nNorme OHSAS 18001 / ISO 45001 et certification\n», sur\nohsas-18001.fr\n(consulté le\n17 juillet 2025\n)\n↑\nILO-OSH\n,\nOrganisation internationale du travail\n.\n↑\nChristelle\nMambueni\n, «\nSanté et sécurité au travail : adieu OHSAS 18001, place à l’ISO 45001\n», sur\nGroupe Afnor\n,\n\ner\n\noctobre 2021\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n»,\n\nOrganisation internationale de normalisation\n\n.\n\n↑\n\n«\n\nISO 45001:2018/Amd 1:2024\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nLe climat, game changer des normes de management\n\n», sur\n\nGroupe Afnor\n\n,\n\n4 mars 2024\n\n(consulté le",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 6,
+        "chunk_total": 10,
+        "nb_chars": 888
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nISO/TC 283 - Management de la santé et de la sécurité au travail\n», sur\nOrganisation internationale de normalisation\n(consulté le\n17 juillet 2025\n)\n↑\n«\nNorme OHSAS 18001 / ISO 45001 et certification\n», sur\nohsas-18001.fr\n(consulté le\n17 juillet 2025\n)\n↑\nILO-OSH\n,\nOrganisation internationale du travail\n.\n↑\nChristelle\nMambueni\n, «\nSanté et sécurité au travail : adieu OHSAS 18001, place à l’ISO 45001\n», sur\nGroupe Afnor\n,\n\ner\n\noctobre 2021\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n»,\n\nOrganisation internationale de normalisation\n\n.\n\n↑\n\n«\n\nISO 45001:2018/Amd 1:2024\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nLe climat, game changer des normes de management\n\n», sur\n\nGroupe Afnor\n\n,\n\n4 mars 2024\n\n(consulté le"
+    },
+    {
+      "texte": "17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018 - analyse de la nouvelle norme pour la santé et la sécurité\n\n», sur\n\nnbn.be\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n,\n\n8 janvier 2019\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nRetour sur la norme Iso 45001 : 2018 « Management de la santé et de la sécurité au travail » - Article de revue\n\n», sur\n\nInstitut national de recherche et de sécurité\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nISO 9001\n\nNormes de sécurité du lieu de travail\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nCertification AFAQ ISO 45001\n\n», sur\n\ncertification.afnor.org\n\n(consulté le\n\n10 novembre 2025\n\n)\n\n.\n\n«",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 7,
+        "chunk_total": 10,
+        "nb_chars": 866
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018 - analyse de la nouvelle norme pour la santé et la sécurité\n\n», sur\n\nnbn.be\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n,\n\n8 janvier 2019\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nRetour sur la norme Iso 45001 : 2018 « Management de la santé et de la sécurité au travail » - Article de revue\n\n», sur\n\nInstitut national de recherche et de sécurité\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nISO 9001\n\nNormes de sécurité du lieu de travail\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nCertification AFAQ ISO 45001\n\n», sur\n\ncertification.afnor.org\n\n(consulté le\n\n10 novembre 2025\n\n)\n\n.\n\n«"
+    },
+    {
+      "texte": "Santé, sécurité et qualité de vie au travail\n\n», sur\n\nGroupe Afnor\n\n«\n\nISO 45001:2018 Systèmes de management de la santé et de la sécurité au travail — Exigences et lignes directrices pour leur utilisation\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO/TC 283 — Systèmes de management de la santé et de la sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO 45001 en 6 points majeurs\n\n», sur\n\nEcholine.fr\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 8,
+        "chunk_total": 10,
+        "nb_chars": 886
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSanté, sécurité et qualité de vie au travail\n\n», sur\n\nGroupe Afnor\n\n«\n\nISO 45001:2018 Systèmes de management de la santé et de la sécurité au travail — Exigences et lignes directrices pour leur utilisation\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO/TC 283 — Systèmes de management de la santé et de la sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO 45001 en 6 points majeurs\n\n», sur\n\nEcholine.fr\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485"
+    },
+    {
+      "texte": "Agroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail du management\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_45001&oldid=235144948\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nArticle manquant de références depuis février 2023\n\nArticle manquant de références/Liste complète\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 45001\n\n15 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
+        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+        "indexe_le": "2026-04-17T02:49:15.951250",
+        "chunk_index": 9,
+        "chunk_total": 10,
+        "nb_chars": 791
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail du management\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_45001&oldid=235144948\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nArticle manquant de références depuis février 2023\n\nArticle manquant de références/Liste complète\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 45001\n\n15 langues\n\nAjouter un sujet"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    app: 'yukpo_assurance'
+    environment: 'production'
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # ── YukpoAssurance FastAPI ──────────────────────────────────────────────────
+  - job_name: 'yukpo_assurance'
+    static_configs:
+      - targets: ['app:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── PostgreSQL (via postgres_exporter) ──────────────────────────────────────
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['db:5432']
+    scrape_interval: 30s
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+
+  # ── Prometheus lui-même ────────────────────────────────────────────────────
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

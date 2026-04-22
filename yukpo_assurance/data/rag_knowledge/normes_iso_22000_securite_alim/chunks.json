@@ -1,0 +1,384 @@
+{
+  "doc_id": "normes_iso_22000_securite_alim",
+  "metadata": {
+    "doc_id": "normes_iso_22000_securite_alim",
+    "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+    "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "risk_manager",
+      "auditeur",
+      "assureur"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+    "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+    "indexe_le": "2026-04-17T03:11:45.386802"
+  },
+  "nb_chars": 10417,
+  "nb_chunks": 15,
+  "chunks": [
+    {
+      "texte": "ISO 22000 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nL'\n\nISO 22000\n\nest une norme internationale, relative à la sécurité des denrées alimentaires. Elle est applicable pour tous les organismes de la\n\nfilière agroalimentaire\n\n.\n\nEsprit de la norme ISO 22000 v2018\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nCette version de la norme adopte la même structure commune dite « cadre » ou universelle (\n\nhigh level structure\n\n) que les versions 2015 des normes de management\n\nISO 9001\n\n,\n\nISO 45001\n\net\n\nISO 14001\n\n. Celle-ci s’organise autour de dix chapitres et simplifie la gestion documentaire pour rendre la norme accessible aux petites structures. Le\n\nchapitre 8",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 0,
+        "chunk_total": 15,
+        "nb_chars": 692
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nISO 22000 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nL'\n\nISO 22000\n\nest une norme internationale, relative à la sécurité des denrées alimentaires. Elle est applicable pour tous les organismes de la\n\nfilière agroalimentaire\n\n.\n\nEsprit de la norme ISO 22000 v2018\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nCette version de la norme adopte la même structure commune dite « cadre » ou universelle (\n\nhigh level structure\n\n) que les versions 2015 des normes de management\n\nISO 9001\n\n,\n\nISO 45001\n\net\n\nISO 14001\n\n. Celle-ci s’organise autour de dix chapitres et simplifie la gestion documentaire pour rendre la norme accessible aux petites structures. Le\n\nchapitre 8"
+    },
+    {
+      "texte": "de la norme, le plus important en volume, est consacré à la maîtrise opérationnelle de la sécurité des denrées alimentaires. Les managers y retrouveront tout ce qui concerne les Bonnes Pratiques d’Hygiène (BPH ou PRP), la\n\ntraçabilité\n\n, le retrait/rappel et l’HACCP. La structure de cette norme respecte le cycle PDCA, outil bien connu d’amélioration continue (planifier, mettre en œuvre, vérifier, améliorer). Elle intègre deux cycles distincts : l’un s’appliquant au système de management et le second à l’application de la méthode HACCP.\n\nBénéfices recherchés\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nTransport routier de liquides alimentaires, certifié ISO 22000 par\n\nSGS\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 1,
+        "chunk_total": 15,
+        "nb_chars": 676
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nde la norme, le plus important en volume, est consacré à la maîtrise opérationnelle de la sécurité des denrées alimentaires. Les managers y retrouveront tout ce qui concerne les Bonnes Pratiques d’Hygiène (BPH ou PRP), la\n\ntraçabilité\n\n, le retrait/rappel et l’HACCP. La structure de cette norme respecte le cycle PDCA, outil bien connu d’amélioration continue (planifier, mettre en œuvre, vérifier, améliorer). Elle intègre deux cycles distincts : l’un s’appliquant au système de management et le second à l’application de la méthode HACCP.\n\nBénéfices recherchés\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nTransport routier de liquides alimentaires, certifié ISO 22000 par\n\nSGS\n\n."
+    },
+    {
+      "texte": "L’adoption d’un Système de Management de la Sécurité des Denrées Alimentaires (SMSDA) relève d’une décision stratégique de l’organisme qui peut l’aider à améliorer ses performances globales. En mettant en œuvre un SMSDA fondé sur la norme\n\nISO 22000\n\n, les bénéfices potentiels pour un organisme sont les suivants :\n\nAptitude à fournir en permanence des denrées alimentaires sûres et des produits et services pertinents conformes aux exigences du (des) client(s) et aux exigences légales et réglementaires applicables ;\n\nPrise en compte des risques associés aux objectifs de l’organisme ;\n\nAptitude à démontrer la conformité aux exigences spécifiées du système de management de la sécurité des denrées alimentaires.\n\nApproche processus et cycle PDCA\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 2,
+        "chunk_total": 15,
+        "nb_chars": 786
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nL’adoption d’un Système de Management de la Sécurité des Denrées Alimentaires (SMSDA) relève d’une décision stratégique de l’organisme qui peut l’aider à améliorer ses performances globales. En mettant en œuvre un SMSDA fondé sur la norme\n\nISO 22000\n\n, les bénéfices potentiels pour un organisme sont les suivants :\n\nAptitude à fournir en permanence des denrées alimentaires sûres et des produits et services pertinents conformes aux exigences du (des) client(s) et aux exigences légales et réglementaires applicables ;\n\nPrise en compte des risques associés aux objectifs de l’organisme ;\n\nAptitude à démontrer la conformité aux exigences spécifiées du système de management de la sécurité des denrées alimentaires.\n\nApproche processus et cycle PDCA\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "La norme ISO 22000:2018 promeut l’adoption d’une approche processus lors du développement, la mise en œuvre et l’amélioration de son SMSDA. C’est une approche processus moins normative que dans la norme ISO 9001:2015, mais elle existe. Comprendre et piloter les processus en interaction comme un système doit contribuer à l’efficacité et l’efficience de l’organisme pour atteindre les résultats escomptés.\n\nL’approche processus doit s’appuyer sur une identification systématique et un management des processus. Cette approche comprend également un travail sur les interactions entre processus, de manière à obtenir les résultats escomptés conformément à la politique de sécurité des denrées alimentaires et à l’orientation stratégique de l’organisme.",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 3,
+        "chunk_total": 15,
+        "nb_chars": 750
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nLa norme ISO 22000:2018 promeut l’adoption d’une approche processus lors du développement, la mise en œuvre et l’amélioration de son SMSDA. C’est une approche processus moins normative que dans la norme ISO 9001:2015, mais elle existe. Comprendre et piloter les processus en interaction comme un système doit contribuer à l’efficacité et l’efficience de l’organisme pour atteindre les résultats escomptés.\n\nL’approche processus doit s’appuyer sur une identification systématique et un management des processus. Cette approche comprend également un travail sur les interactions entre processus, de manière à obtenir les résultats escomptés conformément à la politique de sécurité des denrées alimentaires et à l’orientation stratégique de l’organisme."
+    },
+    {
+      "texte": "La norme mentionne que le management des processus et du système dans son ensemble peut être réalisé en appliquant le cycle PDCA. Celui-ci est le principe de l’amélioration continue selon une roue partagée en quatre secteurs :\n\nP (\n\nPlan\n\n) : prévoir, planifier, spécifier, définir ;\n\nD (\n\nDo\n\n) : faire, mettre en œuvre (en maîtrisant) ;\n\nC (\n\nCheck\n\n) : vérifier, évaluer ;\n\nA (\n\nAct\n\n) : réagir, agir, améliorer.\n\nDans la norme, l’approche processus utilise le cycle PDCA à deux niveaux. L’un couvre le cadre global du SMSDA (cf. chapitres 4 à 7, 9 et 10 de la norme ISO 22000:2018). L’autre concerne la réalisation des activités opérationnelles (cf.\n\nchapitre 8\n\n). Cela signifie que la communication entre les deux niveaux est essentielle.\n\nDocumentation\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 4,
+        "chunk_total": 15,
+        "nb_chars": 796
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nLa norme mentionne que le management des processus et du système dans son ensemble peut être réalisé en appliquant le cycle PDCA. Celui-ci est le principe de l’amélioration continue selon une roue partagée en quatre secteurs :\n\nP (\n\nPlan\n\n) : prévoir, planifier, spécifier, définir ;\n\nD (\n\nDo\n\n) : faire, mettre en œuvre (en maîtrisant) ;\n\nC (\n\nCheck\n\n) : vérifier, évaluer ;\n\nA (\n\nAct\n\n) : réagir, agir, améliorer.\n\nDans la norme, l’approche processus utilise le cycle PDCA à deux niveaux. L’un couvre le cadre global du SMSDA (cf. chapitres 4 à 7, 9 et 10 de la norme ISO 22000:2018). L’autre concerne la réalisation des activités opérationnelles (cf.\n\nchapitre 8\n\n). Cela signifie que la communication entre les deux niveaux est essentielle.\n\nDocumentation\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "Les documents (procédures, instructions, modes opératoires, standards de fabrication, fiches de bonnes pratiques, etc.) et les enregistrements (résultats des surveillances, des contrôles, des mesures, traçabilité...) sont regroupés en tant qu’informations documentées. L’organisme a le choix des supports pour les informations documentées. La norme n’impose plus de procédures systèmes. C’est à l’organisme de définir le niveau de détail de son système documentaire en fonction des risques et des compétences disponibles.\n\nContexte de l'organisme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 5,
+        "chunk_total": 15,
+        "nb_chars": 583
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nLes documents (procédures, instructions, modes opératoires, standards de fabrication, fiches de bonnes pratiques, etc.) et les enregistrements (résultats des surveillances, des contrôles, des mesures, traçabilité...) sont regroupés en tant qu’informations documentées. L’organisme a le choix des supports pour les informations documentées. La norme n’impose plus de procédures systèmes. C’est à l’organisme de définir le niveau de détail de son système documentaire en fonction des risques et des compétences disponibles.\n\nContexte de l'organisme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "En demandant à l’organisme à s’intéresser à son contexte, en l’incitant à identifier ses enjeux internes (forces et faiblesses, par exemple) et externes (menaces et opportunités, par exemple), la norme relie plus fortement la démarche de sécurité sanitaire des aliments à la « vraie vie » de l’organisme. La compréhension du contexte peut être facilitée par la prise en compte des aspects législatifs, technologiques, concurrentiels, commerciaux, culturels, sociaux et économiques, de la\n\ncybersécurité\n\net de la\n\nfraude alimentaire\n\n, de la protection des denrées alimentaires et de la contamination intentionnelle, des connaissances et des performances de l’organisme, au niveau international, national, régional ou local.",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 6,
+        "chunk_total": 15,
+        "nb_chars": 724
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nEn demandant à l’organisme à s’intéresser à son contexte, en l’incitant à identifier ses enjeux internes (forces et faiblesses, par exemple) et externes (menaces et opportunités, par exemple), la norme relie plus fortement la démarche de sécurité sanitaire des aliments à la « vraie vie » de l’organisme. La compréhension du contexte peut être facilitée par la prise en compte des aspects législatifs, technologiques, concurrentiels, commerciaux, culturels, sociaux et économiques, de la\n\ncybersécurité\n\net de la\n\nfraude alimentaire\n\n, de la protection des denrées alimentaires et de la contamination intentionnelle, des connaissances et des performances de l’organisme, au niveau international, national, régional ou local."
+    },
+    {
+      "texte": "L'organisme doit également déterminer les parties intéressées dites « pertinentes » pour l’organisme. En outre, les exigences (besoins et/ou attentes) de ces parties intéressées doivent également être déterminées. Connaître les acteurs clés (parties intéressées pertinentes), leur fonctionnement, leurs prises de positions et les relations qu’ils entretiennent entre eux permettra d’identifier plus facilement leurs préoccupations.\n\nProgrammes prérequis (PRP)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'organisme doit gérer ses programmes prérequis : il s'agit de règles d'hygiène de base nécessaires au maintien d'un environnement adapté à l'élaboration du produit. Ces PRP sont également nommés BPH (Bonnes pratiques d'hygiène), BPF (\n\nBonnes pratiques de fabrication\n\n)… Cela correspond aux activités mises en place\n\navant",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 7,
+        "chunk_total": 15,
+        "nb_chars": 822
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nL'organisme doit également déterminer les parties intéressées dites « pertinentes » pour l’organisme. En outre, les exigences (besoins et/ou attentes) de ces parties intéressées doivent également être déterminées. Connaître les acteurs clés (parties intéressées pertinentes), leur fonctionnement, leurs prises de positions et les relations qu’ils entretiennent entre eux permettra d’identifier plus facilement leurs préoccupations.\n\nProgrammes prérequis (PRP)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'organisme doit gérer ses programmes prérequis : il s'agit de règles d'hygiène de base nécessaires au maintien d'un environnement adapté à l'élaboration du produit. Ces PRP sont également nommés BPH (Bonnes pratiques d'hygiène), BPF (\n\nBonnes pratiques de fabrication\n\n)… Cela correspond aux activités mises en place\n\navant"
+    },
+    {
+      "texte": "de réaliser l'analyse des dangers et choisir les CCP et les PRPO. Pour cela, l'organisme peut s'aider des guides de bonnes pratiques d'hygiène nationaux ou internationaux propres à chaque secteur de la chaîne alimentaire. La série des spécifications techniques\n\nISO-TS 22002\n\ndoit aussi guider les organismes dans leurs choix. Ces programmes doivent prévenir l'apparition de défaillance due à une non-maîtrise de l'hygiène.\n\nÉquipe chargée de la sécurité des aliments\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa direction doit désigner une équipe chargée de la sécurité des denrées alimentaires pluridisciplinaire (souvent nommée équipe HACCP). Elle devra notamment réaliser l'analyse des dangers, sur les principes de la norme\n\nISO 22000",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 8,
+        "chunk_total": 15,
+        "nb_chars": 735
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nde réaliser l'analyse des dangers et choisir les CCP et les PRPO. Pour cela, l'organisme peut s'aider des guides de bonnes pratiques d'hygiène nationaux ou internationaux propres à chaque secteur de la chaîne alimentaire. La série des spécifications techniques\n\nISO-TS 22002\n\ndoit aussi guider les organismes dans leurs choix. Ces programmes doivent prévenir l'apparition de défaillance due à une non-maîtrise de l'hygiène.\n\nÉquipe chargée de la sécurité des aliments\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa direction doit désigner une équipe chargée de la sécurité des denrées alimentaires pluridisciplinaire (souvent nommée équipe HACCP). Elle devra notamment réaliser l'analyse des dangers, sur les principes de la norme\n\nISO 22000"
+    },
+    {
+      "texte": "ainsi que sur les procédures définies par l'entreprise pour faire vivre son plan de maîtrise des dangers (plan HACCP/PRPO). Elle doit également prendre en compte les contraintes réglementaires et les exigences de ses clients. Les membres de l'équipe chargée de la sécurité des denrées alimentaires doivent disposer de compétences spécifiques : sur le produit, sur le procédé, sur les équipements et sur les dangers considérés.\n\nUn système HACCP efficace\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 9,
+        "chunk_total": 15,
+        "nb_chars": 490
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nainsi que sur les procédures définies par l'entreprise pour faire vivre son plan de maîtrise des dangers (plan HACCP/PRPO). Elle doit également prendre en compte les contraintes réglementaires et les exigences de ses clients. Les membres de l'équipe chargée de la sécurité des denrées alimentaires doivent disposer de compétences spécifiques : sur le produit, sur le procédé, sur les équipements et sur les dangers considérés.\n\nUn système HACCP efficace\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "L'équipe chargée de la sécurité des denrées alimentaires doit mener une analyse des dangers (identification des dangers raisonnablement prévisibles - évaluation des dangers et détermination des mesures de maîtrise essentielles à la maîtrise des dangers significatifs). En effet, pour chaque danger retenu comme significatif, l'organisme doit définir une (combinaison de) mesure(s) de maîtrise. Ces mesures de maîtrise doivent être :\n\nValidées. Il s'agit d'obtenir des preuves démontrant que les mesures sélectionnées sont en mesure d'être efficaces ;\n\nSurveillées. Lors de la mise en œuvre, il est nécessaire de procéder à des observations et des mesures pour s'assurer que les mesures fonctionnent comme prévu ;\n\nVérifiées. Il s'agit de s'assurer de leur efficacité, c'est-à-dire être sûr que les dangers soient en dessous des niveaux acceptables.\n\nAide méthodologique\n\n[\n\nmodifier\n\n|",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 10,
+        "chunk_total": 15,
+        "nb_chars": 885
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nL'équipe chargée de la sécurité des denrées alimentaires doit mener une analyse des dangers (identification des dangers raisonnablement prévisibles - évaluation des dangers et détermination des mesures de maîtrise essentielles à la maîtrise des dangers significatifs). En effet, pour chaque danger retenu comme significatif, l'organisme doit définir une (combinaison de) mesure(s) de maîtrise. Ces mesures de maîtrise doivent être :\n\nValidées. Il s'agit d'obtenir des preuves démontrant que les mesures sélectionnées sont en mesure d'être efficaces ;\n\nSurveillées. Lors de la mise en œuvre, il est nécessaire de procéder à des observations et des mesures pour s'assurer que les mesures fonctionnent comme prévu ;\n\nVérifiées. Il s'agit de s'assurer de leur efficacité, c'est-à-dire être sûr que les dangers soient en dessous des niveaux acceptables.\n\nAide méthodologique\n\n[\n\nmodifier\n\n|"
+    },
+    {
+      "texte": "modifier le code\n\n]\n\nDe nombreux documents (présentation, modules de soutien) gratuits sont disponibles sur le site thématique du Groupe Afnor\n\n[\n\n]\n.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\n2005 : ISO 22000,\n\nre\nédition.\n2018 : ISO 22000,\n\ne\nédition.\n2019 : Publication du guide d’interprétation ISO 22000 version 2018 par la fondation FSSC 22000\n[\n\n]\n\n.\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nOlivier Boutou,\n\nCertification ISO 22000 - Les 8 clés de la réussite\n\n, Afnor, 2020\n\nOlivier Boutou et Patrick Bottino,\n\nLe kit de l'auditeur en agroalimentaire - Hygiène, HACCP, IFS, BRC, ISO/FSSC 22000\n\n, Afnor, 2020\n\nOlivier Boutou,\n\nLe kit du responsable qualité en agroalimentaire\n\n, Afnor, 2019\n\nOlivier Boutou,\n\nDe l'HACCP à l'ISO 22000 - Management de la sécurité des aliments\n\n, Afnor, 2014\n\nDidier Blanc,",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 11,
+        "chunk_total": 15,
+        "nb_chars": 826
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nmodifier le code\n\n]\n\nDe nombreux documents (présentation, modules de soutien) gratuits sont disponibles sur le site thématique du Groupe Afnor\n\n[\n\n]\n.\nHistorique\n[\nmodifier\n|\nmodifier le code\n]\n2005 : ISO 22000,\n\nre\nédition.\n2018 : ISO 22000,\n\ne\nédition.\n2019 : Publication du guide d’interprétation ISO 22000 version 2018 par la fondation FSSC 22000\n[\n\n]\n\n.\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nOlivier Boutou,\n\nCertification ISO 22000 - Les 8 clés de la réussite\n\n, Afnor, 2020\n\nOlivier Boutou et Patrick Bottino,\n\nLe kit de l'auditeur en agroalimentaire - Hygiène, HACCP, IFS, BRC, ISO/FSSC 22000\n\n, Afnor, 2020\n\nOlivier Boutou,\n\nLe kit du responsable qualité en agroalimentaire\n\n, Afnor, 2019\n\nOlivier Boutou,\n\nDe l'HACCP à l'ISO 22000 - Management de la sécurité des aliments\n\n, Afnor, 2014\n\nDidier Blanc,"
+    },
+    {
+      "texte": "ISO 22000, HACCP et sécurité des aliments - Recommandations, outils, FAQ et retours de terrain\n\n, Afnor, 2009\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nDossier Agroalimentaire : objectif qualité, sécurité traçabilité - Groupe AFNOR\n\n», sur\n\nGroupe AFNOR\n\n(consulté le\n\n29 août 2020\n\n)\n\n.\n\n↑\n\n(en-US)\n\n«\n\nFSSC 22000\n\n», sur\n\nFSSC 22000\n\n(consulté le\n\n16 mars 2021\n\n)\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAlimentation\n\nAgroalimentaire\n\nSécurité alimentaire\n\nCertification\n\nGestion de la qualité\n\nHACCP\n\nGestion du risque\n\nMicrobiologie\n\nPaquet hygiène\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 12,
+        "chunk_total": 15,
+        "nb_chars": 896
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nISO 22000, HACCP et sécurité des aliments - Recommandations, outils, FAQ et retours de terrain\n\n, Afnor, 2009\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nDossier Agroalimentaire : objectif qualité, sécurité traçabilité - Groupe AFNOR\n\n», sur\n\nGroupe AFNOR\n\n(consulté le\n\n29 août 2020\n\n)\n\n.\n\n↑\n\n(en-US)\n\n«\n\nFSSC 22000\n\n», sur\n\nFSSC 22000\n\n(consulté le\n\n16 mars 2021\n\n)\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAlimentation\n\nAgroalimentaire\n\nSécurité alimentaire\n\nCertification\n\nGestion de la qualité\n\nHACCP\n\nGestion du risque\n\nMicrobiologie\n\nPaquet hygiène\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles"
+    },
+    {
+      "texte": "Qualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l'agriculture et de l'agronomie\n\nAlimentation et gastronomie\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_22000&oldid=231064546\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène\n\nCatégories cachées :\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Agriculture et agronomie/Articles liés\n\nPortail:Biologie/Articles liés\n\nPortail:Sciences/Articles liés\n\nProjet:Biologie/Pages liées\n\nPortail:Alimentation et gastronomie/Articles liés",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 13,
+        "chunk_total": 15,
+        "nb_chars": 881
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485\n\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail de l'agriculture et de l'agronomie\n\nAlimentation et gastronomie\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_22000&oldid=231064546\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène\n\nCatégories cachées :\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Agriculture et agronomie/Articles liés\n\nPortail:Biologie/Articles liés\n\nPortail:Sciences/Articles liés\n\nProjet:Biologie/Pages liées\n\nPortail:Alimentation et gastronomie/Articles liés"
+    },
+    {
+      "texte": "Portail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 22000\n\n23 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_22000_securite_alim",
+        "nom_doc": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "nom": "ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "risk_manager",
+          "auditeur",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_22000",
+        "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+        "indexe_le": "2026-04-17T03:11:45.386802",
+        "chunk_index": 14,
+        "chunk_total": 15,
+        "nb_chars": 94
+      },
+      "texte_embed": "normes — ISO 22000 — Sécurité des aliments, HACCP (Wikipedia FR)\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 22000\n\n23 langues\n\nAjouter un sujet"
+    }
+  ]
+}

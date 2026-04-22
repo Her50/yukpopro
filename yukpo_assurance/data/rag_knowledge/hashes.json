@@ -1,0 +1,727 @@
+{
+  "cgi_gn": {
+    "hash": "0b29ebac94c892f385d4ed97c834d4a01f05ecc07678bcd3248f7aec92a2fe48",
+    "url": "https://mbudget.gov.gn/wp-content/uploads/2022/05/Code-General-des-Impots-2022-2.pdf",
+    "verifie_le": "2026-04-18T09:04:06.060909"
+  },
+  "cgi_cg": {
+    "hash": "4e4cb79135782817fc26c18e0c8418c789888564b9576e92493676ecb7ff1f52",
+    "url": "https://www.finances.gouv.cg/sites/default/files/documents/CGI%20Tome%20I.pdf",
+    "verifie_le": "2026-04-17T08:31:02.602834"
+  },
+  "code_travail_ga": {
+    "hash": "1291e3091f40aef6669944485fac872e89bc46d9a2f2ffe8d7d21d0c588a91b6",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/109996/GAB-109996.pdf",
+    "verifie_le": "2026-04-18T09:19:24.981757"
+  },
+  "code_travail_mg": {
+    "hash": "dbb9bf3158424a7b57115ed8d21706c29a42ac52ea31c48e7b051ad3600b7f05",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/116786/MDG-116786.pdf",
+    "verifie_le": "2026-04-18T09:27:56.259694"
+  },
+  "cc_cm_btp": {
+    "hash": "2a2371f49214c89457148db8b8e1d991b668334d001d0c239df766f459e7d797",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/40876/CMR-40876.pdf",
+    "verifie_le": "2026-04-19T16:07:19.254029"
+  },
+  "cc_ci_interpro": {
+    "hash": "9c943324f562e45215411b5bfbcf2fb3bb976c84dd72c810f0d55f02948cf310",
+    "url": "https://www.droitci.info/files/827.07.77c-Convention-interprofessionnelle-du-19-juillet-1977-entre-AICI-et-UGTCI.pdf",
+    "verifie_le": "2026-04-18T18:01:20.566522"
+  },
+  "cc_bf_interpro": {
+    "hash": "eb73044cf435fb8ea683a067b6109e5d6a5c4f15e7148be59b1a205bee6ced3f",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/51257/BFA-51257.pdf",
+    "verifie_le": "2026-04-19T16:08:32.107943"
+  },
+  "cc_ne_interpro": {
+    "hash": "db21ede2be5be9785b6a5657e0508dba3094bd2c1af0cc801526e5f967d53182",
+    "url": "https://wageindicator.org/fr-ne/travail-au-niger/convention-collective/niger---convention-collective-interprofessionnelle",
+    "verifie_le": "2026-04-19T16:09:52.483014"
+  },
+  "cc_sn_interpro": {
+    "hash": "c18b2c18089679e46c2719040fa1c24c4dabd7a1b088033f91fcaae48c22fd10",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/convention-collective-nationale-interprofessionnelle---2019",
+    "verifie_le": "2026-04-19T16:07:49.314750"
+  },
+  "cc_tg_interpro": {
+    "hash": "3983f90c893cbd7e6fa0a41b2f0092eaab5ee34f64f8fd9ea480d41d96f2179e",
+    "url": "https://wageindicator.org/fr-tg/travail-au-togo/convention-collective/convention-collective-interprofessionnelle-du-togo",
+    "verifie_le": "2026-04-19T16:08:39.598273"
+  },
+  "cc_bj_interpro": {
+    "hash": "8ec0ff91c36a60a7b3056c011ea1be0408b429b09d9fdc21de2cc4755e388230",
+    "url": "https://wageindicator.org/fr-bj/travail-au-benin/convention-collective/benin---convention-collective-generale-du-travail",
+    "verifie_le": "2026-04-19T16:09:39.848657"
+  },
+  "cc_sn_banques": {
+    "hash": "45209ab082fb87d66af625f0e784f7c251f5d0de29402c34adeb6e7f909b2a3e",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/onvention-collective-nationale-professionnelle-des-banques-et-etablissements-financiers-du-senegal-",
+    "verifie_le": "2026-04-19T16:07:55.825407"
+  },
+  "cc_sn_btp": {
+    "hash": "282e789e184fac7df399cb32c019dcba75e75f97fe6aa3b91b4defb6fad46700",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/protocole-d-accord-entre-syndicats-et-employeurs-des-entreprises-du-batiment-et-des-travaux-publics",
+    "verifie_le": "2026-04-19T16:08:17.641346"
+  },
+  "cc_sn_commerce": {
+    "hash": "ebb566c1eca6b48c8bb64794506a26ba18768077c3d92febe1405d3ecb8123af",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/convention-collective-du-commerce-",
+    "verifie_le": "2026-04-19T16:08:02.741508"
+  },
+  "cc_sn_hotellerie": {
+    "hash": "785b76cffca1a4c8433d74071e0bb8f64675d0164db8d494467939e0313a9e0c",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/convention-collective-nationale-des-industries-hotelieres-de-la-republique-du-senegal-",
+    "verifie_le": "2026-04-19T16:08:24.893552"
+  },
+  "cc_sn_assurances": {
+    "hash": "c9fbb4d137884973d967fc59c8a70df48231fadfd2592de7708b9ff357cac1e5",
+    "url": "https://wageindicator.org/fr-sn/travail-au-senegal/convention-collective/convention-collective-des-entreprises-d-assurances",
+    "verifie_le": "2026-04-19T16:08:10.799871"
+  },
+  "cc_tg_banques": {
+    "hash": "32d0a79ccea6d675d248dc9053e131716db470dbf248aa743d6bad5cf4dd89b3",
+    "url": "https://wageindicator.org/fr-tg/travail-au-togo/convention-collective/convention-collective-des-banques-des-etablissements-financiers-et-des-assurances-du-togo",
+    "verifie_le": "2026-04-19T16:08:45.994289"
+  },
+  "cc_tg_assurances": {
+    "hash": "9a95276503eefb57c66b527b3250a2301287dca552111ed7826f116553c5b482",
+    "url": "https://wageindicator.org/fr-tg/travail-au-togo/convention-collective/convention-collective-des-compagnies-d-assurances-du-togo",
+    "verifie_le": "2026-04-19T16:08:54.785447"
+  },
+  "cc_tg_mines": {
+    "hash": "8553bbfd6ea8de48901859f1d13454f6533f0ec473d61ce7b357e2037f407b30",
+    "url": "https://wageindicator.org/fr-tg/travail-au-togo/convention-collective/convention-collective-des-mines-du-togo",
+    "verifie_le": "2026-04-19T16:09:32.967508"
+  },
+  "cc_tg_btp": {
+    "hash": "bf2927cd94a64c0597181351d446a8b35aad316da9d395731d5c00bf69ceff63",
+    "url": "https://wageindicator.org/fr-tg/travail-au-togo/convention-collective/convention-collective-des-entreprises-du-batiment-et-des-travaux-publics-du-togo",
+    "verifie_le": "2026-04-19T16:09:25.320836"
+  },
+  "stats_cm_ins_annuaire": {
+    "hash": "0391c35ed4be4718a918c87879e2ee329e1790646652fc58db6076f1f7c466ce",
+    "url": "https://ins-cameroun.cm/statistique/",
+    "verifie_le": "2026-04-19T16:17:08.190999"
+  },
+  "stats_sn_ansd_sit_eco": {
+    "hash": "5d91a280b980956e2d5dd5c20c53a82e64762ad27a5d57c7e394dd133b59857c",
+    "url": "https://www.ansd.sn/sites/default/files/2026-02/SESN%202024.pdf",
+    "verifie_le": "2026-04-19T16:16:56.055011"
+  },
+  "stats_sn_ansd_publications": {
+    "hash": "c112bc4aa9a4810ecda304849976945bebc0402b4658aeb41fd95bce5e464444",
+    "url": "https://www.ansd.sn/sites/default/files/2026-04/BMSCE_FEV_2026_V01.pdf",
+    "verifie_le": "2026-04-19T16:14:37.699819"
+  },
+  "stats_bf_insd_publications": {
+    "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+    "url": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+    "verifie_le": "2026-04-19T16:17:46.025409"
+  },
+  "cc_ne_banques": {
+    "hash": "f6d58f14c8e0edae5e3bb80eae8c41bbe6c1b03442f3b4760ec73ab9e9269de5",
+    "url": "https://wageindicator.org/fr-ne/travail-au-niger/convention-collective/convention-collective-des-banques-etablissements-financiers-du-niger",
+    "verifie_le": "2026-04-19T16:09:59.726481"
+  },
+  "stats_tg_inseed_publications": {
+    "hash": "9965e3e2bbcd4ba30372ed2628f1a83ea536a3e73ea5d8b897015df513d668e1",
+    "url": "https://inseed.tg/publications/",
+    "verifie_le": "2026-04-18T18:10:32.426609"
+  },
+  "eco_wb_sn": {
+    "hash": "1e7fbb563e970a522ed6cdeb39aaa8b35df5647c0acf81e8470029dcc47050a7",
+    "url": "https://api.worldbank.org/v2/en/country/SEN?downloadformat=csv",
+    "verifie_le": "2026-04-18T18:12:46.793356"
+  },
+  "eco_wb_ci": {
+    "hash": "5c7ee5b42f3f1fbc8d7487dbd10a433f7abb3bf8037bd2707d381bbe46aed445",
+    "url": "https://api.worldbank.org/v2/en/country/CIV?downloadformat=csv",
+    "verifie_le": "2026-04-18T18:13:18.896038"
+  },
+  "eco_wb_cm": {
+    "hash": "ff68d1da9f94654854e3fbfd18fc464bbba4e572c3183394b74b44071eaabc52",
+    "url": "https://www.banquemondiale.org/fr/country/cameroon",
+    "verifie_le": "2026-04-18T18:12:54.853037"
+  },
+  "eco_wb_bf": {
+    "hash": "2dda9c273224ce44e73403c47f7fe5e20f05b30b404d1755dd36ff4aa9ac98e8",
+    "url": "https://www.banquemondiale.org/fr/country/burkinafaso",
+    "verifie_le": "2026-04-18T18:13:41.336074"
+  },
+  "eco_wb_tg": {
+    "hash": "4706d14204094b49e018d04836aac41d457ccdc95b089b32740829c909ec5a0a",
+    "url": "https://www.banquemondiale.org/fr/country/togo",
+    "verifie_le": "2026-04-18T13:04:04.822811"
+  },
+  "eco_wb_bj": {
+    "hash": "a78da8a05ae3fe1b51ef3fb8affa88be6ff9437aa732f0e8f18766772b1175bb",
+    "url": "https://www.banquemondiale.org/fr/country/benin",
+    "verifie_le": "2026-04-18T13:05:16.350722"
+  },
+  "eco_wb_ga": {
+    "hash": "e05c635109bc7368b15dbbf05140dd94dadf438a4783b8238b6a3a2dacf45147",
+    "url": "https://www.banquemondiale.org/fr/country/gabon",
+    "verifie_le": "2026-04-18T13:07:41.339738"
+  },
+  "eco_beac_rapport_annuel": {
+    "hash": "5ec2c3ffb5cf004d884644ba3ae6c1f3fe831627c5cba83b4ec3c888bbaf3c76",
+    "url": "https://www.beac.int/wp-content/uploads/2019/02/RAPPORT-ANNUEL-BEAC-2022-ANG-WEB.pdf",
+    "verifie_le": "2026-04-18T13:12:03.690154"
+  },
+  "eco_bceao_rapport_annuel": {
+    "hash": "ae86c55b3364fd2ee9c29112e258a0386e4fbfefa4bfdeab9979e7be62cbc1fd",
+    "url": "https://www.bceao.int/sites/default/files/2023-07/Rapport%20sur%20la%20politique%20mone%CC%81taire%20-%20Juin%202023.pdf",
+    "verifie_le": "2026-04-18T13:10:23.129076"
+  },
+  "cc_bj_presse": {
+    "hash": "f874bcb39066c20ac05d4733c740502c3a4eb44ea462f29cf7b1bb2c0743874b",
+    "url": "https://wageindicator.org/fr-bj/travail-au-benin/convention-collective/la-convention-collective-applicable-au-personnel-de-la-presse-en-republique-du-benin",
+    "verifie_le": "2026-04-19T16:12:48.138257"
+  },
+  "eco_crca_rapport_cima": {
+    "hash": "87d841f4148e2da7af54231aa26b11259ba6136311ed409aad5026143ac54dfb",
+    "url": "https://www.cima-afrique.org/",
+    "verifie_le": "2026-04-18T13:15:36.057269"
+  },
+  "stats_ml_instat_publications": {
+    "hash": "85496d2ef58280a4100cf317e20934bac93634e391382fb3605df819d29f2e78",
+    "url": "https://www.instat-mali.org/laravel-filemanager/files/shares/doc/Conditions%20d'utilisation.pdf",
+    "verifie_le": "2026-04-18T18:11:57.426638"
+  },
+  "code_penal_ml": {
+    "hash": "eb9e0f2546781fe59e59e87cb423a072c6f8705ff41b759b582542f5695acb68",
+    "url": "https://policehumanrightsresources.org/content/uploads/2016/07/Penal-Code-1961.pdf",
+    "verifie_le": "2026-04-18T07:54:15.780674"
+  },
+  "code_penal_ne": {
+    "hash": "17f20d68255764c7cd522936dbf6d95bf22ab2d34726c74383ba8922b632c6b2",
+    "url": "https://policehumanrightsresources.org/content/uploads/2016/07/Penal-Code-Niger-2004.pdf",
+    "verifie_le": "2026-04-18T07:54:21.815661"
+  },
+  "code_penal_tg": {
+    "hash": "93ef24d9f7636f00be107906e3b3d96eb997fd68b9b0b8e1766a6097c35a7e17",
+    "url": "https://policehumanrightsresources.org/content/uploads/2019/07/Togo-Criminal-Code-2015.pdf",
+    "verifie_le": "2026-04-18T07:53:58.888904"
+  },
+  "code_penal_cd": {
+    "hash": "34e78a9166bc2670be5849b3e18e5691e6e0d535cbef4e2d953acc64a7753ee5",
+    "url": "https://policehumanrightsresources.org/content/uploads/2016/07/Penal-Code-1940.pdf",
+    "verifie_le": "2026-04-19T16:05:34.699469"
+  },
+  "code_penal_ga": {
+    "hash": "85e89d6e1db7a9c0f4bbfed6174e355108e4c609b627036460f79e1024b67ed6",
+    "url": "https://policehumanrightsresources.org/content/uploads/2016/07/Penal-Code.pdf",
+    "verifie_le": "2026-04-19T16:05:48.346723"
+  },
+  "code_penal_gn": {
+    "hash": "65d8b43972fa80dd10c61e687f2df092b0d1bea747e188bff2e5db3c1d9c672f",
+    "url": "https://policehumanrightsresources.org/content/uploads/2019/07/NOUVEAU-CODE-PENAL-DE-LA-REPUBLIQUE-DE-GUINEE-Fevrier-2016.pdf",
+    "verifie_le": "2026-04-19T16:05:28.811800"
+  },
+  "code_penal_cm": {
+    "hash": "64281c7ce81305664c15496c2dc0de42101787dbea09dc7897e93163fa719df0",
+    "url": "https://www.wipo.int/edocs/lexdocs/laws/fr/cm/cm014fr.pdf",
+    "verifie_le": "2026-04-18T07:51:58.433806"
+  },
+  "code_penal_sn": {
+    "hash": "8bd623d6e3779500508ec0f320451378047a6f1efa2bb9e22a1935f6e3560be4",
+    "url": "https://www.unodc.org/cld/uploads/res/document/sen/1965/code_penal_html/Code_penal_Senegal.pdf",
+    "verifie_le": "2026-04-18T07:53:43.159410"
+  },
+  "code_penal_bf": {
+    "hash": "5835ac6dc368fc61fa8047944bd23d801c9dc8bedf976564e73f3494ebc0538b",
+    "url": "https://presidencedufaso.net/wp-content/uploads/2019/04/Code_Penal.pdf",
+    "verifie_le": "2026-04-18T07:53:51.251304"
+  },
+  "code_penal_ci": {
+    "hash": "2435a74b9a02444f4300c19a50f158809683ae14cb2761fac5d2eb2b00b5fdb2",
+    "url": "https://bit.ly/code-penal-ivoirien-2020",
+    "verifie_le": "2026-04-16T19:20:43.418513"
+  },
+  "normes_codex_alimentarius": {
+    "hash": "255fbcb8231001b4e3d85715b4587ff34254a308676f4c3eb420a4a509936a1e",
+    "url": "https://www.fao.org/fao-who-codexalimentarius/sh-proxy/fr/?lnk=1&url=https%253A%252F%252Fworkspace.fao.org%252Fsites%252Fcodex%252FStandards%252FCXC%2B20-1979%252FCXC_020e.pdf",
+    "verifie_le": "2026-04-18T18:27:12.851836"
+  },
+  "normes_codinorm_ci": {
+    "hash": "02c76115e717d9def945774c8aeb9fc7297b941323f80846d3dc7d27a76c2fa6",
+    "url": "https://www.codinorm.ci/doc/formation/Catalogue_Formation.pdf",
+    "verifie_le": "2026-04-18T13:32:28.851754"
+  },
+  "commerce_omc_profils_pays": {
+    "hash": "f8d2ae37e5ae195c6cb4c23d20d9fea62fad2fbdb6a5158ab2c77a68d4a79645",
+    "url": "https://www.wto.org/french/res_f/statis_f/statis_f.htm",
+    "verifie_le": "2026-04-18T18:44:17.818156"
+  },
+  "commerce_omc_accords": {
+    "hash": "558426fa8d7b6606e4ee503a397751a4e3c124da00c67fd2f7a38f7368b7b590",
+    "url": "https://docs.wto.org/gattdocs/r/GG/LET/1064.PDF",
+    "verifie_le": "2026-04-18T18:43:10.706261"
+  },
+  "normes_cemac_directives": {
+    "hash": "3a8b8de068511d87cfbd004ebb7b11837080dd4b5472805202a8723ad5a47ab0",
+    "url": "https://www.cemac.int/",
+    "verifie_le": "2026-04-18T18:41:03.178059"
+  },
+  "commerce_afcfta": {
+    "hash": "98e49460fcb8fe038ab22c95f92644f8e69a4502e7f5762c74733e6fb2ad5cff",
+    "url": "https://au-afcfta.org/wp-content/uploads/2024/10/Travel-Advisory.pdf",
+    "verifie_le": "2026-04-18T18:46:27.567457"
+  },
+  "normes_oit_conventions": {
+    "hash": "17825dc95a339b12dfbde923fce408b2a9c11f7a5e1241c80cfbd4fd1ca2097f",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_internationale_du_travail",
+    "verifie_le": "2026-04-18T18:25:05.417648"
+  },
+  "normes_iso_31000_risques": {
+    "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+    "url": "https://fr.wikipedia.org/wiki/ISO_31000",
+    "verifie_le": "2026-04-18T13:22:03.538534"
+  },
+  "normes_iso_9001_qualite": {
+    "hash": "4c5e369cdb3448d0e201b0c92fbef44b54f1d8a5de5f774321f883292bbee58b",
+    "url": "https://fr.wikipedia.org/wiki/ISO_9001",
+    "verifie_le": "2026-04-18T13:19:53.136348"
+  },
+  "normes_iso_catalogue": {
+    "hash": "ce26c0ceba7fed7ccc563943d361aa9646c9dd8340c01de640cc407ebdb5b600",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_internationale_de_normalisation",
+    "verifie_le": "2026-04-18T13:17:46.456757"
+  },
+  "normes_iso_45001_sst": {
+    "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
+    "url": "https://fr.wikipedia.org/wiki/ISO_45001",
+    "verifie_le": "2026-04-18T13:24:18.821255"
+  },
+  "normes_uemoa_directives": {
+    "hash": "d7e27665930990e0a431b3641abcf2e5ce466b984a5420bbdaa33a601057f016",
+    "url": "https://fr.wikipedia.org/wiki/Union_%C3%A9conomique_et_mon%C3%A9taire_ouest-africaine",
+    "verifie_le": "2026-04-18T18:38:36.089886"
+  },
+  "normes_oapi_pi": {
+    "hash": "d50d5a7d32f8b4feeb4202ca1fa3507f03171d5ee710631035cf88094ad76907",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_africaine_de_la_propri%C3%A9t%C3%A9_intellectuelle",
+    "verifie_le": "2026-04-18T18:36:28.667272"
+  },
+  "normes_unido_industrie_afrique": {
+    "hash": "6e82c1ea4463db34c5ce2aee66d925358e479b7c1a0be537c667407af88ef8eb",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_des_Nations_unies_pour_le_d%C3%A9veloppement_industriel",
+    "verifie_le": "2026-04-17T02:49:38.290440"
+  },
+  "commerce_uemoa_tarif": {
+    "hash": "36a96c2632b76591577316a2c4da3dcfce5e64b6498f2f3aa1aa4bf0bf1f6640",
+    "url": "https://fr.wikipedia.org/wiki/Union_%C3%A9conomique_et_mon%C3%A9taire_ouest-africaine",
+    "verifie_le": "2026-04-18T18:48:35.830929"
+  },
+  "commerce_unctad_investissement": {
+    "hash": "93a82256f58597a8209a40f5f347f1a2c907e387f015129fdd1ca831d5e672bf",
+    "url": "https://unctad.org/system/files/official-document/wir2023_en.pdf",
+    "verifie_le": "2026-04-18T13:51:27.489876"
+  },
+  "normes_cedeao_industrie": {
+    "hash": "6ab50df73276a4d37d6a9f57aa1a0197a9bc86a3537be8b7e4ed47bc5fa8122d",
+    "url": "https://fr.wikipedia.org/wiki/Communaut%C3%A9_%C3%A9conomique_des_%C3%89tats_de_l%27Afrique_de_l%27Ouest",
+    "verifie_le": "2026-04-17T02:49:38.752167"
+  },
+  "normes_iso_14001_env": {
+    "hash": "5aaa36376b8f5510103f962e344a8f572d39d707510cf210d4de0ddd47353e10",
+    "url": "https://fr.wikipedia.org/wiki/ISO_14001",
+    "verifie_le": "2026-04-19T16:23:35.733858"
+  },
+  "commerce_brvm": {
+    "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+    "url": "https://www.brvm.org/fr",
+    "verifie_le": "2026-04-19T16:23:16.012770"
+  },
+  "eco_boad_rapport": {
+    "hash": "0af679c1211990ea2967c3fc2fd4929d1668ad12031bb5593cfccf06136ce8ea",
+    "url": "https://www.boad.org/fr/",
+    "verifie_le": "2026-04-19T16:23:26.593792"
+  },
+  "normes_gri_reporting": {
+    "hash": "03fdcff83d014d1c5354b657b83c5d5b5bbdfe03814acca77fe1c53135c127a7",
+    "url": "https://fr.wikipedia.org/wiki/Global_Reporting_Initiative",
+    "verifie_le": "2026-04-19T16:23:49.326531"
+  },
+  "normes_afnor_qualite": {
+    "hash": "390f8c730b3d18a877db4a5161d248bfed0145d84736e4cc58d4edbe5b63e962",
+    "url": "https://www.afnor.org/",
+    "verifie_le": "2026-04-19T16:23:42.161082"
+  },
+  "marches_publics_ci": {
+    "hash": "f2fade93dca898b23532eda8b18dff7bb59b5cb684376fdb5c2f185c79b09313",
+    "url": "https://arcop.ci/download/170/decisions-crs/26128/decision-n244-2025-arcop-crs-du-06-octobre-2025-sur-le-recours-de-lentreprise-societe-des-grands-travaux-internationaux-sgti-contestant-les-resultats-du-lot-1-de-lappel-d.pdf",
+    "verifie_le": "2026-04-19T16:23:59.185595"
+  },
+  "marches_publics_bj": {
+    "hash": "ca51bc5af5420c9ad3680460ca9fafe5697e335ca9dc2461e37f1f33d30738e2",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_B%C3%A9nin",
+    "verifie_le": "2026-04-19T16:24:05.726555"
+  },
+  "marches_publics_tg": {
+    "hash": "55f7262419b632c8641463a5a760f0efc2c43aa8d89d79d6664bded7775cacd8",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Togo",
+    "verifie_le": "2026-04-19T16:24:16.340274"
+  },
+  "marches_publics_gn": {
+    "hash": "0cec4ddf4b7727a5b620d7b93180c6f0247b86da52c3bb9691652ac35437baba",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e",
+    "verifie_le": "2026-04-19T16:24:49.489923"
+  },
+  "commerce_cci_ci": {
+    "hash": "fd8cb58fa952a5f783e62cbd515834ef5edbb960a0cf4d53da3e9c5296b73de9",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_C%C3%B4te_d%27Ivoire",
+    "verifie_le": "2026-04-19T16:25:11.258906"
+  },
+  "commerce_cci_cm": {
+    "hash": "07e5bbd7186bc5d83a07095f3fb4de9a0313903df0964be331a1da72bf9c5a2d",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Cameroun",
+    "verifie_le": "2026-04-19T16:24:56.698835"
+  },
+  "normes_anor_cm": {
+    "hash": "619b635ad58efee4fa3a59c9491b565ce2271de4fe18b9204f59ef9cf135b33c",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Cameroun",
+    "verifie_le": "2026-04-18T18:30:40.279159"
+  },
+  "normes_asn_sn": {
+    "hash": "54319f36b4768c85f90a3b2cdf37df9049ea39c4d07633731482aa3165e574cc",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_S%C3%A9n%C3%A9gal",
+    "verifie_le": "2026-04-18T18:32:47.334288"
+  },
+  "normes_abnorm_bj": {
+    "hash": "3b1107c4d1824df4009f8dc108edcac135fb5d3ce0ab098a1eefc199d92a96d4",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_B%C3%A9nin",
+    "verifie_le": "2026-04-18T13:35:49.216024"
+  },
+  "commerce_cci_sn": {
+    "hash": "873cb002f698a6290cbcac2218c6090dbd5ebc80ab93187252a4e61038cd4036",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_S%C3%A9n%C3%A9gal",
+    "verifie_le": "2026-04-19T16:25:03.932435"
+  },
+  "eco_zone_franc": {
+    "hash": "14b67f3c2e3ef2683cf94b2faa381eb82124f90aa5f60ec3156720c567aa5c27",
+    "url": "https://fr.wikipedia.org/wiki/Zone_franc",
+    "verifie_le": "2026-04-17T02:50:50.174147"
+  },
+  "eco_afdb_afrique": {
+    "hash": "348a175caf1235677681bc3145f6f13e3631de37821b5627ced39255b2229846",
+    "url": "https://fr.wikipedia.org/wiki/Banque_africaine_de_d%C3%A9veloppement",
+    "verifie_le": "2026-04-19T16:23:07.038353"
+  },
+  "normes_ifrs_comptabilite": {
+    "hash": "5d705881818b3a14f8055acfb0e4cb8b178f24ad09874cc2ceb97507e15f9a64",
+    "url": "https://fr.wikipedia.org/wiki/International_Financial_Reporting_Standards",
+    "verifie_le": "2026-04-17T02:50:50.662004"
+  },
+  "commerce_cisg_vente_inter": {
+    "hash": "10890f21d8f05cd31ad1ac29d5121d26384f5392db153ddd95fce1940a0341e3",
+    "url": "https://fr.wikipedia.org/wiki/Convention_des_Nations_unies_sur_les_contrats_de_vente_internationale_de_marchandises",
+    "verifie_le": "2026-04-19T16:25:27.720714"
+  },
+  "commerce_incoterms": {
+    "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+    "url": "https://fr.wikipedia.org/wiki/Commerce_international",
+    "verifie_le": "2026-04-19T16:25:19.014142"
+  },
+  "commerce_lettre_credit_ucp": {
+    "hash": "d8bb08368fdc133da765aa0857adc68566e162097ce1a069bfa669c2b633fe1e",
+    "url": "https://fr.wikipedia.org/wiki/Lettre_de_cr%C3%A9dit",
+    "verifie_le": "2026-04-19T16:25:41.991605"
+  },
+  "commerce_syscohada_comptabilite": {
+    "hash": "c866d3697b9d25b8d320e01a63ed4dee0d354687f8718cdee75a55408c6f2005",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_pour_l%27harmonisation_en_Afrique_du_droit_des_affaires",
+    "verifie_le": "2026-04-19T16:25:35.189241"
+  },
+  "commerce_agoa_usa_afrique": {
+    "hash": "443c43056cd946551ed7c3c209bd30a28c7181ab4095150d7914c9096f731492",
+    "url": "https://fr.wikipedia.org/wiki/African_Growth_and_Opportunity_Act",
+    "verifie_le": "2026-04-19T16:25:49.778180"
+  },
+  "normes_iso_27001_securite_info": {
+    "hash": "547f265351f99e0a0037bc6378efe92f435dcd9e81e26402f7ac29ab01796acd",
+    "url": "https://fr.wikipedia.org/wiki/ISO/CEI_27001",
+    "verifie_le": "2026-04-19T16:25:56.269857"
+  },
+  "normes_iso_26000_rse": {
+    "hash": "b6e23a585f319963032e1aaa2274a4c536143df21debbde0066e6471e0a3e612",
+    "url": "https://fr.wikipedia.org/wiki/ISO_26000",
+    "verifie_le": "2026-04-19T16:26:09.189952"
+  },
+  "normes_iso_22000_securite_alim": {
+    "hash": "ec86e80b5f663dd4f1ecba1cd36db4f41e548d0517588237f50e9268f26983e7",
+    "url": "https://fr.wikipedia.org/wiki/ISO_22000",
+    "verifie_le": "2026-04-19T16:26:02.719597"
+  },
+  "normes_six_sigma_qualite": {
+    "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+    "url": "https://fr.wikipedia.org/wiki/Six_Sigma",
+    "verifie_le": "2026-04-19T16:26:25.217155"
+  },
+  "normes_haccp_alimentaire": {
+    "hash": "4335220374ec7f896ab86beada6aa590be770b369786a5e1713255bd0b9b8bf5",
+    "url": "https://fr.wikipedia.org/wiki/S%C3%A9curit%C3%A9_des_aliments",
+    "verifie_le": "2026-04-19T16:26:19.055115"
+  },
+  "normes_lean_production": {
+    "hash": "c57362888b2335ce41ff08e72469754644731fa2c06102fa1f1a9b602a40a51e",
+    "url": "https://fr.wikipedia.org/wiki/Lean_(production)",
+    "verifie_le": "2026-04-19T16:26:32.286456"
+  },
+  "normes_arso_afrique": {
+    "hash": "03e68319c7912dae10b2badc52c8f4e3c21541ce6133d84e913c1cb51c9f1f8f",
+    "url": "https://fr.wikipedia.org/wiki/Normalisation",
+    "verifie_le": "2026-04-19T16:26:39.238357"
+  },
+  "normes_smi_management_qse": {
+    "hash": "9c36a8a4c9280dcdc60960959d77e2dd561a8fcdd87be5160824a8d81bfc2246",
+    "url": "https://fr.wikipedia.org/wiki/Syst%C3%A8me_de_management",
+    "verifie_le": "2026-04-19T16:26:46.037558"
+  },
+  "eco_wiki_cg": {
+    "hash": "6c70bfddb80ce52fc517eafec4d37c7a1162bf06916a0b0adfe7a9554d6541a0",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_r%C3%A9publique_du_Congo",
+    "verifie_le": "2026-04-19T16:22:10.969918"
+  },
+  "eco_wiki_ml": {
+    "hash": "47b7d81594f3249e76a271a90605ed4ca01185439b0899df7ca4889bdac5cc9a",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Mali",
+    "verifie_le": "2026-04-19T16:21:56.878373"
+  },
+  "eco_wiki_ne": {
+    "hash": "0b136630df80bc85ddb0cbb7afea3a7dde49ab7ff7edb74a91fa1ac636a4f838",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Niger",
+    "verifie_le": "2026-04-19T16:22:03.434369"
+  },
+  "eco_wiki_gq": {
+    "hash": "2a421d670f242cbe157e4dac2abf915179a37f6192f5d45bb6973a2753068773",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e_%C3%A9quatoriale",
+    "verifie_le": "2026-04-19T16:22:35.456353"
+  },
+  "eco_wiki_td": {
+    "hash": "0879532de0ec1aa9be48c725e4b2efe949862b6b21ce9c449205c03198c979bd",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Tchad",
+    "verifie_le": "2026-04-19T16:22:19.582226"
+  },
+  "eco_wiki_cf": {
+    "hash": "6f542813db2681f913509a3f28838eef4dadbeaced24f758fd8a19af428914bc",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_R%C3%A9publique_centrafricaine",
+    "verifie_le": "2026-04-19T16:22:26.942653"
+  },
+  "eco_wiki_gw": {
+    "hash": "14359b5b712f7f72c14905b6a51d7ac8062841231c79f714269df0a9e68d73d7",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e-Bissau",
+    "verifie_le": "2026-04-19T16:22:59.020296"
+  },
+  "eco_wiki_gn": {
+    "hash": "fa746d9f69809b06726fa79f34f2ab8f6937109886bb7f77041c889df5ed295e",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e",
+    "verifie_le": "2026-04-19T16:22:43.950786"
+  },
+  "eco_wiki_km": {
+    "hash": "baae3cf1d9e12f4a979b4510e88602ad6094c003f82204b9b3e8beaf971cf5bf",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_des_Comores",
+    "verifie_le": "2026-04-19T16:22:51.731557"
+  },
+  "code_travail_cf": {
+    "hash": "aff07cb0d817753b620cb04702735bdc47e7f559f1771fa52cacb5c974cc80ed",
+    "url": "https://faolex.fao.org/docs/pdf/caf158592.pdf",
+    "verifie_le": "2026-04-18T09:39:44.707470"
+  },
+  "code_civil_ci": {
+    "hash": "dd7d37226360b28f8574465ec8b274780562ceea250a33d15161640911f5bc5e",
+    "url": "https://faolex.fao.org/docs/pdf/ivc216397.pdf",
+    "verifie_le": "2026-04-18T07:47:56.804400"
+  },
+  "code_famille_bj": {
+    "hash": "2f2e76c2898632f4ce3394f33b3b374a3339b7cb9c295fc00b85febc5853bac9",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/75298/BEN-75298.pdf",
+    "verifie_le": "2026-04-18T07:50:20.815348"
+  },
+  "code_penal_bj": {
+    "hash": "4710e2280226bca015573166b6577f292e86ea6b49500898e30ba87f756cf00a",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/113834/BEN-113834.pdf",
+    "verifie_le": "2026-04-18T07:54:08.095714"
+  },
+  "code_travail_tg": {
+    "hash": "29d1ac33c1eeec1cba7dfd8c63c85b7174a1f5311ee911c1fd8bc76d5987770d",
+    "url": "https://faolex.fao.org/docs/pdf/tog213551.pdf",
+    "verifie_le": "2026-04-22T09:33:33.870920"
+  },
+  "code_travail_ne": {
+    "hash": "970d83ee50d9d1ca1e30280113e8602abf003989981590ba356faab64773a12c",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/91382/NER-91382.pdf",
+    "verifie_le": "2026-04-22T09:43:14.289748"
+  },
+  "code_travail_ml": {
+    "hash": "c121583f835847c049ef02eb5bf2302596fa474599c02f3996c6e76b438b7c10",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/32274/MLI-32274.pdf",
+    "verifie_le": "2026-04-22T09:41:06.367787"
+  },
+  "ohada_audcg": {
+    "hash": "1bf754fd5d93938f319fe986f4d5e8dbe32b7180287db67180bc8aff5326f528",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_pour_l%27harmonisation_en_Afrique_du_droit_des_affaires",
+    "verifie_le": "2026-04-19T16:23:05.922585"
+  },
+  "ohada_aus": {
+    "hash": "413db14391f89d6649210a869927816e7dc5168956a5c7891944cd6f9870dddc",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_pour_l%27harmonisation_en_Afrique_du_droit_des_affaires",
+    "verifie_le": "2026-04-19T16:23:36.907823"
+  },
+  "ohada_auscgie": {
+    "hash": "9bfec171bcff54bd947d5ca8f78a8675723ea72be4bcae14813c432d5d5fffdb",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_pour_l%27harmonisation_en_Afrique_du_droit_des_affaires",
+    "verifie_le": "2026-04-19T16:23:44.637087"
+  },
+  "marches_publics_ml": {
+    "hash": "9ce3d87db4b4caf2302d408c71fe8b8fb78a31e734b37537dc6c96f3e7e9232d",
+    "url": "https://www.armds.ml/",
+    "verifie_le": "2026-04-19T16:24:42.710826"
+  },
+  "commerce_itc_trademap_ci": {
+    "hash": "22e2218f723d59e9ca10bd7dcf9c66f1c9b3df5c62619b96f34996b0e43feda8",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_C%C3%B4te_d%27Ivoire",
+    "verifie_le": "2026-04-19T16:24:24.448701"
+  },
+  "commerce_itc_trademap_cm": {
+    "hash": "63676d337122d26272de6eb59fe01efabd31965f46e36808734f0e422b88acd4",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Cameroun",
+    "verifie_le": "2026-04-19T16:24:41.143122"
+  },
+  "commerce_itc_trademap_sn": {
+    "hash": "c7bb30160615e676662296340dd875feb45d44c4f08f9b679689d205e6cde885",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_S%C3%A9n%C3%A9gal",
+    "verifie_le": "2026-04-19T16:24:49.430321"
+  },
+  "cc_cg_interpro": {
+    "hash": "24c8dfce20d30bbaedda9374fb17a5847721d4efcf44da7dae506b35db94d5be",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_r%C3%A9publique_du_Congo",
+    "verifie_le": "2026-04-19T16:25:06.265615"
+  },
+  "cc_cm_banques": {
+    "hash": "cbfa994f75d77955e1ef47d7512052b2d238c6fa685a40eb701c762823bc0ee3",
+    "url": "https://fr.wikipedia.org/wiki/Banque_centrale_des_%C3%89tats_de_l%27Afrique_centrale",
+    "verifie_le": "2026-04-19T16:25:13.127177"
+  },
+  "cc_cm_interpro": {
+    "hash": "482c2d019b148f4dee1656b17bbab9e89fd4027b5e9ea10f2a33b491ff8654e4",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Cameroun",
+    "verifie_le": "2026-04-19T16:25:23.042336"
+  },
+  "cc_ga_interpro": {
+    "hash": "ec0f3d6f527392efcf73f63e63243c7d530688cb0dfdcbd39c137140302538b0",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Gabon",
+    "verifie_le": "2026-04-19T16:25:33.663067"
+  },
+  "cc_gn_interpro": {
+    "hash": "ca10f1bcf34d56a5d42f2d951d6e04031a500de5a881661bfcc9db3962572c17",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e",
+    "verifie_le": "2026-04-19T16:25:43.747959"
+  },
+  "code_famille_sn": {
+    "hash": "c31a8b0a01f3f27a2609ccab944b6f03f618f664868057d4d9dc386b761b6f24",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_S%C3%A9n%C3%A9gal",
+    "verifie_le": "2026-04-19T16:25:50.372052"
+  },
+  "code_travail_cg": {
+    "hash": "56ca775ffd36fea1a07ee08f71499766c216a7d44074ff35ab352a02f168a8c7",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_r%C3%A9publique_du_Congo",
+    "verifie_le": "2026-04-19T16:26:17.265584"
+  },
+  "code_travail_gn": {
+    "hash": "f0c4cd16c220e7635eaed5641e3fc130d9499e4fda295e73983a4cd1302e514c",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_Guin%C3%A9e",
+    "verifie_le": "2026-04-19T16:26:26.083587"
+  },
+  "code_cima_pdf": {
+    "hash": "3c407d95992a1b8094a6098817a8c53ae94b2f62a323c2915bff8c0b21a4fbfd",
+    "url": "https://fr.wikipedia.org/wiki/Assurance",
+    "verifie_le": "2026-04-19T16:27:03.377062"
+  },
+  "stats_cm_ins_eesi3": {
+    "hash": "822e7c33f6ea91f4ef62df3f0a9701331c0987d5f04beee07ce5655100ce332f",
+    "url": "https://ins-cameroun.cm/statistique/",
+    "verifie_le": "2026-04-19T16:30:32.372736"
+  },
+  "normes_inrs_prevention": {
+    "hash": "2058e55be676afe1b8dfaf817b7bb7c85074aca120540679a02fca8e4df73c71",
+    "url": "https://www.inrs.fr/media.html?refINRS=ED%206026",
+    "verifie_le": "2026-04-19T16:30:54.047342"
+  },
+  "marches_publics_ne": {
+    "hash": "86ec8082c710a014ff49917e762c0c2355774ee3165f48d93741045362807a23",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Niger",
+    "verifie_le": "2026-04-19T16:30:54.969754"
+  },
+  "marches_publics_bf": {
+    "hash": "9ff076e4280d9bff3fe608d6cf8d5061e40bc46b9dcf122e60857dc76d79e9ed",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Burkina_Faso",
+    "verifie_le": "2026-04-19T16:30:55.985256"
+  },
+  "stats_cg_cnsee_publications": {
+    "hash": "2ac8f7aa75042450618ea38f111cff779b4af35099e18d05e60e695acf9e79be",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_de_la_r%C3%A9publique_du_Congo",
+    "verifie_le": "2026-04-19T16:31:49.780007"
+  },
+  "ohada_actes_uniformes_page": {
+    "hash": "c589d0cf8996bbd77417a39d3ce7e9691062852f59486e6cec112a91beb99c22",
+    "url": "https://fr.wikipedia.org/wiki/Organisation_pour_l%27harmonisation_en_Afrique_du_droit_des_affaires",
+    "verifie_le": "2026-04-22T11:41:07.002640"
+  },
+  "syscohada_plan_comptable": {
+    "hash": "8b6db4acf9a576165e1071e41025ed6e57e1dcb7e62bdb35099f17008720e4d2",
+    "url": "https://dgd.gov.gn/wp-content/uploads/2023/10/Ohada_syscohada_plan_comptable.pdf",
+    "verifie_le": "2026-04-22T11:07:58.318584"
+  },
+  "ohada_jo_auve_2023": {
+    "hash": "851366a003327a59640a11b668d2a7817ff9308f240d12cf82cc96c2a56489ba",
+    "url": "https://www.ohada.com/uploads/actualite/7010/J.O._special_AUVE_15.11.2023.pdf",
+    "verifie_le": "2026-04-22T11:39:59.810561"
+  },
+  "cgi_cm": {
+    "hash": "b90d94c360893c6c2f2237e6382f667f67cfd298de5d291977d93c896ff4a36b",
+    "url": "https://www.impots.cm/sites/default/files/documents/CGI%202024%20version%20francaise.pdf",
+    "verifie_le": "2026-04-22T11:13:35.856305"
+  },
+  "cgi_ci": {
+    "hash": "708b86d7165bfc748dbe133f17dd378a38a3a71448875396797ac64941ee2b2c",
+    "url": "https://www.dgi.gouv.ci/assets/documents/IMPOTS%20ET%20TAXES%20EN%20COTE%20D'IVOIRE%20.pdf",
+    "verifie_le": "2026-04-22T11:10:13.597754"
+  },
+  "code_travail_ci": {
+    "hash": "2acd07efb84b57c8f2abb6eaccb4ddce2f5f7ee54c69043ffb9b4cecbeff9e86",
+    "url": "https://cotedivoirepaie.ci/wp-content/uploads/2023/02/Le-code-du-travail-ivoirien-2023.pdf",
+    "verifie_le": "2026-04-22T11:12:24.759156"
+  },
+  "code_travail_cm": {
+    "hash": "87a4dae877a1253d17f646ef9958d5bd38a8681d2c94dec24c9b4c35329d89f6",
+    "url": "https://www.minfopra.gov.cm/recueil/fichiers%20word/LOI%20N%C2%B0%20092-007%20DU%2014%20A0UT%201992%20portant%20code%20du%20travail.pdf",
+    "verifie_le": "2026-04-22T11:15:55.347337"
+  },
+  "code_travail_sn": {
+    "hash": "33e584661050b45d2f89847ec6de3e712d2fbf9b66deb541327002c83651eb38",
+    "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/49603/SEN-49603.pdf",
+    "verifie_le": "2026-04-22T11:08:10.675404"
+  },
+  "cgi_sn": {
+    "hash": "f96fbc6849f26db3b21c100ab22281a3f198b60f5e967dd38957f0f767554f32",
+    "url": "https://www.finances.gouv.sn/app/uploads/code-general-des-impots-2013.pdf",
+    "verifie_le": "2026-04-22T11:08:57.497710"
+  },
+  "code_travail_bf": {
+    "hash": "f613fc17c29501a1a9179fa3665d0a53953ce19d91dac745ab527447a34cb41f",
+    "url": "https://fr.wikipedia.org/wiki/%C3%89conomie_du_Burkina_Faso",
+    "verifie_le": "2026-04-22T11:12:02.768625"
+  },
+  "cgi_bf": {
+    "hash": "7884c6a499ee8acfc47da54a82d0f5cfaf7436906dc68c91eb99fe39e218f9d0",
+    "url": "https://patronat.bf/wp-content/uploads/2021/12/Loi-058-portant-CODE-GENERAL-DES-IMPOTS-final-3.pdf",
+    "verifie_le": "2026-04-22T11:12:11.977006"
+  },
+  "cgi_tg": {
+    "hash": "a490bf18f1b7f5bc21ccc8871a98787d2dccf1c1c040c0b5fb69f458251b4543",
+    "url": "https://investirautogo.tg/media/cgi%20complet.pdf",
+    "verifie_le": "2026-04-22T11:12:31.860997"
+  }
+}

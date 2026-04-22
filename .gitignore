@@ -1,0 +1,24 @@
+# Fichiers personnels — ne pas inclure dans yukpopro
+*.docx
+*.wbk
+*.pdf
+~$*
+backend.log
+generate_cv*.py
+strategie_ia_assurance_cameroun.md
+
+# Archives
+_archive_*/
+
+# Claude Code
+.claude/
+
+# Mobile (repo séparé)
+yukpopro_mobile/
+
+# Secrets
+.env
+.env.*
+!.env.example
+!.env.railway
+*.secret

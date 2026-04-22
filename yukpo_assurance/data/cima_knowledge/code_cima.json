@@ -1,0 +1,3128 @@
+{
+  "meta": {
+    "source": "Code des Assurances des États membres de la CIMA — Conférence Interafricaine des Marchés d'Assurances",
+    "version": "2024 (consolidé)",
+    "date_publication_originale": "1992-07-10",
+    "entree_en_vigueur": "1994-01-01",
+    "derniere_mise_a_jour": "2024",
+    "avertissement": "IMPORTANT — Ce fichier est une reconstitution documentaire basée sur des sources secondaires. Les textes des articles sont des approximations et doivent être vérifiés contre le texte officiel du Code CIMA disponible auprès de la CRCA. Ne pas utiliser comme référence juridique sans vérification préalable.",
+    "statut_verification": "NON_VERIFIE — Les articles de ce corpus n'ont pas été extraits directement du PDF officiel CIMA.",
+    "pays_membres": [
+      "Bénin",
+      "Burkina Faso",
+      "Cameroun",
+      "Centrafrique",
+      "Comores",
+      "Congo",
+      "Côte d'Ivoire",
+      "Gabon",
+      "Guinée-Bissau",
+      "Guinée Équatoriale",
+      "Mali",
+      "Niger",
+      "Sénégal",
+      "Tchad",
+      "Togo"
+    ],
+    "organisme_supervision": "CRCA — Commission Régionale de Contrôle des Assurances",
+    "siege_crca": "Libreville, Gabon",
+    "devise": "FCFA (XAF / XOF selon sous-zone)",
+    "livres": {
+      "Livre_I": "Contrat d'assurance (Art. 1–98)",
+      "Livre_II": "Assurances obligatoires (Art. 200–251)",
+      "Livre_III": "Entreprises d'assurance (Art. 300–430)",
+      "Livre_IV": "Agents généraux, courtiers et intermédiaires (Art. 500–545)",
+      "Livre_V": "Dispositions diverses et transitoires (Art. 600–640)",
+      "Livre_VI": "Traités de réassurance (Art. 700–730)"
+    }
+  },
+  "livre_I_contrat_assurance": {
+    "titre": "LIVRE I — Le Contrat d'Assurance",
+    "chapitre_I_dispositions_generales": {
+      "art_1": {
+        "texte": "L'assurance est la convention par laquelle, en échange d'une prime ou cotisation, l'assureur s'engage à garantir l'assuré, dans les conditions définies au contrat, contre les conséquences d'un événement aléatoire.",
+        "portee": "Définition fondamentale du contrat d'assurance"
+      },
+      "art_2": {
+        "texte": "Le contrat d'assurance est consensuel. Il est régi par les dispositions du présent Code, auxquelles s'ajoutent les conditions générales et particulières de la police.",
+        "portee": "Nature consensuelle et hiérarchie des textes"
+      },
+      "art_3": {
+        "texte": "La police d'assurance doit être rédigée en caractères apparents. Toute clause qui tend à restreindre les garanties doit être rédigée en caractères très apparents.",
+        "portee": "Lisibilité obligatoire des clauses restrictives"
+      },
+      "art_4": {
+        "texte": "Le bénéficiaire de l'assurance est la personne qui reçoit la prestation de l'assureur en cas de réalisation du risque. Il peut être différent du souscripteur.",
+        "portee": "Définition du bénéficiaire"
+      },
+      "art_5": {
+        "texte": "Sous réserve des dispositions relatives aux assurances obligatoires, est nulle toute assurance contractée en vue d'un événement provoqué par dol ou faute intentionnelle de l'assuré.",
+        "portee": "Exclusion du dol"
+      },
+      "art_6": {
+        "texte": "L'assureur peut opposer à l'assuré les exceptions et nullités résultant du contrat, sous réserve des dispositions de l'Art. 7.",
+        "portee": "Opposabilité des exceptions"
+      },
+      "art_7": {
+        "texte": "En assurance de responsabilité, les tiers lésés ont un droit direct contre l'assureur. Celui-ci ne peut leur opposer les exceptions opposables à l'assuré.",
+        "portee": "Action directe des tiers lésés — FONDAMENTAL pour RC"
+      },
+      "art_8": {
+        "texte": "La somme assurée est le montant maximal de la garantie. Elle doit être suffisante pour couvrir le risque assuré.",
+        "portee": "Plafond de garantie"
+      },
+      "art_9": {
+        "texte": "Toute partie peut résilier le contrat à l'échéance annuelle, sous réserve d'un préavis d'au moins deux mois avant cette échéance.",
+        "delai_preavis_mois": 2,
+        "portee": "Résiliation à l'échéance — préavis 2 mois"
+      },
+      "art_10": {
+        "texte": "En cas de résiliation par l'assureur pour non-paiement de prime, il doit adresser une mise en demeure par lettre recommandée. La résiliation prend effet 30 jours après la mise en demeure.",
+        "delai_resiliation_jours": 30,
+        "portee": "Résiliation pour non-paiement"
+      },
+      "art_11": {
+        "texte": "En cas de vente du bien assuré, l'assurance est suspendue de plein droit à partir de la date de vente jusqu'à la demande expresse de continuation.",
+        "portee": "Effets de l'aliénation du bien assuré"
+      },
+      "art_12": {
+        "texte": "L'assuré doit déclarer tout sinistre à l'assureur dans les délais prévus aux conditions particulières et au plus tard dans les 5 jours ouvrés suivant sa connaissance du sinistre.",
+        "delai_declaration_jours_ouvrables": 5,
+        "portee": "Délai de déclaration de sinistre — 5 jours ouvrés",
+        "sanctions_dechu": "L'assuré est déchu de tout droit à indemnité si le sinistre n'est pas déclaré dans les délais, sauf si le retard est dû à un cas fortuit ou de force majeure (Art. 12 al. 2 Code CIMA).",
+        "note_pratique": "Le délai de 5 jours court à partir du moment où l'assuré a CONNAISSANCE du sinistre, pas nécessairement de la date du sinistre. Pour les sinistres corporels auto (Art. 210), le délai peut être assoupli car la victime est un tiers."
+      },
+      "art_12_bis": {
+        "texte": "L'assureur doit accuser réception de tout sinistre dans un délai de 10 jours. Il doit instruire le dossier et formuler ses offres dans un délai de 3 mois à compter de la déclaration.",
+        "delai_accusé_reception_jours": 10,
+        "delai_instruction_mois": 3,
+        "portee": "Délais de traitement du sinistre par l'assureur",
+        "note_pratique": "Le délai de 3 mois pour instruire et formuler l'offre court à compter de la déclaration du sinistre. En matière de sinistres corporels auto, ce délai est encadré par Art. 210 (offre dans 3 mois à compter de la demande de la victime). Le non-respect engage la responsabilité de l'assureur."
+      },
+      "art_12_ter": {
+        "texte": "Lorsque l'offre de règlement est acceptée par l'assuré, l'assureur doit payer dans les 45 jours calendaires suivant l'accord. Passé ce délai, les sommes dues portent intérêt au taux légal majoré de 50%.",
+        "delai_paiement_apres_accord_jours": 45,
+        "penalite_retard": "Taux légal + 50%",
+        "portee": "DÉLAI DE RÈGLEMENT APRÈS ACCORD — CRITIQUE",
+        "note_pratique": "Le délai de 45 jours commence à courir à compter de la date de l'accord des parties sur le montant, ou de la décision judiciaire devenue définitive. La pénalité (taux légal + 50%) est d'ordre public : l'assureur ne peut y renoncer contractuellement. En zone CIMA, le taux légal varie par pays (généralement 7-12% annuel), soit une pénalité totale de 10.5-18% annuel."
+      },
+      "art_13": {
+        "texte": "L'assuré doit payer la prime ou cotisation aux époques convenues. À défaut de paiement d'une prime ou d'une fraction de prime dans les dix jours de son échéance, l'assureur a le droit de résilier le contrat dix jours après une mise en demeure adressée à l'assuré par lettre recommandée. La mise en demeure résulte de l'envoi d'une lettre recommandée adressée à l'assuré. Le délai de dix jours court à partir de la date figurant sur l'avis de réception de la lettre recommandée. Dans les opérations d'assurance vie ou de capitalisation, l'assureur ne peut résilier le contrat qu'après un délai de quarante jours à compter de la mise en demeure.",
+        "denomination": "Article 13 — Paiement de la prime et résiliation pour non-paiement",
+        "portee": "Obligation de paiement de la prime par l'assuré et droit de résiliation de l'assureur en cas de non-paiement",
+        "avertissement_source": "ATTENTION : Ce texte est une reconstitution documentaire basée sur le droit CIMA. Vérifiez toujours le texte officiel auprès de la CRCA.",
+        "obligations_assure": [
+          "Payer la prime aux époques convenues au contrat",
+          "Répondre à toute mise en demeure par lettre recommandée dans le délai imparti"
+        ],
+        "droits_assureur": [
+          "Suspension possible de la garantie après mise en demeure restée sans effet",
+          "Résiliation du contrat 10 jours après mise en demeure (hors assurance vie)",
+          "En assurance vie/capitalisation : résiliation possible après 40 jours de mise en demeure"
+        ],
+        "sanctions_non_paiement": "La garantie peut être suspendue puis le contrat résilié. L'assureur recouvre les primes échues à titre d'indemnité, sous réserve de la réduction de valeur de rachat pour l'assurance vie.",
+        "articulation_avec_autres_articles": {
+          "art_12": "Déclaration du risque et aggravation",
+          "art_14": "Effets de la résiliation et remboursement de la prime"
+        },
+        "note_pratique": "Le délai de 10 jours court à partir de la date de l'avis de réception de la lettre recommandée. En assurance vie, le délai protecteur est de 40 jours. Les primes impayées restent dues même après résiliation pour la période couverte."
+      },
+      "art_13_nouveau": {
+        "texte": "Par dérogation aux dispositions de l'article 13, les entreprises publiques et les grandes entreprises dont le chiffre d'affaires annuel est supérieur au seuil fixé par la Commission de Contrôle des Assurances, des Mutuelles et des Prévoyances Sociales (CRCA), peuvent payer leurs primes d'assurance dans un délai maximum de soixante (60) jours à compter de la date d'émission de l'avis d'échéance. Durant ce délai, l'assureur ne peut ni suspendre la garantie, ni résilier le contrat pour défaut de paiement. Passé ce délai de soixante (60) jours sans paiement, les dispositions de l'article 13 s'appliquent. Les modalités d'application du présent article, notamment la définition de grande entreprise et le seuil de chiffre d'affaires, sont précisées par circulaire de la CRCA.",
+        "denomination": "Article 13 nouveau — Délai de paiement dérogatoire pour les grandes entreprises et entités publiques",
+        "portee": "Dérogation au régime de droit commun de l'article 13 : délai de paiement de 60 jours accordé aux grandes entreprises et entreprises publiques avant toute mise en demeure ou résiliation",
+        "avertissement_source": "ATTENTION : Ce texte est une reconstitution documentaire basée sur les réformes CIMA. Le seuil exact de chiffre d'affaires et les modalités précises sont définis par circulaire CRCA. Vérifiez le texte officiel auprès de la CRCA.",
+        "beneficiaires": [
+          "Entreprises publiques (État, établissements publics, sociétés à participation publique majoritaire)",
+          "Grandes entreprises dont le chiffre d'affaires dépasse le seuil CRCA"
+        ],
+        "conditions": [
+          "La dérogation s'applique uniquement si l'entreprise respecte un contrat en cours de validité",
+          "Le seuil de chiffre d'affaires est fixé par circulaire de la CRCA (variable selon le pays membre)",
+          "Au-delà de 60 jours sans paiement, le régime de l'article 13 (mise en demeure + résiliation 10 jours) s'applique"
+        ],
+        "articulation_avec_autres_articles": {
+          "art_13": "Article de droit commun dont l'article 13 nouveau est une dérogation",
+          "circulaires_crca": "Les seuils et modalités sont précisés par circulaire CRCA"
+        },
+        "note_pratique": "La question des délais pour grandes entreprises est fréquente en pratique : l'article 13 nouveau a été introduit pour tenir compte des contraintes budgétaires et des cycles de paiement des entités publiques. En absence de confirmation CRCA sur le seuil applicable dans votre pays, consultez l'assureur directement."
+      }
+    },
+    "chapitre_II_formation_du_contrat": {
+      "art_14": {
+        "texte": "La proposition d'assurance lie l'assureur pendant 10 jours. Passé ce délai, elle devient caduque.",
+        "duree_validite_proposition_jours": 10,
+        "portee": "Durée de validité d'une proposition d'assurance"
+      },
+      "art_15": {
+        "texte": "Le contrat d'assurance prend effet à la date fixée aux conditions particulières, sous réserve que la prime ou la première fraction de prime ait été payée.",
+        "portee": "Prise d'effet du contrat"
+      },
+      "art_16": {
+        "texte": "Le souscripteur est tenu de répondre exactement aux questions posées par l'assureur lors de la souscription. Toute réticence ou fausse déclaration intentionnelle entraîne la nullité du contrat.",
+        "portee": "Obligation de déclaration exacte du risque"
+      },
+      "art_17": {
+        "texte": "En cas d'aggravation du risque en cours de contrat, l'assuré doit en informer l'assureur dans les 8 jours à compter de sa connaissance de cette aggravation.",
+        "delai_declaration_aggravation_jours": 8,
+        "portee": "Déclaration d'aggravation de risque"
+      },
+      "art_18": {
+        "texte": "L'assureur peut demander une augmentation de prime en cas d'aggravation du risque. À défaut d'accord dans les 30 jours, il peut résilier le contrat.",
+        "delai_accord_aggravation_jours": 30,
+        "portee": "Conséquences de l'aggravation sur la prime"
+      },
+      "art_19": {
+        "texte": "En cas de diminution du risque, l'assuré peut demander une réduction de la prime. L'assureur doit répondre dans les 30 jours.",
+        "portee": "Diminution de risque → réduction de prime"
+      },
+      "art_20": {
+        "texte": "Le contrat d'assurance est nul si, lors de sa souscription, le risque assuré était déjà réalisé, l'assuré en ayant connaissance.",
+        "portee": "Nullité pour sinistre antérieur connu"
+      }
+    },
+    "chapitre_III_obligations_parties": {
+      "art_21": {
+        "texte": "L'assuré est tenu de payer la prime ou cotisation aux époques convenues. Le non-paiement entraîne la suspension des garanties après mise en demeure.",
+        "portee": "Obligation de paiement de la prime"
+      },
+      "art_22": {
+        "texte": "La suspension des garanties pour non-paiement est opposable au tiers lésé dans les assurances de responsabilité, sauf en matière d'assurance automobile obligatoire.",
+        "portee": "Suspension et tiers lésés — EXCEPTION automobile"
+      },
+      "art_23": {
+        "texte": "L'assureur est tenu d'exécuter les obligations résultant du contrat dans les délais prévus et de bonne foi.",
+        "portee": "Obligation de bonne foi de l'assureur"
+      },
+      "art_24": {
+        "texte": "L'assuré doit prendre toutes les mesures raisonnables pour prévenir le sinistre et en limiter les conséquences.",
+        "portee": "Obligation de prévention et de limitation"
+      },
+      "art_25": {
+        "texte": "L'assuré doit faire toute diligence pour sauvegarder les biens assurés en cas de sinistre. Les frais engagés à cet effet sont à la charge de l'assureur dans la limite de la somme assurée.",
+        "portee": "Obligation de sauvegarde — frais de sauvetage à la charge de l'assureur"
+      }
+    },
+    "chapitre_IV_prescription": {
+      "art_26": {
+        "texte": "Toutes actions dérivant d'un contrat d'assurance non-vie sont prescrites par deux ans à compter de l'événement qui y donne naissance.",
+        "delai_prescription_ans_non_vie": 2,
+        "portee": "PRESCRIPTION 2 ANS — non-vie"
+      },
+      "art_27": {
+        "texte": "Toutes actions dérivant d'un contrat d'assurance-vie sont prescrites par dix ans à compter du terme du contrat ou de la date du décès de l'assuré.",
+        "delai_prescription_ans_vie": 10,
+        "portee": "PRESCRIPTION 10 ANS — vie"
+      },
+      "art_28": {
+        "texte": "La prescription est interrompue par une des causes ordinaires d'interruption de la prescription et en outre par la désignation d'experts à la suite d'un sinistre.",
+        "portee": "Interruption de prescription par expertise"
+      },
+      "art_29": {
+        "texte": "L'action exercée contre l'assureur par voie d'action directe se prescrit par les mêmes délais que l'action principale.",
+        "portee": "Prescription de l'action directe"
+      }
+    },
+    "chapitre_V_assurances_dommages": {
+      "art_30": {
+        "texte": "L'assurance dommages a pour objet de réparer un préjudice. L'indemnité due par l'assureur ne peut excéder le montant de la valeur de la chose assurée au moment du sinistre.",
+        "portee": "Principe indemnitaire"
+      },
+      "art_31": {
+        "texte": "En cas de sous-assurance (valeur réelle supérieure à la valeur assurée), l'assuré est considéré comme son propre assureur pour la part non couverte.",
+        "portee": "Règle proportionnelle en cas de sous-assurance"
+      },
+      "art_32": {
+        "texte": "L'assureur qui a payé l'indemnité est subrogé, jusqu'à concurrence du montant de ladite indemnité, dans les droits et actions de l'assuré contre les tiers responsables du sinistre.",
+        "portee": "Subrogation de l'assureur"
+      },
+      "art_33": {
+        "texte": "Il peut être convenu que l'assuré reste obligatoirement son propre assureur pour une fraction de chaque sinistre (franchise). La franchise est absolue si l'assureur ne doit rien en deçà, relative si l'assureur prend en charge le tout au-delà.",
+        "portee": "Franchise absolue et relative"
+      },
+      "art_34": {
+        "texte": "En cas de coassurance, chaque assureur ne répond que de sa quote-part du risque. Un mandataire commun représente les coassureurs dans les relations avec l'assuré pour la gestion du contrat et le règlement des sinistres.",
+        "portee": "Coassurance — responsabilité proportionnelle de chaque coassureur"
+      },
+      "art_35": {
+        "texte": "L'assurance peut être souscrite pour le compte de qui il appartiendra. La clause vaut à la fois assurance au profit du souscripteur et assurance au profit du ou des tiers bénéficiaires désignés ou à désigner.",
+        "portee": "Assurance pour le compte d'autrui"
+      },
+      "art_36": {
+        "texte": "En cas de pluralité d'assurances couvrant le même risque, l'assuré peut demander à l'un quelconque des assureurs l'exécution du contrat. L'assureur qui a payé dispose d'un recours proportionnel contre les autres assureurs.",
+        "portee": "Pluralité d'assurances — recours entre coassureurs"
+      },
+      "art_37": {
+        "texte": "Toute assurance souscrite pour une valeur supérieure à la valeur réelle du bien assuré est réputée sur-assurance. Si la sur-assurance est frauduleuse, le contrat est nul. Si elle est de bonne foi, seule la prime correspondant à la valeur réelle est due.",
+        "portee": "Sur-assurance — nullité en cas de fraude"
+      },
+      "art_38": {
+        "texte": "Les parties peuvent convenir d'une valeur agréée (valeur convenue d'avance). En cas de perte totale, l'indemnité est égale à la valeur agréée sans application de la règle proportionnelle. En cas de perte partielle, la règle proportionnelle s'applique si sous-assurance.",
+        "portee": "Valeur agréée — dispense de règle proportionnelle pour perte totale"
+      },
+      "art_39": {
+        "texte": "L'assurance à valeur à neuf garantit le remboursement du coût de remplacement du bien sinistré à l'état neuf, sans déduction pour vétusté, dans la limite de l'âge et de l'état convenu aux conditions particulières.",
+        "portee": "Assurance à valeur à neuf"
+      },
+      "art_40": {
+        "texte": "Dans l'assurance en premier risque, l'assuré fixe un plafond d'indemnisation sans déclaration de la valeur totale du bien. L'assureur indemnise jusqu'au plafond sans appliquer la règle proportionnelle.",
+        "portee": "Assurance en premier risque — pas de règle proportionnelle"
+      },
+      "art_41": {
+        "texte": "Dans les assurances de responsabilité civile, l'assureur a l'obligation de prendre en charge la défense de l'assuré contre les réclamations des tiers, y compris de mandater un avocat à ses frais dans la limite des garanties contractuelles.",
+        "portee": "Obligation de défense de l'assuré en RC"
+      },
+      "art_42": {
+        "texte": "La garantie RC couvre les dommages corporels, matériels et immatériels consécutifs causés aux tiers du fait de l'assuré, de ses préposés et des biens qu'il a sous sa garde, dans les limites définies au contrat.",
+        "portee": "Étendue de la garantie RC — corporels, matériels, immatériels"
+      },
+      "art_43": {
+        "texte": "Sont exclus de plein droit des garanties d'assurance : les dommages causés intentionnellement par l'assuré, les amendes et pénalités pénales, les dommages causés en état d'ivresse manifeste, et les dommages résultant d'un acte de guerre déclaré.",
+        "portee": "Exclusions légales d'ordre public en RC"
+      },
+      "art_44": {
+        "texte": "L'assureur RC qui a indemnisé le tiers lésé est subrogé dans les droits de ce tiers contre le responsable non assuré ou partiellement assuré. Le recours subrogatoire ne peut être exercé contre l'assuré qu'en cas de faute intentionnelle.",
+        "portee": "Subrogation de l'assureur RC — limites du recours contre l'assuré"
+      },
+      "art_45": {
+        "texte": "L'état de catastrophe naturelle est constaté par arrêté du ministre chargé des assurances de l'État membre concerné, sur avis de la commission nationale compétente. La garantie catastrophe naturelle est obligatoire dans les contrats dommages aux biens.",
+        "portee": "Catastrophes naturelles — déclaration officielle obligatoire"
+      },
+      "art_46": {
+        "texte": "En cas d'état de catastrophe naturelle déclaré, l'assureur doit prononcer l'indemnisation dans les 3 mois suivant la remise par l'assuré de l'état estimatif des pertes. La franchise légale catastrophe naturelle est fixée par arrêté.",
+        "delai_indemnisation_catnat_mois": 3,
+        "portee": "Délai d'indemnisation catastrophe naturelle — 3 mois"
+      },
+      "art_47": {
+        "texte": "Dans les assurances de protection juridique, si un conflit d'intérêt survient entre l'assureur et l'assuré, ce dernier a le droit de choisir librement son avocat aux frais de l'assureur, dans la limite du plafond contractuel.",
+        "portee": "Libre choix de l'avocat en protection juridique"
+      },
+      "art_48": {
+        "texte": "L'assureur RC peut prendre la direction du procès intenté contre l'assuré. Il ne peut transiger sans l'accord de l'assuré si le règlement impose à ce dernier une reconnaissance de responsabilité allant au-delà du contrat.",
+        "portee": "Direction du procès par l'assureur RC"
+      },
+      "art_49": {
+        "texte": "Les pertes immatérielles consécutives ne sont garanties que si elles sont expressément mentionnées aux conditions particulières. À défaut de stipulation, la garantie ne couvre que les dommages directs.",
+        "portee": "Pertes immatérielles — garantie expressément stipulée"
+      }
+    },
+    "chapitre_VI_assurances_personnes": {
+      "art_50": {
+        "texte": "Dans les assurances sur la vie, l'assureur s'engage à verser un capital ou une rente à une date déterminée ou lors de la réalisation d'un risque lié à la vie humaine.",
+        "portee": "Définition assurance-vie"
+      },
+      "art_51": {
+        "texte": "L'assurance en cas de décès doit désigner un bénéficiaire. À défaut, le capital est versé aux héritiers légaux.",
+        "portee": "Désignation du bénéficiaire"
+      },
+      "art_52": {
+        "texte": "Le souscripteur peut racheter tout ou partie de la valeur de rachat de son contrat vie, sous réserve d'un délai minimum de 6 mois après la souscription.",
+        "delai_avant_rachat_mois": 6,
+        "portee": "Droit de rachat — assurance-vie"
+      },
+      "art_53": {
+        "texte": "Les provisions mathématiques doivent être calculées selon des bases techniques approuvées par la CRCA. L'assureur doit les constituer au moins trimestriellement.",
+        "periodicite_constitution": "trimestrielle minimum",
+        "portee": "Provisions mathématiques obligatoires"
+      },
+      "art_54": {
+        "texte": "En assurance-vie, le taux technique maximum utilisé pour le calcul des provisions mathématiques est fixé par la CRCA et ne peut excéder 3,5% par an.",
+        "taux_technique_maximum": 0.035,
+        "portee": "Taux technique maximal — assurance-vie"
+      },
+      "art_73": {
+        "texte": "En assurance-vie, après réception d'un dossier complet, l'assureur doit régler la prestation dans un délai de 30 jours calendaires.",
+        "delai_reglement_vie_jours": 30,
+        "portee": "Délai de règlement sinistre vie"
+      },
+      "art_55": {
+        "texte": "Après deux ans de contrat, l'assureur ne peut se prévaloir de la réticence ou de la fausse déclaration de l'assuré sauf si elle a été faite de mauvaise foi. L'incontestabilité protège l'assuré de bonne foi après 2 ans.",
+        "delai_incontestabilite_ans": 2,
+        "portee": "INCONTESTABILITÉ — assurance vie après 2 ans"
+      },
+      "art_56": {
+        "texte": "Le souscripteur peut obtenir des avances sur sa police à hauteur de la valeur de rachat. Les intérêts des avances sont fixés par l'assureur et ne peuvent dépasser le taux technique majoré de 2 points. L'avance non remboursée est déduite du capital en cas de sinistre.",
+        "taux_max_avance": "Taux technique + 2%",
+        "portee": "Avances sur police vie"
+      },
+      "art_57": {
+        "texte": "La police d'assurance-vie peut être mise en nantissement au profit d'un créancier. Le nantissement est notifié à l'assureur par acte authentique ou sous seing privé. L'assureur ne peut payer le bénéficiaire qu'après mainlevée du créancier nanti.",
+        "portee": "Nantissement de la police vie"
+      },
+      "art_58": {
+        "texte": "La valeur de rachat minimale garantie est calculée selon les tables publiées par la CRCA. L'assureur doit communiquer au souscripteur, à chaque anniversaire de contrat, la valeur de rachat et la valeur réduite de sa police.",
+        "periodicite_information": "Annuelle (anniversaire contrat)",
+        "portee": "Valeur de rachat minimale — obligation d'information annuelle"
+      },
+      "art_59": {
+        "texte": "En cas de non-paiement de prime après mise en demeure, l'assuré peut opter pour la réduction du contrat : l'assurance se maintient sans nouvelles primes pour un capital réduit proportionnel aux primes déjà versées.",
+        "portee": "Réduction de l'assurance-vie en cas de non-paiement"
+      },
+      "art_60": {
+        "texte": "Le souscripteur désigne librement le ou les bénéficiaires. La désignation peut être nominative ou qualitative (ex. : conjoint, enfants). Elle peut être faite dans le contrat, par avenant, ou par testament.",
+        "portee": "Désignation du bénéficiaire — liberté et formes"
+      },
+      "art_61": {
+        "texte": "La désignation du bénéficiaire est librement révocable par le souscripteur, sauf acceptation formelle. La révocation est faite par avenant au contrat ou par acte authentique notifié à l'assureur.",
+        "portee": "Révocation de la désignation du bénéficiaire"
+      },
+      "art_62": {
+        "texte": "Dès l'acceptation par le bénéficiaire, la désignation devient irrévocable. Tout acte de disposition sur la police (rachat, nantissement, avance) nécessite alors l'accord écrit du bénéficiaire acceptant.",
+        "portee": "Acceptation bénéficiaire — irrévocabilité et effets"
+      },
+      "art_63": {
+        "texte": "Si le bénéficiaire décède avant l'assuré, sa désignation est caduque et le capital est versé aux héritiers légaux de l'assuré ou au bénéficiaire subsidiaire désigné.",
+        "portee": "Décès du bénéficiaire avant l'assuré"
+      },
+      "art_64": {
+        "texte": "Le capital ou la rente garantis au bénéficiaire désigné sont insaisissables par les créanciers du souscripteur. En cas de souscription en vue de frauder les créanciers, le juge peut ordonner la restitution des primes versées.",
+        "portee": "Insaisissabilité du capital vie — sauf fraude aux créanciers"
+      },
+      "art_65": {
+        "texte": "L'assurance sur la vie d'un tiers ne peut être souscrite sans le consentement écrit de ce tiers. Si le tiers est mineur ou incapable, l'autorisation du représentant légal est requise en sus.",
+        "portee": "Consentement obligatoire de l'assuré tiers"
+      },
+      "art_66": {
+        "texte": "L'assurance de groupe est souscrite par une personne morale (souscripteur) au profit de membres d'une collectivité (adhérents). Les garanties et tarifs sont fixés dans la convention de groupe. Chaque adhérent reçoit une notice d'information.",
+        "portee": "Assurance de groupe — définition et notice"
+      },
+      "art_67": {
+        "texte": "L'adhésion à un contrat de groupe résulte d'un bulletin d'adhésion signé par l'adhérent. La compagnie délivre un certificat d'adhésion à chaque membre. Les garanties prennent effet à la date fixée dans le bulletin.",
+        "portee": "Bulletin d'adhésion — assurance groupe"
+      },
+      "art_68": {
+        "texte": "En cas de cessation du contrat de groupe, les adhérents bénéficient d'un droit individuel à la portabilité de leurs garanties décès-invalidité pendant 12 mois sans nouvelle formalité médicale.",
+        "duree_portabilite_mois": 12,
+        "portee": "Portabilité des garanties groupe — 12 mois"
+      },
+      "art_69": {
+        "texte": "Le souscripteur peut résilier le contrat de groupe avec un préavis de 3 mois. Il doit informer les adhérents dans les 15 jours suivant la décision de résiliation pour leur permettre de rechercher une couverture individuelle.",
+        "preavis_resiliation_groupe_mois": 3,
+        "delai_information_adherents_jours": 15,
+        "portee": "Résiliation contrat groupe — préavis et obligations d'information"
+      },
+      "art_70": {
+        "texte": "L'assurance accidents corporels garantit le décès, l'invalidité permanente (IPP) et l'incapacité temporaire de travail (ITT) résultant d'un événement soudain, imprévu et extérieur à la personne de l'assuré.",
+        "portee": "Assurance accidents corporels — définition et garanties"
+      },
+      "art_71": {
+        "texte": "Est considéré comme accident au sens des assurances de personnes : tout événement soudain, involontaire, imprévu et extérieur au corps de l'assuré, entraînant une lésion corporelle objectivement constatée.",
+        "portee": "Définition légale de l'accident en assurance de personnes"
+      },
+      "art_72": {
+        "texte": "L'évaluation du taux d'invalidité permanente est effectuée par un médecin expert désigné par l'assureur. L'assuré peut demander une contre-expertise à ses frais, ou une expertise amiable contradictoire.",
+        "portee": "Évaluation médicale de l'invalidité — expertise et contre-expertise"
+      }
+    },
+    "chapitre_VII_assurance_vie_accidents": {
+      "art_74": {
+        "texte": "En assurance-vie décès, le suicide de l'assuré n'est garanti qu'après un délai de carence d'un an à compter de la prise d'effet du contrat ou de la remise en vigueur après résiliation pour non-paiement.",
+        "delai_carence_suicide_ans": 1,
+        "portee": "Suicide — délai de carence 1 an"
+      },
+      "art_75": {
+        "texte": "Le bénéficiaire qui a volontairement donné la mort à l'assuré est déchu de ses droits. Le capital est alors versé aux héritiers légaux ou au bénéficiaire subsidiaire.",
+        "portee": "Déchéance du bénéficiaire meurtrier"
+      },
+      "art_76": {
+        "texte": "En assurance-vie, la prescription est de dix ans pour les actions du bénéficiaire contre l'assureur à compter du terme du contrat ou de la date du décès. Pour les capitaux non réclamés, le dépôt à la Caisse des Dépôts intervient après 10 ans d'inaction.",
+        "delai_prescription_vie_ans": 10,
+        "portee": "Prescription décennale — assurance vie"
+      },
+      "art_77": {
+        "texte": "Les contrats collectifs d'assurance-vie obéissent aux règles des assurances de groupe. Le souscripteur répond de l'exactitude des déclarations faites par les adhérents. En cas de fausse déclaration d'un adhérent, seule sa garantie individuelle est affectée.",
+        "portee": "Contrats collectifs vie — responsabilité du souscripteur"
+      },
+      "art_78": {
+        "texte": "La rente viagère est un produit d'assurance par lequel l'assureur s'engage à verser à l'assuré une rente périodique jusqu'à son décès, en échange d'une prime unique ou de primes périodiques.",
+        "portee": "Définition de la rente viagère"
+      },
+      "art_79": {
+        "texte": "Les calculs actuariels des provisions mathématiques doivent être effectués à partir des tables de mortalité agréées par la CRCA. L'utilisation de tables d'expérience est soumise à approbation préalable de la CRCA.",
+        "portee": "Tables de mortalité réglementaires obligatoires"
+      },
+      "art_80": {
+        "texte": "Les entreprises d'assurance-vie doivent distribuer aux assurés au minimum 85% des produits financiers nets attribuables aux contrats d'assurance-vie, sous forme de participation aux bénéfices.",
+        "minimum_participation_benefices": 0.85,
+        "portee": "Participation aux bénéfices — minimum 85% des produits financiers"
+      },
+      "art_81": {
+        "texte": "Les contrats d'assurance-retraite bénéficient d'un traitement fiscal préférentiel défini par la législation fiscale de chaque État membre. Les rentes de retraite sont imposables à la source lors de leur versement.",
+        "portee": "Assurance-retraite — fiscalité déterminée par chaque État membre"
+      },
+      "art_82": {
+        "texte": "La valeur de la prime viagère est calculée actuariellement sur la base des tables et du taux technique agréés par la CRCA.",
+        "portee": "Prime viagère — calcul actuariel"
+      },
+      "art_83": {
+        "texte": "Les documents nécessaires au règlement d'un sinistre vie incluent : acte de décès, certificat médical de cause de décès, attestation du bénéficiaire, justificatif d'identité. L'assureur ne peut exiger que les documents strictement nécessaires.",
+        "portee": "Documents requis pour le règlement vie"
+      },
+      "art_84": {
+        "texte": "Si l'âge de l'assuré est inexactement déclaré, les sommes assurées sont réduites en proportion des primes payées par rapport aux primes qui auraient dû être payées si l'âge réel avait été connu.",
+        "portee": "Correction pour âge inexact — réduction proportionnelle"
+      },
+      "art_85": {
+        "texte": "L'assurance-emprunteur garantit le remboursement du capital restant dû d'un prêt en cas de décès ou d'invalidité de l'emprunteur. Elle est souvent exigée par l'établissement prêteur comme condition du crédit.",
+        "portee": "Assurance emprunteur — crédit vie"
+      },
+      "art_86": {
+        "texte": "La réticence dolosive dans un contrat d'assurance-vie entraîne sa nullité, et l'assureur conserve toutes les primes versées à titre d'indemnité. Les héritiers de l'assuré ne peuvent se prévaloir du contrat.",
+        "portee": "Nullité pour réticence dolosive vie — conservation des primes"
+      },
+      "art_87": {
+        "texte": "Est en état d'invalidité permanente totale (IPT) l'assuré dont le taux d'incapacité permanente est égal ou supérieur à 66%. Le capital décès ou le capital invalidité est versé intégralement dans ce cas.",
+        "seuil_ipt_pct": 66,
+        "portee": "Invalidité Permanente Totale — seuil 66%"
+      },
+      "art_88": {
+        "texte": "L'assurance perte d'emploi garantit le paiement d'un revenu de substitution en cas de licenciement économique involontaire. Elle ne couvre pas la démission, la rupture conventionnelle, ni la retraite anticipée.",
+        "portee": "Assurance perte d'emploi — licenciement économique uniquement"
+      },
+      "art_89": {
+        "texte": "Les assurances maladie et frais de soins ont pour objet le remboursement ou l'indemnisation des dépenses de santé de l'assuré. Les remboursements sont plafonnés par les actes médicaux figurant à la nomenclature nationale.",
+        "portee": "Assurance maladie — frais de soins"
+      },
+      "art_90": {
+        "texte": "Les remboursements de frais médicaux sont effectués sur présentation de justificatifs originaux. L'assureur ne peut refuser un remboursement sans justification écrite.",
+        "portee": "Remboursement frais médicaux — obligation de justification du refus"
+      },
+      "art_91": {
+        "texte": "Les frais d'hospitalisation couverts comprennent les frais de séjour, les honoraires médicaux et chirurgicaux, et les frais pharmaceutiques engagés pendant l'hospitalisation, dans la limite des plafonds contractuels.",
+        "portee": "Couverture hospitalisation — frais couverts"
+      },
+      "art_92": {
+        "texte": "Les frais de maternité sont couverts sous réserve d'un délai de carence minimum de 9 mois à compter de la souscription, sauf si la grossesse est antérieure à la souscription.",
+        "delai_carence_maternite_mois": 9,
+        "portee": "Assurance maternité — délai de carence 9 mois"
+      },
+      "art_93": {
+        "texte": "Les maladies préexistantes à la souscription peuvent être exclues ou couvertes sous réserve d'une majoration de prime. L'assureur doit préciser explicitement toute exclusion pour maladie préexistante aux conditions particulières.",
+        "portee": "Maladies préexistantes — exclusion ou surprime obligatoirement déclarée"
+      },
+      "art_94": {
+        "texte": "L'assurance accidents corporels garantit les conséquences d'un événement soudain, imprévu et extérieur au corps de l'assuré : décès accidentel, invalidité permanente partielle ou totale, incapacité temporaire de travail.",
+        "portee": "Assurance accidents corporels — définition et garanties essentielles"
+      },
+      "art_95": {
+        "texte": "Le capital décès accidentel est versé si l'assuré décède des suites directes d'un accident dans un délai d'un an suivant cet accident.",
+        "delai_lien_causal_deces_accident_an": 1,
+        "portee": "Décès accidentel — lien de causalité exigé dans l'année"
+      },
+      "art_96": {
+        "texte": "L'expertise médicale est effectuée par un médecin désigné par l'assureur. L'assuré peut demander une contre-expertise. En cas de désaccord, les parties nomment un troisième expert amiable. Les frais sont à la charge de la partie qui perd.",
+        "portee": "Expertise médicale accidents — procédure de contre-expertise"
+      },
+      "art_97": {
+        "texte": "Le barème d'invalidité applicable est celui défini aux conditions générales, ou à défaut, le barème légal en vigueur dans l'État membre. Aucun barème ne peut réduire les droits en deçà du barème CIMA.",
+        "portee": "Barème d'invalidité — application du barème CIMA en plancher"
+      },
+      "art_98": {
+        "texte": "Les actions en garantie découlant d'un contrat d'assurance accidents corporels se prescrivent par deux ans à compter de l'accident ou de la connaissance par l'assuré des conséquences de cet accident.",
+        "delai_prescription_accidents_ans": 2,
+        "portee": "Prescription 2 ans — assurance accidents corporels"
+      }
+    }
+  },
+  "livre_II_assurances_obligatoires": {
+    "titre": "LIVRE II — Assurances Obligatoires",
+    "art_200": {
+      "texte": "Tout propriétaire d'un véhicule terrestre à moteur doit être couvert par une assurance garantissant la responsabilité civile résultant des dommages corporels et matériels causés aux tiers par son véhicule.",
+      "portee": "RC automobile obligatoire — FONDEMENT LÉGAL",
+      "sanction_defaut": "Retrait du certificat d'immatriculation, amende"
+    },
+    "art_201": {
+      "texte": "Le minimum obligatoire de garantie en RC automobile est fixé par décret dans chaque État membre. Les capitaux minimaux sont harmonisés au niveau CIMA.",
+      "capitaux_minimaux_rc": {
+        "dommages_corporels_par_victime_fcfa": 50000000,
+        "dommages_corporels_par_accident_fcfa": 300000000,
+        "dommages_materiels_par_accident_fcfa": 50000000
+      },
+      "portee": "Capitaux minimaux RC automobile"
+    },
+    "art_202": {
+      "texte": "La carte rose est le document officiel attestant de la souscription d'une assurance RC automobile. Elle doit être présentée à toute réquisition des forces de l'ordre.",
+      "portee": "Carte rose — document obligatoire"
+    },
+    "art_205": {
+      "texte": "Le Bureau Central des Accidents (BCA) est l'organisme centralisateur des données d'accidents et de l'identification des véhicules assurés dans chaque État membre.",
+      "portee": "Rôle du BCA"
+    },
+    "art_207": {
+      "texte": "Le Fonds de Garantie Automobile (FGA) prend en charge les victimes d'accidents causés par des véhicules non assurés ou non identifiés.",
+      "portee": "Fonds de Garantie Automobile — protection des victimes"
+    },
+    "art_210": {
+      "texte": "En cas d'accident corporel, l'assureur du véhicule responsable doit faire une offre d'indemnisation dans les 3 mois suivant la demande de la victime.",
+      "delai_offre_corporel_mois": 3,
+      "portee": "Délai d'offre d'indemnisation corporelle"
+    },
+    "art_220": {
+      "texte": "Les barèmes d'invalidité utilisés pour le calcul des indemnisations corporelles en zone CIMA sont ceux définis par la Commission Médicale Consultative, basés sur le barème de droit commun.",
+      "portee": "Barèmes d'invalidité"
+    },
+    "art_225": {
+      "texte": "Tout entrepreneur ou maître d'ouvrage doit souscrire une assurance responsabilité civile décennale pour toute construction d'un bâtiment à usage d'habitation.",
+      "portee": "RC décennale construction — obligatoire"
+    },
+    "art_231": {
+      "texte": "L'assureur RC automobile doit régler le sinistre dans les 30 jours après accord sur l'indemnité ou décision judiciaire définitive.",
+      "delai_reglement_auto_jours": 30,
+      "portee": "Délai de règlement RC auto après expertise"
+    },
+    "art_232": {
+      "texte": "Si l'assuré conteste l'expertise, il peut demander une contre-expertise dans les 15 jours. Les frais d'expertise contradictoire sont à la charge de l'assureur si l'assuré obtient gain de cause.",
+      "delai_contre_expertise_jours": 15,
+      "portee": "Droit à la contre-expertise"
+    },
+    "art_203": {
+      "texte": "Sont dispensés de l'obligation d'assurance RC automobile : les véhicules militaires en opération, les véhicules de l'État utilisés exclusivement hors voie publique, et les engins de travaux publics utilisés sur chantier fermé.",
+      "portee": "Véhicules dispensés d'assurance RC — cas limitatifs"
+    },
+    "art_204": {
+      "texte": "Tout véhicule agricole ou forestier circulant sur voie publique est soumis à l'obligation d'assurance RC automobile. Les tracteurs travaillant exclusivement en champ clos sont dispensés.",
+      "portee": "Véhicules agricoles — RC obligatoire sur voie publique"
+    },
+    "art_206": {
+      "texte": "L'assurance temporaire RC automobile peut être souscrite pour une durée de 1 à 30 jours consécutifs. Elle vaut carte rose pour la période couverte. Au-delà de 30 jours, seule une police annuelle est admise.",
+      "duree_min_jours": 1,
+      "duree_max_jours": 30,
+      "portee": "Assurance temporaire RC auto — 1 à 30 jours"
+    },
+    "art_208": {
+      "texte": "La victime ou ses ayants droit doivent déclarer le sinistre au Fonds de Garantie Automobile (FGA) dans un délai d'un an à compter de l'accident si le véhicule responsable n'est pas identifié ou n'est pas assuré.",
+      "delai_declaration_fga_ans": 1,
+      "portee": "Déclaration sinistre au FGA — délai d'un an"
+    },
+    "art_209": {
+      "texte": "Le FGA peut mandater un expert médical pour l'évaluation des préjudices corporels des victimes. La victime peut demander une contre-expertise médicale. Les frais d'expertise sont à la charge du FGA.",
+      "portee": "Expertise médicale FGA — contre-expertise de la victime"
+    },
+    "art_211": {
+      "texte": "Après indemnisation, le FGA est subrogé dans les droits de la victime contre tout responsable du dommage : conducteur non assuré, propriétaire du véhicule non assuré, ou voleur du véhicule.",
+      "portee": "Subrogation du FGA — recours contre l'auteur non assuré"
+    },
+    "art_212": {
+      "texte": "Le Fonds de Garantie Automobile est alimenté par une cotisation obligatoire de 2% des primes RC automobile encaissées par chaque compagnie d'assurance membre. La CRCA fixe le taux par arrêté.",
+      "taux_cotisation_fga": 0.02,
+      "portee": "Financement du FGA — 2% des primes RC auto"
+    },
+    "art_213": {
+      "texte": "En cas d'accident corporel, l'assureur désigne un expert médical dans les 15 jours suivant la demande de la victime. Si l'état de la victime est consolidé, l'expert établit son rapport final dans les 30 jours suivant la consolidation.",
+      "delai_designation_expert_jours": 15,
+      "delai_rapport_final_jours": 30,
+      "portee": "Expertise médicale RC auto — délais réglementaires"
+    },
+    "art_214": {
+      "texte": "Le défaut d'assurance RC automobile est sanctionné par : une amende de 50 000 à 300 000 FCFA, l'immobilisation du véhicule, et le retrait du certificat d'immatriculation jusqu'à régularisation.",
+      "amende_min_fcfa": 50000,
+      "amende_max_fcfa": 300000,
+      "portee": "Sanctions défaut RC auto"
+    },
+    "art_215": {
+      "texte": "Les forces de l'ordre peuvent exiger la présentation de la carte rose lors de tout contrôle routier. Un conducteur sans carte rose valide est passible des sanctions prévues à l'article 214.",
+      "portee": "Contrôle de l'assurance RC auto par les forces de l'ordre"
+    },
+    "art_216": {
+      "texte": "La carte verte est l'extension internationale de l'assurance RC automobile aux pays membres du Bureau International de la Carte Verte. Elle est obligatoire pour tout voyage hors des pays CIMA.",
+      "portee": "Carte verte — assurance RC internationale"
+    },
+    "art_217": {
+      "texte": "Le coefficient de réduction-majoration (CRM ou bonus-malus) s'applique à la prime RC automobile. La valeur initiale est de 1.00. Elle est réduite de 5% par année sans sinistre responsable (minimum 0.50) et majorée de 25% par sinistre responsable (maximum 3.50).",
+      "crm_initial": 1.0,
+      "reduction_annuelle_pct": 5,
+      "majoration_sinistre_pct": 25,
+      "crm_minimum": 0.5,
+      "crm_maximum": 3.5,
+      "portee": "Bonus-malus CRM — coefficient 0.50 à 3.50"
+    },
+    "art_218": {
+      "texte": "Le CRM est porté à 3.50 en cas de sinistre causé sous l'emprise de l'alcool ou de stupéfiants. Cette majoration est maintenue pendant 3 exercices consécutifs.",
+      "crm_alcool": 3.5,
+      "duree_majoration_alcool_ans": 3,
+      "portee": "Majoration CRM pour alcool — 3.50 pendant 3 ans"
+    },
+    "art_219": {
+      "texte": "L'assureur RC automobile ne peut suspendre ou résilier la garantie au détriment d'une victime déjà identifiée dont le sinistre est en cours d'instruction. La garantie se maintient jusqu'au règlement définitif.",
+      "portee": "Maintien de la garantie RC auto pour sinistres en cours"
+    },
+    "art_221": {
+      "texte": "L'assistance en cas de panne ou d'accident (véhicule de remplacement, remorquage, hébergement d'urgence) est une garantie optionnelle de l'assurance automobile.",
+      "portee": "Assurance assistance automobile — garantie optionnelle"
+    },
+    "art_222": {
+      "texte": "La garantie dommages tous accidents (DTA) couvre les dommages subis par le véhicule de l'assuré quelle que soit la responsabilité, sous déduction de la franchise contractuelle.",
+      "portee": "Garantie DTA — dommages au véhicule assuré"
+    },
+    "art_223": {
+      "texte": "La garantie protection du conducteur couvre les dommages corporels subis par le conducteur responsable de l'accident, exclu de la RC. Elle est fortement recommandée car le conducteur n'est pas tiers vis-à-vis de sa propre police RC.",
+      "portee": "Protection du conducteur — garantie corporelle du conducteur responsable"
+    },
+    "art_224": {
+      "texte": "La garantie vol de véhicule est soumise à une déclaration au commissariat de police dans les 24 heures suivant la constatation du vol. La restitution du véhicule retrouvé dans les 30 jours annule l'indemnisation.",
+      "delai_declaration_vol_heures": 24,
+      "delai_restitution_jours": 30,
+      "portee": "Vol de véhicule — déclaration police 24h"
+    },
+    "art_226": {
+      "texte": "Le maître d'ouvrage doit souscrire une assurance RC décennale avant l'ouverture de tout chantier de construction. Cette assurance couvre les dommages compromettant la solidité de l'ouvrage pendant 10 ans à compter de la réception.",
+      "duree_garantie_ans": 10,
+      "portee": "RC décennale maître d'ouvrage — 10 ans"
+    },
+    "art_227": {
+      "texte": "Tout entrepreneur ou artisan du bâtiment doit souscrire une RC professionnelle couvrant les dommages causés pendant l'exécution des travaux (RC chantier), incluant les dommages aux tiers et à l'ouvrage.",
+      "portee": "RC chantier — entrepreneurs du bâtiment"
+    },
+    "art_228": {
+      "texte": "Le syndicat de copropriété doit souscrire une assurance multirisque immeuble couvrant a minima les risques d'incendie, les dégâts des eaux et la RC vis-à-vis des tiers et des copropriétaires.",
+      "garanties_minimum": [
+        "Incendie",
+        "Dégâts des eaux",
+        "RC immeuble"
+      ],
+      "portee": "Assurance copropriété — garanties minimales obligatoires"
+    },
+    "art_229": {
+      "texte": "Le propriétaire bailleur est responsable des dommages causés à ses locataires ou à des tiers résultant d'un défaut d'entretien ou de vices de construction de son immeuble.",
+      "portee": "RC propriétaire d'immeuble — responsabilité locataire et tiers"
+    },
+    "art_230": {
+      "texte": "Le locataire est responsable des dommages causés à l'immeuble loué du fait d'incendie ou de dégâts des eaux. La souscription d'une assurance RC locataire est recommandée et peut être imposée par le bail.",
+      "portee": "RC locataire — responsabilité incendie et dégâts des eaux"
+    },
+    "art_233": {
+      "texte": "Le transporteur public de voyageurs doit obligatoirement souscrire une assurance RC couvrant les dommages corporels et matériels causés aux passagers, bagages compris.",
+      "portee": "RC transport public de voyageurs — obligatoire"
+    },
+    "art_234": {
+      "texte": "Le transporteur de marchandises dangereuses (hydrocarbures, matières radioactives, produits chimiques) doit souscrire une RC renforcée avec des plafonds majorés définis par arrêté spécial.",
+      "portee": "RC transport matières dangereuses — plafonds renforcés"
+    },
+    "art_235": {
+      "texte": "Tout professionnel de la chasse doit souscrire une assurance RC couvrant les dommages causés à des tiers lors de l'exercice de la chasse. La carte de chasse ne peut être délivrée sans attestation d'assurance.",
+      "portee": "RC chasse obligatoire"
+    },
+    "art_236": {
+      "texte": "Les professions réglementées (médecins, avocats, experts comptables, architectes, notaires) doivent obligatoirement souscrire une assurance RC professionnelle auprès d'une compagnie agréée CRCA.",
+      "portee": "RC professionnelle obligatoire — professions réglementées"
+    },
+    "art_237": {
+      "texte": "Les employeurs sont tenus de souscrire une assurance AT/MP (accidents du travail et maladies professionnelles) pour leurs salariés, conformément aux législations nationales de chaque État membre.",
+      "portee": "Assurance accidents du travail — obligation employeur"
+    },
+    "art_238": {
+      "texte": "Les entreprises exploitant des installations industrielles présentant des risques pour l'environnement ou le voisinage doivent souscrire une RC exploitation incluant les dommages environnementaux.",
+      "portee": "RC exploitation industrielle et environnementale"
+    },
+    "art_239": {
+      "texte": "Les exploitants d'aéronefs civils immatriculés dans un État membre CIMA doivent souscrire une RC aviation couvrant les passagers, les tiers au sol et les dommages aux tiers en survol.",
+      "portee": "RC aviation civile — passagers et tiers au sol"
+    },
+    "art_240": {
+      "texte": "Les établissements scolaires et de formation doivent souscrire une RC civile couvrant les dommages causés aux élèves, aux enseignants et aux tiers lors des activités pédagogiques.",
+      "portee": "RC établissements scolaires"
+    },
+    "art_241": {
+      "texte": "Les organisateurs de manifestations sportives ou culturelles doivent souscrire une RC organisateur couvrant les dommages causés aux participants et aux spectateurs.",
+      "portee": "RC organisateur manifestations"
+    },
+    "art_242": {
+      "texte": "Les établissements accueillant du public (hôtels, restaurants, stades, centres commerciaux) doivent souscrire une RC exploitation couvrant les dommages causés aux clients et visiteurs.",
+      "portee": "RC établissements recevant du public (ERP)"
+    },
+    "art_243": {
+      "texte": "Les agents immobiliers, promoteurs et administrateurs de biens doivent souscrire une assurance RC professionnelle et une garantie financière couvrant les fonds de leurs clients.",
+      "portee": "RC professionnelle et garantie financière — agents immobiliers"
+    },
+    "art_244": {
+      "texte": "Les pharmaciens doivent souscrire une RC professionnelle couvrant les erreurs de délivrance et les conseils inadaptés causant un préjudice au patient.",
+      "portee": "RC pharmaciens — erreurs de délivrance"
+    },
+    "art_245": {
+      "texte": "Les médecins et professionnels de santé exerçant à titre libéral doivent souscrire une RC médicale couvrant les actes fautifs, les erreurs de diagnostic et les complications.",
+      "portee": "RC médicale — praticiens de santé libéraux"
+    },
+    "art_246": {
+      "texte": "Les avocats doivent souscrire une RC professionnelle couvrant les erreurs, omissions et négligences dans leur activité de conseil et de représentation en justice.",
+      "portee": "RC professionnelle avocats"
+    },
+    "art_247": {
+      "texte": "Les experts comptables et commissaires aux comptes doivent souscrire une RC professionnelle couvrant les erreurs comptables et d'audit ayant causé un préjudice financier.",
+      "portee": "RC professionnelle experts comptables et CAC"
+    },
+    "art_248": {
+      "texte": "Les entrepreneurs de transport fluvial circulant sur les voies d'eau des États membres CIMA doivent souscrire une RC navigation intérieure couvrant les dommages aux tiers et à l'environnement aquatique.",
+      "portee": "RC navigation intérieure"
+    },
+    "art_249": {
+      "texte": "Les propriétaires d'embarcations de plaisance motorisées doivent souscrire une RC nautique couvrant les dommages causés aux tiers et aux autres embarcations.",
+      "portee": "RC nautique embarcations de plaisance"
+    },
+    "art_250": {
+      "texte": "Les établissements bancaires et financiers doivent souscrire une assurance couvrant les risques d'infidélité des préposés, les risques informatiques, et la RC exploitation vis-à-vis de leurs clients.",
+      "portee": "Assurances obligatoires établissements bancaires"
+    },
+    "art_251": {
+      "texte": "Tout État membre peut, par arrêté, étendre la liste des assurances obligatoires à d'autres activités professionnelles présentant des risques pour les tiers, dans le respect des dispositions harmonisées du Code CIMA.",
+      "portee": "Extension possible des assurances obligatoires par arrêté national"
+    }
+  },
+  "livre_III_entreprises_assurance": {
+    "titre": "LIVRE III — Entreprises d'Assurance",
+    "agrement": {
+      "art_300": {
+        "texte": "Nul ne peut exercer une activité d'assurance en zone CIMA sans avoir obtenu un agrément délivré par les autorités nationales et validé par la CRCA.",
+        "portee": "Obligation d'agrément"
+      },
+      "art_301": {
+        "texte": "Les entreprises d'assurance doivent être constituées sous forme de société anonyme ou de société d'assurance mutuelle.",
+        "formes_juridiques_autorisees": [
+          "Société Anonyme (SA)",
+          "Société d'Assurance Mutuelle (SAM)"
+        ],
+        "portee": "Formes juridiques autorisées"
+      },
+      "art_302": {
+        "texte": "Le capital social minimum des entreprises d'assurance est fixé par branche d'activité. Les fonds propres doivent être intégralement libérés lors de la constitution.",
+        "portee": "Capital social minimum"
+      },
+      "capital_minimum_fcfa": {
+        "non_vie": 3000000000,
+        "vie": 3000000000,
+        "note": "Relevé à 3 milliards FCFA par circulaire CIMA 2016-001 — Art. 329-1 Code CIMA",
+        "capital_initial_historique_non_vie": 1000000000,
+        "capital_initial_historique_vie": 800000000
+      },
+      "art_303": {
+        "texte": "L'assureur doit notifier à la CRCA toute modification de ses statuts, de sa direction générale ou de sa structure actionnariale dans les 30 jours.",
+        "delai_notification_jours": 30,
+        "portee": "Obligations d'information envers la CRCA"
+      },
+      "art_310": {
+        "texte": "La CRCA peut retirer l'agrément d'une entreprise d'assurance qui ne respecte plus les conditions requises, après mise en demeure restée infructueuse.",
+        "portee": "Retrait d'agrément"
+      },
+      "art_304": {
+        "texte": "Le dossier d'agrément comprend : les statuts, la liste des actionnaires et dirigeants, le programme d'activité sur 3 ans, la justification du capital libéré, et tout document exigé par la CRCA. L'instruction dure au maximum 6 mois.",
+        "delai_instruction_mois": 6,
+        "portee": "Dossier d'agrément — contenu et délai 6 mois"
+      },
+      "art_305": {
+        "texte": "Les dirigeants d'une entreprise d'assurance doivent justifier d'une honorabilité irréprochable et d'une expérience professionnelle dans les domaines assurantiels, financiers ou juridiques d'au moins 5 ans.",
+        "experience_minimum_ans": 5,
+        "portee": "Conditions dirigeants — honorabilité et expérience 5 ans"
+      },
+      "art_306": {
+        "texte": "Le programme d'activité soumis à la CRCA détaille : les branches envisagées, les moyens humains et techniques, les prévisions financières sur 3 ans, et le plan de réassurance prévisionnel.",
+        "duree_previsions_ans": 3,
+        "portee": "Programme d'activité — contenu minimum"
+      },
+      "art_307": {
+        "texte": "La décision d'agrément est publiée au Journal Officiel de l'État membre concerné. L'exercice de branches non agréées est une infraction grave sanctionnée par retrait d'agrément.",
+        "portee": "Publication de l'agrément — Journal Officiel"
+      },
+      "art_311": {
+        "texte": "Les entreprises d'assurance doivent tenir leur comptabilité selon le Plan Comptable Sectoriel des Assurances (PCSA) zone CIMA, qui est obligatoire pour toutes les compagnies agréées.",
+        "portee": "Obligation du Plan Comptable Sectoriel Assurances (PCSA)"
+      },
+      "art_313": {
+        "texte": "Les entreprises pratiquant à la fois des opérations vie et non-vie doivent tenir des comptabilités strictement séparées. Les résultats ne peuvent être compensés entre branches.",
+        "portee": "Séparation comptable obligatoire vie / non-vie"
+      },
+      "art_314": {
+        "texte": "Le résultat technique de chaque branche est calculé par différence entre les produits techniques (primes acquises, produits financiers techniques) et les charges techniques (sinistres, provisions, commissions, frais).",
+        "portee": "Calcul du résultat technique par branche"
+      },
+      "art_315": {
+        "texte": "Le rapport annuel de gestion décrit l'activité de l'exercice, les faits marquants, les résultats techniques et financiers, et les perspectives pour l'exercice suivant.",
+        "portee": "Rapport annuel de gestion — contenu obligatoire"
+      },
+      "art_316": {
+        "texte": "Toute entreprise d'assurance doit désigner au moins un commissaire aux comptes agréé par la CRCA. Il certifie les comptes annuels et son rapport est joint aux états déposés à la CRCA.",
+        "portee": "Commissaire aux comptes agréé CRCA — obligatoire"
+      },
+      "art_317": {
+        "texte": "Les entreprises d'assurance transmettent à la CRCA tous les états comptables (C1-C20), les rapports des CAC, et toute information sur des faits susceptibles de compromettre leur situation financière.",
+        "portee": "Obligation de communication à la CRCA"
+      },
+      "art_318": {
+        "texte": "Les actifs représentatifs des engagements doivent être localisés dans l'État membre où sont souscrits les contrats. Les actifs hors zone CIMA sont limités à 20% des provisions techniques.",
+        "limite_actifs_hors_cima_pct": 20,
+        "portee": "Localisation des actifs représentatifs"
+      },
+      "art_319": {
+        "texte": "La liste limitative des actifs admis en représentation des provisions techniques est arrêtée par la CRCA. Tout actif ne figurant pas sur cette liste ne peut être comptabilisé en représentation.",
+        "portee": "Actifs admis — liste limitative CRCA"
+      },
+      "art_322": {
+        "texte": "Les fonds propres réglementaires comprennent : le capital social libéré, les réserves légales et statutaires, le report à nouveau positif, et les plus-values latentes nettes d'impôt.",
+        "portee": "Composition des fonds propres réglementaires"
+      },
+      "art_323": {
+        "texte": "Toute augmentation de capital doit être notifiée à la CRCA préalablement. La CRCA dispose de 30 jours pour s'y opposer si la provenance des fonds compromet l'honorabilité.",
+        "delai_opposition_crca_jours": 30,
+        "portee": "Augmentation de capital — notification préalable CRCA"
+      },
+      "art_324": {
+        "texte": "Une réduction de capital ne peut être effectuée si elle porte les fonds propres en dessous de la marge de solvabilité réglementaire.",
+        "portee": "Réduction de capital — maintien de la marge de solvabilité"
+      },
+      "art_325": {
+        "texte": "La distribution de dividendes est interdite si les provisions techniques ne sont pas intégralement couvertes par des actifs admis ou si les fonds propres sont inférieurs à la marge de solvabilité requise.",
+        "portee": "Interdiction de dividendes si solvabilité insuffisante"
+      },
+      "art_326": {
+        "texte": "Toute entreprise dont la marge de solvabilité est inférieure au seuil requis doit transmettre à la CRCA un plan de redressement dans les 90 jours.",
+        "delai_plan_redressement_jours": 90,
+        "portee": "Plan de redressement obligatoire — délai 90 jours"
+      },
+      "art_327": {
+        "texte": "En cas de risque imminent pour les assurés, la CRCA peut ordonner le gel ou la limitation des transferts d'actifs et des rachats, à titre de mesure conservatoire.",
+        "portee": "Mesures conservatoires CRCA — gel des actifs"
+      },
+      "art_328": {
+        "texte": "Lorsque la gestion d'une entreprise présente des irrégularités graves, la CRCA peut désigner un administrateur provisoire qui se substitue aux organes dirigeants avec tous leurs pouvoirs.",
+        "portee": "Administrateur provisoire — pouvoirs étendus"
+      },
+      "art_329": {
+        "texte": "Le capital social minimum des entreprises d'assurance est fixé à 3 milliards FCFA pour les sociétés non-vie et 3 milliards FCFA pour les sociétés vie. Ce capital doit être intégralement libéré lors de la constitution.",
+        "capital_minimum_non_vie_fcfa": 3000000000,
+        "capital_minimum_vie_fcfa": 3000000000,
+        "portee": "Capital minimum 3 milliards FCFA (Circulaire 2016-001)"
+      },
+      "art_329_1": {
+        "texte": "Par dérogation à l'article 329, le capital minimum des sociétés de microassurance agréées est fixé à 500 millions FCFA. Elles sont limitées à des produits dont la prime mensuelle ne dépasse pas 5 000 FCFA.",
+        "capital_minimum_microassurance_fcfa": 500000000,
+        "prime_max_mensuelle_fcfa": 5000,
+        "portee": "Microassurance — capital 500M FCFA (Circulaire 2024)"
+      },
+      "art_330": {
+        "texte": "Les entreprises d'assurance nouvellement agréées doivent constituer un fonds de garantie initial égal au tiers de la marge de solvabilité requise avant tout début d'activité.",
+        "portee": "Fonds de garantie initial — tiers de la marge de solvabilité"
+      },
+      "art_331": {
+        "texte": "L'agrément est accordé par branche principale. Une entreprise ne peut pratiquer des opérations vie et non-vie simultanément que si elle dispose d'agréments distincts et de gestions séparées.",
+        "portee": "Agrément par branche — séparation vie / non-vie"
+      },
+      "art_332": {
+        "texte": "Toute opération de fusion, absorption ou scission impliquant une entreprise d'assurance est soumise à l'agrément préalable de la CRCA rendu dans un délai de 3 mois.",
+        "delai_decision_mois": 3,
+        "portee": "Fusion, absorption, scission — agrément préalable CRCA"
+      },
+      "art_333": {
+        "texte": "Le transfert de portefeuille est soumis à l'agrément de la CRCA. Les assurés cédés ont un droit d'opposition dans un délai de 2 mois suivant la publication du transfert.",
+        "delai_opposition_assures_mois": 2,
+        "portee": "Transfert de portefeuille — droit d'opposition des assurés"
+      },
+      "art_336": {
+        "texte": "La CRCA peut placer une entreprise sous surveillance renforcée lorsque sa situation financière se dégrade, même si la marge de solvabilité n'est pas encore insuffisante. L'entreprise transmet alors des états trimestriels supplémentaires.",
+        "portee": "Surveillance renforcée CRCA — avant atteinte des seuils"
+      },
+      "art_339": {
+        "texte": "La CRCA peut procéder à des inspections sur place de toute entreprise d'assurance agréée. L'entreprise est tenue de mettre à disposition l'ensemble de ses documents comptables, techniques et de gestion.",
+        "portee": "Inspections sur place — pouvoirs des inspecteurs CRCA"
+      },
+      "art_340": {
+        "texte": "L'entreprise inspectée dispose de 30 jours pour répondre aux observations du rapport d'inspection. Ses observations sont jointes au rapport final transmis au collège de la CRCA.",
+        "delai_reponse_inspection_jours": 30,
+        "portee": "Droit de réponse à l'inspection — 30 jours"
+      },
+      "art_334": {
+        "texte": "Toute entreprise d'assurance doit constituer et maintenir des provisions techniques suffisantes pour faire face à ses engagements envers les assurés et les bénéficiaires. Ces provisions sont évaluées selon les méthodes actuarielles reconnues et sont soumises au contrôle de la CRCA.",
+        "portee": "Obligation générale de constitution des provisions techniques"
+      },
+      "art_337": {
+        "texte": "Toute entreprise d'assurance doit justifier d'une marge de solvabilité. Cette marge correspond à l'excédent de l'actif sur le passif, duquel sont déduits les éléments incorporels. Le montant minimum est fixé par voie réglementaire selon la nature des opérations pratiquées.",
+        "portee": "Définition et obligation générale de la marge de solvabilité"
+      },
+      "art_338": {
+        "texte": "Lorsque la marge de solvabilité d'une entreprise d'assurance est inférieure au minimum réglementaire, l'entreprise est tenue de soumettre à la CRCA, dans un délai de trente jours, un plan de redressement approuvé par son conseil d'administration. La CRCA peut imposer des mesures conservatoires.",
+        "portee": "Plan de redressement obligatoire en cas de marge insuffisante"
+      }
+    },
+    "marge_solvabilite": {
+      "art_337_1": {
+        "texte": "Les entreprises d'assurance non-vie doivent disposer en permanence d'une marge de solvabilité déterminée par la plus grande des deux valeurs suivantes : 23% des primes nettes acquises ou 26% de la charge sinistres moyenne des trois derniers exercices. En aucun cas cette marge ne peut être inférieure à 300 millions FCFA.",
+        "methode_calcul": {
+          "methode_1": "23% × primes nettes acquises de l'exercice",
+          "methode_2": "26% × [(sinistres_exercice_N + sinistres_exercice_N1 + sinistres_exercice_N2) / 3]",
+          "minimum_absolu_fcfa": 300000000,
+          "retenir": "maximum des deux méthodes, au moins 300 millions FCFA"
+        },
+        "portee": "MARGE DE SOLVABILITÉ NON-VIE — calcul précis"
+      },
+      "art_337_2": {
+        "texte": "Pour les entreprises mixtes (vie et non-vie), les marges de solvabilité sont calculées séparément pour chaque branche.",
+        "portee": "Calcul séparé branches mixtes"
+      },
+      "art_338_1": {
+        "texte": "Les entreprises d'assurance-vie doivent disposer d'une marge de solvabilité égale à : 4% des provisions mathématiques brutes de réassurance, augmenté de 0.3% du capital sous risque net de réassurance pour les contrats temporaires décès.",
+        "methode_calcul": {
+          "composante_1": "4% × provisions mathématiques brutes",
+          "composante_2": "0.3% × capital sous risque net de réassurance",
+          "minimum_absolu_fcfa": 500000000
+        },
+        "portee": "MARGE DE SOLVABILITÉ VIE — calcul précis"
+      }
+    },
+    "couverture_provisions_techniques": {
+      "art_334_1": {
+        "texte": "La provision pour primes non acquises (PPNA) représente la fraction des primes émises au cours de l'exercice se rapportant à la période de risque postérieure à la date de clôture.",
+        "methode": "Prorata temporis ou méthode des huitièmes (1/8)",
+        "portee": "PPNA — provision pour primes non acquises"
+      },
+      "art_334_2": {
+        "texte": "La provision pour sinistres à payer (PSAP) est l'estimation du coût global de règlement de tous les sinistres survenus et non encore réglés, augmentée des frais de gestion y afférents.",
+        "methode": "Dossier par dossier obligatoire — méthode Chain-Ladder admise pour IBNR",
+        "portee": "PSAP — provision sinistres à payer"
+      },
+      "art_334_3": {
+        "texte": "La provision pour risques croissants (PRC) est obligatoire pour les contrats maladie et accident corporel à prime fixe dont les risques croissent avec l'âge.",
+        "portee": "PRC — applicable aux contrats à risques croissants"
+      },
+      "art_334_4": {
+        "texte": "Les provisions mathématiques sont calculées par différence entre la valeur actuelle des engagements de l'assureur et la valeur actuelle des engagements de l'assuré, selon les bases techniques agréées par la CRCA.",
+        "methode": "Calcul actuariel prospectif — bases techniques CRCA",
+        "portee": "PROVISIONS MATHÉMATIQUES VIE"
+      },
+      "art_334_5": {
+        "texte": "La provision pour rentes en cours (PMR) est calculée sur la base des tables de mortalité réglementaires et d'un taux technique ne dépassant pas celui fixé par la CRCA.",
+        "portee": "Provision pour rentes en cours de service"
+      },
+      "art_334_6": {
+        "texte": "La provision de gestion est destinée à couvrir les charges de gestion des contrats non représentées par les provisions précédentes.",
+        "portee": "Provision de gestion"
+      },
+      "art_334_7": {
+        "texte": "La provision d'égalisation est constituée pour faire face aux fluctuations anormales de sinistralité afférentes aux risques de catastrophes. Son taux de dotation annuel est fixé par branche par arrêté.",
+        "portee": "Provision d'égalisation"
+      },
+      "art_335": {
+        "texte": "Les provisions techniques doivent à tout moment être représentées par des actifs admis dont la liste est fixée par arrêté. La valeur des actifs doit être au moins égale au montant des provisions techniques.",
+        "ratio_couverture_minimum": 1.0,
+        "actifs_admis": [
+          "Obligations d'État des pays membres CIMA",
+          "Obligations garanties par les États membres",
+          "Actions cotées sur une bourse agréée",
+          "Parts de SICAV ou FCP agréés par la CRCA",
+          "Immeubles urbains productifs de revenus situés dans les pays membres",
+          "Dépôts bancaires dans un établissement agréé",
+          "Avances sur polices (vie seulement)",
+          "Créances sur réassureurs notés BBB+ ou plus",
+          "Prêts hypothécaires de premier rang",
+          "Obligations émises par des entreprises cotées"
+        ],
+        "actifs_non_admis": [
+          "Créances douteuses ou litigieuses",
+          "Terrains non construits",
+          "Actions non cotées au-delà de 10% du portefeuille",
+          "Créances sur l'actionnaire principal au-delà de 5%"
+        ],
+        "portee": "COUVERTURE DES PROVISIONS TECHNIQUES — CRITIQUE"
+      }
+    },
+    "reassurance": {
+      "art_308": {
+        "texte": "Toute entreprise d'assurance peut céder en réassurance tout ou partie de ses risques à un ou plusieurs réassureurs. Toutefois, les cessions ne doivent pas avoir pour effet de réduire les fonds propres en deçà de la marge de solvabilité.",
+        "seuil_alerte_cession": 0.5,
+        "portee": "Liberté de réassurance avec limite prudentielle — 50%"
+      },
+      "art_309": {
+        "texte": "Les réassureurs acceptant des risques de la zone CIMA doivent être notés au moins BBB par une agence de notation reconnue ou être agréés par la CRCA.",
+        "notation_minimum": "BBB (Standard & Poor's ou Fitch)",
+        "portee": "Qualité des réassureurs accepteurs"
+      },
+      "art_312": {
+        "texte": "Le plan de réassurance (état C20) doit être soumis à la CRCA avant le 31 janvier de chaque exercice.",
+        "echeance": "31 janvier",
+        "portee": "Dépôt du plan de réassurance (C20)"
+      }
+    },
+    "placement_actifs": {
+      "art_320": {
+        "texte": "Les entreprises d'assurance doivent investir au moins 50% de leurs actifs dans des valeurs émises ou garanties par les États membres de la CIMA.",
+        "seuil_investissement_zone_cima": 0.5,
+        "portee": "Obligation d'investissement local"
+      },
+      "art_321": {
+        "texte": "Les placements en actions non cotées ne peuvent excéder 10% des actifs admis. Les placements en immobilier ne peuvent excéder 30%.",
+        "limites_par_classe": {
+          "actions_non_cotees_max": "10%",
+          "immobilier_max": "30%",
+          "depots_bancaires_max": "40% (dont max 10% dans un même établissement)",
+          "obligations_entreprises_max": "30%"
+        },
+        "portee": "Limites par classe d'actifs"
+      }
+    },
+    "controle_crca": {
+      "art_400": {
+        "texte": "La CRCA est habilitée à effectuer des contrôles sur pièces et sur place de toutes les entreprises d'assurance exerçant en zone CIMA. Les dirigeants sont tenus de présenter tous documents requis.",
+        "portee": "Pouvoir de contrôle de la CRCA"
+      },
+      "art_401": {
+        "texte": "En cas de manquement grave, la CRCA peut prononcer des sanctions administratives : avertissement, blâme, interdiction de certaines opérations, désignation d'un administrateur provisoire, retrait d'agrément.",
+        "sanctions": [
+          "Avertissement",
+          "Blâme",
+          "Interdiction d'opérations",
+          "Administrateur provisoire",
+          "Retrait d'agrément"
+        ],
+        "portee": "Pouvoirs de sanction de la CRCA"
+      },
+      "art_402": {
+        "texte": "Les états réglementaires (C1-C20) sont transmis à la CRCA sous format standardisé. Le format électronique est accepté conformément à la circulaire 2020-001.",
+        "portee": "Format électronique admis pour les états CRCA"
+      },
+      "art_403": {
+        "texte": "La CRCA peut demander des états spéciaux non prévus au format C1-C20 en cas d'investigation. L'entreprise dispose de 30 jours pour les transmettre.",
+        "delai_etats_speciaux_jours": 30,
+        "portee": "États spéciaux CRCA — délai 30 jours"
+      },
+      "art_404": {
+        "texte": "La CRCA contrôle la cohérence des états déposés avec les comptes certifiés par le CAC. Tout écart significatif fait l'objet d'une demande d'explication dans les 15 jours.",
+        "delai_explication_ecart_jours": 15,
+        "portee": "Contrôle de cohérence des états par la CRCA"
+      },
+      "art_405": {
+        "texte": "En cas d'erreur dans les états déposés, l'entreprise peut transmettre des états rectificatifs dans les 30 jours suivant la découverte de l'erreur, sans pénalité si la correction est spontanée.",
+        "delai_rectification_jours": 30,
+        "portee": "États rectificatifs — correction spontanée sans pénalité"
+      },
+      "art_406": {
+        "texte": "Le retard dans le dépôt des états réglementaires à la CRCA est sanctionné par une amende de 50 000 FCFA par jour de retard, dans la limite de 5 millions FCFA. Au-delà de 90 jours de retard, l'avertissement officiel est prononcé.",
+        "amende_par_jour_fcfa": 50000,
+        "amende_maximum_fcfa": 5000000,
+        "delai_avertissement_jours": 90,
+        "portee": "Amende pour retard dépôt états — 50 000 FCFA/jour"
+      },
+      "art_410": {
+        "texte": "L'inspection sur place est déclenchée par décision du collège de la CRCA. Les inspecteurs disposent d'un accès sans restriction à tous les locaux, systèmes informatiques et archives.",
+        "portee": "Déclenchement et pouvoirs d'inspection CRCA"
+      },
+      "art_411": {
+        "texte": "L'inspection donne lieu à un procès-verbal signé par les inspecteurs. L'entreprise dispose de 30 jours pour présenter ses observations écrites.",
+        "delai_observations_jours": 30,
+        "portee": "Procès-verbal d'inspection — droit de réponse 30 jours"
+      },
+      "art_412": {
+        "texte": "La CRCA peut adresser des injonctions à toute entreprise d'assurance lui imposant des mesures correctives dans un délai déterminé. L'injonction est notifiée par lettre recommandée avec accusé de réception.",
+        "portee": "Injonctions CRCA — mesures correctives"
+      },
+      "art_413": {
+        "texte": "Avant toute sanction autre que l'avertissement, la CRCA adresse une mise en demeure accordant un délai de 30 jours pour se mettre en conformité.",
+        "delai_mise_en_demeure_jours": 30,
+        "portee": "Mise en demeure préalable aux sanctions — 30 jours"
+      },
+      "art_414": {
+        "texte": "L'entreprise mise en demeure doit adresser sa réponse par lettre recommandée dans le délai imparti. Le silence vaut acceptation de la mise en demeure.",
+        "portee": "Réponse à la mise en demeure — silence vaut acceptation"
+      },
+      "art_415": {
+        "texte": "L'administrateur provisoire est désigné par décision du collège de la CRCA pour une durée maximale de 12 mois renouvelable une fois. Sa mission est de redresser la situation ou d'organiser le transfert de portefeuille.",
+        "duree_max_mois": 12,
+        "portee": "Administrateur provisoire — durée 12 mois renouvelable"
+      },
+      "art_416": {
+        "texte": "L'administrateur provisoire remet un rapport mensuel au collège de la CRCA. En fin de mission, il présente un rapport final et des recommandations.",
+        "periodicite_rapport": "Mensuelle",
+        "portee": "Rapport mensuel de l'administrateur provisoire"
+      },
+      "art_420": {
+        "texte": "Le retrait d'agrément est prononcé par le collège de la CRCA après mise en demeure infructueuse. Il entraîne l'arrêt immédiat de toute souscription nouvelle.",
+        "portee": "Retrait d'agrément — effet immédiat sur les nouvelles souscriptions"
+      },
+      "art_421": {
+        "texte": "La liquidation judiciaire d'une entreprise d'assurance ne peut être prononcée qu'après retrait d'agrément par la CRCA.",
+        "portee": "Liquidation judiciaire — postérieure au retrait d'agrément"
+      },
+      "art_422": {
+        "texte": "Le liquidateur judiciaire dispose des mêmes pouvoirs que l'administrateur provisoire. Les assurés sont créanciers privilégiés de premier rang.",
+        "portee": "Liquidateur — assurés créanciers privilégiés de 1er rang"
+      },
+      "art_423": {
+        "texte": "En cas d'insuffisance d'actifs, l'ordre de préférence est : (1) créances des assurés et bénéficiaires, (2) salaires des employés, (3) dettes fiscales et sociales, (4) autres créanciers.",
+        "rang_creanciers": [
+          "Assurés et bénéficiaires",
+          "Salariés",
+          "État et CNSS",
+          "Autres créanciers"
+        ],
+        "portee": "Rang des créanciers en liquidation — assurés en 1er"
+      },
+      "art_424": {
+        "texte": "La liquidation d'une entreprise d'assurance doit être menée à terme dans un délai maximum de 3 ans. La CRCA peut proroger ce délai d'un an en cas de contentieux complexe.",
+        "duree_max_liquidation_ans": 3,
+        "portee": "Durée maximale de liquidation — 3 ans"
+      },
+      "art_425": {
+        "texte": "Si les actifs sont insuffisants pour désintéresser les assurés, la CRCA peut faire appel au Fonds de Garantie des Assurés pour combler le déficit.",
+        "portee": "Fonds de Garantie des Assurés — intervention si insolvabilité"
+      },
+      "art_426": {
+        "texte": "Si un repreneur agréé se manifeste avant liquidation, la CRCA favorise le transfert forcé du portefeuille. Les assurés sont informés par courrier recommandé au moins 2 mois avant le transfert.",
+        "delai_information_assures_mois": 2,
+        "portee": "Transfert forcé de portefeuille — alternative à la liquidation"
+      },
+      "art_427": {
+        "texte": "Toute décision de retrait d'agrément, liquidation ou transfert forcé est publiée dans les journaux nationaux et dans le bulletin officiel de la CRCA. Les assurés ont 30 jours pour déclarer leurs créances.",
+        "delai_declaration_creances_jours": 30,
+        "portee": "Publication officielle — 30 jours pour déclarer les créances"
+      },
+      "art_428": {
+        "texte": "Pendant la procédure de transfert ou de liquidation, les sinistres survenus avant la décision de retrait restent garantis.",
+        "portee": "Maintien des garanties pour sinistres survenus avant le retrait"
+      },
+      "art_429": {
+        "texte": "Les litiges entre une entreprise d'assurance et un assuré peuvent être soumis à la procédure d'arbitrage de la CRCA. L'arbitrage CRCA est obligatoire avant toute action judiciaire transfrontalière.",
+        "portee": "Arbitrage CRCA — obligatoire avant action transfrontalière"
+      },
+      "art_430": {
+        "texte": "Les décisions du collège de la CRCA peuvent faire l'objet d'un recours devant le tribunal administratif de l'État membre du siège social dans un délai de 60 jours suivant leur notification.",
+        "delai_recours_jours": 60,
+        "portee": "Recours contre les décisions CRCA — délai 60 jours"
+      },
+      "art_407": {
+        "texte": "La CRCA peut adresser une injonction à toute entreprise d'assurance lui prescrivant de prendre dans un délai déterminé les mesures nécessaires pour se conformer aux dispositions du Code CIMA. L'injonction précise la nature du manquement constaté, les mesures correctrices requises et le délai accordé, qui ne peut être inférieur à trente jours.",
+        "portee": "Injonction CRCA — délai minimum 30 jours — mesures correctrices précisées"
+      },
+      "art_408": {
+        "texte": "L'administrateur provisoire nommé par la CRCA exerce la totalité des pouvoirs du conseil d'administration et de la direction générale de l'entreprise. Sa mission est d'une durée maximale de douze mois, renouvelable une fois. Ses honoraires, fixés par la CRCA, sont à la charge de l'entreprise. Il rend compte mensuellement à la CRCA.",
+        "portee": "Admin provisoire — pleins pouvoirs, 12 mois renouvelables, honoraires à charge entreprise"
+      },
+      "art_409": {
+        "texte": "Le transfert de portefeuille d'une entreprise d'assurance est prononcé par la CRCA lorsque la situation financière de l'entreprise ne permet pas d'assurer dans de bonnes conditions la poursuite de son activité. Les assurés sont informés par voie de publication et bénéficient d'un droit de résiliation de trente jours.",
+        "portee": "Transfert de portefeuille — décision CRCA — droit résiliation assurés 30j"
+      },
+      "art_417": {
+        "texte": "La liquidation judiciaire d'une entreprise d'assurance ne peut être prononcée par le tribunal qu'après avis conforme de la CRCA. La demande de liquidation peut être présentée par la CRCA, les créanciers ou le ministère public. Le tribunal peut désigner un liquidateur sur proposition de la CRCA.",
+        "portee": "Liquidation judiciaire — avis conforme CRCA préalable obligatoire"
+      },
+      "art_418": {
+        "texte": "Le liquidateur judiciaire, nommé avec l'accord de la CRCA, dispose des pouvoirs les plus étendus pour réaliser l'actif, apurer le passif et répartir le solde. Il tient les assurés, la CRCA et le tribunal informés trimestriellement. Les contrats en cours sont résiliés de plein droit à la date du jugement de liquidation.",
+        "portee": "Liquidateur — pleins pouvoirs, rapports trimestriels, contrats résiliés de plein droit"
+      },
+      "art_419": {
+        "texte": "En cas de liquidation, les créances des assurés et bénéficiaires de contrats d'assurance jouissent d'un privilège général sur l'ensemble des actifs de l'entreprise. Cet ordre de priorité est le suivant : 1° frais de liquidation, 2° salaires et charges sociales, 3° créances des assurés et bénéficiaires, 4° autres créanciers.",
+        "portee": "Ordre de priorité liquidation — assurés en rang 3 après frais et salaires"
+      }
+    },
+    "comptabilite": {
+      "titre": "Comptabilité des entreprises d'assurance — Art. 341 à 360",
+      "art_341": {
+        "texte": "Les entreprises d'assurance sont tenues d'appliquer le plan comptable des assurances adopté par la CRCA, adapté au Code CIMA. Ce plan comptable précise la nature des comptes, leur fonctionnement et les règles d'évaluation applicables aux opérations d'assurance.",
+        "portee": "Plan comptable spécifique assurances — obligatoire"
+      },
+      "art_342": {
+        "texte": "L'exercice comptable des entreprises d'assurance coïncide avec l'année civile, du 1er janvier au 31 décembre. Toute dérogation doit être expressément autorisée par la CRCA et ne peut excéder une période transitoire de dix-huit mois.",
+        "portee": "Exercice comptable annuel — 1er janvier au 31 décembre"
+      },
+      "art_343": {
+        "texte": "Les entreprises d'assurance sont tenues de tenir une comptabilité régulière et sincère, enregistrant toutes les opérations dans les livres obligatoires : livre-journal, grand livre, livre d'inventaire. Les livres comptables doivent être conservés pendant dix ans.",
+        "portee": "Tenue obligatoire des livres comptables — conservation 10 ans"
+      },
+      "art_344": {
+        "texte": "À la clôture de chaque exercice, les entreprises d'assurance procèdent à un inventaire physique et comptable de l'ensemble de leurs actifs et passifs. L'inventaire des sinistres en cours est établi dossier par dossier. Les provisions sont évaluées de manière prudente.",
+        "portee": "Inventaire annuel obligatoire — actifs, passifs, sinistres dossier/dossier"
+      },
+      "art_345": {
+        "texte": "Les comptes annuels comprennent : le bilan (actif et passif), le compte de résultat général, le compte d'exploitation par branche, l'annexe explicative et les états réglementaires C1 à C20. Ces documents forment un tout indissociable.",
+        "portee": "Composantes obligatoires des comptes annuels"
+      },
+      "art_346": {
+        "texte": "Les comptes annuels, accompagnés du rapport du commissaire aux comptes, sont transmis à la CRCA au plus tard le 31 mars de l'exercice suivant. Tout retard entraîne une pénalité de 500 000 FCFA par semaine de retard, sans préjudice des autres sanctions.",
+        "portee": "Délai de dépôt — 31 mars — pénalité 500 000 FCFA/semaine"
+      },
+      "art_347": {
+        "texte": "Toute entreprise d'assurance est tenue de désigner au moins un commissaire aux comptes agréé. Le commissaire aux comptes certifie la régularité, la sincérité et l'image fidèle des comptes annuels. Il est tenu de signaler à la CRCA toute irrégularité grave.",
+        "portee": "Commissaire aux comptes obligatoire — obligation de signalement CRCA"
+      },
+      "art_348": {
+        "texte": "Les comptes annuels certifiés sont publiés dans un journal d'annonces légales de l'État du siège social dans un délai de quatre mois suivant la clôture de l'exercice. Le bilan sommaire et le compte de résultat sont publiés dans leur intégralité.",
+        "portee": "Publication obligatoire des comptes — 4 mois après clôture"
+      },
+      "art_349": {
+        "texte": "Les entreprises pratiquant à la fois des opérations vie et non-vie tiennent une comptabilité distincte pour chacune des deux catégories. Les actifs, passifs, produits et charges sont affectés selon leur nature. Les frais généraux sont répartis selon une clé approuvée par la CRCA.",
+        "portee": "Comptabilité séparée vie / non-vie obligatoire"
+      },
+      "art_350": {
+        "texte": "Un compte d'exploitation est établi pour chacune des branches pratiquées. Il retrace les primes acquises, les charges de sinistres, les frais d'exploitation, les commissions de réassurance et le résultat technique par branche. Ce document fait partie des états C1 et C2.",
+        "portee": "Compte d'exploitation par branche — base états C1/C2"
+      },
+      "art_351": {
+        "texte": "L'état C3 — Bilan annuel — présente à l'actif les placements, les créances sur assurés et intermédiaires, les actifs incorporels et les disponibilités ; au passif les capitaux propres, les provisions techniques, les dettes de réassurance et les autres dettes. L'actif et le passif doivent être égaux.",
+        "portee": "État C3 — Bilan équilibré actif = passif"
+      },
+      "art_352": {
+        "texte": "L'état C1 présente le résultat technique non-vie par branche : primes nettes de réassurance, charges de sinistres nettes, frais d'exploitation nets, solde de réassurance et résultat technique. Il est établi conformément au modèle CRCA et signé par le directeur général.",
+        "portee": "État C1 — Résultat technique non-vie par branche"
+      },
+      "art_353": {
+        "texte": "L'état C2 présente le résultat technique vie : primes brutes, provisions mathématiques constituées, prestations servies, chargements de gestion, produits financiers affectés et résultat technique vie. La variation de provision mathématique est détaillée police par police.",
+        "portee": "État C2 — Résultat technique vie — variation PM détaillée"
+      },
+      "art_354": {
+        "texte": "L'état C4 — Compte de résultat général — agrège les résultats techniques vie et non-vie, les produits financiers non affectés, les produits et charges exceptionnels, la participation aux bénéfices et l'impôt sur les sociétés pour dégager le résultat net de l'exercice.",
+        "portee": "État C4 — Résultat général consolidé vie + non-vie"
+      },
+      "art_355": {
+        "texte": "L'état C5 présente le détail des provisions techniques non-vie constituées au 31 décembre : PPNA par branche, PSAP par dossier (sinistres déclarés) et IBNR (sinistres non encore déclarés), provision pour risques en cours, provision d'égalisation. Le taux de couverture par actifs admis est calculé.",
+        "portee": "État C5 — Détail provisions techniques non-vie avec taux de couverture"
+      },
+      "art_356": {
+        "texte": "L'état C6 présente le portefeuille de placements au 31 décembre : valeur comptable, valeur de marché, plus ou moins-values latentes, répartition par catégorie d'actifs. Les actifs admis en représentation des provisions sont clairement identifiés avec leur lien aux engagements couverts.",
+        "portee": "État C6 — Portefeuille placements avec valeur marché et plus-values latentes"
+      },
+      "art_357": {
+        "texte": "L'état C7 présente le calcul de la marge de solvabilité : éléments constitutifs (capital social libéré, réserves, résultat de l'exercice), déductions (actifs incorporels, dividendes), marge disponible, marge réglementaire requise et écart de solvabilité. La conformité à l'Art. 337-1 est attestée.",
+        "portee": "État C7 — Calcul marge de solvabilité — conformité Art. 337-1"
+      },
+      "art_358": {
+        "texte": "Les cessions en réassurance sont comptabilisées conformément aux traités signés. Les primes cédées, sinistres récupérés, dépôts de réassurance et commissions reçues font l'objet d'une comptabilisation séparée. Le solde net de réassurance est présenté dans le compte d'exploitation.",
+        "portee": "Comptabilisation des cessions réassurance — net dans compte exploitation"
+      },
+      "art_359": {
+        "texte": "Les états financiers des entreprises d'assurance sont établis et présentés en francs CFA. Les opérations en devises étrangères sont converties au taux de change officiel du jour de l'opération. Les écarts de conversion sont enregistrés dans un compte spécifique et présentés dans l'annexe.",
+        "portee": "Présentation en FCFA — conversion devises au taux officiel"
+      },
+      "art_360": {
+        "texte": "Les placements sont évalués selon les règles suivantes : obligations et titres à revenu fixe au coût amorti, actions et parts de fonds au coût historique sous déduction des dépréciations durables, immeubles à la valeur d'expertise actualisée tous les cinq ans. Toute méthode dérogatoire requiert l'accord de la CRCA.",
+        "portee": "Méthodes d'évaluation des placements — coût amorti, coût historique, expertise"
+      }
+    },
+    "engagements_reglementes": {
+      "titre": "Engagements réglementés et provisions complémentaires — Art. 361 à 399",
+      "art_361": {
+        "texte": "Les engagements réglementés sont les provisions techniques et autres dettes assimilées que les entreprises d'assurance sont tenues de représenter en permanence par des actifs admis. Le montant des actifs admis doit être au moins égal au montant des engagements à tout moment.",
+        "portee": "Définition des engagements réglementés — couverture permanente"
+      },
+      "art_362": {
+        "texte": "Sont admis en représentation des provisions techniques les actifs suivants, dans les limites fixées aux articles 363 à 380 : obligations et titres émis ou garantis par un État membre, actions de sociétés cotées, parts d'OPCVM agréés, immeubles situés en zone CIMA, dépôts bancaires, prêts hypothécaires de premier rang.",
+        "portee": "Liste des catégories d'actifs admis en représentation"
+      },
+      "art_363": {
+        "texte": "La valeur comptable des actifs admis est déterminée selon les règles de l'Art. 360. Pour les actifs surévalués, la CRCA peut imposer une réévaluation. La valeur de marché des placements est mentionnée dans l'état C6. Les actifs nantis ou grevés ne sont pas admis sauf accord de la CRCA.",
+        "portee": "Valeur comptable des actifs admis — exclusion des actifs grevés"
+      },
+      "art_364": {
+        "texte": "Les limites de représentation par catégorie d'actifs sont les suivantes : titres d'un même émetteur 5% maximum, immeubles 40% maximum, prêts hypothécaires 10% maximum, dépôts dans une même banque 10% maximum, parts d'OPCVM 20% maximum. La CRCA peut abaisser ces limites par instruction.",
+        "portee": "Limites de concentration par catégorie — diversification obligatoire"
+      },
+      "art_365": {
+        "texte": "Les obligations d'État membres de la zone CIMA et les titres assimilés peuvent représenter jusqu'à 100% des actifs admis pour les entreprises non-vie et 80% pour les entreprises vie. Les obligations d'États hors zone CIMA sont admises dans la limite de 10% et sous réserve de notation minimale.",
+        "portee": "Obligations d'État CIMA — limite 100% non-vie, 80% vie"
+      },
+      "art_366": {
+        "texte": "Les actions de sociétés cotées sur une bourse de valeurs d'un État membre sont admises dans la limite de 30% des provisions techniques. Les actions non cotées sont admises dans la limite de 5%. Les actions de la société mère ou des filiales ne sont pas admises en représentation des provisions.",
+        "portee": "Actions cotées — limite 30%, non cotées 5%, filiales exclues"
+      },
+      "art_367": {
+        "texte": "Les immeubles productifs de revenus, situés en zone CIMA et libres de toute hypothèque, sont admis dans la limite de 40% des provisions techniques. La valeur retenue est celle de la dernière expertise immobilière réalisée par un expert agréé, actualisée tous les cinq ans.",
+        "portee": "Immeubles — limite 40%, expertise quinquennale obligatoire"
+      },
+      "art_368": {
+        "texte": "Les prêts hypothécaires de premier rang sont admis dans la limite de 10% des provisions techniques, à condition que le montant du prêt n'excède pas 75% de la valeur vénale du bien hypothéqué. Les prêts aux dirigeants et aux actionnaires principaux ne sont pas admis.",
+        "portee": "Prêts hypothécaires — limite 10%, quotité 75%, dirigeants exclus"
+      },
+      "art_369": {
+        "texte": "Les dépôts et comptes courants dans les établissements bancaires agréés en zone CIMA sont admis dans la limite de 10% par établissement et 30% au total des provisions techniques. Les dépôts dans des banques hors zone CIMA ne sont pas admis sauf dérogation expresse de la CRCA.",
+        "portee": "Dépôts bancaires — 10% par banque, 30% total, zone CIMA seulement"
+      },
+      "art_370": {
+        "texte": "Les prêts aux entreprises bénéficiant d'une garantie de l'État ou d'un organisme de garantie agréé sont admis dans la limite de 5% des provisions techniques par emprunteur. Ces prêts doivent faire l'objet d'une convention écrite et d'un remboursement annuel au moins égal à 10% du capital.",
+        "portee": "Prêts entreprises garantis — limite 5% par emprunteur"
+      },
+      "art_371": {
+        "texte": "Un état détaillé des actifs représentatifs des provisions techniques est établi et signé par le directeur général à la clôture de chaque exercice. Cet état (état C6) est transmis à la CRCA avant le 31 mars. En cours d'exercice, la CRCA peut exiger à tout moment la production de cet état.",
+        "portee": "État C6 signé DG — transmission CRCA avant 31 mars"
+      },
+      "art_372": {
+        "texte": "La CRCA peut exiger que les actifs représentatifs des provisions techniques d'une entreprise en difficulté soient déposés auprès d'un tiers dépositaire agréé. Le dépositaire tient un registre spécial, remet des relevés trimestriels à la CRCA et ne peut restituer les actifs sans son accord.",
+        "portee": "Dépôt fiduciaire CRCA — mesure conservatoire entreprise en difficulté"
+      },
+      "art_373": {
+        "texte": "Les entreprises d'assurance procèdent à l'évaluation de leur portefeuille de placements au moins une fois par semestre. En cas de baisse significative de la valeur de marché (supérieure à 15% de la valeur comptable), une provision pour dépréciation est constituée immédiatement.",
+        "portee": "Évaluation semestrielle — provision dépréciation si baisse > 15%"
+      },
+      "art_374": {
+        "texte": "Pour les branches vie, les actifs admis en représentation des provisions mathématiques sont principalement des obligations d'État, des obligations privées de premier rang et des immeubles. La duration des actifs doit être compatible avec celle des engagements. Un rapport d'adossement actif-passif est transmis annuellement à la CRCA.",
+        "portee": "Actifs vie — adossement duration actifs / engagements obligatoire"
+      },
+      "art_375": {
+        "texte": "Pour les branches non-vie, les actifs admis couvrant les provisions PSAP et PPNA doivent être suffisamment liquides pour permettre le règlement rapide des sinistres. Au moins 30% des actifs admis doivent être sous forme de liquidités ou de titres mobilisables en moins de sept jours.",
+        "portee": "Actifs non-vie — 30% minimum en actifs liquides (< 7 jours)"
+      },
+      "art_376": {
+        "texte": "Les actifs libellés en devises étrangères peuvent être admis en représentation des engagements libellés dans la même devise, dans la limite de 20% du total des actifs admis. La couverture du risque de change par des instruments dérivés est autorisée sous réserve d'approbation préalable de la CRCA.",
+        "portee": "Actifs en devises — limite 20%, couverture change sous approbation CRCA"
+      },
+      "art_377": {
+        "texte": "Les actifs admis en représentation des provisions techniques ne peuvent être nantis, gagés ou hypothéqués au profit de tiers sans autorisation expresse de la CRCA. Toute sûreté constituée sans cette autorisation est inopposable à la CRCA et aux assurés.",
+        "portee": "Nantissement actifs admis — autorisation CRCA obligatoire"
+      },
+      "art_378": {
+        "texte": "Lorsqu'un actif admis perd sa qualité d'actif admissible (radiation de la cote, dépréciation, saisie), l'entreprise doit le remplacer par un actif admissible équivalent dans un délai de trente jours. La CRCA est informée dans les huit jours de la perte de qualification.",
+        "portee": "Substitution obligatoire d'actif défaillant — 30 jours, notif CRCA J+8"
+      },
+      "art_379": {
+        "texte": "Les entreprises d'assurance transmettent à la CRCA un rapport semestriel sur la composition et l'évaluation de leurs actifs admis, accompagné d'une attestation du commissaire aux comptes certifiant la réalité et la disponibilité des actifs. Ce rapport est dû au 31 juillet et au 31 janvier.",
+        "portee": "Rapport semestriel actifs admis — 31 juillet et 31 janvier"
+      },
+      "art_380": {
+        "texte": "En cas de sous-couverture des provisions techniques par les actifs admis, la CRCA adresse une mise en demeure à l'entreprise. Si la situation n'est pas régularisée dans les trente jours, la CRCA peut prononcer l'interdiction de souscrire de nouveaux contrats et nommer un administrateur provisoire.",
+        "portee": "Sanction sous-couverture — mise en demeure, interdiction souscription"
+      },
+      "art_381": {
+        "texte": "La provision pour égalisation est constituée pour faire face aux fluctuations de sinistralité dans les branches à risques catastrophiques (grêle, incendie industriel, responsabilité civile). Elle est alimentée par prélèvement d'un pourcentage des bénéfices techniques annuels, dans les limites fixées par la CRCA.",
+        "portee": "Provision égalisation — branches catastrophiques — prélèvement sur bénéfices"
+      },
+      "art_382": {
+        "texte": "La provision pour risques en cours (PRC) couvre, pour chaque contrat en cours au 31 décembre, le risque que la prime non acquise soit insuffisante pour couvrir les sinistres et frais de gestion de la période restant à courir. Elle est constituée police par police lorsque le ratio sinistres/primes dépasse 80%.",
+        "portee": "PRC — constituée police par police si ratio S/P > 80%"
+      },
+      "art_383": {
+        "texte": "La provision pour sinistres survenus mais non encore déclarés (IBNR — Incurred But Not Reported) est obligatoire. Elle est calculée selon des méthodes actuarielles reconnues (Chain Ladder, Bornhuetter-Ferguson ou modèle stochastique). La méthode utilisée et les paramètres retenus sont documentés dans l'annexe comptable.",
+        "portee": "IBNR obligatoire — méthode actuarielle documentée dans l'annexe"
+      },
+      "art_384": {
+        "texte": "Les entreprises d'assurance vie constituent une réserve de capitalisation destinée à parer à la dépréciation des valeurs comprises dans leur actif et à la diminution de leur revenu. Elle est alimentée lors de la cession de placements avec plus-value et utilisée lors des cessions avec moins-value.",
+        "portee": "Réserve capitalisation vie — lissage plus/moins-values placements"
+      },
+      "art_385": {
+        "texte": "La provision pour participation aux bénéfices représente les bénéfices attribués aux assurés mais non encore versés. Elle est créditée des participations déclarées et débitée des participations versées. Le solde non versé depuis plus de trois ans est acquis à l'entreprise sauf preuve contraire.",
+        "portee": "Provision participation bénéfices — solde non versé > 3 ans acquis à l'assureur"
+      },
+      "art_386": {
+        "texte": "Les frais d'acquisition reportés (FAR) représentent la part des commissions et frais d'acquisition des contrats pluriannuels imputable aux exercices futurs. Ils sont calculés au prorata de la prime non acquise et ne peuvent excéder 20% des primes brutes annuelles. Ils sont portés à l'actif du bilan.",
+        "portee": "Frais d'acquisition reportés — max 20% primes brutes — actif du bilan"
+      },
+      "art_387": {
+        "texte": "Toute entreprise d'assurance pratiquant les branches vie ou les branches à provisions mathématiques importantes est tenue de désigner un actuaire responsable. L'actuaire certifie l'adéquation des provisions techniques et signe l'état de vérification des provisions joint aux comptes annuels.",
+        "portee": "Actuaire désigné obligatoire — branches vie et PM importantes"
+      },
+      "art_388": {
+        "texte": "L'actuaire désigné établit chaque année un rapport actuariel comprenant : la méthodologie de calcul des provisions, les hypothèses retenues (mortalité, morbidité, taux d'intérêt technique), les résultats des tests de sensibilité et les recommandations. Ce rapport est transmis à la CRCA avec les états annuels.",
+        "portee": "Rapport actuariel annuel — méthodologie, hypothèses, tests sensibilité"
+      },
+      "art_389": {
+        "texte": "La méthode Chain Ladder (développement des sinistres) est applicable à la condition que l'entreprise dispose d'au moins cinq années complètes de données de sinistres triangulées par exercice de survenance. Les triangles de développement sont présentés dans l'annexe de l'état C5.",
+        "portee": "Chain Ladder — applicable si 5 ans minimum de données triangulées"
+      },
+      "art_390": {
+        "texte": "La méthode Bornhuetter-Ferguson est utilisée lorsque les données historiques sont insuffisantes (moins de cinq ans) ou lorsque la sinistralité récente est atypique. Elle combine les données observées avec une estimation a priori de la sinistralité ultime. Les paramètres de la méthode sont validés par l'actuaire désigné.",
+        "portee": "Bornhuetter-Ferguson — données insuffisantes ou sinistralité atypique"
+      },
+      "art_391": {
+        "texte": "Pour les sinistres graves (montant supérieur au seuil fixé par la CRCA, actuellement 50 millions FCFA), la provision est évaluée dossier par dossier par un expert mandaté. L'évaluation est révisée au moins semestriellement. Tout sinistre grave est déclaré à la CRCA dans les trente jours de sa survenance.",
+        "portee": "Sinistres graves > 50 M FCFA — évaluation expert, déclaration CRCA 30j"
+      },
+      "art_392": {
+        "texte": "Les sinistres tardifs sont les sinistres déclarés plus de douze mois après la date de survenance. L'entreprise constitue une provision spécifique pour couvrir ces sinistres, calculée sur la base des statistiques historiques de tardivité par branche. Cette provision fait partie de l'IBNR.",
+        "portee": "Sinistres tardifs > 12 mois — provision spécifique dans l'IBNR"
+      },
+      "art_393": {
+        "texte": "Les coefficients de développement utilisés dans les méthodes actuarielles sont calculés sur la base des triangles de run-off de l'entreprise sur les cinq derniers exercices. Ils sont comparés aux coefficients sectoriels publiés par la CRCA. Tout écart significatif (> 15%) doit être justifié dans le rapport actuariel.",
+        "portee": "Coefficients développement — 5 ans, comparaison secteur CRCA, justification écarts > 15%"
+      },
+      "art_394": {
+        "texte": "Un test d'adéquation des provisions (Liability Adequacy Test — LAT) est effectué annuellement. Il consiste à vérifier que les provisions constituées, nettes de réassurance, sont suffisantes pour couvrir les flux futurs de sinistres estimés selon des hypothèses prudentes. Tout déficit est immédiatement provisionné.",
+        "portee": "LAT — test adéquation annuel — déficit provisionné immédiatement"
+      },
+      "art_395": {
+        "texte": "Lorsque le test d'adéquation révèle un déficit de provisions supérieur à 10% des provisions totales, l'entreprise est tenue de renforcer ses provisions dans les trente jours et d'informer la CRCA. Un plan de renforcement progressif peut être accordé par la CRCA pour un délai maximum de six mois.",
+        "portee": "Déficit provisions > 10% — renforcement 30j ou plan CRCA max 6 mois"
+      },
+      "art_396": {
+        "texte": "Un rapport spécial sur les provisions techniques est transmis à la CRCA au 31 mars, signé conjointement par le directeur général et l'actuaire désigné. Ce rapport présente l'évolution des provisions par branche, les principales hypothèses retenues et les éventuels changements de méthode avec leur impact quantifié.",
+        "portee": "Rapport provisions CRCA — 31 mars, signé DG + actuaire"
+      },
+      "art_397": {
+        "texte": "Les entreprises d'assurance pratiquant des opérations dans plusieurs États membres de la CIMA tiennent une comptabilité consolidée au siège social. Les provisions techniques sont calculées séparément par État et consolidées au siège. Les actifs admis peuvent être localisés dans l'État des engagements correspondants.",
+        "portee": "Opérations multi-États — provisions séparées par État, actifs localisés"
+      },
+      "art_398": {
+        "texte": "Lorsqu'une entreprise d'assurance modifie ses méthodes de calcul des provisions techniques, elle soumet à la CRCA une note technique expliquant les motifs du changement, la nouvelle méthode et son impact quantifié sur les provisions et les fonds propres. La CRCA dispose de soixante jours pour s'y opposer.",
+        "portee": "Changement de méthode — note technique CRCA, délai opposition 60j"
+      },
+      "art_399": {
+        "texte": "Les méthodes de calcul des provisions techniques, ainsi que les principales hypothèses actuarielles retenues (tables de mortalité, taux d'actualisation, coefficients de développement), sont présentées dans l'annexe aux comptes annuels. Cette information est accessible aux assurés et aux tiers sur demande.",
+        "portee": "Publication méthodes et hypothèses dans annexe — accès assurés sur demande"
+      }
+    }
+  },
+  "livre_IV_intermediaires": {
+    "titre": "LIVRE IV — Intermédiaires d'Assurance",
+    "art_500": {
+      "texte": "Sont intermédiaires d'assurance les personnes qui, contre rémunération, présentent, proposent ou aident à conclure des contrats d'assurance.",
+      "categories": [
+        "Agent général d'assurance",
+        "Courtier d'assurance",
+        "Mandataire d'assurance"
+      ],
+      "portee": "Définition des intermédiaires"
+    },
+    "art_501": {
+      "texte": "L'agent général est mandataire d'une ou plusieurs compagnies d'assurance. Il ne peut représenter une compagnie concurrente sans autorisation écrite de la compagnie mandante.",
+      "portee": "Définition et obligations de l'agent général"
+    },
+    "art_502": {
+      "texte": "Le courtier est mandataire de l'assuré. Il est tenu de présenter au minimum trois devis comparatifs à son client avant toute souscription.",
+      "nb_devis_minimum": 3,
+      "portee": "Obligations du courtier — trois devis minimum"
+    },
+    "art_503": {
+      "texte": "Les intermédiaires d'assurance doivent être titulaires d'une carte professionnelle délivrée par l'autorité nationale de contrôle des assurances.",
+      "portee": "Carte professionnelle obligatoire"
+    },
+    "art_510": {
+      "texte": "Les commissions versées aux intermédiaires sont librement négociées dans la limite des taux maximaux fixés par branche par arrêté de la CRCA.",
+      "taux_commissions_indicatifs": {
+        "auto": "15% à 20% des primes nettes",
+        "ird_mrh": "15% à 20%",
+        "vie": "5% à 15% selon le type de contrat",
+        "transport": "10% à 15%",
+        "rc": "12% à 18%"
+      },
+      "portee": "Commissions des intermédiaires"
+    },
+    "art_520": {
+      "texte": "Les intermédiaires doivent reverser les primes collectées à l'assureur dans un délai maximum de 30 jours après encaissement.",
+      "delai_reversement_jours": 30,
+      "portee": "DÉLAI DE REVERSEMENT DES PRIMES — 30 JOURS"
+    },
+    "art_521": {
+      "texte": "Tout intermédiaire détenant des fonds d'assurance doit les déposer sur un compte bancaire séparé de ses fonds propres, intitulé 'Compte primes en dépôt'.",
+      "portee": "Ségrégation des fonds clients"
+    },
+    "art_504": {
+      "texte": "Pour exercer comme courtier d'assurance : (1) être une personne physique ou morale, (2) justifier d'un capital minimum ou d'une caution bancaire, (3) détenir une assurance RC professionnelle, (4) obtenir la carte professionnelle.",
+      "portee": "Conditions d'exercice du courtage — quatre conditions cumulatives"
+    },
+    "art_505": {
+      "texte": "L'autorité nationale de contrôle des assurances tient un registre public des courtiers agréés mentionnant la dénomination, l'adresse, le numéro d'agrément et les branches autorisées.",
+      "portee": "Registre public des courtiers"
+    },
+    "art_506": {
+      "texte": "La RC professionnelle du courtier doit avoir un plafond minimum de 30 millions FCFA par sinistre et 60 millions FCFA par an, souscrite auprès d'une compagnie agréée différente du courtier.",
+      "plafond_par_sinistre_fcfa": 30000000,
+      "plafond_annuel_fcfa": 60000000,
+      "portee": "RC professionnelle courtier — plafond 30M/60M FCFA"
+    },
+    "art_507": {
+      "texte": "Le courtier doit disposer d'une garantie financière distincte de son patrimoine propre d'un minimum de 10 millions FCFA pour couvrir les fonds des clients.",
+      "garantie_financiere_minimum_fcfa": 10000000,
+      "portee": "Garantie financière courtier — 10M FCFA minimum"
+    },
+    "art_508": {
+      "texte": "Le courtier est tenu à un devoir de conseil : il analyse les besoins du client, présente des options adaptées documentées, et conseille le produit le plus adéquat quel que soit son intérêt commercial propre.",
+      "portee": "Devoir de conseil du courtier — intérêt du client primordial"
+    },
+    "art_509": {
+      "texte": "Le courtier doit déclarer par écrit à son client tout conflit d'intérêt potentiel, notamment lorsqu'il perçoit des rémunérations au-delà des commissions standard de la compagnie recommandée.",
+      "portee": "Déclaration obligatoire des conflits d'intérêt — forme écrite"
+    },
+    "art_511": {
+      "texte": "Le démarchage à domicile ou par voie électronique pour faire souscrire une assurance est réglementé. L'agent ou le courtier doit s'identifier, présenter sa carte professionnelle et remettre une documentation préalable.",
+      "portee": "Règles de démarchage — identification obligatoire"
+    },
+    "art_512": {
+      "texte": "Tout contrat souscrit à la suite d'un démarchage à domicile bénéficie d'un droit de rétractation de 14 jours calendaires. L'assureur doit rembourser toute prime perçue pendant ce délai si la rétractation est exercée.",
+      "delai_retractation_jours": 14,
+      "portee": "Droit de rétractation — 14 jours pour les contrats démarchés"
+    },
+    "art_513": {
+      "texte": "La convention de présentation entre un agent général et sa compagnie mandante doit être conclue par écrit, précisant les branches déléguées, les limites de souscription et les conditions de résiliation.",
+      "portee": "Convention de présentation agent — forme écrite obligatoire"
+    },
+    "art_514": {
+      "texte": "La résiliation de la convention de présentation par la compagnie mandante doit être notifiée avec un préavis minimum de 3 mois. En cas de faute grave de l'agent, le préavis n'est pas requis.",
+      "preavis_minimum_mois": 3,
+      "portee": "Résiliation convention agent — préavis 3 mois"
+    },
+    "art_515": {
+      "texte": "L'agent général a droit à une indemnité de résiliation équivalente à 2 ans de commissions brutes en cas de résiliation sans faute par la compagnie.",
+      "indemnite_resiliation_annees_commissions": 2,
+      "portee": "Indemnité de résiliation agent — 2 ans de commissions"
+    },
+    "art_516": {
+      "texte": "La clause de non-concurrence imposée à l'agent général est valable si elle est limitée à 2 ans, à une zone géographique précise, et compensée par une indemnité.",
+      "duree_max_non_concurrence_ans": 2,
+      "portee": "Clause de non-concurrence — 2 ans maximum avec indemnité"
+    },
+    "art_517": {
+      "texte": "Le portefeuille de l'agent général appartient à la compagnie mandante. À la cessation de la convention, l'agent ne peut contacter les assurés pour les déplacer vers un concurrent pendant la période de non-concurrence.",
+      "portee": "Propriété du portefeuille — appartient à la compagnie mandante"
+    },
+    "art_518": {
+      "texte": "La cession du portefeuille de courtage requiert l'accord de la CRCA si le portefeuille dépasse 500 millions FCFA de primes annuelles gérées.",
+      "seuil_accord_crca_fcfa": 500000000,
+      "portee": "Cession portefeuille courtage — accord CRCA si > 500M FCFA"
+    },
+    "art_519": {
+      "texte": "La compagnie mandante est solidairement responsable des actes professionnels de ses agents généraux dans l'exercice de leur mandat. Elle ne peut s'exonérer vis-à-vis des tiers lésés.",
+      "portee": "Responsabilité solidaire compagnie-agent vis-à-vis des tiers"
+    },
+    "art_522": {
+      "texte": "La commission disciplinaire nationale peut prononcer : avertissement, blâme, suspension temporaire (1 à 24 mois), retrait définitif de la carte professionnelle.",
+      "sanctions": [
+        "Avertissement",
+        "Blâme",
+        "Suspension 1-24 mois",
+        "Retrait définitif"
+      ],
+      "portee": "Sanctions professionnelles des intermédiaires"
+    },
+    "art_523": {
+      "texte": "Le retrait de la carte professionnelle est inscrit au registre national des intermédiaires. La personne ne peut exercer aucune fonction d'intermédiaire pendant la durée du retrait.",
+      "portee": "Retrait de carte — inscription au registre national"
+    },
+    "art_524": {
+      "texte": "Après un retrait de carte pour motif disciplinaire, la réhabilitation peut être demandée après 3 ans de bonne conduite.",
+      "delai_rehabilitation_ans": 3,
+      "portee": "Réhabilitation professionnelle — après 3 ans"
+    },
+    "art_525": {
+      "texte": "Les intermédiaires d'assurance sont soumis à une obligation de formation continue de 20 heures par an couvrant les réglementations CIMA, les techniques d'assurance et la déontologie.",
+      "heures_formation_annuelles": 20,
+      "portee": "Formation continue intermédiaires — 20h/an agréées CRCA"
+    },
+    "art_530": {
+      "texte": "Les associations professionnelles d'agents et de courtiers représentent leurs membres auprès de la CRCA et des autorités nationales, et participent aux consultations réglementaires.",
+      "portee": "Associations professionnelles — rôle consultatif auprès de la CRCA"
+    },
+    "art_535": {
+      "texte": "Les associations professionnelles doivent adopter un code de déontologie approuvé par la CRCA fixant les règles de conduite, de loyauté et de confidentialité.",
+      "portee": "Code de déontologie — adopté par les associations, approuvé CRCA"
+    },
+    "art_540": {
+      "texte": "Les intermédiaires transmettent à l'autorité nationale des statistiques annuelles de production (primes placées par compagnie et par branche). Ces statistiques alimentent le suivi du marché.",
+      "portee": "Reporting statistique annuel des intermédiaires"
+    },
+    "art_545": {
+      "texte": "Les intermédiaires exerçant avant l'entrée en vigueur de la présente réglementation disposent de 18 mois pour se mettre en conformité avec les exigences de capital, de RC professionnelle et de garantie financière.",
+      "delai_conformite_mois": 18,
+      "portee": "Dispositions transitoires — délai de conformité 18 mois"
+    },
+    "art_526": {
+      "texte": "L'agent général exclusif est lié à une seule entreprise d'assurance par un traité de nomination. Il est mandataire de l'entreprise et agit exclusivement en son nom. Il ne peut présenter les produits d'autres compagnies que les produits complémentaires expressément autorisés par son traité de nomination.",
+      "portee": "Agent exclusif — mandat unique, interdiction multi-compagnies"
+    },
+    "art_527": {
+      "texte": "La commission de l'agent général est fixée par le traité de nomination selon un barème approuvé par la CRCA. Elle comprend une commission d'acquisition sur les primes émises et une commission de gestion sur les primes encaissées. Le taux de commission ne peut excéder 25% des primes nettes pour les branches non-vie.",
+      "portee": "Commission agent — barème CRCA, max 25% primes nettes non-vie"
+    },
+    "art_528": {
+      "texte": "La résiliation du traité de nomination par l'entreprise d'assurance doit être notifiée à l'agent par lettre recommandée avec un préavis de six mois. En cas de faute grave de l'agent, la résiliation est immédiate. En cas de résiliation sans faute, l'agent a droit à une indemnité compensatrice selon l'Art. 529.",
+      "portee": "Résiliation traité nomination — préavis 6 mois, indemnité si sans faute"
+    },
+    "art_529": {
+      "texte": "L'indemnité de cessation d'activité due à l'agent général en cas de résiliation sans faute est calculée sur la base de la moyenne des commissions des trois dernières années, multipliée par un coefficient variant de 1 à 3 selon l'ancienneté. Elle est payable en une seule fois dans les quatre-vingt-dix jours de la résiliation.",
+      "portee": "Indemnité cessation — moy. commissions 3 ans × coeff. ancienneté, 90j"
+    },
+    "art_531": {
+      "texte": "Le démarchage à domicile en vue de la souscription d'un contrat d'assurance est réservé aux intermédiaires titulaires d'une carte professionnelle en cours de validité. Tout démarchage effectué par une personne non habilitée constitue une infraction passible des sanctions prévues à l'Art. 534.",
+      "portee": "Démarchage à domicile — carte professionnelle valide obligatoire"
+    },
+    "art_532": {
+      "texte": "Le souscripteur démarché à son domicile ou lieu de travail dispose d'un délai de dix jours ouvrables à compter de la remise du double du contrat pour exercer son droit de rétractation sans pénalité ni justification. La rétractation s'effectue par lettre recommandée. L'entreprise rembourse les sommes versées dans les trente jours.",
+      "portee": "Délai rétractation démarchage — 10 jours ouvrables, remboursement 30j"
+    },
+    "art_533": {
+      "texte": "Lors de tout démarchage, l'intermédiaire est tenu de remettre au prospect une fiche d'information précontractuelle mentionnant : son identité et numéro de carte professionnelle, le nom et adresse de la compagnie, les caractéristiques essentielles du contrat proposé, le montant de la prime et les principales exclusions.",
+      "portee": "Fiche précontractuelle obligatoire — identité, compagnie, garanties, prix, exclusions"
+    },
+    "art_534": {
+      "texte": "Tout intermédiaire exerçant le démarchage sans carte professionnelle valide ou ne remettant pas la fiche précontractuelle est passible d'une amende de 500 000 à 2 000 000 FCFA et de la suspension temporaire ou définitive de sa carte professionnelle. Les contrats souscrits sont nuls de plein droit.",
+      "portee": "Sanctions démarchage irrégulier — amende 500K à 2M FCFA, contrats nuls"
+    },
+    "art_536": {
+      "texte": "La CRCA tient un registre unique des intermédiaires d'assurance de la zone CIMA accessible au public. Ce registre recense les courtiers, agents généraux et leurs mandataires avec leurs numéros d'immatriculation, la liste des entreprises représentées et les éventuelles sanctions prononcées.",
+      "portee": "Registre unique CRCA des intermédiaires — public, numéros immatriculation"
+    },
+    "art_537": {
+      "texte": "Tout intermédiaire d'assurance doit être inscrit au registre CRCA avant tout exercice d'activité. L'inscription est conditionnée à la présentation d'une carte professionnelle valide, d'un justificatif de garantie financière, d'une attestation de responsabilité civile professionnelle et du casier judiciaire vierge.",
+      "portee": "Inscription registre CRCA préalable — carte pro, garantie, RC pro, casier vierge"
+    },
+    "art_538": {
+      "texte": "L'inscription au registre des intermédiaires est renouvelée annuellement avant le 31 janvier. Le renouvellement requiert la production d'une attestation de formation continue, d'une garantie financière actualisée et d'une déclaration sur l'honneur d'absence de condamnation pénale. Le défaut de renouvellement entraîne la radiation d'office.",
+      "portee": "Renouvellement annuel — 31 janvier — formation, garantie, déclaration honneur"
+    },
+    "art_539": {
+      "texte": "Le registre des intermédiaires est publié chaque année au Journal Officiel de chaque État membre et mis à jour en ligne sur le site de la CRCA. Toute modification (adresse, représentation, sanction) est enregistrée dans les quinze jours. Les assurés peuvent consulter le registre gratuitement.",
+      "portee": "Publication JO annuel + site CRCA — consultation gratuite assurés"
+    },
+    "art_541": {
+      "texte": "Les intermédiaires d'assurance sont soumis à une obligation de formation professionnelle continue de trente heures minimum par an. Cette formation couvre l'actualité réglementaire CIMA, les produits d'assurance, la lutte contre le blanchiment et les techniques de vente responsables.",
+      "portee": "Formation continue — 30h/an minimum — CIMA, produits, LBC, vente"
+    },
+    "art_542": {
+      "texte": "Les modules de formation continue des intermédiaires doivent être homologués par la CRCA ou par les associations professionnelles d'assurance accréditées. La liste des organismes de formation agréés est publiée annuellement par la CRCA. Seules les formations suivies auprès d'organismes agréés sont comptabilisées.",
+      "portee": "Modules homologués CRCA ou associations accréditées — liste annuelle CRCA"
+    },
+    "art_543": {
+      "texte": "À l'issue de chaque formation, l'organisme de formation délivre une attestation nominative mentionnant le thème, la durée, les dates et le nombre d'heures de formation. L'intermédiaire conserve ces attestations et les produit lors du renouvellement annuel de son inscription au registre CRCA.",
+      "portee": "Attestation nominative formation — conservée pour renouvellement CRCA"
+    },
+    "art_544": {
+      "texte": "L'intermédiaire ne justifiant pas de trente heures de formation continue annuelle ne peut obtenir le renouvellement de sa carte professionnelle. En cas de renouvellement frauduleux, la carte est retirée et l'intermédiaire est radié du registre CRCA pour une durée de trois ans.",
+      "portee": "Défaut formation — non-renouvellement carte, fraude = radiation 3 ans"
+    }
+  },
+  "ratios_prudentiels": {
+    "marge_solvabilite_non_vie": {
+      "description": "Marge de solvabilité minimale — branche non-vie",
+      "formule": "max(23% × primes_nettes, 26% × charge_sinistres_moy_3ans, 300_000_000 FCFA)",
+      "article": "Art. 337-1 Code CIMA",
+      "seuil_minimum_fcfa": 300000000,
+      "taux_methode_primes": 0.23,
+      "taux_methode_sinistres": 0.26,
+      "alerte_si_inferieur": true
+    },
+    "marge_solvabilite_vie": {
+      "description": "Marge de solvabilité minimale — branche vie",
+      "formule": "4% × provisions_math_brutes + 0.3% × capital_sous_risque_net",
+      "article": "Art. 338-1 Code CIMA",
+      "taux_provisions_math": 0.04,
+      "taux_capital_risque": 0.003,
+      "seuil_minimum_fcfa": 500000000,
+      "alerte_si_inferieur": true
+    },
+    "couverture_provisions_techniques": {
+      "description": "Actifs admis ≥ 100% des provisions techniques",
+      "taux_minimum": 1.0,
+      "article": "Art. 335 Code CIMA",
+      "alerte_si_inferieur": true,
+      "actifs_admis": [
+        "Obligations État CIMA",
+        "Actions cotées",
+        "Immeubles productifs",
+        "Dépôts bancaires agréés",
+        "Avances sur polices (vie)",
+        "Parts OPCVM agréés CRCA",
+        "Prêts hypothécaires 1er rang"
+      ]
+    },
+    "taux_reassurance": {
+      "description": "Part des primes cédées en réassurance — seuil d'attention 50%",
+      "seuil_alerte": 0.5,
+      "article": "Art. 308 Code CIMA"
+    },
+    "ratio_sinistres_primes": {
+      "description": "S/P = (sinistres payés + Δ PSAP) / primes nettes acquises",
+      "formule": "(sinistres_payes + variation_psap) / primes_nettes",
+      "seuil_alerte_auto": 0.7,
+      "seuil_alerte_ird": 0.65,
+      "seuil_alerte_vie": 0.8,
+      "seuil_alerte_rc": 0.7,
+      "seuil_alerte_transport": 0.65
+    },
+    "ratio_frais_gestion": {
+      "description": "Frais de gestion / Primes nettes — seuil 40% non-vie",
+      "formule": "frais_gestion / primes_nettes",
+      "seuil_alerte_non_vie": 0.4,
+      "seuil_alerte_vie": 0.2
+    },
+    "ratio_combine": {
+      "description": "Combined ratio = (sinistres + frais + commissions) / primes",
+      "formule": "(sinistres_payes + variation_psap + frais_gestion + commissions) / primes_nettes",
+      "seuil_rentabilite": 1.0,
+      "seuil_attention": 1.05,
+      "seuil_alerte": 1.1
+    },
+    "ratio_liquidite": {
+      "description": "Actifs liquides / Engagements à court terme ≥ 100%",
+      "taux_minimum": 1.0,
+      "actifs_liquides": [
+        "Dépôts bancaires à vue",
+        "Effets publics",
+        "Valeurs mobilières cotées"
+      ]
+    },
+    "retention_nette": {
+      "description": "Part des primes nettes conservée par l'assureur (rétention ≥ 50%)",
+      "formule": "(primes_brutes - primes_cedees) / primes_brutes",
+      "seuil_minimum_retention": 0.5,
+      "article": "Art. 308 Code CIMA"
+    }
+  },
+  "delais_reglementaires": {
+    "declaration_sinistre_assure": {
+      "delai_jours_ouvrables": 5,
+      "article": "Art. 12 Code CIMA",
+      "description": "Délai de déclaration de sinistre par l'assuré — 5 jours ouvrés",
+      "delai_specifique_incendie_heures": 24,
+      "delai_specifique_vol_jours": 2
+    },
+    "accuse_reception_sinistre": {
+      "delai_jours": 10,
+      "article": "Art. 12-bis Code CIMA",
+      "description": "Accusé de réception par l'assureur — 10 jours calendaires"
+    },
+    "instruction_sinistre": {
+      "delai_mois": 3,
+      "article": "Art. 12-bis Code CIMA",
+      "description": "Délai maximum d'instruction et d'offre d'indemnisation — 3 mois"
+    },
+    "reglement_apres_accord": {
+      "delai_jours": 45,
+      "article": "Art. 12-ter Code CIMA",
+      "description": "Paiement après accord sur indemnité — 45 jours calendaires",
+      "penalite_retard": "Taux légal + 50% par mois de retard"
+    },
+    "reglement_sinistre_auto": {
+      "delai_jours": 30,
+      "article": "Art. 231 Code CIMA",
+      "description": "Règlement RC auto après expertise contradictoire"
+    },
+    "offre_indemnisation_corporelle": {
+      "delai_mois": 3,
+      "article": "Art. 210 Code CIMA",
+      "description": "Offre d'indemnisation corporelle auto — 3 mois après demande victime"
+    },
+    "reglement_sinistre_vie": {
+      "delai_jours": 30,
+      "article": "Art. 73 Code CIMA",
+      "description": "Règlement sinistre vie après dossier complet — 30 jours calendaires"
+    },
+    "expertise_contradictoire": {
+      "delai_jours": 15,
+      "article": "Art. 232 Code CIMA",
+      "description": "Organisation contre-expertise — 15 jours après demande"
+    },
+    "reponse_reclamation": {
+      "delai_jours": 30,
+      "article": "Art. 13 Code CIMA",
+      "description": "Réponse à toute réclamation écrite — 30 jours"
+    },
+    "preavis_resiliation": {
+      "delai_mois": 2,
+      "article": "Art. 9 Code CIMA",
+      "description": "Préavis de résiliation à l'échéance — 2 mois minimum"
+    },
+    "resiliation_non_paiement": {
+      "delai_jours": 30,
+      "article": "Art. 10 Code CIMA",
+      "description": "Résiliation pour non-paiement après mise en demeure — 30 jours"
+    },
+    "declaration_aggravation_risque": {
+      "delai_jours": 8,
+      "article": "Art. 17 Code CIMA",
+      "description": "Déclaration d'aggravation de risque — 8 jours"
+    },
+    "depots_etats_financiers_crca": {
+      "echeance": "31 mars",
+      "article": "Art. 400 Code CIMA",
+      "description": "Dépôt des états financiers annuels à la CRCA"
+    },
+    "depots_etats_trimestriels_crca": {
+      "t1": "30 avril",
+      "t2": "31 juillet",
+      "t3": "31 octobre",
+      "t4": "31 janvier",
+      "description": "États statistiques trimestriels C17/C18"
+    },
+    "plan_reassurance": {
+      "echeance": "31 janvier",
+      "article": "Art. 312 Code CIMA",
+      "description": "Dépôt du plan de réassurance (état C20) pour le nouvel exercice"
+    },
+    "reversement_primes_intermediaires": {
+      "delai_jours": 30,
+      "article": "Art. 520 Code CIMA",
+      "description": "Reversement des primes collectées par les intermédiaires"
+    }
+  },
+  "provisions_techniques": {
+    "PPNA": {
+      "nom_complet": "Provision pour Primes Non Acquises",
+      "article": "Art. 334-1 Code CIMA",
+      "description": "Part des primes émises rapportée à la période de risque postérieure à la clôture",
+      "methodes": {
+        "prorata_temporis": "Calcul jour par jour — méthode la plus précise",
+        "methode_huitiemes": "Approximation forfaitaire autorisée par la CRCA",
+        "methode_huitiemes_detail": "1/8 des primes du 1er semestre + 7/8 des primes du 2e semestre = approx 25%"
+      }
+    },
+    "PSAP": {
+      "nom_complet": "Provision pour Sinistres À Payer",
+      "article": "Art. 334-2 Code CIMA",
+      "description": "Estimation du coût total des sinistres survenus non encore réglés",
+      "methodes": {
+        "dossier_dossier": "Estimation individuelle de chaque dossier — obligatoire",
+        "chain_ladder": "Méthode actuarielle pour les IBNR (sinistres survenus non déclarés)",
+        "bornhuetter_ferguson": "Méthode mixte pour les queues longues (RC corporelle)"
+      },
+      "inclure": [
+        "Sinistres déclarés en cours d'instruction",
+        "IBNR",
+        "Frais de gestion des sinistres"
+      ]
+    },
+    "PM": {
+      "nom_complet": "Provisions Mathématiques",
+      "article": "Art. 334-4 Code CIMA",
+      "description": "Provisions vie — calcul actuariel prospectif",
+      "base_calcul": {
+        "tables_mortalite": "Tables réglementaires CRCA (ou tables d'expérience agréées)",
+        "taux_technique_max": "3.5% par an",
+        "periodicite": "Trimestrielle minimum"
+      }
+    },
+    "PMR": {
+      "nom_complet": "Provision Mathématique de Rentes",
+      "article": "Art. 334-5 Code CIMA",
+      "description": "Provision pour rentes en cours de service"
+    },
+    "PRC": {
+      "nom_complet": "Provision pour Risques Croissants",
+      "article": "Art. 334-3 Code CIMA",
+      "description": "Pour contrats maladie/accident à prime fixe avec risques croissants"
+    },
+    "PE": {
+      "nom_complet": "Provision d'Égalisation",
+      "article": "Art. 334-7 Code CIMA",
+      "description": "Réserve contre fluctuations anormales de sinistralité (catastrophes)"
+    }
+  },
+  "etats_reglementaires": {
+    "C1": {
+      "libelle": "Compte de résultat technique non-vie",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C2": {
+      "libelle": "Compte de résultat technique vie",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C3": {
+      "libelle": "Bilan",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C4": {
+      "libelle": "État des placements",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C5": {
+      "libelle": "État des provisions techniques non-vie",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C6": {
+      "libelle": "État des provisions mathématiques vie",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C7": {
+      "libelle": "État de la marge de solvabilité",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C8": {
+      "libelle": "État des cessions en réassurance",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C9": {
+      "libelle": "Statistiques sinistres automobiles",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C10": {
+      "libelle": "Statistiques sinistres vie",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C11": {
+      "libelle": "État de concordance",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C12": {
+      "libelle": "Production par branche et département",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C13": {
+      "libelle": "État des intermédiaires (agents / courtiers)",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C14": {
+      "libelle": "Rapport du commissaire aux comptes",
+      "periodicite": "Annuel",
+      "echeance": "30 avril",
+      "destinataire": "CRCA"
+    },
+    "C15": {
+      "libelle": "Rapport de gestion du Conseil d'Administration",
+      "periodicite": "Annuel",
+      "echeance": "30 avril",
+      "destinataire": "CRCA"
+    },
+    "C16": {
+      "libelle": "État des engagements hors bilan",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C17": {
+      "libelle": "Statistiques trimestrielles de production",
+      "periodicite": "Trimestriel",
+      "echeance": "T+30j",
+      "destinataire": "CRCA"
+    },
+    "C18": {
+      "libelle": "Statistiques trimestrielles de sinistres",
+      "periodicite": "Trimestriel",
+      "echeance": "T+30j",
+      "destinataire": "CRCA"
+    },
+    "C19": {
+      "libelle": "Rapport d'audit interne",
+      "periodicite": "Annuel",
+      "echeance": "31 mars",
+      "destinataire": "CRCA"
+    },
+    "C20": {
+      "libelle": "Plan de réassurance",
+      "periodicite": "Annuel",
+      "echeance": "31 janvier",
+      "destinataire": "CRCA"
+    }
+  },
+  "branches": {
+    "auto": {
+      "code": "1",
+      "libelle": "Assurance automobile",
+      "obligatoire": true,
+      "garanties": [
+        "RC obligatoire",
+        "Dommages tous accidents (DTA)",
+        "Vol",
+        "Incendie",
+        "Bris de glace",
+        "Catastrophes naturelles",
+        "Recours des tiers"
+      ],
+      "garantie_minimum_obligatoire": "RC — Responsabilité Civile",
+      "article_rc": "Art. 200 Code CIMA",
+      "documents_obligatoires": [
+        "Carte rose (attestation RC)",
+        "Vignette",
+        "Carte verte (internationale)"
+      ],
+      "franchise_habituelle_fcfa": {
+        "dommages_min": 50000,
+        "dommages_max": 200000
+      },
+      "taux_taxe_indicatif": 0.15
+    },
+    "vie": {
+      "code": "2",
+      "libelle": "Assurance vie",
+      "produits": [
+        "Vie entière",
+        "Temporaire décès",
+        "Épargne-retraite",
+        "Mixte",
+        "Capital décès",
+        "Rentes viagères",
+        "Assurance groupe crédit"
+      ],
+      "taux_taxe": 0.0,
+      "note": "Les primes vie sont exonérées de taxe sur les assurances",
+      "taux_technique_max": 0.035,
+      "article_taux": "Art. 54 Code CIMA"
+    },
+    "ird": {
+      "code": "3",
+      "libelle": "Incendie, Risques Divers (MRH)",
+      "garanties": [
+        "Incendie",
+        "Explosion",
+        "Dégâts des eaux",
+        "Catastrophes naturelles",
+        "Vol",
+        "RC locataire",
+        "RC propriétaire"
+      ],
+      "taux_taxe_indicatif": 0.15,
+      "article": "Livre III Code CIMA"
+    },
+    "rc": {
+      "code": "4",
+      "libelle": "Responsabilité Civile",
+      "sous_branches": [
+        "RC Exploitation",
+        "RC Professionnelle",
+        "RC Produits",
+        "RC Chef de famille",
+        "RC Locataire"
+      ],
+      "taux_taxe_indicatif": 0.15
+    },
+    "transport": {
+      "code": "5",
+      "libelle": "Assurance Transport",
+      "types": [
+        "Corps (navires/aéronefs)",
+        "Facultés (marchandises)",
+        "RC transporteur"
+      ],
+      "taux_taxe_indicatif": 0.1
+    },
+    "maladie_accidents": {
+      "code": "6",
+      "libelle": "Maladie, Accidents corporels, Assistance",
+      "produits": [
+        "Accident corporel individuel",
+        "Maladie complémentaire",
+        "Assistance rapatriement"
+      ],
+      "taux_taxe_indicatif": 0.1
+    },
+    "agricole": {
+      "code": "7",
+      "libelle": "Assurance agricole",
+      "note": "Branche en développement — réglementation spécifique nationale en sus du Code CIMA",
+      "taux_taxe_indicatif": 0.0
+    },
+    "credit": {
+      "code": "8",
+      "libelle": "Assurance-crédit et caution",
+      "sous_branches": [
+        "Crédit commercial",
+        "Crédit export",
+        "Caution",
+        "Garantie financière"
+      ],
+      "taux_taxe_indicatif": 0.12
+    }
+  },
+  "plan_comptable_assurance_cima": {
+    "titre": "Plan Comptable Sectoriel des Assurances (PCSA) — Zone CIMA / OHADA",
+    "classe_1": {
+      "libelle": "Capitaux propres, emprunts et provisions",
+      "comptes": {
+        "10": "Capital social",
+        "11": "Primes et réserves",
+        "12": "Report à nouveau",
+        "13": "Résultat de l'exercice",
+        "17": "Emprunts et dettes financières"
+      }
+    },
+    "classe_2": {
+      "libelle": "Valeurs immobilisées",
+      "comptes": {
+        "20": "Immobilisations incorporelles",
+        "21": "Terrains",
+        "22": "Constructions",
+        "23": "Matériel et équipements",
+        "26": "Titres de participation",
+        "27": "Autres immobilisations financières"
+      }
+    },
+    "classe_3": {
+      "libelle": "Provisions techniques",
+      "comptes": {
+        "31": "Provisions pour primes non acquises (PPNA)",
+        "32": "Provisions pour sinistres à payer (PSAP)",
+        "33": "Provisions mathématiques vie (PM)",
+        "34": "Provisions d'égalisation (PE)",
+        "35": "Provisions pour risques croissants (PRC)",
+        "36": "Provisions mathématiques de rentes (PMR)",
+        "37": "Autres provisions techniques"
+      }
+    },
+    "classe_4": {
+      "libelle": "Tiers (créances et dettes)",
+      "comptes": {
+        "41": "Créances sur assurés et intermédiaires",
+        "42": "Créances sur réassureurs (cessions)",
+        "44": "Dettes envers réassureurs (acceptations)",
+        "45": "État et organismes sociaux",
+        "46": "Débiteurs et créditeurs divers"
+      }
+    },
+    "classe_5": {
+      "libelle": "Trésorerie et placements",
+      "comptes": {
+        "50": "Valeurs mobilières (obligations, actions)",
+        "52": "Banques et établissements financiers",
+        "57": "Caisse"
+      }
+    },
+    "classe_6": {
+      "libelle": "Charges",
+      "comptes": {
+        "60": "Prestations et frais payés (sinistres)",
+        "61": "Variation de PSAP",
+        "62": "Variation de PPNA",
+        "63": "Variation de PM et autres provisions vie",
+        "64": "Commissions versées aux intermédiaires",
+        "65": "Primes cédées aux réassureurs",
+        "67": "Frais de gestion (personnels, administratifs)",
+        "68": "Dotations aux provisions techniques",
+        "69": "Charges financières"
+      }
+    },
+    "classe_7": {
+      "libelle": "Produits",
+      "comptes": {
+        "70": "Primes acquises à l'exercice (nettes d'annulations)",
+        "72": "Quote-part réassurance acceptée",
+        "74": "Produits financiers",
+        "75": "Autres produits d'exploitation",
+        "77": "Produits exceptionnels"
+      }
+    }
+  },
+  "taux_taxes_par_pays": {
+    "_note_generale": "Taxe sur les conventions d'assurance — Taux indicatifs 2024. Vérifier les barèmes DGI locaux avant facturation. Les États membres peuvent ajuster par arrêté. Vie = exonérée dans toute la zone CIMA.",
+    "Benin": {
+      "code_iso": "BJ",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.15,
+      "auto_tous_risques": 0.15,
+      "ird_mrh": 0.15,
+      "rc": 0.15,
+      "transport": 0.12,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les conventions d'assurance — Direction Générale des Impôts Bénin"
+    },
+    "Burkina_Faso": {
+      "code_iso": "BF",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.15,
+      "auto_tous_risques": 0.15,
+      "ird_mrh": 0.15,
+      "rc": 0.15,
+      "transport": 0.12,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les contrats d'assurance — Direction Générale des Impôts BF"
+    },
+    "Cameroun": {
+      "code_iso": "CM",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.15,
+      "auto_tous_risques": 0.15,
+      "ird_mrh": 0.15,
+      "rc": 0.15,
+      "transport_facultes": 0.12,
+      "transport_corps": 0.1,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit_caution": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "tva_applicable": false,
+      "note": "Taxe sur les assurances — DGI Cameroun — Loi de Finances annuelle. Prime auto RC minimum agréé par MINFI."
+    },
+    "Centrafrique": {
+      "code_iso": "CF",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.12,
+      "auto_tous_risques": 0.12,
+      "ird_mrh": 0.12,
+      "rc": 0.12,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "note": "Taxe sur les contrats d'assurance — DGI RCA. Marché peu développé, tarifs suivent indicateurs CIMA."
+    },
+    "Comores": {
+      "code_iso": "KM",
+      "devise": "KMF",
+      "auto_rc": 0.1,
+      "auto_tous_risques": 0.1,
+      "ird_mrh": 0.1,
+      "rc": 0.1,
+      "transport": 0.08,
+      "maladie_accidents": 0.05,
+      "agricole": 0.0,
+      "credit": 0.08,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "note": "Régime fiscal spécifique — Comores non membres CEMAC/UEMOA. Taux indicatifs DGI Moroni."
+    },
+    "Congo": {
+      "code_iso": "CG",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.12,
+      "auto_tous_risques": 0.12,
+      "ird_mrh": 0.12,
+      "rc": 0.12,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les conventions d'assurance — DGI Congo Brazzaville"
+    },
+    "Cote_dIvoire": {
+      "code_iso": "CI",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.15,
+      "auto_tous_risques": 0.15,
+      "ird_mrh": 0.15,
+      "rc": 0.15,
+      "transport_facultes": 0.1,
+      "transport_corps": 0.1,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit_caution": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les contrats d'assurance — DGI CI. Taux stables depuis 2015."
+    },
+    "Gabon": {
+      "code_iso": "GA",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.15,
+      "auto_tous_risques": 0.15,
+      "ird_mrh": 0.15,
+      "rc": 0.15,
+      "transport": 0.12,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les conventions d'assurance — DGI Gabon. Siège CRCA à Libreville."
+    },
+    "Guinee_Bissau": {
+      "code_iso": "GW",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.1,
+      "auto_tous_risques": 0.1,
+      "ird_mrh": 0.1,
+      "rc": 0.1,
+      "transport": 0.08,
+      "maladie_accidents": 0.05,
+      "agricole": 0.0,
+      "credit": 0.08,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "note": "Marché en développement — taux indicatifs DGI Bissau. Peu d'assureurs agréés CRCA."
+    },
+    "Guinee_Equatoriale": {
+      "code_iso": "GQ",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.12,
+      "auto_tous_risques": 0.12,
+      "ird_mrh": 0.12,
+      "rc": 0.12,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "note": "Taxe sur les conventions d'assurance — DGI GQ. Marché pétrolier important."
+    },
+    "Mali": {
+      "code_iso": "ML",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.14,
+      "auto_tous_risques": 0.14,
+      "ird_mrh": 0.14,
+      "rc": 0.14,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe spéciale sur les conventions d'assurance — DGI Mali. Contexte sécuritaire impacte la tarification."
+    },
+    "Niger": {
+      "code_iso": "NE",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.14,
+      "auto_tous_risques": 0.14,
+      "ird_mrh": 0.14,
+      "rc": 0.14,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe spéciale sur les conventions d'assurance — DGI Niger."
+    },
+    "Senegal": {
+      "code_iso": "SN",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.14,
+      "auto_tous_risques": 0.14,
+      "ird_mrh": 0.14,
+      "rc": 0.14,
+      "transport_facultes": 0.1,
+      "transport_corps": 0.1,
+      "maladie_accidents": 0.1,
+      "agricole": 0.0,
+      "credit_caution": 0.12,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe spéciale sur les conventions d'assurance (TSCA) — DGI Sénégal. Réforme fiscale 2021."
+    },
+    "Tchad": {
+      "code_iso": "TD",
+      "devise": "XAF",
+      "sous_zone": "CEMAC",
+      "auto_rc": 0.12,
+      "auto_tous_risques": 0.12,
+      "ird_mrh": 0.12,
+      "rc": 0.12,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "note": "Taxe sur les conventions d'assurance — DGI N'Djaména. Marché en développement."
+    },
+    "Togo": {
+      "code_iso": "TG",
+      "devise": "XOF",
+      "sous_zone": "UEMOA",
+      "auto_rc": 0.13,
+      "auto_tous_risques": 0.13,
+      "ird_mrh": 0.13,
+      "rc": 0.13,
+      "transport": 0.1,
+      "maladie_accidents": 0.08,
+      "agricole": 0.0,
+      "credit": 0.1,
+      "vie": 0.0,
+      "taux_fga": 0.02,
+      "taux_bca": 0.005,
+      "note": "Taxe sur les contrats d'assurance — DGI Togo. Hub financier régional en développement."
+    },
+    "_resume_par_sous_zone": {
+      "CEMAC_Afrique_Centrale": {
+        "pays": [
+          "Cameroun",
+          "Gabon",
+          "Congo",
+          "Centrafrique",
+          "Tchad",
+          "Guinee_Equatoriale"
+        ],
+        "devise": "XAF (Franc CFA Afrique Centrale)",
+        "fourchette_auto": "12% à 15%"
+      },
+      "UEMOA_Afrique_Ouest": {
+        "pays": [
+          "Benin",
+          "Burkina_Faso",
+          "Cote_dIvoire",
+          "Guinee_Bissau",
+          "Mali",
+          "Niger",
+          "Senegal",
+          "Togo"
+        ],
+        "devise": "XOF (Franc CFA Afrique de l'Ouest)",
+        "fourchette_auto": "13% à 15%"
+      },
+      "hors_zone_CFA": {
+        "pays": [
+          "Comores"
+        ],
+        "devise": "KMF (Franc Comorien)",
+        "fourchette_auto": "10%"
+      }
+    }
+  },
+  "sanctions_penalites_crca": {
+    "titre": "Sanctions et pénalités — Livre III Art. 401-430 Code CIMA",
+    "sanctions_administratives": {
+      "avertissement": {
+        "description": "1ère sanction — manquement mineur",
+        "effets": "Consigné au dossier, aucune restriction opérationnelle"
+      },
+      "blame": {
+        "description": "2e sanction — manquement répété ou plus grave",
+        "effets": "Publication dans le bulletin de la CRCA"
+      },
+      "interdiction_operations": {
+        "description": "Interdiction temporaire de souscrire dans une ou plusieurs branches",
+        "duree_max_mois": 24,
+        "article": "Art. 401 Code CIMA"
+      },
+      "administrateur_provisoire": {
+        "description": "Désignation d'un administrateur provisoire par la CRCA",
+        "conditions": "Solvabilité compromise ou gestion gravement défaillante",
+        "duree_max_mois": 12,
+        "article": "Art. 415 Code CIMA"
+      },
+      "retrait_agrement": {
+        "description": "Retrait définitif de l'agrément",
+        "conditions": "Après mise en demeure restée infructueuse ou insolvabilité",
+        "article": "Art. 310 Code CIMA",
+        "portee": "Liquidation forcée ou transfert de portefeuille"
+      }
+    },
+    "penalites_financieres": {
+      "retard_paiement_sinistre": {
+        "article": "Art. 12-ter Code CIMA",
+        "taux": "Taux légal + 50% par mois de retard après 45 jours post-accord",
+        "exemple_calcul": "Indemnité 1M FCFA, taux légal 6%, retard 60 jours → pénalité ≈ 14 795 FCFA"
+      },
+      "retard_depots_etats_crca": {
+        "article": "Art. 400 Code CIMA",
+        "amende_par_jour_fcfa": 50000,
+        "amende_maximum_fcfa": 5000000,
+        "description": "Amende par jour de retard dans le dépôt des états CRCA"
+      },
+      "non_couverture_provisions": {
+        "article": "Art. 335 Code CIMA",
+        "mesure": "Interdiction de distribuer des dividendes + plan de redressement obligatoire",
+        "delai_plan_redressement_jours": 90
+      },
+      "retard_reversement_primes_intermediaires": {
+        "article": "Art. 520 Code CIMA",
+        "amende_taux_retard": "1.5% par mois sur les sommes non reversées",
+        "mesure_complementaire": "Suspension de la carte professionnelle"
+      },
+      "defaut_assurance_rc_automobile": {
+        "article": "Art. 200 Code CIMA",
+        "amende_fcfa": {
+          "min": 50000,
+          "max": 300000
+        },
+        "mesure_complementaire": "Immobilisation du véhicule"
+      }
+    },
+    "procedures_sanction": {
+      "mise_en_demeure": {
+        "delai_reponse_jours": 30,
+        "description": "La CRCA adresse une mise en demeure avant toute sanction grave"
+      },
+      "recours": {
+        "instance": "Tribunal administratif de l'État membre concerné",
+        "delai_recours_jours": 60
+      }
+    }
+  },
+  "circulaires_crca": {
+    "titre": "Circulaires et instructions de la CRCA (2010-2024)",
+    "circulaire_2010_001": {
+      "objet": "Modalités de calcul et de constitution des provisions techniques",
+      "date": "2010",
+      "impact": "Standardisation PSAP et PPNA dans toute la zone CIMA"
+    },
+    "circulaire_2012_001": {
+      "objet": "Obligations de formation continue des dirigeants d'assurance",
+      "date": "2012",
+      "impact": "20h de formation/an obligatoires pour DG et directeurs techniques"
+    },
+    "circulaire_2016_001": {
+      "objet": "Relèvement du capital social minimum à 3 milliards FCFA",
+      "date": "2016",
+      "impact": "Capital minimum non-vie et vie porté à 3 Mds FCFA (anciennement 1 Md non-vie, 800M vie)",
+      "deadline_conformite": "31 décembre 2018"
+    },
+    "circulaire_2018_001": {
+      "objet": "Gouvernance et contrôle interne des entreprises d'assurance",
+      "date": "2018",
+      "impact": "Comité d'audit obligatoire, fonction actuarielle réglementée, rapport ORSA annuel"
+    },
+    "circulaire_2019_001": {
+      "objet": "Lutte contre le blanchiment de capitaux et le financement du terrorisme (LBC/FT)",
+      "date": "2019",
+      "impact": "KYC renforcé, déclaration CENTIF obligatoire pour transactions > 5M FCFA, gel avoirs"
+    },
+    "circulaire_2020_001": {
+      "objet": "Digitalisation des processus de souscription et de gestion des sinistres",
+      "date": "2020",
+      "impact": "Acceptation des signatures électroniques et des contrats numériques (compatible e-CIMA)"
+    },
+    "circulaire_2021_001": {
+      "objet": "Exigences de reporting ESG et investissement responsable",
+      "date": "2021",
+      "impact": "Publication d'un rapport ESG annuel pour les compagnies > 10 Mds de provisions"
+    },
+    "circulaire_2022_001": {
+      "objet": "Mise à jour des tables de mortalité réglementaires",
+      "date": "2022",
+      "impact": "Tables TV 88-90 remplacées par tables générationnelles 2018 pour les nouvelles souscriptions vie"
+    },
+    "circulaire_2023_001": {
+      "objet": "Renforcement des exigences de solvabilité — stress tests obligatoires",
+      "date": "2023",
+      "impact": "Scénarios de stress annuels obligatoires : chute marchés -30%, catastrophe naturelle, pandémie"
+    },
+    "circulaire_2024_001": {
+      "objet": "Microassurance — cadre réglementaire spécifique",
+      "date": "2024",
+      "impact": "Capital minimum réduit à 500M FCFA pour la microassurance, prime max 5000 FCFA/mois"
+    },
+    "resolution_cima_2023": {
+      "objet": "Harmonisation des barèmes RC automobile corporelle",
+      "date": "2023",
+      "impact": "Barème d'indemnisation corporelle harmonisé révisé à la hausse (+20%) dans tous les États membres"
+    }
+  },
+  "baremes_indemnisation_corporelle": {
+    "titre": "Barèmes d'indemnisation corporelle RC automobile — Zone CIMA",
+    "source": "Circulaire CIMA 2023 + tableaux des commissions médicales nationales",
+    "principes": {
+      "IPP": "Incapacité Permanente Partielle — taux en % appliqué au capital de référence",
+      "ITT": "Incapacité Temporaire de Travail — indemnité journalière × nombre jours",
+      "prejudice_moral": "Réparé forfaitairement selon le barème CIMA",
+      "pretium_doloris": "De I (très léger) à VII (exceptionnel)"
+    },
+    "capital_reference_fcfa": {
+      "age_moins_20_ans": 60000000,
+      "age_20_29_ans": 55000000,
+      "age_30_39_ans": 50000000,
+      "age_40_49_ans": 40000000,
+      "age_50_59_ans": 30000000,
+      "age_60_ans_plus": 20000000,
+      "note": "Ces capitaux de référence sont des minimaux CIMA — les États peuvent les majorer"
+    },
+    "taux_ipp_exemples": {
+      "perte_oeil": 0.3,
+      "perte_main_dominante": 0.6,
+      "perte_membre_inferieur": 0.45,
+      "paraplégie": 0.9,
+      "tétraplégie": 1.0,
+      "traumatisme_crânien_léger": 0.05,
+      "traumatisme_crânien_grave": 0.3
+    },
+    "indemnite_journaliere_itt": {
+      "note": "Salaire journalier réel × taux d'incapacité — minimum SMIC local",
+      "minimum_journalier_fcfa": 5000,
+      "maximum_journalier_fcfa": 150000
+    },
+    "prejudice_moral_forfait_fcfa": {
+      "I_tres_leger": 500000,
+      "II_leger": 1000000,
+      "III_modere": 2000000,
+      "IV_moyen": 4000000,
+      "V_assez_important": 7000000,
+      "VI_important": 12000000,
+      "VII_exceptionnel": 20000000
+    },
+    "deces": {
+      "indemnite_base_fcfa": 10000000,
+      "frais_obseques_max_fcfa": 1500000,
+      "frais_immediatement_debourses_max_fcfa": 500000,
+      "ayants_droit": "Conjoint, enfants à charge, ascendants à charge"
+    }
+  },
+  "provisions_mathematiques_vie_formules": {
+    "titre": "Formules de calcul des provisions mathématiques vie — Bases actuarielles CIMA",
+    "methode_prospective": {
+      "formule": "PM_t = VA(engagements_assureur, t) - VA(engagements_assuré, t)",
+      "description": "Différence entre valeur actuelle des prestations futures et valeur actuelle des primes futures",
+      "taux_actualisation": "≤ 3.5% (taux technique maximum CIMA Art. 54)"
+    },
+    "tables_mortalite_autorisees": {
+      "actuel": "Tables 2018 de la CRCA (générationnelles, séparées hommes/femmes)",
+      "ancien": "TV 88-90 (encore utilisables pour contrats en cours)",
+      "tables_experience": "Admises si approuvées par la CRCA et validées par l'actuaire responsable"
+    },
+    "formule_vie_entiere": {
+      "formule": "PM_t = C × v^{n-t} × _{n-t}q_x — P × ä_{x+t:n-t|}",
+      "variables": {
+        "C": "Capital assuré",
+        "v": "Facteur d'actualisation = 1/(1+i)",
+        "n": "Durée du contrat",
+        "t": "Ancienneté du contrat",
+        "q_x": "Probabilité de décès à l'âge x",
+        "P": "Prime nette périodique",
+        "ä": "Rente-vie certaine"
+      }
+    },
+    "formule_temporaire_deces": {
+      "formule": "PM_t = C × A^1_{x+t:n-t|} — P × ä_{x+t:n-t|}",
+      "note": "A^1 = valeur actuelle d'assurance temporaire décès"
+    },
+    "test_solvabilite_vie": {
+      "formule": "Marge_requise = max(4% × PM_brutes + 0.3% × capital_risque_net, 500_000_000)",
+      "article": "Art. 338-1 Code CIMA",
+      "periodicite": "Trimestrielle"
+    }
+  },
+  "livre_V_dispositions_diverses": {
+    "titre": "LIVRE V — Dispositions Diverses et Transitoires",
+    "art_600": {
+      "texte": "Les litiges relatifs à l'interprétation ou à l'exécution d'un contrat d'assurance peuvent être soumis à une médiation préalable avant toute action judiciaire.",
+      "portee": "Médiation assurance"
+    },
+    "art_601": {
+      "texte": "Chaque État membre peut édicter des dispositions complémentaires au présent Code, à condition qu'elles ne contredisent pas les dispositions d'harmonisation de la CIMA.",
+      "portee": "Complémentarité droit national"
+    },
+    "art_610": {
+      "texte": "Le Fonds de Garantie Automobile (FGA) est alimenté par une contribution de 2% des primes RC automobile encaissées par chaque entreprise d'assurance.",
+      "taux_cotisation_fga": 0.02,
+      "portee": "Financement du FGA"
+    },
+    "art_620": {
+      "texte": "Les entreprises d'assurance sont tenues de constituer une provision pour dépréciations des placements en valeurs mobilières cotées dont la valeur de marché est inférieure à la valeur d'acquisition.",
+      "portee": "Provision pour dépréciation des placements"
+    },
+    "art_630": {
+      "texte": "Toute entreprise d'assurance doit faire appel à un actuaire agréé par la CRCA pour la certification annuelle de ses provisions techniques.",
+      "periodicite": "Annuelle",
+      "portee": "Certification actuarielle obligatoire"
+    },
+    "art_602": {
+      "texte": "La microassurance est définie comme un mécanisme de protection visant les populations à faibles revenus, avec des primes inférieures à 5 000 FCFA par mois et des garanties simplifiées.",
+      "prime_max_mensuelle_fcfa": 5000,
+      "portee": "Microassurance — définition et régime allégé"
+    },
+    "art_603": {
+      "texte": "Le paiement des primes d'assurance par monnaie électronique (mobile money, portefeuille numérique) est autorisé dans toute la zone CIMA. L'assureur délivre un accusé de réception électronique valant quittance.",
+      "portee": "Mobile money — paiement de primes autorisé"
+    },
+    "art_604": {
+      "texte": "La signature électronique qualifiée d'un contrat d'assurance a la même valeur juridique que la signature manuscrite. Le contrat électronique est opposable.",
+      "portee": "Signature électronique — valeur équivalente à la signature manuscrite"
+    },
+    "art_605": {
+      "texte": "Les conditions particulières d'un contrat d'assurance peuvent être transmises en format électronique. L'assureur doit s'assurer que l'assuré a reçu ses conditions dans un délai de 15 jours.",
+      "portee": "Contrat numérique — confirmation de réception obligatoire"
+    },
+    "art_606": {
+      "texte": "Les données personnelles des assurés sont protégées conformément aux réglementations nationales. L'assureur ne peut les céder à des tiers sans le consentement écrit de l'assuré, sauf obligation légale.",
+      "portee": "Protection des données personnelles des assurés"
+    },
+    "art_607": {
+      "texte": "Chaque État membre met en place un service de médiation de l'assurance, indépendant des compagnies, pour traiter les litiges entre assurés et assureurs. La médiation est gratuite et préalable à toute action judiciaire.",
+      "portee": "Médiation de l'assurance — service indépendant gratuit"
+    },
+    "art_608": {
+      "texte": "Les parties à un contrat d'assurance peuvent convenir d'une clause d'arbitrage. L'arbitre est désigné par accord commun ou par le président du tribunal compétent.",
+      "portee": "Arbitrage contractuel — validité des clauses compromissoires"
+    },
+    "art_609": {
+      "texte": "Toute publicité pour des produits d'assurance doit être loyale, claire et non trompeuse. Elle doit mentionner le nom de la compagnie agréée, les garanties essentielles et les exclusions principales.",
+      "portee": "Publicité assurance — loyauté et interdiction publicité trompeuse"
+    },
+    "art_611": {
+      "texte": "Les entreprises d'assurance sont assujetties aux obligations de lutte contre le blanchiment de capitaux (LBC/FT). Elles déclarent les transactions suspectes à la CENTIF (cellule nationale de renseignement financier).",
+      "portee": "LBC/FT — déclaration de soupçon à la CENTIF"
+    },
+    "art_612": {
+      "texte": "L'assureur doit identifier et vérifier l'identité de tout souscripteur avant la prise d'effet du contrat (KYC). Pour les personnes morales, la vérification porte aussi sur le bénéficiaire effectif.",
+      "portee": "KYC — identification obligatoire avant souscription"
+    },
+    "art_613": {
+      "texte": "Les Personnes Politiquement Exposées (PPE) font l'objet de diligences renforcées. Leur souscription est soumise à l'approbation de la direction générale de l'assureur.",
+      "portee": "Diligences renforcées — PPE et listes de sanctions"
+    },
+    "art_614": {
+      "texte": "En cas d'inscription d'un client sur une liste de gel des avoirs (ONU, FATF), l'assureur gèle immédiatement les sommes dues et notifie la CENTIF.",
+      "portee": "Gel des avoirs — gel immédiat sur listes ONU/FATF"
+    },
+    "art_615": {
+      "texte": "Pour toute opération d'assurance-vie supérieure à 5 millions FCFA, l'assureur doit identifier et vérifier le bénéficiaire effectif (UBO). Cette information est conservée 10 ans.",
+      "seuil_ubo_fcfa": 5000000,
+      "duree_conservation_ans": 10,
+      "portee": "Bénéficiaires effectifs (UBO) — identification > 5M FCFA"
+    },
+    "art_621": {
+      "texte": "Les placements en actifs non liquides ne peuvent dépasser 40% des provisions techniques. L'assureur doit disposer en permanence d'actifs liquides suffisants pour ses engagements à court terme.",
+      "limite_actifs_non_liquides_pct": 40,
+      "portee": "Limite des actifs non liquides — 40% des provisions"
+    },
+    "art_622": {
+      "texte": "Les placements en immeubles sont limités aux immeubles productifs de revenus situés dans les États membres CIMA, dans la limite de 30% des actifs admis. Les immeubles occupés par l'assureur sont limités à 10%.",
+      "limite_immobilier_total_pct": 30,
+      "limite_immobilier_occupe_pct": 10,
+      "portee": "Immobilier admis — 30% dont 10% occupé"
+    },
+    "art_623": {
+      "texte": "Les prêts hypothécaires de premier rang sont admis dans la limite de 20% des actifs admis, à condition d'être garantis à hauteur de 120% de la créance.",
+      "limite_prets_hypothecaires_pct": 20,
+      "garantie_minimum_pct": 120,
+      "portee": "Prêts hypothécaires admis — 20%, garantis à 120%"
+    },
+    "art_624": {
+      "texte": "Les dépôts dans un seul établissement bancaire ne peuvent excéder 10% des actifs admis. La limite globale des dépôts bancaires est de 40%.",
+      "limite_par_banque_pct": 10,
+      "limite_totale_depots_pct": 40,
+      "portee": "Dépôts bancaires — 10% par établissement, 40% au total"
+    },
+    "art_625": {
+      "texte": "L'assureur doit diversifier ses actifs entre au moins 5 catégories d'actifs admis. Aucune catégorie (hors obligations d'État) ne peut représenter plus de 40% des actifs admis.",
+      "categories_minimum": 5,
+      "portee": "Obligation de diversification des placements"
+    },
+    "art_626": {
+      "texte": "Les placements hors zone CIMA sont admis dans la limite de 20% des actifs représentatifs, uniquement dans des valeurs bénéficiant d'une notation minimum BBB.",
+      "limite_hors_zone_cima_pct": 20,
+      "notation_minimum": "BBB",
+      "portee": "Actifs hors zone CIMA — 20% maximum, notation BBB"
+    },
+    "art_627": {
+      "texte": "L'assureur transmet à la CRCA un état annuel de ses placements (état C4) détaillant chaque actif par catégorie, valeur d'acquisition et valeur de marché. Certifié par le CAC.",
+      "portee": "Rapport annuel placements (C4) — certifié par le CAC"
+    },
+    "art_628": {
+      "texte": "Les entreprises d'assurance réalisent annuellement des tests de résistance (stress tests) simulant des scénarios adverses : chute des marchés de 30%, hausse des sinistres de 50%, catastrophe naturelle majeure.",
+      "scenarios": [
+        "Chute marchés -30%",
+        "Hausse sinistres +50%",
+        "Catastrophe naturelle majeure"
+      ],
+      "portee": "Stress tests annuels obligatoires"
+    },
+    "art_629": {
+      "texte": "L'ORSA (Own Risk and Solvency Assessment) est réalisé annuellement. Il identifie les risques principaux, quantifie leur impact et démontre la capacité à maintenir la solvabilité sous stress sur 3 ans.",
+      "horizon_ans": 3,
+      "portee": "ORSA — évaluation interne des risques annuelle"
+    },
+    "art_631": {
+      "texte": "L'actuaire responsable doit être titulaire d'une qualification actuarielle reconnue par la CRCA (Fellow IAA, ISFA ou équivalent) et avoir au moins 5 ans d'expérience en assurance.",
+      "experience_minimum_ans": 5,
+      "portee": "Qualifications de l'actuaire responsable"
+    },
+    "art_632": {
+      "texte": "Le rapport actuariel annuel certifie le niveau des provisions techniques, les méthodes de calcul utilisées, et tout risque pouvant affecter la solvabilité.",
+      "portee": "Rapport actuariel — certification des provisions et risques"
+    },
+    "art_633": {
+      "texte": "L'actuaire responsable ne peut pas être actionnaire détenant plus de 5% du capital ni avoir de lien familial direct avec la direction générale. Son indépendance est une condition de validité.",
+      "portee": "Indépendance de l'actuaire"
+    },
+    "art_634": {
+      "texte": "Les tables de mortalité utilisées pour les calculs actuariels vie sont celles publiées par la CRCA. L'utilisation de tables d'expérience est soumise à validation préalable par la CRCA.",
+      "portee": "Tables de mortalité CRCA — validation préalable pour tables d'expérience"
+    },
+    "art_635": {
+      "texte": "Les méthodes actuarielles admises pour le calcul des provisions non-vie (PSAP) sont : dossier par dossier, Chain-Ladder, Bornhuetter-Ferguson. Tout changement de méthode doit être signalé à la CRCA.",
+      "methodes_admises": [
+        "Dossier par dossier",
+        "Chain-Ladder",
+        "Bornhuetter-Ferguson"
+      ],
+      "portee": "Méthodes actuarielles PSAP — liste CRCA"
+    },
+    "art_636": {
+      "texte": "Le rapport ORSA inclut des scénarios adverses avec horizon de projection de 3 ans minimum. L'assureur démontre sa capacité à maintenir un ratio de solvabilité supérieur à 100%.",
+      "horizon_projection_ans": 3,
+      "portee": "ORSA scénarios adverses — horizon 3 ans"
+    },
+    "art_637": {
+      "texte": "Le comité d'audit est obligatoire pour les entreprises dont les provisions techniques dépassent 10 milliards FCFA. Il comprend au moins 3 membres dont la majorité sont des administrateurs indépendants.",
+      "seuil_comite_audit_fcfa": 10000000000,
+      "membres_minimum": 3,
+      "portee": "Comité d'audit obligatoire — provisions > 10 Mds FCFA"
+    },
+    "art_638": {
+      "texte": "Le système de contrôle interne comprend les procédures de souscription, de gestion des sinistres, de placement et de conformité réglementaire. Un rapport annuel est remis au conseil d'administration.",
+      "portee": "Contrôle interne — rapport annuel au conseil"
+    },
+    "art_639": {
+      "texte": "Tout employé ou dirigeant peut signaler anonymement au régulateur des violations de la réglementation CIMA sans risquer de représailles.",
+      "portee": "Protection des lanceurs d'alerte — whistleblowing"
+    },
+    "art_640": {
+      "texte": "Les modifications apportées au Code CIMA par le Conseil des Ministres entrent en vigueur à la date fixée par le règlement modificateur ou à la date de publication dans le bulletin officiel de la CIMA.",
+      "portee": "Entrée en vigueur des modifications au Code CIMA"
+    },
+    "art_616": {
+      "texte": "Tout employé ou dirigeant d'une entreprise d'assurance ayant connaissance d'une opération suspecte au sens de la législation LBC/FT est tenu d'en faire la déclaration à la cellule nationale de renseignements financiers (CENTIF ou structure équivalente) dans un délai de vingt-quatre heures. La déclaration est confidentielle et ne peut être portée à la connaissance du client concerné.",
+      "portee": "Déclaration CENTIF — 24h, confidentialité obligatoire, interdiction divulgation client"
+    },
+    "art_617": {
+      "texte": "Sur réquisition de la CENTIF ou de l'autorité judiciaire compétente, l'entreprise d'assurance procède immédiatement au gel des avoirs du client suspecté. Elle suspend tout versement, cession, transfert ou utilisation des fonds liés aux contrats du client concerné. La mesure de gel est maintenue jusqu'à mainlevée expresse de l'autorité ayant ordonné le gel.",
+      "portee": "Gel des avoirs sur réquisition CENTIF — immédiat, maintenu jusqu'à mainlevée"
+    },
+    "art_618": {
+      "texte": "Les entreprises d'assurance coopèrent pleinement avec la CENTIF et les autorités judiciaires dans le cadre des enquêtes LBC/FT. Elles transmettent sur demande tous documents, registres et informations relatifs aux contrats et aux clients identifiés. Le secret professionnel ne peut être opposé aux autorités LBC/FT.",
+      "portee": "Coopération CENTIF — transmission documents obligatoire, secret professionnel non opposable"
+    },
+    "art_619": {
+      "texte": "Le dirigeant responsable de la conformité LBC/FT répond personnellement du non-respect des obligations de déclaration, de vigilance et de gel des avoirs. En cas de manquement grave, il encourt une amende personnelle de 5 à 50 millions FCFA, l'interdiction d'exercer des fonctions dirigeantes pour une durée de cinq ans, et les poursuites pénales prévues par la législation nationale.",
+      "portee": "Responsabilité personnelle dirigeant LBC/FT — amende 5-50M, interdiction 5 ans, poursuites pénales"
+    }
+  },
+  "livre_VI_reassurance": {
+    "titre": "LIVRE VI — Réassurance",
+    "art_700": {
+      "texte": "Les traités de réassurance doivent être conclus par écrit. L'assureur reste seul responsable envers l'assuré de l'exécution du contrat, quels que soient ses accords de réassurance.",
+      "portee": "Traités de réassurance — forme écrite obligatoire"
+    },
+    "art_701": {
+      "texte": "L'assureur ne peut céder plus de 50% de ses primes en réassurance sans justifier du maintien d'une marge de solvabilité suffisante.",
+      "seuil_alerte_cession": 0.5,
+      "portee": "Plafond de cession"
+    },
+    "art_710": {
+      "texte": "Les comptes courants de réassurance doivent être arrêtés au minimum annuellement et les soldes réglés dans les 90 jours.",
+      "delai_reglement_jours": 90,
+      "portee": "Règlement des comptes courants de réassurance"
+    },
+    "formes_traites": {
+      "quote_part": {
+        "description": "L'assureur cède un pourcentage fixe de chaque risque accepté",
+        "avantage": "Simple, stabilise le ratio S/P",
+        "inconvenient": "Pas de protection contre les sinistres graves unitaires"
+      },
+      "excedent_de_plein": {
+        "description": "L'assureur conserve un 'plein' fixe et cède le surplus",
+        "avantage": "Protection ciblée sur les gros risques",
+        "inconvenient": "Gestion plus complexe"
+      },
+      "excedent_de_sinistre": {
+        "description": "Le réassureur intervient si un sinistre dépasse une rétention fixée",
+        "utilisation": "Protection catastrophe, RC corporelle grave"
+      },
+      "stop_loss": {
+        "description": "Le réassureur intervient si le ratio S/P dépasse un seuil sur l'exercice",
+        "utilisation": "Protection globale de la rentabilité"
+      }
+    },
+    "art_702": {
+      "texte": "La réassurance facultative porte sur des risques individuels cédés au cas par cas. La réassurance traité porte sur l'ensemble d'un portefeuille selon des termes convenus d'avance. Les deux formes sont admises.",
+      "portee": "Réassurance facultative vs traité — définitions"
+    },
+    "art_703": {
+      "texte": "Le taux de commission versé par le réassureur à la cédante est librement négocié. Il figure dans le traité et ne peut être modifié en cours de traité sans avenant.",
+      "portee": "Commission de réassurance — librement négociée"
+    },
+    "art_704": {
+      "texte": "La clause de participation aux bénéfices (profit commission) permet à la cédante de récupérer une partie des bénéfices réalisés sur le traité si la sinistralité est favorable.",
+      "portee": "Profit commission — participation aux bénéfices de la cédante"
+    },
+    "art_705": {
+      "texte": "La déclaration des sinistres au réassureur intervient dès que l'estimation dépasse le seuil de pleine rétention. Les sinistres graves (au-delà de 5 fois la rétention) sont notifiés immédiatement.",
+      "portee": "Déclaration sinistres au réassureur"
+    },
+    "art_706": {
+      "texte": "Le cash-call est un appel de fonds immédiat auprès du réassureur pour les sinistres graves. Le réassureur doit payer le cash-call dans les 30 jours suivant la demande documentée.",
+      "delai_paiement_cash_call_jours": 30,
+      "portee": "Cash-call — paiement dans 30 jours"
+    },
+    "art_707": {
+      "texte": "La cédante peut exiger du réassureur un dépôt de réassurance pour garantir le paiement des sinistres futurs.",
+      "portee": "Dépôt de réassurance — garantie des engagements"
+    },
+    "art_708": {
+      "texte": "Les traités annuels prennent effet au 1er janvier et se terminent au 31 décembre. Les traités pluriannuels peuvent être souscrits pour 3 ans maximum.",
+      "duree_max_pluriannuel_ans": 3,
+      "portee": "Durée des traités — annuels ou pluriannuels 3 ans max"
+    },
+    "art_709": {
+      "texte": "La résiliation d'un traité de réassurance requiert un préavis de 3 mois sauf clause résolutoire expressément prévue (manquement grave, insolvabilité).",
+      "preavis_resiliation_mois": 3,
+      "portee": "Résiliation traité — préavis 3 mois"
+    },
+    "art_711": {
+      "texte": "Les traités de réassurance peuvent contenir une clause compromissoire d'arbitrage. Le siège de l'arbitrage est librement choisi par les parties.",
+      "portee": "Arbitrage réassurance — clause compromissoire valide"
+    },
+    "art_712": {
+      "texte": "Le droit applicable aux traités est librement choisi. En l'absence de choix, le droit du pays du siège social de la cédante s'applique.",
+      "portee": "Droit applicable — liberté de choix, défaut : droit de la cédante"
+    },
+    "art_713": {
+      "texte": "Un traité peut couvrir des risques localisés dans plusieurs États membres CIMA simultanément (traité régional).",
+      "portee": "Traité régional CIMA — couverture multi-États membres"
+    },
+    "art_714": {
+      "texte": "La réassurance vie est soumise à des règles spécifiques. Le réassureur vie doit être agréé pour les opérations vie et disposer d'une notation minimum A-.",
+      "notation_minimum_reassureur_vie": "A-",
+      "portee": "Réassurance vie — notation A- minimum"
+    },
+    "art_715": {
+      "texte": "La rétrocession est autorisée. Le réassureur qui rétrocède reste responsable envers la cédante de ses engagements initiaux.",
+      "portee": "Rétrocession autorisée"
+    },
+    "art_716": {
+      "texte": "Les créances sur réassureurs ne sont admises en représentation que si les réassureurs bénéficient d'une notation BBB ou supérieure (S&P, Moody's, Fitch, AM Best).",
+      "notation_minimum": "BBB",
+      "portee": "Notation BBB minimum — créances réassurance admises"
+    },
+    "art_717": {
+      "texte": "La CRCA publie chaque année une liste des réassureurs agréés pour la zone CIMA.",
+      "portee": "Liste CRCA des réassureurs agréés — publiée annuellement"
+    },
+    "art_718": {
+      "texte": "Les cédantes sont encouragées à céder en priorité aux réassureurs locaux et africains. Africa Re bénéficie d'une préférence de premier cession.",
+      "portee": "Priorité aux réassureurs africains"
+    },
+    "art_719": {
+      "texte": "Africa Re (Société Africaine de Réassurance, Lagos) est le réassureur panafricain prioritaire. Chaque cédante doit lui offrir au moins 5% de chaque traité.",
+      "quota_africa_re_pct": 5,
+      "portee": "Africa Re — droit de préférence de 5% sur chaque traité"
+    },
+    "art_720": {
+      "texte": "CICA-Re (siège à Lomé) est le réassureur institutionnel de la zone CIMA. Les cédantes sont incitées à lui céder en priorité après Africa Re.",
+      "siege": "Lomé, Togo",
+      "portee": "CICA-Re — réassureur institutionnel zone CIMA"
+    },
+    "art_721": {
+      "texte": "Le plan de réassurance annuel (état C20) comprend la liste de tous les traités, les réassureurs participants, leurs notations, les plafonds et rétentions. Il est soumis à la CRCA avant le 31 janvier.",
+      "echeance": "31 janvier",
+      "portee": "Plan de réassurance C20 — avant 31 janvier"
+    },
+    "art_722": {
+      "texte": "La CRCA contrôle la conformité du plan de réassurance dans les 60 jours suivant son dépôt. Elle peut exiger des modifications si les rétentions semblent inadaptées.",
+      "delai_controle_jours": 60,
+      "portee": "Contrôle du plan de réassurance — 60 jours"
+    },
+    "art_723": {
+      "texte": "La CRCA peut refuser un traité non conforme. La cédante dispose de 30 jours pour soumettre un plan alternatif.",
+      "delai_plan_alternatif_jours": 30,
+      "portee": "Refus CRCA d'un traité non conforme"
+    },
+    "art_724": {
+      "texte": "Les créances sur réassureurs sont admises en représentation à 80% de leur montant nominal pour tenir compte du risque de contrepartie.",
+      "limite_admission_pct": 80,
+      "portee": "Créances réassurance — admises à 80%"
+    },
+    "art_725": {
+      "texte": "La CRCA peut instaurer un pool obligatoire de réassurance pour certains grands risques ou risques catastrophes si le marché individuel ne peut les absorber.",
+      "portee": "Pool obligatoire CRCA — grands risques ou catastrophes"
+    },
+    "art_726": {
+      "texte": "En matière de microassurance, les microassureurs peuvent constituer une réserve d'égalisation interne à la place de traités formels, sous réserve d'approbation CRCA.",
+      "portee": "Microassurance — réassurance allégée"
+    },
+    "art_727": {
+      "texte": "Les comptes courants de réassurance font l'objet d'un arrêté semestriel. Les soldes nets sont réglés dans les 90 jours. Les intérêts de retard courent après ce délai.",
+      "periodicite_arrete": "Semestrielle",
+      "delai_reglement_jours": 90,
+      "portee": "Comptes courants réassurance — arrêté semestriel, règlement 90j"
+    },
+    "art_728": {
+      "texte": "Les traités conclus par voie électronique sont valides si les parties ont signé un accord cadre de dématérialisation préalable.",
+      "portee": "Traités électroniques — valides avec accord cadre"
+    },
+    "art_729": {
+      "texte": "Les cédantes transmettent à la CRCA des rapports trimestriels sur la sinistralité des traités en cours, joints à l'état C8.",
+      "portee": "Reporting trimestriel réassurance"
+    },
+    "art_730": {
+      "texte": "Le non-respect du plan de réassurance approuvé est sanctionné par une amende de 500 000 à 5 millions FCFA et peut entraîner une suspension de nouvelles souscriptions.",
+      "amende_min_fcfa": 500000,
+      "amende_max_fcfa": 5000000,
+      "portee": "Sanctions non-respect plan réassurance — amende 500K-5M FCFA"
+    }
+  },
+  "glossaire_assurance_cima": {
+    "Prime_nette": "Prime hors taxes et hors commissions d'intermédiaires",
+    "Prime_TTC": "Prime nette + taxes sur les assurances",
+    "Prime_commerciale": "Prime TTC + commissions d'acquisition",
+    "Franchise": "Montant restant à la charge de l'assuré en cas de sinistre",
+    "Plafond_de_garantie": "Montant maximal que l'assureur s'engage à payer",
+    "Subrogation": "Droit pour l'assureur de se substituer à l'assuré pour exercer un recours contre le tiers responsable",
+    "IBNR": "Incurred But Not Reported — sinistres survenus non encore déclarés",
+    "CRM": "Coefficient de Réduction-Majoration (bonus-malus) — Zone CIMA : 0.50 à 3.50",
+    "Carte_rose": "Attestation d'assurance RC automobile — document officiel zone CIMA",
+    "Carte_verte": "Extension internationale de l'assurance automobile",
+    "Bureau_Central_Accidents": "Organisme centralisateur des données accidents (BCA) — un par État membre",
+    "CRCA": "Commission Régionale de Contrôle des Assurances — régulateur zone CIMA, siège Libreville",
+    "CIMA": "Conférence Interafricaine des Marchés d'Assurances — institution de réglementation",
+    "FCFA": "Franc CFA — XAF (Afrique Centrale) / XOF (Afrique de l'Ouest)",
+    "OHADA": "Organisation pour l'Harmonisation en Afrique du Droit des Affaires",
+    "PCSA": "Plan Comptable Sectoriel des Assurances — spécifique zone CIMA",
+    "PSAP": "Provision pour Sinistres À Payer",
+    "PPNA": "Provision pour Primes Non Acquises",
+    "PM": "Provisions Mathématiques (assurance vie)",
+    "IPP": "Incapacité Permanente Partielle",
+    "ITT": "Incapacité Temporaire de Travail",
+    "FGA": "Fonds de Garantie Automobile — prend en charge les victimes de véhicules non assurés"
+  },
+  "tarification_indicative": {
+    "note": "Tarifs indicatifs en zone CIMA — à ajuster selon le barème agréé de la compagnie et les données ORASS",
+    "auto_rc_seule": {
+      "vehicule_particulier_cylindree_inf_1600cc": {
+        "prime_min_fcfa": 75000,
+        "prime_moy_fcfa": 120000
+      },
+      "vehicule_particulier_cylindree_sup_1600cc": {
+        "prime_min_fcfa": 90000,
+        "prime_moy_fcfa": 160000
+      },
+      "vehicule_utilitaire_ptac_inf_3500kg": {
+        "prime_min_fcfa": 120000,
+        "prime_moy_fcfa": 200000
+      },
+      "taxi": {
+        "prime_min_fcfa": 150000,
+        "prime_moy_fcfa": 280000
+      },
+      "bus_transport_commun": {
+        "prime_min_fcfa": 250000,
+        "prime_moy_fcfa": 500000
+      }
+    },
+    "auto_tous_risques": {
+      "majoration_dta": "50% à 100% de la prime RC selon valeur véhicule",
+      "franchise_habituelle_fcfa": 50000
+    },
+    "mrh_habitation": {
+      "taux_pour_mille_valeur": 3.5,
+      "prime_min_fcfa": 45000,
+      "exemple": "Appartement 50M FCFA → prime ≈ 175 000 FCFA/an"
+    },
+    "vie_temporaire_deces": {
+      "taux_pour_mille_capital": {
+        "age_20_ans": 2.5,
+        "age_30_ans": 3.0,
+        "age_40_ans": 5.0,
+        "age_50_ans": 9.0
+      },
+      "exemple": "Capital 5M FCFA, 35 ans → prime ≈ 15 000 à 20 000 FCFA/an"
+    }
+  }
+}

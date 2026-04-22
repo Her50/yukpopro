@@ -1,0 +1,61 @@
+# ─── YukpoAssurance — Docker Compose LOCAL (dev / tests) ─────────────────────
+# Lance uniquement PostgreSQL + Redis en local.
+# Le backend Python tourne directement sur la machine (uvicorn, pas Docker).
+#
+# Usage :
+#   docker compose -f docker-compose.local.yml up -d       → démarrer DB + Redis
+#   docker compose -f docker-compose.local.yml down -v     → tout arrêter + supprimer volumes
+#   docker compose -f docker-compose.local.yml logs -f db  → logs PostgreSQL
+#
+# Après démarrage :
+#   cd yukpo_assurance
+#   alembic upgrade head     # créer les tables
+#   uvicorn api.main:app --reload --port 8000
+#
+# Connexion :
+#   DATABASE_URL = postgresql+asyncpg://yukpo:yukpo_secret_2025@localhost:5432/yukpo_assurance
+#   REDIS_URL    = redis://localhost:6379/0
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── PostgreSQL 15 ────────────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: yukpo_postgres_local
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: yukpo_assurance
+      POSTGRES_USER: yukpo
+      POSTGRES_PASSWORD: yukpo_secret_2025
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yukpo -d yukpo_assurance"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Redis 7 ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: yukpo_redis_local
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_local_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_local_data:
+  redis_local_data:

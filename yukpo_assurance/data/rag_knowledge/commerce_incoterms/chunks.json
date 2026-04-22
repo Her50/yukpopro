@@ -1,0 +1,975 @@
+{
+  "doc_id": "commerce_incoterms",
+  "metadata": {
+    "doc_id": "commerce_incoterms",
+    "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+    "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "commercial",
+    "metier_tags": [
+      "commercial",
+      "DAF",
+      "juriste",
+      "assureur"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+    "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+    "indexe_le": "2026-04-17T03:11:03.671280"
+  },
+  "nb_chars": 28979,
+  "nb_chunks": 38,
+  "chunks": [
+    {
+      "texte": "Commerce international — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nCet article est une\n\nébauche\n\nconcernant l’\n\néconomie\n\n.\n\nVous pouvez partager vos connaissances en l’améliorant (\n\ncomment ?\n\n) selon les recommandations des\n\nprojets correspondants\n\n.\n\nConsultez la liste des\n\ntâches à accomplir\n\nen\n\npage de discussion\n\n.\n\nLa poupe du\n\nporte-conteneurs\n\ngéant\n\nColombo Express\n\n.\n\nLe\n\ncommerce international\n\nest l'échange de biens, de services entre pays. Ce type de commerce existe depuis des siècles (cf.\n\nroute de la soie\n\n), mais il connaît un nouvel essor du fait de la\n\nmondialisation économique\n\n.\n\nLa\n\nthéorie du commerce international\n\nest la branche de l'économie qui étudie et modélise le commerce international.\n\nPar ailleurs, il existe un « droit des opérations de commerce international », formalisé notamment par les\n\nincoterms",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 0,
+        "chunk_total": 38,
+        "nb_chars": 880
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nCommerce international — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nCet article est une\n\nébauche\n\nconcernant l’\n\néconomie\n\n.\n\nVous pouvez partager vos connaissances en l’améliorant (\n\ncomment ?\n\n) selon les recommandations des\n\nprojets correspondants\n\n.\n\nConsultez la liste des\n\ntâches à accomplir\n\nen\n\npage de discussion\n\n.\n\nLa poupe du\n\nporte-conteneurs\n\ngéant\n\nColombo Express\n\n.\n\nLe\n\ncommerce international\n\nest l'échange de biens, de services entre pays. Ce type de commerce existe depuis des siècles (cf.\n\nroute de la soie\n\n), mais il connaît un nouvel essor du fait de la\n\nmondialisation économique\n\n.\n\nLa\n\nthéorie du commerce international\n\nest la branche de l'économie qui étudie et modélise le commerce international.\n\nPar ailleurs, il existe un « droit des opérations de commerce international », formalisé notamment par les\n\nincoterms"
+    },
+    {
+      "texte": "de la Chambre de commerce internationale.\n\nSelon la\n\nBanque mondiale\n\n, en 2019, le volume mondial total d'\n\nexportations\n\nde biens et de services était de $24 795 milliards de\n\ndollars\n\n[\n\n]\net le volume mondial total d'\nimportations\nde biens et de services était de $24 312 milliards de dollars\n[\n\n]\n.\nÉvolution du commerce international\n[\nmodifier\n|\nmodifier le code\n]\nÉvolution du commerce international depuis 1970.\nSource : Banque Mondiale.\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 1,
+        "chunk_total": 38,
+        "nb_chars": 448
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nde la Chambre de commerce internationale.\n\nSelon la\n\nBanque mondiale\n\n, en 2019, le volume mondial total d'\n\nexportations\n\nde biens et de services était de $24 795 milliards de\n\ndollars\n\n[\n\n]\net le volume mondial total d'\nimportations\nde biens et de services était de $24 312 milliards de dollars\n[\n\n]\n.\nÉvolution du commerce international\n[\nmodifier\n|\nmodifier le code\n]\nÉvolution du commerce international depuis 1970.\nSource : Banque Mondiale.\n["
+    },
+    {
+      "texte": "]\nLe développement des moyens de transport de personnes et de marchandises a conduit le commerce mondial à croître plus vite que le\nproduit intérieur brut\n(PIB) dès le\nXIX\ne\nsiècle\n. Le développement de la flotte à vapeur, l'ouverture du\ncanal de Suez\n, la multiplication des réseaux de communication et des installations bancaires et commerciales ainsi que l'élargissement de l'espace colonial (où les\ncolonies\nsont devenues un territoire vers lequel les produits finis de la métropole sont vendus et les matières premières achetées) qui passe de 25 à 51 millions de kilomètres carrés ont fait que le volume du commerce International a triplé entre 1876 et 1913\n[\n\n]\n. Le volume des exportations rapporté au\nproduit intérieur brut réel\na atteint un sommet en 1913, avant de redescendre entre les deux guerres mondiales\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 2,
+        "chunk_total": 38,
+        "nb_chars": 821
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\nLe développement des moyens de transport de personnes et de marchandises a conduit le commerce mondial à croître plus vite que le\nproduit intérieur brut\n(PIB) dès le\nXIX\ne\nsiècle\n. Le développement de la flotte à vapeur, l'ouverture du\ncanal de Suez\n, la multiplication des réseaux de communication et des installations bancaires et commerciales ainsi que l'élargissement de l'espace colonial (où les\ncolonies\nsont devenues un territoire vers lequel les produits finis de la métropole sont vendus et les matières premières achetées) qui passe de 25 à 51 millions de kilomètres carrés ont fait que le volume du commerce International a triplé entre 1876 et 1913\n[\n\n]\n. Le volume des exportations rapporté au\nproduit intérieur brut réel\na atteint un sommet en 1913, avant de redescendre entre les deux guerres mondiales\n["
+    },
+    {
+      "texte": "]\n. Depuis 1950, le commerce mondial a recommencé à croître plus vite que le PIB : entre 1950 et 2010, le volume des exportations mondiales a été multiplié par 33 quand le PIB réel mondial augmentait d'un facteur 8,6\n[\n\n]\n\n. La\n\ncrise bancaire et financière de l'automne 2008\n\na conduit à une forte baisse des exportations en 2009, de plus de 12 % en volume, mais celle-ci a été annulée par un rebond d'ampleur équivalente l'année suivante.",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 3,
+        "chunk_total": 38,
+        "nb_chars": 440
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\n. Depuis 1950, le commerce mondial a recommencé à croître plus vite que le PIB : entre 1950 et 2010, le volume des exportations mondiales a été multiplié par 33 quand le PIB réel mondial augmentait d'un facteur 8,6\n[\n\n]\n\n. La\n\ncrise bancaire et financière de l'automne 2008\n\na conduit à une forte baisse des exportations en 2009, de plus de 12 % en volume, mais celle-ci a été annulée par un rebond d'ampleur équivalente l'année suivante."
+    },
+    {
+      "texte": "Cette configuration a été profondément modifiée par un changement structurel : une étude conjointe du Fonds monétaire international et de la Banque mondiale révèle que les changements structurels de l’économie chinoise expliquent en grande partie le ralentissement du commerce international : le commerce a progressé de guère plus de 3 % en 2012 et 2013 contre une moyenne constatée de 7,1 % entre 1987 et 2007, avant la crise ; pour la première fois en plus de quarante ans, le commerce a progressé plus lentement que l'économie mondiale elle-même",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 4,
+        "chunk_total": 38,
+        "nb_chars": 548
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nCette configuration a été profondément modifiée par un changement structurel : une étude conjointe du Fonds monétaire international et de la Banque mondiale révèle que les changements structurels de l’économie chinoise expliquent en grande partie le ralentissement du commerce international : le commerce a progressé de guère plus de 3 % en 2012 et 2013 contre une moyenne constatée de 7,1 % entre 1987 et 2007, avant la crise ; pour la première fois en plus de quarante ans, le commerce a progressé plus lentement que l'économie mondiale elle-même"
+    },
+    {
+      "texte": "L'étude montre que la modification de la relation entre le commerce et l'évolution du PIB mondial est due essentiellement au changement des chaînes d'approvisionnement commerciales des deux principales économies du monde, les États-Unis et la Chine : dans les années 1990 et 2000, la Chine importait massivement des composants, principalement des États-Unis, pour les assembler et les réexporter\n\nLa part importée des exportations chinoises est montée jusqu'à 60 % au milieu des années 1990, mais elle s'est effondrée à 35 % en 2013, les entreprises chinoises utilisant maintenant des composants fabriqués sur place\n\nLa croissance des échanges commerciaux internationaux devrait donc ralentir, à moins que d'autres régions, telles que le reste de l'Asie, l'Afrique et l'Amérique du Sud, ne prennent le relais\n\n[\n\n]\n.\nSource : Banque Mondiale.\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 5,
+        "chunk_total": 38,
+        "nb_chars": 844
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nL'étude montre que la modification de la relation entre le commerce et l'évolution du PIB mondial est due essentiellement au changement des chaînes d'approvisionnement commerciales des deux principales économies du monde, les États-Unis et la Chine : dans les années 1990 et 2000, la Chine importait massivement des composants, principalement des États-Unis, pour les assembler et les réexporter\n\nLa part importée des exportations chinoises est montée jusqu'à 60 % au milieu des années 1990, mais elle s'est effondrée à 35 % en 2013, les entreprises chinoises utilisant maintenant des composants fabriqués sur place\n\nLa croissance des échanges commerciaux internationaux devrait donc ralentir, à moins que d'autres régions, telles que le reste de l'Asie, l'Afrique et l'Amérique du Sud, ne prennent le relais\n\n[\n\n]\n.\nSource : Banque Mondiale.\n["
+    },
+    {
+      "texte": "]\nLe volume total du commerce international (exports + imports de biens et de services) représentait 25% du\nPIB\nmondial en 1970. La part du commerce international a subi une forte croissance jusqu'en 2008 pour représenter 61% du\nPIB\nmondial\n[\n\n]\n. Cette part est en décrue depuis 2008 (52% en 2020), en corrélation avec le pic de production du pétrole conventionnel de 2008. La moitié du trafic maritime mondial est consacré aux énergies fossiles, dont 37% pour transport du seul pétrole, et la quasi-totalité du trafic maritime utilise le pétrole comme énergie.\nLa croissance rapide des échanges commerciaux est appelée\nmondialisation économique\n.\nPrincipaux acteurs du commerce international\n[\nmodifier\n|\nmodifier le code\n]\nLes principaux acteurs du commerce international en 2015 sont la\nChine\n, les\nÉtats-Unis\n, l'\nAllemagne\n, le\nJapon\net la\nFrance\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 6,
+        "chunk_total": 38,
+        "nb_chars": 854
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\nLe volume total du commerce international (exports + imports de biens et de services) représentait 25% du\nPIB\nmondial en 1970. La part du commerce international a subi une forte croissance jusqu'en 2008 pour représenter 61% du\nPIB\nmondial\n[\n\n]\n. Cette part est en décrue depuis 2008 (52% en 2020), en corrélation avec le pic de production du pétrole conventionnel de 2008. La moitié du trafic maritime mondial est consacré aux énergies fossiles, dont 37% pour transport du seul pétrole, et la quasi-totalité du trafic maritime utilise le pétrole comme énergie.\nLa croissance rapide des échanges commerciaux est appelée\nmondialisation économique\n.\nPrincipaux acteurs du commerce international\n[\nmodifier\n|\nmodifier le code\n]\nLes principaux acteurs du commerce international en 2015 sont la\nChine\n, les\nÉtats-Unis\n, l'\nAllemagne\n, le\nJapon\net la\nFrance\n["
+    },
+    {
+      "texte": "]\n. Les principales monnaies utilisées pour les transactions sont le\ndollar américain\net l'\neuro\n.\nLes dix principaux pays pour le commerce international en 2007.\nLe graphique qui aurait dû être présenté ici ne peut pas être affiché car il utilise l'ancienne extension Graph, désactivée pour des questions de sécurité. Des indications pour créer un nouveau graphique avec la nouvelle extension Chart sont disponibles\nici\n.\nSource :\nLe Journal de Montréal\n[\n\n]\n\n.\n\nThéorie du commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nThéorie du commerce international\n\n.\n\nAccords commerciaux régionaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nClassification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes accords commerciaux régionaux sont de différents types, reflétant chacun des degrés d’intégration économiques distincts.\n\nBéla Balassa\n\n, dans\n\nThe theory of economic integration",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 7,
+        "chunk_total": 38,
+        "nb_chars": 897
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\n. Les principales monnaies utilisées pour les transactions sont le\ndollar américain\net l'\neuro\n.\nLes dix principaux pays pour le commerce international en 2007.\nLe graphique qui aurait dû être présenté ici ne peut pas être affiché car il utilise l'ancienne extension Graph, désactivée pour des questions de sécurité. Des indications pour créer un nouveau graphique avec la nouvelle extension Chart sont disponibles\nici\n.\nSource :\nLe Journal de Montréal\n[\n\n]\n\n.\n\nThéorie du commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nThéorie du commerce international\n\n.\n\nAccords commerciaux régionaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nClassification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes accords commerciaux régionaux sont de différents types, reflétant chacun des degrés d’intégration économiques distincts.\n\nBéla Balassa\n\n, dans\n\nThe theory of economic integration"
+    },
+    {
+      "texte": ", a proposé en 1961 une typologie en six grandes catégories :\n\nla « zone d’échange préférentielle » qui lève les obstacles au commerce interrégional pour certains produits ;\n\nla « zone de libre-échange » qui est marquée par une suppression des obstacles tarifaires, comme l'\n\nALENA\n\ndepuis 1994 ;\n\nl'« union douanière » qui combine une libre circulation des marchandises et l’adoption d’un tarif extérieur commun, c’est-à-dire des taxes douanières identiques à chaque pays membre vis-à-vis des pays tiers ;\n\nle « marché commun » correspond à la libre circulation des marchandises, des capitaux et des personnes ;\n\nl'« union économique et monétaire » ajoute l'instauration d'une monnaie unique ;\n\nl'« union politique » correspond à l'étape ultime et intègre une politique étrangère et de défense commune, dans un cadre qui peut rester fédéral : l’\n\nAllemagne\n\ndu\n\nXIX\n\ne",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 8,
+        "chunk_total": 38,
+        "nb_chars": 869
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n, a proposé en 1961 une typologie en six grandes catégories :\n\nla « zone d’échange préférentielle » qui lève les obstacles au commerce interrégional pour certains produits ;\n\nla « zone de libre-échange » qui est marquée par une suppression des obstacles tarifaires, comme l'\n\nALENA\n\ndepuis 1994 ;\n\nl'« union douanière » qui combine une libre circulation des marchandises et l’adoption d’un tarif extérieur commun, c’est-à-dire des taxes douanières identiques à chaque pays membre vis-à-vis des pays tiers ;\n\nle « marché commun » correspond à la libre circulation des marchandises, des capitaux et des personnes ;\n\nl'« union économique et monétaire » ajoute l'instauration d'une monnaie unique ;\n\nl'« union politique » correspond à l'étape ultime et intègre une politique étrangère et de défense commune, dans un cadre qui peut rester fédéral : l’\n\nAllemagne\n\ndu\n\nXIX\n\ne"
+    },
+    {
+      "texte": "siècle a atteint ce stade en 1870, soit 46 ans après la création d’une union douanière entre différents États allemands, le\n\nZollverein\n\n.\n\nImpacts\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nDepuis les années 1990 le commerce intrarégional a progressé au sein de l’\n\nALENA\n\n, passant de 42 à 54 % des exportations totales des pays membres, au sein du\n\nMercosur\n\nce chiffre est passé de 9 à 20 % sur la même période, tandis qu’en Europe la part des échanges intracommunautaires n’a guère progressé en dépit d’une intégration croissante, restant toutefois au niveau élevé de 74 % en 2006\n\n[\n\n]\n\n.\n\nDes impacts difficiles à cerner\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAvant l’entrée en vigueur de l’\n\nALENA\n\nen 1994,\n\nPaul Krugman\n\n(\n\nLa mondialisation n’est pas coupable",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 9,
+        "chunk_total": 38,
+        "nb_chars": 764
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nsiècle a atteint ce stade en 1870, soit 46 ans après la création d’une union douanière entre différents États allemands, le\n\nZollverein\n\n.\n\nImpacts\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nDepuis les années 1990 le commerce intrarégional a progressé au sein de l’\n\nALENA\n\n, passant de 42 à 54 % des exportations totales des pays membres, au sein du\n\nMercosur\n\nce chiffre est passé de 9 à 20 % sur la même période, tandis qu’en Europe la part des échanges intracommunautaires n’a guère progressé en dépit d’une intégration croissante, restant toutefois au niveau élevé de 74 % en 2006\n\n[\n\n]\n\n.\n\nDes impacts difficiles à cerner\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nAvant l’entrée en vigueur de l’\n\nALENA\n\nen 1994,\n\nPaul Krugman\n\n(\n\nLa mondialisation n’est pas coupable"
+    },
+    {
+      "texte": ") s’interrogeait sur les conséquences de cet accord alors que certains hommes politiques américains prévoyaient la disparition de centaines de milliers d’emplois. Selon lui, la portée de tels accords est limitée. En effet les droits de douane internationaux sont aujourd’hui de l’ordre de 3 ou 4 %, ce qui signifie un faible impact de leur disparition. Dans le cas précis de l’\n\nALENA\n\n, l’intégration du\n\nMexique\n\ndans une zone de\n\nlibre-échange\n\navec les\n\nÉtats-Unis\n\net le\n\nCanada\n\naura surtout comme effet de redonner confiance aux investisseurs financiers en ce pays en proie à des difficultés économiques : une conséquence des comportements irrationnels des acteurs financiers n’ayant que peu à voir avec le commerce international.\n\nEn 1950,\n\nJacob Viner\n\n(\n\nThe Customs Union Issue\n\n) a tenté de prévoir les conséquences de la constitution d’\n\nunions économiques",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 10,
+        "chunk_total": 38,
+        "nb_chars": 869
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n) s’interrogeait sur les conséquences de cet accord alors que certains hommes politiques américains prévoyaient la disparition de centaines de milliers d’emplois. Selon lui, la portée de tels accords est limitée. En effet les droits de douane internationaux sont aujourd’hui de l’ordre de 3 ou 4 %, ce qui signifie un faible impact de leur disparition. Dans le cas précis de l’\n\nALENA\n\n, l’intégration du\n\nMexique\n\ndans une zone de\n\nlibre-échange\n\navec les\n\nÉtats-Unis\n\net le\n\nCanada\n\naura surtout comme effet de redonner confiance aux investisseurs financiers en ce pays en proie à des difficultés économiques : une conséquence des comportements irrationnels des acteurs financiers n’ayant que peu à voir avec le commerce international.\n\nEn 1950,\n\nJacob Viner\n\n(\n\nThe Customs Union Issue\n\n) a tenté de prévoir les conséquences de la constitution d’\n\nunions économiques"
+    },
+    {
+      "texte": "régionales. Elles ont selon lui un double impact sur le commerce international :\n\nElles sont d’abord destructrices de certains flux commerciaux, vu que les partenaires d’une même union économique tendent à réduire leurs importations en provenance des pays tiers. Ce fut par exemple le cas de la\n\nGrande-Bretagne\n\nvis-à-vis du\n\nCommonwealth\n\nà la suite de son entrée dans l’\n\nUnion européenne\n\n. La préférence communautaire (une des clauses de la PAC par exemple) supplantant dès lors la « préférence impériale ». Plus récemment l’entrée des pays d’Europe de l’Est dans l’\n\nUnion européenne\n\nrisque de nuire aux importations textiles en provenance du\n\nMaghreb\n\n.",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 11,
+        "chunk_total": 38,
+        "nb_chars": 661
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nrégionales. Elles ont selon lui un double impact sur le commerce international :\n\nElles sont d’abord destructrices de certains flux commerciaux, vu que les partenaires d’une même union économique tendent à réduire leurs importations en provenance des pays tiers. Ce fut par exemple le cas de la\n\nGrande-Bretagne\n\nvis-à-vis du\n\nCommonwealth\n\nà la suite de son entrée dans l’\n\nUnion européenne\n\n. La préférence communautaire (une des clauses de la PAC par exemple) supplantant dès lors la « préférence impériale ». Plus récemment l’entrée des pays d’Europe de l’Est dans l’\n\nUnion européenne\n\nrisque de nuire aux importations textiles en provenance du\n\nMaghreb\n\n."
+    },
+    {
+      "texte": "Elles sont d’un autre côté créatrices de flux. Elles permettent une collaboration, et donc une spécialisation accrue des différents pays membres qui accroît le commerce intra-zone. Elles permettent une meilleure entente et une connaissance accrue des partenaires commerciaux qui apporte confiance et facilité dans les échanges (il est par exemple plus aisé d'organiser un échange avec les Allemands qu'avec les Chinois). Cela permet donc aux pays d'accroître leur visibilité sur la scène internationale. Enfin, le développement de certains secteurs protégés peut finalement se révéler profitable pour certaines économies étrangères. La politique agricole commune, bien qu’ayant freiné les importations agricoles américaines, a toutefois accru les commandes à ces derniers de matériel agricole.",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 12,
+        "chunk_total": 38,
+        "nb_chars": 793
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nElles sont d’un autre côté créatrices de flux. Elles permettent une collaboration, et donc une spécialisation accrue des différents pays membres qui accroît le commerce intra-zone. Elles permettent une meilleure entente et une connaissance accrue des partenaires commerciaux qui apporte confiance et facilité dans les échanges (il est par exemple plus aisé d'organiser un échange avec les Allemands qu'avec les Chinois). Cela permet donc aux pays d'accroître leur visibilité sur la scène internationale. Enfin, le développement de certains secteurs protégés peut finalement se révéler profitable pour certaines économies étrangères. La politique agricole commune, bien qu’ayant freiné les importations agricoles américaines, a toutefois accru les commandes à ces derniers de matériel agricole."
+    },
+    {
+      "texte": "Finalement il est difficile de conclure quant au côté profitable ou non de la constitution d’espaces économiques régionaux pour la croissance des volumes d’échanges internationaux.\n\nDangers vis-à-vis du multilatéralisme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa constitution d’espaces économiques régionaux réduit le nombre de négociateurs lors des réunions de l’OMC (l’\n\nUnion européenne\n\nest par exemple représentée en tant que membre de l’organisation), ce qui peut faciliter les accords. En permettant le développement des économies dans un cadre protégé, le régionalisme peut être une étape préalable au multilatéralisme, permettant à certains pays de prendre de l’assurance. C’est ainsi que\n\nMike Moore",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 13,
+        "chunk_total": 38,
+        "nb_chars": 707
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nFinalement il est difficile de conclure quant au côté profitable ou non de la constitution d’espaces économiques régionaux pour la croissance des volumes d’échanges internationaux.\n\nDangers vis-à-vis du multilatéralisme\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa constitution d’espaces économiques régionaux réduit le nombre de négociateurs lors des réunions de l’OMC (l’\n\nUnion européenne\n\nest par exemple représentée en tant que membre de l’organisation), ce qui peut faciliter les accords. En permettant le développement des économies dans un cadre protégé, le régionalisme peut être une étape préalable au multilatéralisme, permettant à certains pays de prendre de l’assurance. C’est ainsi que\n\nMike Moore"
+    },
+    {
+      "texte": ", ancien président de l’OMC, déclarait que le régionalisme pouvait servir à compléter et à promouvoir le multilatéralisme, mais qu’il ne devait en aucun cas le remplacer. Mais le risque est grand selon lui de voir les économies se refermer sur des zones restreintes de commerce privilégié, encourageant en retour les autres économies à faire de même, spirale négative qui pourrait mener à une contraction des échanges mondiaux et du PIB mondial.\n\nL’autre danger est une focalisation des ensembles économiques régionaux sur leur compétitivité face aux autres grandes économies. Le vocable de «\n\nguerre économique\n\n» ou la recherche systématique de la « compétitivité » sont les symptômes d’un retour des dogmes\n\nmercantilistes\n\n, de ce que\n\nPaul Krugman",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 14,
+        "chunk_total": 38,
+        "nb_chars": 752
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n, ancien président de l’OMC, déclarait que le régionalisme pouvait servir à compléter et à promouvoir le multilatéralisme, mais qu’il ne devait en aucun cas le remplacer. Mais le risque est grand selon lui de voir les économies se refermer sur des zones restreintes de commerce privilégié, encourageant en retour les autres économies à faire de même, spirale négative qui pourrait mener à une contraction des échanges mondiaux et du PIB mondial.\n\nL’autre danger est une focalisation des ensembles économiques régionaux sur leur compétitivité face aux autres grandes économies. Le vocable de «\n\nguerre économique\n\n» ou la recherche systématique de la « compétitivité » sont les symptômes d’un retour des dogmes\n\nmercantilistes\n\n, de ce que\n\nPaul Krugman"
+    },
+    {
+      "texte": "appelle la « théorie pop du commerce international ». Cette mentalité qui associe le commerce international à une compétition où il y aurait des gagnants et des perdants se manifeste régulièrement dans les discours politiques liés à la constitution de zone de coopération économique : « il faut faire l’Europe pour faire le poids ! » disent certains. À long terme, la diffusion de ce genre d’idées pourrait nuire au libre-échange et donc au commerce international.\n\nDifférents types de commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe commerce international comprend toutes les opérations sur le marché mondial. Il est l'organe regroupant les divers pays du monde engagés dans la production des biens destinés aux marchés étrangers.\n\nLe commerce mondial comprend :",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 15,
+        "chunk_total": 38,
+        "nb_chars": 779
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nappelle la « théorie pop du commerce international ». Cette mentalité qui associe le commerce international à une compétition où il y aurait des gagnants et des perdants se manifeste régulièrement dans les discours politiques liés à la constitution de zone de coopération économique : « il faut faire l’Europe pour faire le poids ! » disent certains. À long terme, la diffusion de ce genre d’idées pourrait nuire au libre-échange et donc au commerce international.\n\nDifférents types de commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLe commerce international comprend toutes les opérations sur le marché mondial. Il est l'organe regroupant les divers pays du monde engagés dans la production des biens destinés aux marchés étrangers.\n\nLe commerce mondial comprend :"
+    },
+    {
+      "texte": "le commerce de concentration : qui consiste à assembler les petites productions locales ou régionales dans des comptoirs créés à cette fin, en quantités convenables pour être manipulés sur le marche mondial ;\n\nLe commerce de distribution : consiste à se procurer les marchandises en très grandes quantités sur le marché mondial et à les emmagasiner pour les distribuer aux consommateurs sur le plan mondial.\n\nLe commerce extérieur s'effectue entre les habitants de deux ou plusieurs pays. Il comprend les importations, achats à l'étranger et les exportations, ventes à l'étranger des biens produits à l'intérieur d'un pays.\n\nLe commerce de transit n'est rien d'autre que la faculté accordé à un produit originaire du pays X et destiné à la consommation dans le pays Y, de traverser le pays Z sans acquitter les droits de douane.",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 16,
+        "chunk_total": 38,
+        "nb_chars": 828
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nle commerce de concentration : qui consiste à assembler les petites productions locales ou régionales dans des comptoirs créés à cette fin, en quantités convenables pour être manipulés sur le marche mondial ;\n\nLe commerce de distribution : consiste à se procurer les marchandises en très grandes quantités sur le marché mondial et à les emmagasiner pour les distribuer aux consommateurs sur le plan mondial.\n\nLe commerce extérieur s'effectue entre les habitants de deux ou plusieurs pays. Il comprend les importations, achats à l'étranger et les exportations, ventes à l'étranger des biens produits à l'intérieur d'un pays.\n\nLe commerce de transit n'est rien d'autre que la faculté accordé à un produit originaire du pays X et destiné à la consommation dans le pays Y, de traverser le pays Z sans acquitter les droits de douane."
+    },
+    {
+      "texte": "On distingue le commerce général qui est l'ensemble de commerce d'importation, d'exportation et de transit, du commerce spécial qui ne comprend que le commerce d'importation et le commerce d'exportation. Il ne comprend pas non plus le commerce en relation avec des zones franches et des entrepôts douaniers.\n\nDe nouvelles formes de commerce international se développent, comme le\n\ncommerce de compensation\n\n[\n\n]\ndonnant lieu à des contrats non standards dans le cadre de grands marchés publics (définition légale dans l'article XVI de l'Annexe 4b\n[\n\n]\n\nde l'\n\naccord de Marrakech\n\nen 1994) :\n\ncompensations commerciales :\n\ntroc\n\n: échange de marchandises sans transfert financier ni mention de la valeur de la transaction ;\n\ncontre-achat : l'exportateur achète ou fait racheter des produits de l'importateur ;",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 17,
+        "chunk_total": 38,
+        "nb_chars": 809
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nOn distingue le commerce général qui est l'ensemble de commerce d'importation, d'exportation et de transit, du commerce spécial qui ne comprend que le commerce d'importation et le commerce d'exportation. Il ne comprend pas non plus le commerce en relation avec des zones franches et des entrepôts douaniers.\n\nDe nouvelles formes de commerce international se développent, comme le\n\ncommerce de compensation\n\n[\n\n]\ndonnant lieu à des contrats non standards dans le cadre de grands marchés publics (définition légale dans l'article XVI de l'Annexe 4b\n[\n\n]\n\nde l'\n\naccord de Marrakech\n\nen 1994) :\n\ncompensations commerciales :\n\ntroc\n\n: échange de marchandises sans transfert financier ni mention de la valeur de la transaction ;\n\ncontre-achat : l'exportateur achète ou fait racheter des produits de l'importateur ;"
+    },
+    {
+      "texte": "compensation au sens strict : échange de marchandises avec transfert financier et mention de la valeur de la transaction.\n\ncompensations industrielles\n\n:\n\nachat en retour (buy-back) : achat par l'exportateur de produits fabriqués par l'importateur et directement liés techniquement aux biens exportés ;\n\naccords d'offset\n\n: l'exportateur associe l'importateur à la fabrication du produit vendu (coproduction,\n\nsous-traitance\n\nou\n\ntransfert de technologie\n\n) ;\n\ncompensations financières :\n\nclearing\n\n: deux États, par\n\naccord bilatéral\n\n, s'achètent leurs produits avec transaction à terme, alors que leur\n\nBanque centrale\n\npaye les fournisseurs nationaux ;\n\nswitch : si la balance clearing est déséquilibrée, la créance est transférée à un pays tiers contre un paiement en devises (switch financier) ou en marchandises (switch commercial) ;\n\npartenariat public-privé\n\n;\n\nswap\n\ndont les",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 18,
+        "chunk_total": 38,
+        "nb_chars": 886
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\ncompensation au sens strict : échange de marchandises avec transfert financier et mention de la valeur de la transaction.\n\ncompensations industrielles\n\n:\n\nachat en retour (buy-back) : achat par l'exportateur de produits fabriqués par l'importateur et directement liés techniquement aux biens exportés ;\n\naccords d'offset\n\n: l'exportateur associe l'importateur à la fabrication du produit vendu (coproduction,\n\nsous-traitance\n\nou\n\ntransfert de technologie\n\n) ;\n\ncompensations financières :\n\nclearing\n\n: deux États, par\n\naccord bilatéral\n\n, s'achètent leurs produits avec transaction à terme, alors que leur\n\nBanque centrale\n\npaye les fournisseurs nationaux ;\n\nswitch : si la balance clearing est déséquilibrée, la créance est transférée à un pays tiers contre un paiement en devises (switch financier) ou en marchandises (switch commercial) ;\n\npartenariat public-privé\n\n;\n\nswap\n\ndont les"
+    },
+    {
+      "texte": "debt-for-nature swap\n\n(en)\n\n.\n\nÉtudes économiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPour favoriser les exportations, de nombreux organismes gouvernementaux publient sur internet des études de marché par secteur et par pays étranger. Ces études sont plus ou moins accessibles et souvent gratuites (des profils peuvent être demandés).\n\nListe d'organismes gouvernementaux par pays :\n\nÉtats-Unis :\n\nl'\n\nUnited States Commercial Service\n\n(en)\n\n(USCS), dépendant du\n\ndépartement du Commerce des États-Unis\n\n, a rédigé quelques milliers de ces études ;\n\nle\n\ndépartement de l'Agriculture des États-Unis\n\npublie des études sur les secteurs agricole et agroalimentaire.\n\nCanada :\n\nExportation et développement Canada\n\n(EDC) ;\n\nAgriculture et Agroalimentaire Canada\n\npublie des études internationales en français sur son secteur.\n\nFrance :\n\nUbifrance",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 19,
+        "chunk_total": 38,
+        "nb_chars": 843
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\ndebt-for-nature swap\n\n(en)\n\n.\n\nÉtudes économiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPour favoriser les exportations, de nombreux organismes gouvernementaux publient sur internet des études de marché par secteur et par pays étranger. Ces études sont plus ou moins accessibles et souvent gratuites (des profils peuvent être demandés).\n\nListe d'organismes gouvernementaux par pays :\n\nÉtats-Unis :\n\nl'\n\nUnited States Commercial Service\n\n(en)\n\n(USCS), dépendant du\n\ndépartement du Commerce des États-Unis\n\n, a rédigé quelques milliers de ces études ;\n\nle\n\ndépartement de l'Agriculture des États-Unis\n\npublie des études sur les secteurs agricole et agroalimentaire.\n\nCanada :\n\nExportation et développement Canada\n\n(EDC) ;\n\nAgriculture et Agroalimentaire Canada\n\npublie des études internationales en français sur son secteur.\n\nFrance :\n\nUbifrance"
+    },
+    {
+      "texte": "est l’organisme coordinateur de l’action gouvernemental pour l'exportation. Il publie des études payantes sur son\n\nsite\n\n;\n\nl’\n\nAgence française pour les investissements internationaux\n\n(AFII) publie des études sur la France pour les entreprises étrangères désirant investir en France.\n\nles deux opérateurs ont fusionné le\n\ner\njanvier 2015\npour devenir\nBusiness France\n.\nRoyaume-Uni : l'\nUK Trade & Investment\nest chargé à la fois de la promotion des exportations et de l'implantation au Royaume-Uni ;\nHong Kong :\nHong Kong Trade Development Council\n(HKTDC) ;\nJapon :\nJETRO\n;\nAustralie :\nAustrade\n(en)\n.\nSites internet diffusant les études de plusieurs organismes :\nGlobaltrade.net\n, issu d'un\nPrivate Public Partnership\nentre l'USCS et la\nFédération des associations du commerce international\n(FITA)\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 20,
+        "chunk_total": 38,
+        "nb_chars": 802
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nest l’organisme coordinateur de l’action gouvernemental pour l'exportation. Il publie des études payantes sur son\n\nsite\n\n;\n\nl’\n\nAgence française pour les investissements internationaux\n\n(AFII) publie des études sur la France pour les entreprises étrangères désirant investir en France.\n\nles deux opérateurs ont fusionné le\n\ner\njanvier 2015\npour devenir\nBusiness France\n.\nRoyaume-Uni : l'\nUK Trade & Investment\nest chargé à la fois de la promotion des exportations et de l'implantation au Royaume-Uni ;\nHong Kong :\nHong Kong Trade Development Council\n(HKTDC) ;\nJapon :\nJETRO\n;\nAustralie :\nAustrade\n(en)\n.\nSites internet diffusant les études de plusieurs organismes :\nGlobaltrade.net\n, issu d'un\nPrivate Public Partnership\nentre l'USCS et la\nFédération des associations du commerce international\n(FITA)\n["
+    },
+    {
+      "texte": "]\n, publie librement sur son site des études de l'USCS, l'USDA, Agriculture et Agroalimentaire Canada, UK Trade & Investment, HKTDC\n[\n\n]\n\net d'organismes non gouvernementaux. Elles sont classées suivant deux critères de tri : par pays étudié et par industrie ou sujet.\n\nLes agences du commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes agences de commerce international gouvernementales sont aussi appelées agences du commerce extérieur.\n\nEn anglais on les trouve sous la dénomination, Foreign Trade Agency, ou International Trade Agency.",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 21,
+        "chunk_total": 38,
+        "nb_chars": 552
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\n, publie librement sur son site des études de l'USCS, l'USDA, Agriculture et Agroalimentaire Canada, UK Trade & Investment, HKTDC\n[\n\n]\n\net d'organismes non gouvernementaux. Elles sont classées suivant deux critères de tri : par pays étudié et par industrie ou sujet.\n\nLes agences du commerce international\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes agences de commerce international gouvernementales sont aussi appelées agences du commerce extérieur.\n\nEn anglais on les trouve sous la dénomination, Foreign Trade Agency, ou International Trade Agency."
+    },
+    {
+      "texte": "Les agences gouvernementales aident leurs entreprises nationales à pénétrer de nouveaux marchés. Elles fournissent un soutien gratuit ou subventionné aux entreprises dans leur pays. Le mandat de l’agence est de développer principalement les exportations de leurs entreprises d’origine vers les marchés étrangers. En second lieu, elles développent les emplois soutenus par l’exportation dans le pays d’origine.\n\nLe règlement des échanges internationaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLorsque l'or (ou l'argent) était utilisé comme une\n\nmonnaie\n\npartout dans le monde (système de l'\n\nétalon-or\n\n,\n\nGold Standard\n\nen anglais), le règlement des échanges internationaux était facile. Les prix des échanges entre les pays sont déterminés en fonction de la quantité d'or contenue dans chaque pièce de monnaie\n\n[\n\n]\n\n. Avec le développement du commerce International qui est la conséquence de la",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 22,
+        "chunk_total": 38,
+        "nb_chars": 894
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nLes agences gouvernementales aident leurs entreprises nationales à pénétrer de nouveaux marchés. Elles fournissent un soutien gratuit ou subventionné aux entreprises dans leur pays. Le mandat de l’agence est de développer principalement les exportations de leurs entreprises d’origine vers les marchés étrangers. En second lieu, elles développent les emplois soutenus par l’exportation dans le pays d’origine.\n\nLe règlement des échanges internationaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLorsque l'or (ou l'argent) était utilisé comme une\n\nmonnaie\n\npartout dans le monde (système de l'\n\nétalon-or\n\n,\n\nGold Standard\n\nen anglais), le règlement des échanges internationaux était facile. Les prix des échanges entre les pays sont déterminés en fonction de la quantité d'or contenue dans chaque pièce de monnaie\n\n[\n\n]\n\n. Avec le développement du commerce International qui est la conséquence de la"
+    },
+    {
+      "texte": "croissance économique\n\n, le\n\nstock\n\nd'or est devenu insuffisant (le commerce international augmente beaucoup plus vite que le volume d'or) et son utilisation comme moyen de paiement international est devenue contraignante. Il faut donc trouver une monnaie de référence internationale destinée à jouer ce rôle. Depuis l'année 1800, environ, le\n\nsterling\n\nbritannique à largement concurrencé l'or dans les paiements internationaux. Cependant, en 1922, avec l'avènement du\n\nleadership\n\ninternational des États-Unis à la fin de la Guerre, les substituts de l'or sont désormais le sterling et le\n\ndollar\n\n. C'est le système de l'\n\nétalon de change or\n\n(\n\nGold Exchange Standard",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 23,
+        "chunk_total": 38,
+        "nb_chars": 672
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\ncroissance économique\n\n, le\n\nstock\n\nd'or est devenu insuffisant (le commerce international augmente beaucoup plus vite que le volume d'or) et son utilisation comme moyen de paiement international est devenue contraignante. Il faut donc trouver une monnaie de référence internationale destinée à jouer ce rôle. Depuis l'année 1800, environ, le\n\nsterling\n\nbritannique à largement concurrencé l'or dans les paiements internationaux. Cependant, en 1922, avec l'avènement du\n\nleadership\n\ninternational des États-Unis à la fin de la Guerre, les substituts de l'or sont désormais le sterling et le\n\ndollar\n\n. C'est le système de l'\n\nétalon de change or\n\n(\n\nGold Exchange Standard"
+    },
+    {
+      "texte": ", en anglais). Mais la confiance dans le sterling (avec le déclin britannique au niveau international depuis 1918) était tellement insuffisante que les détenteurs de la monnaie britannique voulaient la convertir rapidement en or. Pour parer au risque de la fuite de l'or et donc des capitaux, les\n\nautorités monétaires\n\nbritanniques ont augmenté les\n\ntaux d'intérêt\n\n, avec pour conséquence directe la baisse de leur croissance économique\n\n[\n\n]\n\n. Mais la\n\nstratégie\n\ninverse (baisse des taux) adoptée par la\n\nFed\n\n(\n\nbanque centrale\n\naméricaine), qui soutient, en quelque sorte les Britanniques en évitant l'émigration de leurs capitaux vers le\n\nmarché financier\n\ndes États-Unis, avait pour résultat l'octroi du\n\ncrédit\n\nbon marché (cf. l'\n\neffet de levier\n\n) et la\n\nspéculation\n\ndans les places financières américaines, ce qui a pour conséquence, lors de la\n\ncrise économique\n\nde 1929, la\n\nfaillite",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 24,
+        "chunk_total": 38,
+        "nb_chars": 900
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n, en anglais). Mais la confiance dans le sterling (avec le déclin britannique au niveau international depuis 1918) était tellement insuffisante que les détenteurs de la monnaie britannique voulaient la convertir rapidement en or. Pour parer au risque de la fuite de l'or et donc des capitaux, les\n\nautorités monétaires\n\nbritanniques ont augmenté les\n\ntaux d'intérêt\n\n, avec pour conséquence directe la baisse de leur croissance économique\n\n[\n\n]\n\n. Mais la\n\nstratégie\n\ninverse (baisse des taux) adoptée par la\n\nFed\n\n(\n\nbanque centrale\n\naméricaine), qui soutient, en quelque sorte les Britanniques en évitant l'émigration de leurs capitaux vers le\n\nmarché financier\n\ndes États-Unis, avait pour résultat l'octroi du\n\ncrédit\n\nbon marché (cf. l'\n\neffet de levier\n\n) et la\n\nspéculation\n\ndans les places financières américaines, ce qui a pour conséquence, lors de la\n\ncrise économique\n\nde 1929, la\n\nfaillite"
+    },
+    {
+      "texte": "de nombreux débiteurs et, par effet de contagion ou de domino, la\n\nbanqueroute\n\nde nombreuses\n\nbanques\n\n. Le recul des États-Unis et des autres pays de l'\n\nOCDE\n\ndurant la\n\nGrande dépression\n\na fait que chaque puissance occidentale se replie sur sa zone d'influence en exigeant que les paiements internationaux, à l'intérieur de la zone, soient effectués dans la monnaie de la puissance dominante. Aucune monnaie internationale n'est donc dominante au niveau international et, toute chose étant égale par ailleurs, des\n\nzones monétaires\n\nsont créées (\n\nzone franc\n\n,\n\nzone sterling\n\n…), et ce malgré la tentative du président\n\nFranklin D. Roosevelt\n\n, en 1934, de redonner confiance au dollar en le dévaluant et en fixant sa\n\nparité\n\navec l'or à 35 dollars l'\n\nonce\n\n. Grâce au nouveau leadership des États-Unis à la fin de la Seconde Guerre mondiale, le retour à l'étalon-or et la création du\n\nFMI",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 25,
+        "chunk_total": 38,
+        "nb_chars": 898
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nde nombreux débiteurs et, par effet de contagion ou de domino, la\n\nbanqueroute\n\nde nombreuses\n\nbanques\n\n. Le recul des États-Unis et des autres pays de l'\n\nOCDE\n\ndurant la\n\nGrande dépression\n\na fait que chaque puissance occidentale se replie sur sa zone d'influence en exigeant que les paiements internationaux, à l'intérieur de la zone, soient effectués dans la monnaie de la puissance dominante. Aucune monnaie internationale n'est donc dominante au niveau international et, toute chose étant égale par ailleurs, des\n\nzones monétaires\n\nsont créées (\n\nzone franc\n\n,\n\nzone sterling\n\n…), et ce malgré la tentative du président\n\nFranklin D. Roosevelt\n\n, en 1934, de redonner confiance au dollar en le dévaluant et en fixant sa\n\nparité\n\navec l'or à 35 dollars l'\n\nonce\n\n. Grâce au nouveau leadership des États-Unis à la fin de la Seconde Guerre mondiale, le retour à l'étalon-or et la création du\n\nFMI"
+    },
+    {
+      "texte": "(fonds monétaire international) ont été décidé lors des accords de\n\nBretton Woods\n\nen 1946. Désormais, le Fonds pourrait faire des crédits grâce aux\n\ndépôts\n\nde ses membres excédentaires. Mais ces dépôts étaient tellement insuffisants que les États-Unis ont dû utiliser le système de versement direct de dollars (cf.\n\nPlan Marshall\n\n) pour aider à l'effort de reconstruction des pays européens notamment. Ce nouveau système de l'étalon de change or (où le dollar domine à côté de l'or) a abouti à considérer que le dollar est devenu synonyme de l'or et, à côté du développement du commerce international, les États-Unis financent désormais leurs dépenses extérieures en dollars.\n\nCette\n\ndollarisation",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 26,
+        "chunk_total": 38,
+        "nb_chars": 700
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n(fonds monétaire international) ont été décidé lors des accords de\n\nBretton Woods\n\nen 1946. Désormais, le Fonds pourrait faire des crédits grâce aux\n\ndépôts\n\nde ses membres excédentaires. Mais ces dépôts étaient tellement insuffisants que les États-Unis ont dû utiliser le système de versement direct de dollars (cf.\n\nPlan Marshall\n\n) pour aider à l'effort de reconstruction des pays européens notamment. Ce nouveau système de l'étalon de change or (où le dollar domine à côté de l'or) a abouti à considérer que le dollar est devenu synonyme de l'or et, à côté du développement du commerce international, les États-Unis financent désormais leurs dépenses extérieures en dollars.\n\nCette\n\ndollarisation"
+    },
+    {
+      "texte": "du monde (prêts extérieurs, aide au développement accordée aux pays en développement et aux pays européens amis, financement des guerres américaines à l'extérieur des États-Unis en dollars) a fait que, en plus du développement économique qu'elle permet, la quantité de dollars émise par les États-Unis a très largement dépassée le stock d'or détenu par la Fed\n\n[\n\n]\n\n. De 1950 à 1978, la quantité de dollars émise à l'étranger a été évaluée à 210 milliards de dollars tandis que ses réserves en or sont l'équivalent de 22,8 milliards de dollars en 1950 et depuis cette époque, cette quantité ne fait que baisser du fait que de nombreux détenteurs de dollars peuvent demander à les échanger contre de l'or. Pour préserver leur stock d'or, les États-Unis, avec l'\n\nunanimité\n\ndes\n\npays riches",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 27,
+        "chunk_total": 38,
+        "nb_chars": 790
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\ndu monde (prêts extérieurs, aide au développement accordée aux pays en développement et aux pays européens amis, financement des guerres américaines à l'extérieur des États-Unis en dollars) a fait que, en plus du développement économique qu'elle permet, la quantité de dollars émise par les États-Unis a très largement dépassée le stock d'or détenu par la Fed\n\n[\n\n]\n\n. De 1950 à 1978, la quantité de dollars émise à l'étranger a été évaluée à 210 milliards de dollars tandis que ses réserves en or sont l'équivalent de 22,8 milliards de dollars en 1950 et depuis cette époque, cette quantité ne fait que baisser du fait que de nombreux détenteurs de dollars peuvent demander à les échanger contre de l'or. Pour préserver leur stock d'or, les États-Unis, avec l'\n\nunanimité\n\ndes\n\npays riches"
+    },
+    {
+      "texte": ", ont décidé que la parité dollar/or à 35 dollars l'once ne concerne que les banques centrales et les particuliers qui veulent échanger des dollars contre de l'or (ou inversement) peuvent recourir au\n\nmarché libre\n\n. Pour lutter contre l'\n\ninflation\n\net arrêter la spéculation sur le dollar en\n\nBourse\n\n, les États-Unis ont augmenté les taux d'intérêt. L'afflux des capitaux étrangers vers le marché financier américain, provocant la baisse de la\n\ncroissance\n\naméricaine par\n\neffet de massue\n\n, a été encouragé par la réévaluation du mark qui permet d'abaisser les exportations allemandes vers les États-Unis et donc la quantité de dollars en circulation à l'extérieur des États-Unis. Pour pallier la rareté du dollar et la dégradation du commerce international qui peut en résulter, le FMI a procédé à la\n\ndématérialisation\n\ndes paiements internationaux en créant une sorte de\n\nmonnaie scripturale",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 28,
+        "chunk_total": 38,
+        "nb_chars": 898
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n, ont décidé que la parité dollar/or à 35 dollars l'once ne concerne que les banques centrales et les particuliers qui veulent échanger des dollars contre de l'or (ou inversement) peuvent recourir au\n\nmarché libre\n\n. Pour lutter contre l'\n\ninflation\n\net arrêter la spéculation sur le dollar en\n\nBourse\n\n, les États-Unis ont augmenté les taux d'intérêt. L'afflux des capitaux étrangers vers le marché financier américain, provocant la baisse de la\n\ncroissance\n\naméricaine par\n\neffet de massue\n\n, a été encouragé par la réévaluation du mark qui permet d'abaisser les exportations allemandes vers les États-Unis et donc la quantité de dollars en circulation à l'extérieur des États-Unis. Pour pallier la rareté du dollar et la dégradation du commerce international qui peut en résulter, le FMI a procédé à la\n\ndématérialisation\n\ndes paiements internationaux en créant une sorte de\n\nmonnaie scripturale"
+    },
+    {
+      "texte": ", les\n\ndroits de tirage spéciaux\n\n[\n\n]\n\n.\n\nPour réduire aussi bien le\n\ndéficit commercial\n\ndes États-Unis devenu très élevé que l'\n\ninflation\n\nqui, toute chose étant égale par ailleurs, le rend encore insoutenable en rendant les produits américains exportés plus chers et donc moins demandés que ceux de la\n\nconcurrence\n\nsur les marchés étrangers et ceux importés bon marché et qui se vendent mieux que les produits nationaux sur le territoire américain (cf. Parabole de la nuit de\n\nDavid Hume\n\n), le président\n\nNixon\n\na décidé en Août 1971, parmi d'autres mesures, de mettre fin à la convertibilité (l'échange) dollar/or et de majorer les importations américaines d'une\n\ntaxe\n\nde 10 %. La dévaluation du dollar en décembre de la même année a fait passer l'once d'or (31,10 g) de 35 à 38 dollars. Craignant une nouvelle dévaluation du dollar, les\n\nfirmes\n\nmultinationales",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 29,
+        "chunk_total": 38,
+        "nb_chars": 871
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n, les\n\ndroits de tirage spéciaux\n\n[\n\n]\n\n.\n\nPour réduire aussi bien le\n\ndéficit commercial\n\ndes États-Unis devenu très élevé que l'\n\ninflation\n\nqui, toute chose étant égale par ailleurs, le rend encore insoutenable en rendant les produits américains exportés plus chers et donc moins demandés que ceux de la\n\nconcurrence\n\nsur les marchés étrangers et ceux importés bon marché et qui se vendent mieux que les produits nationaux sur le territoire américain (cf. Parabole de la nuit de\n\nDavid Hume\n\n), le président\n\nNixon\n\na décidé en Août 1971, parmi d'autres mesures, de mettre fin à la convertibilité (l'échange) dollar/or et de majorer les importations américaines d'une\n\ntaxe\n\nde 10 %. La dévaluation du dollar en décembre de la même année a fait passer l'once d'or (31,10 g) de 35 à 38 dollars. Craignant une nouvelle dévaluation du dollar, les\n\nfirmes\n\nmultinationales"
+    },
+    {
+      "texte": "en possession de dollars cherchent à s'en débarrasser en les échangeant contre des\n\ndevises\n\neuropéennes plus fortes ou contre le\n\nyen\n\njaponais et les particuliers achètent des quantités de plus en plus élevées d'or. Après la dévaluation de 10 % du dollar en 1973, la\n\ndemande\n\nportant sur ce dernier a fortement augmenté avec le premier choc pétrolier de la même année, ce qui a poussé les autorités américaines à lui fixer un\n\ncours forcé\n\n[",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 30,
+        "chunk_total": 38,
+        "nb_chars": 444
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nen possession de dollars cherchent à s'en débarrasser en les échangeant contre des\n\ndevises\n\neuropéennes plus fortes ou contre le\n\nyen\n\njaponais et les particuliers achètent des quantités de plus en plus élevées d'or. Après la dévaluation de 10 % du dollar en 1973, la\n\ndemande\n\nportant sur ce dernier a fortement augmenté avec le premier choc pétrolier de la même année, ce qui a poussé les autorités américaines à lui fixer un\n\ncours forcé\n\n["
+    },
+    {
+      "texte": "]\n. Devant ces hauts et bas, souvent brutaux, des monnaies internationales, le commerce International est devenu instable. Cette instabilité est, de plus, encouragée par la détention des dollars à l'étranger provoquée par la sortie de capitaux américains survenue à l'occasion du déficit énorme de la balance des paiements des États-Unis. Ces quantités en dollar détenues à l'étranger des États-Unis forment un marché à part appelé \"euro-dollars\". La hausse, sans précédent, du prix du pétrole (cf.\nPremier choc pétrolier\n) a permis au pays exportateurs de pétrole d'y placer leurs excédents en dollars appelés les \"pétrodollars\"\n[\n\n]\n\n. Ces quantités de dollars détenues à l'étranger des États-Unis permettent de financer les pays en déficit, les banques étrangères et les\n\nsuccursales\n\ndes banques américaines sont autorisées à\n\nprêter",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 31,
+        "chunk_total": 38,
+        "nb_chars": 837
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n]\n. Devant ces hauts et bas, souvent brutaux, des monnaies internationales, le commerce International est devenu instable. Cette instabilité est, de plus, encouragée par la détention des dollars à l'étranger provoquée par la sortie de capitaux américains survenue à l'occasion du déficit énorme de la balance des paiements des États-Unis. Ces quantités en dollar détenues à l'étranger des États-Unis forment un marché à part appelé \"euro-dollars\". La hausse, sans précédent, du prix du pétrole (cf.\nPremier choc pétrolier\n) a permis au pays exportateurs de pétrole d'y placer leurs excédents en dollars appelés les \"pétrodollars\"\n[\n\n]\n\n. Ces quantités de dollars détenues à l'étranger des États-Unis permettent de financer les pays en déficit, les banques étrangères et les\n\nsuccursales\n\ndes banques américaines sont autorisées à\n\nprêter"
+    },
+    {
+      "texte": "en dollars. Par conséquent, la quantité de dollars en circulation à l'extérieur des États-Unis est passée de quelques milliards de dollars dans les années 1960 à près de 1000 au début de l'année 1980 et à 1270 milliards six mois plus tard.\n\nUn mouvement analogue a concerné le mark de la\n\nRépublique fédérale d'Allemagne\n\noù le\n\ndeuxième choc pétrolier\n\na provoqué une sortie massive de la devise allemande à cause du déficit de sa\n\nbalance commerciale\n\net par là de celui de sa\n\nbalance des paiements\n\n.\n\nLe système monétaire à deux devises (le dollar et le mark), au début des années 1980, prouve que les accords de\n\nBretton Woods\n\nsont en crise puisque le système de l'\n\nétalon-or\n\ndont le\n\nFMI\n\nest un garde fou n'a pas résisté à l'instabilité du dollar et du commerce International. Il suffit, selon\n\nJean-Marie Albertini\n\n, que quelques grands débiteurs deviennent insolvables pour que la",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 32,
+        "chunk_total": 38,
+        "nb_chars": 894
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nen dollars. Par conséquent, la quantité de dollars en circulation à l'extérieur des États-Unis est passée de quelques milliards de dollars dans les années 1960 à près de 1000 au début de l'année 1980 et à 1270 milliards six mois plus tard.\n\nUn mouvement analogue a concerné le mark de la\n\nRépublique fédérale d'Allemagne\n\noù le\n\ndeuxième choc pétrolier\n\na provoqué une sortie massive de la devise allemande à cause du déficit de sa\n\nbalance commerciale\n\net par là de celui de sa\n\nbalance des paiements\n\n.\n\nLe système monétaire à deux devises (le dollar et le mark), au début des années 1980, prouve que les accords de\n\nBretton Woods\n\nsont en crise puisque le système de l'\n\nétalon-or\n\ndont le\n\nFMI\n\nest un garde fou n'a pas résisté à l'instabilité du dollar et du commerce International. Il suffit, selon\n\nJean-Marie Albertini\n\n, que quelques grands débiteurs deviennent insolvables pour que la"
+    },
+    {
+      "texte": "banqueroute\n\nla plus importante de toute l'histoire du\n\nlibéralisme\n\nse réalise. Au début des années 1980, le chercheur considère que, face aux États-Unis, qui ne semblent se préoccuper que de leurs propres intérêts (les dévaluations du dollar accroissent les exportations américaines au détriment de l'Europe et du Japon et l'\n\ninflation\n\nles poussent à augmenter les\n\ntaux d'intérêt\n\nprovocant ainsi une fuite des capitaux vers le\n\nmarché financier\n\naméricaine), les pays européens doivent s'unir pour devenir plus forts\n\n[\n\n]\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nChambre de commerce et d'industrie France international\n\nAutarcie\n\nDouane\n\nLibre-échange\n\nIntégration économique\n\nMercantilisme\n\nProtectionnisme\n\nAdam Smith\n\nOrganisation mondiale du commerce\n\nSystème harmonisé\n\nBarrières au commerce\n\nLiens externes\n\n[\n\nmodifier",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 33,
+        "chunk_total": 38,
+        "nb_chars": 900
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nbanqueroute\n\nla plus importante de toute l'histoire du\n\nlibéralisme\n\nse réalise. Au début des années 1980, le chercheur considère que, face aux États-Unis, qui ne semblent se préoccuper que de leurs propres intérêts (les dévaluations du dollar accroissent les exportations américaines au détriment de l'Europe et du Japon et l'\n\ninflation\n\nles poussent à augmenter les\n\ntaux d'intérêt\n\nprovocant ainsi une fuite des capitaux vers le\n\nmarché financier\n\naméricaine), les pays européens doivent s'unir pour devenir plus forts\n\n[\n\n]\n\n.\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nChambre de commerce et d'industrie France international\n\nAutarcie\n\nDouane\n\nLibre-échange\n\nIntégration économique\n\nMercantilisme\n\nProtectionnisme\n\nAdam Smith\n\nOrganisation mondiale du commerce\n\nSystème harmonisé\n\nBarrières au commerce\n\nLiens externes\n\n[\n\nmodifier"
+    },
+    {
+      "texte": "|\n\nmodifier le code\n\n]\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nBritannica\n\nL'Encyclopédie canadienne\n\nUniversalis\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nGND\n\nJapon\n\nIsraël\n\nTchéquie\n\nLettonie\n\n(en)\n\nBase statistique\n\ndu\n\nWorld Trade Monitor\n\nLe commerce extérieur de la France sur le site de la direction générale des Douanes\n\n(en)\n\nCommerce International - Base Statistique (2014)\n\nTrade Map\n\n, base de données du\n\nCentre du commerce international\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nNotes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRéférences\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\n(en)\n\n«\n\nImports of goods and services (constant 2010 US $)\n\n», sur",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 34,
+        "chunk_total": 38,
+        "nb_chars": 900
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n|\n\nmodifier le code\n\n]\n\nNotices dans des dictionnaires ou encyclopédies généralistes\n\n:\n\nBritannica\n\nL'Encyclopédie canadienne\n\nUniversalis\n\nNotices d'autorité\n\n:\n\nBnF\n\n(\n\ndonnées\n\n)\n\nLCCN\n\nGND\n\nJapon\n\nIsraël\n\nTchéquie\n\nLettonie\n\n(en)\n\nBase statistique\n\ndu\n\nWorld Trade Monitor\n\nLe commerce extérieur de la France sur le site de la direction générale des Douanes\n\n(en)\n\nCommerce International - Base Statistique (2014)\n\nTrade Map\n\n, base de données du\n\nCentre du commerce international\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nNotes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRéférences\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\n(en)\n\n«\n\nImports of goods and services (constant 2010 US $)\n\n», sur"
+    },
+    {
+      "texte": "Our World in Data\n\n(consulté le\n\n12 février 2021\n\n)\n\n↑\n\nJean-Marie Albertini\n\n,\n\nLes rouages de l'économie nationale\n\n, Paris, Les\n\nÉditions Ouvrières\n\n,\n\n, 317\np.\n(\nISBN\n2-7082-0663-X\n)\n,\np.\n\n↑\nOrganisation mondiale du commerce\n, «\nTendances du commerce international\n»,\n\n↑\n\nSource :\n\nOrganisation mondiale du commerce\n\n[1]\n\n↑\n\nLa mutation de la Chine en cause dans le ralentissement du commerce mondial\n\n,\n\nLes Échos\n\n, 21 novembre 2014.\n\n↑\n\n(en)\n\n«\n\nImports of goods and services (constant 2010 US $)\n\n», sur\n\ndata.worldbank.org\n\n(consulté le\n\n14 septembre 2023\n\n)\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\nCentre du commerce international\n\n, «\n\nTrade Map\n\n»\n\n(consulté le\n\n2 octobre 2016\n\n)\n\n.\n\n↑\n\n«\n\nLe yuan chinois entre dans la cour des grandes monnaies mondiales\n\n», sur\n\nLe Journal de Montréal\n\n,\n\n30 septembre 2016\n\n(consulté le",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 35,
+        "chunk_total": 38,
+        "nb_chars": 896
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nOur World in Data\n\n(consulté le\n\n12 février 2021\n\n)\n\n↑\n\nJean-Marie Albertini\n\n,\n\nLes rouages de l'économie nationale\n\n, Paris, Les\n\nÉditions Ouvrières\n\n,\n\n, 317\np.\n(\nISBN\n2-7082-0663-X\n)\n,\np.\n\n↑\nOrganisation mondiale du commerce\n, «\nTendances du commerce international\n»,\n\n↑\n\nSource :\n\nOrganisation mondiale du commerce\n\n[1]\n\n↑\n\nLa mutation de la Chine en cause dans le ralentissement du commerce mondial\n\n,\n\nLes Échos\n\n, 21 novembre 2014.\n\n↑\n\n(en)\n\n«\n\nImports of goods and services (constant 2010 US $)\n\n», sur\n\ndata.worldbank.org\n\n(consulté le\n\n14 septembre 2023\n\n)\n\n↑\n\n«\n\nWorld Bank Open Data\n\n», sur\n\nWorld Bank Open Data\n\n(consulté le\n\n13 novembre 2023\n\n)\n\n.\n\n↑\n\nCentre du commerce international\n\n, «\n\nTrade Map\n\n»\n\n(consulté le\n\n2 octobre 2016\n\n)\n\n.\n\n↑\n\n«\n\nLe yuan chinois entre dans la cour des grandes monnaies mondiales\n\n», sur\n\nLe Journal de Montréal\n\n,\n\n30 septembre 2016\n\n(consulté le"
+    },
+    {
+      "texte": "2 octobre 2016\n\n)\n\n.\n\n↑\n\nOMC, Statistiques du commerce international 2007\n\n↑\n\nMarchés spéciaux\n\n↑\n\narticle XVI\n\n↑\n\n(en)\n\nExport.Gov : partenariats stratégiques pour l'export\n\n↑\n\nGlobaltrade.net\n\n↑\n\nJean-Marie Albertini\n\n,\n\nLes rouages de l'économie nationale\n\n, Paris, Les\n\nÉditions Ouvrières\n\n,\n\noctobre 1982\n\n, 317\n\np.\n\n(\n\nISBN\n\n2-7082-0663-X\n\n)\n\n,\n\np.\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 199\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 200\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 201\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 202\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 203\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 204\n\nPortail de l’économie\n\nPortail du commerce\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Commerce_international&oldid=231249265\n\n».\n\nCatégories\n\n:\n\nCommerce international\n\nÉconomie internationale\n\nCatégories cachées :\n\nPages avec des graphiques",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 36,
+        "chunk_total": 38,
+        "nb_chars": 865
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\n2 octobre 2016\n\n)\n\n.\n\n↑\n\nOMC, Statistiques du commerce international 2007\n\n↑\n\nMarchés spéciaux\n\n↑\n\narticle XVI\n\n↑\n\n(en)\n\nExport.Gov : partenariats stratégiques pour l'export\n\n↑\n\nGlobaltrade.net\n\n↑\n\nJean-Marie Albertini\n\n,\n\nLes rouages de l'économie nationale\n\n, Paris, Les\n\nÉditions Ouvrières\n\n,\n\noctobre 1982\n\n, 317\n\np.\n\n(\n\nISBN\n\n2-7082-0663-X\n\n)\n\n,\n\np.\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 199\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 200\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 201\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 202\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 203\n\n↑\n\nJean-Marie Albertini\n\n, ..., p. 204\n\nPortail de l’économie\n\nPortail du commerce\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Commerce_international&oldid=231249265\n\n».\n\nCatégories\n\n:\n\nCommerce international\n\nÉconomie internationale\n\nCatégories cachées :\n\nPages avec des graphiques"
+    },
+    {
+      "texte": "Page avec des graphiques désactivés\n\nWikipédia:ébauche économie\n\nArticle contenant un appel à traduction en anglais\n\nPage utilisant un modèle Bases inactif\n\nPage utilisant P1417\n\nPage utilisant P5395\n\nPage utilisant P3219\n\nPage pointant vers des bases externes\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nPortail:Économie/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Commerce/Articles liés\n\nRechercher\n\nRechercher\n\nCommerce international\n\n68 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "commerce_incoterms",
+        "nom_doc": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "nom": "Incoterms — Termes commerciaux internationaux (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "commercial",
+          "DAF",
+          "juriste",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Commerce_international",
+        "hash": "487210dd9109ba3b8f5fda06c0896927b5e1145a795ee665547b8a1b432a3d1f",
+        "indexe_le": "2026-04-17T03:11:03.671280",
+        "chunk_index": 37,
+        "chunk_total": 38,
+        "nb_chars": 546
+      },
+      "texte_embed": "commercial — Incoterms — Termes commerciaux internationaux (Wikipedia FR)\nPage avec des graphiques désactivés\n\nWikipédia:ébauche économie\n\nArticle contenant un appel à traduction en anglais\n\nPage utilisant un modèle Bases inactif\n\nPage utilisant P1417\n\nPage utilisant P5395\n\nPage utilisant P3219\n\nPage pointant vers des bases externes\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nPortail:Économie/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Commerce/Articles liés\n\nRechercher\n\nRechercher\n\nCommerce international\n\n68 langues\n\nAjouter un sujet"
+    }
+  ]
+}

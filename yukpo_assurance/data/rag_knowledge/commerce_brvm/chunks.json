@@ -1,0 +1,312 @@
+{
+  "doc_id": "commerce_brvm",
+  "metadata": {
+    "doc_id": "commerce_brvm",
+    "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+    "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+    "pays": "TRANSNATIONAL",
+    "zone": "UEMOA",
+    "domaine": "commercial",
+    "metier_tags": [
+      "assureur",
+      "analyste",
+      "DAF",
+      "actuaire",
+      "commercial"
+    ],
+    "fiabilite": "officiel",
+    "url_source": "https://www.brvm.org/fr",
+    "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+    "indexe_le": "2026-04-19T16:23:16.014111"
+  },
+  "nb_chars": 8626,
+  "nb_chunks": 11,
+  "chunks": [
+    {
+      "texte": "BRVM - Bourse Régionale des Valeurs Mobilières |\nAller au contenu principal\nSe connecter\nPortefeuille boursier\nFR\nEN\nPO\nDimanche, 19 avril, 2026 - 16:23\nSéance fermée\nABJC\n3 250\n-4,20%\nBICB\n5 110\n0,00%\nBICC\n23 705\n0,87%\nBNBC\n1 505\n-3,83%\nBOAB\n7 985\n0,00%\nBOABF\n5 630\n0,00%\nBOAC\n8 595\n2,38%\nBOAM\n4 650\n1,08%\nBOAN\n3 195\n6,67%\nBOAS\n6 750\n0,67%\nCABC\n3 880\n-1,93%\nCBIBF\n17 000\n1,85%\nCFAC\n1 550\n-0,32%\nCIEC\n3 100\n0,00%\nECOC\n16 200\n3,44%\nETIT\n\n-7,14%\n\nFTSC\n\n2 200\n\n0,92%\n\nLNBB\n\n3 940\n\n1,81%\n\nNEIC\n\n1 370\n\n-0,72%\n\nNSBC\n\n14 195\n\n-1,02%\n\nNTLC\n\n11 800\n\n1,69%\n\nONTBF\n\n2 720\n\n0,00%\n\nORAC\n\n15 000\n\n-2,00%\n\nORGT\n\n3 340\n\n-1,47%\n\nPALC\n\n8 125\n\n0,00%\n\nPRSC\n\n4 995\n\n-1,90%\n\nSAFC\n\n5 425\n\n-7,42%\n\nSCRC\n\n2 000\n\n-0,49%\n\nSDCC\n\n7 140\n\n0,00%\n\nSDSC\n\n1 800\n\n-2,99%\n\nSEMC\n\n1 620\n\n-7,14%\n\nSGBC\n\n33 000\n\n0,00%\n\nSHEC\n\n1 885\n\n-5,03%\n\nSIBC\n\n7 000\n\n0,29%\n\nSICC\n\n4 220\n\n7,38%\n\nSIVC\n\n2 740\n\n-3,57%\n\nSLBC\n\n39 985\n\n-0,46%\n\nSMBC\n\n11 535",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 0,
+        "chunk_total": 11,
+        "nb_chars": 895
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nBRVM - Bourse Régionale des Valeurs Mobilières |\nAller au contenu principal\nSe connecter\nPortefeuille boursier\nFR\nEN\nPO\nDimanche, 19 avril, 2026 - 16:23\nSéance fermée\nABJC\n3 250\n-4,20%\nBICB\n5 110\n0,00%\nBICC\n23 705\n0,87%\nBNBC\n1 505\n-3,83%\nBOAB\n7 985\n0,00%\nBOABF\n5 630\n0,00%\nBOAC\n8 595\n2,38%\nBOAM\n4 650\n1,08%\nBOAN\n3 195\n6,67%\nBOAS\n6 750\n0,67%\nCABC\n3 880\n-1,93%\nCBIBF\n17 000\n1,85%\nCFAC\n1 550\n-0,32%\nCIEC\n3 100\n0,00%\nECOC\n16 200\n3,44%\nETIT\n\n-7,14%\n\nFTSC\n\n2 200\n\n0,92%\n\nLNBB\n\n3 940\n\n1,81%\n\nNEIC\n\n1 370\n\n-0,72%\n\nNSBC\n\n14 195\n\n-1,02%\n\nNTLC\n\n11 800\n\n1,69%\n\nONTBF\n\n2 720\n\n0,00%\n\nORAC\n\n15 000\n\n-2,00%\n\nORGT\n\n3 340\n\n-1,47%\n\nPALC\n\n8 125\n\n0,00%\n\nPRSC\n\n4 995\n\n-1,90%\n\nSAFC\n\n5 425\n\n-7,42%\n\nSCRC\n\n2 000\n\n-0,49%\n\nSDCC\n\n7 140\n\n0,00%\n\nSDSC\n\n1 800\n\n-2,99%\n\nSEMC\n\n1 620\n\n-7,14%\n\nSGBC\n\n33 000\n\n0,00%\n\nSHEC\n\n1 885\n\n-5,03%\n\nSIBC\n\n7 000\n\n0,29%\n\nSICC\n\n4 220\n\n7,38%\n\nSIVC\n\n2 740\n\n-3,57%\n\nSLBC\n\n39 985\n\n-0,46%\n\nSMBC\n\n11 535"
+    },
+    {
+      "texte": "0,00%\n\nSNTS\n\n28 495\n\n3,62%\n\nSOGC\n\n7 920\n\n-0,63%\n\nSPHC\n\n7 300\n\n4,66%\n\nSTAC\n\n2 755\n\n-6,61%\n\nSTBC\n\n20 500\n\n2,24%\n\nTTLC\n\n2 795\n\n0,00%\n\nTTLS\n\n3 280\n\n0,00%\n\nUNLC\n\n57 500\n\n0,00%\n\nUNXC\n\n1 870\n\n0,27%\n\nCourriel\n\n*\n\nS'abonner\n\nPublications précédentes\n\nFormulaire de recherche\n\nRechercher\n\nFacebook\n\nTwitter\n\nYoutube\n\nLinkdIn\n\nAccueil\n\nA propos\n\nCourtiers (SGI)\n\nJournée de cotation\n\nDonnées et Services\n\nRapports sociétés cotées\n\nAnnonces émetteurs\n\nPublications\n\nBRVM Prestige\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a organisé, les 26 et 27...\n\n...\n\nLa capitalisation boursière du marché des actions de la BRVM s’élève, au 30...\n\nDepuis le 2 janvier 2026, la Bourse Régionale des Valeurs Mobilières (BRVM) a...\n\nLa BRVM clôture l’année 2025 avec une progression remarquable de 25,26 %\n\nMalgré...\n\nLe Directeur Général de la Bourse Régionale des Valeurs Mobilières (BRVM), Dr Edoh...",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 1,
+        "chunk_total": 11,
+        "nb_chars": 885
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\n0,00%\n\nSNTS\n\n28 495\n\n3,62%\n\nSOGC\n\n7 920\n\n-0,63%\n\nSPHC\n\n7 300\n\n4,66%\n\nSTAC\n\n2 755\n\n-6,61%\n\nSTBC\n\n20 500\n\n2,24%\n\nTTLC\n\n2 795\n\n0,00%\n\nTTLS\n\n3 280\n\n0,00%\n\nUNLC\n\n57 500\n\n0,00%\n\nUNXC\n\n1 870\n\n0,27%\n\nCourriel\n\n*\n\nS'abonner\n\nPublications précédentes\n\nFormulaire de recherche\n\nRechercher\n\nFacebook\n\nTwitter\n\nYoutube\n\nLinkdIn\n\nAccueil\n\nA propos\n\nCourtiers (SGI)\n\nJournée de cotation\n\nDonnées et Services\n\nRapports sociétés cotées\n\nAnnonces émetteurs\n\nPublications\n\nBRVM Prestige\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a organisé, les 26 et 27...\n\n...\n\nLa capitalisation boursière du marché des actions de la BRVM s’élève, au 30...\n\nDepuis le 2 janvier 2026, la Bourse Régionale des Valeurs Mobilières (BRVM) a...\n\nLa BRVM clôture l’année 2025 avec une progression remarquable de 25,26 %\n\nMalgré...\n\nLe Directeur Général de la Bourse Régionale des Valeurs Mobilières (BRVM), Dr Edoh..."
+    },
+    {
+      "texte": "La Bourse Régionale des Valeurs Mobilières (BRVM) a franchi ce vendredi 20 juin...\n\nLe mercredi 28 mai 2025, la Côte d’Ivoire a inscrit une nouvelle page...\n\nLa BRVM est honorée d’avoir eu, en conférence spéciale, Monsieur Emmanuel Koffi AHOUTOU,...\n\nAbidjan, Côte d'Ivoire, le 13 mai 2025 — Africa50, l'investisseur et\n\n...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a procédé ce mardi 29 avril...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a officiellement admis à sa cote,...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) et le Global Green Growth Institute...\n\nListe des entreprises admises au programme ELITE BRVM Lounge\n\n...\n\nBRVM AWARDS 2026\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a organisé, les 26 et 27 mars 2026 à Dakar, la...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 29 mars, 2029",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 2,
+        "chunk_total": 11,
+        "nb_chars": 823
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a franchi ce vendredi 20 juin...\n\nLe mercredi 28 mai 2025, la Côte d’Ivoire a inscrit une nouvelle page...\n\nLa BRVM est honorée d’avoir eu, en conférence spéciale, Monsieur Emmanuel Koffi AHOUTOU,...\n\nAbidjan, Côte d'Ivoire, le 13 mai 2025 — Africa50, l'investisseur et\n\n...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a procédé ce mardi 29 avril...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a officiellement admis à sa cote,...\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) et le Global Green Growth Institute...\n\nListe des entreprises admises au programme ELITE BRVM Lounge\n\n...\n\nBRVM AWARDS 2026\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a organisé, les 26 et 27 mars 2026 à Dakar, la...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 29 mars, 2029"
+    },
+    {
+      "texte": "LA BRVM SONNE LA CLOCHE POUR L’ÉGALITÉ DES GENRES ET APPELLE À DAVANTAGE D’ACTIONS EN FAVEUR DE L’INCLUSION DES FEMMES\n\n...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 31 décembre, 2026\n\nLA BRVM ACCENTUE SON DYNAMISME EN CE DÉBUT D’ANNÉE\n\nLa capitalisation boursière du marché des actions de la BRVM s’élève, au 30 janvier 2026, à 14 069...\n\nLire plus\n\nDate d'expiration:\n\nLundi, 31 décembre, 2029\n\nLE BULLETIN OFFICIEL DE LA COTE DE LA BRVM : DES EVOLUTIONS MAJEURES POUR UNE MEILLEURE LISIBILITE DU MARCHE\n\nDepuis le 2 janvier 2026, la Bourse Régionale des Valeurs Mobilières (BRVM) a introduit plusieurs évolutions structurantes dans...\n\nLire plus\n\nDate d'expiration:\n\nLundi, 31 décembre, 2029\n\n2025 : LA CONSOLIDATION QUINQUENNALE, 99,15 % de progression en 5 ans\n\nLa BRVM clôture l’année 2025 avec une progression remarquable de 25,26 %\n\nMalgré un contexte économique mondial toujours...\n\nLire plus",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 3,
+        "chunk_total": 11,
+        "nb_chars": 898
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nLA BRVM SONNE LA CLOCHE POUR L’ÉGALITÉ DES GENRES ET APPELLE À DAVANTAGE D’ACTIONS EN FAVEUR DE L’INCLUSION DES FEMMES\n\n...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 31 décembre, 2026\n\nLA BRVM ACCENTUE SON DYNAMISME EN CE DÉBUT D’ANNÉE\n\nLa capitalisation boursière du marché des actions de la BRVM s’élève, au 30 janvier 2026, à 14 069...\n\nLire plus\n\nDate d'expiration:\n\nLundi, 31 décembre, 2029\n\nLE BULLETIN OFFICIEL DE LA COTE DE LA BRVM : DES EVOLUTIONS MAJEURES POUR UNE MEILLEURE LISIBILITE DU MARCHE\n\nDepuis le 2 janvier 2026, la Bourse Régionale des Valeurs Mobilières (BRVM) a introduit plusieurs évolutions structurantes dans...\n\nLire plus\n\nDate d'expiration:\n\nLundi, 31 décembre, 2029\n\n2025 : LA CONSOLIDATION QUINQUENNALE, 99,15 % de progression en 5 ans\n\nLa BRVM clôture l’année 2025 avec une progression remarquable de 25,26 %\n\nMalgré un contexte économique mondial toujours...\n\nLire plus"
+    },
+    {
+      "texte": "Date d'expiration:\n\nDimanche, 31 décembre, 2028\n\nJOURNEE NATIONALE DES RESSOURCES HUMAINES 2025: LE DG DE LA BRVM PARTAGE SA VISION SUR L'AGILITE DU CAPITAL HUMAIN ET LA GESTION &  LA RETENTION DES TALENTS\n\nLe Directeur Général de la Bourse Régionale des Valeurs Mobilières (BRVM), Dr Edoh Kossi AMENOUNVE a pris part...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 11 juillet, 2026\n\nLA CAPITALISATION BOURSIERE DE LA BRVM PROGRESSE DE 2000 MILLIARDS FCFA EN 6 MOIS !\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a franchi ce vendredi 20 juin 2025 une nouvelle étape de...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 20 juin, 2026\n\nPREMIERE COTATION SUR LA BMPA CI : UN DEMARRAGE PROMETTEUR POUR LE MARCHE AGRICOLE IVOIRIEN\n\nLe mercredi 28 mai 2025, la Côte d’Ivoire a inscrit une nouvelle page dans l’histoire de son agriculture...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 30 mai, 2026",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 4,
+        "chunk_total": 11,
+        "nb_chars": 882
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nDate d'expiration:\n\nDimanche, 31 décembre, 2028\n\nJOURNEE NATIONALE DES RESSOURCES HUMAINES 2025: LE DG DE LA BRVM PARTAGE SA VISION SUR L'AGILITE DU CAPITAL HUMAIN ET LA GESTION &  LA RETENTION DES TALENTS\n\nLe Directeur Général de la Bourse Régionale des Valeurs Mobilières (BRVM), Dr Edoh Kossi AMENOUNVE a pris part...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 11 juillet, 2026\n\nLA CAPITALISATION BOURSIERE DE LA BRVM PROGRESSE DE 2000 MILLIARDS FCFA EN 6 MOIS !\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a franchi ce vendredi 20 juin 2025 une nouvelle étape de...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 20 juin, 2026\n\nPREMIERE COTATION SUR LA BMPA CI : UN DEMARRAGE PROMETTEUR POUR LE MARCHE AGRICOLE IVOIRIEN\n\nLe mercredi 28 mai 2025, la Côte d’Ivoire a inscrit une nouvelle page dans l’histoire de son agriculture...\n\nLire plus\n\nDate d'expiration:\n\nSamedi, 30 mai, 2026"
+    },
+    {
+      "texte": "CONFERENCE SPECIALE BRVM AWARDS 2025  : La Côte d’Ivoire et l’Expérience ivoirienne en matière de privatisation à l’honneur lors des BRVM Awards 2025 !\n\nLa BRVM est honorée d’avoir eu, en conférence spéciale, Monsieur Emmanuel Koffi AHOUTOU, Ministre, Directeur de Cabinet du...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 14 mai, 2026\n\nAFRICA50 ET LA BRVM S'ASSOCIENT POUR MOBILISER DES CAPITAUX REGIONAUX DESTINES AU DEVELOPPEMENT D'INFRASTRUCTURES\n\nAbidjan, Côte d'Ivoire, le 13 mai 2025 — Africa50, l'investisseur et gestionnaire d'actifs panafricain dans les\n\n...\n\nLire plus\n\nDate d'expiration:\n\nMercredi, 13 mai, 2026\n\nBRVM AWARDS : COTONOU ACCUEILLE LA 6E EDITION DE LA CELEBRATION DE L'EXCELLENCE SUR LE MARCHE FINANCIER REGIONAL DE L’UEMOA\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a procédé ce mardi 29 avril 2025 à Cotonou, à l’ouverture...\n\nLire plus\n\nDate d'expiration:",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 5,
+        "chunk_total": 11,
+        "nb_chars": 886
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nCONFERENCE SPECIALE BRVM AWARDS 2025  : La Côte d’Ivoire et l’Expérience ivoirienne en matière de privatisation à l’honneur lors des BRVM Awards 2025 !\n\nLa BRVM est honorée d’avoir eu, en conférence spéciale, Monsieur Emmanuel Koffi AHOUTOU, Ministre, Directeur de Cabinet du...\n\nLire plus\n\nDate d'expiration:\n\nJeudi, 14 mai, 2026\n\nAFRICA50 ET LA BRVM S'ASSOCIENT POUR MOBILISER DES CAPITAUX REGIONAUX DESTINES AU DEVELOPPEMENT D'INFRASTRUCTURES\n\nAbidjan, Côte d'Ivoire, le 13 mai 2025 — Africa50, l'investisseur et gestionnaire d'actifs panafricain dans les\n\n...\n\nLire plus\n\nDate d'expiration:\n\nMercredi, 13 mai, 2026\n\nBRVM AWARDS : COTONOU ACCUEILLE LA 6E EDITION DE LA CELEBRATION DE L'EXCELLENCE SUR LE MARCHE FINANCIER REGIONAL DE L’UEMOA\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a procédé ce mardi 29 avril 2025 à Cotonou, à l’ouverture...\n\nLire plus\n\nDate d'expiration:"
+    },
+    {
+      "texte": "Mercredi, 29 avril, 2026\n\nLA BANQUE INTERNATIONALE POUR L’INDUSTRIE ET LE COMMERCE DU BENIN (BIIC) ADMISE A LA COTE DE LA BRVM\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a officiellement admis à sa cote, sur le marché des actions,...\n\nLire plus\n\nDate d'expiration:\n\nMardi, 28 avril, 2026\n\nFINANCE VERTE : LA BRVM ET LE GGGI UNISSENT LEURS FORCES\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) et le Global Green Growth Institute (GGGI) ont procédé, ce jeudi...\n\nLire plus\n\nDate d'expiration:\n\nMercredi, 22 avril, 2026\n\nELITE BRVM LOUNGE\n\nListe des entreprises admises au programme ELITE BRVM Lounge\n\n...\n\nLire plus\n\nDate d'expiration:\n\nMardi, 22 octobre, 2030\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n15 mai 2026\n\n,  |\n\nBANK OF AFRICA CI  : Paiement de dividendes  le\n\n6 mai 2026\n\n,  594,528 FCFA  par action  |",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 6,
+        "chunk_total": 11,
+        "nb_chars": 861
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nMercredi, 29 avril, 2026\n\nLA BANQUE INTERNATIONALE POUR L’INDUSTRIE ET LE COMMERCE DU BENIN (BIIC) ADMISE A LA COTE DE LA BRVM\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) a officiellement admis à sa cote, sur le marché des actions,...\n\nLire plus\n\nDate d'expiration:\n\nMardi, 28 avril, 2026\n\nFINANCE VERTE : LA BRVM ET LE GGGI UNISSENT LEURS FORCES\n\nLa Bourse Régionale des Valeurs Mobilières (BRVM) et le Global Green Growth Institute (GGGI) ont procédé, ce jeudi...\n\nLire plus\n\nDate d'expiration:\n\nMercredi, 22 avril, 2026\n\nELITE BRVM LOUNGE\n\nListe des entreprises admises au programme ELITE BRVM Lounge\n\n...\n\nLire plus\n\nDate d'expiration:\n\nMardi, 22 octobre, 2030\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n15 mai 2026\n\n,  |\n\nBANK OF AFRICA CI  : Paiement de dividendes  le\n\n6 mai 2026\n\n,  594,528 FCFA  par action  |"
+    },
+    {
+      "texte": "TPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\n: Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n19 avril 2026\n\n,  |\n\nORAGROUP  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n26 avril 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 7,
+        "chunk_total": 11,
+        "nb_chars": 881
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n6 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\nFCTCEPT  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n27 mai 2026\n\n,  |\n\n: Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n19 avril 2026\n\n,  |\n\nORAGROUP  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n26 avril 2026\n\n,  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |"
+    },
+    {
+      "texte": "TPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |\n\nBANK OF AFRICA BF  : Paiement de dividendes  le\n\n23 avril 2026\n\n,  397 FCFA par action  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |\n\nTop 5\n\nCours\n\nVariation\n\nSICC\n\n4 220\n\n7,38%\n\nBOAN\n\n3 200\n\n6,67%\n\nSPHC\n\n7 300\n\n4,66%\n\nSNTS\n\n28 495\n\n3,62%\n\nECOC\n\n16 250\n\n3,44%\n\nFlop 5\n\nCours\n\nVariation\n\nSAFC\n\n5 425\n\n-7,42%\n\nETIT\n\n-7,14%\n\nSEMC\n\n1 625\n\n-7,14%\n\nSTAC\n\n2 755\n\n-6,61%\n\nSHEC\n\n1 890\n\n-5,03%\n\nActivités du marché\n\nValeur des transactions\n\n2 919 883 424 FCFA\n\nCapitalisation Actions\n\n15 384 908 146 062 FCFA\n\nCapitalisation des obligations\n\n11 901 884 141 881 FCFA\n\nBRVM-C\n\n399,03\n\n0,43%\n\nBRVM-30\n\n187,37\n\n0,58%\n\nBRVM-PRES\n\n156,34\n\n1,05%\n\nDernière mise à jour : Vendredi, 17 avril, 2026 - 22:45",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 8,
+        "chunk_total": 11,
+        "nb_chars": 840
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |\n\nBANK OF AFRICA BF  : Paiement de dividendes  le\n\n23 avril 2026\n\n,  397 FCFA par action  |\n\nTPBF  : Paiement des coupons d’intérêts et / ou remboursement de capital  le\n\n24 avril 2026\n\n,  |\n\nTop 5\n\nCours\n\nVariation\n\nSICC\n\n4 220\n\n7,38%\n\nBOAN\n\n3 200\n\n6,67%\n\nSPHC\n\n7 300\n\n4,66%\n\nSNTS\n\n28 495\n\n3,62%\n\nECOC\n\n16 250\n\n3,44%\n\nFlop 5\n\nCours\n\nVariation\n\nSAFC\n\n5 425\n\n-7,42%\n\nETIT\n\n-7,14%\n\nSEMC\n\n1 625\n\n-7,14%\n\nSTAC\n\n2 755\n\n-6,61%\n\nSHEC\n\n1 890\n\n-5,03%\n\nActivités du marché\n\nValeur des transactions\n\n2 919 883 424 FCFA\n\nCapitalisation Actions\n\n15 384 908 146 062 FCFA\n\nCapitalisation des obligations\n\n11 901 884 141 881 FCFA\n\nBRVM-C\n\n399,03\n\n0,43%\n\nBRVM-30\n\n187,37\n\n0,58%\n\nBRVM-PRES\n\n156,34\n\n1,05%\n\nDernière mise à jour : Vendredi, 17 avril, 2026 - 22:45"
+    },
+    {
+      "texte": "Investissons pour un développement durable et une richesse mieux partagée\n\nJe suis un Débutant\n\nJe suis un débutant et je m’intéresse à la bourse, son fonctionnement et comment investir.\n\nEntrer\n\nJe suis un Emetteur\n\nJe suis une entreprise (privée ou publique) ou un Etat et je souhaite obtenir des informations sur comment être coté ou lever des fonds sur le marché boursier régional.\n\nEntrer\n\nJe suis un Financier\n\nJ’exerce dans la finance et je souhaite obtenir des informations financières sur les sociétés cotées.\n\nEntrer\n\nJe suis un Investisseur\n\nJe suis un investisseur de la BRVM et souhaite suivre le marché et mon portefeuille boursier.\n\nEntrer\n\nEmetteurs\n\nCourtiers (SGI)\n\nSociétés de Gestion d'OPCVM (SGO)\n\nConseils en investissements boursiers\n\nSociétés de Gestion de Patrimoine\n\nBanques Teneurs de Compte - Conservateurs\n\nApporteurs d'affaires et démarcheurs\n\nGarants",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 9,
+        "chunk_total": 11,
+        "nb_chars": 881
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nInvestissons pour un développement durable et une richesse mieux partagée\n\nJe suis un Débutant\n\nJe suis un débutant et je m’intéresse à la bourse, son fonctionnement et comment investir.\n\nEntrer\n\nJe suis un Emetteur\n\nJe suis une entreprise (privée ou publique) ou un Etat et je souhaite obtenir des informations sur comment être coté ou lever des fonds sur le marché boursier régional.\n\nEntrer\n\nJe suis un Financier\n\nJ’exerce dans la finance et je souhaite obtenir des informations financières sur les sociétés cotées.\n\nEntrer\n\nJe suis un Investisseur\n\nJe suis un investisseur de la BRVM et souhaite suivre le marché et mon portefeuille boursier.\n\nEntrer\n\nEmetteurs\n\nCourtiers (SGI)\n\nSociétés de Gestion d'OPCVM (SGO)\n\nConseils en investissements boursiers\n\nSociétés de Gestion de Patrimoine\n\nBanques Teneurs de Compte - Conservateurs\n\nApporteurs d'affaires et démarcheurs\n\nGarants"
+    },
+    {
+      "texte": "Agences de notation\n\nLiens utiles\n\nMentions légales\n\nPlan du site\n\nBourse Régionale des Valeurs Mobilières - 18, Rue Joseph Anoma. Abidjan - Côte d'Ivoire Contact: (225) 27 20 32 66 85\n\nPowered by",
+      "metadata": {
+        "doc_id": "commerce_brvm",
+        "nom_doc": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "nom": "BRVM — Bourse Régionale des Valeurs Mobilières UEMOA",
+        "pays": "TRANSNATIONAL",
+        "zone": "UEMOA",
+        "domaine": "commercial",
+        "metier_tags": [
+          "assureur",
+          "analyste",
+          "DAF",
+          "actuaire",
+          "commercial"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.brvm.org/fr",
+        "hash": "1ef5fdd9ba1db05a3f7b539cb10bfa49afb3f1c595d5f657769fc68026fe784e",
+        "indexe_le": "2026-04-19T16:23:16.014111",
+        "chunk_index": 10,
+        "chunk_total": 11,
+        "nb_chars": 196
+      },
+      "texte_embed": "commercial — BRVM — Bourse Régionale des Valeurs Mobilières UEMOA\nAgences de notation\n\nLiens utiles\n\nMentions légales\n\nPlan du site\n\nBourse Régionale des Valeurs Mobilières - 18, Rue Joseph Anoma. Abidjan - Côte d'Ivoire Contact: (225) 27 20 32 66 85\n\nPowered by"
+    }
+  ]
+}

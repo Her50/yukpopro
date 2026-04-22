@@ -1,0 +1,1325 @@
+{
+  "doc_id": "stats_bf_insd_publications",
+  "metadata": {
+    "doc_id": "stats_bf_insd_publications",
+    "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+    "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+    "pays": "BF",
+    "zone": "UEMOA",
+    "domaine": "statistiques",
+    "metier_tags": [
+      "analyste",
+      "assureur",
+      "DAF",
+      "consultant"
+    ],
+    "fiabilite": "officiel",
+    "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+    "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+    "indexe_le": "2026-04-16T06:16:10.430051"
+  },
+  "nb_chars": 22115,
+  "nb_chunks": 52,
+  "chunks": [
+    {
+      "texte": "BURKINA FASO\n\nLa patrie ou la mort, nous vaincrons\n\nMINISTERE DE L’ECONOMIE ET DES FINANCES\n\n------------------------\n\nSECRETARIAT GENERAL\n\n------------------\n\nINSTITUT NATIONAL DE LA STATISTIQUE ET DE LA DEMOGRAPHIE\n\nINDICE HARMONISE\n\nDES PRIX A LA CONSOMMATION\n\n(IHPC)\n\nBURKINA FASO – Février 2026\n\n\"Informations préliminaires\"\n\nL'Institut National de la Statistique et de la Démographie (INSD) a le plaisir de mettre à la disposition des utilisateurs\n\nl'Indice Harmonisé des Prix à la Consommation (IHPC) base 2023 en remplacement de l’indice base 2014.\n\nCet indice est harmonisé car le même instrument de suivi de l'évolution des prix a été mis en place dans les pays\n\nmembres de l'Union Economique et Monétaire Ouest-Africaine (UEMOA). Il a satisfait à un critère important de qualité",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 0,
+        "chunk_total": 52,
+        "nb_chars": 789
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nBURKINA FASO\n\nLa patrie ou la mort, nous vaincrons\n\nMINISTERE DE L’ECONOMIE ET DES FINANCES\n\n------------------------\n\nSECRETARIAT GENERAL\n\n------------------\n\nINSTITUT NATIONAL DE LA STATISTIQUE ET DE LA DEMOGRAPHIE\n\nINDICE HARMONISE\n\nDES PRIX A LA CONSOMMATION\n\n(IHPC)\n\nBURKINA FASO – Février 2026\n\n\"Informations préliminaires\"\n\nL'Institut National de la Statistique et de la Démographie (INSD) a le plaisir de mettre à la disposition des utilisateurs\n\nl'Indice Harmonisé des Prix à la Consommation (IHPC) base 2023 en remplacement de l’indice base 2014.\n\nCet indice est harmonisé car le même instrument de suivi de l'évolution des prix a été mis en place dans les pays\n\nmembres de l'Union Economique et Monétaire Ouest-Africaine (UEMOA). Il a satisfait à un critère important de qualité"
+    },
+    {
+      "texte": "du point de vue de la couverture géographique. En effet, l'IHPC a pour couverture géographique les treize (13) régions\n\nadministratives du pays et pour population de référence l'ensemble des ménages de ces 13 régions. Le panier de la\n\nménagère comprend environ 838 produits suivis dans 3951 points d'observation. Plus de 25000 relevés de prix sont\n\neffectués chaque mois par les enquêteurs de l'INSD. La période de base de l'IHPC est l'année 2023 et les pondérations de\n\nl'indice proviennent d'une enquête sur les dépenses des ménages réalisée en 2021\n\nTableau 1 : Indice National Harmonisé des Prix à la Consommation de février 2026 (Base 100 en 2023)\n\nIndices des mois de Variation en %\n\nPondé Contribu\n\nLibellé févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12mois\n\nration tion\n\nINDICE GLOBAL 10 000 102,6 103,2 102,8 103,2 103,4 0,2 0,2 0,2 0,8\n\nProduits alimentaires et boissons non",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 1,
+        "chunk_total": 52,
+        "nb_chars": 893
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\ndu point de vue de la couverture géographique. En effet, l'IHPC a pour couverture géographique les treize (13) régions\n\nadministratives du pays et pour population de référence l'ensemble des ménages de ces 13 régions. Le panier de la\n\nménagère comprend environ 838 produits suivis dans 3951 points d'observation. Plus de 25000 relevés de prix sont\n\neffectués chaque mois par les enquêteurs de l'INSD. La période de base de l'IHPC est l'année 2023 et les pondérations de\n\nl'indice proviennent d'une enquête sur les dépenses des ménages réalisée en 2021\n\nTableau 1 : Indice National Harmonisé des Prix à la Consommation de février 2026 (Base 100 en 2023)\n\nIndices des mois de Variation en %\n\nPondé Contribu\n\nLibellé févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12mois\n\nration tion\n\nINDICE GLOBAL 10 000 102,6 103,2 102,8 103,2 103,4 0,2 0,2 0,2 0,8\n\nProduits alimentaires et boissons non"
+    },
+    {
+      "texte": "I 2 904 105,7 105,8 103,3 103,3 104,4 0,32 1,1 -1,3 -1,2\n\nalcoolisées\n\nProduits alimentaires 2 661 106,3 105,9 103,2 103,2 104,4 1,2 -1,5 -1,8\n\ndont: Pains et céréales 919 109,8 96,5 95,1 94,2 93,5 -0,8 -3,1 -14,9\n\nViande 231 113,5 116,8 120,0 123,5 127,9 3,5 9,5 12,6\n\nPoisson et fruits de mer 270 102,4 103,4 104,3 104,6 104,5 -0,1 1,1 2,1\n\nHuiles et graisses 200 103,5 96,4 96,4 96,3 96,8 0,5 0,4 -6,4\n\nLégumes en fruits frais ou refrigéré 127 86,0 113,3 95,6 96,2 109,5 13,8 -3,4 27,3\n\nTubercules et plantains 48 113,1 105,9 106,1 110,5 111,7 1,1 5,5 -1,2\n\nSel, épices, sauces et\n\n166 111,2 111,4 110,6 115,9 117,3 1,3 5,3 5,5\n\nproduits alimentaires n,d,a,\n\nII Boissons alcoolisées, tabac et stupéfiants 123 108,2 107,4 107,6 115,1 109,4 -0,07 -5,0 1,9 1,1\n\nIII Vêtements et chaussures 555 100,0 100,6 100,9 100,9 100,9 0,00 0,0 0,3 0,9\n\nLogement, eau, électricité, gaz et autres",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 2,
+        "chunk_total": 52,
+        "nb_chars": 883
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nI 2 904 105,7 105,8 103,3 103,3 104,4 0,32 1,1 -1,3 -1,2\n\nalcoolisées\n\nProduits alimentaires 2 661 106,3 105,9 103,2 103,2 104,4 1,2 -1,5 -1,8\n\ndont: Pains et céréales 919 109,8 96,5 95,1 94,2 93,5 -0,8 -3,1 -14,9\n\nViande 231 113,5 116,8 120,0 123,5 127,9 3,5 9,5 12,6\n\nPoisson et fruits de mer 270 102,4 103,4 104,3 104,6 104,5 -0,1 1,1 2,1\n\nHuiles et graisses 200 103,5 96,4 96,4 96,3 96,8 0,5 0,4 -6,4\n\nLégumes en fruits frais ou refrigéré 127 86,0 113,3 95,6 96,2 109,5 13,8 -3,4 27,3\n\nTubercules et plantains 48 113,1 105,9 106,1 110,5 111,7 1,1 5,5 -1,2\n\nSel, épices, sauces et\n\n166 111,2 111,4 110,6 115,9 117,3 1,3 5,3 5,5\n\nproduits alimentaires n,d,a,\n\nII Boissons alcoolisées, tabac et stupéfiants 123 108,2 107,4 107,6 115,1 109,4 -0,07 -5,0 1,9 1,1\n\nIII Vêtements et chaussures 555 100,0 100,6 100,9 100,9 100,9 0,00 0,0 0,3 0,9\n\nLogement, eau, électricité, gaz et autres"
+    },
+    {
+      "texte": "IV 823 101,2 103,2 104,8 104,7 104,7 0,00 0,0 1,5 3,5\n\ncombustibles\n\nAmeublement, équipement ménager et\n\nV 270 100,6 101,3 101,2 101,3 101,5 0,01 0,3 0,2 0,9\n\nentretien courant du ménage\n\nVI Santé 697 101,1 101,7 103,1 103,1 103,1 0,00 0,0 1,4 2,0\n\nVII Transport 1 336 101,4 101,5 101,5 101,6 101,8 0,02 0,2 0,3 0,4\n\nVIII Information et communication 809 100,8 96,9 96,9 99,6 99,9 0,02 0,3 3,1 -0,9\n\nIX Loisirs, sport et culture 104 99,8 100,5 100,5 100,6 100,6 0,00 0,0 0,1 0,8\n\nX Services d'enseignement 238 101,4 101,6 101,6 97,7 97,6 0,00 -0,2 -4,0 -3,8\n\nXI Restaurants et services d'hébergement 1 814 101,9 105,1 105,4 106,7 106,1 -0,12 -0,6 0,9 4,1\n\nXII Assurances et services financiers 9 99,3 99,3 99,3 99,3 99,3 0,00 0,0 0,0 0,0\n\nSoins personnels, protection sociale et\n\nXIII 318 101,7 101,7 101,7 101,8 101,8 0,00 0,0 0,1 0,1\n\nbiens divers\n\npage1",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 3,
+        "chunk_total": 52,
+        "nb_chars": 856
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nIV 823 101,2 103,2 104,8 104,7 104,7 0,00 0,0 1,5 3,5\n\ncombustibles\n\nAmeublement, équipement ménager et\n\nV 270 100,6 101,3 101,2 101,3 101,5 0,01 0,3 0,2 0,9\n\nentretien courant du ménage\n\nVI Santé 697 101,1 101,7 103,1 103,1 103,1 0,00 0,0 1,4 2,0\n\nVII Transport 1 336 101,4 101,5 101,5 101,6 101,8 0,02 0,2 0,3 0,4\n\nVIII Information et communication 809 100,8 96,9 96,9 99,6 99,9 0,02 0,3 3,1 -0,9\n\nIX Loisirs, sport et culture 104 99,8 100,5 100,5 100,6 100,6 0,00 0,0 0,1 0,8\n\nX Services d'enseignement 238 101,4 101,6 101,6 97,7 97,6 0,00 -0,2 -4,0 -3,8\n\nXI Restaurants et services d'hébergement 1 814 101,9 105,1 105,4 106,7 106,1 -0,12 -0,6 0,9 4,1\n\nXII Assurances et services financiers 9 99,3 99,3 99,3 99,3 99,3 0,00 0,0 0,0 0,0\n\nSoins personnels, protection sociale et\n\nXIII 318 101,7 101,7 101,7 101,8 101,8 0,00 0,0 0,1 0,1\n\nbiens divers\n\npage1"
+    },
+    {
+      "texte": "LES GRAPHIQUES DES PRINCIPAUX INDICATEURS Graphique 1 : Variation en glissement annuel de l’IHPC (2024, 2025, 2026) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2024 2025 2026 Graphique 2 : Variation en glissement de l’indice des divisions de janvier 2026 et février 2026 page2 Graphique 3 : Variation mensuelle de l’IHPC (2024,2025,2026) 2,5 1,5 0,5 Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -0,5 -1 -1,5 -2 -2,5 2025 Graphique 4: Variation en glissement annuel de l'inflation sous jacente (2024, 2025,2026) (Indice hors énergie et produits frais) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -1 -2 -3 2025 Graphique 5 : Variation en glissmement annuel de l’indice des produits alimentaires (2024, 2025, 2026) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 4,
+        "chunk_total": 52,
+        "nb_chars": 884
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nLES GRAPHIQUES DES PRINCIPAUX INDICATEURS Graphique 1 : Variation en glissement annuel de l’IHPC (2024, 2025, 2026) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2024 2025 2026 Graphique 2 : Variation en glissement de l’indice des divisions de janvier 2026 et février 2026 page2 Graphique 3 : Variation mensuelle de l’IHPC (2024,2025,2026) 2,5 1,5 0,5 Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -0,5 -1 -1,5 -2 -2,5 2025 Graphique 4: Variation en glissement annuel de l'inflation sous jacente (2024, 2025,2026) (Indice hors énergie et produits frais) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -1 -2 -3 2025 Graphique 5 : Variation en glissmement annuel de l’indice des produits alimentaires (2024, 2025, 2026) Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 5,
+        "chunk_total": 52,
+        "nb_chars": 126
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nFévr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Mars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 6,
+        "chunk_total": 52,
+        "nb_chars": 121
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nMars Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Avr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 7,
+        "chunk_total": 52,
+        "nb_chars": 116
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nAvr Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Mai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 8,
+        "chunk_total": 52,
+        "nb_chars": 112
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nMai Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Juin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 9,
+        "chunk_total": 52,
+        "nb_chars": 108
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nJuin Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Juil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 10,
+        "chunk_total": 52,
+        "nb_chars": 103
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nJuil Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Août Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 11,
+        "chunk_total": 52,
+        "nb_chars": 98
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nAoût Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Sept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 12,
+        "chunk_total": 52,
+        "nb_chars": 93
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nSept Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Oct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 13,
+        "chunk_total": 52,
+        "nb_chars": 88
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nOct Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Nov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 14,
+        "chunk_total": 52,
+        "nb_chars": 84
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nNov Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Déc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 15,
+        "chunk_total": 52,
+        "nb_chars": 80
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nDéc -2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "-2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 16,
+        "chunk_total": 52,
+        "nb_chars": 76
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n-2 -4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "-4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 17,
+        "chunk_total": 52,
+        "nb_chars": 73
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n-4 -6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "-6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 18,
+        "chunk_total": 52,
+        "nb_chars": 70
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n-6 2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 19,
+        "chunk_total": 52,
+        "nb_chars": 67
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n2025 page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "page2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 20,
+        "chunk_total": 52,
+        "nb_chars": 62
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\npage2 INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "INDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 21,
+        "chunk_total": 52,
+        "nb_chars": 56
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nINDICE HARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "HARMONISE DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 22,
+        "chunk_total": 52,
+        "nb_chars": 49
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nHARMONISE DES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "DES PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 23,
+        "chunk_total": 52,
+        "nb_chars": 39
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nDES PRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "PRIX A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 24,
+        "chunk_total": 52,
+        "nb_chars": 35
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nPRIX A LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "A LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 25,
+        "chunk_total": 52,
+        "nb_chars": 30
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nA LA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "LA CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 26,
+        "chunk_total": 52,
+        "nb_chars": 28
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nLA CONSOMMATION Février 2026"
+    },
+    {
+      "texte": "CONSOMMATION Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 27,
+        "chunk_total": 52,
+        "nb_chars": 25
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nCONSOMMATION Février 2026"
+    },
+    {
+      "texte": "Février 2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 28,
+        "chunk_total": 52,
+        "nb_chars": 12
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nFévrier 2026"
+    },
+    {
+      "texte": "2026",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 29,
+        "chunk_total": 52,
+        "nb_chars": 4
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n2026"
+    },
+    {
+      "texte": "EVOLUTION ANNUELLE\n\nEn février 2026, l’Indice Harmonisé des Prix à la Consommation (IHPC) augmente de 0,8 % par rapport au même\n\nmois de 2025.\n\nCette augmentation du niveau général des prix est principalement imputable aux hausses observées dans les divisions «\n\nRestaurants et services d'hébergement » (+4,1 %), « Logement, eau, électricité, gaz et autres combustibles » (+3,5 %), « Santé\n\n» (+2,0 %), « Boissons alcoolisées, tabac et stupéfiants » (+1,1 %), « Vêtements et chaussures » (+0,9 %), « Ameublement,\n\néquipement ménager et entretien courant du ménage » (+0,9 %), « Loisirs, sport et culture » (+0,8 %), « Transport » (+0,4 %)\n\net « Soins personnels, protection sociale et biens divers » (+0,1 %).\n\nToutefois, cette évolution haussière du niveau général des prix a été partiellement atténuée par les baisses enregistrées dans les",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 30,
+        "chunk_total": 52,
+        "nb_chars": 841
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nEVOLUTION ANNUELLE\n\nEn février 2026, l’Indice Harmonisé des Prix à la Consommation (IHPC) augmente de 0,8 % par rapport au même\n\nmois de 2025.\n\nCette augmentation du niveau général des prix est principalement imputable aux hausses observées dans les divisions «\n\nRestaurants et services d'hébergement » (+4,1 %), « Logement, eau, électricité, gaz et autres combustibles » (+3,5 %), « Santé\n\n» (+2,0 %), « Boissons alcoolisées, tabac et stupéfiants » (+1,1 %), « Vêtements et chaussures » (+0,9 %), « Ameublement,\n\néquipement ménager et entretien courant du ménage » (+0,9 %), « Loisirs, sport et culture » (+0,8 %), « Transport » (+0,4 %)\n\net « Soins personnels, protection sociale et biens divers » (+0,1 %).\n\nToutefois, cette évolution haussière du niveau général des prix a été partiellement atténuée par les baisses enregistrées dans les"
+    },
+    {
+      "texte": "divisions « Produits alimentaires et boissons non alcoolisées » (-1,2 %), « Services d'enseignement » (-3,8 %) et « Information\n\net communication » (-0,9 %).\n\nL’indicateur de convergence de l’UEMOA, calculé sur la base de la moyenne des indices des douze derniers mois\n\nrapportée à celle des douze mois précédents, ressort à -0,8 % en février 2026, contre 3,9 % en février 2025.\n\nEVOLUTION MENSUELLE\n\nEn février 2026, l’IHPC s’établit à 103,4 points, soit une hausse de 0,2 % par rapport au mois de janvier précédent.\n\nCette progression des prix, observée notamment dans les régions du Kadiogo (+0,6 %) et du Guiriko (+0,3 %), résulte de\n\nl’évolution contrastée des prix au niveau de plusieurs divisions de consommation dont la contribution est non nulle.\n\nAinsi, les prix des divisions « Produits alimentaires et boissons non alcoolisées » (+1,1 %), « Ameublement, équipement",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 31,
+        "chunk_total": 52,
+        "nb_chars": 876
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\ndivisions « Produits alimentaires et boissons non alcoolisées » (-1,2 %), « Services d'enseignement » (-3,8 %) et « Information\n\net communication » (-0,9 %).\n\nL’indicateur de convergence de l’UEMOA, calculé sur la base de la moyenne des indices des douze derniers mois\n\nrapportée à celle des douze mois précédents, ressort à -0,8 % en février 2026, contre 3,9 % en février 2025.\n\nEVOLUTION MENSUELLE\n\nEn février 2026, l’IHPC s’établit à 103,4 points, soit une hausse de 0,2 % par rapport au mois de janvier précédent.\n\nCette progression des prix, observée notamment dans les régions du Kadiogo (+0,6 %) et du Guiriko (+0,3 %), résulte de\n\nl’évolution contrastée des prix au niveau de plusieurs divisions de consommation dont la contribution est non nulle.\n\nAinsi, les prix des divisions « Produits alimentaires et boissons non alcoolisées » (+1,1 %), « Ameublement, équipement"
+    },
+    {
+      "texte": "ménager et entretien courant du ménage » (+0,3 %), « Information et communication » (+0,3 %) et « Transport » (+0,2 %) ont\n\naugmenté. Les contributions de ces divisions sont positives et respectivement de (+0,32 points), (+0,01 points), (+0,02 points)\n\net (+0,02 points). En revanche, ceux des divisions « Boissons alcoolisées, tabac et stupéfiants » (-5,0 %) et « Restaurants et\n\nservices d'hébergement » (-0,6 %) de contributions (-0,07 points) et (-0,12 points) ont diminué.\n\nLa hausse des prix dans la division « Produits alimentaires et boissons non alcoolisées » est principalement imputable à\n\nl’augmentation des prix des « Légumes-fruits, frais ou réfrigérés » (+13,8 %) et de la « Viande fraîche » (+5,5 %) en dépit de\n\nla baisse des prix des céréales (-1,1 %).\n\nS’agissant de la division « Ameublement, équipement ménager et entretien courant du ménage », l’augmentation des prix",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 32,
+        "chunk_total": 52,
+        "nb_chars": 889
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nménager et entretien courant du ménage » (+0,3 %), « Information et communication » (+0,3 %) et « Transport » (+0,2 %) ont\n\naugmenté. Les contributions de ces divisions sont positives et respectivement de (+0,32 points), (+0,01 points), (+0,02 points)\n\net (+0,02 points). En revanche, ceux des divisions « Boissons alcoolisées, tabac et stupéfiants » (-5,0 %) et « Restaurants et\n\nservices d'hébergement » (-0,6 %) de contributions (-0,07 points) et (-0,12 points) ont diminué.\n\nLa hausse des prix dans la division « Produits alimentaires et boissons non alcoolisées » est principalement imputable à\n\nl’augmentation des prix des « Légumes-fruits, frais ou réfrigérés » (+13,8 %) et de la « Viande fraîche » (+5,5 %) en dépit de\n\nla baisse des prix des céréales (-1,1 %).\n\nS’agissant de la division « Ameublement, équipement ménager et entretien courant du ménage », l’augmentation des prix"
+    },
+    {
+      "texte": "s’explique notamment par le renchérissement du « Savon de menage en morceaux » (+1,8 %) et des « Articles de nettoyage et\n\nd'entretien » (+0,2 %).\n\nDans la division « Transport », la hausse des prix est liée principalement à l’augmentation des prix des « Motocyclettes » (+1,3\n\n%) et des « Vélos » (+0,4 %).\n\nAu niveau de la division « Information et communication », la progression des prix est imputable à celle des « Services de\n\ncommunication mobile » (+0,3 %) et du « Poste téléphonique mobile moyenne gamme » (+5,3 %).\n\nÀ l’inverse, la baisse observée dans la division « Boissons alcoolisées, tabac et stupéfiants » s’explique par la diminution des\n\nprix du « Tabac local à chiquer » (-8,9 %) et de la « Bière traditionnelle (dolo) » (-5,8 %). De même, le recul des prix de la",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 33,
+        "chunk_total": 52,
+        "nb_chars": 782
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\ns’explique notamment par le renchérissement du « Savon de menage en morceaux » (+1,8 %) et des « Articles de nettoyage et\n\nd'entretien » (+0,2 %).\n\nDans la division « Transport », la hausse des prix est liée principalement à l’augmentation des prix des « Motocyclettes » (+1,3\n\n%) et des « Vélos » (+0,4 %).\n\nAu niveau de la division « Information et communication », la progression des prix est imputable à celle des « Services de\n\ncommunication mobile » (+0,3 %) et du « Poste téléphonique mobile moyenne gamme » (+5,3 %).\n\nÀ l’inverse, la baisse observée dans la division « Boissons alcoolisées, tabac et stupéfiants » s’explique par la diminution des\n\nprix du « Tabac local à chiquer » (-8,9 %) et de la « Bière traditionnelle (dolo) » (-5,8 %). De même, le recul des prix de la"
+    },
+    {
+      "texte": "division « Restaurants et services d'hébergement » est essentiellement lié à la baisse des prix du « Mouton grillé » (-12,2 %).\n\nEn ce qui concerne la volatilité des prix, les « produits frais » (+1,5 %) ainsi que les produits de l’énergie (+0,3 %) ont\n\ncontribué à la hausse des prix, en dépit du recul observé pour les produits hors énergie et hors produits frais (-0,2 %).\n\nPar ailleurs, qu’ils soient d’origine locale (+0,2 %), importée (+0,1 %), provenant de l’UEMOA (+0,2 %) ou hors UEMOA\n\n(+0,1 %), les produits ont globalement contribué à la hausse du niveau général des prix.\n\nSelon le secteur d’activité, la hausse des prix est principalement imputable aux produits du secteur primaire (+1,8 %), malgré\n\nla baisse observée pour ceux des secteurs secondaire (-0,1 %) et tertiaire (-0,3 %).",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 34,
+        "chunk_total": 52,
+        "nb_chars": 798
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\ndivision « Restaurants et services d'hébergement » est essentiellement lié à la baisse des prix du « Mouton grillé » (-12,2 %).\n\nEn ce qui concerne la volatilité des prix, les « produits frais » (+1,5 %) ainsi que les produits de l’énergie (+0,3 %) ont\n\ncontribué à la hausse des prix, en dépit du recul observé pour les produits hors énergie et hors produits frais (-0,2 %).\n\nPar ailleurs, qu’ils soient d’origine locale (+0,2 %), importée (+0,1 %), provenant de l’UEMOA (+0,2 %) ou hors UEMOA\n\n(+0,1 %), les produits ont globalement contribué à la hausse du niveau général des prix.\n\nSelon le secteur d’activité, la hausse des prix est principalement imputable aux produits du secteur primaire (+1,8 %), malgré\n\nla baisse observée pour ceux des secteurs secondaire (-0,1 %) et tertiaire (-0,3 %)."
+    },
+    {
+      "texte": "Enfin, selon la durabilité, les prix des biens durables et non durables ont progressé chacun de 0,5 % par rapport au mois de\n\njanvier, tandis que ceux des services ont reculé de 0,3 %.\n\npage3\n\nTableau 2 : Évolution du niveau des prix des biens et services de consommation dans les pays de\n\nl’UEMOA (Base 100 en 2023) *\n\nIndices pour les mois de Variations (en %) depuis\n\nPays Pondération\n\njanv-25 oct-25 nov-25 déc-25 janv-26 1 mois 3 mois 12 mois\n\nBénin 959 100,7 102,0 101,7 101,8 101,6 -0,2 -0,4 0,9\n\nBurkina-Faso 1 046 103,0 103,0 103,2 102,8 103,2 0,4 0,2 0,2\n\nCôte d’Ivoire 3 373 102,7 103,8 103,7 104,1 104,2 0,1 0,4 1,4\n\nGuinée-Bissau 97 106,7 103,1 103,0 103,4 103,4 0,1 0,4 -3,0\n\nMali 1 148 105,7 105,4 105,9 105,0 104,9 -0,2 -0,6 -0,8\n\nNiger 943 107,6 99,5 98,9 97,8 96,7 -1,2 -2,8 -10,2\n\nSénégal 1 827 101,6 104,4 104,3 103,3 102,0 -1,3 -2,4 0,4",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 35,
+        "chunk_total": 52,
+        "nb_chars": 857
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nEnfin, selon la durabilité, les prix des biens durables et non durables ont progressé chacun de 0,5 % par rapport au mois de\n\njanvier, tandis que ceux des services ont reculé de 0,3 %.\n\npage3\n\nTableau 2 : Évolution du niveau des prix des biens et services de consommation dans les pays de\n\nl’UEMOA (Base 100 en 2023) *\n\nIndices pour les mois de Variations (en %) depuis\n\nPays Pondération\n\njanv-25 oct-25 nov-25 déc-25 janv-26 1 mois 3 mois 12 mois\n\nBénin 959 100,7 102,0 101,7 101,8 101,6 -0,2 -0,4 0,9\n\nBurkina-Faso 1 046 103,0 103,0 103,2 102,8 103,2 0,4 0,2 0,2\n\nCôte d’Ivoire 3 373 102,7 103,8 103,7 104,1 104,2 0,1 0,4 1,4\n\nGuinée-Bissau 97 106,7 103,1 103,0 103,4 103,4 0,1 0,4 -3,0\n\nMali 1 148 105,7 105,4 105,9 105,0 104,9 -0,2 -0,6 -0,8\n\nNiger 943 107,6 99,5 98,9 97,8 96,7 -1,2 -2,8 -10,2\n\nSénégal 1 827 101,6 104,4 104,3 103,3 102,0 -1,3 -2,4 0,4"
+    },
+    {
+      "texte": "Togo 607 102,8 101,3 101,9 102,2 102,8 0,6 1,5 0,0\n\nUEMOA# 10 000 103,2 103,3 103,2 103,0 102,7 -0,3 -0,6 -0,5\n\nIndice Burkina - Faso, Mali et\n\n3 137 105,4 102,8 102,9 102,1 101,9 -0,2 -1,0 -3,3\n\nNiger\n\nSource : INSD\n\n(*) Les relevés des prix sont effectués sur l’ensemble du territoire de chaque Etat\n\nTableau 3 : Évolution des indices des nomenclatures secondaires au niveau national\n\nLibellé Pondération févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12mois\n\nGlobal 102,6 103,2 102,8 103,2 103,4 0,2 0,2 0,8\n\nproduits frais 2 101 106,1 107,4 103,9 103,9 105,4 1,5 -1,8 -0,7\n\nEnergie 1 043 101,8 103,5 104,8 104,7 105,0 0,3 1,4 3,1\n\nHors Energie et produits frais 6 856 101,7 101,9 102,1 102,8 102,6 -0,2 0,7 0,9\n\nLocal 6 476 103,0 104,2 103,5 104,2 104,4 0,2 0,2 1,4\n\nImporté 3 524 101,9 101,3 101,4 101,5 101,6 0,1 0,4 -0,3\n\nPrimaire 1 779 107,8 110,3 107,0 106,9 108,8 1,8 -1,3 0,9",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 36,
+        "chunk_total": 52,
+        "nb_chars": 892
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nTogo 607 102,8 101,3 101,9 102,2 102,8 0,6 1,5 0,0\n\nUEMOA# 10 000 103,2 103,3 103,2 103,0 102,7 -0,3 -0,6 -0,5\n\nIndice Burkina - Faso, Mali et\n\n3 137 105,4 102,8 102,9 102,1 101,9 -0,2 -1,0 -3,3\n\nNiger\n\nSource : INSD\n\n(*) Les relevés des prix sont effectués sur l’ensemble du territoire de chaque Etat\n\nTableau 3 : Évolution des indices des nomenclatures secondaires au niveau national\n\nLibellé Pondération févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12mois\n\nGlobal 102,6 103,2 102,8 103,2 103,4 0,2 0,2 0,8\n\nproduits frais 2 101 106,1 107,4 103,9 103,9 105,4 1,5 -1,8 -0,7\n\nEnergie 1 043 101,8 103,5 104,8 104,7 105,0 0,3 1,4 3,1\n\nHors Energie et produits frais 6 856 101,7 101,9 102,1 102,8 102,6 -0,2 0,7 0,9\n\nLocal 6 476 103,0 104,2 103,5 104,2 104,4 0,2 0,2 1,4\n\nImporté 3 524 101,9 101,3 101,4 101,5 101,6 0,1 0,4 -0,3\n\nPrimaire 1 779 107,8 110,3 107,0 106,9 108,8 1,8 -1,3 0,9"
+    },
+    {
+      "texte": "Secondaire 4 640 101,6 101,3 101,5 101,8 101,7 -0,1 0,4 0,1\n\nTertiaire 3 581 101,4 102,2 102,3 103,4 103,0 -0,3 0,9 1,6\n\nNon durable 5 030 104,3 104,7 103,8 104,0 104,5 0,5 -0,2 0,2\n\nSemi durable 813 100,0 100,4 100,6 100,6 100,6 0,0 0,2 0,7\n\nDurable 576 99,9 99,9 99,8 100,0 100,6 0,5 0,7 0,7\n\nService 3 581 101,4 102,2 102,3 103,4 103,0 -0,3 0,9 1,6\n\nOrigine UEMOA 6 866 103,0 104,2 103,6 104,3 104,5 0,2 0,2 1,4\n\nOrigine Hors UEMOA 3 134 101,7 100,9 101,0 101,0 101,2 0,1 0,3 -0,6\n\npage4\n\nTableau 4 : Prix moyens de quelques produits essentiels au niveau régional en février 2026\n\nBANKUITANNOUNYA\n\nKADIOGO GUIRIKO GOULMOU YAADGA LIPTAKO KUILSE OUBRI NAKAMBE NAZINON NANDO DJORO\n\nPRODUITS Unités (Boucle du N\n\n(Centre) (Hauts bassins) (Est) (Nord) (Sahel) (Centre-Nord) (Plateau Central) (Centre-Est) (Centre-Sud) (Centre-Ouest) (Sud-Ouest)\n\nMouhoun) (Cascades)",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 37,
+        "chunk_total": 52,
+        "nb_chars": 863
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nSecondaire 4 640 101,6 101,3 101,5 101,8 101,7 -0,1 0,4 0,1\n\nTertiaire 3 581 101,4 102,2 102,3 103,4 103,0 -0,3 0,9 1,6\n\nNon durable 5 030 104,3 104,7 103,8 104,0 104,5 0,5 -0,2 0,2\n\nSemi durable 813 100,0 100,4 100,6 100,6 100,6 0,0 0,2 0,7\n\nDurable 576 99,9 99,9 99,8 100,0 100,6 0,5 0,7 0,7\n\nService 3 581 101,4 102,2 102,3 103,4 103,0 -0,3 0,9 1,6\n\nOrigine UEMOA 6 866 103,0 104,2 103,6 104,3 104,5 0,2 0,2 1,4\n\nOrigine Hors UEMOA 3 134 101,7 100,9 101,0 101,0 101,2 0,1 0,3 -0,6\n\npage4\n\nTableau 4 : Prix moyens de quelques produits essentiels au niveau régional en février 2026\n\nBANKUITANNOUNYA\n\nKADIOGO GUIRIKO GOULMOU YAADGA LIPTAKO KUILSE OUBRI NAKAMBE NAZINON NANDO DJORO\n\nPRODUITS Unités (Boucle du N\n\n(Centre) (Hauts bassins) (Est) (Nord) (Sahel) (Centre-Nord) (Plateau Central) (Centre-Est) (Centre-Sud) (Centre-Ouest) (Sud-Ouest)\n\nMouhoun) (Cascades)"
+    },
+    {
+      "texte": "Riz brisé local ou importé Sac de 25 Kg 13 787 12 496 13 000 14 374 15 492 13 748 11 175 13 831 14 000 13 748 14 000 12 321 11 866\n\nRiz importé Kg 504 497 600 450 500 600 520 474 500 500 500 516 500\n\nRiz importé1 Sac de 50 kg 20 304 19 059 24 000 18 748 21 832 23 249 21 071 18 748 21 000 19 235 20 000 25 000 20 322\n\nRiz local blanc longs grains Sac de 25 kg 12 075 11 274 13 000 12 500 11 000 11 664 10 817 11 000 11 000 13 500 10 488 12 000 13 000\n\nMaïs blanc Kg 215 159 320 203 288 308 222 176 187 186 175 155 212\n\nMaïs blanc1 Sac de 100 kg 19 078 15 732 34 000 18 000 25 000 27 166 17 500 17 500 22 000 19 248 16 495 13 665 14 665\n\nMil (petit mil) Kg 319 316 354 308 364 444 296 259 269 271 224 275 376\n\nMil (petit mil)1 Sac de 100 kg 28 944 26 833 40 000 27 000 30 000 36 333 26 000 30 000 30 000 26 458 21 000 29 663 25 000\n\nSorgho blanc Kg 295 252 311 197 297 316 237 275 159 229 177 270 403",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 38,
+        "chunk_total": 52,
+        "nb_chars": 899
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nRiz brisé local ou importé Sac de 25 Kg 13 787 12 496 13 000 14 374 15 492 13 748 11 175 13 831 14 000 13 748 14 000 12 321 11 866\n\nRiz importé Kg 504 497 600 450 500 600 520 474 500 500 500 516 500\n\nRiz importé1 Sac de 50 kg 20 304 19 059 24 000 18 748 21 832 23 249 21 071 18 748 21 000 19 235 20 000 25 000 20 322\n\nRiz local blanc longs grains Sac de 25 kg 12 075 11 274 13 000 12 500 11 000 11 664 10 817 11 000 11 000 13 500 10 488 12 000 13 000\n\nMaïs blanc Kg 215 159 320 203 288 308 222 176 187 186 175 155 212\n\nMaïs blanc1 Sac de 100 kg 19 078 15 732 34 000 18 000 25 000 27 166 17 500 17 500 22 000 19 248 16 495 13 665 14 665\n\nMil (petit mil) Kg 319 316 354 308 364 444 296 259 269 271 224 275 376\n\nMil (petit mil)1 Sac de 100 kg 28 944 26 833 40 000 27 000 30 000 36 333 26 000 30 000 30 000 26 458 21 000 29 663 25 000\n\nSorgho blanc Kg 295 252 311 197 297 316 237 275 159 229 177 270 403"
+    },
+    {
+      "texte": "Sorgho blanc1 Sac de 100 kg 26 206 22 246 37 000 22 000 25 000 27 000 17 500 30 000 20 000 22 136 20 000 28 166 20 000\n\nFarine de blé Kg 531 542 524 474 583 500 500 500 500 600 500 500 500\n\nViande de bœuf avec os Kg 2 688 2 328 3 573 3 132 3 066 2 647 3 303 2 855 2 501 1 951 2 717 2 941 3 672\n\nViande fraîche de mouton avec os Kg 3 637 2 974 4 373 2 966 5 245 3 661 3 078 3 751 4 126 3 709 2 529 3 128 4 529\n\nCarpe fraîche Kg 1 931 2 057 2 000 2 000 3 000 2 133 1 897 1 897 2 000 2 349 2 081 2 500 2 000\n\nChinchard frais Kg 1 348 1 400 1 300 1 249 1 500 1 475 1 400 1 500 1 300 1 300 1 396 1 415 1 349\n\nHuile d'arachide Litre 1 308 1 039 1 732 1 400 2 000 1 008 1 000 1 775 1 225 1 100 1 000 1 300 1 016\n\nHuile de coton Litre 1 008 1 139 1 600 1 400 1 200 1 125 1 084 1 620 1 049 1 100 1 000 1 100 1 049\n\nChou vert Kg 261 311 360 283 403 440 230 238 156 261 262 298 435",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 39,
+        "chunk_total": 52,
+        "nb_chars": 870
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nSorgho blanc1 Sac de 100 kg 26 206 22 246 37 000 22 000 25 000 27 000 17 500 30 000 20 000 22 136 20 000 28 166 20 000\n\nFarine de blé Kg 531 542 524 474 583 500 500 500 500 600 500 500 500\n\nViande de bœuf avec os Kg 2 688 2 328 3 573 3 132 3 066 2 647 3 303 2 855 2 501 1 951 2 717 2 941 3 672\n\nViande fraîche de mouton avec os Kg 3 637 2 974 4 373 2 966 5 245 3 661 3 078 3 751 4 126 3 709 2 529 3 128 4 529\n\nCarpe fraîche Kg 1 931 2 057 2 000 2 000 3 000 2 133 1 897 1 897 2 000 2 349 2 081 2 500 2 000\n\nChinchard frais Kg 1 348 1 400 1 300 1 249 1 500 1 475 1 400 1 500 1 300 1 300 1 396 1 415 1 349\n\nHuile d'arachide Litre 1 308 1 039 1 732 1 400 2 000 1 008 1 000 1 775 1 225 1 100 1 000 1 300 1 016\n\nHuile de coton Litre 1 008 1 139 1 600 1 400 1 200 1 125 1 084 1 620 1 049 1 100 1 000 1 100 1 049\n\nChou vert Kg 261 311 360 283 403 440 230 238 156 261 262 298 435"
+    },
+    {
+      "texte": "Feuilles fraîches d'oseille Kg 385 279 1 187 738 451 607 292 422 350 401 293 148 485\n\nAubergine locale 'koumba' Kg 372 407 480 396 348 730 344 326 460 389 309 455 396\n\nGombo frais Kg 1 346 766 1 046 1 976 571 1 292 938 533 862 801 885 1 261 2 859\n\nTomates rondes Kg 611 546 733 365 627 545 523 240 396 387 389 582 725\n\nOignon frais rond Kg 440 544 786 429 867 399 437 439 425 331 319 568 600\n\nHaricot local blanc Kg 527 522 618 556 579 654 403 393 488 445 489 514 570\n\nSucre importé en morceau blanc/blond Kg 900 900 900 900 900 900 900 900 900 900 900 900 900\n\nBois de chauffe arbre de brousse Kg 77 55 153 268 100 89 61 153 61 47 63 48 29\n\nCharbon de bois Kg 254 183 306 343 339 229 363 391 196 214 211 171 189\n\nChargement d'une bouteille de 12,5kg Unité 5 563 5 500 6 000 6 000 8 000 6 000 5 800 6 000 5 750 5 750 6 000 5 750 6 000",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 40,
+        "chunk_total": 52,
+        "nb_chars": 834
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nFeuilles fraîches d'oseille Kg 385 279 1 187 738 451 607 292 422 350 401 293 148 485\n\nAubergine locale 'koumba' Kg 372 407 480 396 348 730 344 326 460 389 309 455 396\n\nGombo frais Kg 1 346 766 1 046 1 976 571 1 292 938 533 862 801 885 1 261 2 859\n\nTomates rondes Kg 611 546 733 365 627 545 523 240 396 387 389 582 725\n\nOignon frais rond Kg 440 544 786 429 867 399 437 439 425 331 319 568 600\n\nHaricot local blanc Kg 527 522 618 556 579 654 403 393 488 445 489 514 570\n\nSucre importé en morceau blanc/blond Kg 900 900 900 900 900 900 900 900 900 900 900 900 900\n\nBois de chauffe arbre de brousse Kg 77 55 153 268 100 89 61 153 61 47 63 48 29\n\nCharbon de bois Kg 254 183 306 343 339 229 363 391 196 214 211 171 189\n\nChargement d'une bouteille de 12,5kg Unité 5 563 5 500 6 000 6 000 8 000 6 000 5 800 6 000 5 750 5 750 6 000 5 750 6 000"
+    },
+    {
+      "texte": "Chargement d'une bouteille de 6 kg Unité 2 125 2 000 2 250 2 250 4 000 2 500 2 300 2 500 2 500 2 150 2 240 2 200 2 240\n\nEssence super Litre 850 845 864 861 867 856 853 861 856 852 856 850 858\n\nGaz-oil Litre 675 670 689 686 692 681 678 686 681 677 681 675 683\n\npage5\n\nTableau 5 : Évolution des indices nationaux suivant les groupes de la NCOA-IHPC\n\nVariation (%) depuis\n\nLibellé Pondération févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12 mois\n\n0101 PRODUITS ALIMENTAIRES 2 661 106,3 105,9 103,2 103,2 104,4 1,2 -1,5 -1,8\n\n0102 BOISSONS NON ALCOOLISÉES 162 100,6 107,4 108,0 108,6 109,1 0,5 1,5 8,5\n\n0103 SERVICES DE TRANSFORMATION D'ALIMENTS ET DE BOISSONS NON ALCOOLIS8É1ES 97,8 97,3 97,3 97,3 97,3 0,0 0,0 -0,5\n\n0201 BOISSONS ALCOOLISÉES 56 104,6 104,5 103,2 109,9 108,2 -1,6 3,5 3,4\n\n0203 TABAC 59 115,0 113,1 114,3 122,2 111,9 -8,4 -1,0 -2,6",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 41,
+        "chunk_total": 52,
+        "nb_chars": 853
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nChargement d'une bouteille de 6 kg Unité 2 125 2 000 2 250 2 250 4 000 2 500 2 300 2 500 2 500 2 150 2 240 2 200 2 240\n\nEssence super Litre 850 845 864 861 867 856 853 861 856 852 856 850 858\n\nGaz-oil Litre 675 670 689 686 692 681 678 686 681 677 681 675 683\n\npage5\n\nTableau 5 : Évolution des indices nationaux suivant les groupes de la NCOA-IHPC\n\nVariation (%) depuis\n\nLibellé Pondération févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois /12 mois\n\n0101 PRODUITS ALIMENTAIRES 2 661 106,3 105,9 103,2 103,2 104,4 1,2 -1,5 -1,8\n\n0102 BOISSONS NON ALCOOLISÉES 162 100,6 107,4 108,0 108,6 109,1 0,5 1,5 8,5\n\n0103 SERVICES DE TRANSFORMATION D'ALIMENTS ET DE BOISSONS NON ALCOOLIS8É1ES 97,8 97,3 97,3 97,3 97,3 0,0 0,0 -0,5\n\n0201 BOISSONS ALCOOLISÉES 56 104,6 104,5 103,2 109,9 108,2 -1,6 3,5 3,4\n\n0203 TABAC 59 115,0 113,1 114,3 122,2 111,9 -8,4 -1,0 -2,6"
+    },
+    {
+      "texte": "0204 STUPÉFIANTS 8 83,9 86,0 89,9 99,8 99,0 -0,8 15,0 18,0\n\n0301 VÊTEMENTS 421 100,0 100,7 100,9 101,0 101,0 0,0 0,3 0,9\n\n0302 CHAUSSURES 133 99,9 100,6 100,7 100,7 100,7 0,0 0,1 0,8\n\n0401 LOCATIONS RÉELLES POUR LE LOGEMENT 127 95,7 94,8 94,8 95,5 94,5 -1,0 -0,3 -1,3\n\n0403 ENTRETIEN, RÉPARATION ET SÉCURITÉ DU LOGEMENT 307 103,4 103,5 103,5 103,6 102,8 -0,7 -0,6 -0,5\n\n0404 ALIMENTATION EN EAU ET SERVICES DIVERS RELATIFS AU LOGEMENT 76 100,1 100,5 100,5 100,5 101,0 0,4 0,4 0,8\n\n0405 ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES 313 101,6 106,9 111,2 110,5 111,7 1,0 4,5 9,9\n\n0501 MEUBLES, ARTICLES D'AMEUBLEMENT ET AUTRES REVETEMENTS DE SOL 38 100,4 102,0 101,6 101,6 101,6 0,0 -0,4 1,2\n\n0502 TEXTILES MÉNAGERS 11 100,5 100,4 100,4 100,4 100,4 0,0 0,0 -0,1\n\n0503 APPAREILS MÉNAGERS 16 99,7 99,7 99,7 99,7 99,7 0,0 -0,1 0,0",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 42,
+        "chunk_total": 52,
+        "nb_chars": 820
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n0204 STUPÉFIANTS 8 83,9 86,0 89,9 99,8 99,0 -0,8 15,0 18,0\n\n0301 VÊTEMENTS 421 100,0 100,7 100,9 101,0 101,0 0,0 0,3 0,9\n\n0302 CHAUSSURES 133 99,9 100,6 100,7 100,7 100,7 0,0 0,1 0,8\n\n0401 LOCATIONS RÉELLES POUR LE LOGEMENT 127 95,7 94,8 94,8 95,5 94,5 -1,0 -0,3 -1,3\n\n0403 ENTRETIEN, RÉPARATION ET SÉCURITÉ DU LOGEMENT 307 103,4 103,5 103,5 103,6 102,8 -0,7 -0,6 -0,5\n\n0404 ALIMENTATION EN EAU ET SERVICES DIVERS RELATIFS AU LOGEMENT 76 100,1 100,5 100,5 100,5 101,0 0,4 0,4 0,8\n\n0405 ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES 313 101,6 106,9 111,2 110,5 111,7 1,0 4,5 9,9\n\n0501 MEUBLES, ARTICLES D'AMEUBLEMENT ET AUTRES REVETEMENTS DE SOL 38 100,4 102,0 101,6 101,6 101,6 0,0 -0,4 1,2\n\n0502 TEXTILES MÉNAGERS 11 100,5 100,4 100,4 100,4 100,4 0,0 0,0 -0,1\n\n0503 APPAREILS MÉNAGERS 16 99,7 99,7 99,7 99,7 99,7 0,0 -0,1 0,0"
+    },
+    {
+      "texte": "0504 VERRERIE VAISSELLE ET USTENSILES DE MÉNAGE 21 97,8 97,8 97,8 97,6 97,6 0,0 -0,2 -0,2\n\n0505 OUTILS ET ÉQUIPEMENT POUR LA MAISON ET LE JARDIN 23 98,3 100,0 100,2 100,2 100,2 0,0 0,1 1,9\n\n0506 BIENS ET SERVICES POUR L'ENTRETIEN COURANT DU MÉNAGE 161 101,4 102,1 102,0 102,0 102,5 0,4 0,4 1,1\n\n0601 MÉDICAMENTS ET PRODUITS DE SANTÉ 450 100,7 101,2 103,5 103,5 103,5 0,0 2,2 2,8\n\n0602 SERVICES DE SOINS EXTERNES 26 86,4 85,8 85,8 85,8 85,8 0,0 0,0 -0,7\n\n0603 SERVICES DE SOINS HOSPITALIERS 105 106,0 106,0 106,0 106,0 106,0 0,0 0,0 0,0\n\n0604 AUTRES SERVICES DE SANTÉ 115 101,6 103,2 103,2 103,2 103,2 0,0 0,0 1,6\n\n0701 ACHAT DE VÉHICULES 404 100,6 100,6 100,6 100,9 101,4 0,6 0,8 0,9\n\n0702 FONCTIONNEMENT DES ÉQUIPEMENTS DE TRANSPORT PERSONNEL 873 101,9 102,0 102,0 102,0 102,0 0,0 0,0 0,1\n\n0703 SERVICES DE TRANSPORT DE PASSAGERS 59 100,4 99,6 100,1 99,8 100,4 0,6 0,8 0,0",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 43,
+        "chunk_total": 52,
+        "nb_chars": 873
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n0504 VERRERIE VAISSELLE ET USTENSILES DE MÉNAGE 21 97,8 97,8 97,8 97,6 97,6 0,0 -0,2 -0,2\n\n0505 OUTILS ET ÉQUIPEMENT POUR LA MAISON ET LE JARDIN 23 98,3 100,0 100,2 100,2 100,2 0,0 0,1 1,9\n\n0506 BIENS ET SERVICES POUR L'ENTRETIEN COURANT DU MÉNAGE 161 101,4 102,1 102,0 102,0 102,5 0,4 0,4 1,1\n\n0601 MÉDICAMENTS ET PRODUITS DE SANTÉ 450 100,7 101,2 103,5 103,5 103,5 0,0 2,2 2,8\n\n0602 SERVICES DE SOINS EXTERNES 26 86,4 85,8 85,8 85,8 85,8 0,0 0,0 -0,7\n\n0603 SERVICES DE SOINS HOSPITALIERS 105 106,0 106,0 106,0 106,0 106,0 0,0 0,0 0,0\n\n0604 AUTRES SERVICES DE SANTÉ 115 101,6 103,2 103,2 103,2 103,2 0,0 0,0 1,6\n\n0701 ACHAT DE VÉHICULES 404 100,6 100,6 100,6 100,9 101,4 0,6 0,8 0,9\n\n0702 FONCTIONNEMENT DES ÉQUIPEMENTS DE TRANSPORT PERSONNEL 873 101,9 102,0 102,0 102,0 102,0 0,0 0,0 0,1\n\n0703 SERVICES DE TRANSPORT DE PASSAGERS 59 100,4 99,6 100,1 99,8 100,4 0,6 0,8 0,0"
+    },
+    {
+      "texte": "0704 SERVICES DE TRANSPORT DE MARCHANDISES 0,0 99,8 99,8 99,8 99,8 99,8 0,0 0,0 0,0\n\n0801 ÉQUIPEMENT D'INFORMATION ET DE COMMUNICATION 113 97,5 96,7 96,6 96,6 97,4 0,8 0,7 -0,2\n\n0802 LOGICIELS HORS JEUX 8 100,2 98,7 98,7 99,3 99,3 0,0 0,6 -0,9\n\n0803 SERVICES D'INFORMATION ET DE COMMUNICATION 688 101,4 96,9 96,9 100,1 100,3 0,2 3,5 -1,1\n\n0901 ARTICLES DE LOISIRS DURABLES 3 104,3 102,2 100,8 100,8 100,8 0,0 -1,4 -3,4\n\n0902 AUTRES BIENS DE LOISIRS 1 101,1 100,9 100,6 100,6 100,6 0,0 -0,3 -0,5\n\n0903 JARDINS ET ANIMAUX 2 105,7 105,6 105,5 105,5 105,5 0,0 -0,1 -0,1\n\n0904 SERVICES DE LOISIRS 10 101,7 102,3 102,3 102,3 102,3 0,0 0,0 0,6\n\n0905 BIENS CULTURELS 3 96,6 96,6 96,6 96,6 96,6 0,0 0,0 0,0\n\n0906 SERVICES CULTURELS 1 98,9 98,9 98,9 98,9 98,9 0,0 0,0 0,0\n\n0907 JOURNAUX, LIVRES ET PAPETERIE 75 99,5 100,4 100,4 100,4 100,4 0,0 0,0 1,0",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 44,
+        "chunk_total": 52,
+        "nb_chars": 841
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n0704 SERVICES DE TRANSPORT DE MARCHANDISES 0,0 99,8 99,8 99,8 99,8 99,8 0,0 0,0 0,0\n\n0801 ÉQUIPEMENT D'INFORMATION ET DE COMMUNICATION 113 97,5 96,7 96,6 96,6 97,4 0,8 0,7 -0,2\n\n0802 LOGICIELS HORS JEUX 8 100,2 98,7 98,7 99,3 99,3 0,0 0,6 -0,9\n\n0803 SERVICES D'INFORMATION ET DE COMMUNICATION 688 101,4 96,9 96,9 100,1 100,3 0,2 3,5 -1,1\n\n0901 ARTICLES DE LOISIRS DURABLES 3 104,3 102,2 100,8 100,8 100,8 0,0 -1,4 -3,4\n\n0902 AUTRES BIENS DE LOISIRS 1 101,1 100,9 100,6 100,6 100,6 0,0 -0,3 -0,5\n\n0903 JARDINS ET ANIMAUX 2 105,7 105,6 105,5 105,5 105,5 0,0 -0,1 -0,1\n\n0904 SERVICES DE LOISIRS 10 101,7 102,3 102,3 102,3 102,3 0,0 0,0 0,6\n\n0905 BIENS CULTURELS 3 96,6 96,6 96,6 96,6 96,6 0,0 0,0 0,0\n\n0906 SERVICES CULTURELS 1 98,9 98,9 98,9 98,9 98,9 0,0 0,0 0,0\n\n0907 JOURNAUX, LIVRES ET PAPETERIE 75 99,5 100,4 100,4 100,4 100,4 0,0 0,0 1,0"
+    },
+    {
+      "texte": "0908 VOYAGES À FORFAIT 10 99,1 99,9 99,9 101,0 101,0 0,1 1,1 2,0\n\n1001 PETITE ENFANCE ET ENSEIGNEMENT PRIMAIRE 71 103,1 99,0 99,0 86,1 85,5 -0,7 -13,6 -17,0\n\n1002 ENSEIGNEMENT SECONDAIRE 122 100,6 101,4 101,4 101,4 101,4 0,0 0,0 0,7\n\n1003 ENSEIGNEMENT POSTSECONDAIRE NON SUPÉRIEUR 4 99,6 99,6 99,6 99,6 99,6 0,0 0,0 0,0\n\n1004 ENSEIGNEMENT TERTIAIRE 23 100,1 100,7 100,7 100,7 100,7 0,0 0,0 0,6\n\n1005 ENSEIGNEMENT NON DÉFINIE PAR NIVEAU 17 101,8 115,8 115,8 115,8 115,8 0,0 0,0 13,7\n\n1101 SERVICES DE SERVICE DE NOURRITURE ET DE BOISSONS 1 812 101,9 105,1 105,4 106,8 106,1 -0,6 0,9 4,1\n\n1102 SERVICES D'HÉBERGEMENT 2 99,4 99,8 99,8 99,8 99,8 0,0 0,0 0,4\n\n1201 ASSURANCE 8 99,2 99,2 99,2 99,2 99,2 0,0 0,0 0,0\n\n1202 SERVICES FINANCIERS 1 100,0 100,0 100,0 100,0 100,0 0,0 0,0 0,0\n\n1301 BIENS ET SERVICES POUR SOINS PERSONNELS 271 101,4 101,4 101,4 101,5 101,5 0,0 0,1 0,1",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 45,
+        "chunk_total": 52,
+        "nb_chars": 870
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n0908 VOYAGES À FORFAIT 10 99,1 99,9 99,9 101,0 101,0 0,1 1,1 2,0\n\n1001 PETITE ENFANCE ET ENSEIGNEMENT PRIMAIRE 71 103,1 99,0 99,0 86,1 85,5 -0,7 -13,6 -17,0\n\n1002 ENSEIGNEMENT SECONDAIRE 122 100,6 101,4 101,4 101,4 101,4 0,0 0,0 0,7\n\n1003 ENSEIGNEMENT POSTSECONDAIRE NON SUPÉRIEUR 4 99,6 99,6 99,6 99,6 99,6 0,0 0,0 0,0\n\n1004 ENSEIGNEMENT TERTIAIRE 23 100,1 100,7 100,7 100,7 100,7 0,0 0,0 0,6\n\n1005 ENSEIGNEMENT NON DÉFINIE PAR NIVEAU 17 101,8 115,8 115,8 115,8 115,8 0,0 0,0 13,7\n\n1101 SERVICES DE SERVICE DE NOURRITURE ET DE BOISSONS 1 812 101,9 105,1 105,4 106,8 106,1 -0,6 0,9 4,1\n\n1102 SERVICES D'HÉBERGEMENT 2 99,4 99,8 99,8 99,8 99,8 0,0 0,0 0,4\n\n1201 ASSURANCE 8 99,2 99,2 99,2 99,2 99,2 0,0 0,0 0,0\n\n1202 SERVICES FINANCIERS 1 100,0 100,0 100,0 100,0 100,0 0,0 0,0 0,0\n\n1301 BIENS ET SERVICES POUR SOINS PERSONNELS 271 101,4 101,4 101,4 101,5 101,5 0,0 0,1 0,1"
+    },
+    {
+      "texte": "1302 EFFETS PERSONNELS NCA 41 99,7 100,2 100,2 100,2 100,2 0,0 0,1 0,6\n\n1303 PROTECTION SOCIALE 2 165,6 165,7 165,7 165,7 165,7 0,0 0,0 0,1\n\n1309 AUTRES SERVICES 5 100,6 100,4 100,4 100,4 100,4 0,0 0,0 -0,2\n\nCOORDONNEES DE L'INSD\n\nAdresse : Institut National de la Statistique et de la Démographie: Avenue Pascal Zagré, Ouaga 2000, 01 BP 374 Ouaga 01\n\nTél : (226) 25 49 85 00 E-mail : insdbf@insd,bf Site web: www,insd,bf\n\nDirecteur de la publication : Toubou RIPAMA\n\nRédacteur en chef: Sibi GUISSOU\n\nRédacteurs : Paul TIENDREBEOGO, KY Kankou Fatima Imelda KY, KABORE Aboudouramane\n\nEquipe centrale : YAMEOGO Cyrus, Boukary TARNAGDA, YONLI Prosper, ILBOUDO Yéro Jérome\n\nEquipe de Koudougou: TAMBOURA Adama et NABAYAOGO Issoufou TIENDREBEOGO Samira, YO Bebou Karim, BASSINGA Barthélémy, GOUNABOU Nabaré Samuel",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 46,
+        "chunk_total": 52,
+        "nb_chars": 808
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\n1302 EFFETS PERSONNELS NCA 41 99,7 100,2 100,2 100,2 100,2 0,0 0,1 0,6\n\n1303 PROTECTION SOCIALE 2 165,6 165,7 165,7 165,7 165,7 0,0 0,0 0,1\n\n1309 AUTRES SERVICES 5 100,6 100,4 100,4 100,4 100,4 0,0 0,0 -0,2\n\nCOORDONNEES DE L'INSD\n\nAdresse : Institut National de la Statistique et de la Démographie: Avenue Pascal Zagré, Ouaga 2000, 01 BP 374 Ouaga 01\n\nTél : (226) 25 49 85 00 E-mail : insdbf@insd,bf Site web: www,insd,bf\n\nDirecteur de la publication : Toubou RIPAMA\n\nRédacteur en chef: Sibi GUISSOU\n\nRédacteurs : Paul TIENDREBEOGO, KY Kankou Fatima Imelda KY, KABORE Aboudouramane\n\nEquipe centrale : YAMEOGO Cyrus, Boukary TARNAGDA, YONLI Prosper, ILBOUDO Yéro Jérome\n\nEquipe de Koudougou: TAMBOURA Adama et NABAYAOGO Issoufou TIENDREBEOGO Samira, YO Bebou Karim, BASSINGA Barthélémy, GOUNABOU Nabaré Samuel"
+    },
+    {
+      "texte": "Equipe de Manga: ADIANABA Christian et BAMOGO Adama Equipe de Kaya: ILBOUDO K Regis et BAMOGO Mariam ; Equipe de Ziniaré: OUATTARA Maténé et ZONO Bibata\n\nEquipe de Tenkodogo: PASGO Issoufou et SEBGO Hyacinthe Equipe de Bobo: Bengaly Labassé, Koutou Ousmane, COULIBALY Hamidou, Ly Abdoul Kadri\n\nEquipe de Dédougou: DIANDA Zakaria et ZALLE Djiblirou Equipe de Dori: Kindo Mamadou, Togo Karim\n\nEquipe de Banfora: TRAORE Losanga et SOMA/OUATTARA Assata Equipe de Fada: Sanfo Hamado, THIOMBIANO Yempabou Arsène\n\nEquipe de Gaoua: CESSOUMA Prudence et KAMBIRE Prosper Equipe de Ouahigouya:Hien Sanibouor, Diara Sombié Salif\n\nPour toute information complémentaire, bien vouloir s'adresser au service des prix à la consommation, Direction de l'Administration et des Finances, tél, (226) 25 49 85 00, email : insdbf@insd,bf\n\npage6",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 47,
+        "chunk_total": 52,
+        "nb_chars": 820
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nEquipe de Manga: ADIANABA Christian et BAMOGO Adama Equipe de Kaya: ILBOUDO K Regis et BAMOGO Mariam ; Equipe de Ziniaré: OUATTARA Maténé et ZONO Bibata\n\nEquipe de Tenkodogo: PASGO Issoufou et SEBGO Hyacinthe Equipe de Bobo: Bengaly Labassé, Koutou Ousmane, COULIBALY Hamidou, Ly Abdoul Kadri\n\nEquipe de Dédougou: DIANDA Zakaria et ZALLE Djiblirou Equipe de Dori: Kindo Mamadou, Togo Karim\n\nEquipe de Banfora: TRAORE Losanga et SOMA/OUATTARA Assata Equipe de Fada: Sanfo Hamado, THIOMBIANO Yempabou Arsène\n\nEquipe de Gaoua: CESSOUMA Prudence et KAMBIRE Prosper Equipe de Ouahigouya:Hien Sanibouor, Diara Sombié Salif\n\nPour toute information complémentaire, bien vouloir s'adresser au service des prix à la consommation, Direction de l'Administration et des Finances, tél, (226) 25 49 85 00, email : insdbf@insd,bf\n\npage6"
+    },
+    {
+      "texte": "TABLEAU 6 : EVOLUTION DES INDICES DANS LES DEUX PLUS GRANDES REGIONS DU BURKINA FASO\n\nA. REGION DU KADIOGO Indices des mois de Variation en %\n\nContrib\n\nution\n\nPondér févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois/12mois\n\nmensue\n\nation\n\nllle en\n\nINDICE GLOBAL 10000 100,6 101,4 100,8 100,9 101,4 0,6 0,6 0,0 0,9\n\nProduits alimentaires et boissons non alcoolisées 2359 103,8 104,5 101,7 101,0 102,5 0,3 1,5 -2,0 -1,3\n\nBoissons alcoolisées, tabac et stupéfiants 98 102,2 103,7 99,5 104,5 104,4 0,0 -0,1 0,7 2,1\n\nVêtements et chaussures 478 100,7 101,3 101,4 101,4 101,4 0,0 0,0 0,1 0,7\n\nLogement, eau, électricité, gaz et autres\n\n965 102,0 101,9 102,2 104,0 103,7 0,0 -0,3 1,8 1,7\n\ncombustibles\n\nAmeublement, équipement ménager et entretien\n\n239 101,0 101,1 101,0 101,1 101,1 0,0 0,0 0,0 0,1\n\ncourant du ménage\n\nSanté 553 98,0 97,8 97,7 97,7 97,7 0,0 0,0 -0,1 -0,2",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 48,
+        "chunk_total": 52,
+        "nb_chars": 866
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nTABLEAU 6 : EVOLUTION DES INDICES DANS LES DEUX PLUS GRANDES REGIONS DU BURKINA FASO\n\nA. REGION DU KADIOGO Indices des mois de Variation en %\n\nContrib\n\nution\n\nPondér févr-25 nov-25 déc-25 janv-26 févr-26 /1mois /3mois/12mois\n\nmensue\n\nation\n\nllle en\n\nINDICE GLOBAL 10000 100,6 101,4 100,8 100,9 101,4 0,6 0,6 0,0 0,9\n\nProduits alimentaires et boissons non alcoolisées 2359 103,8 104,5 101,7 101,0 102,5 0,3 1,5 -2,0 -1,3\n\nBoissons alcoolisées, tabac et stupéfiants 98 102,2 103,7 99,5 104,5 104,4 0,0 -0,1 0,7 2,1\n\nVêtements et chaussures 478 100,7 101,3 101,4 101,4 101,4 0,0 0,0 0,1 0,7\n\nLogement, eau, électricité, gaz et autres\n\n965 102,0 101,9 102,2 104,0 103,7 0,0 -0,3 1,8 1,7\n\ncombustibles\n\nAmeublement, équipement ménager et entretien\n\n239 101,0 101,1 101,0 101,1 101,1 0,0 0,0 0,0 0,1\n\ncourant du ménage\n\nSanté 553 98,0 97,8 97,7 97,7 97,7 0,0 0,0 -0,1 -0,2"
+    },
+    {
+      "texte": "Transport 1813 101,0 100,5 100,5 100,5 100,6 0,0 0,1 0,1 -0,5\n\nInformation et communication 763 91,5 90,5 90,5 92,9 93,3 0,0 0,3 3,0 1,9\n\nLoisirs, sport et culture 140 99,5 100,0 100,0 100,2 100,2 0,0 0,0 0,1 0,7\n\nServices d'enseignement 387 100,6 101,3 101,3 98,1 98,1 0,0 0,0 -3,2 -2,5\n\nRestaurants et services d'hébergement 1895 99,7 104,0 104,4 103,9 104,9 0,2 1,0 0,9 5,3\n\nAssurances et services financiers 17 100,5 100,5 100,5 100,5 100,5 0,0 0,0 0,0 0,0\n\nSoins personnels, protection sociale et biens\n\n293 100,1 100,4 100,4 100,4 100,4 0,0 0,0 0,0 0,3\n\ndivers\n\nB. REGION DU GUIRIKO Indices des mois de Variation en %\n\nContrib\n\nPondér févr-25 nov-25 déc-25 janv-26 févr-26 ution /1mois /3mois/12mois\n\nation mensue\n\nINDICE GLOBAL 10 000 101,2 101,9 101,0 101,3 101,5 0,3 0,3 -0,4 0,3\n\nProduits alimentaires et boissons non alcoolisées 3214 101,8 105,5 102,9 102,3 103,4 0,3 1,1 -2,0 1,5",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 49,
+        "chunk_total": 52,
+        "nb_chars": 891
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nTransport 1813 101,0 100,5 100,5 100,5 100,6 0,0 0,1 0,1 -0,5\n\nInformation et communication 763 91,5 90,5 90,5 92,9 93,3 0,0 0,3 3,0 1,9\n\nLoisirs, sport et culture 140 99,5 100,0 100,0 100,2 100,2 0,0 0,0 0,1 0,7\n\nServices d'enseignement 387 100,6 101,3 101,3 98,1 98,1 0,0 0,0 -3,2 -2,5\n\nRestaurants et services d'hébergement 1895 99,7 104,0 104,4 103,9 104,9 0,2 1,0 0,9 5,3\n\nAssurances et services financiers 17 100,5 100,5 100,5 100,5 100,5 0,0 0,0 0,0 0,0\n\nSoins personnels, protection sociale et biens\n\n293 100,1 100,4 100,4 100,4 100,4 0,0 0,0 0,0 0,3\n\ndivers\n\nB. REGION DU GUIRIKO Indices des mois de Variation en %\n\nContrib\n\nPondér févr-25 nov-25 déc-25 janv-26 févr-26 ution /1mois /3mois/12mois\n\nation mensue\n\nINDICE GLOBAL 10 000 101,2 101,9 101,0 101,3 101,5 0,3 0,3 -0,4 0,3\n\nProduits alimentaires et boissons non alcoolisées 3214 101,8 105,5 102,9 102,3 103,4 0,3 1,1 -2,0 1,5"
+    },
+    {
+      "texte": "Boissons alcoolisées, tabac et stupéfiants 81 100,2 103,0 108,2 114,3 115,5 0,0 1,0 12,1 15,2\n\nVêtements et chaussures 576 98,4 98,4 98,4 98,4 98,4 0,0 0,0 0,0 0,0\n\nLogement, eau, électricité, gaz et autres\n\n870 100,1 103,2 103,9 104,5 104,1 0,0 -0,4 0,9 4,1\n\ncombustibles\n\nAmeublement, équipement ménager et entretien\n\n251 99,0 99,0 99,0 99,0 99,0 0,0 0,0 0,0 0,0\n\ncourant du ménage\n\nSanté 607 97,8 97,8 97,8 97,8 97,8 0,0 0,0 0,0 0,0\n\nTransport 1167 102,6 102,4 102,4 102,6 102,6 0,0 0,0 0,2 0,0\n\nInformation et communication 848 107,2 99,7 99,7 103,7 103,7 0,0 0,0 4,0 -3,3\n\nLoisirs, sport et culture 118 99,4 99,4 99,4 99,4 99,4 0,0 0,0 0,0 0,0\n\nServices d'enseignement 275 99,6 95,6 95,6 94,0 94,0 0,0 0,0 -1,6 -5,6\n\nRestaurants et services d'hébergement 1588 100,1 99,9 98,9 99,0 98,7 0,0 -0,3 -1,2 -1,5\n\nAssurances et services financiers 7 100,0 99,9 100,0 100,0 100,0 0,0 0,0 0,0 0,0",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 50,
+        "chunk_total": 52,
+        "nb_chars": 891
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nBoissons alcoolisées, tabac et stupéfiants 81 100,2 103,0 108,2 114,3 115,5 0,0 1,0 12,1 15,2\n\nVêtements et chaussures 576 98,4 98,4 98,4 98,4 98,4 0,0 0,0 0,0 0,0\n\nLogement, eau, électricité, gaz et autres\n\n870 100,1 103,2 103,9 104,5 104,1 0,0 -0,4 0,9 4,1\n\ncombustibles\n\nAmeublement, équipement ménager et entretien\n\n251 99,0 99,0 99,0 99,0 99,0 0,0 0,0 0,0 0,0\n\ncourant du ménage\n\nSanté 607 97,8 97,8 97,8 97,8 97,8 0,0 0,0 0,0 0,0\n\nTransport 1167 102,6 102,4 102,4 102,6 102,6 0,0 0,0 0,2 0,0\n\nInformation et communication 848 107,2 99,7 99,7 103,7 103,7 0,0 0,0 4,0 -3,3\n\nLoisirs, sport et culture 118 99,4 99,4 99,4 99,4 99,4 0,0 0,0 0,0 0,0\n\nServices d'enseignement 275 99,6 95,6 95,6 94,0 94,0 0,0 0,0 -1,6 -5,6\n\nRestaurants et services d'hébergement 1588 100,1 99,9 98,9 99,0 98,7 0,0 -0,3 -1,2 -1,5\n\nAssurances et services financiers 7 100,0 99,9 100,0 100,0 100,0 0,0 0,0 0,0 0,0"
+    },
+    {
+      "texte": "Soins personnels, protection sociale et biens\n\n400 99,4 99,4 99,4 99,4 99,4 0,0 0,0 0,0 0,0\n\ndivers",
+      "metadata": {
+        "doc_id": "stats_bf_insd_publications",
+        "nom_doc": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "nom": "INSD Burkina Faso — Publications et Tableaux de Bord",
+        "pays": "BF",
+        "zone": "UEMOA",
+        "domaine": "statistiques",
+        "metier_tags": [
+          "analyste",
+          "assureur",
+          "DAF",
+          "consultant"
+        ],
+        "fiabilite": "officiel",
+        "url_source": "https://www.insd.bf/sites/default/files/2026-03/NOTE_IHPC_Base_2023_de_FEVRIER_2026.pdf",
+        "hash": "f7bf075052d6b1109b98441de4bee069be84e9c9f7eb29352826b18fc6bb8f75",
+        "indexe_le": "2026-04-16T06:16:10.430051",
+        "chunk_index": 51,
+        "chunk_total": 52,
+        "nb_chars": 99
+      },
+      "texte_embed": "BF — statistiques — INSD Burkina Faso — Publications et Tableaux de Bord\nSoins personnels, protection sociale et biens\n\n400 99,4 99,4 99,4 99,4 99,4 0,0 0,0 0,0 0,0\n\ndivers"
+    }
+  ]
+}

@@ -1,0 +1,652 @@
+{
+  "orass": {
+    "tables": {
+      "POL_CONTRATS": {
+        "colonnes": [
+          {
+            "nom": "NUM_POLICE",
+            "type": "varchar(20)",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "COD_BRANCHE",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_ASSURE",
+            "type": "varchar(15)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_APPORTEUR",
+            "type": "varchar(10)",
+            "nullable": true
+          },
+          {
+            "nom": "COD_PAYS",
+            "type": "char(2)",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_EFFET",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_ECHEANCE",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_PRIME_TTC",
+            "type": "decimal(15,2)",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_PRIME_HT",
+            "type": "decimal(15,2)",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_TAXES",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "COD_STATUT",
+            "type": "char(1)",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_EMISSION",
+            "type": "datetime",
+            "nullable": false
+          },
+          {
+            "nom": "COD_DEVISE",
+            "type": "char(3)",
+            "nullable": false
+          },
+          {
+            "nom": "NUM_AVENANT",
+            "type": "integer",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_CREATION",
+            "type": "datetime",
+            "nullable": false
+          },
+          {
+            "nom": "USR_CREATION",
+            "type": "varchar(20)",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "NUM_POLICE",
+          "NUM_AVENANT"
+        ],
+        "cles_etrangeres": [
+          {
+            "colonnes": [
+              "COD_ASSURE"
+            ],
+            "table_ref": "CLI_TIERS",
+            "colonnes_ref": [
+              "COD_TIERS"
+            ]
+          },
+          {
+            "colonnes": [
+              "COD_APPORTEUR"
+            ],
+            "table_ref": "PAR_APPORTEURS",
+            "colonnes_ref": [
+              "COD_APPORTEUR"
+            ]
+          }
+        ],
+        "description_metier": "Table principale des contrats/polices d'assurance",
+        "concepts": [
+          "police",
+          "contrat",
+          "prime",
+          "production"
+        ]
+      },
+      "SIN_DOSSIERS": {
+        "colonnes": [
+          {
+            "nom": "NUM_SINISTRE",
+            "type": "varchar(20)",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "NUM_POLICE",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_BRANCHE",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_SURVENANCE",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_DECLARATION",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_CLOTURE",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_ESTIME",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_PROVISION",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_REGLE",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_RECOURS",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "COD_STATUT",
+            "type": "char(1)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_CAUSE",
+            "type": "varchar(10)",
+            "nullable": true
+          },
+          {
+            "nom": "TXT_DESCRIPTION",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "nom": "IND_FRAUDE",
+            "type": "bit",
+            "nullable": false
+          },
+          {
+            "nom": "SCO_FRAUDE",
+            "type": "integer",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_CREATION",
+            "type": "datetime",
+            "nullable": false
+          },
+          {
+            "nom": "USR_CREATION",
+            "type": "varchar(20)",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "NUM_SINISTRE"
+        ],
+        "cles_etrangeres": [
+          {
+            "colonnes": [
+              "NUM_POLICE"
+            ],
+            "table_ref": "POL_CONTRATS",
+            "colonnes_ref": [
+              "NUM_POLICE"
+            ]
+          }
+        ],
+        "description_metier": "Dossiers sinistres — instruction et règlement",
+        "concepts": [
+          "sinistre",
+          "dossier",
+          "indemnisation",
+          "règlement"
+        ]
+      },
+      "CLI_TIERS": {
+        "colonnes": [
+          {
+            "nom": "COD_TIERS",
+            "type": "varchar(15)",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "COD_TYPE_TIERS",
+            "type": "char(1)",
+            "nullable": false
+          },
+          {
+            "nom": "NOM_TIERS",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "nom": "PRE_TIERS",
+            "type": "varchar(50)",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_NAISSANCE",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "COD_SEXE",
+            "type": "char(1)",
+            "nullable": true
+          },
+          {
+            "nom": "TEL_MOBILE",
+            "type": "varchar(20)",
+            "nullable": true
+          },
+          {
+            "nom": "ADR_EMAIL",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "nom": "COD_PAYS",
+            "type": "char(2)",
+            "nullable": false
+          },
+          {
+            "nom": "NOM_VILLE",
+            "type": "varchar(50)",
+            "nullable": true
+          },
+          {
+            "nom": "NUM_CNI",
+            "type": "varchar(30)",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_CREATION",
+            "type": "datetime",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "COD_TIERS"
+        ],
+        "cles_etrangeres": [],
+        "description_metier": "Référentiel tiers : assurés, bénéficiaires, tiers responsables",
+        "concepts": [
+          "client",
+          "assuré",
+          "tiers",
+          "bénéficiaire"
+        ]
+      },
+      "CPT_ECRITURES": {
+        "colonnes": [
+          {
+            "nom": "NUM_ECRITURE",
+            "type": "bigint",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "COD_JOURNAL",
+            "type": "varchar(5)",
+            "nullable": false
+          },
+          {
+            "nom": "NUM_CPTE_DEBIT",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "NUM_CPTE_CREDIT",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_ECRITURE",
+            "type": "decimal(15,2)",
+            "nullable": false
+          },
+          {
+            "nom": "LIB_ECRITURE",
+            "type": "varchar(200)",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_ECRITURE",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_VALEUR",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "NUM_POLICE",
+            "type": "varchar(20)",
+            "nullable": true
+          },
+          {
+            "nom": "NUM_SINISTRE",
+            "type": "varchar(20)",
+            "nullable": true
+          },
+          {
+            "nom": "NUM_EXERCICE",
+            "type": "char(4)",
+            "nullable": false
+          },
+          {
+            "nom": "IND_VALIDE",
+            "type": "bit",
+            "nullable": false
+          },
+          {
+            "nom": "USR_SAISIE",
+            "type": "varchar(20)",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "NUM_ECRITURE"
+        ],
+        "cles_etrangeres": [],
+        "description_metier": "Grand livre PCSA — toutes les écritures comptables",
+        "concepts": [
+          "écriture",
+          "comptabilité",
+          "journal",
+          "compte",
+          "PCSA"
+        ]
+      },
+      "CPT_PROVISIONS": {
+        "colonnes": [
+          {
+            "nom": "ID_PROVISION",
+            "type": "bigint",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "COD_TYPE_PROV",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_BRANCHE",
+            "type": "varchar(10)",
+            "nullable": true
+          },
+          {
+            "nom": "NUM_EXERCICE",
+            "type": "char(4)",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_INVENTAIRE",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_PROVISION",
+            "type": "decimal(18,2)",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_PRECEDENT",
+            "type": "decimal(18,2)",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_DOTATION",
+            "type": "decimal(18,2)",
+            "nullable": true
+          },
+          {
+            "nom": "MTN_REPRISE",
+            "type": "decimal(18,2)",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_VALIDATION",
+            "type": "datetime",
+            "nullable": true
+          },
+          {
+            "nom": "USR_VALIDATION",
+            "type": "varchar(20)",
+            "nullable": true
+          }
+        ],
+        "cles_primaires": [
+          "ID_PROVISION"
+        ],
+        "cles_etrangeres": [],
+        "description_metier": "Provisions techniques CIMA — inventaire par exercice",
+        "concepts": [
+          "provision",
+          "PPNA",
+          "PSAP",
+          "PM",
+          "PPB",
+          "PTS",
+          "PREC"
+        ]
+      },
+      "PAR_APPORTEURS": {
+        "colonnes": [
+          {
+            "nom": "COD_APPORTEUR",
+            "type": "varchar(10)",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "NOM_APPORTEUR",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_TYPE",
+            "type": "varchar(5)",
+            "nullable": false
+          },
+          {
+            "nom": "NUM_AGREMENT",
+            "type": "varchar(30)",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_AGREMENT",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_EXPIR_AGREMENT",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "TEL_APPORTEUR",
+            "type": "varchar(20)",
+            "nullable": true
+          },
+          {
+            "nom": "ADR_EMAIL",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "nom": "COD_PAYS",
+            "type": "char(2)",
+            "nullable": false
+          },
+          {
+            "nom": "TAU_COMMISSION",
+            "type": "decimal(5,2)",
+            "nullable": true
+          },
+          {
+            "nom": "IND_ACTIF",
+            "type": "bit",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "COD_APPORTEUR"
+        ],
+        "cles_etrangeres": [],
+        "description_metier": "Réseau apporteurs d'affaires : courtiers, agents généraux, mandataires",
+        "concepts": [
+          "apporteur",
+          "courtier",
+          "agent",
+          "commission",
+          "agrément"
+        ]
+      },
+      "REA_TRAITES": {
+        "colonnes": [
+          {
+            "nom": "COD_TRAITE",
+            "type": "varchar(20)",
+            "nullable": false,
+            "pk": true
+          },
+          {
+            "nom": "COD_REASSUREUR",
+            "type": "varchar(15)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_TYPE_TRAITE",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "COD_BRANCHE",
+            "type": "varchar(10)",
+            "nullable": false
+          },
+          {
+            "nom": "TAU_CESSION",
+            "type": "decimal(5,2)",
+            "nullable": false
+          },
+          {
+            "nom": "MTN_PLEIN",
+            "type": "decimal(15,2)",
+            "nullable": true
+          },
+          {
+            "nom": "DAT_EFFET",
+            "type": "date",
+            "nullable": false
+          },
+          {
+            "nom": "DAT_ECHEANCE",
+            "type": "date",
+            "nullable": true
+          },
+          {
+            "nom": "TAU_COMMISSION_REA",
+            "type": "decimal(5,2)",
+            "nullable": true
+          },
+          {
+            "nom": "IND_ACTIF",
+            "type": "bit",
+            "nullable": false
+          }
+        ],
+        "cles_primaires": [
+          "COD_TRAITE"
+        ],
+        "cles_etrangeres": [],
+        "description_metier": "Traités de réassurance — quote-part et excédent de sinistres",
+        "concepts": [
+          "réassurance",
+          "traité",
+          "cession",
+          "réassureur"
+        ]
+      }
+    },
+    "derniere_introspection": "2026-04-22T11:29:43.985121",
+    "version_schema": "72e169ea",
+    "mappings_metier": {
+      "police.numero": "POL_CONTRATS.NUM_POLICE",
+      "police.prime_ttc": "POL_CONTRATS.MTN_PRIME_TTC",
+      "police.prime_ht": "POL_CONTRATS.MTN_PRIME_HT",
+      "police.date_effet": "POL_CONTRATS.DAT_EFFET",
+      "police.date_echeance": "POL_CONTRATS.DAT_ECHEANCE",
+      "police.branche": "POL_CONTRATS.COD_BRANCHE",
+      "police.statut": "POL_CONTRATS.COD_STATUT",
+      "police.apporteur_id": "POL_CONTRATS.COD_APPORTEUR",
+      "police.assure_id": "POL_CONTRATS.COD_ASSURE",
+      "police.pays": "POL_CONTRATS.COD_PAYS",
+      "client.nom": "CLI_TIERS.NOM_TIERS",
+      "client.prenom": "CLI_TIERS.PRE_TIERS",
+      "client.telephone": "CLI_TIERS.TEL_MOBILE",
+      "client.email": "CLI_TIERS.ADR_EMAIL",
+      "client.date_naissance": "CLI_TIERS.DAT_NAISSANCE",
+      "client.type": "CLI_TIERS.COD_TYPE_TIERS",
+      "sinistre.reference": "SIN_DOSSIERS.NUM_SINISTRE",
+      "sinistre.date_survenance": "SIN_DOSSIERS.DAT_SURVENANCE",
+      "sinistre.date_declaration": "SIN_DOSSIERS.DAT_DECLARATION",
+      "sinistre.montant_estime": "SIN_DOSSIERS.MTN_ESTIME",
+      "sinistre.montant_regle": "SIN_DOSSIERS.MTN_REGLE",
+      "sinistre.montant_provision": "SIN_DOSSIERS.MTN_PROVISION",
+      "sinistre.statut": "SIN_DOSSIERS.COD_STATUT",
+      "sinistre.branche": "SIN_DOSSIERS.COD_BRANCHE",
+      "sinistre.police_id": "SIN_DOSSIERS.NUM_POLICE",
+      "ecriture.journal": "CPT_ECRITURES.COD_JOURNAL",
+      "ecriture.compte_debit": "CPT_ECRITURES.NUM_CPTE_DEBIT",
+      "ecriture.compte_credit": "CPT_ECRITURES.NUM_CPTE_CREDIT",
+      "ecriture.montant": "CPT_ECRITURES.MTN_ECRITURE",
+      "ecriture.libelle": "CPT_ECRITURES.LIB_ECRITURE",
+      "ecriture.date": "CPT_ECRITURES.DAT_ECRITURE",
+      "ecriture.police_id": "CPT_ECRITURES.NUM_POLICE",
+      "provision.type": "CPT_PROVISIONS.COD_TYPE_PROV",
+      "provision.montant": "CPT_PROVISIONS.MTN_PROVISION",
+      "provision.date": "CPT_PROVISIONS.DAT_INVENTAIRE",
+      "provision.branche": "CPT_PROVISIONS.COD_BRANCHE",
+      "provision.exercice": "CPT_PROVISIONS.NUM_EXERCICE",
+      "reassurance.traite_id": "REA_TRAITES.COD_TRAITE",
+      "reassurance.taux_cession": "REA_TRAITES.TAU_CESSION",
+      "reassurance.reassureur_id": "REA_TRAITES.COD_REASSUREUR",
+      "reassurance.bordereau": "REA_BORDEREAUX.NUM_BORDEREAU",
+      "apporteur.code": "PAR_APPORTEURS.COD_APPORTEUR",
+      "apporteur.nom": "PAR_APPORTEURS.NOM_APPORTEUR",
+      "apporteur.agrement": "PAR_APPORTEURS.NUM_AGREMENT",
+      "apporteur.type": "PAR_APPORTEURS.COD_TYPE"
+    }
+  }
+}

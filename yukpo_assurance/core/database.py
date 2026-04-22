@@ -1,0 +1,899 @@
+"""
+YukpoAssurance — Base de données persistante
+SQLite en développement, PostgreSQL en production.
+Stockage : utilisateurs, sessions chat, messages, réunions, actions, audit trail, dossiers,
+           RH (employés, congés, évaluations, recrutement),
+           Commercial (prospects, objectifs, campagnes),
+           Collaboration (documents, versions, workflows, commentaires, notifications).
+"""
+import logging
+from datetime import datetime
+from typing import AsyncGenerator
+
+from sqlalchemy import (
+    Boolean, Column, DateTime, Float, ForeignKey,
+    Integer, JSON, String, Text,
+)
+from sqlalchemy.ext.asyncio import (
+    AsyncSession, async_sessionmaker, create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase, relationship
+
+from config.settings import settings
+
+logger = logging.getLogger("yukpo_assurance.database")
+
+
+# ─── Engine (SQLite dev / PostgreSQL prod) ────────────────────────────────────
+
+def _build_engine():
+    url = settings.DATABASE_URL
+    if url.startswith("postgresql"):
+        return create_async_engine(url, pool_size=10, max_overflow=20, echo=False)
+    # Dev local / test : SQLite async (ne nécessite pas de serveur)
+    sqlite_url = url if url.startswith("sqlite") else "sqlite+aiosqlite:///./yukpo_assurance.db"
+    return create_async_engine(
+        sqlite_url,
+        echo=False,
+        connect_args={"check_same_thread": False},
+    )
+
+
+engine = _build_engine()
+async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+# ─── UTILISATEURS ────────────────────────────────────────────────────────────
+
+class UtilisateurDB(Base):
+    """
+    Table des utilisateurs — authentification production.
+    Rôles RBAC : agent | manager | daf | dg | actuaire | commercial | marketing | courtier | admin
+    """
+    __tablename__ = "utilisateurs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    nom = Column(String(100), nullable=False)
+    prenoms = Column(String(150), nullable=True)
+    # Mot de passe haché avec bcrypt (passlib)
+    hashed_password = Column(String(255), nullable=False)
+    role = Column(String(50), nullable=False, default="agent")
+    compagnie_id = Column(Integer, nullable=False, default=1)
+    actif = Column(Boolean, default=True, nullable=False)
+    # Infos complémentaires
+    telephone = Column(String(30), nullable=True)
+    code_agent = Column(String(30), nullable=True, index=True)
+    # Sécurité
+    nb_connexions = Column(Integer, default=0, nullable=False)
+    derniere_connexion = Column(DateTime, nullable=True)
+    tentatives_echec = Column(Integer, default=0, nullable=False)
+    bloque_jusqu_au = Column(DateTime, nullable=True)
+    # 2FA TOTP (Google Authenticator)
+    totp_secret = Column(String(100), nullable=True)
+    totp_active = Column(Boolean, default=False, nullable=False)
+    # Audit
+    cree_le = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    cree_par = Column(Integer, nullable=True)    # user_id du créateur
+
+    def __repr__(self) -> str:
+        return f"<UtilisateurDB id={self.id} username={self.username} role={self.role}>"
+
+
+# ─── SESSIONS CHAT ────────────────────────────────────────────────────────────
+
+class SessionChatDB(Base):
+    __tablename__ = "sessions_chat"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    user_nom = Column(String, nullable=True)
+    role_utilisateur = Column(String, default="agent")
+    titre = Column(String, nullable=True)
+    ecran_contexte = Column(String, nullable=True)
+    resume = Column(Text, nullable=True)
+    memoire_utilisateur = Column(JSON, default=dict)
+    nb_messages = Column(Integer, default=0)
+    tokens_total = Column(Integer, default=0)
+    creee_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+    messages = relationship(
+        "MessageChatDB", back_populates="session",
+        cascade="all, delete-orphan", order_by="MessageChatDB.timestamp",
+    )
+
+
+class MessageChatDB(Base):
+    __tablename__ = "messages_chat"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String, ForeignKey("sessions_chat.id", ondelete="CASCADE"), index=True)
+    role = Column(String, nullable=False)         # "user" | "assistant"
+    contenu = Column(Text, nullable=False)
+    attachments_meta = Column(JSON, default=list)  # métadonnées (sans le base64 lourd)
+    generated_files = Column(JSON, default=list)
+    modele_utilise = Column(String, nullable=True)
+    tokens = Column(Integer, default=0)
+    domaine = Column(String, nullable=True)
+    dossier_reference = Column(String, nullable=True, index=True)  # SIN/police liée
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship("SessionChatDB", back_populates="messages")
+
+
+# ─── RÉUNIONS ─────────────────────────────────────────────────────────────────
+
+class ReunionDB(Base):
+    __tablename__ = "reunions"
+
+    id = Column(String, primary_key=True)
+    titre = Column(String, nullable=False)
+    type_reunion = Column(String, default="ordinaire")
+    lieu = Column(String, nullable=True)
+    president_seance = Column(String, nullable=True)
+    statut = Column(String, default="en_cours")
+    ordre_du_jour = Column(JSON, default=list)
+    participants = Column(JSON, default=list)
+    transcription = Column(Text, nullable=True)
+    notes_manuelles = Column(Text, nullable=True)
+    synthese = Column(Text, nullable=True)
+    decisions = Column(JSON, default=list)
+    points_reportes = Column(JSON, default=list)
+    date_reunion = Column(DateTime, default=datetime.utcnow)
+    creee_par_user_id = Column(Integer, nullable=True)
+    creee_par_nom = Column(String, nullable=True)
+    creee_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+    actions = relationship(
+        "ActionReunionDB", back_populates="reunion",
+        cascade="all, delete-orphan", order_by="ActionReunionDB.id",
+    )
+
+
+class ActionReunionDB(Base):
+    __tablename__ = "actions_reunions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    reunion_id = Column(String, ForeignKey("reunions.id", ondelete="CASCADE"), index=True)
+    responsable = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    echeance = Column(DateTime, nullable=True)
+    statut = Column(String, default="en_attente")
+    priorite = Column(String, default="normale")
+
+    reunion = relationship("ReunionDB", back_populates="actions")
+
+
+# ─── AUDIT TRAIL ──────────────────────────────────────────────────────────────
+
+class AuditLogDB(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    compagnie_id = Column(Integer, default=1, index=True)     # multitenancy
+    user_id = Column(Integer, nullable=True, index=True)
+    user_nom = Column(String, nullable=True)
+    action = Column(String, index=True)           # "chat_message" | "generation_doc" | ...
+    module = Column(String, index=True)           # "chat" | "sinistres" | "documents" | ...
+    resource_type = Column(String, nullable=True) # "session" | "sinistre" | "reunion" | ...
+    resource_id = Column(String, nullable=True, index=True)
+    details = Column(JSON, nullable=True)
+    ip_address = Column(String, nullable=True)
+    duree_ms = Column(Float, nullable=True)
+    succes = Column(Boolean, default=True)
+    erreur = Column(Text, nullable=True)
+
+
+# ─── COÛTS IA (tracking tokens / coûts API) ───────────────────────────────────
+
+class CoutIADB(Base):
+    """Suivi des coûts d'utilisation des APIs IA par utilisateur et modèle."""
+    __tablename__ = "couts_ia"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    compagnie_id = Column(Integer, default=1, index=True)
+    user_id = Column(Integer, nullable=True, index=True)
+    modele = Column(String, nullable=False, index=True)   # "claude-opus-4-6" | "gpt-4o" | ...
+    module = Column(String, nullable=True, index=True)    # "chat" | "sinistres" | ...
+    tokens_input = Column(Integer, default=0)
+    tokens_output = Column(Integer, default=0)
+    cout_estime_usd = Column(Float, default=0.0)          # Coût estimé en USD
+    session_id = Column(String, nullable=True, index=True)
+
+
+# ─── DOSSIERS (index des pièces de l'entreprise) ─────────────────────────────
+
+class DossierIndexDB(Base):
+    """
+    Index des dossiers de l'entreprise pour la recherche contextuelle du chat.
+    Stocke les références et un résumé textuel pour la recherche sémantique.
+    """
+    __tablename__ = "dossiers_index"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type_dossier = Column(String, index=True)        # "sinistre" | "contrat" | "courrier" | "reunion"
+    reference = Column(String, index=True, unique=True)
+    titre = Column(String, nullable=False)
+    contenu_indexe = Column(Text, nullable=True)     # Texte extrait pour la recherche
+    meta_donnees = Column(JSON, default=dict)
+    cree_par_user_id = Column(Integer, nullable=True)
+    cree_par_nom = Column(String, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── PROFIL COMPAGNIE (multi-tenant / multi-secteur) ─────────────────────────
+
+class CompagnieDB(Base):
+    """
+    Profil complet d'une compagnie cliente.
+    Porte le secteur d'activité, les informations légales, et la config WhatsApp/paiement.
+    """
+    __tablename__ = "compagnies"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # Identité légale
+    nom = Column(String, nullable=False)
+    sigle = Column(String, nullable=True)
+    secteur = Column(String, default="assurance", index=True)  # assurance | banque | ecole | ...
+    pays = Column(String, default="CM")           # Code ISO pays
+    ville = Column(String, nullable=True)
+    adresse = Column(String, nullable=True)
+    telephone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    site_web = Column(String, nullable=True)
+    # Documents légaux
+    numero_rccm = Column(String, nullable=True)
+    numero_contribuable = Column(String, nullable=True)
+    numero_agrement = Column(String, nullable=True)  # Pour assurances : numéro agrément CRCA
+    capital_social = Column(Float, default=0)
+    # Logo (URL ou chemin relatif)
+    logo_url = Column(String, nullable=True)
+    # Textes légaux pour contrats
+    mentions_legales = Column(Text, nullable=True)
+    # Config WhatsApp Business
+    whatsapp_phone_id = Column(String, nullable=True)
+    whatsapp_token = Column(String, nullable=True)
+    whatsapp_verify_token = Column(String, nullable=True)
+    # Config paiement
+    mtn_momo_api_key = Column(String, nullable=True)
+    orange_money_api_key = Column(String, nullable=True)
+    cinetpay_api_key = Column(String, nullable=True)
+    cinetpay_site_id = Column(String, nullable=True)
+    # SMTP pour envoi emails
+    smtp_host = Column(String, nullable=True)
+    smtp_port = Column(Integer, default=587)
+    smtp_user = Column(String, nullable=True)
+    smtp_password = Column(String, nullable=True)
+    smtp_from = Column(String, nullable=True)
+    # Méta
+    actif = Column(Boolean, default=True)
+    plan_abonnement = Column(String, default="starter")  # starter | pro | enterprise
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── SESSIONS WHATSAPP ────────────────────────────────────────────────────────
+
+class SessionWhatsAppDB(Base):
+    """
+    Session de conversation WhatsApp par numéro de téléphone client.
+    Stocke l'état de la machine à états pour reprendre la conversation.
+    """
+    __tablename__ = "sessions_whatsapp"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    numero_client = Column(String, nullable=False, index=True)  # +237600000000
+    nom_client = Column(String, nullable=True)
+    etat = Column(String, default="accueil")      # accueil | devis | sinistre | suivi | paiement
+    sous_etat = Column(String, nullable=True)
+    contexte = Column(JSON, default=dict)          # données collectées au fil de la conv
+    langue = Column(String, default="fr")
+    dernier_message = Column(DateTime, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── TRANSACTIONS PAIEMENT ────────────────────────────────────────────────────
+
+class TransactionPaiementDB(Base):
+    __tablename__ = "transactions_paiement"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    reference = Column(String, unique=True, index=True, nullable=False)
+    type_paiement = Column(String, nullable=False)   # "prime" | "acompte" | "solde" | "scolarite"
+    operateur = Column(String, nullable=True)          # "mtn_momo" | "orange_money" | "cinetpay" | "wave"
+    montant = Column(Float, nullable=False)
+    devise = Column(String, default="XAF")
+    numero_payeur = Column(String, nullable=True)      # Numéro mobile du payeur
+    nom_payeur = Column(String, nullable=True)
+    reference_externe = Column(String, nullable=True)  # ID transaction opérateur
+    reference_police = Column(String, nullable=True)   # Numéro de police concernée
+    statut = Column(String, default="en_attente", index=True)
+    # en_attente | initie | en_cours | reussi | echoue | annule | rembourse
+    message_retour = Column(Text, nullable=True)
+    metadata_operateur = Column(JSON, default=dict)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+    paye_le = Column(DateTime, nullable=True)
+
+
+# ─── RESSOURCES HUMAINES ──────────────────────────────────────────────────────
+
+class EmployeDB(Base):
+    __tablename__ = "employes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    # Identité
+    nom = Column(String, nullable=False)
+    prenom = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    telephone = Column(String, nullable=True)
+    # Poste
+    departement = Column(String, nullable=True, index=True)
+    poste = Column(String, nullable=True)
+    statut = Column(String, default="actif", index=True)  # actif | conge | demissionnaire | licencie
+    # Paie
+    salaire_brut = Column(Float, default=0)
+    date_embauche = Column(DateTime, nullable=True)
+    # Méta
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+    conges = relationship("CongeDB", back_populates="employe", cascade="all, delete-orphan")
+    evaluations = relationship("EvaluationDB", back_populates="employe", cascade="all, delete-orphan")
+
+
+class CongeDB(Base):
+    __tablename__ = "conges"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    employe_id = Column(Integer, ForeignKey("employes.id", ondelete="CASCADE"), index=True)
+    type_conge = Column(String, default="annuel")   # annuel | maladie | maternite | paternite | sans_solde
+    date_debut = Column(DateTime, nullable=False)
+    date_fin = Column(DateTime, nullable=False)
+    nb_jours = Column(Float, default=0)
+    motif = Column(Text, nullable=True)
+    statut = Column(String, default="en_attente", index=True)  # en_attente | approuve | refuse
+    approuve_par_id = Column(Integer, nullable=True)
+    approuve_par_nom = Column(String, nullable=True)
+    commentaire_rh = Column(Text, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+    employe = relationship("EmployeDB", back_populates="conges")
+
+
+class EvaluationDB(Base):
+    __tablename__ = "evaluations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    employe_id = Column(Integer, ForeignKey("employes.id", ondelete="CASCADE"), index=True)
+    evaluateur_id = Column(Integer, nullable=True)
+    evaluateur_nom = Column(String, nullable=True)
+    periode = Column(String, nullable=True)        # "2024-T1" | "2024-annuel"
+    notes = Column(JSON, default=dict)             # {critere: note/5}
+    score_global = Column(Float, default=0)
+    mention = Column(String, nullable=True)
+    commentaire = Column(Text, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+
+    employe = relationship("EmployeDB", back_populates="evaluations")
+
+
+class RecrutementDB(Base):
+    __tablename__ = "recrutements"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    poste = Column(String, nullable=False)
+    departement = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    salaire_min = Column(Float, default=0)
+    salaire_max = Column(Float, default=0)
+    statut = Column(String, default="ouvert", index=True)   # ouvert | en_cours | cloture | annule
+    nb_candidats = Column(Integer, default=0)
+    date_limite = Column(DateTime, nullable=True)
+    cree_par_id = Column(Integer, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── COMMERCIAL ───────────────────────────────────────────────────────────────
+
+class ProspectDB(Base):
+    __tablename__ = "prospects"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    agent_id = Column(Integer, nullable=True, index=True)
+    agent_nom = Column(String, nullable=True)
+    # Identité
+    nom = Column(String, nullable=False)
+    prenom = Column(String, nullable=True)
+    telephone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    # Pipeline
+    source = Column(String, default="appel_entrant")
+    branche_interesse = Column(String, nullable=True, index=True)
+    statut = Column(String, default="nouveau", index=True)
+    score = Column(Float, default=0)
+    niveau_qualification = Column(String, default="froid")   # froid | tiède | chaud
+    # Données commerciales
+    deja_assure = Column(Boolean, default=False)
+    budget_fcfa = Column(Float, default=0)
+    delai_decision_jours = Column(Integer, default=30)
+    notes = Column(Text, nullable=True)
+    dernier_contact = Column(DateTime, nullable=True)
+    # Méta
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+class ObjectifCommercialDB(Base):
+    __tablename__ = "objectifs_commerciaux"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    agent_id = Column(Integer, nullable=True, index=True)
+    annee = Column(Integer, nullable=False, index=True)
+    mois = Column(Integer, nullable=False)
+    type_objectif = Column(String, nullable=False)    # primes | contrats | prospects
+    valeur_cible = Column(Float, nullable=False)
+    valeur_atteinte = Column(Float, default=0)
+    description = Column(Text, nullable=True)
+    cree_par_id = Column(Integer, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+class CampagneDB(Base):
+    __tablename__ = "campagnes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    nom = Column(String, nullable=False)
+    type_campagne = Column(String, nullable=False)   # renouvellement | fidelisation | acquisition | cross_selling
+    description = Column(Text, nullable=True)
+    date_debut = Column(DateTime, nullable=False)
+    date_fin = Column(DateTime, nullable=False)
+    cibles = Column(JSON, default=list)
+    budget_fcfa = Column(Float, default=0)
+    statut = Column(String, default="planifiee", index=True)   # planifiee | active | terminee | annulee
+    nb_contacts = Column(Integer, default=0)
+    nb_conversions = Column(Integer, default=0)
+    cree_par_id = Column(Integer, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── COLLABORATION DOCUMENTAIRE ───────────────────────────────────────────────
+
+class DocumentCollabDB(Base):
+    __tablename__ = "documents_collab"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    reference = Column(String, unique=True, index=True, nullable=False)
+    titre = Column(String, nullable=False)
+    type_document = Column(String, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    # Contenu (stockage référence fichier ou texte)
+    contenu_url = Column(String, nullable=True)
+    contenu_texte = Column(Text, nullable=True)
+    montant_concerne = Column(Float, default=0)
+    # Workflow
+    statut = Column(String, default="brouillon", index=True)
+    # brouillon | en_review | approuve | rejete | archive
+    type_workflow = Column(String, default="simple")
+    etapes_workflow = Column(JSON, default=list)
+    etape_courante = Column(Integer, default=0)
+    # Auteur
+    auteur_id = Column(Integer, nullable=False, index=True)
+    auteur_nom = Column(String, nullable=False)
+    # Version courante
+    version_courante = Column(Integer, default=1)
+    historique = Column(JSON, default=list)
+    # Méta
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+    versions = relationship("VersionDocDB", back_populates="document", cascade="all, delete-orphan")
+    commentaires = relationship("CommentaireDocDB", back_populates="document", cascade="all, delete-orphan")
+
+
+class VersionDocDB(Base):
+    __tablename__ = "versions_docs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    document_id = Column(Integer, ForeignKey("documents_collab.id", ondelete="CASCADE"), index=True)
+    numero_version = Column(Integer, nullable=False)
+    contenu_url = Column(String, nullable=True)
+    contenu_texte = Column(Text, nullable=True)
+    modifie_par_id = Column(Integer, nullable=False)
+    modifie_par_nom = Column(String, nullable=False)
+    commentaire = Column(Text, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+
+    document = relationship("DocumentCollabDB", back_populates="versions")
+
+
+class WorkflowApprovalDB(Base):
+    __tablename__ = "workflow_approvals"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    document_id = Column(Integer, ForeignKey("documents_collab.id", ondelete="CASCADE"), index=True)
+    etape = Column(Integer, nullable=False)
+    approbateur_id = Column(Integer, nullable=False, index=True)
+    approbateur_nom = Column(String, nullable=False)
+    approbateur_role = Column(String, nullable=True)
+    statut = Column(String, default="en_attente")   # en_attente | bloquee | approuve | rejete
+    commentaire = Column(Text, nullable=True)
+    date_action = Column(DateTime, nullable=True)
+
+
+class CommentaireDocDB(Base):
+    __tablename__ = "commentaires_docs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    document_id = Column(Integer, ForeignKey("documents_collab.id", ondelete="CASCADE"), index=True)
+    auteur_id = Column(Integer, nullable=False)
+    auteur_nom = Column(String, nullable=False)
+    contenu = Column(Text, nullable=False)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+
+    document = relationship("DocumentCollabDB", back_populates="commentaires")
+
+
+class NotificationDB(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, index=True, nullable=False)
+    user_id = Column(Integer, nullable=False, index=True)
+    type_notif = Column(String, nullable=False)      # "approbation_requise" | "document_approuve" | "commentaire" | ...
+    titre = Column(String, nullable=False)
+    message = Column(Text, nullable=True)
+    lien = Column(String, nullable=True)             # ex: "/collaboration/documents/42"
+    lu = Column(Boolean, default=False, index=True)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+# ─── COMMUNITY MANAGER ───────────────────────────────────────────────────────
+
+class PostSocialDB(Base):
+    """Post généré par l'IA pour les réseaux sociaux."""
+    __tablename__ = "posts_social"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    plateforme = Column(String, nullable=False, index=True)   # facebook | instagram | linkedin | twitter | whatsapp | tiktok
+    type_contenu = Column(String, default="produit")           # produit | promo | actualite | sinistre | conseil | campagne
+    sujet = Column(String, nullable=True)                      # contexte métier (ex: "Assurance Auto")
+    legende = Column(Text, nullable=False)                     # texte principal
+    legende_variante_b = Column(Text, nullable=True)           # variante A/B test
+    hashtags = Column(JSON, default=list)
+    image_url = Column(String, nullable=True)
+    lien_url = Column(String, nullable=True)
+    ton = Column(String, default="professionnel")              # professionnel | decontracte | promotionnel | urgent
+    langue = Column(String, default="fr")
+    statut = Column(String, default="brouillon", index=True)  # brouillon | planifie | publie | echoue | annule
+    planifie_le = Column(DateTime, nullable=True, index=True)
+    publie_le = Column(DateTime, nullable=True)
+    id_post_externe = Column(String, nullable=True)            # ID Meta/LinkedIn
+    modele_ia = Column(String, default="claude-opus-4-6")
+    prompt_generation = Column(Text, nullable=True)
+    # A/B analytics
+    engagement_a = Column(Integer, default=0)
+    engagement_b = Column(Integer, default=0)
+    ab_gagnant = Column(String, nullable=True)                 # 'A' | 'B'
+    # Publication
+    retry_count = Column(Integer, default=0)
+    external_post_id = Column(String, nullable=True)           # alias exposé (id_post_externe = legacy)
+    # Meta
+    cree_par = Column(String, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    message_erreur = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)                # alias anglais pour compat scheduler
+
+
+class PreferencesCMDB(Base):
+    """Préférences Community Manager par compagnie."""
+    __tablename__ = "preferences_cm"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, unique=True)
+    voix_marque = Column(Text, nullable=True)                   # description du ton/identité
+    mots_interdits = Column(JSON, default=list)
+    toujours_inclure = Column(JSON, default=list)               # ex: numéro de tél, site web
+    hashtags_defaut = Column(JSON, default=list)
+    heures_publication = Column(JSON, default=lambda: [8, 12, 18])  # heures optimales
+    plateformes_actives = Column(JSON, default=dict)
+    max_posts_par_jour = Column(Integer, default=3)
+    ab_test_auto = Column(Boolean, default=True)
+    secteur_contenu = Column(String, default="assurance")
+    modele_ia_prefere = Column(String, default="claude-opus-4-6")
+    mise_a_jour_le = Column(DateTime, default=datetime.utcnow)
+
+
+class AnalyticsPostDB(Base):
+    """Analytics d'un post publié."""
+    __tablename__ = "analytics_posts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    post_id = Column(Integer, ForeignKey("posts_social.id", ondelete="CASCADE"), nullable=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    plateforme = Column(String, nullable=False, index=True)
+    impressions = Column(Integer, default=0)
+    portee = Column(Integer, default=0)
+    likes = Column(Integer, default=0)
+    commentaires = Column(Integer, default=0)
+    partages = Column(Integer, default=0)
+    clics = Column(Integer, default=0)
+    conversions = Column(Integer, default=0)           # devis/contacts générés
+    # Engagement calculé
+    taux_engagement = Column(Float, nullable=True)
+    effectiveness_score = Column(Float, nullable=True)
+    # ROAS
+    commandes_attribuees = Column(Integer, default=0)
+    revenus_attribues_fcfa = Column(Integer, default=0)
+    # Date de publication (copie dénormalisée depuis PostSocialDB pour les agrégats)
+    publie_le = Column(DateTime, nullable=True, index=True)
+    recupere_le = Column(DateTime, default=datetime.utcnow)
+
+
+class SocialConnectorDB(Base):
+    """Connexion OAuth d'un compte social par compagnie (Facebook Page, Instagram Business…)."""
+    __tablename__ = "social_connectors"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    plateforme = Column(String, nullable=False, index=True)    # facebook | instagram | linkedin | twitter | tiktok
+    account_id = Column(String, nullable=True)                 # page_id ou user_id externe
+    account_nom = Column(String, nullable=True)                # nom de la page/compte
+    metadata_json = Column(JSON, default=dict)                 # page_access_token, page_id, ig_user_id, …
+    est_actif = Column(Boolean, default=True, index=True)
+    connecte_le = Column(DateTime, default=datetime.utcnow)
+    expire_le = Column(DateTime, nullable=True)                # expiration du token si connue
+    cree_par = Column(String, nullable=True)
+
+
+# ─── TRENDS / VEILLE MARCHÉ ──────────────────────────────────────────────────
+
+class TrendSnapshotDB(Base):
+    """Snapshot historique d'une tendance de marché."""
+    __tablename__ = "trend_snapshots"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=True, index=True)  # null = global
+    region = Column(String, nullable=False, index=True)         # CM | SN | CI | NG | ALL
+    periode = Column(String, default="24h")                     # 24h | 7d | 30d
+    sujet = Column(Text, nullable=False, index=True)
+    score_social = Column(Float, default=0.0)
+    score_commerce = Column(Float, default=0.0)
+    score_opportunite = Column(Float, default=0.0)
+    momentum_pct = Column(Float, default=0.0)                   # évolution en %
+    categories = Column(JSON, default=list)                     # ["assurance", "automobile", ...]
+    sources = Column(JSON, default=list)                        # ["google", "twitter", ...]
+    snapshot_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class AlerteTrendDB(Base):
+    """Alerte envoyée sur une tendance (évite doublons 24h)."""
+    __tablename__ = "alertes_trends"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False)
+    sujet = Column(Text, nullable=False)
+    region = Column(String, nullable=False)
+    score_opportunite = Column(Float, nullable=False)
+    envoyee_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class BrouillonTrendDB(Base):
+    """Brouillon de post généré automatiquement depuis une tendance."""
+    __tablename__ = "brouillons_trends"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    region = Column(String, nullable=False)
+    sujet = Column(String, nullable=False)
+    score_opportunite = Column(Float, nullable=False)
+    brouillon_facebook = Column(Text, nullable=True)
+    brouillon_instagram = Column(Text, nullable=True)
+    brouillon_linkedin = Column(Text, nullable=True)
+    brouillon_whatsapp = Column(Text, nullable=True)
+    statut = Column(String, default="brouillon")               # brouillon | publie | rejete
+    post_id = Column(Integer, ForeignKey("posts_social.id"), nullable=True)
+    genere_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+# ─── AGENDA & RAPPELS EMPLOYÉS ───────────────────────────────────────────────
+
+class EvenementAgendaDB(Base):
+    """Événement / rendez-vous dans l'agenda d'un employé."""
+    __tablename__ = "evenements_agenda"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    employe_id = Column(Integer, nullable=False, index=True)    # référence EmployeDB
+    titre = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    type_evenement = Column(String, default="rendez_vous")      # rendez_vous | reunion | echeance | tache | rappel | conge
+    date_debut = Column(DateTime, nullable=False, index=True)
+    date_fin = Column(DateTime, nullable=True)
+    toute_la_journee = Column(Boolean, default=False)
+    lieu = Column(String, nullable=True)
+    lien_visio = Column(String, nullable=True)
+    recurrence = Column(String, nullable=True)                  # null | quotidien | hebdomadaire | mensuel
+    couleur = Column(String, default="#003366")
+    # Participants (autres employés)
+    participants = Column(JSON, default=list)                   # liste d'employe_id
+    # Rappels
+    rappels = Column(JSON, default=lambda: [30])               # délais en minutes avant l'événement
+    # Liaison avec d'autres modules
+    lien_sinistre = Column(Integer, nullable=True)
+    lien_contrat = Column(Integer, nullable=True)
+    lien_reunion = Column(String, nullable=True)
+    # Statut
+    statut = Column(String, default="planifie")                # planifie | termine | annule | reporte
+    cree_par = Column(String, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+    mis_a_jour_le = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class TacheDB(Base):
+    """Tâche assignée à un employé avec suivi et rappels."""
+    __tablename__ = "taches"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False, index=True)
+    titre = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    assigne_a = Column(Integer, nullable=False, index=True)    # employe_id
+    assigne_par = Column(String, nullable=True)
+    priorite = Column(String, default="normale")               # basse | normale | haute | urgente
+    statut = Column(String, default="a_faire", index=True)    # a_faire | en_cours | bloquee | terminee | annulee
+    date_echeance = Column(DateTime, nullable=True, index=True)
+    date_debut_prevue = Column(DateTime, nullable=True)
+    date_completion = Column(DateTime, nullable=True)
+    avancement_pct = Column(Integer, default=0)               # 0-100
+    # Rappels automatiques
+    rappel_j_moins = Column(Integer, default=1)               # rappel X jours avant échéance
+    rappel_envoye = Column(Boolean, default=False)
+    # Liaisons modules
+    lien_sinistre = Column(Integer, nullable=True)
+    lien_contrat = Column(Integer, nullable=True)
+    lien_police = Column(String, nullable=True)
+    # Tags
+    tags = Column(JSON, default=list)
+    pieces_jointes = Column(JSON, default=list)               # URLs fichiers liés
+    commentaires = Column(JSON, default=list)                 # [{auteur, texte, date}]
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    mis_a_jour_le = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class RappelDB(Base):
+    """Rappel envoyé (email/WhatsApp/notification push) — évite doublons."""
+    __tablename__ = "rappels_envoyes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=False)
+    employe_id = Column(Integer, nullable=False, index=True)
+    type_source = Column(String, nullable=False)              # tache | evenement | echeance_contrat | sinistre
+    source_id = Column(Integer, nullable=False)               # ID de l'entité source
+    canal = Column(String, nullable=False)                    # email | whatsapp | push | sms
+    message = Column(Text, nullable=False)
+    envoye_le = Column(DateTime, default=datetime.utcnow, index=True)
+    statut = Column(String, default="envoye")                 # envoye | echoue | lu
+
+
+# ─── SIGNATURES ÉLECTRONIQUES ────────────────────────────────────────────────
+
+class SignatureDB(Base):
+    """Audit trail des signatures électroniques de documents."""
+    __tablename__ = "signatures_electroniques"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    signature_id = Column(String, unique=True, nullable=False, index=True)
+    hash_sha256 = Column(String(64), nullable=False)
+    timestamp_utc = Column(String, nullable=False)
+    user_id = Column(Integer, nullable=False, index=True)
+    signataire_nom = Column(String, nullable=False)
+    signataire_role = Column(String, nullable=True)
+    compagnie_id = Column(Integer, ForeignKey("compagnies.id"), nullable=True)
+    manifest_json = Column(Text, nullable=False)
+    cree_le = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── DOCUMENTS GÉNÉRÉS (historique YukpoPro + YukpoAssurance) ────────────────
+
+class DocumentGenereDB(Base):
+    """
+    Historique des documents générés par l'IA (rapports, slides, traductions).
+    Partagé entre YukpoPro et YukpoAssurance pour l'amélioration itérative via chat.
+    """
+    __tablename__ = "documents_generes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    compagnie_id = Column(Integer, nullable=True, index=True)
+    titre = Column(String(300), nullable=False)
+    type_doc = Column(String(50), nullable=False, index=True)  # rapport | slides | traduction | autre
+    fichier = Column(String(300), nullable=True)               # nom du fichier généré (DOCX/PPTX/PDF)
+    contenu_source = Column(Text, nullable=True)               # prompt / demande initiale
+    contenu_genere = Column(Text, nullable=True)               # aperçu markdown / texte traduit
+    session_id = Column(String(100), nullable=True, index=True) # session chat liée
+    meta = Column(JSON, default=dict)                          # langue_source, langue_cible, type_rapport…
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    modifie_le = Column(DateTime, default=datetime.utcnow)
+
+
+# ─── TOKENS IA / CRÉDITS YUKPOPRO ─────────────────────────────────────────────
+
+class CreditIAUserDB(Base):
+    """
+    Solde de crédits IA par utilisateur YukpoPro.
+    1 crédit Yukpo = 200× le coût réel en token converti en FCFA.
+    Se renouvelle chaque mois selon le plan d'abonnement.
+    """
+    __tablename__ = "credits_ia_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, unique=True, index=True)
+    plan = Column(String(50), nullable=False, default="gratuit")
+    credits_alloues = Column(Integer, default=500)      # crédits mensuels selon plan
+    credits_utilises = Column(Integer, default=0)       # consommés ce mois
+    periode_debut = Column(DateTime, default=datetime.utcnow)
+    periode_fin = Column(DateTime, nullable=True)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+class ConsommationTokenDB(Base):
+    """
+    Log détaillé de chaque consommation de tokens par appel IA.
+    Permet le calcul exact des crédits débités en FCFA×200.
+    """
+    __tablename__ = "consommations_tokens"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    modele = Column(String(100), nullable=False)            # claude-sonnet-4-6 | gpt-4o | …
+    tokens_input = Column(Integer, default=0)
+    tokens_output = Column(Integer, default=0)
+    cout_usd = Column(Float, default=0.0)                   # coût réel USD
+    cout_fcfa = Column(Float, default=0.0)                  # coût réel FCFA (1 USD = 600 FCFA)
+    credits_debites = Column(Float, default=0.0)            # crédits Yukpo déduits (200× cout_fcfa)
+    module = Column(String(100), nullable=True)             # chat | traduction | rapport | slides
+    session_id = Column(String(100), nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+# ─── INIT & HELPERS ───────────────────────────────────────────────────────────
+
+async def init_db() -> None:
+    """Crée toutes les tables si elles n'existent pas. À appeler au démarrage."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("[DB] Tables initialisées")
+
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Dépendance FastAPI pour l'injection de session DB."""
+    async with async_session_maker() as session:
+        yield session

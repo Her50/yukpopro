@@ -1,0 +1,1050 @@
+{
+  "doc_id": "normes_six_sigma_qualite",
+  "metadata": {
+    "doc_id": "normes_six_sigma_qualite",
+    "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+    "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "commercial",
+      "DAF"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+    "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+    "indexe_le": "2026-04-17T03:11:49.689036"
+  },
+  "nb_chars": 12291,
+  "nb_chunks": 41,
+  "chunks": [
+    {
+      "texte": "Six Sigma — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article\n\nne cite pas suffisamment ses sources\n\n(\n\nfévrier 2009\n\n).\n\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\n\nréférences utiles à sa\n\nvérifiabilité\n\net en les liant à la section «\n\nNotes et références\n\n».\n\nEn pratique :\n\nQuelles sources sont attendues ?\n\nComment ajouter mes sources ?\n\nLe symbole de six sigma.\n\nSix Sigma\n\nou\n\n6 Sigma\n\nest une marque déposée de\n\nMotorola\n\ndésignant une méthode structurée de\n\nmanagement\n\nvisant à une amélioration de la\n\nqualité\n\net de l'efficacité des\n\nprocessus",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 0,
+        "chunk_total": 41,
+        "nb_chars": 807
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nSix Sigma — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article\n\nne cite pas suffisamment ses sources\n\n(\n\nfévrier 2009\n\n).\n\nSi vous disposez d'ouvrages ou d'articles de référence ou si vous connaissez des sites web de qualité traitant du thème abordé ici, merci de compléter l'article en donnant les\n\nréférences utiles à sa\n\nvérifiabilité\n\net en les liant à la section «\n\nNotes et références\n\n».\n\nEn pratique :\n\nQuelles sources sont attendues ?\n\nComment ajouter mes sources ?\n\nLe symbole de six sigma.\n\nSix Sigma\n\nou\n\n6 Sigma\n\nest une marque déposée de\n\nMotorola\n\ndésignant une méthode structurée de\n\nmanagement\n\nvisant à une amélioration de la\n\nqualité\n\net de l'efficacité des\n\nprocessus"
+    },
+    {
+      "texte": ". La méthode a d’abord été appliquée à des processus industriels avant d’être élargie à tous les types de processus, notamment administratifs,\n\nlogistiques\n\n, commerciaux et d'économie d'énergie. Au début des années 2000, elle connaît un essor en raison de la complexité des organisations et de l'internationalisation des processus qui impose une vision mondiale des problèmes.\n\nLa méthode Six Sigma repose à la fois sur des enquêtes (la\n\nvoix du client\n\n) et sur des données mesurables  et fiables (les\n\nindicateurs\n\n). Elle est utilisée pour réduire la variabilité dans les processus de production et les produits de façon à améliorer la qualité globale des produits et des services.\n\nHistoire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL’histoire de Six Sigma débute en 1986 chez\n\nMotorola",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 1,
+        "chunk_total": 41,
+        "nb_chars": 787
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n. La méthode a d’abord été appliquée à des processus industriels avant d’être élargie à tous les types de processus, notamment administratifs,\n\nlogistiques\n\n, commerciaux et d'économie d'énergie. Au début des années 2000, elle connaît un essor en raison de la complexité des organisations et de l'internationalisation des processus qui impose une vision mondiale des problèmes.\n\nLa méthode Six Sigma repose à la fois sur des enquêtes (la\n\nvoix du client\n\n) et sur des données mesurables  et fiables (les\n\nindicateurs\n\n). Elle est utilisée pour réduire la variabilité dans les processus de production et les produits de façon à améliorer la qualité globale des produits et des services.\n\nHistoire\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL’histoire de Six Sigma débute en 1986 chez\n\nMotorola"
+    },
+    {
+      "texte": ", qui cherche à mettre en place une méthode pour améliorer ses processus de fabrication et la qualité de ses produits de façon à mieux satisfaire ses clients. La méthode devient célèbre dans les années 1990 après que\n\nGeneral Electric\n\na décidé de l’appliquer et de l’améliorer. Son succès viendra de l'annonce des économies réalisées par cette société\n\n[\n\n]\n\n.\n\nOrigine de l'appellation\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nEn\n\nstatistiques\n\n, la lettre grecque\n\nsigma\n\nσ désigne l'\n\nécart type\n\n; « Six Sigma » signifie donc « six fois l'écart type ». L'écart type pouvant être assimilé à la dispersion d'un processus, on parle aussi d'étendue comme paramètre de dispersion : l'étendue R (en\n\nanglais\n\n:\n\nrange\n\n) est la différence entre la valeur maxi et la valeur mini d'un échantillon. Au sens mathématique, l'\n\nécart type\n\nest la racine carrée de la\n\nvariance\n\n.",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 2,
+        "chunk_total": 41,
+        "nb_chars": 869
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n, qui cherche à mettre en place une méthode pour améliorer ses processus de fabrication et la qualité de ses produits de façon à mieux satisfaire ses clients. La méthode devient célèbre dans les années 1990 après que\n\nGeneral Electric\n\na décidé de l’appliquer et de l’améliorer. Son succès viendra de l'annonce des économies réalisées par cette société\n\n[\n\n]\n\n.\n\nOrigine de l'appellation\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nEn\n\nstatistiques\n\n, la lettre grecque\n\nsigma\n\nσ désigne l'\n\nécart type\n\n; « Six Sigma » signifie donc « six fois l'écart type ». L'écart type pouvant être assimilé à la dispersion d'un processus, on parle aussi d'étendue comme paramètre de dispersion : l'étendue R (en\n\nanglais\n\n:\n\nrange\n\n) est la différence entre la valeur maxi et la valeur mini d'un échantillon. Au sens mathématique, l'\n\nécart type\n\nest la racine carrée de la\n\nvariance\n\n."
+    },
+    {
+      "texte": "La méthode consiste à faire en sorte que tous les éléments issus d'un processus soient compris dans un intervalle s'éloignant au maximum de six sigma par rapport à la\n\nmoyenne\n\ngénérale des éléments issus de ce processus. En réduisant la variabilité des produits du processus, on réduit le risque de voir le produit (ou service) rejeté par son destinataire car en dehors de ses attentes ou spécifications. Le principe vise donc à travailler sur le processus afin que seuls des produits conformes aux exigences soient livrés : produire juste dès la première fois en éliminant les coûts liés aux retouches, recyclage, mise au rebut et risque de vente d'un produit non conforme\n\n[",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 3,
+        "chunk_total": 41,
+        "nb_chars": 677
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nLa méthode consiste à faire en sorte que tous les éléments issus d'un processus soient compris dans un intervalle s'éloignant au maximum de six sigma par rapport à la\n\nmoyenne\n\ngénérale des éléments issus de ce processus. En réduisant la variabilité des produits du processus, on réduit le risque de voir le produit (ou service) rejeté par son destinataire car en dehors de ses attentes ou spécifications. Le principe vise donc à travailler sur le processus afin que seuls des produits conformes aux exigences soient livrés : produire juste dès la première fois en éliminant les coûts liés aux retouches, recyclage, mise au rebut et risque de vente d'un produit non conforme\n\n["
+    },
+    {
+      "texte": "]\n.\nConcept\n[\nmodifier\n|\nmodifier le code\n]\nUn processus industriel ou un service comprend un certain nombre de tâches répétitives, l'exemple le plus simple étant la production d'une pièce en grande série. Une pièce ou une prestation est conforme si elle respecte un certain nombre de critères, mais les pièces ou les services ne sauraient être strictement identiques. L’esprit Six Sigma consiste à améliorer le processus pour que ces produits soient tous bons, il ne s’agit pas de contrôler les produits, mais bien d’être sûr que le processus soit fiable\n[\n\n]\n.\nLe concept s’applique non seulement à la production, mais aussi à la\nlogistique\n, au développement. Cependant, l'exemple de la société\n3M\nmontre que la méthode s'applique plutôt aux tâches de production qu'aux travaux de\nrecherche\noù la créativité est nécessaire\n[",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 4,
+        "chunk_total": 41,
+        "nb_chars": 827
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n]\n.\nConcept\n[\nmodifier\n|\nmodifier le code\n]\nUn processus industriel ou un service comprend un certain nombre de tâches répétitives, l'exemple le plus simple étant la production d'une pièce en grande série. Une pièce ou une prestation est conforme si elle respecte un certain nombre de critères, mais les pièces ou les services ne sauraient être strictement identiques. L’esprit Six Sigma consiste à améliorer le processus pour que ces produits soient tous bons, il ne s’agit pas de contrôler les produits, mais bien d’être sûr que le processus soit fiable\n[\n\n]\n.\nLe concept s’applique non seulement à la production, mais aussi à la\nlogistique\n, au développement. Cependant, l'exemple de la société\n3M\nmontre que la méthode s'applique plutôt aux tâches de production qu'aux travaux de\nrecherche\noù la créativité est nécessaire\n["
+    },
+    {
+      "texte": "]\n. Il suffit d’avoir un processus dont les performances sont mesurables\n[\n\n]\n\n.\n\nEn pratique la limite de 6σ est difficilement atteignable, mais certaines entreprises peuvent rechercher le 4σ ou 3σ, comme dans l’\n\naéronautique\n\n.\n\nMéthode Six Sigma\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nSix Sigma repose sur les notions de\n\nclient\n\n,\n\nprocessus\n\net\n\nmesure\n\n; il s'appuie en particulier sur :\n\nles attentes mesurables du client (CTQ, en\n\nanglais\n\n:\n\nCritical To Quality\n\n) ;\n\ndes mesures fiables mesurant la performance du\n\nprocessus métier\n\nde l'entreprise par rapport à ces attentes ;\n\ndes outils\n\nstatistiques\n\npour analyser les causes sources influant sur la performance ;\n\ndes solutions attaquant ces causes sources ;\n\ndes outils pour contrôler que les solutions ont bien l'impact escompté sur la performance.\n\nPrincipe DMAIC",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 5,
+        "chunk_total": 41,
+        "nb_chars": 879
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n]\n. Il suffit d’avoir un processus dont les performances sont mesurables\n[\n\n]\n\n.\n\nEn pratique la limite de 6σ est difficilement atteignable, mais certaines entreprises peuvent rechercher le 4σ ou 3σ, comme dans l’\n\naéronautique\n\n.\n\nMéthode Six Sigma\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nPrincipes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nSix Sigma repose sur les notions de\n\nclient\n\n,\n\nprocessus\n\net\n\nmesure\n\n; il s'appuie en particulier sur :\n\nles attentes mesurables du client (CTQ, en\n\nanglais\n\n:\n\nCritical To Quality\n\n) ;\n\ndes mesures fiables mesurant la performance du\n\nprocessus métier\n\nde l'entreprise par rapport à ces attentes ;\n\ndes outils\n\nstatistiques\n\npour analyser les causes sources influant sur la performance ;\n\ndes solutions attaquant ces causes sources ;\n\ndes outils pour contrôler que les solutions ont bien l'impact escompté sur la performance.\n\nPrincipe DMAIC"
+    },
+    {
+      "texte": "La méthode se base ainsi sur cinq étapes qui se contractent dans l’\n\nacronyme\n\n«\n\nDMAIC\n\n» en\n\nanglais\n\n:\n\nDefine, Measure, Analyse, Improve, Control\n\n, soit « Définir, mesurer, analyser, améliorer, maîtriser »\n\n[\n\n]\n\n.\n\nChaque étape possède des outils différents qui sont regroupés dans une démarche cohérente. Typiquement, la gamme d'outils utilisés dans chacune des phases est (cette liste n'est pas exhaustive) :\n\nDéfinir\n\n: définir le projet, le processus à améliorer, identifier les gains opérationnels et financiers, comprendre les attentes des clients (voix du client) et les CTQ appelés aussi Yi, cartographier le processus (\n\nSIPOC\n\n) (en\n\nanglais\n\n:\n\nSupplier Input Process Output Customer\n\n), identifier les facteurs influents du processus (appelés Xi)\n\nMesurer\n\n: mettre sous monitoring le processus pour mesurer simultanément les Yi et XI,\n\ndiagrammes d'Ishikawa",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 6,
+        "chunk_total": 41,
+        "nb_chars": 876
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nLa méthode se base ainsi sur cinq étapes qui se contractent dans l’\n\nacronyme\n\n«\n\nDMAIC\n\n» en\n\nanglais\n\n:\n\nDefine, Measure, Analyse, Improve, Control\n\n, soit « Définir, mesurer, analyser, améliorer, maîtriser »\n\n[\n\n]\n\n.\n\nChaque étape possède des outils différents qui sont regroupés dans une démarche cohérente. Typiquement, la gamme d'outils utilisés dans chacune des phases est (cette liste n'est pas exhaustive) :\n\nDéfinir\n\n: définir le projet, le processus à améliorer, identifier les gains opérationnels et financiers, comprendre les attentes des clients (voix du client) et les CTQ appelés aussi Yi, cartographier le processus (\n\nSIPOC\n\n) (en\n\nanglais\n\n:\n\nSupplier Input Process Output Customer\n\n), identifier les facteurs influents du processus (appelés Xi)\n\nMesurer\n\n: mettre sous monitoring le processus pour mesurer simultanément les Yi et XI,\n\ndiagrammes d'Ishikawa"
+    },
+    {
+      "texte": "… après s'être assuré de la capabilité des processus de mesure (R&R, kappa)\n\nAnalyser\n\n: réaliser une analyse de données pour identifier les facteurs Xi les plus influents sur les Yi (réponses)  cartographie détaillée des processus (par exemple,\n\nanalyse de la valeur\n\najoutée), tests d'hypothèses (\n\nANOVA\n\n,\n\nχ²\n\n, tests de variances…),\n\nplans d'expérience\n\n…\n\nAméliorer\n\n: trouver des actions d'améliorations relativement aux Xi les plus influentes en utilisant des outils tels que plans d'expérience,\n\nAMDEC\n\n,\n\npoka yoke\n\n…\n\nMaîtriser\n\n: mettre en place des outils de pilotage du processus tels que\n\nMSP\n\n…\n\nLes objectifs pour l'entreprise sont de se doter d'actions mesurables et efficaces, de satisfaire ses clients, d'impliquer les équipes et bien souvent d'améliorer son image.",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 7,
+        "chunk_total": 41,
+        "nb_chars": 786
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n… après s'être assuré de la capabilité des processus de mesure (R&R, kappa)\n\nAnalyser\n\n: réaliser une analyse de données pour identifier les facteurs Xi les plus influents sur les Yi (réponses)  cartographie détaillée des processus (par exemple,\n\nanalyse de la valeur\n\najoutée), tests d'hypothèses (\n\nANOVA\n\n,\n\nχ²\n\n, tests de variances…),\n\nplans d'expérience\n\n…\n\nAméliorer\n\n: trouver des actions d'améliorations relativement aux Xi les plus influentes en utilisant des outils tels que plans d'expérience,\n\nAMDEC\n\n,\n\npoka yoke\n\n…\n\nMaîtriser\n\n: mettre en place des outils de pilotage du processus tels que\n\nMSP\n\n…\n\nLes objectifs pour l'entreprise sont de se doter d'actions mesurables et efficaces, de satisfaire ses clients, d'impliquer les équipes et bien souvent d'améliorer son image."
+    },
+    {
+      "texte": "Lorsqu'un processus ne peut être amélioré alors qu'il ne répond plus aux attentes du client, Six Sigma se décline aussi en méthodes de création de nouveaux processus ou de nouveaux produits sous le nom de DFSS (en anglais : Design For Six Sigma ). Cette autre méthode se décompose aussi en 5 étapes qui se contractent en DMADV pour « définir, mesurer, analyser, développer ( design en anglais ) et vérifier ». Certification [ modifier | modifier le code ] Il existe la certification de l' American Society for Quality (ASQ) qui bénéficie d'une reconnaissance internationale [réf. nécessaire] , l'IASSC ( International Accreditation for Six Sigma Certification ) ainsi que le CSSC ( Council for Six Sigma Certification ). Nouvelles tendances [ modifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 8,
+        "chunk_total": 41,
+        "nb_chars": 861
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nLorsqu'un processus ne peut être amélioré alors qu'il ne répond plus aux attentes du client, Six Sigma se décline aussi en méthodes de création de nouveaux processus ou de nouveaux produits sous le nom de DFSS (en anglais : Design For Six Sigma ). Cette autre méthode se décompose aussi en 5 étapes qui se contractent en DMADV pour « définir, mesurer, analyser, développer ( design en anglais ) et vérifier ». Certification [ modifier | modifier le code ] Il existe la certification de l' American Society for Quality (ASQ) qui bénéficie d'une reconnaissance internationale [réf. nécessaire] , l'IASSC ( International Accreditation for Six Sigma Certification ) ainsi que le CSSC ( Council for Six Sigma Certification ). Nouvelles tendances [ modifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "[ modifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 9,
+        "chunk_total": 41,
+        "nb_chars": 120
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n[ modifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "modifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 10,
+        "chunk_total": 41,
+        "nb_chars": 118
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nmodifier | modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "| modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 11,
+        "chunk_total": 41,
+        "nb_chars": 109
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n| modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "modifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 12,
+        "chunk_total": 41,
+        "nb_chars": 107
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nmodifier le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "le code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 13,
+        "chunk_total": 41,
+        "nb_chars": 98
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nle code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "code ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 14,
+        "chunk_total": 41,
+        "nb_chars": 95
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\ncode ] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 15,
+        "chunk_total": 41,
+        "nb_chars": 90
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n] Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "Lean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 16,
+        "chunk_total": 41,
+        "nb_chars": 88
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nLean Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "Six sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 17,
+        "chunk_total": 41,
+        "nb_chars": 83
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nSix sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "sigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 18,
+        "chunk_total": 41,
+        "nb_chars": 79
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nsigma (LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "(LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 19,
+        "chunk_total": 41,
+        "nb_chars": 73
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n(LSS) [ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "[ modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 20,
+        "chunk_total": 41,
+        "nb_chars": 67
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n[ modifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "modifier | modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 21,
+        "chunk_total": 41,
+        "nb_chars": 65
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nmodifier | modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "| modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 22,
+        "chunk_total": 41,
+        "nb_chars": 56
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n| modifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "modifier le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 23,
+        "chunk_total": 41,
+        "nb_chars": 54
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nmodifier le code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "le code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 24,
+        "chunk_total": 41,
+        "nb_chars": 45
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nle code ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "code ] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 25,
+        "chunk_total": 41,
+        "nb_chars": 42
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\ncode ] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "] Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 26,
+        "chunk_total": 41,
+        "nb_chars": 37
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n] Article détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "Article détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 27,
+        "chunk_total": 41,
+        "nb_chars": 35
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nArticle détaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": "détaillé : Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 28,
+        "chunk_total": 41,
+        "nb_chars": 27
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\ndétaillé : Lean Six Sigma ."
+    },
+    {
+      "texte": ": Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 29,
+        "chunk_total": 41,
+        "nb_chars": 18
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n: Lean Six Sigma ."
+    },
+    {
+      "texte": "Lean Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 30,
+        "chunk_total": 41,
+        "nb_chars": 16
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nLean Six Sigma ."
+    },
+    {
+      "texte": "Six Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 31,
+        "chunk_total": 41,
+        "nb_chars": 11
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nSix Sigma ."
+    },
+    {
+      "texte": "Sigma .",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 32,
+        "chunk_total": 41,
+        "nb_chars": 7
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nSigma ."
+    },
+    {
+      "texte": ".",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 33,
+        "chunk_total": 41,
+        "nb_chars": 1
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n."
+    },
+    {
+      "texte": "Une autre méthode est de plus en plus associée au Six Sigma, le\n\nLean\n\n(de l'anglais\n\nlean\n\nsignifiant maigre, sans gras) (outils comme\n\nValue Stream Mapping\n\n,\n\nTakt time\n\n). Le\n\nLean 6 Sigma\n\nprend de plus en plus le pas sur le « pur » Six Sigma\n\n[réf. nécessaire]\n\n.\n\nConcrètement, le\n\nLean Six Sigma\n\nest la rencontre entre deux méthodes d'amélioration en continu destinées à accroître la performance de l'entreprise.\n\nAlors que le Six Sigma va venir réduire les variations observées sur le produit, le\n\nLean\n\nva se concentrer sur le processus de production et sur l'élimination de tout ce qui est superflu. En réduisant les temps de travail et les temps d'attente, le processus va gagner en efficacité. Dans certaines industries, le temps d'attente est un facteur important pour le client (CTQ)\n\n[\n\n]\n\n.\n\nLe Six Sigma et le\n\nLean manufacturing\n\nrestent distincts. Le\n\nLean manufacturing",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 34,
+        "chunk_total": 41,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nUne autre méthode est de plus en plus associée au Six Sigma, le\n\nLean\n\n(de l'anglais\n\nlean\n\nsignifiant maigre, sans gras) (outils comme\n\nValue Stream Mapping\n\n,\n\nTakt time\n\n). Le\n\nLean 6 Sigma\n\nprend de plus en plus le pas sur le « pur » Six Sigma\n\n[réf. nécessaire]\n\n.\n\nConcrètement, le\n\nLean Six Sigma\n\nest la rencontre entre deux méthodes d'amélioration en continu destinées à accroître la performance de l'entreprise.\n\nAlors que le Six Sigma va venir réduire les variations observées sur le produit, le\n\nLean\n\nva se concentrer sur le processus de production et sur l'élimination de tout ce qui est superflu. En réduisant les temps de travail et les temps d'attente, le processus va gagner en efficacité. Dans certaines industries, le temps d'attente est un facteur important pour le client (CTQ)\n\n[\n\n]\n\n.\n\nLe Six Sigma et le\n\nLean manufacturing\n\nrestent distincts. Le\n\nLean manufacturing"
+    },
+    {
+      "texte": "permet de construire un système de production basé sur une philosophie et des outils intégrés. Le Six Sigma est la maîtrise d'un procédé. L'utilisation d'outils\n\nlean\n\ndans le Six Sigma peut permettre d'atteindre un résultat, mais ne peut pas se substituer au\n\nLean Manufacturing\n\ntel que compris dans l'industrie.\n\nL'association des deux termes est, dans certains cas, considérée comme du\n\nmarketing\n\n, car issue de deux méthodes éprouvées dans le temps et intrinsèquement suffisantes. D'autre part, on associe un outil (Six sigma) à un système (ensemble d'éléments dont des outils).\n\nDesign for Six Sigma\n\n(DFSS)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMise en œuvre d'une\n\ndémarche qualité\n\ndès la conception de nouveaux processus. L'objectif est un produit ou un service répondant aux exigences du client. Les outils utilisés sont, par exemple, les matrices de KANO ou la maison de la qualité.",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 35,
+        "chunk_total": 41,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\npermet de construire un système de production basé sur une philosophie et des outils intégrés. Le Six Sigma est la maîtrise d'un procédé. L'utilisation d'outils\n\nlean\n\ndans le Six Sigma peut permettre d'atteindre un résultat, mais ne peut pas se substituer au\n\nLean Manufacturing\n\ntel que compris dans l'industrie.\n\nL'association des deux termes est, dans certains cas, considérée comme du\n\nmarketing\n\n, car issue de deux méthodes éprouvées dans le temps et intrinsèquement suffisantes. D'autre part, on associe un outil (Six sigma) à un système (ensemble d'éléments dont des outils).\n\nDesign for Six Sigma\n\n(DFSS)\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nMise en œuvre d'une\n\ndémarche qualité\n\ndès la conception de nouveaux processus. L'objectif est un produit ou un service répondant aux exigences du client. Les outils utilisés sont, par exemple, les matrices de KANO ou la maison de la qualité."
+    },
+    {
+      "texte": "Formations et certifications\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes formations disponibles sur le marché ont pour objectif de permettre aux différents acteurs (cf plus haut) d'accroître leurs connaissances et d'obtenir des compétences. Il y a des formations courtes (2 à 3 jours) pour les\n\nChampions\n\n(ou\n\nDeployment Leaders\n\n) et des programmes plus longs (plusieurs sessions sur 3 à 6 mois) pour les\n\nGreen Belts\n\net les\n\nBlack Belts\n\n. Les programmes de formation-action sont le meilleur moyen de lancer des projets Six Sigma dans les organisations. Les programmes de formation doivent répondre aux exigences de « savoir », « savoir faire » et « savoir être » définis dans la norme\n\nAFNOR\n\nNFX 06 091\n\n« Démarches Lean, Six Sigma, Lean Six Sigma - Exigences des compétences des chefs de projets d'amélioration et des animateurs d'ateliers »",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 36,
+        "chunk_total": 41,
+        "nb_chars": 846
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nFormations et certifications\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes formations disponibles sur le marché ont pour objectif de permettre aux différents acteurs (cf plus haut) d'accroître leurs connaissances et d'obtenir des compétences. Il y a des formations courtes (2 à 3 jours) pour les\n\nChampions\n\n(ou\n\nDeployment Leaders\n\n) et des programmes plus longs (plusieurs sessions sur 3 à 6 mois) pour les\n\nGreen Belts\n\net les\n\nBlack Belts\n\n. Les programmes de formation-action sont le meilleur moyen de lancer des projets Six Sigma dans les organisations. Les programmes de formation doivent répondre aux exigences de « savoir », « savoir faire » et « savoir être » définis dans la norme\n\nAFNOR\n\nNFX 06 091\n\n« Démarches Lean, Six Sigma, Lean Six Sigma - Exigences des compétences des chefs de projets d'amélioration et des animateurs d'ateliers »"
+    },
+    {
+      "texte": ". Ce qui conduit à des formations de durée entre 6 et 8 jours pour des\n\nGreen Belt\n\n, entre 12 et 16 jours pour des\n\nBlack Belt\n\net ceci en plusieurs sessions espacées de quelques semaines pour application. La masse de connaissances à acquérir et leur applicabilité nécessitent la réalisation d'un projet concret issu de son entreprise\n\n[\n\n]\n\n.\n\nOutils analytiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nARIS\n\nSix Sigma\n\nJMP\n\nMicrosoft Visio\n\nMinitab\n\nCorico\n\nR\n\n(\n\nlogiciel libre\n\nd'\n\nanalyse statistique\n\n) : ses fonctions statistiques et graphiques peuvent être utilisées pour des projets Six Sigma. En outre, certains paquets présents sur\n\nCRAN\n\ncontiennent des outils spécifiques pour Six Sigma tels que SixSigma, qualityTools, qcc et IQCC.\n\nSoftware AG\n\nBPM Suite\n\nStatgraphics\n\nSTATISTICA\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\na\n\net\n\nb\n\n(en)",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 37,
+        "chunk_total": 41,
+        "nb_chars": 871
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\n. Ce qui conduit à des formations de durée entre 6 et 8 jours pour des\n\nGreen Belt\n\n, entre 12 et 16 jours pour des\n\nBlack Belt\n\net ceci en plusieurs sessions espacées de quelques semaines pour application. La masse de connaissances à acquérir et leur applicabilité nécessitent la réalisation d'un projet concret issu de son entreprise\n\n[\n\n]\n\n.\n\nOutils analytiques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nARIS\n\nSix Sigma\n\nJMP\n\nMicrosoft Visio\n\nMinitab\n\nCorico\n\nR\n\n(\n\nlogiciel libre\n\nd'\n\nanalyse statistique\n\n) : ses fonctions statistiques et graphiques peuvent être utilisées pour des projets Six Sigma. En outre, certains paquets présents sur\n\nCRAN\n\ncontiennent des outils spécifiques pour Six Sigma tels que SixSigma, qualityTools, qcc et IQCC.\n\nSoftware AG\n\nBPM Suite\n\nStatgraphics\n\nSTATISTICA\n\nNotes et références\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\na\n\net\n\nb\n\n(en)"
+    },
+    {
+      "texte": "The Council for Six Sigma Certification,\n\nSix Sigma: A Complete Step-by-Step Guide\n\n,\n\njuillet 2018\n\n, 829\n\np.\n\n(\n\nISBN\n\n978-1732592650\n\n,\n\nlire en ligne\n\n)\n\n,\n\np.\n\n8, 25, 27,\n\n.\n\n↑\n\na\n\nb\n\net\n\nc\n\nPeyrucat 2003\n\n↑\n\n«\n\nSix Sigma 'killed' innovation in 3M | ZDNet\n\n», sur\n\nZDNet\n\n(consulté le\n\n12 novembre 2015\n\n)\n\n↑\n\nGillot 2010\n\n↑\n\n«\n\nDescriptif de la certification\n\n»\n\n[PDF]\n\n, sur\n\nAfnor Certification\n\n,\n\nseptembre 2019\n\n(consulté le\n\n5 novembre 2020\n\n)\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nJean-François\n\nPeyrucat\n\n, «\n\nLe Six Sigma, une démarche pour traquer les défauts du process\n\n»,\n\nMesures\n\n,\n\nn\n\no\n\n753,‎\n\nmars 2003\n\n,\n\np.\n\nSebastien\nGillot\n, «\nLa théorie du chaos appliquée aux banques\n»,\nAgefi\n,\nn\no\n3,‎\nmars 2009\n,\np.",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 38,
+        "chunk_total": 41,
+        "nb_chars": 795
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nThe Council for Six Sigma Certification,\n\nSix Sigma: A Complete Step-by-Step Guide\n\n,\n\njuillet 2018\n\n, 829\n\np.\n\n(\n\nISBN\n\n978-1732592650\n\n,\n\nlire en ligne\n\n)\n\n,\n\np.\n\n8, 25, 27,\n\n.\n\n↑\n\na\n\nb\n\net\n\nc\n\nPeyrucat 2003\n\n↑\n\n«\n\nSix Sigma 'killed' innovation in 3M | ZDNet\n\n», sur\n\nZDNet\n\n(consulté le\n\n12 novembre 2015\n\n)\n\n↑\n\nGillot 2010\n\n↑\n\n«\n\nDescriptif de la certification\n\n»\n\n[PDF]\n\n, sur\n\nAfnor Certification\n\n,\n\nseptembre 2019\n\n(consulté le\n\n5 novembre 2020\n\n)\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nJean-François\n\nPeyrucat\n\n, «\n\nLe Six Sigma, une démarche pour traquer les défauts du process\n\n»,\n\nMesures\n\n,\n\nn\n\no\n\n753,‎\n\nmars 2003\n\n,\n\np.\n\nSebastien\nGillot\n, «\nLa théorie du chaos appliquée aux banques\n»,\nAgefi\n,\nn\no\n3,‎\nmars 2009\n,\np."
+    },
+    {
+      "texte": "Sebastien\nGillot\n, «\nUne simulation destinée à identifier les dysfonctionnements des processus bancaires\n»,\nAgefi\n,\nn\no\n4,‎\nmars 2010\n,\np.",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 39,
+        "chunk_total": 41,
+        "nb_chars": 138
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nSebastien\nGillot\n, «\nUne simulation destinée à identifier les dysfonctionnements des processus bancaires\n»,\nAgefi\n,\nn\no\n4,‎\nmars 2010\n,\np."
+    },
+    {
+      "texte": "Articles connexes\n[\nmodifier\n|\nmodifier le code\n]\nDorian Shainin\net sa méthode\nMatrice de pugh\nLean Six Sigma\nPortail du management\nPortail de l'industrie\nPortail du génie mécanique\nCe document provient de «\nhttps://fr.wikipedia.org/w/index.php?title=Six_Sigma&oldid=234489234\n».\nCatégorie\n:\nOutil du management de la qualité\nCatégories cachées :\nArticle manquant de références depuis février 2009\nArticle manquant de références/Liste complète\nArticle à référence nécessaire\nPortail:Management/Articles liés\nPortail:Économie/Articles liés\nPortail:Sciences humaines et sociales/Articles liés\nPortail:Société/Articles liés\nPortail:Industrie/Articles liés\nPortail:Technologies/Articles liés\nPortail:Génie mécanique/Articles liés\nRechercher\nRechercher\nSix Sigma\n42 langues\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_six_sigma_qualite",
+        "nom_doc": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "nom": "Six Sigma — Méthode de qualité industrielle (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "commercial",
+          "DAF"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Six_Sigma",
+        "hash": "69d7a7735da2e5d2da5c14e4be796a7049e26536cfbf42f6d8f25605cec5c3f9",
+        "indexe_le": "2026-04-17T03:11:49.689036",
+        "chunk_index": 40,
+        "chunk_total": 41,
+        "nb_chars": 785
+      },
+      "texte_embed": "normes — Six Sigma — Méthode de qualité industrielle (Wikipedia FR)\nArticles connexes\n[\nmodifier\n|\nmodifier le code\n]\nDorian Shainin\net sa méthode\nMatrice de pugh\nLean Six Sigma\nPortail du management\nPortail de l'industrie\nPortail du génie mécanique\nCe document provient de «\nhttps://fr.wikipedia.org/w/index.php?title=Six_Sigma&oldid=234489234\n».\nCatégorie\n:\nOutil du management de la qualité\nCatégories cachées :\nArticle manquant de références depuis février 2009\nArticle manquant de références/Liste complète\nArticle à référence nécessaire\nPortail:Management/Articles liés\nPortail:Économie/Articles liés\nPortail:Sciences humaines et sociales/Articles liés\nPortail:Société/Articles liés\nPortail:Industrie/Articles liés\nPortail:Technologies/Articles liés\nPortail:Génie mécanique/Articles liés\nRechercher\nRechercher\nSix Sigma\n42 langues\nAjouter un sujet"
+    }
+  ]
+}

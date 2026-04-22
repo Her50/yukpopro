@@ -1,0 +1,335 @@
+# ─── YukpoAssurance — Pipeline CI/CD GitHub Actions ───────────────────────────
+# Triggers : push main/develop, PR vers main
+# Jobs     : lint → test → security → docker-build
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: CI/CD YukpoAssurance
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+# Annule les jobs en cours si un nouveau push arrive sur la même branche
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  # Variables d'environnement factices pour les tests (jamais de vraies clés ici)
+  CLAUDE_API_KEY: "test-key-ci-not-real"
+  OPENAI_API_KEY: "test-key-ci-not-real"
+  SECRET_KEY: "ci-test-secret-key-not-used-in-production"
+  DATABASE_URL: "sqlite+aiosqlite:///./test_yukpo.db"
+  ORASS_MODE: "simulation"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 1 — LINT
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-lint-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-lint-
+            ${{ runner.os }}-pip-
+
+      - name: Install lint dependencies
+        run: |
+          pip install --upgrade pip
+          pip install ruff black mypy
+          pip install -r requirements.txt
+
+      - name: Run ruff (linter)
+        run: ruff check . --output-format=github
+
+      - name: Run black (format check)
+        run: black --check --diff .
+
+      - name: Run mypy (type checking)
+        run: |
+          mypy api/ modules/ core/ config/ \
+            --ignore-missing-imports \
+            --no-strict-optional \
+            --warn-return-any \
+            --python-version 3.11 \
+            --no-error-summary \
+            || true  # Avertissements non bloquants pour l'instant
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 2 — TESTS
+# ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-test-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov httpx
+
+      - name: Create necessary directories
+        run: mkdir -p data/generated logs
+
+      - name: Run tests with coverage
+        env:
+          CLAUDE_API_KEY: ${{ env.CLAUDE_API_KEY }}
+          OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
+          SECRET_KEY: ${{ env.SECRET_KEY }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          ORASS_MODE: ${{ env.ORASS_MODE }}
+        run: |
+          pytest tests/ \
+            -v \
+            --tb=short \
+            --cov=. \
+            --cov-report=html:htmlcov \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            --cov-fail-under=70 \
+            --junitxml=test-results/junit.xml \
+            -p no:warnings
+
+      - name: Upload test results (JUnit XML)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-py${{ matrix.python-version }}
+          path: test-results/junit.xml
+          retention-days: 30
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-py${{ matrix.python-version }}
+          path: htmlcov/
+          retention-days: 30
+
+      - name: Publish test summary on PR
+        uses: dorny/test-reporter@v1
+        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
+        with:
+          name: Pytest Results (Python ${{ matrix.python-version }})
+          path: test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: Coverage comment on PR
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 80
+          MINIMUM_ORANGE: 70
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 3 — SECURITY SCAN
+# ─────────────────────────────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-security-
+
+      - name: Install security tools
+        run: |
+          pip install bandit safety
+          pip install -r requirements.txt
+
+      - name: Run bandit (SAST — code vulnerabilities)
+        run: |
+          bandit -r api/ modules/ core/ config/ \
+            -f json \
+            -o bandit-report.json \
+            --severity-level medium \
+            --confidence-level medium \
+            -x tests/ \
+            || true  # Ne bloque pas le pipeline sur les avertissements
+          bandit -r api/ modules/ core/ config/ \
+            --severity-level high \
+            --confidence-level high \
+            -x tests/
+
+      - name: Run safety (dependency vulnerabilities)
+        run: |
+          safety check \
+            --file requirements.txt \
+            --json \
+            --output safety-report.json \
+            || true
+          safety check --file requirements.txt
+
+      - name: Upload bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+          retention-days: 30
+
+      - name: Upload safety report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safety-dependency-report
+          path: safety-report.json
+          retention-days: 30
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 4 — DOCKER BUILD
+# ─────────────────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build (no push)
+    runs-on: ubuntu-latest
+    needs: [test, security]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image (validate only, no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: |
+            yukpo-assurance:${{ github.sha }}
+            yukpo-assurance:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      # Évite la croissance infinie du cache Docker
+      - name: Move Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Run Trivy vulnerability scanner on image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: yukpo-assurance:${{ github.sha }}
+          format: table
+          exit-code: 0  # Ne bloque pas — informatif seulement
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 5 — RÉSUMÉ PR (notification finale)
+# ─────────────────────────────────────────────────────────────────────────────
+  pr-summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [lint, test, security, docker-build]
+    if: github.event_name == 'pull_request' && always()
+
+    steps:
+      - name: Generate PR summary comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jobs = {
+              lint:         '${{ needs.lint.result }}',
+              test:         '${{ needs.test.result }}',
+              security:     '${{ needs.security.result }}',
+              'docker-build': '${{ needs.docker-build.result }}',
+            };
+
+            const icon = r => r === 'success' ? '✅' : r === 'skipped' ? '⏭️' : '❌';
+            const allOk = Object.values(jobs).every(r => r === 'success' || r === 'skipped');
+
+            const body = `## 🤖 YukpoAssurance CI/CD — Résumé
+
+            | Job | Statut |
+            |-----|--------|
+            | Lint (ruff, black, mypy) | ${icon(jobs.lint)} ${jobs.lint} |
+            | Tests & Coverage (≥70%) | ${icon(jobs.test)} ${jobs.test} |
+            | Security (bandit, safety) | ${icon(jobs.security)} ${jobs.security} |
+            | Docker Build | ${icon(jobs['docker-build'])} ${jobs['docker-build']} |
+
+            **Statut global : ${allOk ? '✅ PRÊT POUR MERGE' : '❌ CORRECTIONS REQUISES'}**
+
+            > Commit \`${{ github.sha }}\` — Branch \`${{ github.head_ref }}\`
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });

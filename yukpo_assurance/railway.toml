@@ -1,0 +1,26 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "gunicorn api.main:app --worker-class uvicorn.workers.UvicornWorker --workers 2 --bind 0.0.0.0:$PORT --timeout 120 --graceful-timeout 30 --max-requests 1000 --max-requests-jitter 100 --access-logfile - --error-logfile - --log-level info"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[deploy.environmentVariables]]
+name = "PYTHONUNBUFFERED"
+value = "1"
+
+[[deploy.environmentVariables]]
+name = "PYTHONDONTWRITEBYTECODE"
+value = "1"
+
+[[deploy.environmentVariables]]
+name = "PYTHONPATH"
+value = "/app"
+
+[[deploy.environmentVariables]]
+name = "WORKERS"
+value = "2"

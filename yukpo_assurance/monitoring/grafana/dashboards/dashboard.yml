@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'YukpoAssurance'
+    orgId: 1
+    folder: 'YukpoAssurance'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

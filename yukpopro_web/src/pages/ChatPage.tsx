@@ -1,0 +1,1053 @@
+/**
+ * Yukpo IA — Interface de chat unifiée
+ * Remplace CopilotePage, AgentsPage, GenerateursPage, AnalysePage, TraductionPage
+ * Un seul chat intelligent qui orchestre tous les agents et outils.
+ */
+import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+import {
+  Send, Plus, Trash2, MessageSquare, Paperclip, X,
+  ChevronLeft, ChevronRight, Bot, Sparkles, Download,
+  FileText, Image, Table, Globe, BarChart2,
+  Pencil, Save, User as UserIcon, Mic, MicOff,
+} from "lucide-react";
+import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
+import { chatApi, profilApi, type UploadedFile } from "@/api/client";
+import { cn } from "@/components/ui";
+import type { CopiloteMessage } from "@/types";
+import { METIERS, PAYS_AFRIQUE } from "@/types";
+import { METIERS_CONFIG } from "@/data/metiers-config";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface AttachedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  content?: string; // base64 ou texte extrait
+}
+
+// ── Composant principal ───────────────────────────────────────────────────────
+
+export const ChatPage = () => {
+  const { user } = useAuthStore();
+  const { profil } = useProfilStore();
+  const {
+    sessions, activeSessionId, isLoading,
+    newSession, selectSession, deleteSession,
+    addMessage, updateLastAssistantMessage, setLoading, clearSession,
+    activeMessages, activeSession,
+  } = useCopiloteStore();
+  const { addDocument } = useDocsStore();
+
+  const [input, setInput] = useState("");
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [historySidebarOpen, setHistorySidebarOpen] = useState(() => window.innerWidth >= 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [profilModalOpen, setProfilModalOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioModalOpen, setAudioModalOpen] = useState(false);
+  const [audioSeconds, setAudioSeconds] = useState(0);
+  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Détecter mobile/desktop
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setHistorySidebarOpen(false);
+    };
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const messages = activeMessages();
+  const metierCtx = METIERS_CONFIG[profil?.metier ?? "default"] ?? METIERS_CONFIG.default;
+  const suggestions = metierCtx.suggestions;
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Focus input
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [activeSessionId]);
+
+  // ── Envoi de message ───────────────────────────────────────────────────────
+
+  const sendMessage = useCallback(async (content: string, files: AttachedFile[] = []) => {
+    if (!content.trim() && files.length === 0) return;
+    if (isLoading) return;
+
+    const userMsg: CopiloteMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: content.trim(),
+      timestamp: new Date().toISOString(),
+      fichiers: files.map(f => f.name),
+    };
+
+    addMessage(userMsg);
+    setInput("");
+    setAttachedFiles([]);
+    setLoading(true);
+
+    // Message assistant "en cours..."
+    const assistantMsg: CopiloteMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date().toISOString(),
+      loading: true,
+    };
+    addMessage(assistantMsg);
+
+    try {
+      const res = await chatApi.send({
+        message: content.trim(),
+        pays: profil?.pays,
+        fichiers: files.map(f => ({ nom: f.name, contenu: f.content || "", type: f.type })),
+      });
+
+      updateLastAssistantMessage(
+        res.reponse,
+        res.agent_utilise ?? null,
+        res.fichiers_generes,
+      );
+
+      // Sauvegarder les documents générés dans l'historique
+      if (res.fichiers_generes && res.fichiers_generes.length > 0) {
+        res.fichiers_generes.forEach(f => {
+          addDocument({
+            titre: content.slice(0, 60) || f,
+            type: f.endsWith(".docx") ? "rapport" : f.endsWith(".pptx") ? "slides" : "traduction",
+            fichier: f,
+            contexteConversation: content,
+          });
+        });
+      }
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail || "Erreur de connexion. Réessayez.";
+      updateLastAssistantMessage(`⚠️ ${detail}`, null);
+      toast.error("Erreur Yukpo IA");
+    } finally {
+      setLoading(false);
+    }
+  }, [isLoading, profil, addMessage, updateLastAssistantMessage, setLoading]);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    sendMessage(input, attachedFiles);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input, attachedFiles);
+    }
+  };
+
+  // ── Upload de fichier ──────────────────────────────────────────────────────
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    setUploadingFile(true);
+
+    for (const file of files) {
+      try {
+        const content = await readFileAsBase64(file);
+        setAttachedFiles(prev => [...prev, {
+          id: crypto.randomUUID(),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          content,
+        }]);
+      } catch {
+        toast.error(`Impossible de lire ${file.name}`);
+      }
+    }
+    setUploadingFile(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (id: string) =>
+    setAttachedFiles(prev => prev.filter(f => f.id !== id));
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  const handleNewSession = () => {
+    newSession();
+    setInput("");
+    setAttachedFiles([]);
+  };
+
+  // ── Enregistrement audio (MediaRecorder + SpeechRecognition) ─────────────
+
+  const startRecording = async () => {
+    // Essai 1 : SpeechRecognition (Chrome/Edge) — transcription en temps réel, mode continu
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SR) {
+      const recognition = new SR();
+      recognitionRef.current = recognition;
+      recognition.lang = "fr-FR";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      let finalTranscript = "";
+
+      recognition.onresult = (e: any) => {
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const res = e.results[i];
+          if (res.isFinal) finalTranscript += res[0].transcript + " ";
+          else interim += res[0].transcript;
+        }
+        // Afficher en direct dans le champ texte
+        setInput(finalTranscript + interim);
+      };
+      recognition.onerror = (e: any) => {
+        if (e.error !== "aborted") toast.error("Erreur micro : " + e.error);
+        stopRecording(false);
+      };
+      recognition.onend = () => {
+        // Ne pas arrêter si l'utilisateur n'a pas cliqué stop
+        if (isRecording) recognition.start();
+      };
+      recognition.start();
+      setIsRecording(true);
+      setAudioModalOpen(true);
+      setAudioSeconds(0);
+      timerRef.current = setInterval(() => setAudioSeconds(s => s + 1), 1000);
+      return;
+    }
+
+    // Essai 2 : MediaRecorder (Firefox, Safari, etc.) — enregistrement blob
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        await envoyerAudio(blob);
+      };
+
+      mr.start(500);
+      setIsRecording(true);
+      setAudioModalOpen(true);
+      setAudioSeconds(0);
+      timerRef.current = setInterval(() => setAudioSeconds(s => s + 1), 1000);
+    } catch (err) {
+      toast.error("Impossible d'accéder au microphone. Vérifiez les permissions.");
+    }
+  };
+
+  const stopRecording = (send = true) => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+
+    // SpeechRecognition
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setIsRecording(false);
+      setAudioModalOpen(false);
+      if (send && input.trim()) {
+        sendMessage(input.trim(), []);
+        setInput("");
+      }
+      return;
+    }
+
+    // MediaRecorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+    setAudioModalOpen(false);
+  };
+
+  const envoyerAudio = async (blob: Blob) => {
+    // Transcription côté client indisponible → on joint l'audio comme fichier
+    const audioFile: AttachedFile = {
+      id: crypto.randomUUID(),
+      name: `message_audio_${Date.now()}.webm`,
+      size: blob.size,
+      type: blob.type,
+      content: await blobToBase64(blob),
+    };
+    sendMessage("[Message audio — transcription en cours]", [audioFile]);
+  };
+
+  const blobToBase64 = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(",")[1] || "");
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+  const toggleRecording = () => {
+    if (isRecording) stopRecording(true);
+    else startRecording();
+  };
+
+  const formatDureeAudio = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, "0");
+    const s = (sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  };
+
+  const fileIcon = (type: string) => {
+    if (type.startsWith("image/")) return <Image className="w-3.5 h-3.5" />;
+    if (type.includes("spreadsheet") || type.includes("excel") || type.includes("csv"))
+      return <Table className="w-3.5 h-3.5" />;
+    return <FileText className="w-3.5 h-3.5" />;
+  };
+
+  // ── Rendu ──────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="flex h-full overflow-hidden" style={{ background: "transparent" }}>
+
+      {/* ── Sidebar historique ─────────────────────────────────────────────── */}
+      <AnimatePresence initial={false}>
+        {historySidebarOpen && (
+          <>
+            {/* Overlay backdrop sur mobile */}
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setHistorySidebarOpen(false)}
+                className="fixed inset-0 bg-black/50 z-20"
+              />
+            )}
+
+            <motion.div
+              initial={isMobile ? { x: -280 } : { width: 0, opacity: 0 }}
+              animate={isMobile ? { x: 0 } : { width: 260, opacity: 1 }}
+              exit={isMobile ? { x: -280 } : { width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className={cn(
+                "flex flex-col bg-slate-900 border-r border-slate-800 overflow-hidden",
+                isMobile
+                  ? "fixed left-0 top-0 h-full w-72 z-30 shadow-2xl flex-shrink-0"
+                  : "flex-shrink-0"
+              )}
+              style={!isMobile ? { width: 260 } : undefined}
+            >
+              {/* Header */}
+              <div className="p-3 border-b border-slate-800 flex-shrink-0 flex gap-2">
+                <button
+                  onClick={handleNewSession}
+                  className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white text-sm font-semibold transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Nouvelle conversation
+                </button>
+                {isMobile && (
+                  <button
+                    onClick={() => setHistorySidebarOpen(false)}
+                    className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Sessions */}
+              <div className="flex-1 overflow-y-auto py-2">
+                {sessions.length === 0 ? (
+                  <p className="text-center text-slate-500 text-xs mt-8 px-4">
+                    Vos conversations apparaîtront ici
+                  </p>
+                ) : (
+                  sessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className={cn(
+                        "group flex items-center gap-2 mx-2 px-3 py-2.5 rounded-xl cursor-pointer text-sm transition-colors",
+                        session.id === activeSessionId
+                          ? "bg-slate-700 text-white"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      )}
+                      onClick={() => { selectSession(session.id); if (isMobile) setHistorySidebarOpen(false); }}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 opacity-60" />
+                      <span className="flex-1 truncate">{session.title}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
+                        className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity p-0.5"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Zone principale ─────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b border-slate-800 bg-slate-900">
+          <button
+            onClick={() => setHistorySidebarOpen(!historySidebarOpen)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+          >
+            {historySidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-yukpo-gradient flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-white font-semibold text-sm">Yukpo Pro</h1>
+              <p className="text-slate-400 text-xs truncate">
+                {activeSession()?.title && messages.length > 0
+                  ? activeSession()!.title
+                  : `${metierCtx.label} · ${profil?.pays ?? "Afrique"}`}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setProfilModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
+            title="Modifier mon profil professionnel"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            {messages.length === 0 && <span className="hidden sm:inline">Mon profil</span>}
+          </button>
+
+          {messages.length > 0 && (
+            <button
+              onClick={handleNewSession}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Nouveau
+            </button>
+          )}
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto">
+          {messages.length === 0 ? (
+            // ── Écran de bienvenue ──────────────────────────────────────────
+            <WelcomeScreen
+              profil={profil}
+              user={user}
+              metierCtx={metierCtx}
+              suggestions={[]}
+              onSuggestion={() => {}}
+              onEditProfil={() => setProfilModalOpen(true)}
+            />
+          ) : (
+            // ── Messages ────────────────────────────────────────────────────
+            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* ── Zone d'input ───────────────────────────────────────────────── */}
+        <div className="flex-shrink-0 bg-slate-900 border-t border-slate-800 px-4 py-4">
+          <div className="max-w-3xl mx-auto">
+
+            {/* Fichiers attachés */}
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {attachedFiles.map(f => (
+                  <div key={f.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-700 border border-slate-600 text-xs text-slate-300">
+                    {fileIcon(f.type)}
+                    <span className="max-w-[120px] truncate">{f.name}</span>
+                    <span className="text-slate-500">{formatFileSize(f.size)}</span>
+                    <button onClick={() => removeFile(f.id)} className="hover:text-red-400 ml-1">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className={cn(
+                "flex items-end gap-2 rounded-2xl border transition-colors bg-slate-800",
+                isLoading ? "border-slate-700" : "border-slate-600 focus-within:border-yukpo-500"
+              )}>
+                {/* Bouton fichier */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || uploadingFile}
+                  className="flex-shrink-0 p-3 text-slate-400 hover:text-yukpo-400 transition-colors disabled:opacity-40"
+                  title="Joindre un fichier (Word, Excel, PDF, image...)"
+                >
+                  {uploadingFile
+                    ? <div className="w-5 h-5 border-2 border-slate-500 border-t-yukpo-400 rounded-full animate-spin" />
+                    : <Paperclip className="w-5 h-5" />
+                  }
+                </button>
+
+                {/* Bouton micro */}
+                <button
+                  type="button"
+                  onClick={toggleRecording}
+                  disabled={isLoading}
+                  className={cn(
+                    "flex-shrink-0 p-3 transition-colors disabled:opacity-40",
+                    isRecording
+                      ? "text-red-400 animate-pulse"
+                      : "text-slate-400 hover:text-yukpo-400"
+                  )}
+                  title={isRecording ? "Arrêter la dictée" : "Dictée vocale"}
+                >
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+
+                {/* Input texte */}
+                <textarea
+                  ref={inputRef}
+                  rows={1}
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    attachedFiles.length > 0
+                      ? "Décrivez ce que vous voulez faire avec ce fichier..."
+                      : "Posez votre question, envoyez un document, demandez une traduction..."
+                  }
+                  disabled={isLoading}
+                  className="flex-1 bg-transparent text-white text-sm placeholder-slate-500 py-3 pr-2 resize-none focus:outline-none min-h-[48px] max-h-[160px] overflow-y-auto disabled:opacity-50"
+                  style={{ height: "48px" }}
+                />
+
+                {/* Bouton envoyer */}
+                <button
+                  type="submit"
+                  disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
+                  className="flex-shrink-0 m-2 p-2 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isLoading
+                    ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    : <Send className="w-4 h-4" />
+                  }
+                </button>
+              </div>
+            </form>
+
+            <p className="text-center text-slate-600 text-xs mt-2">
+              Yukpo Pro peut faire des erreurs. Vérifiez les informations importantes.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Input fichier caché */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.ppt,.pptx"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {/* ── Modal Audio ─────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {audioModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center"
+            >
+              {/* Animation micro */}
+              <div className="relative w-20 h-20 mx-auto mb-6">
+                <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ping" />
+                <div className="absolute inset-2 rounded-full bg-red-500/30 animate-ping animation-delay-75" />
+                <div className="relative w-20 h-20 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">
+                  <Mic className="w-8 h-8 text-red-400" />
+                </div>
+              </div>
+
+              <h3 className="text-white font-bold text-lg mb-1">Enregistrement en cours</h3>
+              <p className="text-slate-400 text-sm mb-3">
+                {recognitionRef.current
+                  ? "Parlez — votre message s'affiche en temps réel"
+                  : "Parlez clairement dans votre microphone"}
+              </p>
+
+              {/* Transcription en temps réel */}
+              {input && (
+                <div className="bg-slate-800 rounded-xl p-3 mb-4 text-left">
+                  <p className="text-slate-300 text-sm leading-relaxed line-clamp-4">{input}</p>
+                </div>
+              )}
+
+              {/* Timer */}
+              <div className="font-mono text-2xl text-red-400 font-bold mb-6">
+                {formatDureeAudio(audioSeconds)}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { stopRecording(false); setInput(""); }}
+                  className="flex-1 px-4 py-3 rounded-xl border border-slate-600 text-slate-400 hover:text-white hover:border-slate-500 transition-colors text-sm font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => stopRecording(true)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white transition-colors text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Envoyer
+                </button>
+              </div>
+
+              <p className="text-slate-600 text-xs mt-3">
+                {recognitionRef.current
+                  ? "Chrome / Edge — transcription automatique"
+                  : "Firefox / Safari — message audio"}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modale édition profil */}
+      <AnimatePresence>
+        {profilModalOpen && (
+          <ProfilModal
+            profil={profil}
+            onClose={() => setProfilModalOpen(false)}
+            onSaved={(updated) => {
+              useProfilStore.getState().setProfil(updated);
+              setProfilModalOpen(false);
+              toast.success("Profil mis à jour ! L'IA s'adapte à votre nouveau profil.");
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ── Écran de bienvenue ────────────────────────────────────────────────────────
+
+// ── Construit le message de bienvenue contextuel ─────────────────────────────
+
+function buildWelcomeText(profil: any, metierCtx: typeof METIER_CONTEXT[string]): string {
+  if (!profil?.metier) {
+    return "Je suis Yukpo Pro, votre assistant professionnel intelligent. Posez-moi une question, envoyez un document à analyser ou traduire, ou demandez-moi de générer un rapport — je comprends le langage naturel et m'adapte à votre demande.";
+  }
+  const agents = metierCtx.agents.slice(0, 2).join(" et ");
+  const cap = metierCtx.capabilities[0]?.toLowerCase() || "vous accompagner dans votre activité";
+  const pays = profil.pays ? ` au ${profil.pays}` : " en Afrique";
+  const niv = profil.niveau_expertise === "expert" || profil.niveau_expertise === "senior" ? "expérimenté" : "professionnel";
+  return `Je suis Yukpo Pro, votre assistant dédié aux ${niv}s en ${metierCtx.label}${pays}. Je peux vous aider à ${cap}, activer ${agents} pour des analyses pointues, générer des rapports et documents, traduire vos fichiers et gérer vos réunions. Posez-moi votre première question ou envoyez un document.`;
+}
+
+const WelcomeScreen = ({
+  profil, user, metierCtx, onEditProfil,
+}: {
+  profil: any; user: any; metierCtx: typeof METIER_CONTEXT[string];
+  suggestions: string[]; onSuggestion: (s: string) => void; onEditProfil: () => void;
+}) => {
+  const prenom = user?.prenom || user?.nom?.split(" ")[0] || "";
+  const welcomeText = buildWelcomeText(profil, metierCtx);
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-xl mx-auto w-full text-center">
+      {/* Logo Yukpo Pro */}
+      <div className="w-16 h-16 rounded-2xl bg-yukpo-gradient flex items-center justify-center mb-6 shadow-lg shadow-yukpo-500/20">
+        <span className="text-2xl">{metierCtx.emoji}</span>
+      </div>
+
+      <h2 className="text-2xl font-display font-bold text-white mb-1">
+        {prenom ? `Bonjour, ${prenom} !` : "Bonjour !"}
+      </h2>
+
+      <p className="text-yukpo-400 text-xs font-semibold uppercase tracking-widest mb-5">
+        Yukpo Pro — Assistant IA
+      </p>
+
+      <p className="text-slate-300 text-[15px] leading-relaxed mb-6 max-w-md">
+        {welcomeText}
+      </p>
+
+      {/* Lien modifier profil */}
+      <button
+        onClick={onEditProfil}
+        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-yukpo-400 transition-colors underline underline-offset-2"
+      >
+        <Pencil className="w-3 h-3" />
+        {profil?.metier ? "Modifier mon profil" : "Configurer mon profil pour des réponses personnalisées"}
+      </button>
+    </div>
+  );
+};
+
+// ── Bulle de message ──────────────────────────────────────────────────────────
+
+const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
+  const isUser = message.role === "user";
+
+  if (isUser) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-end"
+      >
+        <div className="max-w-[80%]">
+          {message.fichiers && message.fichiers.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 justify-end mb-1.5">
+              {message.fichiers.map((f, i) => (
+                <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-700 text-slate-300 text-xs">
+                  <Paperclip className="w-3 h-3" />
+                  {f}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="bg-yukpo-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed">
+            {message.content as string}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Assistant
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex gap-3"
+    >
+      <div className="w-8 h-8 rounded-xl bg-yukpo-gradient flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Sparkles className="w-4 h-4 text-white" />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        {/* Badge agent utilisé */}
+        {message.agent_utilise && (
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Bot className="w-3 h-3 text-yukpo-400" />
+            <span className="text-xs text-yukpo-400 font-medium">{message.agent_utilise}</span>
+          </div>
+        )}
+
+        {/* Contenu */}
+        {message.loading ? (
+          <div className="flex gap-1 items-center py-2">
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="w-2 h-2 rounded-full bg-slate-500 animate-bounce"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="prose prose-invert prose-sm max-w-none text-slate-200
+            prose-headings:text-white prose-headings:font-semibold
+            prose-strong:text-white prose-code:text-yukpo-300
+            prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700
+            prose-blockquote:border-yukpo-500 prose-blockquote:text-slate-300
+            prose-a:text-yukpo-400 prose-li:text-slate-300">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content as string}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Fichiers générés (téléchargement) */}
+        {message.fichiers && message.fichiers.length > 0 && !message.loading && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {message.fichiers.map((f, i) => {
+              const nomFichier = f.split(/[/\\]/).pop() || f;
+              return (
+                <a
+                  key={i}
+                  href={`/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`}
+                  download={nomFichier}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yukpo-700 border border-yukpo-500 hover:bg-yukpo-600 text-white text-xs font-medium transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Télécharger — {nomFichier}
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// ── Modale édition profil ──────────────────────────────────────────────────────
+
+const NIVEAUX_EXPERTISE = [
+  { value: "debutant",      label: "Débutant (0-2 ans)" },
+  { value: "intermediaire", label: "Intermédiaire (2-5 ans)" },
+  { value: "senior",        label: "Senior (5-10 ans)" },
+  { value: "expert",        label: "Expert (10+ ans)" },
+];
+
+const ProfilModal = ({
+  profil, onClose, onSaved,
+}: {
+  profil: any;
+  onClose: () => void;
+  onSaved: (updated: any) => void;
+}) => {
+  const [metier, setMetier]     = useState(profil?.metier || "");
+  const [pays, setPays]         = useState(profil?.pays || "CM");
+  const [secteur, setSecteur]   = useState(profil?.secteur || "");
+  const [entreprise, setEntreprise] = useState(profil?.entreprise || "");
+  const [niveau, setNiveau]     = useState(profil?.niveau_expertise || "intermediaire");
+  const [annees, setAnnees]     = useState(String(profil?.annees_experience || ""));
+  const [bio, setBio]           = useState(profil?.bio || "");
+  const [saving, setSaving]     = useState(false);
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const updated = await profilApi.update({
+        metier, pays, secteur, entreprise,
+        niveau_expertise: niveau as any,
+        annees_experience: annees ? parseInt(annees) : undefined,
+        bio,
+      });
+      onSaved(updated);
+    } catch {
+      toast.error("Erreur lors de la mise à jour du profil");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 z-40"
+      />
+
+      {/* Panel slide-over droite */}
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-slate-900 border-l border-slate-700 z-50 flex flex-col shadow-2xl"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <UserIcon className="w-4 h-4 text-yukpo-400" />
+            <h2 className="text-white font-semibold text-sm">Mon profil professionnel</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <p className="px-5 py-3 text-xs text-slate-400 border-b border-slate-800 flex-shrink-0">
+          Votre profil configure l'IA : plus il est précis, plus les réponses sont adaptées à votre contexte.
+        </p>
+
+        {/* Formulaire */}
+        <div className="flex-1 overflow-y-auto">
+          <form id="profil-form" onSubmit={handleSave} className="p-5 space-y-4">
+            {/* Métier */}
+            <div>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">Métier / Profession *</label>
+              <select
+                value={metier}
+                onChange={(e) => setMetier(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+              >
+                <option value="">— Sélectionner votre métier —</option>
+                {METIERS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Pays + Niveau */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">Pays</label>
+                <select
+                  value={pays}
+                  onChange={(e) => setPays(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+                >
+                  {PAYS_AFRIQUE.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">Niveau</label>
+                <select
+                  value={niveau}
+                  onChange={(e) => setNiveau(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+                >
+                  {NIVEAUX_EXPERTISE.map((n) => (
+                    <option key={n.value} value={n.value}>{n.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Secteur + Entreprise */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">Secteur d'activité</label>
+                <input
+                  type="text"
+                  value={secteur}
+                  onChange={(e) => setSecteur(e.target.value)}
+                  placeholder="Finance, BTP…"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">Entreprise</label>
+                <input
+                  type="text"
+                  value={entreprise}
+                  onChange={(e) => setEntreprise(e.target.value)}
+                  placeholder="Votre organisation"
+                  className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+                />
+              </div>
+            </div>
+
+            {/* Années d'expérience */}
+            <div>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">Années d'expérience</label>
+              <input
+                type="number"
+                min="0"
+                max="50"
+                value={annees}
+                onChange={(e) => setAnnees(e.target.value)}
+                placeholder="Ex: 8"
+                className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+              />
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">Bio professionnelle</label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Vos spécialités, votre contexte de travail…"
+                rows={3}
+                className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-yukpo-500"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-slate-700 flex-shrink-0 flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white hover:border-slate-500 text-sm transition-colors"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            form="profil-form"
+            disabled={saving}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+          >
+            {saving
+              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <Save className="w-4 h-4" />
+            }
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
+// ── Helper lecture fichier ─────────────────────────────────────────────────────
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}

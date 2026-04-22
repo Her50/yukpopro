@@ -1,0 +1,375 @@
+{
+  "doc_id": "normes_iso_31000_risques",
+  "metadata": {
+    "doc_id": "normes_iso_31000_risques",
+    "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+    "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+    "pays": "TRANSNATIONAL",
+    "zone": "OHADA",
+    "domaine": "normes",
+    "metier_tags": [
+      "auditeur",
+      "risk_manager",
+      "assureur",
+      "actuaire"
+    ],
+    "fiabilite": "semi_officiel",
+    "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+    "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+    "indexe_le": "2026-04-17T02:48:49.888999"
+  },
+  "nb_chars": 11069,
+  "nb_chunks": 14,
+  "chunks": [
+    {
+      "texte": "ISO 31000 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nISO 31000\ndésigne une famille de normes de\ngestion des risques\ncodifiés par l'\nOrganisation internationale de normalisation\n. Le but de la norme ISO 31000 est de fournir des principes et des lignes directrices du management des risques ainsi que les processus de mise en œuvre au niveau stratégique et opérationnel. Elle ne vise pas à promouvoir l'uniformisation du management du risque au sein des organismes, mais plutôt à harmoniser la\nmyriade\nd’approches, de standards et de méthodologies existantes en matière de management des risques.\nActuellement, la famille ISO 31000 comprend :\nISO 31000:2018 – Management du risque — Principes et lignes directrices\n[\n\n]\nISO/CEI 31010:2009 - Gestion des risques — Techniques d'évaluation des risques\n[\n\n]\nISO Guide 73:2009 - Management du risque — Vocabulaire\n[",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 0,
+        "chunk_total": 14,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nISO 31000 — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\nISO 31000\ndésigne une famille de normes de\ngestion des risques\ncodifiés par l'\nOrganisation internationale de normalisation\n. Le but de la norme ISO 31000 est de fournir des principes et des lignes directrices du management des risques ainsi que les processus de mise en œuvre au niveau stratégique et opérationnel. Elle ne vise pas à promouvoir l'uniformisation du management du risque au sein des organismes, mais plutôt à harmoniser la\nmyriade\nd’approches, de standards et de méthodologies existantes en matière de management des risques.\nActuellement, la famille ISO 31000 comprend :\nISO 31000:2018 – Management du risque — Principes et lignes directrices\n[\n\n]\nISO/CEI 31010:2009 - Gestion des risques — Techniques d'évaluation des risques\n[\n\n]\nISO Guide 73:2009 - Management du risque — Vocabulaire\n["
+    },
+    {
+      "texte": "]\nIntroduction\n[\nmodifier\n|\nmodifier le code\n]\nEn\nnovembre\n\n, la norme internationale\nISO 31000\nen management des risques est publiée avant d’être rapidement transposée en norme française par l’AFNOR sous la référence NF ISO 31000:2018\n[\n\n]\n. Cette norme propose des principes et des lignes directrices pour le management des risques ainsi que pour la mise en place de processus de mise en œuvre aux niveaux stratégique et opérationnel.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLe but de la norme ISO 31000:2018 est de s’appliquer et de s’adapter à\n« tout public, toute entreprise publique ou privée, toute collectivité, toute association, tout groupe ou individu\n[",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 1,
+        "chunk_total": 14,
+        "nb_chars": 678
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\n]\nIntroduction\n[\nmodifier\n|\nmodifier le code\n]\nEn\nnovembre\n\n, la norme internationale\nISO 31000\nen management des risques est publiée avant d’être rapidement transposée en norme française par l’AFNOR sous la référence NF ISO 31000:2018\n[\n\n]\n. Cette norme propose des principes et des lignes directrices pour le management des risques ainsi que pour la mise en place de processus de mise en œuvre aux niveaux stratégique et opérationnel.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLe but de la norme ISO 31000:2018 est de s’appliquer et de s’adapter à\n« tout public, toute entreprise publique ou privée, toute collectivité, toute association, tout groupe ou individu\n["
+    },
+    {
+      "texte": "]\n. »\nIl ne s’agit pas d’uniformiser les pratiques, ni de créer un système de management parallèle. Au contraire, la norme ISO 31000, quoiqu'elle propose un référentiel unique, est adaptable et flexible.\nL’approche proposée consiste à formaliser les pratiques de management des risques, tout en permettant aux entreprises de mettre en place un cadre ERM (\nenterprise risk management\n) évitant ainsi une approche de management des risques par « silos »\n[\n\n]\n.\nNouvelle définition du mot risque\n[\nmodifier\n|\nmodifier le code\n]\nLa nouvelle définition abandonne la vision de l’ingénieur (\n« le risque est la combinaison de probabilité d’évènement et de sa conséquence »\n) pour relier les risques aux objectifs de l’organisation :\n« Le risque est l’effet de l’incertitude sur l'atteinte des objectifs\n[\n\n]\n\n. »",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 2,
+        "chunk_total": 14,
+        "nb_chars": 805
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\n]\n. »\nIl ne s’agit pas d’uniformiser les pratiques, ni de créer un système de management parallèle. Au contraire, la norme ISO 31000, quoiqu'elle propose un référentiel unique, est adaptable et flexible.\nL’approche proposée consiste à formaliser les pratiques de management des risques, tout en permettant aux entreprises de mettre en place un cadre ERM (\nenterprise risk management\n) évitant ainsi une approche de management des risques par « silos »\n[\n\n]\n.\nNouvelle définition du mot risque\n[\nmodifier\n|\nmodifier le code\n]\nLa nouvelle définition abandonne la vision de l’ingénieur (\n« le risque est la combinaison de probabilité d’évènement et de sa conséquence »\n) pour relier les risques aux objectifs de l’organisation :\n« Le risque est l’effet de l’incertitude sur l'atteinte des objectifs\n[\n\n]\n\n. »"
+    },
+    {
+      "texte": "Le Centre Européen de Normalisation a répertorié environ 60 standards en relation avec le mot « risque ». Il s’agit d’une « non-conformité » en qualité, d’une « pollution » en environnement, d’une « défaillance » d’un équipement, d’une « intoxication » ou d'une « atteinte corporelle » en matière de sécurité des personnes, mais aussi d’un « rendement » en finance ou d’une « opportunité » pour le manager d’entreprise. C’est pourquoi une révision de l'« ISO Guide 73 – Vocabulaire du management du risque » a été menée parallèlement afin de faciliter les discussions entre professionnels des risques, tous secteurs confondus.\n\nLes 11 principes du management des risques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n1 -\n\nLe management des risques crée de la valeur et la préserve\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 3,
+        "chunk_total": 14,
+        "nb_chars": 775
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nLe Centre Européen de Normalisation a répertorié environ 60 standards en relation avec le mot « risque ». Il s’agit d’une « non-conformité » en qualité, d’une « pollution » en environnement, d’une « défaillance » d’un équipement, d’une « intoxication » ou d'une « atteinte corporelle » en matière de sécurité des personnes, mais aussi d’un « rendement » en finance ou d’une « opportunité » pour le manager d’entreprise. C’est pourquoi une révision de l'« ISO Guide 73 – Vocabulaire du management du risque » a été menée parallèlement afin de faciliter les discussions entre professionnels des risques, tous secteurs confondus.\n\nLes 11 principes du management des risques\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n1 -\n\nLe management des risques crée de la valeur et la préserve\n\n."
+    },
+    {
+      "texte": "Le management des risques contribue de façon tangible à l'atteinte des objectifs et à l'amélioration des performances de l’organisation, à travers la révision de son système de management et de ses processus.\n\n2 -\n\nLe management des risques est intégré aux processus d’organisation\n\n.\n\nLe management des risques doit être intégrée dans le système de management existant tant au niveau stratégique qu’au niveau opérationnel.\n\n3 -\n\nLe management des risques est intégré aux processus de prise de décision\n\n.\n\nLe management des risques est une\n\naide à la décision\n\npour faire des choix argumentés, pour définir des priorités et pour sélectionner les actions les plus appropriées\n\n4 -\n\nLe management des risques traite explicitement de l'incertitude\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 4,
+        "chunk_total": 14,
+        "nb_chars": 748
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nLe management des risques contribue de façon tangible à l'atteinte des objectifs et à l'amélioration des performances de l’organisation, à travers la révision de son système de management et de ses processus.\n\n2 -\n\nLe management des risques est intégré aux processus d’organisation\n\n.\n\nLe management des risques doit être intégrée dans le système de management existant tant au niveau stratégique qu’au niveau opérationnel.\n\n3 -\n\nLe management des risques est intégré aux processus de prise de décision\n\n.\n\nLe management des risques est une\n\naide à la décision\n\npour faire des choix argumentés, pour définir des priorités et pour sélectionner les actions les plus appropriées\n\n4 -\n\nLe management des risques traite explicitement de l'incertitude\n\n."
+    },
+    {
+      "texte": "En identifiant les risques potentiels, l’organisation peut mettre en place des outils de réduction et de financement des risques dans le but de maximaliser les chances de succès et minimiser les possibilités de pertes.\n\n5 -\n\nLe management des risques est systématique, structuré et utilisé en temps utile\n\n.\n\nLes processus du management des risques devraient être cohérents à travers l’organisation afin d’assurer l’efficacité, la pertinence, la cohérence et la fiabilité des résultats.\n\n6 -\n\nLe management des risques s'appuie sur la meilleure information disponible\n\n.\n\nPour un management des risques efficace, il est important de considérer et de comprendre toutes les informations disponibles et pertinentes pour une activité, tout en reconnaissant les limites des données et des modèles utilisés\n\n7 -\n\nLe management des risques est adapté\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 5,
+        "chunk_total": 14,
+        "nb_chars": 846
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nEn identifiant les risques potentiels, l’organisation peut mettre en place des outils de réduction et de financement des risques dans le but de maximaliser les chances de succès et minimiser les possibilités de pertes.\n\n5 -\n\nLe management des risques est systématique, structuré et utilisé en temps utile\n\n.\n\nLes processus du management des risques devraient être cohérents à travers l’organisation afin d’assurer l’efficacité, la pertinence, la cohérence et la fiabilité des résultats.\n\n6 -\n\nLe management des risques s'appuie sur la meilleure information disponible\n\n.\n\nPour un management des risques efficace, il est important de considérer et de comprendre toutes les informations disponibles et pertinentes pour une activité, tout en reconnaissant les limites des données et des modèles utilisés\n\n7 -\n\nLe management des risques est adapté\n\n."
+    },
+    {
+      "texte": "Le management des risques d’une organisation doit être adapté en fonction des ressources disponibles – ressources de personnel, de finance et de temps – ainsi qu’en fonction de son environnement interne et externe\n\n8 -\n\nLe management des risques intègre les facteurs humains et culturels\n\n.\n\nLe management des risques doit reconnaître la contribution des personnes et des facteurs culturels à la réalisation des objectifs de l'organisation.\n\n9 -\n\nLe management des risques est transparent et participatif\n\n.\n\nEn impliquant les\n\nparties prenantes\n\n, internes et externes, lors des processus de management des risques, l’organisation reconnaît l’importance de la communication et de la consultation lors des étapes d’identification, d’évaluation et de traitement des risques.\n\n10 -\n\nLe management des risques est dynamique, itératif et réactif au changement\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 6,
+        "chunk_total": 14,
+        "nb_chars": 858
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nLe management des risques d’une organisation doit être adapté en fonction des ressources disponibles – ressources de personnel, de finance et de temps – ainsi qu’en fonction de son environnement interne et externe\n\n8 -\n\nLe management des risques intègre les facteurs humains et culturels\n\n.\n\nLe management des risques doit reconnaître la contribution des personnes et des facteurs culturels à la réalisation des objectifs de l'organisation.\n\n9 -\n\nLe management des risques est transparent et participatif\n\n.\n\nEn impliquant les\n\nparties prenantes\n\n, internes et externes, lors des processus de management des risques, l’organisation reconnaît l’importance de la communication et de la consultation lors des étapes d’identification, d’évaluation et de traitement des risques.\n\n10 -\n\nLe management des risques est dynamique, itératif et réactif au changement\n\n."
+    },
+    {
+      "texte": "Le management des risques doit être flexible. L’environnement concurrentiel oblige l’organisation à s’adapter au contexte interne et externe, spécialement lorsque de nouveaux risques apparaissent, lorsque certains risques sont modifiés, tandis que d'autres disparaissent.\n\n11 -\n\nLe management des risques facilite l'amélioration continue de l'organisation\n\n.\n\nLes organisations possédant une maturité en matière de management des risques sont celles qui investissent à long terme et qui démontrent la réalisation régulière de ses objectifs.\n\nStructure de la norme ISO 31000\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nStructure de la norme ISO 31000 en management des risques, 2008.\n\nLa norme est structurée en trois parties, à savoir les principes, le cadre d’organisation et le processus de management (voir schéma) :\n\nLes\n\nprincipes",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 7,
+        "chunk_total": 14,
+        "nb_chars": 829
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nLe management des risques doit être flexible. L’environnement concurrentiel oblige l’organisation à s’adapter au contexte interne et externe, spécialement lorsque de nouveaux risques apparaissent, lorsque certains risques sont modifiés, tandis que d'autres disparaissent.\n\n11 -\n\nLe management des risques facilite l'amélioration continue de l'organisation\n\n.\n\nLes organisations possédant une maturité en matière de management des risques sont celles qui investissent à long terme et qui démontrent la réalisation régulière de ses objectifs.\n\nStructure de la norme ISO 31000\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nStructure de la norme ISO 31000 en management des risques, 2008.\n\nLa norme est structurée en trois parties, à savoir les principes, le cadre d’organisation et le processus de management (voir schéma) :\n\nLes\n\nprincipes"
+    },
+    {
+      "texte": "répondent à la question pourquoi fait-on du management des risques. Le processus d’intégration de ces principes se fait ensuite à deux niveaux : le niveau décisionnel et le niveau opérationnel.\n\nLe\n\ncadre d’organisation\n\nexplique comment intégrer, via le processus itératif de la\n\nroue de Deming\n\n(Plan-Do-Check-Act), le management des risques dans la stratégie de l’organisation (conduite stratégique).\n\nLe\n\nprocessus de management\n\nprécise comment intégrer le management des risques au niveau opérationnel.\n\nDévelopper le management global des risques ou ERM\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nEnterprise risk management\n\n.",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 8,
+        "chunk_total": 14,
+        "nb_chars": 648
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nrépondent à la question pourquoi fait-on du management des risques. Le processus d’intégration de ces principes se fait ensuite à deux niveaux : le niveau décisionnel et le niveau opérationnel.\n\nLe\n\ncadre d’organisation\n\nexplique comment intégrer, via le processus itératif de la\n\nroue de Deming\n\n(Plan-Do-Check-Act), le management des risques dans la stratégie de l’organisation (conduite stratégique).\n\nLe\n\nprocessus de management\n\nprécise comment intégrer le management des risques au niveau opérationnel.\n\nDévelopper le management global des risques ou ERM\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nEnterprise risk management\n\n."
+    },
+    {
+      "texte": "La norme propose une approche pour développer un cadre permettant aux entreprises d'intégrer le management des risques. Le point d’entrée est d’aligner les objectifs de l’organisation, la politique de management des risques et les responsabilités légales et contractuelles. Le cadre du management des risques doit être intégré dans les processus de décisions et d’organisation de toutes les activités de l’entreprise, en veillant aux contextes internes et externes, aux responsabilités de chacun et aux ressources disponibles au niveau stratégique et opérationnel.\n\n1 -\n\nObjectifs stratégiques\n\nLa Direction Générale et son comité exécutif sont responsables des décisions stratégiques de l’entreprise. L'approche, généralement à long terme, décrit sa vision du management des risques et les objectifs globaux à atteindre.\n\n2 -\n\nObjectifs opérationnels",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 9,
+        "chunk_total": 14,
+        "nb_chars": 851
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nLa norme propose une approche pour développer un cadre permettant aux entreprises d'intégrer le management des risques. Le point d’entrée est d’aligner les objectifs de l’organisation, la politique de management des risques et les responsabilités légales et contractuelles. Le cadre du management des risques doit être intégré dans les processus de décisions et d’organisation de toutes les activités de l’entreprise, en veillant aux contextes internes et externes, aux responsabilités de chacun et aux ressources disponibles au niveau stratégique et opérationnel.\n\n1 -\n\nObjectifs stratégiques\n\nLa Direction Générale et son comité exécutif sont responsables des décisions stratégiques de l’entreprise. L'approche, généralement à long terme, décrit sa vision du management des risques et les objectifs globaux à atteindre.\n\n2 -\n\nObjectifs opérationnels"
+    },
+    {
+      "texte": "Généralement, les cadres supérieurs ont la responsabilité de déployer les objectifs stratégiques généraux en des plans d’organisation pour obtenir des résultats. Les plans développés à ce niveau pour chaque\n\nbusiness unit\n\ndéfinissent les résultats à atteindre.\n\n3 -\n\nObjectifs de production\n\nDe même, les cadres ont la responsabilité de développer des plans opérationnels plus spécifiques avec des résultats à court terme à atteindre. Ces plans prescrivent en détail comment les résultats des processus ou des activités de l’entreprise seront mis en place et réalisés.\n\nCertification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'ISO 31000 n'est pas une norme certifiable. Il s’agit d'orientations utiles à l'élaboration et à la réalisation des programmes d'audit internes ou externes, ainsi qu'à l'évaluation des pratiques en matière de management du risque.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 10,
+        "chunk_total": 14,
+        "nb_chars": 900
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nGénéralement, les cadres supérieurs ont la responsabilité de déployer les objectifs stratégiques généraux en des plans d’organisation pour obtenir des résultats. Les plans développés à ce niveau pour chaque\n\nbusiness unit\n\ndéfinissent les résultats à atteindre.\n\n3 -\n\nObjectifs de production\n\nDe même, les cadres ont la responsabilité de développer des plans opérationnels plus spécifiques avec des résultats à court terme à atteindre. Ces plans prescrivent en détail comment les résultats des processus ou des activités de l’entreprise seront mis en place et réalisés.\n\nCertification\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nL'ISO 31000 n'est pas une norme certifiable. Il s’agit d'orientations utiles à l'élaboration et à la réalisation des programmes d'audit internes ou externes, ainsi qu'à l'évaluation des pratiques en matière de management du risque.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code"
+    },
+    {
+      "texte": "]\n\n2009 :\n\nre\nédition.\n2018 :\n\ne\n\nédition.\n\nRéférences\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\nRéférence officielle ISO 31000 – Management du risque — Principes et lignes directrices\n\n[1]\n\n↑\n\nRéférence officielle ISO/CEI 31010:2009 - Gestion des risques - Techniques d'évaluation des risques\n\n[2]\n\n↑\n\nRéférence officielle ISO Guide 73:2009 - Management du risque — Vocabulaire\n\n[3]\n\n↑\n\nRéférence officielle française AFNOR NF ISO 31000 :2018\n\n[4]\n\n↑\n\nISO 31000 catalogue\n\nhttp://www.iso.org/iso/catalogue_detail.htm?csnumber=43170\n\n↑\n\nArticle ISO 31000 - The Gold Standard, Alex Dali and Christopher Lajtha, Strategic Risk, September 2009\n\n[5]\n\n↑\n\nISO Guide 73: Risk Management - Vocabulary\n\n[6]\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRisque\n\nGestion des risques\n\nEnterprise Risk Management\n\nRisque opérationnel",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 11,
+        "chunk_total": 14,
+        "nb_chars": 879
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\n]\n\n2009 :\n\nre\nédition.\n2018 :\n\ne\n\nédition.\n\nRéférences\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n↑\n\nRéférence officielle ISO 31000 – Management du risque — Principes et lignes directrices\n\n[1]\n\n↑\n\nRéférence officielle ISO/CEI 31010:2009 - Gestion des risques - Techniques d'évaluation des risques\n\n[2]\n\n↑\n\nRéférence officielle ISO Guide 73:2009 - Management du risque — Vocabulaire\n\n[3]\n\n↑\n\nRéférence officielle française AFNOR NF ISO 31000 :2018\n\n[4]\n\n↑\n\nISO 31000 catalogue\n\nhttp://www.iso.org/iso/catalogue_detail.htm?csnumber=43170\n\n↑\n\nArticle ISO 31000 - The Gold Standard, Alex Dali and Christopher Lajtha, Strategic Risk, September 2009\n\n[5]\n\n↑\n\nISO Guide 73: Risk Management - Vocabulary\n\n[6]\n\nVoir aussi\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRisque\n\nGestion des risques\n\nEnterprise Risk Management\n\nRisque opérationnel"
+    },
+    {
+      "texte": "International Organization for Standardization\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nStandard\n\nInternational Organization for Standardization\n\nStandard\n\nAS/NZS ISO 31000:2009 Risk management - Principles and guidelines\n\nArticle\n\nISO 31000 : la future norme internationale en gestion des risques face à la crise, Alex Dali, RiskAssur-hebdo, numéro 110, 16 janvier 2009\n\nArticle\n\nLes enjeux de la norme ISO 31000 en gestion des risques, Alex Dali, Tribune de l’Assurance, Février 2009\n\nArticle\n\nLa norme ISO 31000 en 10 questions, Gilles motet, Les Cahiers de la sécurité industrielle, Mai 2009\n\nArticle\n\nISO 31000 : The Gold Standard, Alex Dali and Christopher Lajtha, Strategic Risk, September 2009\n\nArticle\n\nL’approche globale du risque avec la norme ISO 31000, Lettre Finyear, 15 mars 2010\n\nPresentation\n\n«",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 12,
+        "chunk_total": 14,
+        "nb_chars": 824
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nInternational Organization for Standardization\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nStandard\n\nInternational Organization for Standardization\n\nStandard\n\nAS/NZS ISO 31000:2009 Risk management - Principles and guidelines\n\nArticle\n\nISO 31000 : la future norme internationale en gestion des risques face à la crise, Alex Dali, RiskAssur-hebdo, numéro 110, 16 janvier 2009\n\nArticle\n\nLes enjeux de la norme ISO 31000 en gestion des risques, Alex Dali, Tribune de l’Assurance, Février 2009\n\nArticle\n\nLa norme ISO 31000 en 10 questions, Gilles motet, Les Cahiers de la sécurité industrielle, Mai 2009\n\nArticle\n\nISO 31000 : The Gold Standard, Alex Dali and Christopher Lajtha, Strategic Risk, September 2009\n\nArticle\n\nL’approche globale du risque avec la norme ISO 31000, Lettre Finyear, 15 mars 2010\n\nPresentation\n\n«"
+    },
+    {
+      "texte": "Présentation Powerpoint par Kevin W Knight, Chairman du comité international ISO 31000,2004-2011\n\n»\n\n(\n\nArchive.org\n\n•\n\nWikiwix\n\n•\n\nGoogle\n\n•\n\nQue faire ?\n\n)\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\nListe des normes de romanisation ISO\nPortail du droit\nCe document provient de «\nhttps://fr.wikipedia.org/w/index.php?title=ISO_31000&oldid=235144939\n».\nCatégories\n:\nNorme ISO\n\nCatégories cachées :\nArticle contenant un lien mort\nArticle contenant un appel à traduction en allemand\nPortail:Droit/Articles liés\nPortail:Société/Articles liés\nRechercher\nRechercher\nISO 31000\n16 langues\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_31000_risques",
+        "nom_doc": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "nom": "ISO 31000:2018 — Management du risque (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "assureur",
+          "actuaire"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/ISO_31000",
+        "hash": "8e5f78bcb9a0d38ce36302c3b295e71398cd3d65e0707a5b9aa1bbf70f79cba7",
+        "indexe_le": "2026-04-17T02:48:49.888999",
+        "chunk_index": 13,
+        "chunk_total": 14,
+        "nb_chars": 697
+      },
+      "texte_embed": "normes — ISO 31000:2018 — Management du risque (Wikipedia FR)\nPrésentation Powerpoint par Kevin W Knight, Chairman du comité international ISO 31000,2004-2011\n\n»\n\n(\n\nArchive.org\n\n•\n\nWikiwix\n\n•\n\nGoogle\n\n•\n\nQue faire ?\n\n)\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\nListe des normes de romanisation ISO\nPortail du droit\nCe document provient de «\nhttps://fr.wikipedia.org/w/index.php?title=ISO_31000&oldid=235144939\n».\nCatégories\n:\nNorme ISO\n\nCatégories cachées :\nArticle contenant un lien mort\nArticle contenant un appel à traduction en allemand\nPortail:Droit/Articles liés\nPortail:Société/Articles liés\nRechercher\nRechercher\nISO 31000\n16 langues\nAjouter un sujet"
+    }
+  ]
+}

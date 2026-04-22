@@ -1,0 +1,82 @@
+# ─── Secrets & Environnement ──────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+.env.railway
+*.secret
+secrets/
+.secret_key        # Clé secrète persistante générée au démarrage — NE PAS COMMITTER
+*.pem              # Certificats PKI
+*.key              # Clés privées
+pki/               # Dossier PKI auto-signé
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# ─── Base de données ──────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+yukpo_assurance.db
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ─── Fichiers générés ─────────────────────────────────────────────────────────
+data/generated/
+data/uploads/
+*.docx
+*.pdf
+*.pptx
+*.xlsx
+
+# ─── IDE & Éditeurs ──────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Tests & Coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+# (docker-compose.yml est volontairement versionné)
+
+# ─── Node.js (Frontend) ───────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ─── ML Models ────────────────────────────────────────────────────────────────
+models/*.pkl
+models/*.joblib
+models/*.h5
