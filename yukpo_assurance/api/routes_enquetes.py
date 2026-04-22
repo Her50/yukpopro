@@ -2,6 +2,7 @@
 Routes Enquêtes & Études — Analyse qualitative IA + collecte quantitative (KoBoCollect-like)
 """
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Optional
 
@@ -305,3 +306,103 @@ async def donnees_formulaire(etude_id: str, current_user: TokenData = Depends(ge
         "n_reponses": len(etude.formulaire.reponses),
         "reponses": etude.formulaire.reponses,
     }
+
+
+# ─── XLSForm export ───────────────────────────────────────────────────────────
+
+@router.get(
+    "/{etude_id}/formulaire/xlsform",
+    summary="Télécharger le formulaire au format XLSForm (KoBoCollect / ODK / SurveyCTO)",
+    response_class=Response,
+)
+async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    etude = ge.get_etude(etude_id)
+    if not etude:
+        raise HTTPException(404, "Étude introuvable")
+    try:
+        xlsx_bytes = ge.generer_xlsform_bytes(etude_id)
+        nom = f"yukpopro_{etude.titre[:30].replace(' ', '_')}.xlsx"
+        return Response(
+            content=xlsx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f'attachment; filename="{nom}"'},
+        )
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Erreur génération XLSForm : {e}")
+
+
+# ─── Génération formulaire par IA ─────────────────────────────────────────────
+
+class GenFormulaireIARequest(BaseModel):
+    description: str
+    titre: str
+    objectif: str
+    population: str
+    n_questions: int = 15
+    creer_dans_etude: Optional[str] = None  # etude_id pour créer automatiquement
+
+
+@router.post(
+    "/generer-formulaire-ia",
+    summary="Claude génère un formulaire professionnel depuis une description + export XLSForm",
+)
+async def generer_formulaire_ia(
+    payload: GenFormulaireIARequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    try:
+        resultat = await ge.generer_formulaire_ia(
+            description=payload.description,
+            titre=payload.titre,
+            objectif=payload.objectif,
+            population=payload.population,
+            n_questions=payload.n_questions,
+        )
+
+        # Si un etude_id est fourni, créer le formulaire directement dans l'étude
+        formulaire_id = None
+        if payload.creer_dans_etude:
+            try:
+                form = ge.creer_formulaire(
+                    etude_id=payload.creer_dans_etude,
+                    titre=resultat["titre_formulaire"],
+                    description=resultat["description"],
+                    questions=resultat["questions"],
+                )
+                formulaire_id = form.formulaire_id
+            except Exception as e:
+                pass  # Non bloquant si l'étude n'existe pas
+
+        return {
+            **resultat,
+            "formulaire_id": formulaire_id,
+            "lien_xlsform": f"/api/v1/enquetes/{payload.creer_dans_etude}/formulaire/xlsform" if formulaire_id else None,
+            "lien_collecte": f"/api/v1/enquetes/formulaire/{formulaire_id}" if formulaire_id else None,
+            "message": (
+                "Formulaire généré. "
+                + (f"Créé dans l'étude — XLSForm disponible pour KoBoCollect/ODK." if formulaire_id else
+                   "Fournissez creer_dans_etude pour l'enregistrer.")
+            ),
+        }
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Erreur génération IA : {e}")
+
+
+# ─── Analyse des commentaires (questions ouvertes) ────────────────────────────
+
+@router.post(
+    "/{etude_id}/analyser-commentaires",
+    summary="Analyse IA des questions ouvertes — thèmes, sentiments, citations représentatives",
+)
+async def analyser_commentaires(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    try:
+        resultats = await ge.analyser_commentaires(etude_id)
+        return resultats
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"Erreur analyse commentaires : {e}")

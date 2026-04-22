@@ -435,6 +435,18 @@ async def analyser_quantitatif(etude_id: str) -> dict:
 
         resultats["questions"].append(res_q)
 
+    # ── Tableaux croisés + Chi² pour questions catégorielles ──────────────────
+    questions_cat = [q for q in sorted(formulaire.questions, key=lambda x: x.ordre)
+                     if q.type_question in ("select_one", "oui_non", "likert")
+                     and q.question_id in df.columns]
+    if len(questions_cat) >= 2:
+        try:
+            tableaux, graphiques_croises = _analyser_tableaux_croises(df, questions_cat)
+            resultats["tableaux_croises"] = tableaux
+            graphiques.update(graphiques_croises)
+        except Exception as e:
+            logger.warning(f"Tableaux croisés : {e}")
+
     etude.graphiques.update(graphiques)
     etude.analyse_quantitative = resultats
     etude.statut = "analyse"
@@ -794,3 +806,465 @@ def get_formulaire_public(formulaire_id: str) -> Optional[Formulaire]:
         return None
     etude = _etudes.get(etude_id)
     return etude.formulaire if etude else None
+
+
+# ─── XLSForm — export KoBoCollect / ODK / SurveyCTO ──────────────────────────
+
+# Correspondance types YukpoPro → types XLSForm standard
+_XLSFORM_TYPE_MAP: dict[str, str] = {
+    "text":             "text",
+    "number":           "integer",
+    "select_one":       "select_one",
+    "select_multiple":  "select_multiple",
+    "rating":           "range",
+    "likert":           "select_one",
+    "date":             "date",
+    "oui_non":          "select_one",
+    "geopoint":         "geopoint",
+    "note":             "note",
+}
+
+def generer_xlsform_bytes(etude_id: str) -> bytes:
+    """
+    Génère un fichier XLSForm (.xlsx) conforme à la norme ODK/KoBoCollect.
+    Importable directement dans : KoBoCollect, KoBoToolbox, ODK Central,
+    SurveyCTO, CommCare, Ona, Enketo.
+    """
+    etude = _etudes.get(etude_id)
+    if not etude:
+        raise ValueError(f"Étude {etude_id} introuvable")
+    if not etude.formulaire:
+        raise ValueError("Aucun formulaire créé — créez d'abord un formulaire via POST /formulaire")
+
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        raise RuntimeError("openpyxl non disponible")
+
+    wb = openpyxl.Workbook()
+    form = etude.formulaire
+
+    # ── Styles ──────────────────────────────────────────────────────────────────
+    HDR_FILL   = PatternFill("solid", fgColor="1F3864")  # bleu marine ODK
+    HDR_FONT   = Font(color="FFFFFF", bold=True, size=11)
+    ALT_FILL   = PatternFill("solid", fgColor="EBF3FB")
+    BORDER_THIN = Border(
+        left=Side(style="thin", color="CCCCCC"),
+        right=Side(style="thin", color="CCCCCC"),
+        top=Side(style="thin", color="CCCCCC"),
+        bottom=Side(style="thin", color="CCCCCC"),
+    )
+
+    def _style_header(ws, row_num: int, n_cols: int):
+        for col in range(1, n_cols + 1):
+            cell = ws.cell(row=row_num, column=col)
+            cell.fill = HDR_FILL
+            cell.font = HDR_FONT
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.border = BORDER_THIN
+
+    def _style_row(ws, row_num: int, n_cols: int, alt: bool = False):
+        for col in range(1, n_cols + 1):
+            cell = ws.cell(row=row_num, column=col)
+            if alt:
+                cell.fill = ALT_FILL
+            cell.border = BORDER_THIN
+            cell.alignment = Alignment(vertical="center", wrap_text=True)
+
+    def _autofit(ws, min_w=12, max_w=60):
+        for col in ws.columns:
+            max_len = max((len(str(c.value or "")) for c in col), default=0)
+            ws.column_dimensions[get_column_letter(col[0].column)].width = min(max(max_len + 2, min_w), max_w)
+
+    # ── Feuille SURVEY ──────────────────────────────────────────────────────────
+    ws_survey = wb.active
+    ws_survey.title = "survey"
+    ws_survey.row_dimensions[1].height = 22
+
+    survey_cols = ["type", "name", "label::French (fr)", "hint::French (fr)",
+                   "required", "relevant", "constraint", "constraint_message",
+                   "appearance", "parameters"]
+    ws_survey.append(survey_cols)
+    _style_header(ws_survey, 1, len(survey_cols))
+
+    choices_rows: list[tuple] = []   # (list_name, name, label)
+    oui_non_added = False
+
+    for q in sorted(form.questions, key=lambda x: x.ordre):
+        xlstype_base = _XLSFORM_TYPE_MAP.get(q.type_question, "text")
+        list_name = f"list_{q.question_id[:8]}"
+        parameters = ""
+
+        # Construire le type XLSForm complet
+        if q.type_question in ("select_one", "likert"):
+            xlstype = f"select_one {list_name}"
+            for opt in q.options:
+                slug = opt.lower().replace(" ", "_").replace("'", "")[:30]
+                choices_rows.append((list_name, slug, opt))
+        elif q.type_question == "select_multiple":
+            xlstype = f"select_multiple {list_name}"
+            for opt in q.options:
+                slug = opt.lower().replace(" ", "_").replace("'", "")[:30]
+                choices_rows.append((list_name, slug, opt))
+        elif q.type_question == "oui_non":
+            xlstype = "select_one oui_non"
+            if not oui_non_added:
+                choices_rows.append(("oui_non", "oui", "Oui"))
+                choices_rows.append(("oui_non", "non", "Non"))
+                oui_non_added = True
+        elif q.type_question == "rating":
+            xlstype = "range"
+            parameters = "start=1 end=5 step=1"
+        else:
+            xlstype = xlstype_base
+
+        name = f"q_{q.question_id[:8]}"
+        required = "yes" if q.obligatoire else "no"
+
+        row = [xlstype, name, q.libelle, "", required, "", "", "", "", parameters]
+        row_num = ws_survey.max_row + 1
+        ws_survey.append(row)
+        _style_row(ws_survey, row_num, len(survey_cols), alt=(row_num % 2 == 0))
+
+    _autofit(ws_survey)
+
+    # ── Feuille CHOICES ─────────────────────────────────────────────────────────
+    ws_choices = wb.create_sheet("choices")
+    choices_cols = ["list_name", "name", "label::French (fr)"]
+    ws_choices.append(choices_cols)
+    _style_header(ws_choices, 1, len(choices_cols))
+
+    prev_list = None
+    for i, (lst, name, label) in enumerate(choices_rows, start=2):
+        ws_choices.append([lst, name, label])
+        alt = (lst == prev_list and i % 2 == 0) or (lst != prev_list and i % 2 == 1)
+        _style_row(ws_choices, i, len(choices_cols), alt=alt)
+        prev_list = lst
+
+    _autofit(ws_choices)
+
+    # ── Feuille SETTINGS ────────────────────────────────────────────────────────
+    ws_settings = wb.create_sheet("settings")
+    settings_cols = ["form_title", "form_id", "version", "default_language",
+                     "instance_name", "submission_url", "style"]
+    ws_settings.append(settings_cols)
+    _style_header(ws_settings, 1, len(settings_cols))
+
+    version = datetime.now().strftime("%Y%m%d%H%M")
+    form_id = f"yukpopro_{etude_id[:8]}"
+    instance_expr = f"concat('{etude.titre[:20]}_', format-date(today(), '%Y%m%d'))"
+    ws_settings.append([etude.titre, form_id, version, "French (fr)", instance_expr, "", "pages"])
+    _style_row(ws_settings, 2, len(settings_cols))
+    _autofit(ws_settings)
+
+    # ── Feuille README ──────────────────────────────────────────────────────────
+    ws_readme = wb.create_sheet("README")
+    ws_readme["A1"] = "YukpoPro — Formulaire XLSForm"
+    ws_readme["A1"].font = Font(bold=True, size=14, color="1F3864")
+    infos = [
+        ("Étude",        etude.titre),
+        ("Terrain",      etude.terrain),
+        ("Questions",    str(len(form.questions))),
+        ("Généré le",    datetime.now().strftime("%d/%m/%Y %H:%M")),
+        ("Version",      version),
+        ("",             ""),
+        ("Import",       "KoBoToolbox : Projects > New > Upload XLSForm"),
+        ("Import",       "ODK Central : Forms > Create Form > Upload"),
+        ("Import",       "SurveyCTO : Design > Upload Form"),
+    ]
+    for row_i, (k, v) in enumerate(infos, start=3):
+        ws_readme[f"A{row_i}"] = k
+        ws_readme[f"B{row_i}"] = v
+        if k:
+            ws_readme[f"A{row_i}"].font = Font(bold=True)
+    ws_readme.column_dimensions["A"].width = 20
+    ws_readme.column_dimensions["B"].width = 50
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.read()
+
+
+async def generer_formulaire_ia(
+    description: str,
+    titre: str,
+    objectif: str,
+    population: str,
+    n_questions: int = 15,
+) -> dict:
+    """
+    Claude génère automatiquement un formulaire structuré à partir d'une description
+    en langage naturel, et retourne à la fois le JSON YukpoPro et le XLSForm.
+    """
+    from core.ia_client import ModeIA, ia_client
+
+    prompt = f"""Tu es un expert en ingénierie de formulaires de collecte de données pour la recherche en Afrique francophone.
+
+MISSION : Génère un formulaire de collecte professionnel complet.
+
+Titre de l'étude : {titre}
+Objectif : {objectif}
+Population cible : {population}
+Description / contexte : {description}
+Nombre de questions souhaité : {n_questions}
+
+Génère un JSON structuré avec exactement ce format :
+{{
+  "titre_formulaire": "...",
+  "description": "...",
+  "sections": [
+    {{
+      "titre_section": "SECTION 1 : Identification du répondant",
+      "questions": [
+        {{
+          "libelle": "Quel est votre sexe ?",
+          "type_question": "select_one",
+          "options": ["Masculin", "Féminin", "Autre"],
+          "obligatoire": true,
+          "hint": "Sélectionnez une seule réponse"
+        }},
+        {{
+          "libelle": "Quel est votre âge ?",
+          "type_question": "number",
+          "options": [],
+          "obligatoire": true,
+          "hint": "En années révolues"
+        }}
+      ]
+    }}
+  ],
+  "conseils_terrain": ["Conseil pratique 1 pour la collecte", "Conseil 2"],
+  "duree_estimee_minutes": 20
+}}
+
+Types disponibles : text, number, select_one, select_multiple, rating (1-5), likert, date, oui_non, geopoint
+- Pour select_one/select_multiple/likert : fournis toujours des options pertinentes
+- Pour rating : pas besoin d'options (1 à 5 automatique)
+- Pour oui_non : pas besoin d'options
+- Adapte les questions au contexte africain francophone (terminologie locale, réalités terrain)
+- Structure en 2-4 sections logiques
+- Inclus des questions démographiques, des questions thématiques, et des questions ouvertes
+- Assure la triangulation des données (croise plusieurs angles sur les mêmes thèmes)
+
+Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
+
+    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+
+    try:
+        debut = reponse.find("{")
+        fin = reponse.rfind("}") + 1
+        data = json.loads(reponse[debut:fin])
+    except Exception:
+        raise ValueError("Impossible de parser la réponse IA — réessayez")
+
+    # Aplatir les sections en liste de questions
+    questions_plates: list[dict] = []
+    ordre = 0
+    for section in data.get("sections", []):
+        for q in section.get("questions", []):
+            q["ordre"] = ordre
+            q["section"] = section.get("titre_section", "")
+            questions_plates.append(q)
+            ordre += 1
+
+    return {
+        "titre_formulaire": data.get("titre_formulaire", titre),
+        "description": data.get("description", ""),
+        "questions": questions_plates,
+        "n_questions": len(questions_plates),
+        "sections": data.get("sections", []),
+        "conseils_terrain": data.get("conseils_terrain", []),
+        "duree_estimee_minutes": data.get("duree_estimee_minutes", 20),
+    }
+
+
+# ─── Analyse quantitative avancée (tableaux croisés + Chi² + commentaires) ───
+
+async def analyser_commentaires(etude_id: str) -> dict:
+    """
+    Analyse IA des questions ouvertes (type text) via Claude.
+    Pour chaque question texte avec réponses :
+    - Thèmes émergents
+    - Sentiment global
+    - Citations représentatives
+    - Mots-clés fréquents
+    """
+    etude = _etudes.get(etude_id)
+    if not etude:
+        raise ValueError(f"Étude {etude_id} introuvable")
+    if not etude.formulaire or not etude.formulaire.reponses:
+        raise ValueError("Aucune donnée collectée")
+
+    from core.ia_client import ModeIA, ia_client
+
+    try:
+        import pandas as pd
+    except ImportError:
+        raise RuntimeError("pandas non disponible")
+
+    form = etude.formulaire
+    df = pd.DataFrame(form.reponses)
+    questions_texte = [q for q in form.questions if q.type_question == "text"]
+
+    if not questions_texte:
+        return {"message": "Aucune question ouverte dans ce formulaire", "analyses": []}
+
+    analyses = []
+    for q in questions_texte:
+        if q.question_id not in df.columns:
+            continue
+        reponses_texte = [str(v) for v in df[q.question_id].dropna() if str(v).strip()]
+        if not reponses_texte:
+            continue
+
+        corpus = "\n".join(f"- {r}" for r in reponses_texte[:100])
+
+        prompt = f"""Analyse ces {len(reponses_texte)} réponses à la question ouverte suivante.
+
+Question : {q.libelle}
+
+Réponses collectées :
+{corpus}
+
+Retourne un JSON structuré :
+{{
+  "themes_emergents": [
+    {{"theme": "Nom du thème", "frequence": 12, "pourcentage": 34.5, "exemples": ["réponse 1", "réponse 2"]}}
+  ],
+  "sentiment_global": "positif|négatif|neutre|mixte",
+  "sentiment_detail": {{"positif": 40, "neutre": 35, "negatif": 25}},
+  "citations_representatives": ["Citation 1 représentative", "Citation 2", "Citation 3"],
+  "mots_cles": ["mot1", "mot2", "mot3", "mot4", "mot5"],
+  "synthese": "Synthèse analytique en 2-3 phrases",
+  "points_attention": ["Point notable 1", "Point notable 2"]
+}}
+
+Sois analytique, identifie les patterns réels dans les données."""
+
+        reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+        try:
+            debut = reponse.find("{")
+            fin = reponse.rfind("}") + 1
+            analyse_q = json.loads(reponse[debut:fin])
+        except Exception:
+            analyse_q = {"synthese": reponse}
+
+        # Graphique : thèmes émergents
+        graphique_themes = None
+        themes = analyse_q.get("themes_emergents", [])
+        if themes:
+            graphique_themes = _graphique_barres(
+                {t["theme"]: t.get("frequence", 0) for t in themes[:10]},
+                f"Thèmes — {q.libelle[:50]}"
+            )
+
+        analyses.append({
+            "question_id": q.question_id,
+            "libelle": q.libelle,
+            "n_reponses": len(reponses_texte),
+            "analyse": analyse_q,
+            "graphique_themes": graphique_themes,
+        })
+
+    # Sauvegarder dans l'étude
+    if not etude.analyse_qualitative:
+        etude.analyse_qualitative = {}
+    etude.analyse_qualitative["analyse_commentaires"] = analyses
+
+    return {
+        "n_questions_analysees": len(analyses),
+        "analyses": analyses,
+    }
+
+
+def _analyser_tableaux_croises(df, questions_cat: list) -> tuple[list[dict], dict[str, str]]:
+    """
+    Génère les tableaux croisés et tests Chi² pour toutes les paires
+    de questions catégorielles. Retourne (résultats, graphiques base64).
+    """
+    try:
+        import pandas as pd
+        import numpy as np
+        from scipy import stats
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        import matplotlib.ticker as mticker
+    except ImportError:
+        return [], {}
+
+    resultats = []
+    graphiques = {}
+
+    paires = [(questions_cat[i], questions_cat[j])
+              for i in range(len(questions_cat))
+              for j in range(i + 1, len(questions_cat))]
+
+    for q1, q2 in paires[:10]:  # Limite à 10 paires pour les perfs
+        id1, id2 = q1.question_id, q2.question_id
+        if id1 not in df.columns or id2 not in df.columns:
+            continue
+
+        sub = df[[id1, id2]].dropna()
+        if len(sub) < 5:
+            continue
+
+        try:
+            ct = pd.crosstab(sub[id1], sub[id2], margins=True, margins_name="Total")
+            ct_pct = pd.crosstab(sub[id1], sub[id2], normalize="index").round(3) * 100
+
+            # Test Chi²
+            ct_nomargin = pd.crosstab(sub[id1], sub[id2])
+            chi2, p_val, dof, _ = stats.chi2_contingency(ct_nomargin)
+            n = ct_nomargin.values.sum()
+            cramer_v = float(np.sqrt(chi2 / (n * (min(ct_nomargin.shape) - 1)))) if n > 0 else 0
+
+            sig = "***" if p_val < 0.001 else "**" if p_val < 0.01 else "*" if p_val < 0.05 else "ns"
+
+            # Graphique heatmap du tableau croisé
+            fig, ax = plt.subplots(figsize=(max(6, len(ct_nomargin.columns)), max(4, len(ct_nomargin))))
+            data_mat = ct_nomargin.values.astype(float)
+            im = ax.imshow(data_mat, cmap="Blues", aspect="auto")
+            ax.set_xticks(range(len(ct_nomargin.columns)))
+            ax.set_yticks(range(len(ct_nomargin.index)))
+            ax.set_xticklabels([str(c)[:20] for c in ct_nomargin.columns], rotation=30, ha="right", fontsize=9)
+            ax.set_yticklabels([str(i)[:20] for i in ct_nomargin.index], fontsize=9)
+            ax.set_xlabel(q2.libelle[:40], fontsize=10)
+            ax.set_ylabel(q1.libelle[:40], fontsize=10)
+            ax.set_title(f"Tableau croisé · χ²={chi2:.2f} p={p_val:.3f} {sig} · V={cramer_v:.2f}", fontsize=10, fontweight="bold")
+            for i in range(len(ct_nomargin.index)):
+                for j in range(len(ct_nomargin.columns)):
+                    val = int(data_mat[i, j])
+                    pct = ct_pct.iloc[i, j] if i < len(ct_pct) and j < len(ct_pct.columns) else 0
+                    ax.text(j, i, f"{val}\n({pct:.0f}%)", ha="center", va="center",
+                            fontsize=8, color="white" if data_mat[i, j] > data_mat.max() * 0.6 else "black")
+            plt.colorbar(im, ax=ax, shrink=0.7)
+            plt.tight_layout()
+            key = f"croise_{id1[:6]}_{id2[:6]}"
+            graphiques[key] = _fig_to_b64(fig)
+            plt.close(fig)
+
+            resultats.append({
+                "question_1": {"id": id1, "libelle": q1.libelle},
+                "question_2": {"id": id2, "libelle": q2.libelle},
+                "tableau_croise": ct.to_dict(),
+                "pourcentages_lignes": ct_pct.to_dict(),
+                "chi2": round(chi2, 4),
+                "p_value": round(p_val, 4),
+                "degres_liberte": int(dof),
+                "significativite": sig,
+                "cramer_v": round(cramer_v, 3),
+                "interpretation": (
+                    f"Association {'très forte' if cramer_v > 0.5 else 'forte' if cramer_v > 0.3 else 'modérée' if cramer_v > 0.1 else 'faible'} "
+                    f"({'statistiquement significative' if p_val < 0.05 else 'non significative'}, p={p_val:.3f})"
+                ),
+                "graphique_key": key,
+            })
+        except Exception as e:
+            logger.warning(f"Tableau croisé {id1}×{id2} : {e}")
+            continue
+
+    return resultats, graphiques
