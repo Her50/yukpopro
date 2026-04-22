@@ -100,6 +100,11 @@ from api.routes_agent import router as agent_router
 from api.routes_agent_systeme import router as agent_systeme_router
 from api.routes_agent_conv import router as agent_conv_router
 from api.routes_portail import router as portail_router
+from api.routes_bureau_redaction import router as bureau_redaction_router
+from api.routes_bureau_ocr import router as bureau_ocr_router
+from api.routes_bureau_audio import router as bureau_audio_router
+from api.routes_bureau_infographie import router as bureau_infographie_router
+from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.graphql_schema import creer_router_graphql
 from core.audit import AuditMiddleware
 from core.auth import auth_router
@@ -555,6 +560,13 @@ app.include_router(pro_reunions_router,   prefix="/api/v1/pro/reunions",    tags
 app.include_router(pro_marketing_router,  prefix="/api/v1/pro/marketing",   tags=["Plateforme Pro — Agent Marketing Visuel"])
 app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes & Études qualitatives/quantitatives"])
 
+# ─── YukpoSecrétariat ─────────────────────────────────────────────────────────
+app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction",   tags=["Secrétariat — Rédaction IA"])
+app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
+app.include_router(bureau_audio_router,      prefix="/api/v1/bureau/audio",       tags=["Secrétariat — Audio → Document"])
+app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie", tags=["Secrétariat — Infographie Print"])
+app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
+
 # GraphQL (Strawberry) — optionnel selon installation
 _graphql_router = creer_router_graphql()
 if _graphql_router:
@@ -569,7 +581,7 @@ async def racine():
         "version": settings.APP_VERSION,
         "statut": "opérationnel",
         "modules": [
-            "Chat IA intelligent (sessions, mémoire, multimodal, Whisper)",
+            "Chat IA intelligent (sessions, mémoire, multimodal, audio)",
             "Copilote IA assurance",
             "Réglementation CIMA (C1-C20, ratios prudentiels)",
             "Sinistres & Détection de fraude (score 0-100)",

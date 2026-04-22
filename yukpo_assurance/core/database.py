@@ -884,6 +884,57 @@ class ConsommationTokenDB(Base):
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+# ─── BUREAU SECRÉTARIAT ───────────────────────────────────────────────────────
+
+class BureauBonTravailDB(Base):
+    """Bon de travail Kanban pour le secrétariat."""
+    __tablename__ = "bureau_bons_travail"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    client_nom = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    type_travail = Column(String(50), default="redaction")  # redaction|ocr|infographie|impression|saisie
+    statut = Column(String(30), default="en_attente", index=True)  # en_attente|en_cours|en_revision|livre|paye|annule
+    montant_fcfa = Column(Integer, default=0)
+    acompte_fcfa = Column(Integer, default=0)
+    echeance = Column(DateTime, nullable=True)
+    notes = Column(Text, default="")
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+    modifie_le = Column(DateTime, default=datetime.utcnow)
+
+
+class BureauTransactionDB(Base):
+    """Transaction de caisse journalière du secrétariat."""
+    __tablename__ = "bureau_transactions_caisse"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    type = Column(String(10), nullable=False)               # entree | sortie
+    montant_fcfa = Column(Integer, nullable=False)
+    libelle = Column(String(300), nullable=False)
+    mode_paiement = Column(String(30), default="especes")   # especes|orange_money|mtn_momo|virement|cheque
+    reference = Column(String(100), nullable=True)
+    horodatage = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class BureauClientDB(Base):
+    """Fiche client du mini-CRM secrétariat."""
+    __tablename__ = "bureau_clients"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    nom = Column(String(200), nullable=False, index=True)
+    telephone = Column(String(30), nullable=False)
+    email = Column(String(150), nullable=True)
+    adresse = Column(String(300), nullable=True)
+    notes = Column(Text, default="")
+    nb_commandes = Column(Integer, default=0)
+    total_paye_fcfa = Column(Integer, default=0)
+    derniere_visite = Column(DateTime, nullable=True)
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:
