@@ -24,3 +24,13 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only --wait-timeout 300
+
+      - name: Show machine status and recent logs
+        if: always()
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          echo "=== Machine status ==="
+          flyctl status --app yukpopro-backend || true
+          echo "=== Recent logs ==="
+          flyctl logs --app yukpopro-backend --no-tail -n 100 || true
