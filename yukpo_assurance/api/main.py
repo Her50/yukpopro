@@ -92,6 +92,7 @@ from api.routes_pro_abonnement import router as pro_abonnement_router
 from api.routes_pro_reunions import router as pro_reunions_router
 from api.routes_pro_marketing import router as pro_marketing_router
 from api.routes_mrh import router as mrh_router
+from api.routes_enquetes import router as enquetes_router
 from api.routes_reassurance import router as reassurance_router
 from api.routes_archive import router as archive_router
 from api.routes_kpi_rh import router as kpi_rh_router
@@ -552,6 +553,7 @@ app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags
 app.include_router(pro_abonnement_router, prefix="/api/v1/pro/abonnement",  tags=["Plateforme Pro — Abonnements"])
 app.include_router(pro_reunions_router,   prefix="/api/v1/pro/reunions",    tags=["Plateforme Pro — Réunions & Transcription"])
 app.include_router(pro_marketing_router,  prefix="/api/v1/pro/marketing",   tags=["Plateforme Pro — Agent Marketing Visuel"])
+app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes & Études qualitatives/quantitatives"])
 
 # GraphQL (Strawberry) — optionnel selon installation
 _graphql_router = creer_router_graphql()
