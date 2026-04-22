@@ -635,6 +635,44 @@ export const enquetesApi = {
     const { data } = await http.post(`/enquetes/${etude_id}/analyser-intelligent`, {}, { timeout: 180_000 });
     return data;
   },
+
+  listerTranscriptions: async (etude_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${etude_id}/transcriptions`);
+    return data;
+  },
+
+  analyserQuantitatif: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/analyser-quantitatif`, {}, { timeout: 180_000 });
+    return data;
+  },
+
+  analyserCommentaires: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/analyser-commentaires`, {}, { timeout: 180_000 });
+    return data;
+  },
+
+  creerFormulaire: async (etude_id: string, payload: {
+    titre: string; description?: string; questions: any[];
+  }): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/formulaire`, payload);
+    return data;
+  },
+
+  genererFormulaireIa: async (payload: {
+    description: string; titre: string; objectif: string;
+    population: string; n_questions?: number; creer_dans_etude?: string;
+  }): Promise<any> => {
+    const { data } = await http.post("/enquetes/generer-formulaire-ia", payload, { timeout: 180_000 });
+    return data;
+  },
+
+  donneesFormulaire: async (etude_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${etude_id}/formulaire/donnees`);
+    return data;
+  },
+
+  xlsformUrl: (etude_id: string): string =>
+    `/api/v1/enquetes/${etude_id}/formulaire/xlsform`,
 };
 
 export default http;
