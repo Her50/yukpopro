@@ -195,8 +195,12 @@ export class TranslateLiveClient {
   }
 
   private async _connectWS(): Promise<void> {
-    const proto = location.protocol === "https:" ? "wss:" : "ws:";
-    const url = `${proto}//${location.host}/api/v1/translate/live/ws`
+    // Vercel ne proxi pas les WebSockets — on pointe directement vers le backend
+    const apiBase = (import.meta.env.VITE_API_URL as string | undefined) || "";
+    const wsBase = apiBase
+      ? apiBase.replace(/^http/, "ws")
+      : (location.protocol === "https:" ? "wss:" : "ws:") + "//" + location.host;
+    const url = `${wsBase}/api/v1/translate/live/ws`
       + `?token=${encodeURIComponent(this.opts.token)}`
       + `&source=${encodeURIComponent(this.opts.source)}`
       + `&target=${encodeURIComponent(this.opts.target)}`;
