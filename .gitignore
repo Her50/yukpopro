@@ -22,3 +22,20 @@ yukpopro_mobile/
 !.env.example
 !.env.railway
 *.secret
+
+.vercel
+
+# Python caches
+__pycache__/
+*.pyc
+
+# QA agent artifacts (heavy, generated per-run)
+tests/qa_agent/artifacts/
+
+# QA agent fixtures binaires (regen via generate_fixtures.py)
+tests/qa_agent/fixtures/*.pdf
+tests/qa_agent/fixtures/*.docx
+tests/qa_agent/fixtures/*.xlsx
+tests/qa_agent/fixtures/*.png
+tests/qa_agent/fixtures/*.m4a
+tests/qa_agent/fixtures/*.mp3

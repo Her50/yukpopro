@@ -1,0 +1,44 @@
+prod:
+  web_url: https://yukpopro-web.vercel.app
+  api_url: https://yukpopro-backend.fly.dev
+  health_url: https://yukpopro-backend.fly.dev/health
+
+local:
+  web_url: http://localhost:5173
+  api_url: http://localhost:8000
+
+credentials:
+  email: admin@yukpopro.cm
+  password: Admin123!
+
+quality:
+  min_score_pass: 7
+  min_score_partial: 5
+  rapport_min_pages: 5
+  slides_min_count: 10
+  enquete_xlsform_min_questions: 15
+  transcription_min_accuracy: 0.85
+
+timeouts:
+  navigation_ms: 30000
+  rapport_simple_s: 90
+  rapport_multi_s: 180
+  slides_s: 120
+  infographie_s: 60
+  reunion_transcription_s: 180
+  emploi_s: 120
+
+playwright:
+  headless: true
+  slow_mo_ms: 0
+  viewport:
+    width: 1440
+    height: 900
+
+claude:
+  model: claude-opus-4-7
+  fallback_model: claude-sonnet-4-6
+  api_env_var: ANTHROPIC_API_KEY
+
+artifacts_root: tests/qa_agent/artifacts
+fixtures_root: tests/qa_agent/fixtures
