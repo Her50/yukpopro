@@ -248,6 +248,12 @@ async def _forcer_plan_business(user_id: int, db: Optional[AsyncSession] = None)
             credit.mise_a_jour = datetime.utcnow()
             await fresh_db.commit()
             logger.warning(f"[Credits] Plan forcé business (admin) user={user_id}")
+    # Invalide le cache bureau si présent pour forcer re-lecture
+    try:
+        from modules.bureau.service_credits_bureau import _PRO_PLAN_CACHE
+        _PRO_PLAN_CACHE.pop(user_id, None)
+    except Exception:
+        pass
 
 
 async def debiter_forfait_fcfa(

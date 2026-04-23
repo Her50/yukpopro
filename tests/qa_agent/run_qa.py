@@ -32,19 +32,19 @@ SUITES_NEED_BROWSER = {"auth", "dashboard", "copilote"}
 
 
 SUITES = [
-    ("health", "tests.qa_agent.suites.test_health"),
-    ("auth", "tests.qa_agent.suites.test_auth"),
-    ("dashboard", "tests.qa_agent.suites.test_dashboard"),
-    ("copilote", "tests.qa_agent.suites.test_copilote"),
-    ("studio", "tests.qa_agent.suites.test_studio"),
+    ("health",      "tests.qa_agent.suites.test_health"),
+    ("auth",        "tests.qa_agent.suites.test_auth"),
+    ("abonnement",  "tests.qa_agent.suites.test_abonnement"),   # doit passer en 3e pour _forcer_plan_business
+    ("dashboard",   "tests.qa_agent.suites.test_dashboard"),
+    ("copilote",    "tests.qa_agent.suites.test_copilote"),
+    ("studio",      "tests.qa_agent.suites.test_studio"),
     ("infographie", "tests.qa_agent.suites.test_infographie"),
-    ("enquetes", "tests.qa_agent.suites.test_enquetes"),
-    ("reunions", "tests.qa_agent.suites.test_reunions"),
-    ("traduction", "tests.qa_agent.suites.test_traduction"),
-    ("emploi", "tests.qa_agent.suites.test_emploi"),
-    ("marches", "tests.qa_agent.suites.test_marches"),
-    ("abonnement", "tests.qa_agent.suites.test_abonnement"),
-    ("documents", "tests.qa_agent.suites.test_documents"),
+    ("enquetes",    "tests.qa_agent.suites.test_enquetes"),
+    ("reunions",    "tests.qa_agent.suites.test_reunions"),
+    ("traduction",  "tests.qa_agent.suites.test_traduction"),
+    ("emploi",      "tests.qa_agent.suites.test_emploi"),
+    ("marches",     "tests.qa_agent.suites.test_marches"),
+    ("documents",   "tests.qa_agent.suites.test_documents"),
 ]
 
 
