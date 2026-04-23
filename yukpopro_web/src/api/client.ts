@@ -673,6 +673,25 @@ export const enquetesApi = {
 
   xlsformUrl: (etude_id: string): string =>
     `/api/v1/enquetes/${etude_id}/formulaire/xlsform`,
+
+  uploadProtocole: async (
+    etude_id: string,
+    file: File,
+    params: { titre: string; objectif?: string; population?: string; n_questions?: number }
+  ): Promise<any> => {
+    const fd = new FormData();
+    fd.append("fichier", file, file.name);
+    fd.append("etude_id", etude_id);
+    fd.append("titre", params.titre);
+    fd.append("objectif", params.objectif || "");
+    fd.append("population", params.population || "");
+    fd.append("n_questions", String(params.n_questions || 20));
+    const { data } = await http.post("/enquetes/upload-protocole", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 240_000,
+    });
+    return data;
+  },
 };
 
 export default http;

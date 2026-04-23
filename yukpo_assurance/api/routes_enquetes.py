@@ -1,10 +1,15 @@
 """
 Routes Enquêtes & Études — Analyse qualitative IA + collecte quantitative (KoBoCollect-like)
 """
+import base64
+import re
+import time as _time
+from pathlib import Path
+from typing import Optional
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
-from typing import Optional
 
 from core.auth import TokenData, get_current_user, require_permission
 from modules.enquetes import gestionnaire_enquetes as ge
@@ -13,6 +18,60 @@ router = APIRouter(dependencies=[Depends(require_permission("enquetes"))])
 
 AUDIO_MIMES = {"audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg",
                "audio/webm", "audio/x-m4a", "application/octet-stream"}
+
+PROTOCOLE_MIMES = {
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+    "text/plain",
+}
+
+_BUREAU_DIR = Path(__file__).parent.parent / "data" / "generated" / "bureau"
+_BUREAU_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _slug(s: str, n: int = 40) -> str:
+    s = re.sub(r"[^a-zA-Z0-9]+", "_", s.strip())[:n].strip("_")
+    return s or "enquete"
+
+
+def _save_bureau(user_id: int, kind: str, titre: str, ext: str, content: bytes) -> str:
+    """Sauve un artefact d'enquête dans bureau/documents. kind: 'xls' | 'rapport'."""
+    ts = int(_time.time())
+    safe_titre = _slug(titre)
+    # Pattern: bureau_doc_{user_id}_{kind}_{titre}_{ts}.{ext}
+    # "_doc_" pour être reconnu comme "Rédaction IA" dans le listing bureau
+    filename = f"bureau_doc_{user_id}_{kind}_{safe_titre}_{ts}.{ext}"
+    path = _BUREAU_DIR / filename
+    path.write_bytes(content)
+    return filename
+
+
+def _extract_text_from_upload(filename: str, content: bytes) -> str:
+    """Extrait le texte d'un PDF / DOCX / TXT."""
+    ext = (filename or "").lower().rsplit(".", 1)[-1]
+    if ext == "txt":
+        return content.decode("utf-8", errors="ignore")
+    if ext == "pdf":
+        try:
+            from io import BytesIO
+            try:
+                from pypdf import PdfReader
+            except ImportError:
+                from PyPDF2 import PdfReader
+            reader = PdfReader(BytesIO(content))
+            return "\n".join((p.extract_text() or "") for p in reader.pages)
+        except Exception as e:
+            raise ValueError(f"Impossible de lire le PDF : {e}")
+    if ext in ("docx", "doc"):
+        try:
+            from io import BytesIO
+            from docx import Document
+            doc = Document(BytesIO(content))
+            return "\n".join(p.text for p in doc.paragraphs)
+        except Exception as e:
+            raise ValueError(f"Impossible de lire le DOCX : {e}")
+    raise ValueError(f"Format non supporté : {ext}. Utilisez PDF, DOCX ou TXT.")
 
 
 # ─── Schémas Pydantic ─────────────────────────────────────────────────────────
@@ -219,6 +278,20 @@ async def generer_rapport(
         raise HTTPException(400, "Format invalide : json | docx | pdf")
     try:
         rapport = await ge.generer_rapport(etude_id, format_rapport)
+        # Persister rapport DOCX/PDF dans Mes Documents
+        etude = ge.get_etude(etude_id)
+        titre = etude.titre if etude else "rapport"
+        try:
+            if format_rapport == "docx" and rapport.get("fichier_docx"):
+                content = base64.b64decode(rapport["fichier_docx"])
+                fichier_id = _save_bureau(current_user.user_id, "rapport", titre, "docx", content)
+                rapport["fichier_id_bureau"] = fichier_id
+            elif format_rapport == "pdf" and rapport.get("fichier_pdf"):
+                content = base64.b64decode(rapport["fichier_pdf"])
+                fichier_id = _save_bureau(current_user.user_id, "rapport", titre, "pdf", content)
+                rapport["fichier_id_bureau"] = fichier_id
+        except Exception:
+            pass
         return rapport
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -321,7 +394,12 @@ async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(g
         raise HTTPException(404, "Étude introuvable")
     try:
         xlsx_bytes = ge.generer_xlsform_bytes(etude_id)
-        nom = f"yukpopro_{etude.titre[:30].replace(' ', '_')}.xlsx"
+        nom = f"yukpopro_{_slug(etude.titre)}.xlsx"
+        # Persister dans Mes Documents
+        try:
+            _save_bureau(current_user.user_id, "xls", etude.titre, "xlsx", xlsx_bytes)
+        except Exception:
+            pass
         return Response(
             content=xlsx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -331,6 +409,103 @@ async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(g
         raise HTTPException(400, str(e))
     except Exception as e:
         raise HTTPException(500, f"Erreur génération XLSForm : {e}")
+
+
+# ─── Upload protocole / outils de collecte (KoBoCollect pro) ───────────────────
+
+class ProtocoleUploadResponse(BaseModel):
+    titre_formulaire: str
+    n_questions: int
+    formulaire_id: Optional[str]
+    lien_xlsform: Optional[str]
+    lien_collecte: Optional[str]
+    message: str
+
+
+@router.post(
+    "/upload-protocole",
+    summary="Upload PDF/DOCX du protocole — Claude génère automatiquement le formulaire XLSForm",
+)
+async def upload_protocole(
+    fichier: UploadFile = File(...),
+    etude_id: Optional[str] = Form(None),
+    titre: str = Form("Enquête"),
+    objectif: str = Form(""),
+    population: str = Form(""),
+    n_questions: int = Form(20),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Workflow pro : uploader le protocole d'enquête → Claude construit le formulaire complet."""
+    content = await fichier.read()
+    if len(content) == 0:
+        raise HTTPException(400, "Fichier vide")
+    if len(content) > 20 * 1024 * 1024:
+        raise HTTPException(400, "Fichier trop volumineux (> 20 Mo)")
+
+    try:
+        texte = _extract_text_from_upload(fichier.filename or "", content)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    if len(texte.strip()) < 50:
+        raise HTTPException(400, "Texte extrait trop court — vérifiez le fichier")
+
+    # Extraire objectif / population si non fournis (heuristique rapide)
+    if not objectif:
+        for keyword in ("objectif", "objectifs", "finalité", "problématique"):
+            idx = texte.lower().find(keyword)
+            if idx >= 0:
+                objectif = texte[idx:idx + 300].replace("\n", " ").strip()
+                break
+    if not population:
+        for keyword in ("population", "échantillon", "cible", "répondants"):
+            idx = texte.lower().find(keyword)
+            if idx >= 0:
+                population = texte[idx:idx + 200].replace("\n", " ").strip()
+                break
+
+    try:
+        resultat = await ge.generer_formulaire_ia(
+            description=texte[:8000],
+            titre=titre,
+            objectif=objectif or "Enquête terrain",
+            population=population or "Population cible",
+            n_questions=n_questions,
+        )
+    except Exception as e:
+        raise HTTPException(500, f"Erreur IA : {e}")
+
+    formulaire_id = None
+    if etude_id:
+        try:
+            form = ge.creer_formulaire(
+                etude_id=etude_id,
+                titre=resultat["titre_formulaire"],
+                description=resultat.get("description", ""),
+                questions=resultat["questions"],
+                sections=resultat.get("sections_metadata", []),
+            )
+            formulaire_id = form.formulaire_id
+            # Persister le XLSForm dans Mes Documents
+            try:
+                xls_bytes = ge.generer_xlsform_bytes(etude_id)
+                _save_bureau(current_user.user_id, "xls", resultat["titre_formulaire"], "xlsx", xls_bytes)
+            except Exception:
+                pass
+        except Exception as e:
+            raise HTTPException(400, f"Étude introuvable ou invalide : {e}")
+
+    return ProtocoleUploadResponse(
+        titre_formulaire=resultat["titre_formulaire"],
+        n_questions=len(resultat["questions"]),
+        formulaire_id=formulaire_id,
+        lien_xlsform=f"/api/v1/enquetes/{etude_id}/formulaire/xlsform" if formulaire_id else None,
+        lien_collecte=f"/api/v1/enquetes/formulaire/{formulaire_id}" if formulaire_id else None,
+        message=(
+            f"Protocole analysé ({len(texte)} car.) — {len(resultat['questions'])} questions générées par IA. "
+            + ("XLSForm sauvegardé dans Mes Documents." if formulaire_id else "Fournissez etude_id pour créer le formulaire.")
+        ),
+    )
 
 
 # ─── Génération formulaire par IA ─────────────────────────────────────────────
@@ -373,6 +548,12 @@ async def generer_formulaire_ia(
                     sections=resultat.get("sections_metadata", []),
                 )
                 formulaire_id = form.formulaire_id
+                # Persister XLSForm dans Mes Documents
+                try:
+                    xls_bytes = ge.generer_xlsform_bytes(payload.creer_dans_etude)
+                    _save_bureau(current_user.user_id, "xls", resultat["titre_formulaire"], "xlsx", xls_bytes)
+                except Exception:
+                    pass
             except Exception as e:
                 pass  # Non bloquant si l'étude n'existe pas
 

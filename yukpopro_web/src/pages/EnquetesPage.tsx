@@ -94,6 +94,11 @@ export const EnquetesPage = () => {
   const [generatingForm,   setGeneratingForm]    = useState(false);
   const [formDonnees,      setFormDonnees]       = useState<any | null>(null);
   const [copied,           setCopied]            = useState(false);
+  // Upload protocole
+  const [protocoleFile,    setProtocoleFile]    = useState<File | null>(null);
+  const [protocoleParams,  setProtocoleParams]  = useState({ titre: "", objectif: "", population: "", n_questions: 20 });
+  const [uploadingProt,    setUploadingProt]    = useState(false);
+  const protocoleRef = useRef<HTMLInputElement>(null);
 
   // État onglet Analyse
   const [analysing,        setAnalysing]         = useState<string | null>(null); // type en cours
@@ -223,6 +228,32 @@ export const EnquetesPage = () => {
     } catch { toast.error("Aucune donnée ou formulaire non créé"); }
   };
 
+  const uploaderProtocole = async () => {
+    if (!protocoleFile || !expandedId) { toast.error("Sélectionnez un fichier"); return; }
+    if (!protocoleParams.titre.trim()) { toast.error("Titre du formulaire requis"); return; }
+    setUploadingProt(true);
+    toast("Yukpo analyse votre protocole…", { icon: "📄", duration: 30000 });
+    try {
+      const res = await enquetesApi.uploadProtocole(expandedId, protocoleFile, protocoleParams);
+      toast.dismiss();
+      toast.success(`Formulaire généré — ${res.n_questions} questions. XLSForm dans Mes Documents.`);
+      setFormulaire({
+        titre_formulaire: res.titre_formulaire,
+        questions: Array(res.n_questions).fill({}),
+        lien_xlsform: res.lien_xlsform,
+        lien_collecte: res.lien_collecte,
+        sections_metadata: [],
+      });
+      setProtocoleFile(null);
+      setProtocoleParams({ titre: "", objectif: "", population: "", n_questions: 20 });
+      if (protocoleRef.current) protocoleRef.current.value = "";
+      if (expandedId) await refreshDetail(expandedId);
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err?.response?.data?.detail || "Erreur analyse protocole");
+    } finally { setUploadingProt(false); }
+  };
+
   const copierLien = (lien: string) => {
     navigator.clipboard.writeText(window.location.origin + lien);
     setCopied(true);
@@ -264,11 +295,13 @@ export const EnquetesPage = () => {
   const genererRapport = async () => {
     if (!expandedId) return;
     setGenerating(true);
-    toast("Génération du rapport académique…", { icon: "📄", duration: 20000 });
+    toast("Génération du rapport académique…", { icon: "📄", duration: 30000 });
     try {
-      const r = await enquetesApi.genererRapport(expandedId, "json");
+      const r = await enquetesApi.genererRapport(expandedId, "docx");
       toast.dismiss();
-      toast.success("Rapport prêt !");
+      toast.success(r.fichier_id_bureau
+        ? "Rapport prêt — sauvegardé dans Mes Documents !"
+        : "Rapport prêt !");
       setRapport(r);
       await refreshDetail(expandedId);
     } catch (err: any) {
@@ -522,9 +555,70 @@ export const EnquetesPage = () => {
                           </div>
                         ) : (
                           <>
-                            {/* Génération IA */}
+                            {/* Workflow options */}
                             {!genIAMode && !formulaire && (
                               <div className="space-y-3">
+                                {/* Option A — Upload protocole (recommandée) */}
+                                <div className="rounded-xl border border-green-500/25 p-4" style={{ background: "rgba(34,197,94,0.04)" }}>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center shrink-0">
+                                      <Upload className="w-4 h-4 text-green-400" />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-white">Option 1 — Uploader votre protocole <span className="text-green-400 text-xs">(recommandé)</span></p>
+                                      <p className="text-xs text-gray-500 mt-0.5">PDF / DOCX / TXT — Yukpo extrait les objectifs, la population, les variables, et construit automatiquement le formulaire XLSForm</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                      <label className={labelCls}>Titre du formulaire *</label>
+                                      <input className={inputCls} placeholder="Enquête ménages 2026" value={protocoleParams.titre} onChange={e => setProtocoleParams(p => ({ ...p, titre: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                      <label className={labelCls}>Population cible</label>
+                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.population} onChange={e => setProtocoleParams(p => ({ ...p, population: e.target.value }))} />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                      <label className={labelCls}>Objectif de l'étude</label>
+                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.objectif} onChange={e => setProtocoleParams(p => ({ ...p, objectif: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                      <label className={labelCls}>Nombre de questions</label>
+                                      <input type="number" min={5} max={60} className={inputCls} value={protocoleParams.n_questions} onChange={e => setProtocoleParams(p => ({ ...p, n_questions: +e.target.value }))} />
+                                    </div>
+                                  </div>
+
+                                  <input
+                                    ref={protocoleRef}
+                                    type="file"
+                                    accept=".pdf,.docx,.doc,.txt"
+                                    className="hidden"
+                                    onChange={e => setProtocoleFile(e.target.files?.[0] ?? null)}
+                                  />
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                      onClick={() => protocoleRef.current?.click()}
+                                      className={`${btnBase} text-green-400 border border-green-500/25 hover:bg-green-500/[0.08]`}
+                                    >
+                                      <FileText className="w-3.5 h-3.5" />
+                                      {protocoleFile ? protocoleFile.name.slice(0, 40) : "Choisir fichier PDF/DOCX"}
+                                    </button>
+                                    {protocoleFile && (
+                                      <button
+                                        onClick={uploaderProtocole}
+                                        disabled={uploadingProt}
+                                        className={`${btnBase} text-white`}
+                                        style={{ background: "#22C55E" }}
+                                      >
+                                        {uploadingProt ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                                        {uploadingProt ? "Analyse…" : "Analyser & générer"}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Option B — Description manuelle */}
                                 <button
                                   onClick={() => setGenIAMode(true)}
                                   className="w-full flex items-center gap-4 p-4 rounded-xl border border-yukpo-500/25 hover:border-yukpo-500/50 transition-all text-left group"
@@ -533,9 +627,9 @@ export const EnquetesPage = () => {
                                   <div className="w-10 h-10 rounded-xl bg-yukpo-500/15 flex items-center justify-center shrink-0 group-hover:bg-yukpo-500/25 transition-all">
                                     <Wand2 className="w-5 h-5 text-yukpo-400" />
                                   </div>
-                                  <div>
-                                    <p className="text-sm font-semibold text-white">Générer le formulaire avec Yukpo</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">Yukpo crée un formulaire professionnel adapté à votre étude — avec logique de saut, groupes, skip logic — exportable XLSForm pour KoBoCollect / ODK</p>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-semibold text-white">Option 2 — Décrire le sujet manuellement</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">Si vous n'avez pas encore de protocole — renseignez juste le contexte, Yukpo génère le formulaire professionnel</p>
                                   </div>
                                   <ChevronRight className="w-4 h-4 text-gray-600 shrink-0 group-hover:text-gray-400 transition-all" />
                                 </button>
@@ -616,6 +710,10 @@ export const EnquetesPage = () => {
                                       Voir les réponses
                                     </button>
                                   </div>
+                                  <p className="text-[10px] text-gray-500 mt-2 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3 text-green-500/70" />
+                                    Le XLSForm est automatiquement sauvegardé dans <strong className="text-gray-400">Mes Documents</strong> dès le téléchargement.
+                                  </p>
                                 </div>
 
                                 {/* Aperçu des sections */}
