@@ -163,8 +163,16 @@ def module_autorise(plan: str, module: str) -> bool:
 async def verifier_acces_module(user_id: int, module: str) -> Tuple[bool, str, str]:
     """
     Vérifie si l'utilisateur a accès au module bureau demandé.
+    Tout abonné YukpoPro (starter/pro/business) a accès à tous les modules bureau.
     Retourne (autorise, plan_actif, message).
     """
+    try:
+        pro_actif, plan_pro = await _has_plan_pro_actif(user_id)
+        if pro_actif:
+            return True, f"pro:{plan_pro}", "ok"
+    except Exception:
+        pass
+
     from core.database import async_session_maker
     try:
         async with async_session_maker() as fresh_db:
@@ -200,10 +208,25 @@ async def debiter_llm(
 ) -> Tuple[bool, float, str]:
     """
     Débite les crédits pour un appel LLM bureau.
-    Retourne (ok, credits_debites, message).
+    Si l'utilisateur a un abonnement YukpoPro actif, débite côté Pro en priorité.
+    Sinon retombe sur le solde bureau.
     Non-bloquant : si la DB échoue, on n'empêche pas l'IA.
     """
     from core.database import async_session_maker
+    try:
+        pro_actif, _ = await _has_plan_pro_actif(user_id)
+        if pro_actif:
+            from modules.pro.service_credits import verifier_et_debiter as _pro_debit
+            ok, dbt, msg = await _pro_debit(
+                user_id=user_id, modele=modele,
+                tokens_input=tokens_input, tokens_output=tokens_output,
+                module=module,
+            )
+            if ok:
+                return ok, dbt, msg
+    except Exception as e:
+        logger.warning(f"[Bureau/Unifie] délégation Pro LLM échouée user={user_id}: {e}")
+
     try:
         async with async_session_maker() as fresh_db:
             credit = await get_ou_creer_credits_bureau(user_id, fresh_db)
@@ -248,11 +271,23 @@ async def debiter_forfait(
     Débite un forfait non-LLM.
     type_forfait : clé de COUTS_FORFAIT_FCFA (ex : "ocr_scan", "infographie_pdf")
     multiplicateur : permet de facturer plusieurs unités (ex : durée audio en minutes)
+
+    Si l'utilisateur a un abonnement YukpoPro actif, débite côté Pro en priorité.
     """
     from core.database import async_session_maker
 
     cout_fcfa = COUTS_FORFAIT_FCFA.get(type_forfait, 1.0) * multiplicateur
     credits_debites = max(1.0, round(cout_fcfa * MULTIPLICATEUR_YUKPO, 2))
+
+    try:
+        pro_actif, _ = await _has_plan_pro_actif(user_id)
+        if pro_actif:
+            from modules.pro.service_credits import debiter_forfait_fcfa as _pro_forfait
+            ok, dbt, msg = await _pro_forfait(user_id, cout_fcfa, module=module)
+            if ok:
+                return ok, dbt, msg
+    except Exception as e:
+        logger.warning(f"[Bureau/Unifie] délégation Pro forfait échouée user={user_id}: {e}")
 
     try:
         async with async_session_maker() as fresh_db:
@@ -289,8 +324,22 @@ async def debiter_forfait(
 async def verifier_solde(user_id: int) -> Tuple[bool, float, int]:
     """
     Vérifie rapidement si l'utilisateur a encore des crédits.
+    Si abonnement YukpoPro actif, on regarde son solde Pro en priorité.
     Retourne (a_credits, restants, alloues).
     """
+    try:
+        pro_actif, _ = await _has_plan_pro_actif(user_id)
+        if pro_actif:
+            from modules.pro.service_credits import verifier_solde_suffisant as _pro_chk
+            ok, restants_pro, plan_pro, _msg = await _pro_chk(user_id)
+            if ok:
+                from modules.pro.service_credits import CREDITS_PAR_PLAN
+                alloues = CREDITS_PAR_PLAN.get(plan_pro, CREDITS_PAR_PLAN["gratuit"])
+                rest = float(restants_pro) if restants_pro != float("inf") else 999999.0
+                return True, rest, int(alloues)
+    except Exception as e:
+        logger.warning(f"[Bureau/Unifie] check Pro solde échoué user={user_id}: {e}")
+
     from core.database import async_session_maker
     try:
         async with async_session_maker() as fresh_db:
@@ -300,6 +349,79 @@ async def verifier_solde(user_id: int) -> Tuple[bool, float, int]:
             return restants > 0, restants, credit.credits_alloues
     except Exception:
         return True, 999999.0, 999999
+
+
+async def _has_plan_pro_actif(user_id: int) -> tuple[bool, str]:
+    """Indique si l'utilisateur dispose d'un abonnement Pro payant ou business."""
+    from core.database import async_session_maker
+    from modules.pro.service_credits import get_ou_creer_credits as _get_pro
+    from modules.pro.service_profil import get_or_create as _get_profil
+    try:
+        async with async_session_maker() as fresh:
+            credit = await _get_pro(user_id, fresh)
+            plan = credit.plan or "gratuit"
+            if plan == "gratuit":
+                try:
+                    profil, _ = await _get_profil(user_id, fresh)
+                    plan = (profil.preferences or {}).get("plan", "gratuit") or "gratuit"
+                except Exception:
+                    pass
+            return plan in ("starter", "pro", "business"), plan
+    except Exception as e:
+        logger.warning(f"[Bureau/Unifie] check Pro échoué user={user_id}: {e}")
+        return False, "gratuit"
+
+
+async def verifier_solde_unifie(user_id: int) -> tuple[bool, float, str, str]:
+    """
+    Pré-check unifié Pro+Bureau pour modules bureau.
+    Si l'utilisateur a un abonnement YukpoPro actif (starter/pro/business), on utilise
+    le solde Pro. Sinon on retombe sur le solde Bureau.
+    Retourne (ok, restants, source, message) — source ∈ {pro, bureau}.
+    """
+    pro_actif, plan_pro = await _has_plan_pro_actif(user_id)
+    if pro_actif:
+        from modules.pro.service_credits import verifier_solde_suffisant
+        ok, restants, plan, msg = await verifier_solde_suffisant(user_id)
+        if ok:
+            return True, restants, "pro", "ok"
+        # Pro épuisé → on tente le bureau en fallback
+    ok_b, restants_b, alloues_b = await verifier_solde(user_id)
+    if ok_b:
+        return True, float(restants_b), "bureau", "ok"
+    return False, 0.0, "bureau", f"CREDITS_EPUISES|restants=0|plan_pro={plan_pro}"
+
+
+async def debiter_llm_unifie(
+    user_id: int, modele: str, tokens_input: int, tokens_output: int,
+    module: str = "bureau",
+) -> Tuple[bool, float, str]:
+    """Débite l'appel LLM côté Pro si abonné, sinon Bureau."""
+    pro_actif, _ = await _has_plan_pro_actif(user_id)
+    if pro_actif:
+        from modules.pro.service_credits import verifier_et_debiter
+        ok, dbt, msg = await verifier_et_debiter(
+            user_id=user_id, modele=modele,
+            tokens_input=tokens_input, tokens_output=tokens_output,
+            module=module,
+        )
+        if ok:
+            return ok, dbt, msg
+    return await debiter_llm(user_id, modele, tokens_input, tokens_output, module)
+
+
+async def debiter_forfait_unifie(
+    user_id: int, type_forfait: str, module: str = "bureau", multiplicateur: float = 1.0,
+) -> Tuple[bool, float, str]:
+    """Débite un forfait non-LLM côté Pro si abonné, sinon Bureau."""
+    pro_actif, _ = await _has_plan_pro_actif(user_id)
+    if pro_actif:
+        cout_fcfa = COUTS_FORFAIT_FCFA.get(type_forfait, 1.0) * multiplicateur
+        from modules.pro.service_credits import debiter_forfait_fcfa
+        ok, dbt, msg = await debiter_forfait_fcfa(user_id, cout_fcfa, module=module)
+        if ok:
+            return ok, dbt, msg
+    return await debiter_forfait(user_id, type_forfait, module=module, multiplicateur=multiplicateur)
 
 
 async def synchroniser_plan_bureau(user_id: int, plan: str, db: AsyncSession) -> None:

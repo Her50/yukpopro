@@ -519,6 +519,44 @@ class SlideBuilderPro:
 
     def _parser_slides_json(self, texte: str, structure: list[dict]) -> list[dict]:
         import json, re
+
+        def _normaliser_points(points, type_slide: str) -> list:
+            if not isinstance(points, list):
+                return []
+            if type_slide == "two_columns":
+                return points
+            flat: list[str] = []
+            for p in points:
+                if isinstance(p, str):
+                    flat.append(p)
+                elif isinstance(p, dict):
+                    g = p.get("gauche") or []
+                    d = p.get("droite") or []
+                    if g or d:
+                        flat.extend(str(x) for x in list(g) + list(d) if x)
+                    else:
+                        label = p.get("label") or p.get("titre") or p.get("nom") or ""
+                        val   = p.get("valeur") or p.get("value") or p.get("description") or ""
+                        flat.append(f"{label} : {val}".strip(" :") or json.dumps(p, ensure_ascii=False))
+                else:
+                    flat.append(str(p))
+            return flat
+
+        def _normaliser_kpis(kpis) -> list[dict]:
+            if not isinstance(kpis, list):
+                return []
+            out: list[dict] = []
+            for k in kpis:
+                if isinstance(k, dict):
+                    out.append({
+                        "label":    str(k.get("label", "") or ""),
+                        "valeur":   str(k.get("valeur", k.get("value", "—"))),
+                        "tendance": str(k.get("tendance", "stable")),
+                    })
+                elif isinstance(k, str):
+                    out.append({"label": k, "valeur": "—", "tendance": "stable"})
+            return out
+
         try:
             match = re.search(r'\{[\s\S]*"slides"[\s\S]*\}', texte)
             if match:
@@ -527,13 +565,14 @@ class SlideBuilderPro:
                 if slides:
                     result = []
                     for slide, struct in zip(slides, structure):
+                        type_s = struct["type"]
                         result.append({
-                            "titre":       slide.get("titre", struct["titre"]),
-                            "type":        struct["type"],
-                            "points":      slide.get("points", []),
-                            "kpis":        slide.get("kpis", []),
-                            "message_cle": slide.get("message_cle", ""),
-                            "note":        slide.get("note", ""),
+                            "titre":       str(slide.get("titre", struct["titre"]) or struct["titre"]),
+                            "type":        type_s,
+                            "points":      _normaliser_points(slide.get("points", []), type_s),
+                            "kpis":        _normaliser_kpis(slide.get("kpis", [])),
+                            "message_cle": str(slide.get("message_cle", "") or ""),
+                            "note":        str(slide.get("note", "") or ""),
                         })
                     return result
         except Exception as e:

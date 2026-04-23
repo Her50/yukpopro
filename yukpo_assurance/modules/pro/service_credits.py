@@ -102,6 +102,54 @@ async def get_ou_creer_credits(user_id: int, db: AsyncSession) -> CreditIAUserDB
     return credit
 
 
+async def verifier_solde_suffisant(user_id: int) -> Tuple[bool, float, str, str]:
+    """
+    Pré-check rapide avant un appel LLM / service coûteux.
+    Retourne : (ok, credits_restants, plan, message).
+    Ne débite rien — sert à retourner 402 CREDITS_EPUISES avant de commencer le travail.
+    """
+    from core.database import async_session_maker
+
+    try:
+        async with async_session_maker() as fresh_db:
+            credit = await get_ou_creer_credits(user_id, fresh_db)
+
+            # Sync plan depuis profil si encore "gratuit"
+            if credit.plan == "gratuit":
+                try:
+                    from modules.pro.service_profil import get_or_create as _get_profil
+                    profil, _ = await _get_profil(user_id, fresh_db)
+                    plan_profil = (profil.preferences or {}).get("plan", "gratuit")
+                    if plan_profil != "gratuit":
+                        credit.plan = plan_profil
+                        credit.credits_alloues = CREDITS_PAR_PLAN.get(
+                            plan_profil, CREDITS_PAR_PLAN["gratuit"]
+                        )
+                        await fresh_db.commit()
+                except Exception:
+                    pass
+
+            if credit.plan == "business":
+                return True, float("inf"), credit.plan, "ok"
+
+            if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
+                credit.credits_utilises = 0
+                credit.periode_debut = datetime.utcnow()
+                credit.periode_fin = datetime.utcnow() + timedelta(days=30)
+                await fresh_db.commit()
+
+            restants = credit.credits_alloues - credit.credits_utilises
+            if restants <= 0:
+                return False, 0.0, credit.plan, (
+                    f"CREDITS_EPUISES|restants=0|plan={credit.plan}"
+                )
+            return True, float(restants), credit.plan, "ok"
+    except Exception as e:
+        logger.error(f"[Credits/PreCheck] Erreur user={user_id}: {e}")
+        # Ne pas bloquer en cas d'erreur DB
+        return True, 0.0, "inconnu", "ok"
+
+
 async def verifier_et_debiter(
     user_id: int,
     modele: str,
@@ -154,8 +202,7 @@ async def verifier_et_debiter(
             restants = credit.credits_alloues - credit.credits_utilises
             if restants <= 0:
                 return False, 0.0, (
-                    f"Crédits Yukpo épuisés ({credit.credits_utilises}/{credit.credits_alloues} ce mois). "
-                    f"Passez au plan supérieur pour continuer."
+                    f"CREDITS_EPUISES|{credit.credits_utilises}|{credit.credits_alloues}"
                 )
 
             # Débit
@@ -232,8 +279,7 @@ async def debiter_forfait_fcfa(
             restants = credit.credits_alloues - credit.credits_utilises
             if restants <= 0:
                 return False, 0.0, (
-                    f"Crédits épuisés ({credit.credits_utilises}/{credit.credits_alloues}). "
-                    "Passez au plan supérieur pour continuer."
+                    f"CREDITS_EPUISES|{credit.credits_utilises}|{credit.credits_alloues}"
                 )
 
             credit.credits_utilises += credits_debites
