@@ -24,7 +24,9 @@ jobs:
 
       - name: Deploy to Vercel
         working-directory: yukpopro_web
-        run: vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
+        run: |
+          vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --yes \
+            --build-env VITE_API_URL=https://yukpopro-backend.fly.dev
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
