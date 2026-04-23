@@ -20,7 +20,7 @@ import logging
 import os
 import re
 import urllib.parse
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 logger = logging.getLogger("yukpo_assurance.pro.scheduler_marches")
 
@@ -156,12 +156,10 @@ async def _cycle_marches_tous_users():
         if not profils:
             return
 
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         for profil in profils:
             try:
                 derniere = getattr(profil, "derniere_recherche_marches", None)
-                if derniere and derniere.tzinfo is None:
-                    derniere = derniere.replace(tzinfo=timezone.utc)
                 if derniere and (now - derniere) < timedelta(hours=_FREQUENCE_DEFAUT):
                     continue
                 await rechercher_marches_pour_user(user_id=profil.user_id, profil=profil)
@@ -385,14 +383,13 @@ async def _sauvegarder_marches(user_id: int, marches: list[dict]):
         from modules.pro.profil_pro import ProfilProfessionnelDB
         from sqlalchemy import update
 
-        now = datetime.now(timezone.utc)
         async with async_session_maker() as db:
             await db.execute(
                 update(ProfilProfessionnelDB)
                 .where(ProfilProfessionnelDB.user_id == user_id)
                 .values(
                     marches_publics_recents=marches,
-                    derniere_recherche_marches=now,
+                    derniere_recherche_marches=datetime.utcnow(),
                 )
             )
             await db.commit()

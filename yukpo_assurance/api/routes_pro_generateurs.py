@@ -16,6 +16,7 @@ Endpoints :
   PATCH /api/v1/pro/documents/{doc_id}     — Mettre à jour un document (version améliorée)
   DELETE /api/v1/pro/documents/{doc_id}    — Supprimer un document de l'historique
 """
+import base64
 import logging
 import mimetypes
 import os
@@ -24,7 +25,8 @@ from typing import Optional, List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
+import io
 from pydantic import BaseModel, Field
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,8 +82,12 @@ async def _debiter_credits_generation(
         logger.warning(f"[Credits] Débit {module} non bloquant : {_e}")
 
 
-async def _pre_check_credits(user_id: int) -> None:
+_ADMIN_ROLES = ("admin", "super_admin", "yukpo_owner")
+
+async def _pre_check_credits(user_id: int, role: str = "") -> None:
     """Vérifie le solde avant de lancer un traitement coûteux. Lève 402 si épuisé."""
+    if role in _ADMIN_ROLES:
+        return
     try:
         from modules.pro.service_credits import verifier_solde_suffisant
         ok, restants, plan, msg = await verifier_solde_suffisant(user_id)
@@ -102,13 +108,24 @@ async def _sauvegarder_doc_genere(
     contenu_genere: str = "",
     session_id: Optional[str] = None,
     meta: Optional[dict] = None,
+    fichier_path: Optional[Path] = None,
 ) -> None:
     """
     Sauvegarde automatiquement un document généré dans DocumentGenereDB.
     Appelé après chaque génération réussie (chat, générateur, agent).
+    Si fichier_path est fourni et le fichier existe, son contenu est stocké en base64
+    dans meta['fichier_b64'] pour résistance aux redémarrages Fly.io.
     """
     try:
         from core.database import DocumentGenereDB
+        meta_final = dict(meta or {})
+        if fichier_path and Path(fichier_path).exists():
+            try:
+                data = Path(fichier_path).read_bytes()
+                if len(data) < 20 * 1024 * 1024:  # < 20 MB
+                    meta_final["fichier_b64"] = base64.b64encode(data).decode()
+            except Exception as _eb:
+                logger.debug(f"[DocDB] Lecture b64 échouée (non-bloquant): {_eb}")
         doc = DocumentGenereDB(
             user_id=user_id,
             titre=titre[:200],
@@ -117,7 +134,7 @@ async def _sauvegarder_doc_genere(
             contenu_source="",
             contenu_genere=contenu_genere[:5000] if contenu_genere else "",
             session_id=session_id,
-            meta=meta or {},
+            meta=meta_final,
             cree_le=datetime.utcnow(),
             modifie_le=datetime.utcnow(),
         )
@@ -190,7 +207,7 @@ async def generer_rapport(
     Génère un rapport professionnel Word (DOCX) ou Markdown.
     Le rapport est personnalisé selon le profil métier de l'utilisateur.
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     from modules.pro.service_profil import get_or_create
     from modules.pro.report_writer_pro import ReportWriterPro
 
@@ -207,20 +224,22 @@ async def generer_rapport(
             format_sortie=req.format_sortie,
         )
         # Sauvegarder + débiter crédits
+        _chemin_r = resultat.get("chemin_fichier") or resultat.get("fichier")
         await _sauvegarder_doc_genere(
             db=db, user_id=current_user.user_id,
             titre=req.sujet[:100],
             type_doc=req.type_rapport,
-            fichier=resultat.get("chemin_fichier") or resultat.get("fichier"),
+            fichier=Path(_chemin_r).name if _chemin_r else None,
             contenu_genere=resultat.get("contenu_markdown", ""),
             meta={"mode": req.mode, "format": req.format_sortie, "source": "generateur"},
+            fichier_path=Path(_chemin_r) if _chemin_r else None,
         )
         await _debiter_credits_generation(
             user_id=current_user.user_id, db=db, module="rapport",
             tokens_input=2500, tokens_output=3500,
         )
         # Ajouter l'URL de téléchargement directement dans la réponse
-        nom_fich = Path(resultat.get("chemin_fichier") or "").name if resultat.get("chemin_fichier") else None
+        nom_fich = Path(_chemin_r or "").name if _chemin_r else None
         if nom_fich:
             resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
             resultat["fichier"] = nom_fich
@@ -269,7 +288,7 @@ async def generer_slides(
     Génère une présentation PowerPoint (PPTX) professionnelle.
     Personnalisée selon le profil métier de l'utilisateur.
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     from modules.pro.service_profil import get_or_create
     from modules.pro.slide_builder_pro import SlideBuilderPro
 
@@ -286,13 +305,15 @@ async def generer_slides(
             format_sortie=req.format_sortie,
         )
         # Sauvegarder + débiter crédits
+        _chemin_fich = resultat.get("chemin_fichier") or resultat.get("fichier")
         await _sauvegarder_doc_genere(
             db=db, user_id=current_user.user_id,
             titre=req.sujet[:100],
             type_doc=f"slides_{req.type_pres}",
-            fichier=resultat.get("chemin_fichier") or resultat.get("fichier"),
+            fichier=Path(_chemin_fich).name if _chemin_fich else None,
             contenu_genere=resultat.get("contenu_markdown", ""),
             meta={"mode": req.mode, "format": req.format_sortie, "source": "generateur"},
+            fichier_path=Path(_chemin_fich) if _chemin_fich else None,
         )
         await _debiter_credits_generation(
             user_id=current_user.user_id, db=db, module="slides",
@@ -395,7 +416,7 @@ async def analyser_et_generer(
     - Uploader un rapport existant + "présentation direction en 10 slides" → PPTX
     - Uploader un contrat PDF + "synthèse des points clés" → note de synthèse DOCX
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     from modules.pro.service_profil import get_or_create
 
     if not instruction.strip():
@@ -550,9 +571,32 @@ async def telecharger_fichier(
                 media_type=mime_type,
             )
 
+    # Fallback : récupérer depuis la DB (résiste aux redémarrages Fly.io)
+    try:
+        from core.database import DocumentGenereDB
+        async with async_session_maker() as _db:
+            row = await _db.execute(
+                select(DocumentGenereDB)
+                .where(DocumentGenereDB.fichier == safe_name)
+                .where(DocumentGenereDB.user_id == current_user.user_id)
+                .order_by(desc(DocumentGenereDB.cree_le))
+                .limit(1)
+            )
+            doc = row.scalar_one_or_none()
+        if doc and isinstance(doc.meta, dict) and doc.meta.get("fichier_b64"):
+            data = base64.b64decode(doc.meta["fichier_b64"])
+            mime_type = mimetypes.guess_type(safe_name)[0] or "application/octet-stream"
+            return StreamingResponse(
+                io.BytesIO(data),
+                media_type=mime_type,
+                headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+            )
+    except Exception as _ef:
+        logger.debug(f"[Fichier/Fallback] DB lookup échoué: {_ef}")
+
     raise HTTPException(
         status_code=404,
-        detail=f"Fichier '{safe_name}' introuvable. Les fichiers sont disponibles temporairement.",
+        detail=f"Fichier '{safe_name}' introuvable. Veuillez régénérer le document.",
     )
 
 
@@ -806,7 +850,7 @@ async def traduire_document(
     Supporte FR ↔ EN et autres langues. Génère optionnellement un DOCX.
     La traduction utilise Claude pour respecter la terminologie sectorielle africaine.
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     from modules.pro.service_profil import get_or_create, incrementer_stat
     from core.ia_client import ModeIA, ia_client
 
@@ -1504,7 +1548,7 @@ async def traduire_fichier(
     - Traduit avec terminologie métier africaine préservée
     - Retourne la traduction + génère optionnellement un DOCX téléchargeable
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     from modules.pro.service_profil import get_or_create, incrementer_stat
 
     # Vérification taille
@@ -2347,7 +2391,7 @@ async def convertir_fichier(
     - Images → DOCX, TXT (via OCR Claude Vision)
     - TXT/MD → DOCX
     """
-    await _pre_check_credits(current_user.user_id)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
     contenu = await fichier.read()
     if len(contenu) > 50 * 1024 * 1024:
         raise HTTPException(413, "Fichier trop volumineux (max 50 MB)")
