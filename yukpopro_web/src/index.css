@@ -309,20 +309,55 @@
      → deviennent surface claire en light. */
   .ykp-page .bg-gray-900,
   .ykp-page .bg-gray-800,
+  .ykp-page .bg-gray-700,
+  .ykp-page .bg-gray-600,
   .ykp-page .bg-slate-900,
   .ykp-page .bg-slate-800,
+  .ykp-page .bg-slate-700,
+  .ykp-page .bg-slate-600,
   .ykp-page .bg-navy-900,
   .ykp-page .bg-navy-800,
   .ykp-page .bg-navy-700 {
     background-color: var(--ykp-elevated);
   }
+  /* Hover variantes : surface hover légèrement teintée */
+  .ykp-page .hover\:bg-slate-700:hover,
+  .ykp-page .hover\:bg-slate-800:hover,
+  .ykp-page .hover\:bg-gray-700:hover,
+  .ykp-page .hover\:bg-gray-800:hover {
+    background-color: #e2e8f0; /* slate-200 */
+  }
   .dark .ykp-page .bg-gray-900  { background-color: #111827; }
   .dark .ykp-page .bg-gray-800  { background-color: #1f2937; }
+  .dark .ykp-page .bg-gray-700  { background-color: #374151; }
+  .dark .ykp-page .bg-gray-600  { background-color: #4b5563; }
   .dark .ykp-page .bg-slate-900 { background-color: #0f172a; }
   .dark .ykp-page .bg-slate-800 { background-color: #1e293b; }
+  .dark .ykp-page .bg-slate-700 { background-color: #334155; }
+  .dark .ykp-page .bg-slate-600 { background-color: #475569; }
   .dark .ykp-page .bg-navy-900  { background-color: #1e2640; }
   .dark .ykp-page .bg-navy-800  { background-color: #243050; }
   .dark .ykp-page .bg-navy-700  { background-color: #2a3657; }
+  .dark .ykp-page .hover\:bg-slate-700:hover { background-color: #334155; }
+  .dark .ykp-page .hover\:bg-slate-800:hover { background-color: #1e293b; }
+  .dark .ykp-page .hover\:bg-gray-700:hover  { background-color: #374151; }
+  .dark .ykp-page .hover\:bg-gray-800:hover  { background-color: #1f2937; }
+
+  /* Borders slate foncées → borders neutres claires en light */
+  .ykp-page .border-slate-600,
+  .ykp-page .border-slate-700,
+  .ykp-page .border-slate-800,
+  .ykp-page .border-gray-600,
+  .ykp-page .border-gray-700,
+  .ykp-page .border-gray-800 {
+    border-color: var(--ykp-border);
+  }
+  .dark .ykp-page .border-slate-600 { border-color: #475569; }
+  .dark .ykp-page .border-slate-700 { border-color: #334155; }
+  .dark .ykp-page .border-slate-800 { border-color: #1e293b; }
+  .dark .ykp-page .border-gray-600  { border-color: #4b5563; }
+  .dark .ykp-page .border-gray-700  { border-color: #374151; }
+  .dark .ykp-page .border-gray-800  { border-color: #1f2937; }
 
   /* MAIS : à l'intérieur d'un bouton/badge à fond coloré,
      on restitue le text-white d'origine. */
