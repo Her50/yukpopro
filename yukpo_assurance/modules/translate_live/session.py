@@ -98,6 +98,9 @@ class TranslateLiveSession:
         self._el_key = elevenlabs_key
         self._gender_buf = GenderBuffer()
         self._current_gender: str = "female"  # défaut jusqu'à première détection
+        # Compteur de traductions effectives dans le cycle de facturation courant.
+        # 0 → marge 5× (STT-only) ; >0 → marge 20× (traduction effective).
+        self._traductions_ce_cycle: int = 0
 
     # ── API publique ──────────────────────────────────────────────────────────
 
@@ -238,6 +241,8 @@ class TranslateLiveSession:
             "utterance_id": utter_id,
             "ts": time.time(),
         })
+        # Signale au cycle de facturation qu'une traduction a eu lieu → marge 20×
+        self._traductions_ce_cycle += 1
 
         # ── TTS ElevenLabs — facturé seulement si traduction effective ────────
         if elevenlabs_disponible(self._el_key) and traduit and traduit != texte:
@@ -353,10 +358,14 @@ class TranslateLiveSession:
 
         try:
             from modules.pro.service_credits import debiter_forfait_fcfa
+            # 5× si STT-only (aucune traduction ce cycle), 20× si traduction effective
+            marge = 20.0 if self._traductions_ce_cycle > 0 else 5.0
+            self._traductions_ce_cycle = 0  # reset pour le prochain cycle
             ok, credits_debites, _ = await debiter_forfait_fcfa(
                 user_id=self.etat.user_id,
                 cout_fcfa=COUT_FCFA_PAR_MINUTE,
                 module="translate_live",
+                multiplicateur=marge,
             )
         except Exception as e:
             logger.warning(f"[TranslateLive] débit échoué (non bloquant) : {e}")
@@ -389,10 +398,12 @@ class TranslateLiveSession:
         cout_fcfa = round(COUT_FCFA_PAR_MINUTE * a_facturer, 2)
         try:
             from modules.pro.service_credits import debiter_forfait_fcfa
+            marge_residu = 20.0 if self._traductions_ce_cycle > 0 else 5.0
             await debiter_forfait_fcfa(
                 user_id=self.etat.user_id,
                 cout_fcfa=cout_fcfa,
                 module="translate_live_residu",
+                multiplicateur=marge_residu,
             )
             self.etat.minutes_facturees += a_facturer
             logger.info(

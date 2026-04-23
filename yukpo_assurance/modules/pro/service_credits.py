@@ -254,15 +254,16 @@ async def debiter_forfait_fcfa(
     user_id: int,
     cout_fcfa: float,
     module: str = "service",
+    multiplicateur: float = MULTIPLICATEUR_YUKPO,
 ) -> Tuple[bool, float, str]:
     """
-    Débite un forfait exprimé en FCFA pour les services non-LLM
-    (marketing visuel, transcription Whisper…).
-    credits_debites = cout_fcfa × MULTIPLICATEUR_YUKPO (min 1).
+    Débite un forfait exprimé en FCFA pour les services non-LLM.
+    credits_debites = cout_fcfa × multiplicateur (min 1).
+    multiplicateur : 20× (défaut, avec traduction) ou 5× (STT-only, sans traduction).
     """
     from core.database import async_session_maker, ConsommationTokenDB
 
-    credits_debites = max(1.0, round(cout_fcfa * MULTIPLICATEUR_YUKPO, 2))
+    credits_debites = max(1.0, round(cout_fcfa * multiplicateur, 2))
     try:
         async with async_session_maker() as fresh_db:
             credit = await get_ou_creer_credits(user_id, fresh_db)
