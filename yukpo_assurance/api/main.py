@@ -611,6 +611,11 @@ app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes 
 
 # ─── Endpoint setup initial (création admin si aucun n'existe) ────────────────
 from fastapi import Body as _Body
+from core.database import async_session_maker as _asm, UtilisateurDB as _UDB
+from sqlalchemy import select as _sel
+from passlib.context import CryptContext as _CC
+from datetime import datetime as _dtt
+import os as _os
 
 @app.post("/api/v1/setup/admin", tags=["Setup"], include_in_schema=False)
 async def setup_admin(
@@ -623,16 +628,9 @@ async def setup_admin(
     Protégé par setup_key = valeur de ADMIN_SETUP_KEY (env var) ou 'yukpo-setup-2024'.
     Une fois l'admin créé, cet endpoint renvoie une erreur 409.
     """
-    import os as _os_s
-    from sqlalchemy.ext.asyncio import create_async_engine as _cae_s, AsyncSession as _AS_s
-    from sqlalchemy.orm import sessionmaker as _sm_s
-    from sqlalchemy import select as _sel_s
-    from passlib.context import CryptContext as _CC_s
-    from datetime import datetime as _dtt_s
     from fastapi import HTTPException as _HE
-    from core.database import UtilisateurDB as _UDB_s
 
-    expected_key = _os_s.environ.get("ADMIN_SETUP_KEY", "yukpo-setup-2024")
+    expected_key = _os.environ.get("ADMIN_SETUP_KEY", "yukpo-setup-2024")
     if setup_key != expected_key:
         raise _HE(403, "setup_key invalide")
     if not email or "@" not in email:
@@ -640,30 +638,24 @@ async def setup_admin(
     if len(password) < 8:
         raise _HE(400, "password : 8 caractères minimum")
 
-    _eng = _cae_s(settings.DATABASE_URL, echo=False)
-    _Sess = _sm_s(_eng, class_=_AS_s, expire_on_commit=False)
+    async with _asm() as _sess:
+        existing = (await _sess.execute(
+            _sel(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+        )).scalars().first()
 
-    try:
-        async with _Sess() as _sess:
-            existing = (await _sess.execute(
-                _sel_s(_UDB_s).where(_UDB_s.role.in_(["super_admin", "yukpo_owner"]))
-            )).scalars().first()
+        if existing:
+            raise _HE(409, f"Admin déjà existant : {existing.email}. Utilisez /auth/login.")
 
-            if existing:
-                raise _HE(409, f"Admin déjà existant : {existing.email}. Utilisez /auth/login.")
-
-            _ctx = _CC_s(schemes=["bcrypt"], deprecated="auto")
-            _u = _UDB_s(
-                username=email.split("@")[0], email=email,
-                nom="Yukpo Admin", hashed_password=_ctx.hash(password),
-                role="super_admin", compagnie_id=1,
-                actif=True, cree_le=_dtt_s.utcnow(), cree_par=None,
-            )
-            _sess.add(_u)
-            await _sess.commit()
-            return {"message": f"Compte super_admin créé : {email}", "role": "super_admin"}
-    finally:
-        await _eng.dispose()
+        _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
+        _u = _UDB(
+            username=email.split("@")[0], email=email,
+            nom="Yukpo Admin", hashed_password=_ctx.hash(password),
+            role="super_admin", compagnie_id=1,
+            actif=True, cree_le=_dtt.utcnow(), cree_par=None,
+        )
+        _sess.add(_u)
+        await _sess.commit()
+        return {"message": f"Compte super_admin créé : {email}", "role": "super_admin"}
 
 # ─── YukpoSecrétariat ─────────────────────────────────────────────────────────
 app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction",   tags=["Secrétariat — Rédaction IA"])
