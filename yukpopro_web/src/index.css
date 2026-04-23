@@ -591,3 +591,45 @@ html:not(.dark) .from-yellow-500  { --tw-gradient-from: #0d9488; }
 html:not(.dark) .to-yellow-600    { --tw-gradient-to: #0f766e; }
 html:not(.dark) .from-amber-500   { --tw-gradient-from: #b45309; }
 html:not(.dark) .to-amber-600     { --tw-gradient-to: #92400e; }
+
+/* ── Textes bleu pâle (lisibles sur fond sombre uniquement) ──── */
+/* text-blue-300 apparaît trop clair sur fond blanc → bleu corporate */
+html:not(.dark) .text-blue-300  { color: #1e40af !important; }
+html:not(.dark) .text-blue-200  { color: #1d4ed8 !important; }
+
+/* ── Fonds bleu semi-transparents (chips sélectionnés, badges) ── */
+/* bg-blue-600/30 = bleu pâle sur blanc = mau contraste → bleu léger lisible */
+html:not(.dark) .bg-blue-600\/30  { background-color: rgba(0,84,166,0.10) !important; }
+html:not(.dark) .bg-blue-600\/20  { background-color: rgba(0,84,166,0.08) !important; }
+html:not(.dark) .bg-blue-600\/40  { background-color: rgba(0,84,166,0.14) !important; }
+html:not(.dark) .bg-blue-500\/15  { background-color: rgba(0,84,166,0.08) !important; }
+html:not(.dark) .bg-blue-500\/10  { background-color: rgba(0,84,166,0.06) !important; }
+html:not(.dark) .bg-blue-500\/20  { background-color: rgba(0,84,166,0.10) !important; }
+
+/* ── Bordures bleu semi-transparentes ───────────────────────── */
+html:not(.dark) .border-blue-500\/60 { border-color: rgba(0,84,166,0.50) !important; }
+html:not(.dark) .border-blue-500\/40 { border-color: rgba(0,84,166,0.40) !important; }
+html:not(.dark) .border-blue-500\/30 { border-color: rgba(0,84,166,0.30) !important; }
+html:not(.dark) .border-blue-500\/20 { border-color: rgba(0,84,166,0.20) !important; }
+
+/* ── Fonds slate semi-transparents (bg-slate-900/50, etc.) ───── */
+/* Tailwind génère .bg-slate-900\/50 différemment de .bg-slate-900 */
+html:not(.dark) .bg-slate-900\/50 { background-color: rgba(248,250,252,0.90) !important; }
+html:not(.dark) .bg-slate-900\/30 { background-color: rgba(248,250,252,0.70) !important; }
+html:not(.dark) .bg-slate-800\/50 { background-color: rgba(241,245,249,0.90) !important; }
+html:not(.dark) .bg-slate-800\/30 { background-color: rgba(241,245,249,0.70) !important; }
+
+/* ── Texte blanc sur éléments non colorés ─────────────────── */
+/* text-white sur titres/labels sans fond coloré → primary text */
+html:not(.dark) h1.text-white,
+html:not(.dark) h2.text-white,
+html:not(.dark) h3.text-white,
+html:not(.dark) p.text-white,
+html:not(.dark) span.text-white:not([class*="bg-"]) { color: var(--ykp-text-primary) !important; }
+
+/* ── Renforcemement netteté texte ─────────────────────────── */
+html:not(.dark) * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

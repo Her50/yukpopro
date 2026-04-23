@@ -105,7 +105,7 @@ export const MarchesPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="ykp-page max-w-4xl mx-auto px-4 py-6 space-y-6">
       <DemoBanner />
       {/* Toast */}
       {toast && (
@@ -236,7 +236,7 @@ export const MarchesPage = () => {
               { nom: "ARMP-CM / ARMP-CI / DGMP-SN", gratuit: true, desc: "Plateformes ARMP nationales" },
               { nom: "SerpAPI Google Search", gratuit: false, desc: "LinkedIn, portails gouvernementaux (clé API requise)" },
             ].map((s) => (
-              <div key={s.nom} className="flex items-start gap-2 p-2 bg-slate-900/50 rounded-lg">
+              <div key={s.nom} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-transparent rounded-lg">
                 <span className={`mt-0.5 text-xs font-bold ${s.gratuit ? "text-emerald-400" : "text-amber-400"}`}>
                   {s.gratuit ? "✓" : "⚙"}
                 </span>
@@ -261,8 +261,8 @@ export const MarchesPage = () => {
             onClick={() => setFrequence(f.val)}
             className={`px-3 py-1.5 text-xs rounded-lg border transition-colors
               ${frequence === f.val
-                ? "bg-blue-600/30 border-blue-500/60 text-blue-300 font-semibold"
-                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"}`}
+                ? "bg-[#0054A6] dark:bg-blue-600/30 border-[#0054A6] dark:border-blue-500/60 text-white dark:text-blue-300 font-semibold"
+                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500"}`}
           >
             {f.label}
           </button>
