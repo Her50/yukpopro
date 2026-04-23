@@ -87,12 +87,15 @@ export interface TranslateLiveOptions {
 export class TranslateLiveClient {
   private ws: WebSocket | null = null;
   private audioCtx: AudioContext | null = null;
+  private playbackCtx: AudioContext | null = null;  // contexte dédié lecture TTS (déverrouillé pendant start())
   private workletNode: AudioWorkletNode | null = null;
   private mediaStream: MediaStream | null = null;
   private heartbeat: number | null = null;
   private opts: TranslateLiveOptions;
   private status: TranslateStatus = "idle";
   private stopping = false;
+  private _playQueue: ArrayBuffer[] = [];
+  private _playing = false;
 
   constructor(opts: TranslateLiveOptions) {
     this.opts = opts;
@@ -112,9 +115,14 @@ export class TranslateLiveClient {
       return;
     }
     this.stopping = false;
+    this._playQueue = [];
+    this._playing = false;
     this.setStatus("connecting");
 
     try {
+      // Déverrouiller l'AudioContext pendant le geste utilisateur (clic Start)
+      // → autorise la lecture audio depuis les callbacks WebSocket qui arrivent ensuite
+      await this._unlockPlaybackCtx();
       await this._acquireMedia();
       await this._connectWS();
       await this._setupAudioPipeline();
@@ -146,11 +154,15 @@ export class TranslateLiveClient {
     this.workletNode = null;
 
     if (this.audioCtx) {
-      try {
-        await this.audioCtx.close();
-      } catch {/* ignore */}
+      try { await this.audioCtx.close(); } catch {/* ignore */}
       this.audioCtx = null;
     }
+    if (this.playbackCtx) {
+      try { await this.playbackCtx.close(); } catch {/* ignore */}
+      this.playbackCtx = null;
+    }
+    this._playQueue = [];
+    this._playing = false;
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach((t) => t.stop());
       this.mediaStream = null;
@@ -172,6 +184,64 @@ export class TranslateLiveClient {
   }
 
   // ── Internals ──────────────────────────────────────────────────────────
+
+  /** Déverrouille l'AudioContext pendant le geste utilisateur initial. */
+  private async _unlockPlaybackCtx(): Promise<void> {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)() as AudioContext;
+      // Jouer un buffer silencieux pour activer le contexte
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      await ctx.resume();
+      this.playbackCtx = ctx;
+    } catch {/* ignore — lecture via Audio() sinon */}
+  }
+
+  /**
+   * Joue des octets MP3 via WebAudio (résiste à la politique autoplay Chrome).
+   * Appelé depuis les callbacks WebSocket — fonctionne car le contexte a été
+   * déverrouillé pendant le clic Start (geste utilisateur).
+   */
+  async playMp3Bytes(mp3: ArrayBuffer): Promise<void> {
+    this._playQueue.push(mp3);
+    if (!this._playing) this._drainQueue();
+  }
+
+  private async _drainQueue(): Promise<void> {
+    if (this._playing || this._playQueue.length === 0) return;
+    this._playing = true;
+    const mp3 = this._playQueue.shift()!;
+    try {
+      const ctx = this.playbackCtx;
+      if (ctx && ctx.state !== "closed") {
+        const audioBuf = await ctx.decodeAudioData(mp3.slice(0));
+        const src = ctx.createBufferSource();
+        src.buffer = audioBuf;
+        src.connect(ctx.destination);
+        src.onended = () => {
+          this._playing = false;
+          this._drainQueue();
+        };
+        src.start(0);
+        return;
+      }
+    } catch {/* fall through to Audio() */}
+    // Fallback : HTML Audio element
+    try {
+      const blob = new Blob([mp3], { type: "audio/mpeg" });
+      const url  = URL.createObjectURL(blob);
+      const elem = new Audio(url);
+      elem.onended = () => { URL.revokeObjectURL(url); this._playing = false; this._drainQueue(); };
+      elem.onerror = () => { URL.revokeObjectURL(url); this._playing = false; this._drainQueue(); };
+      await elem.play();
+    } catch {
+      this._playing = false;
+      this._drainQueue();
+    }
+  }
 
   private async _acquireMedia(): Promise<void> {
     if (this.opts.sourceMode === "display") {
@@ -239,8 +309,11 @@ export class TranslateLiveClient {
               type: string; utterance_id: string; gender: "male"|"female"; format: string;
             };
             const audioBytes = new Uint8Array(ev.data, 4 + metaLen);
-            const audioBlob  = new Blob([audioBytes], { type: "audio/mpeg" });
             if (meta.type === "audio") {
+              // Lecture directe via WebAudio (contourne autoplay Chrome)
+              void this.playMp3Bytes(audioBytes.buffer.slice(audioBytes.byteOffset, audioBytes.byteOffset + audioBytes.byteLength));
+              // Notifier la page pour l'indicateur genre
+              const audioBlob = new Blob([audioBytes], { type: "audio/mpeg" });
               this.opts.onEvent({ ...meta, type: "audio", audioBlob } as TranslateEventAudio);
             }
           } catch {/* ignore malformed */}

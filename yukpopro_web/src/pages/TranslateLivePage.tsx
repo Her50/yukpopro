@@ -68,8 +68,6 @@ export const TranslateLivePage = () => {
   const clientRef = useRef<TranslateLiveClient | null>(null);
   const lignesRef = useRef<HTMLDivElement>(null);
   const ttsRef = useRef(getTTSSpeaker());  // fallback browser TTS si ElevenLabs absent
-  const audioQueueRef = useRef<HTMLAudioElement[]>([]);
-  const playingRef = useRef(false);
 
   // ── Chargement référentiel ───────────────────────────────────────────────
   useEffect(() => {
@@ -164,10 +162,8 @@ export const TranslateLivePage = () => {
             ttsRef.current.speak(ev.translated_text, ev.target_lang);
           }
         } else if (ev.type === "audio") {
-          // Audio ElevenLabs reçu → lecture immédiate en file d'attente
-          const audioEv = ev as TranslateEventAudio;
-          setLastGender(audioEv.gender);
-          playAudioBlob(audioEv.audioBlob);
+          // Lecture gérée par TranslateLiveClient.playMp3Bytes — juste mettre à jour l'UI
+          setLastGender((ev as TranslateEventAudio).gender);
         } else if (ev.type === "usage") {
           setMinutesUsed(ev.minutes);
           setCreditsUsed(ev.credits_debited_total);
@@ -189,23 +185,6 @@ export const TranslateLivePage = () => {
     await clientRef.current?.stop();
     clientRef.current = null;
     ttsRef.current.cancel();
-    audioQueueRef.current = [];
-    playingRef.current = false;
-  };
-
-  // Lecture audio ElevenLabs (file d'attente pour éviter chevauchement)
-  const playAudioBlob = (blob: Blob) => {
-    const url  = URL.createObjectURL(blob);
-    const elem = new Audio(url);
-    audioQueueRef.current.push(elem);
-    const playNext = () => {
-      if (audioQueueRef.current.length === 0) { playingRef.current = false; return; }
-      playingRef.current = true;
-      const next = audioQueueRef.current.shift()!;
-      next.onended = () => { URL.revokeObjectURL(next.src); playNext(); };
-      next.play().catch(() => playNext());
-    };
-    if (!playingRef.current) playNext();
   };
 
   const handleSauvegarderMesDocuments = async () => {
