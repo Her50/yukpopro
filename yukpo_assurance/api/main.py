@@ -648,6 +648,33 @@ async def setup_admin(
         await _sess.commit()
         return {"message": f"Compte super_admin créé : {email}", "role": "super_admin"}
 
+
+@app.post("/api/v1/setup/reset-admin-password", tags=["Setup"], include_in_schema=False)
+async def reset_admin_password(
+    email: str = _Body(...),
+    new_password: str = _Body(...),
+    setup_key: str = _Body(...),
+):
+    """Réinitialise le mot de passe du super_admin existant. Protégé par setup_key."""
+    from fastapi import HTTPException as _HE
+    from sqlalchemy import update as _upd
+
+    expected_key = _os.environ.get("ADMIN_SETUP_KEY", "yukpo-setup-2024")
+    if setup_key != expected_key:
+        raise _HE(403, "setup_key invalide")
+    if len(new_password) < 8:
+        raise _HE(400, "password : 8 caractères minimum")
+
+    _hashed = _bcrypt_mod.hashpw(new_password[:72].encode(), _bcrypt_mod.gensalt()).decode()
+    async with _asm() as _sess:
+        result = await _sess.execute(
+            _upd(_UDB).where(_UDB.email == email).values(hashed_password=_hashed)
+        )
+        await _sess.commit()
+        if result.rowcount == 0:
+            raise _HE(404, f"Aucun utilisateur avec l'email {email}")
+        return {"message": f"Mot de passe réinitialisé pour {email}"}
+
 # ─── YukpoSecrétariat ─────────────────────────────────────────────────────────
 app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction",   tags=["Secrétariat — Rédaction IA"])
 app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
