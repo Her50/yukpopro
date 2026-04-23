@@ -163,6 +163,90 @@
     color: var(--ykp-text-faint);
   }
 
+  /* text-gray-* (utilisé dans certaines pages legacy) */
+  .ykp-page .text-gray-100,
+  .ykp-page .text-gray-200 {
+    color: var(--ykp-text-primary);
+  }
+  .ykp-page .text-gray-300 {
+    color: var(--ykp-text-secondary);
+  }
+  .ykp-page .text-gray-400,
+  .ykp-page .text-gray-500 {
+    color: var(--ykp-text-muted);
+  }
+  .ykp-page .text-gray-600 {
+    color: var(--ykp-text-faint);
+  }
+
+  /* Remap accent colors : les variantes claires (-200/-300/-400)
+     utilisées pour lisibilité sur fond sombre deviennent trop pâles
+     en light → on bascule vers la variante foncée équivalente. */
+  .ykp-page .text-yukpo-200,
+  .ykp-page .text-yukpo-300,
+  .ykp-page .text-yukpo-400  { color: #4338ca; }  /* yukpo-700 */
+  .ykp-page .text-corp-300,
+  .ykp-page .text-corp-400   { color: #003476; }  /* corp-700 */
+  .ykp-page .text-bright-300,
+  .ykp-page .text-bright-400 { color: #0054A6; }  /* corp-600 (bright n'a pas de variante foncée) */
+  .ykp-page .text-gold-300,
+  .ykp-page .text-gold-400   { color: #b45309; }  /* amber-700 plus lisible que gold-600 */
+  .ykp-page .text-accent-400 { color: #0e7490; }  /* cyan-700 */
+  .ykp-page .text-success-400 { color: #047857; } /* emerald-700 */
+  .ykp-page .text-warning-400 { color: #b45309; }
+  .ykp-page .text-danger-400  { color: #b91c1c; } /* red-700 */
+  .ykp-page .text-amber-400   { color: #b45309; }
+  .ykp-page .text-amber-400\/80 { color: rgba(180,83,9,0.90); }
+  .ykp-page .text-blue-400    { color: #1d4ed8; }
+  .ykp-page .text-indigo-400  { color: #4338ca; }
+  .ykp-page .text-purple-400  { color: #7e22ce; }
+  .ykp-page .text-green-400   { color: #047857; }
+  .ykp-page .text-red-400     { color: #b91c1c; }
+  .ykp-page .text-red-300     { color: #b91c1c; }
+  .ykp-page .text-cyan-400    { color: #0e7490; }
+  .ykp-page .text-pink-400    { color: #be185d; }
+  .ykp-page .text-emerald-400 { color: #047857; }
+
+  /* En dark mode : on restitue les valeurs Tailwind d'origine */
+  .dark .ykp-page .text-gray-100  { color: #f3f4f6; }
+  .dark .ykp-page .text-gray-200  { color: #e5e7eb; }
+  .dark .ykp-page .text-gray-300  { color: #d1d5db; }
+  .dark .ykp-page .text-gray-400  { color: #9ca3af; }
+  .dark .ykp-page .text-gray-500  { color: #6b7280; }
+  .dark .ykp-page .text-gray-600  { color: #4b5563; }
+  .dark .ykp-page .text-yukpo-200 { color: #c7d2fe; }
+  .dark .ykp-page .text-yukpo-300 { color: #a5b4fc; }
+  .dark .ykp-page .text-yukpo-400 { color: #818cf8; }
+  .dark .ykp-page .text-corp-300  { color: #60a5fa; }
+  .dark .ykp-page .text-corp-400  { color: #3b82f6; }
+  .dark .ykp-page .text-bright-300 { color: #67d8f5; }
+  .dark .ykp-page .text-bright-400 { color: #00B0F0; }
+  .dark .ykp-page .text-gold-300  { color: #fcd34d; }
+  .dark .ykp-page .text-gold-400  { color: #fbbf24; }
+  .dark .ykp-page .text-accent-400 { color: #22d3ee; }
+  .dark .ykp-page .text-success-400 { color: #34d399; }
+  .dark .ykp-page .text-warning-400 { color: #fbbf24; }
+  .dark .ykp-page .text-danger-400 { color: #f87171; }
+  .dark .ykp-page .text-amber-400  { color: #fbbf24; }
+  .dark .ykp-page .text-amber-400\/80 { color: rgba(251,191,36,0.80); }
+  .dark .ykp-page .text-blue-400   { color: #60a5fa; }
+  .dark .ykp-page .text-indigo-400 { color: #818cf8; }
+  .dark .ykp-page .text-purple-400 { color: #c084fc; }
+  .dark .ykp-page .text-green-400  { color: #4ade80; }
+  .dark .ykp-page .text-red-400    { color: #f87171; }
+  .dark .ykp-page .text-red-300    { color: #fca5a5; }
+  .dark .ykp-page .text-cyan-400   { color: #22d3ee; }
+  .dark .ykp-page .text-pink-400   { color: #f472b6; }
+  .dark .ykp-page .text-emerald-400 { color: #34d399; }
+
+  /* Backgrounds "pastel" accent utilisés en surbrillance (ex: bg-yukpo-500/10)
+     → s'affichent correctement en light, mais certaines combinaisons avec
+     text-X-200 deviennent illisibles. On renforce le contraste du texte. */
+  .ykp-page .bg-yukpo-500\/10 .text-yukpo-200,
+  .ykp-page [class*="bg-yukpo-500\\/"] .text-yukpo-200 { color: #3730a3; }
+  .ykp-page [class*="bg-corp-"] .text-corp-200,
+  .ykp-page [class*="bg-corp-"] .text-bright-300 { color: #003476; }
+
   /* Remap automatique des borders/backgrounds translucides blancs
      (utilisés pour dividers dans les pages dark d'origine)
      → bordures slate discrètes en light, restent blanc translucide en dark. */
