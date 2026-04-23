@@ -4,6 +4,8 @@ import {
   ExclamationTriangleIcon, EyeIcon, ArrowPathIcon, SparklesIcon,
   XMarkIcon, BuildingStorefrontIcon, CameraIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 import { clsx } from 'clsx'
 import { apiClient } from '../api/client'
 
@@ -119,7 +121,7 @@ function PortailFournisseur({ onEnvoi }: { onEnvoi: (p: PieceFournisseur) => voi
           <CheckCircleIcon className="h-10 w-10 text-green-600" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900">Document envoyé avec succès</h3>
-        <p className="text-sm text-gray-500">La compagnie d'assurance a reçu votre document. Yukpo IA va l'analyser automatiquement.</p>
+        <p className="text-sm text-gray-500">La compagnie d'assurance a reçu votre document. YukpoPro va l'analyser automatiquement.</p>
         <button onClick={() => setSucces(false)}
           className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-primary-700">
           Envoyer un autre document
@@ -132,7 +134,7 @@ function PortailFournisseur({ onEnvoi }: { onEnvoi: (p: PieceFournisseur) => voi
     <div className="space-y-5">
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-800">
         <p className="font-semibold mb-1">Portail fournisseur sécurisé</p>
-        <p className="text-xs">Vos documents sont transmis directement au gestionnaire du dossier. Yukpo IA analyse automatiquement chaque pièce avant validation humaine.</p>
+        <p className="text-xs">Vos documents sont transmis directement au gestionnaire du dossier. YukpoPro analyse automatiquement chaque pièce avant validation humaine.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -237,7 +239,7 @@ function FileAttente({ pieces, onUpdate }: { pieces: PieceFournisseur[]; onUpdat
 
   const STATUT_CFG: Record<string, { label: string; icon: React.ReactNode; classes: string }> = {
     en_attente: { label: 'En attente', icon: <ClockIcon className="h-3.5 w-3.5" />, classes: 'bg-gray-100 text-gray-600' },
-    en_analyse: { label: 'Analyse IA', icon: <SparklesIcon className="h-3.5 w-3.5" />, classes: 'bg-blue-100 text-blue-700' },
+    en_analyse: { label: 'Analyse YukpoPro', icon: <SparklesIcon className="h-3.5 w-3.5" />, classes: 'bg-blue-100 text-blue-700' },
     valide: { label: 'Validé', icon: <CheckCircleIcon className="h-3.5 w-3.5" />, classes: 'bg-green-100 text-green-700' },
     rejete: { label: 'Rejeté', icon: <ExclamationTriangleIcon className="h-3.5 w-3.5" />, classes: 'bg-red-100 text-red-700' },
   }
@@ -285,7 +287,7 @@ function FileAttente({ pieces, onUpdate }: { pieces: PieceFournisseur[]; onUpdat
               {p.analyse_ia && (
                 <div className={clsx('mt-3 text-xs rounded-lg p-2.5',
                   (p.score_ia || 0) > 80 ? 'bg-green-50 text-green-800' : (p.score_ia || 0) > 60 ? 'bg-yellow-50 text-yellow-800' : 'bg-red-50 text-red-800')}>
-                  <span className="font-semibold">Yukpo IA : </span>{p.analyse_ia}
+                  <span className="font-semibold">YukpoPro : </span>{p.analyse_ia}
                 </div>
               )}
 
@@ -330,10 +332,11 @@ function FileAttente({ pieces, onUpdate }: { pieces: PieceFournisseur[]; onUpdat
       </div>
 
       {pieces.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
-          <DocumentTextIcon className="h-10 w-10 mx-auto mb-2" />
-          <p className="text-sm">Aucune pièce en attente</p>
-        </div>
+        <EmptyState
+          icon={<DocumentTextIcon className="h-10 w-10" />}
+          title="Aucune pièce en attente"
+          description="Les documents transmis par les fournisseurs apparaîtront ici."
+        />
       )}
     </div>
   )
@@ -362,7 +365,8 @@ export default function FournisseurPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Portail Fournisseurs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Réception des pièces · Analyse IA · Validation ORASS/Mercure</p>
+          <p className="text-sm text-gray-500 mt-0.5">Réception des pièces · Analyse YukpoPro · Validation ORASS/Mercure</p>
+          <DemoBanner className="mt-2" />
         </div>
         <div className="flex items-center gap-2 text-xs bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200">
           <ClockIcon className="h-3.5 w-3.5" />

@@ -13,11 +13,13 @@ import { RapportsModule } from '../components/RapportsModule'
 import { BuildingStorefrontIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import { OngletCourtiers } from './CourtiersPage'
 import { CorrespondancesModule } from '../components/CorrespondancesModule'
-import { Sinistre } from '../api/types'
+import { Sinistre, EtapeWorkflow } from '../api/types'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { clsx } from 'clsx'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -152,6 +154,14 @@ const DEMO_SINISTRES: Sinistre[] = [
     date_sinistre: '2026-03-15', date_declaration: '2026-03-16',
     montant_estime: 2_500_000, montant_regle: 0, assure_nom: 'Kouassi Jean-Baptiste',
     description: 'Collision à carrefour Akwa — constat amiable scanné', score_fraude: 12, police_numero: 'POL-AUTO-001',
+    etapes_workflow: [
+      { id: 'ouverture',          label: 'Ouverture sinistre',      statut: 'fait',      date: '16/03/2026' },
+      { id: 'accuse_reception',   label: 'Accusé de réception',     statut: 'fait',      date: '16/03/2026' },
+      { id: 'mise_en_cause',      label: 'Mise en cause',           statut: 'fait',      date: '18/03/2026' },
+      { id: 'relances',           label: 'Relances',                statut: 'fait',      date: '25/03/2026' },
+      { id: 'reclamation_pieces', label: 'Réclamations des pièces', statut: 'fait',      date: '18/03/2026' },
+      { id: 'mission_expert',     label: 'Mission expert / Avocat', statut: 'en_cours',  date: '01/04/2026' },
+    ],
   },
   {
     id: '2', numero: 'SIN-2026-002', branche: 'vie', statut: 'ouvert',
@@ -182,10 +192,73 @@ const DEMO_SINISTRES: Sinistre[] = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUT_CONFIG: Record<string, { label: string; classes: string }> = {
-  ouvert:   { label: 'Ouvert',    classes: 'bg-blue-100 text-blue-700' },
-  en_cours: { label: 'En cours',  classes: 'bg-yellow-100 text-yellow-700' },
-  clos:     { label: 'Clôturé',   classes: 'bg-green-100 text-green-700' },
-  rejet:    { label: 'Rejeté',    classes: 'bg-red-100 text-red-700' },
+  ouvert:            { label: 'Ouvert',            classes: 'bg-blue-100 text-blue-700' },
+  en_cours:          { label: 'En cours',           classes: 'bg-yellow-100 text-yellow-700' },
+  expertise_en_cours:{ label: 'Expertise',          classes: 'bg-purple-100 text-purple-700' },
+  relance:           { label: 'Relancé',            classes: 'bg-orange-100 text-orange-700' },
+  contentieux:       { label: 'Contentieux',        classes: 'bg-red-100 text-red-700' },
+  accord:            { label: 'Accord',             classes: 'bg-teal-100 text-teal-700' },
+  clos:              { label: 'Clôturé',            classes: 'bg-green-100 text-green-700' },
+  rejet:             { label: 'Rejeté',             classes: 'bg-red-100 text-red-700' },
+}
+
+// ─── Étapes workflow règlement sinistre (risques divers / RC Auto) ────────────
+
+const ETAPES_LABELS: { id: string; label: string }[] = [
+  { id: 'ouverture',           label: 'Ouverture sinistre' },
+  { id: 'accuse_reception',    label: 'Accusé de réception' },
+  { id: 'mise_en_cause',       label: 'Mise en cause' },
+  { id: 'relances',            label: 'Relances' },
+  { id: 'reclamation_pieces',  label: 'Réclamations des pièces' },
+  { id: 'mission_expert',      label: 'Mission expert / Avocat' },
+  { id: 'bons_prise_en_charge',label: 'Bons de prise en charge' },
+  { id: 'preavs_saisine',      label: 'Préavis de saisine' },
+  { id: 'requete_unilaterale', label: 'Requête unilatérale' },
+  { id: 'etude_rapport',       label: 'Étude rapport expertise' },
+  { id: 'identification_victimes', label: 'Identification des victimes' },
+  { id: 'notes_techniques',    label: 'Notes techniques' },
+  { id: 'offre_indemnisation', label: 'Offre d\'indemnisation' },
+  { id: 'accord_reglement',    label: 'Accord de règlement' },
+  { id: 'pv_transaction',      label: 'Procès verbal de transaction' },
+  { id: 'quittances',          label: 'Quittances de règlement' },
+  { id: 'transmission_cheques', label: 'Transmissions chèques' },
+  { id: 'revision',            label: 'Révisions' },
+]
+
+function WorkflowTimeline({ etapes }: { etapes?: EtapeWorkflow[] }) {
+  const resolved: EtapeWorkflow[] = ETAPES_LABELS.map((e, i) => {
+    const found = etapes?.find(x => x.id === e.id)
+    if (found) return found
+    return { id: e.id, label: e.label, statut: i === 0 ? 'en_cours' : 'en_attente' }
+  })
+
+  const dot = (s: EtapeWorkflow['statut']) => {
+    if (s === 'fait')       return 'bg-green-500'
+    if (s === 'en_cours')   return 'bg-yellow-400 animate-pulse'
+    if (s === 'na')         return 'bg-gray-200'
+    return 'bg-gray-300'
+  }
+
+  return (
+    <div className="space-y-1">
+      {resolved.map((e, i) => (
+        <div key={e.id} className="flex items-start gap-3">
+          <div className="flex flex-col items-center mt-1">
+            <div className={clsx('w-2.5 h-2.5 rounded-full flex-shrink-0', dot(e.statut))} />
+            {i < resolved.length - 1 && (
+              <div className="w-px flex-1 bg-gray-200 mt-1" style={{ minHeight: 14 }} />
+            )}
+          </div>
+          <div className="pb-2 min-w-0">
+            <p className={clsx('text-xs leading-tight', e.statut === 'fait' ? 'text-gray-700 font-medium' : e.statut === 'en_cours' ? 'text-yellow-700 font-semibold' : 'text-gray-400')}>
+              {i + 1}. {e.label}
+            </p>
+            {e.date && <p className="text-[10px] text-gray-400 mt-0.5">{e.date}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function formatMontant(m?: number) {
@@ -274,7 +347,7 @@ function ScanZone({ typeSinistre, onResult, onCancel }: ScanZoneProps) {
         {loading ? (
           <div className="space-y-3">
             <LoadingSpinner className="mx-auto h-10 w-10" />
-            <p className="text-sm font-medium text-gray-700">Yukpo IA analyse le document…</p>
+            <p className="text-sm font-medium text-gray-700">YukpoPro analyse le document…</p>
             <p className="text-xs text-gray-500">Extraction des champs : {typeSinistre.champs_auto.join(', ')}</p>
           </div>
         ) : (
@@ -552,6 +625,15 @@ function SinistreDetail({ s, onClose }: { s: Sinistre; onClose: () => void }) {
             ) : null
           })()}
 
+          {/* Suivi étapes règlement */}
+          <div className="border border-gray-100 rounded-xl p-4 bg-gray-50">
+            <div className="flex items-center gap-2 mb-3">
+              <ChevronRightIcon className="h-3.5 w-3.5 text-gray-400" />
+              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Suivi étapes règlement</span>
+            </div>
+            <WorkflowTimeline etapes={s.etapes_workflow} />
+          </div>
+
           {/* Actions rapides selon statut */}
           {s.statut === 'ouvert' && (
             <div className="flex gap-2 pt-2">
@@ -815,6 +897,7 @@ function OngletFournisseursSinistres() {
 export default function SinistresPage() {
   const [onglet, setOnglet] = useState<OngletSinistre>('dossiers')
   const [sinistres, setSinistres] = useState<Sinistre[]>(DEMO_SINISTRES)
+  const [isDemoData, setIsDemoData] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [filtreFamille, setFiltreFamille] = useState<FamilleSinistre | 'tous'>('tous')
@@ -832,9 +915,9 @@ export default function SinistresPage() {
     setIsLoading(true)
     sinistresAPI.list().then((data: unknown) => {
       const d = data as Record<string, unknown>
-      const list = Array.isArray(data) ? data : (d.items as Sinistre[]) || DEMO_SINISTRES
-      setSinistres(list.length > 0 ? list : DEMO_SINISTRES)
-    }).catch(() => setSinistres(DEMO_SINISTRES))
+      const list = Array.isArray(data) ? data as Sinistre[] : (d.items as Sinistre[])
+      if (list && list.length > 0) { setSinistres(list); setIsDemoData(false) }
+    }).catch(() => {})
       .finally(() => setIsLoading(false))
   }, [])
 
@@ -922,6 +1005,7 @@ export default function SinistresPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sinistres</h1>
           <p className="text-sm text-gray-500 mt-0.5">Vie & Non-Vie · Branches CIMA · Recours · Correspondances</p>
+          {isDemoData && <DemoBanner className="mt-2" />}
         </div>
         {onglet === 'dossiers' && (
           <button
@@ -1064,10 +1148,11 @@ export default function SinistresPage() {
       ) : (
         <div className="space-y-2">
           {sinistresFiltres.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <ShieldExclamationIcon className="h-10 w-10 mx-auto mb-2 text-gray-300" />
-              <p className="text-sm">Aucun sinistre trouvé</p>
-            </div>
+            <EmptyState
+              icon={<ShieldExclamationIcon className="h-10 w-10" />}
+              title="Aucun sinistre trouvé"
+              description="Aucun sinistre ne correspond aux filtres sélectionnés."
+            />
           ) : (
             sinistresFiltres.map(s => (
               <SinistreCard key={s.id} s={s} onClick={() => setDetail(s)} />
@@ -1151,7 +1236,7 @@ export default function SinistresPage() {
                     <span className="font-semibold text-gray-800">{typeChoisi.label}</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Scannez ou photographiez un document pour que Yukpo IA extrait automatiquement toutes les informations nécessaires.
+                    Scannez ou photographiez un document pour que YukpoPro extrait automatiquement toutes les informations nécessaires.
                   </p>
                   <ScanZone
                     typeSinistre={typeChoisi}
@@ -1165,7 +1250,7 @@ export default function SinistresPage() {
               {etape === 'validation' && typeChoisi && ocrResult && ocrFichier && (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
-                    Yukpo IA a extrait les informations suivantes. Vérifiez et corrigez si nécessaire avant de soumettre.
+                    YukpoPro a extrait les informations suivantes. Vérifiez et corrigez si nécessaire avant de soumettre.
                   </p>
                   <ValidationExtraction
                     type={typeChoisi}
@@ -1186,7 +1271,7 @@ export default function SinistresPage() {
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">Sinistre déclaré avec succès</h3>
                     <p className="text-sm text-gray-500 mt-1">
-                      Le dossier a été créé et est visible dans la liste. Yukpo IA a calculé le score de fraude initial.
+                      Le dossier a été créé et est visible dans la liste. YukpoPro a calculé le score de fraude initial.
                     </p>
                   </div>
                   <div className="flex gap-3 justify-center">

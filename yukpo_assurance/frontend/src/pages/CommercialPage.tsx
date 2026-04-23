@@ -8,6 +8,8 @@ import {
 import { clsx } from 'clsx'
 import { apiClient } from '../api/client'
 import { RapportsModule } from '../components/RapportsModule'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -374,6 +376,7 @@ export function CommercialPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Commercial & Prospection</h1>
           <p className="text-sm text-gray-400">{prospects.length} prospects · Pipeline actif : {(totalPipeline / 1_000_000).toFixed(1)} M FCFA</p>
+          <DemoBanner className="mt-2" message="Données de démonstration — connectez votre CRM pour voir vos prospects réels." />
         </div>
         <button onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-700">

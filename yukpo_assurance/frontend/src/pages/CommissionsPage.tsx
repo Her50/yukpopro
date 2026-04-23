@@ -4,6 +4,8 @@ import {
   CheckCircleIcon, ExclamationTriangleIcon, ClockIcon,
 } from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,6 +95,7 @@ export function CommissionsPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Module Commissions</h1>
           <p className="text-sm text-gray-400">Tous intermédiaires — Courtiers · Agents Généraux · Apporteurs</p>
+          <DemoBanner className="mt-2" message="Données de démonstration — connectez votre SI pour voir vos commissions réelles." />
         </div>
         <button className="flex items-center gap-2 text-sm border border-gray-300 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-50">
           <ArrowDownTrayIcon className="h-4 w-4" /> Exporter
@@ -242,10 +245,11 @@ export function CommissionsPage() {
         </div>
 
         {liste.length === 0 && (
-          <div className="text-center py-10 text-gray-400 text-sm">
-            <BanknotesIcon className="h-8 w-8 mx-auto mb-2" />
-            Aucune commission pour ces filtres
-          </div>
+          <EmptyState
+            icon={<BanknotesIcon className="h-8 w-8" />}
+            title="Aucune commission pour ces filtres"
+            description="Modifiez les filtres pour élargir la recherche."
+          />
         )}
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   XMarkIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, ResponsiveContainer, Legend,
@@ -228,7 +229,7 @@ export default function ComptabilitePage() {
     numero_facture: `FAC-${Date.now().toString().slice(-6)}`,
     compte_pcsa: type === 'facture_garage' ? '6150' : type === 'facture_hopital' ? '6180' : '6199',
     confiance: 0.85 + Math.random() * 0.12,
-    champs_orass: { DOCUMENT_OCR: 'OK', SOURCE: 'Claude Vision' },
+    champs_orass: { DOCUMENT_OCR: 'OK', SOURCE: 'reconnaissance visuelle YukpoPro' },
   })
 
   const fmt = (n: number) => n.toLocaleString('fr-FR') + ' XAF'
@@ -262,6 +263,7 @@ export default function ComptabilitePage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Comptabilité</h1>
           <p className="text-sm text-gray-500 mt-1">OCR pièces comptables · Rapprochement bancaire · Analytique charges</p>
+          <DemoBanner className="mt-2" />
         </div>
         <button className="flex items-center gap-2 text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
           <ArrowDownTrayIcon className="w-4 h-4" />
@@ -358,7 +360,7 @@ export default function ComptabilitePage() {
               {uploading ? (
                 <p className="text-sm text-blue-600 flex items-center justify-center gap-2">
                   <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                  Analyse OCR en cours (Claude Vision)…
+                  Analyse OCR en cours (reconnaissance visuelle YukpoPro)…
                 </p>
               ) : isDragActive ? (
                 <p className="text-sm text-primary-600 font-medium">Déposer les fichiers ici…</p>
@@ -682,7 +684,7 @@ export default function ComptabilitePage() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Fournisseur', 'Type', 'Référence sinistre', 'Montant TTC', 'Score IA', 'Statut', 'Actions'].map(h => (
+                    {['Fournisseur', 'Type', 'Référence sinistre', 'Montant TTC', 'Score', 'Statut', 'Actions'].map(h => (
                       <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>

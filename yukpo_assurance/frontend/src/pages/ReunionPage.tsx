@@ -3,7 +3,7 @@
  * - Création de réunion avec ordre du jour
  * - Enregistrement audio en temps réel (MediaRecorder)
  * - Transcription automatique Whisper via backend
- * - Analyse IA : synthèse, décisions, recommandations, actions
+ * - Analyse YukpoPro : synthèse, décisions, recommandations, actions
  * - Génération PV officiel (Word/PDF)
  * - Proposition agenda réunion suivante
  * - Suivi des actions (tableau de bord)
@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
 import { apiClient } from '../api/client'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -404,7 +405,7 @@ function PanelReunion({ reunion, onClose, onUpdated }: { reunion: Reunion, onClo
 
   const onglets: { id: 'enregistrement'|'analyse'|'pv'|'agenda', label: string, icon: React.ComponentType<{className?:string}>, disabled?: boolean }[] = [
     { id: 'enregistrement', label: 'Enregistrement & Notes', icon: MicrophoneIcon },
-    { id: 'analyse', label: 'Analyse IA', icon: SparklesIcon, disabled: !transcription && !notes },
+    { id: 'analyse', label: 'Analyse YukpoPro', icon: SparklesIcon, disabled: !transcription && !notes },
     { id: 'pv', label: 'PV & Rapport', icon: DocumentTextIcon, disabled: !analyse },
     { id: 'agenda', label: 'Agenda suivant', icon: CalendarDaysIcon, disabled: !analyse },
   ]
@@ -496,14 +497,14 @@ function PanelReunion({ reunion, onClose, onUpdated }: { reunion: Reunion, onClo
               <div className="border border-gray-200 rounded-xl p-5">
                 <p className="text-sm font-semibold text-gray-800 mb-3">Notes manuelles (si pas d'enregistrement audio)</p>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={6}
-                  placeholder="Saisir ici les points discutés, décisions, intervenants… L'IA analysera ce texte."
+                  placeholder="Saisir ici les points discutés, décisions, intervenants… YukpoPro analysera ce texte."
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
               </div>
 
               <button onClick={transcrire} disabled={(!audioBlob && !notes.trim()) || loadingTranscript}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
                 {loadingTranscript ? (
-                  <><ArrowPathIcon className="h-5 w-5 animate-spin" />Transcription en cours (Whisper)…</>
+                  <><ArrowPathIcon className="h-5 w-5 animate-spin" />Transcription en cours……</>
                 ) : (
                   <><SparklesIcon className="h-5 w-5" />Transcrire & analyser</>
                 )}
@@ -511,7 +512,7 @@ function PanelReunion({ reunion, onClose, onUpdated }: { reunion: Reunion, onClo
             </div>
           )}
 
-          {/* ── Onglet Analyse IA ── */}
+          {/* ── Onglet Analyse YukpoPro ── */}
           {onglet === 'analyse' && (
             <div className="space-y-5">
               {transcription && (
@@ -525,7 +526,7 @@ function PanelReunion({ reunion, onClose, onUpdated }: { reunion: Reunion, onClo
                 <button onClick={analyser} disabled={loadingAnalyse}
                   className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold text-base hover:opacity-90 disabled:opacity-50">
                   {loadingAnalyse ? (
-                    <><ArrowPathIcon className="h-5 w-5 animate-spin" />Analyse IA en cours…</>
+                    <><ArrowPathIcon className="h-5 w-5 animate-spin" />Analyse YukpoPro en cours…</>
                   ) : (
                     <><SparklesIcon className="h-5 w-5" />Analyser la réunion par IA</>
                   )}
@@ -747,7 +748,7 @@ export default function ReunionPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Réunions & Agenda</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Enregistrement, transcription Whisper, analyse IA, PV automatisé, suivi des actions
+            Enregistrement, transcription audio, analyse YukpoPro, PV automatisé, suivi des actions
           </p>
         </div>
         <button onClick={() => setShowCreer(true)}
@@ -841,10 +842,11 @@ export default function ReunionPage() {
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
-                <UserGroupIcon className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">Aucune réunion trouvée</p>
-              </div>
+              <EmptyState
+                icon={<UserGroupIcon className="h-10 w-10" />}
+                title="Aucune réunion trouvée"
+                description="Modifiez les filtres ou créez une nouvelle réunion."
+              />
             )}
           </div>
         </div>
@@ -900,7 +902,11 @@ export default function ReunionPage() {
               </tbody>
             </table>
             {toutesActions.length === 0 && (
-              <div className="text-center py-10 text-gray-400 text-sm">Aucune action à suivre</div>
+              <EmptyState
+                icon={<ListBulletIcon className="h-8 w-8" />}
+                title="Aucune action à suivre"
+                description="Les actions issues des réunions apparaîtront ici."
+              />
             )}
           </div>
         </div>

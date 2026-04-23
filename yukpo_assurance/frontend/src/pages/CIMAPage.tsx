@@ -4,6 +4,7 @@ import { cimaAPI } from '../api/client'
 import { RatioCIMA } from '../api/types'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { clsx } from 'clsx'
+import { DemoBanner } from '../components/DemoBanner'
 
 const DEMO_RATIOS: RatioCIMA[] = [
   // Non-Vie
@@ -64,6 +65,7 @@ export function CIMAPage() {
   const [messages, setMessages] = useState<QAMessage[]>([])
   const [question, setQuestion] = useState('')
   const [isAsking, setIsAsking] = useState(false)
+  const [isDemoData, setIsDemoData] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -71,7 +73,12 @@ export function CIMAPage() {
       setIsLoadingRatios(true)
       try {
         const data = await cimaAPI.getRatios() as Record<string, unknown>
-        setRatios(Array.isArray(data) ? data : (data.ratios as typeof DEMO_RATIOS) || DEMO_RATIOS)
+        if (Array.isArray(data) && data.length > 0) {
+          setRatios(data)
+          setIsDemoData(false)
+        } else {
+          setRatios((data.ratios as typeof DEMO_RATIOS) || DEMO_RATIOS)
+        }
       } catch {
         setRatios(DEMO_RATIOS)
       } finally {
@@ -113,6 +120,7 @@ export function CIMAPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Réglementation CIMA</h1>
           <p className="text-sm text-gray-400">Ratios prudentiels • Q&R réglementaire • Échéances</p>
+          {isDemoData && <DemoBanner className="mt-2" />}
         </div>
       </div>
 

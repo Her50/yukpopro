@@ -17,6 +17,7 @@ import {
   ShieldCheckIcon, CurrencyDollarIcon, DocumentArrowUpIcon,
   UserIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
 import { clsx } from 'clsx'
 import { useDropzone } from 'react-dropzone'
@@ -1215,6 +1216,7 @@ export function RHPage() {
           <p className="text-sm text-gray-500 mt-1">
             {modeVue === 'employe' ? 'Mon espace personnel — demandes & documents' : 'Tableau de bord RH · Gestion complète du personnel'}
           </p>
+          <DemoBanner className="mt-2" />
         </div>
         {/* Sélecteur de vue — en prod : basé sur le rôle JWT */}
         <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">

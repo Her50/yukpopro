@@ -6,6 +6,8 @@ import {
 } from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
 import { apiClient } from '../api/client'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -390,6 +392,7 @@ export default function AgendaPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Réunions & Agenda</h1>
           <p className="text-sm text-gray-500 mt-0.5">CR automatique IA · Suivi actions · Rappels CIMA</p>
+          <DemoBanner className="mt-2" message="Données de démonstration — vos réunions réelles apparaîtront ici après synchronisation." />
         </div>
         <button
           onClick={() => setShowNouvelle(true)}

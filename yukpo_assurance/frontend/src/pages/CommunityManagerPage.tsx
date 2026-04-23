@@ -8,6 +8,7 @@ import {
   EyeIcon,
   ShareIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface PostSocial {
   id: string
@@ -79,6 +80,7 @@ export default function CommunityManagerPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
   const [prompt, setPrompt] = useState('')
+  const [isDemoData, setIsDemoData] = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -89,7 +91,12 @@ export default function CommunityManagerPage() {
         })
         if (res.ok) {
           const data = await res.json()
-          setPosts(Array.isArray(data.posts) ? data.posts : DEMO_POSTS)
+          if (Array.isArray(data.posts) && data.posts.length > 0) {
+            setPosts(data.posts)
+            setIsDemoData(false)
+          } else {
+            setPosts(DEMO_POSTS)
+          }
         } else {
           setPosts(DEMO_POSTS)
         }
@@ -139,6 +146,7 @@ export default function CommunityManagerPage() {
           Community Manager IA
         </h1>
         <p className="text-sm text-gray-500">Gérez vos réseaux sociaux avec YukpoPro — posts auto-générés, planification, analytics</p>
+        {isDemoData && <DemoBanner className="mt-2" />}
       </div>
 
       {/* KPIs */}

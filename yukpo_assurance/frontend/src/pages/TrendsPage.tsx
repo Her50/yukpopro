@@ -7,6 +7,7 @@ import {
   GlobeAltIcon,
   NewspaperIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface Trend {
   id: string
@@ -92,6 +93,7 @@ export default function TrendsPage() {
   const [search, setSearch] = useState('')
   const [filterCategorie, setFilterCategorie] = useState('')
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null)
+  const [isDemoData, setIsDemoData] = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -102,7 +104,12 @@ export default function TrendsPage() {
         })
         if (res.ok) {
           const data = await res.json()
-          setTrends(Array.isArray(data.tendances) ? data.tendances : DEMO_TRENDS)
+          if (Array.isArray(data.tendances) && data.tendances.length > 0) {
+            setTrends(data.tendances)
+            setIsDemoData(false)
+          } else {
+            setTrends(DEMO_TRENDS)
+          }
         } else {
           setTrends(DEMO_TRENDS)
         }
@@ -129,8 +136,9 @@ export default function TrendsPage() {
           <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <ArrowTrendingUpIcon className="h-6 w-6 text-primary-600" />
             Veille & Tendances
-          </h2>
+          </h1>
           <p className="text-sm text-gray-500">IA analyse le marché assurance africain en temps réel</p>
+          {isDemoData && <DemoBanner className="mt-2" />}
         </div>
         <button
           onClick={() => window.location.reload()}

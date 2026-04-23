@@ -34,6 +34,7 @@ import {
 import { clsx } from 'clsx'
 import { CorrespondancesModule } from '../components/CorrespondancesModule'
 import { apiClient } from '../api/client'
+import { DemoBanner } from '../components/DemoBanner'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -585,7 +586,7 @@ function OngletAssistantIA({ dossiers }: { dossiers: DossierLitige[] }) {
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Réponse IA non disponible (mode démo).\n\nSur la question : "${texte}"\n\n**Éléments de réponse (Code CIMA) :**\n\n• Art. 12 : Délai de règlement sinistre 30 jours après production pièces complètes\n• Art. 18 : Tout rejet doit être notifié avec motifs par écrit\n• Art. 308 : Recours arbitrage CIMA avant juridiction ordinaire\n• Art. 13 : Prescription biennale pour les actions dérivant du contrat d'assurance\n\nPour une analyse approfondie, connectez le backend Yukpo IA.`,
+        content: `Réponse non disponible (mode démo).\n\nSur la question : "${texte}"\n\n**Éléments de réponse (Code CIMA) :**\n\n• Art. 12 : Délai de règlement sinistre 30 jours après production pièces complètes\n• Art. 18 : Tout rejet doit être notifié avec motifs par écrit\n• Art. 308 : Recours arbitrage CIMA avant juridiction ordinaire\n• Art. 13 : Prescription biennale pour les actions dérivant du contrat d'assurance\n\nPour une analyse approfondie, connectez le backend YukpoPro.`,
       }])
     } finally {
       setLoading(false)
@@ -890,6 +891,7 @@ export default function ServiceJuridiquePage() {
             Service Juridique
           </h1>
           <p className="text-sm text-gray-500 mt-1">Litiges · Correspondances légales · Assistant IA CIMA · Modèles</p>
+          <DemoBanner className="mt-2" />
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-2 text-sm border border-gray-300 bg-white text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50">

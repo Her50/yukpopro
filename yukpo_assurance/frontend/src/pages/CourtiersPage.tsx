@@ -13,6 +13,8 @@ import { clsx } from 'clsx'
 import { courtiersAPI } from '../api/client'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { KPICard } from '../components/KPICard'
+import { DemoBanner } from '../components/DemoBanner'
+import { EmptyState } from '../components/EmptyState'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -496,10 +498,11 @@ function DocumentsRecus({
       </div>
 
       {liste.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
-          <InboxArrowDownIcon className="h-10 w-10 mx-auto mb-2" />
-          <p className="text-sm">Aucun document reçu</p>
-        </div>
+        <EmptyState
+          icon={<InboxArrowDownIcon className="h-10 w-10" />}
+          title="Aucun document reçu"
+          description="Les documents transmis par vos courtiers apparaîtront ici."
+        />
       )}
     </div>
   )
@@ -586,7 +589,11 @@ function OngletCommissions() {
           </tbody>
         </table>
         {liste.length === 0 && (
-          <div className="text-center py-10 text-gray-400 text-sm">Aucune commission pour ce filtre</div>
+          <EmptyState
+            icon={<BanknotesIcon className="h-8 w-8" />}
+            title="Aucune commission"
+            description="Aucune commission ne correspond aux filtres sélectionnés."
+          />
         )}
       </div>
     </div>
@@ -624,6 +631,7 @@ export function CourtiersPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Courtiers & Intermédiaires</h1>
           <p className="text-sm text-gray-400">Production · Dématérialisation documents · Commissions</p>
+          <DemoBanner className="mt-2" message="Données de démonstration — connectez votre réseau de courtiers pour voir les données réelles." />
         </div>
         {enAttente > 0 && (
           <div className="flex items-center gap-2 text-xs bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200">

@@ -16,6 +16,7 @@ import {
   UserGroupIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 import { useDropzone } from 'react-dropzone'
 import { ArchiveNumerique } from '../components/ArchiveNumerique'
 import { RapportsModule } from '../components/RapportsModule'
@@ -194,6 +195,7 @@ export default function ReassurancePage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Réassurance</h1>
           <p className="text-sm text-gray-500 mt-1">Programme traités · PML · Bordereau cession · État C12 CIMA</p>
+          <DemoBanner className="mt-2" />
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-2 text-sm border border-gray-300 bg-white text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50">
@@ -377,9 +379,9 @@ export default function ReassurancePage() {
               </div>
             </div>
 
-            {/* Analyse IA */}
+            {/* Analyse YukpoPro */}
             <div className="bg-gradient-to-br from-primary-50 to-indigo-50 border border-primary-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-primary-700 mb-2">Analyse IA du programme</p>
+              <p className="text-xs font-semibold text-primary-700 mb-2">Analyse YukpoPro du programme</p>
               <div className="space-y-2 text-xs text-gray-700">
                 <p>✓ Programme conforme Art. 308 CIMA — rétentions dans les limites réglementaires</p>
                 <p>⚠ Concentration SCOR SE à 38% — envisager diversification vers AFRICA Re</p>

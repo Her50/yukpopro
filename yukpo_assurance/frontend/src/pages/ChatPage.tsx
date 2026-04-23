@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { clsx } from 'clsx'
 import { RapportsModule } from '../components/RapportsModule'
+import { EmptyState } from '../components/EmptyState'
 
 type ViewTab = 'conversation' | 'rapports'
 
@@ -148,10 +149,12 @@ export function ChatPage() {
         {/* Liste sessions */}
         <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
           {sessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-              <ChatBubbleLeftIcon className="h-8 w-8 text-gray-300 mb-2" />
-              <p className="text-xs text-gray-400">Aucune conversation. Commencez par en créer une.</p>
-            </div>
+            <EmptyState
+              icon={<ChatBubbleLeftIcon className="h-8 w-8" />}
+              title="Aucune conversation"
+              description="Commencez par en créer une."
+              className="py-8"
+            />
           ) : (
             sessions.map((session) => (
               <SessionItem

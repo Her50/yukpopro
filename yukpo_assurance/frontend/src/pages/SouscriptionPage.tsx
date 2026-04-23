@@ -4,6 +4,7 @@ import {
   ArrowRightIcon, ArrowLeftIcon, SparklesIcon, ExclamationTriangleIcon,
   ClipboardDocumentCheckIcon, CalculatorIcon,
 } from '@heroicons/react/24/outline'
+import { DemoBanner } from '../components/DemoBanner'
 import { souscriptionAPI, apiClient } from '../api/client'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { SouscriptionResponse } from '../api/types'
@@ -452,14 +453,14 @@ function DetailsRisque({ produit, clientData, onNext, onBack }: {
         </button>
         <button type="submit"
           className="flex-1 bg-primary-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2">
-          <SparklesIcon className="h-4 w-4" /> Calculer la prime avec Yukpo IA
+          <SparklesIcon className="h-4 w-4" /> Calculer la prime avec YukpoPro
         </button>
       </div>
     </form>
   )
 }
 
-// ─── Étape 4 : tarification IA ────────────────────────────────────────────────
+// ─── Étape 4 : tarification automatique ────────────────────────────────────────────────
 
 function TarificationIA({ produit, clientData, risqueData, onValider, onBack }: {
   produit: ProduitAssurance
@@ -473,7 +474,7 @@ function TarificationIA({ produit, clientData, risqueData, onValider, onBack }: 
   const [commentaire, setCommentaire] = useState('')
 
   useEffect(() => {
-    // Appel tarification IA
+    // Appel tarification automatique
     const calc = async () => {
       try {
         const { data } = await apiClient.post('/api/v1/tarification/calculer', {
@@ -508,7 +509,7 @@ function TarificationIA({ produit, clientData, risqueData, onValider, onBack }: 
   if (loading) return (
     <div className="text-center py-10 space-y-3">
       <LoadingSpinner className="mx-auto h-10 w-10" />
-      <p className="text-sm font-medium text-gray-700">Yukpo IA calcule votre prime…</p>
+      <p className="text-sm font-medium text-gray-700">YukpoPro calcule votre prime…</p>
       <p className="text-xs text-gray-500">Tables CIMA · Barèmes en vigueur · Zone {produit.famille === 'vie' ? 'Vie CIMA' : 'Non-Vie CIMA'}</p>
     </div>
   )
@@ -636,7 +637,8 @@ export function SouscriptionPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Souscription & Tarification</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Vie & Non-Vie — scan CNI → tarification IA → émission contrat</p>
+          <p className="text-sm text-gray-500 mt-0.5">Vie & Non-Vie — scan CNI → tarification automatique → émission contrat</p>
+          <DemoBanner className="mt-2" />
         </div>
         {onglet === 'portefeuille' && (
           <button
@@ -846,7 +848,7 @@ export function SouscriptionPage() {
                     <h3 className="text-lg font-bold text-gray-900">Contrat émis avec succès</h3>
                     <p className="text-sm text-gray-500 mt-1">
                       Le contrat {produit?.label} a été créé et est prêt à être remis au client.
-                      Yukpo IA a calculé la prime et généré le numéro de police.
+                      YukpoPro a calculé la prime et généré le numéro de police.
                     </p>
                   </div>
                   <div className="flex gap-3 justify-center">
