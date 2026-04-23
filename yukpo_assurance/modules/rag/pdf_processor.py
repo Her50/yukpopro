@@ -322,13 +322,42 @@ def traiter_pdf(
     return len(chunks)
 
 
+_PATTERNS_GARBAGE = [
+    "OHADA.com - Connexion",
+    "Mot de passe oublié",
+    "S'inscrire",
+    "Aller au contenu\nUn article de Wikipédia",
+    "Aller au contenu\n\nUn article de Wikipédia",
+    "heading-top-none",       # Balise HTML World Bank
+    "PUBLIC NOTICE\n\nRWANDA TRAVEL ADVISORY",
+    "Select your country Global Tri",   # ILO NATLEX selector
+]
+
+def _est_chunk_valide(texte: str) -> bool:
+    """Retourne False si le chunk est clairement du scraping parasite (login, Wikipédia, nav HTML)."""
+    if len(texte.strip()) < 80:
+        return False
+    for pat in _PATTERNS_GARBAGE:
+        if pat in texte:
+            return False
+    return True
+
+
 def charger_chunks(chemin: Path) -> Optional[list[dict]]:
-    """Charge les chunks depuis un fichier JSON existant."""
+    """Charge les chunks depuis un fichier JSON existant, en filtrant le contenu parasite."""
     try:
         if not chemin.exists():
             return None
         data = json.loads(chemin.read_text(encoding="utf-8"))
-        return data.get("chunks", [])
+        chunks = data.get("chunks", [])
+        # Filtre anti-scraping-raté : pages de login, Wikipédia, nav HTML
+        valides = [c for c in chunks if _est_chunk_valide(c.get("texte", ""))]
+        if len(valides) < len(chunks):
+            logger.debug(
+                f"[PDFProcessor] {chemin.parent.name}: {len(chunks) - len(valides)}"
+                f"/{len(chunks)} chunks filtrés (contenu parasite)"
+            )
+        return valides
     except Exception as e:
         logger.warning(f"[PDFProcessor] Chargement chunks {chemin} échoué : {e}")
         return None

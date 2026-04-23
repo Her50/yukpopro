@@ -210,19 +210,18 @@ def _formater_contexte(resultats: list[dict], question: str) -> str:
     )
     footer = (
         "\n" + "=" * 50 + "\n"
-        "INSTRUCTIONS STRICTES POUR L'IA :\n"
+        "INSTRUCTIONS POUR L'IA :\n"
         "1. Cite les passages ci-dessus avec leur source EXACTE (nom du texte, article, pays).\n"
         "2. Reproduis le texte officiel TEL QUEL — sans le modifier ni le paraphraser.\n"
         "3. Tu peux ensuite apporter une ANALYSE SEPAREE, CLAIREMENT ETIQUETEE '[ANALYSE]' :\n"
         "   - Impact pratique concret pour le professionnel concerné.\n"
         "   - Articulation avec d'autres textes (OHADA vs droit national, SYSCOHADA, COBAC, UEMOA).\n"
         "   - Sanctions / conséquences du non-respect avec les montants disponibles dans le corpus.\n"
-        "4. INTERDIT : Si un passage est court, reproduis-le tel quel — N'invente PAS de contenu\n"
-        "   supplémentaire. N'utilise PAS tes connaissances générales pour compléter le texte.\n"
-        "5. Si une information manque dans le corpus, indique EXPLICITEMENT :\n"
-        "   'Cette information n'est pas dans notre corpus documentaire — consultez les textes officiels.'\n"
-        "   Propose d'orienter l'utilisateur vers les sources officielles (OHADA, CRCA, etc.).\n"
-        "6. Adapte le niveau de l'analyse au contexte du pays et au profil utilisateur.\n"
+        "4. Si un article ou texte demandé N'EST PAS dans les passages ci-dessus :\n"
+        "   Utilise ta connaissance de formation pour répondre, mais indique EXPLICITEMENT :\n"
+        "   '[Réponse depuis mémoire IA — non indexé dans le corpus Yukpo]'\n"
+        "   Reste précis, cite le numéro d'article et le texte tel que tu le connais.\n"
+        "5. Adapte le niveau de l'analyse au contexte du pays et au profil utilisateur.\n"
         "=" * 50
     )
 
