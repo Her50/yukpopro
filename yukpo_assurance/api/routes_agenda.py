@@ -16,7 +16,7 @@ Routes FastAPI — Agenda & Rappels Employés
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -420,7 +420,7 @@ async def changer_statut_tache(
     if payload.avancement_pct is not None:
         t.avancement_pct = payload.avancement_pct
     if payload.statut == "terminee":
-        t.date_completion = datetime.now(timezone.utc)
+        t.date_completion = datetime.utcnow()
         t.avancement_pct = 100
     await db.commit()
     return {"id": tache_id, "statut": payload.statut}
@@ -450,7 +450,7 @@ async def ajouter_commentaire(
     commentaires.append({
         "auteur": current_user.username,
         "texte": payload.texte,
-        "date": datetime.now(timezone.utc).isoformat(),
+        "date": datetime.utcnow().isoformat(),
     })
     t.commentaires = commentaires
     await db.commit()

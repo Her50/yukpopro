@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 
 logger = logging.getLogger("yukpo.cm.scheduler")
@@ -64,7 +64,7 @@ async def publier_posts_dus(db_session_factory) -> None:
         get_ig_business_account_id,
     )
 
-    maintenant = datetime.now(timezone.utc)
+    maintenant = datetime.utcnow()
 
     async with db_session_factory() as db:
         # Posts planifiés dus (max 10 à la fois, avec retry < 3)
@@ -148,7 +148,7 @@ async def verifier_gagnants_ab(db_session_factory) -> None:
     from sqlalchemy import select
     from core.database import PostSocialDB
 
-    seuil = datetime.now(timezone.utc) - timedelta(hours=24)
+    seuil = datetime.utcnow() - timedelta(hours=24)
 
     async with db_session_factory() as db:
         result = await db.execute(
@@ -182,7 +182,7 @@ async def _boucle_scheduler(db_session_factory) -> None:
 
     while True:
         try:
-            maintenant = datetime.now(timezone.utc)
+            maintenant = datetime.utcnow()
 
             # Planification quotidienne à 6h
             date_aujourd_hui = maintenant.date()

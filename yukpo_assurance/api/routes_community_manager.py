@@ -12,7 +12,7 @@ Routes FastAPI — Community Manager IA
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -311,7 +311,7 @@ async def changer_statut_post(
 
     post.statut = payload.statut
     if payload.statut == "publie":
-        post.publie_le = datetime.now(timezone.utc)
+        post.publie_le = datetime.utcnow()
     await db.commit()
     return {"id": post_id, "statut": payload.statut}
 
@@ -399,7 +399,7 @@ async def update_preferences(
     prefs.ab_test_auto = payload.ab_test_auto
     prefs.secteur_contenu = payload.secteur_contenu
     prefs.modele_ia_prefere = payload.modele_ia_prefere
-    prefs.mise_a_jour_le = datetime.now(timezone.utc)
+    prefs.mise_a_jour_le = datetime.utcnow()
     await db.commit()
     return {"message": "Préférences CM mises à jour"}
 
@@ -608,7 +608,7 @@ async def connecter_compte_social(
         connector.account_nom = payload.account_nom
         connector.metadata_json = payload.metadata_json
         connector.est_actif = True
-        connector.connecte_le = datetime.now(timezone.utc)
+        connector.connecte_le = datetime.utcnow()
     else:
         connector = SocialConnectorDB(
             compagnie_id=current_user.compagnie_id,

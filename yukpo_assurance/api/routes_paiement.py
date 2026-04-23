@@ -13,7 +13,7 @@ Routes FastAPI — Paiement Mobile Money.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
@@ -115,7 +115,7 @@ async def initier_paiement(
         description=payload.description,
         etat="en_attente",
         cree_par=current_user.username,
-        cree_le=datetime.now(timezone.utc),
+        cree_le=datetime.utcnow(),
     )
     db.add(transaction)
     await db.flush()
@@ -192,7 +192,7 @@ async def verifier_statut(
     if nouvel_etat != transaction.etat:
         transaction.etat = nouvel_etat
         if nouvel_etat == "reussi":
-            transaction.paye_le = datetime.now(timezone.utc)
+            transaction.paye_le = datetime.utcnow()
         await db.commit()
 
     return {
@@ -331,7 +331,7 @@ async def callback_cinetpay(
         if t:
             t.etat = resultat.get("etat", t.etat)
             if t.etat == "reussi":
-                t.paye_le = datetime.now(timezone.utc)
+                t.paye_le = datetime.utcnow()
             await db.commit()
 
     return {"status": "ok"}
@@ -367,7 +367,7 @@ async def callback_mtn(
         if t:
             t.etat = resultat.get("etat", t.etat)
             if t.etat == "reussi":
-                t.paye_le = datetime.now(timezone.utc)
+                t.paye_le = datetime.utcnow()
             await db.commit()
 
     return {"status": "ok"}
@@ -395,7 +395,7 @@ async def callback_orange(
             statut = data.get("status", "")
             if statut in ("SUCCESS", "SUCCESSFULL"):
                 t.etat = "reussi"
-                t.paye_le = datetime.now(timezone.utc)
+                t.paye_le = datetime.utcnow()
             elif statut in ("FAILED", "CANCELLED"):
                 t.etat = "echoue"
             await db.commit()

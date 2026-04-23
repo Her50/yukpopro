@@ -3,7 +3,7 @@ import asyncio
 import base64
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -281,7 +281,7 @@ async def _stream_response(session, message: str, current_user: TokenData) -> St
         )
         session.messages.extend([msg_user, msg_assistant])
         session.nb_messages += 2
-        session.mise_a_jour = datetime.now(timezone.utc)
+        session.mise_a_jour = datetime.utcnow()
 
         if not session.titre and session.nb_messages == 2:
             asyncio.ensure_future(_set_session_titre(session, message))

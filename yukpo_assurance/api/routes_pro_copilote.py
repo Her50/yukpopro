@@ -28,7 +28,7 @@ import logging
 import re
 import uuid
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, List
 
@@ -71,8 +71,8 @@ async def _sauvegarder_doc_db(
             contenu_genere=contenu_genere[:5000] if contenu_genere else "",
             session_id=session_id,
             meta=meta or {},
-            cree_le=datetime.now(timezone.utc),
-            modifie_le=datetime.now(timezone.utc),
+            cree_le=datetime.utcnow(),
+            modifie_le=datetime.utcnow(),
         )
         db.add(doc)
         await db.commit()
@@ -113,7 +113,7 @@ def _get_session(user_id: int) -> dict:
         _SESSIONS[user_id] = {
             "session_id": uuid.uuid4().hex,
             "messages": [],
-            "cree_le": datetime.now(timezone.utc).isoformat(),
+            "cree_le": datetime.utcnow().isoformat(),
             "dernier_message": None,
             "nb_appels_agent": 0,
         }
@@ -125,10 +125,10 @@ def _ajouter_message(session: dict, role: str, contenu: str, meta: dict | None =
     session["messages"].append({
         "role": role,
         "content": contenu,
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "ts": datetime.utcnow().isoformat(),
         "meta": meta or {},
     })
-    session["dernier_message"] = datetime.now(timezone.utc).isoformat()
+    session["dernier_message"] = datetime.utcnow().isoformat()
     # Garder seulement les N derniers messages (paires user/assistant)
     if len(session["messages"]) > _MAX_MESSAGES_SESSION:
         session["messages"] = session["messages"][-_MAX_MESSAGES_SESSION:]
@@ -2217,7 +2217,7 @@ async def nouvelle_session_copilote(
     _SESSIONS[current_user.user_id] = {
         "session_id": uuid.uuid4().hex,
         "messages": [],
-        "cree_le": datetime.now(timezone.utc).isoformat(),
+        "cree_le": datetime.utcnow().isoformat(),
         "dernier_message": None,
         "nb_appels_agent": 0,
         "raison_nouveau": req.raison,

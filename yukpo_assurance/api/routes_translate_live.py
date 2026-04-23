@@ -136,7 +136,7 @@ async def websocket_translate_live(
         user_plan=plan,
         source_lang=source,
         target_lang=target,
-        elevenlabs_key=settings.ELEVENLABS_API_KEY,
+        elevenlabs_key=getattr(settings, "ELEVENLABS_API_KEY", ""),
     )
     try:
         await session.run()
