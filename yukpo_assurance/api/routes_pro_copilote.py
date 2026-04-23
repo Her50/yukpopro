@@ -890,20 +890,6 @@ FORMAT_CIBLE (si conversion): docx, pdf, pptx, xlsx, csv, txt, jpg
 JSON REQUIS (tous les champs, null si non applicable):
 {{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "langue_cible": null, "format_cible": null, "confiance": 0.9}}"""
 
-    # Fast-path : si pas de fichiers, on teste les mots-clés d'abord.
-    # Si aucun signal spécial détecté → conversation directe, 0 appel LLM.
-    # IMPORTANT: ne sauter le LLM que pour des messages courts/salutations évidentes
-    # car les mots-clés ratent beaucoup de formulations naturelles ("tu peux me faire...",
-    # "donne-moi une lettre de...", "j'ai besoin d'un rapport...").
-    if not a_fichiers and not contenu_fichiers:
-        fast = _orchestrer_fallback_keywords(message, profil, False)
-        if fast["intention"] != "conversation":
-            return fast  # Signal fort détecté → pas besoin du LLM
-        # Pour "conversation" : ne sauter le LLM que pour les messages courts/évidents
-        if len(message.strip()) < 60:
-            logger.debug("[Orchestrateur] fast-path conversation courte → LLM skipped")
-            return fast
-
     try:
         reponse = await asyncio.wait_for(
             ia_client.appeler(
