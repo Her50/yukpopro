@@ -935,6 +935,42 @@ class BureauClientDB(Base):
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+# ─── CRÉDITS BUREAU SECRÉTARIAT ──────────────────────────────────────────────
+
+class CreditBureauDB(Base):
+    """
+    Solde de crédits Bureau par utilisateur YukpoSecrétariat.
+    Plans : gratuit (1 000) / secretariat (20 000) / infographie (20 000) / complet (50 000).
+    Séparé de CreditIAUserDB pour ne pas interférer avec les plans YukpoPro.
+    """
+    __tablename__ = "credits_bureau"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, unique=True, index=True)
+    plan = Column(String(50), nullable=False, default="gratuit")
+    credits_alloues = Column(Integer, default=1000)
+    credits_utilises = Column(Float, default=0.0)
+    periode_debut = Column(DateTime, default=datetime.utcnow)
+    periode_fin = Column(DateTime, nullable=True)
+    mise_a_jour = Column(DateTime, default=datetime.utcnow)
+
+
+class ConsommationBureauDB(Base):
+    """Log de consommation par appel bureau (LLM + forfaits non-LLM)."""
+    __tablename__ = "consommations_bureau"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    modele = Column(String(100), nullable=False, default="forfait")
+    tokens_input = Column(Integer, default=0)
+    tokens_output = Column(Integer, default=0)
+    cout_usd = Column(Float, default=0.0)
+    cout_fcfa = Column(Float, default=0.0)
+    credits_debites = Column(Float, default=0.0)
+    module = Column(String(100), nullable=True)   # redaction|ocr|audio|traduction|infographie|gestion
+    cree_le = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:
