@@ -29,6 +29,7 @@ import re
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -152,7 +153,6 @@ def _extraire_texte_fichiers(fichiers: list) -> str:
         return ""
     import base64
     import io
-    from pathlib import Path
 
     extraits = []
     for f in fichiers:
@@ -892,10 +892,16 @@ JSON REQUIS (tous les champs, null si non applicable):
 
     # Fast-path : si pas de fichiers, on teste les mots-clés d'abord.
     # Si aucun signal spécial détecté → conversation directe, 0 appel LLM.
+    # IMPORTANT: ne sauter le LLM que pour des messages courts/salutations évidentes
+    # car les mots-clés ratent beaucoup de formulations naturelles ("tu peux me faire...",
+    # "donne-moi une lettre de...", "j'ai besoin d'un rapport...").
     if not a_fichiers and not contenu_fichiers:
         fast = _orchestrer_fallback_keywords(message, profil, False)
-        if fast["intention"] == "conversation":
-            logger.debug("[Orchestrateur] fast-path conversation → LLM skipped")
+        if fast["intention"] != "conversation":
+            return fast  # Signal fort détecté → pas besoin du LLM
+        # Pour "conversation" : ne sauter le LLM que pour les messages courts/évidents
+        if len(message.strip()) < 60:
+            logger.debug("[Orchestrateur] fast-path conversation courte → LLM skipped")
             return fast
 
     try:
@@ -1338,7 +1344,9 @@ Yukpo Pro PEUT générer et télécharger directement depuis ce chat :
 
 RÈGLE ABSOLUE : Quand l'utilisateur demande de générer/créer/rédiger un document,
 tu NE DIS JAMAIS "je ne peux pas" — le backend génère automatiquement le fichier.
-Tu confirmes que le document est en cours de génération et sera téléchargeable.
+Si un lien `/api/v1/...` ou un nom de fichier apparaît dans le résultat de l'agent ci-dessous,
+cite-le tel quel comme lien de téléchargement.
+NE JAMAIS inventer ou promettre un lien de téléchargement si aucun lien réel n'est fourni dans le résultat.
 
 **FORMATAGE MARKDOWN OBLIGATOIRE :**
 - Utilise **gras** pour les termes clés, montants, noms propres importants
@@ -1471,7 +1479,6 @@ async def copilote_chat(
             chemin_docx = None
             try:
                 import base64
-                from pathlib import Path
                 from datetime import datetime as _dt
                 from api.routes_pro_generateurs import (
                     _traduire_docx_avec_structure,
@@ -1917,7 +1924,7 @@ async def copilote_chat(
                         )
                         if res:
                             parties_rag.append(res)
-                    if not parties_rag or not any("CODE CIMA" not in p for p in parties_rag):
+                    if not parties_rag or not any("CODE CIMA" in p for p in parties_rag):
                         res2 = await asyncio.wait_for(
                             asyncio.to_thread(rechercher_corpus_reglementaire, req.message, pays),
                             timeout=4.0,
@@ -2138,7 +2145,18 @@ async def copilote_chat(
                 db=db,
             )
             if not ok:
-                raise HTTPException(status_code=429, detail=msg_credits)
+                # msg_credits = "CREDITS_EPUISES|utilises|alloues"
+                if msg_credits.startswith("CREDITS_EPUISES|"):
+                    parts = msg_credits.split("|")
+                    utilises = parts[1] if len(parts) > 1 else "?"
+                    alloues  = parts[2] if len(parts) > 2 else "?"
+                    raise HTTPException(status_code=402, detail={
+                        "code":    "CREDITS_EPUISES",
+                        "message": f"Crédits Yukpo épuisés ({utilises}/{alloues} ce mois).",
+                        "action":  "Rechargez vos crédits ou changez de plan pour continuer.",
+                        "url":     "/abonnement",
+                    })
+                raise HTTPException(status_code=402, detail=msg_credits)
         except HTTPException:
             raise
         except Exception as _e:
