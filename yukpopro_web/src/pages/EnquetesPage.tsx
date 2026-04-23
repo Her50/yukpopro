@@ -383,7 +383,7 @@ export const EnquetesPage = () => {
               <div>
                 <label className={labelCls}>Méthodologie</label>
                 <select className={inputCls} value={form.methodologie} onChange={e => setForm(f => ({ ...f, methodologie: e.target.value }))}>
-                  {METHODOLOGIES.map(m => <option key={m.value} value={m.value} style={{ background: "#1a2030" }}>{m.label}</option>)}
+                  {METHODOLOGIES.map(m => <option key={m.value} value={m.value} style={{ background: "var(--ykp-elevated)", color: "var(--ykp-text-primary)" }}>{m.label}</option>)}
                 </select>
               </div>
               <div>
@@ -436,7 +436,7 @@ export const EnquetesPage = () => {
           const isOpen = expandedId === etude.etude_id;
           const idx = statutIdx(etude.statut);
           return (
-            <div key={etude.etude_id} className="rounded-2xl border border-white/[0.06] overflow-hidden" style={{ background: "#161B27" }}>
+            <div key={etude.etude_id} className="rounded-2xl border overflow-hidden" style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)" }}>
 
               {/* En-tête carte */}
               <button className="w-full flex items-start gap-4 px-5 py-4 hover:bg-white/[0.025] transition-all text-left" onClick={() => ouvrirEtude(etude)}>
