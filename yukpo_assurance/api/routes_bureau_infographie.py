@@ -112,7 +112,7 @@ async def generer_depuis_brief(
         logger.error(f"[Bureau Infographie] Génération échouée : {e}")
         raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
 
-    # Débit crédits : LLM spec + forfait PDF
+    # Débit crédits : LLM (tokens) + création (montant FCFA = prix_fcfa du gabarit)
     try:
         meta = resultat.meta or {}
         if meta.get("tokens_input") or meta.get("tokens_output"):
@@ -123,10 +123,14 @@ async def generer_depuis_brief(
                 tokens_output=int(meta.get("tokens_output", 0) or 0),
                 module="infographie",
             )
-        if resultat.pdf_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
-        if resultat.png_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+        prix_gabarit = float(GABARITS[demande.type_gabarit].get("prix_fcfa", 0) or 0)
+        if prix_gabarit > 0 and resultat.pdf_bytes:
+            await debiter_forfait(
+                current_user.user_id,
+                "infographie_creation",
+                module="infographie",
+                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+            )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie échoué : {_e}")
 
@@ -137,12 +141,12 @@ async def generer_depuis_brief(
     png_b64 = None
 
     if resultat.pdf_bytes:
-        pdf_id = f"bureau_infog_{current_user.user_id}_{demande.type_gabarit}_{ts}.pdf"
+        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.pdf"
         (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
         pdf_b64 = base64.b64encode(resultat.pdf_bytes).decode()
 
     if resultat.png_bytes:
-        png_id = f"bureau_infog_{current_user.user_id}_{demande.type_gabarit}_{ts}.png"
+        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.png"
         (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
         png_b64 = base64.b64encode(resultat.png_bytes).decode()
 
@@ -218,11 +222,18 @@ async def generer_manuel(
         raise HTTPException(status_code=500, detail=str(e))
 
     ts = int(__import__("time").time())
-    pdf_id = f"bureau_infog_{current_user.user_id}_{demande.type_gabarit}_{ts}.pdf"
+    pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.pdf"
     (_DATA_DIR / pdf_id).write_bytes(pdf_bytes)
 
     try:
-        await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
+        prix_gabarit = float(GABARITS[demande.type_gabarit].get("prix_fcfa", 0) or 0)
+        if prix_gabarit > 0:
+            await debiter_forfait(
+                current_user.user_id,
+                "infographie_creation",
+                module="infographie",
+                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+            )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie manuel échoué : {_e}")
 
@@ -300,16 +311,16 @@ async def generer_depuis_modele_image(
     pdf_id = png_id = pdf_b64 = png_b64 = None
 
     if resultat.pdf_bytes:
-        pdf_id = f"bureau_infog_{current_user.user_id}_{type_gabarit}_{ts}.pdf"
+        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{type_gabarit}_{ts}.pdf"
         (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
         pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
 
     if resultat.png_bytes:
-        png_id = f"bureau_infog_{current_user.user_id}_{type_gabarit}_{ts}.png"
+        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{type_gabarit}_{ts}.png"
         (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
         png_b64 = _b64.b64encode(resultat.png_bytes).decode()
 
-    # Débit : vision modèle + LLM spec + forfaits PDF/PNG
+    # Débit : vision modèle + LLM spec + création (prix_fcfa du gabarit)
     try:
         if analyse_style:
             await debiter_forfait(current_user.user_id, "infographie_vision", module="infographie")
@@ -322,10 +333,14 @@ async def generer_depuis_modele_image(
                 tokens_output=int(meta.get("tokens_output", 0) or 0),
                 module="infographie",
             )
-        if resultat.pdf_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
-        if resultat.png_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+        prix_gabarit = float(GABARITS[type_gabarit].get("prix_fcfa", 0) or 0)
+        if prix_gabarit > 0 and resultat.pdf_bytes:
+            await debiter_forfait(
+                current_user.user_id,
+                "infographie_creation",
+                module="infographie",
+                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+            )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie modèle échoué : {_e}")
 
@@ -398,12 +413,12 @@ async def generer_format_custom(
     pdf_id = png_id = pdf_b64 = png_b64 = None
 
     if resultat.pdf_bytes:
-        pdf_id = f"bureau_infog_{current_user.user_id}_custom_{ts}.pdf"
+        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_custom_{ts}.pdf"
         (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
         pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
 
     if resultat.png_bytes:
-        png_id = f"bureau_infog_{current_user.user_id}_custom_{ts}.png"
+        png_id = f"bureau_pdf_{current_user.user_id}_infographie_custom_{ts}.png"
         (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
         png_b64 = _b64.b64encode(resultat.png_bytes).decode()
 
@@ -417,10 +432,14 @@ async def generer_format_custom(
                 tokens_output=int(meta.get("tokens_output", 0) or 0),
                 module="infographie",
             )
-        if resultat.pdf_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
-        if resultat.png_bytes:
-            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+        prix_gabarit = float(gabarit_custom.get("prix_fcfa", 5000) or 5000)
+        if prix_gabarit > 0 and resultat.pdf_bytes:
+            await debiter_forfait(
+                current_user.user_id,
+                "infographie_creation",
+                module="infographie",
+                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+            )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie custom échoué : {_e}")
 

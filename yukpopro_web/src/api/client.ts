@@ -513,70 +513,111 @@ export const reunionsApi = {
   },
 };
 
-export interface VisuelMarketingSpec {
-  visual_type: string;
-  format: string;
-  theme: string;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  brand_name?: string;
-  brand_color?: string;
-  badge?: string;
-  contact?: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  price?: string;
-  organizer?: string;
-  bullets?: string[];
-  hashtags?: string[];
-  logo_base64?: string;
-  output_format?: string;
-  sauvegarder?: boolean;
-  titre_document?: string;
+// ── Infographie Pro (anciennement Marketing) ─────────────────────────────────
+
+export interface GabaritInfographie {
+  cle: string;
+  label: string;
+  width_mm: number;
+  height_mm: number;
+  bleed_mm: number;
+  categorie: string;
+  description: string;
+  prix_fcfa: number;
 }
 
-export interface VisuelSummary {
-  id: number;
+export interface SpecificationInfographieData {
   titre: string;
-  visual_type: string;
-  format: string;
-  theme: string;
-  dimensions: string;
-  image_preview: string;
-  cree_le: string;
-  fichier?: string;
+  sous_titre?: string | null;
+  corps?: string | null;
+  details?: string[];
+  palette?: string;
+  nom_organisation?: string | null;
+  contact?: string | null;
+  slogan?: string | null;
+  date_evenement?: string | null;
+  lieu?: string | null;
 }
 
-export const marketingApi = {
-  genererVisuel: async (spec: VisuelMarketingSpec): Promise<{
-    image_base64: string;
-    format_mime: string;
-    dimensions: { w: number; h: number };
-    doc_id: number | null;
-    sauvegarde: boolean;
-  }> => {
-    const { data } = await http.post("/pro/marketing/visuel/generer", spec, { timeout: 60_000 });
+export interface ResultatInfographieReponse {
+  gabarit: string;
+  titre?: string;
+  palette?: string;
+  specification: SpecificationInfographieData | null;
+  pdf_id: string | null;
+  png_id: string | null;
+  pdf_base64: string | null;
+  png_base64: string | null;
+  prix_fcfa: number;
+  meta?: Record<string, any>;
+  analyse_modele?: string;
+  dimensions_mm?: { width: number; height: number; bleed: number };
+}
+
+export const infographieApi = {
+  listerGabarits: async (): Promise<{ gabarits: GabaritInfographie[]; palettes: string[] }> => {
+    const { data } = await http.get("/bureau/infographie/gabarits");
     return data;
   },
 
-  listerVisuels: async (): Promise<{ visuels: VisuelSummary[] }> => {
-    const { data } = await http.get("/pro/marketing/visuels");
+  genererDepuisBrief: async (payload: {
+    brief: string;
+    type_gabarit: string;
+    pays?: string;
+  }): Promise<ResultatInfographieReponse> => {
+    const { data } = await http.post("/bureau/infographie/generer", payload, { timeout: 90_000 });
     return data;
   },
 
-  supprimerVisuel: async (id: number): Promise<void> => {
-    await http.delete(`/pro/marketing/visuels/${id}`);
+  genererManuel: async (payload: {
+    type_gabarit: string;
+    titre: string;
+    sous_titre?: string;
+    corps?: string;
+    details?: string[];
+    palette?: string;
+    nom_organisation?: string;
+    contact?: string;
+    slogan?: string;
+    date_evenement?: string;
+    lieu?: string;
+  }): Promise<ResultatInfographieReponse> => {
+    const { data } = await http.post("/bureau/infographie/generer-manuel", payload, { timeout: 60_000 });
+    return data;
   },
 
-  types: async (): Promise<{
-    visual_types: string[];
-    formats: { id: string; label: string; dimensions: string }[];
-    themes: string[];
-  }> => {
-    const { data } = await http.get("/pro/marketing/types");
+  genererDepuisModele: async (payload: {
+    modele: File;
+    brief: string;
+    type_gabarit: string;
+    pays?: string;
+  }): Promise<ResultatInfographieReponse> => {
+    const fd = new FormData();
+    fd.append("modele", payload.modele);
+    fd.append("brief", payload.brief);
+    fd.append("type_gabarit", payload.type_gabarit);
+    fd.append("pays", payload.pays || "CM");
+    const { data } = await http.post("/bureau/infographie/generer-depuis-modele", fd, {
+      timeout: 120_000,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data;
+  },
+
+  genererCustom: async (payload: {
+    width_mm: number;
+    height_mm: number;
+    bleed_mm?: number;
+    brief: string;
+    pays?: string;
+  }): Promise<ResultatInfographieReponse> => {
+    const { data } = await http.post("/bureau/infographie/generer-custom", payload, { timeout: 90_000 });
+    return data;
+  },
+
+  urlTelechargement: (fichier_id: string): string => {
+    const base = (http.defaults.baseURL || "").replace(/\/$/, "");
+    return `${base}/bureau/infographie/fichier/${encodeURIComponent(fichier_id)}`;
   },
 };
 

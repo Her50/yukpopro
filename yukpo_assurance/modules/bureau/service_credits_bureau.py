@@ -93,9 +93,10 @@ PLANS_BUREAU: dict[str, dict] = {
 # Multiplié par 20 = crédits Yukpo débités
 COUTS_FORFAIT_FCFA: dict[str, float] = {
     # Infographie (non-LLM = rendu ReportLab + traitement image)
-    "infographie_pdf":       5.0,   # 100 crédits
-    "infographie_png":       2.5,   #  50 crédits (preview)
-    "infographie_vision":   10.0,   # 200 crédits (analyse image modèle)
+    # "infographie_creation" est facturé au tarif réel du gabarit (en FCFA),
+    # via multiplicateur=prix_fcfa_du_gabarit. Ex : carte visite 2000 FCFA, flyer A5 3000 FCFA.
+    "infographie_creation":  1.0,   # base 1 FCFA, multiplié par le prix_fcfa du gabarit
+    "infographie_vision":   10.0,   # 200 crédits (analyse image modèle uploadé)
     # OCR / traitement image
     "ocr_scan":              3.0,   #  60 crédits
     "ocr_manuscrit":         5.0,   # 100 crédits (vision avancée)

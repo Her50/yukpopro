@@ -90,7 +90,6 @@ from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_pro_abonnement import router as pro_abonnement_router
 from api.routes_pro_reunions import router as pro_reunions_router
-from api.routes_pro_marketing import router as pro_marketing_router
 from api.routes_mrh import router as mrh_router
 from api.routes_enquetes import router as enquetes_router
 from api.routes_reassurance import router as reassurance_router
@@ -108,6 +107,7 @@ from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
 from api.routes_bureau_abonnement import router as bureau_abonnement_router
+from api.routes_translate_live import router as translate_live_router
 from api.graphql_schema import creer_router_graphql
 from core.audit import AuditMiddleware
 from core.auth import auth_router
@@ -599,7 +599,6 @@ app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Pl
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])
 app.include_router(pro_abonnement_router, prefix="/api/v1/pro/abonnement",  tags=["Plateforme Pro — Abonnements"])
 app.include_router(pro_reunions_router,   prefix="/api/v1/pro/reunions",    tags=["Plateforme Pro — Réunions & Transcription"])
-app.include_router(pro_marketing_router,  prefix="/api/v1/pro/marketing",   tags=["Plateforme Pro — Agent Marketing Visuel"])
 app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes & Études qualitatives/quantitatives"])
 
 # ─── Endpoint setup initial (création admin si aucun n'existe) ────────────────
@@ -685,6 +684,9 @@ app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",   
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])
 app.include_router(bureau_abonnement_router, prefix="/api/v1/bureau/abonnement",  tags=["Secrétariat — Abonnement & Crédits"])
+
+# ─── YukpoTranslate Live (traduction vocale temps réel) ─────────────────────
+app.include_router(translate_live_router, prefix="/api/v1/translate/live", tags=["Traduction Live (YukpoTranslate)"])
 
 # GraphQL (Strawberry) — optionnel selon installation
 _graphql_router = creer_router_graphql()

@@ -1,11 +1,13 @@
-import { useState, FormEvent, useRef, DragEvent } from "react";
-import { FileText, Presentation, Download, CheckCircle, Loader, BookOpen, ArrowRight, Upload, X, FolderOpen, RefreshCw, Palette, Sparkles, Image as ImageIcon, Save, ChevronDown } from "lucide-react";
+import { useState, FormEvent, useRef, DragEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Presentation, Download, CheckCircle, Loader, BookOpen, ArrowRight, Upload, X, FolderOpen, RefreshCw, Palette, Sparkles, Image as ImageIcon, Save, ChevronDown, Wand2, Settings2, FileImage, Maximize2 } from "lucide-react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import { Card, Button, Textarea, Badge, Select } from "@/components/ui";
-import { generateurApi, marketingApi, VisuelMarketingSpec } from "@/api/client";
+import { generateurApi, infographieApi, GabaritInfographie, ResultatInfographieReponse } from "@/api/client";
 
-type Tab = "rapport" | "slides" | "modeles" | "conversion" | "marketing";
+type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
+type InfogMode = "brief" | "manuel" | "modele" | "custom";
 
 interface Template {
   label: string;
@@ -444,6 +446,7 @@ const EXTENSIONS_ACCEPTEES = ".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.pptx";
 const FORMATS_SLIDES = new Set(["rapport_direction","bilan_activite","proposition_client","pitch_projet","formation","analyse_marche"]);
 
 export const GenerateursPage = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("rapport");
   const [loading, setLoading] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
@@ -477,103 +480,140 @@ export const GenerateursPage = () => {
   const fileRapportRef = useRef<HTMLInputElement>(null);
   const fileSlidesRef  = useRef<HTMLInputElement>(null);
 
-  // ── Marketing visuel ─────────────────────────────────────────────────────
-  const [mktLoading, setMktLoading]           = useState(false);
-  const [mktImage, setMktImage]               = useState<string | null>(null);
-  const [mktMime, setMktMime]                 = useState("image/png");
-  const [mktDocId, setMktDocId]               = useState<number | null>(null);
-  const [mktVisualType, setMktVisualType]     = useState("poster");
-  const [mktFormat, setMktFormat]             = useState("portrait");
-  const [mktTheme, setMktTheme]               = useState("purple");
-  const [mktTitle, setMktTitle]               = useState("");
-  const [mktSubtitle, setMktSubtitle]         = useState("");
-  const [mktDescription, setMktDescription]  = useState("");
-  const [mktBrandName, setMktBrandName]       = useState("");
-  const [mktBrandColor, setMktBrandColor]     = useState("#7B3FE4");
-  const [mktBadge, setMktBadge]               = useState("");
-  const [mktContact, setMktContact]           = useState("");
-  const [mktDate, setMktDate]                 = useState("");
-  const [mktLocation, setMktLocation]         = useState("");
-  const [mktPrice, setMktPrice]               = useState("");
-  const [mktOrganizer, setMktOrganizer]       = useState("");
-  const [mktBullets, setMktBullets]           = useState("");
-  const [mktHashtags, setMktHashtags]         = useState("");
+  // ── Infographie Pro (print-ready PDF + PNG preview) ──────────────────────
+  const [infogMode, setInfogMode]               = useState<InfogMode>("brief");
+  const [infogGabarits, setInfogGabarits]       = useState<GabaritInfographie[]>([]);
+  const [infogPalettes, setInfogPalettes]       = useState<string[]>([]);
+  const [infogGabarit, setInfogGabarit]         = useState<string>("flyer_a5");
+  const [infogPays, setInfogPays]               = useState<string>("CM");
+  const [infogLoading, setInfogLoading]         = useState(false);
+  const [infogResult, setInfogResult]           = useState<ResultatInfographieReponse | null>(null);
+  const [infogZoom, setInfogZoom]               = useState(false);
+  // Brief IA
+  const [infogBrief, setInfogBrief]             = useState("");
+  // Manuel
+  const [infogPalette, setInfogPalette]         = useState("classique");
+  const [infogTitre, setInfogTitre]             = useState("");
+  const [infogSousTitre, setInfogSousTitre]     = useState("");
+  const [infogCorps, setInfogCorps]             = useState("");
+  const [infogDetails, setInfogDetails]         = useState("");
+  const [infogOrg, setInfogOrg]                 = useState("");
+  const [infogContact, setInfogContact]         = useState("");
+  const [infogSlogan, setInfogSlogan]           = useState("");
+  const [infogDate, setInfogDate]               = useState("");
+  const [infogLieu, setInfogLieu]               = useState("");
+  // Modèle (upload image)
+  const [infogModele, setInfogModele]           = useState<File | null>(null);
+  const infogModeleRef                          = useRef<HTMLInputElement>(null);
+  // Custom (dimensions libres)
+  const [infogW, setInfogW]                     = useState<number>(148);
+  const [infogH, setInfogH]                     = useState<number>(210);
+  const [infogBleed, setInfogBleed]             = useState<number>(3);
 
-  const MKT_TYPES = [
-    { id: "poster",        label: "Affiche / Poster" },
-    { id: "flyer",         label: "Flyer" },
-    { id: "social_post",   label: "Post Réseaux Sociaux" },
-    { id: "banner",        label: "Bannière" },
-    { id: "invitation",    label: "Invitation" },
-    { id: "certificate",   label: "Certificat / Attestation" },
-    { id: "business_card", label: "Carte de visite" },
-  ];
-  const MKT_FORMATS = [
-    { id: "portrait",    label: "Portrait (1080×1350)" },
-    { id: "square",      label: "Carré (1080×1080)" },
-    { id: "landscape",   label: "Paysage (1200×630)" },
-    { id: "story",       label: "Story (1080×1920)" },
-    { id: "banner_wide", label: "Bannière large (1500×500)" },
-    { id: "a4",          label: "A4 (2480×3508)" },
-    { id: "business_card", label: "Carte de visite (1050×600)" },
-  ];
-  const MKT_THEMES = [
-    { id: "purple",    label: "Yukpo Violet", color: "#7B1FE4" },
-    { id: "blue",      label: "Bleu Corporate", color: "#0062FF" },
-    { id: "dark",      label: "Dark Premium", color: "#00DCFF" },
-    { id: "gold",      label: "Or & Prestige", color: "#FFD700" },
-    { id: "elegant",   label: "Élégant Sombre", color: "#C3A564" },
-    { id: "green",     label: "Vert Nature", color: "#32E678" },
-    { id: "orange",    label: "Orange Énergie", color: "#FFA014" },
-    { id: "red",       label: "Rouge Impact", color: "#FF503C" },
-    { id: "corporate", label: "Corporate Clair", color: "#194190" },
-    { id: "light",     label: "Clair Moderne", color: "#285AD2" },
-  ];
+  useEffect(() => {
+    if (tab !== "infographie" || infogGabarits.length > 0) return;
+    infographieApi.listerGabarits()
+      .then(d => {
+        setInfogGabarits(d.gabarits);
+        setInfogPalettes(d.palettes);
+        if (d.palettes?.length) setInfogPalette(d.palettes[0]);
+      })
+      .catch(() => toast.error("Impossible de charger les gabarits"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
-  const handleGenererVisuel = async (e: FormEvent) => {
+  const gabaritsParCategorie = infogGabarits.reduce<Record<string, GabaritInfographie[]>>((acc, g) => {
+    (acc[g.categorie] ||= []).push(g);
+    return acc;
+  }, {});
+  const gabaritCourant = infogGabarits.find(g => g.cle === infogGabarit);
+
+  const handleGenererInfographie = async (e: FormEvent) => {
     e.preventDefault();
-    if (!mktTitle.trim()) { toast.error("Le titre est obligatoire"); return; }
-    setMktLoading(true); setMktImage(null);
+    setInfogLoading(true);
+    setInfogResult(null);
     try {
-      const spec: VisuelMarketingSpec = {
-        visual_type:   mktVisualType,
-        format:        mktFormat,
-        theme:         mktTheme,
-        title:         mktTitle,
-        subtitle:      mktSubtitle || undefined,
-        description:   mktDescription || undefined,
-        brand_name:    mktBrandName || undefined,
-        brand_color:   mktBrandColor,
-        badge:         mktBadge || undefined,
-        contact:       mktContact || undefined,
-        date:          mktDate || undefined,
-        location:      mktLocation || undefined,
-        price:         mktPrice || undefined,
-        organizer:     mktOrganizer || undefined,
-        bullets:       mktBullets.split("\n").filter(b => b.trim()),
-        hashtags:      mktHashtags.split(",").map(h => h.trim()).filter(Boolean),
-        sauvegarder:   true,
-        titre_document: mktTitle,
-      };
-      const res = await marketingApi.genererVisuel(spec);
-      setMktImage(res.image_base64);
-      setMktMime(res.format_mime);
-      setMktDocId(res.doc_id);
-      if (res.sauvegarde) toast.success("Visuel généré et sauvegardé dans Mes Documents !");
-      else toast.success("Visuel généré !");
+      let res: ResultatInfographieReponse;
+      if (infogMode === "brief") {
+        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
+        res = await infographieApi.genererDepuisBrief({ brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays });
+      } else if (infogMode === "manuel") {
+        if (!infogTitre.trim()) { toast.error("Titre requis"); setInfogLoading(false); return; }
+        res = await infographieApi.genererManuel({
+          type_gabarit: infogGabarit,
+          titre: infogTitre,
+          sous_titre: infogSousTitre || undefined,
+          corps: infogCorps || undefined,
+          details: infogDetails.split("\n").map(s => s.trim()).filter(Boolean),
+          palette: infogPalette,
+          nom_organisation: infogOrg || undefined,
+          contact: infogContact || undefined,
+          slogan: infogSlogan || undefined,
+          date_evenement: infogDate || undefined,
+          lieu: infogLieu || undefined,
+        });
+      } else if (infogMode === "modele") {
+        if (!infogModele) { toast.error("Choisissez une image modèle"); setInfogLoading(false); return; }
+        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
+        res = await infographieApi.genererDepuisModele({
+          modele: infogModele, brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays,
+        });
+      } else {
+        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
+        if (infogW <= 0 || infogH <= 0) { toast.error("Dimensions invalides"); setInfogLoading(false); return; }
+        res = await infographieApi.genererCustom({
+          width_mm: infogW, height_mm: infogH, bleed_mm: infogBleed, brief: infogBrief, pays: infogPays,
+        });
+      }
+      setInfogResult(res);
+      toast.success("Infographie générée et sauvegardée dans Mes Documents !");
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Erreur lors de la génération");
+      const status = err?.response?.status;
+      const detail: string = err?.response?.data?.detail || "";
+      if (status === 402 && detail.startsWith("CREDITS_EPUISES")) {
+        // ex: "CREDITS_EPUISES|restants=120|plan=secretariat"
+        const restants = /restants=(\d+)/.exec(detail)?.[1] ?? "0";
+        const plan     = /plan=([^|]+)/.exec(detail)?.[1] ?? "—";
+        toast((t) => (
+          <span className="text-sm">
+            Crédits insuffisants ({restants} restants, plan {plan}).
+            <button
+              onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+              className="ml-2 px-2 py-1 bg-yukpo-500 text-white rounded text-xs font-semibold"
+            >
+              Recharger / Upgrader
+            </button>
+          </span>
+        ), { duration: 8000, icon: "💳" });
+      } else if (status === 403 && detail.startsWith("MODULE_NON_AUTORISE")) {
+        toast((t) => (
+          <span className="text-sm">
+            Module Infographie non inclus dans votre plan.
+            <button
+              onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+              className="ml-2 px-2 py-1 bg-purple-500 text-white rounded text-xs font-semibold"
+            >
+              Upgrader
+            </button>
+          </span>
+        ), { duration: 8000, icon: "🔒" });
+      } else {
+        toast.error(detail || "Erreur lors de la génération");
+      }
     } finally {
-      setMktLoading(false);
+      setInfogLoading(false);
     }
   };
 
-  const handleTelechargerVisuel = () => {
-    if (!mktImage) return;
-    const ext = mktMime === "image/jpeg" ? "jpg" : "png";
-    const a   = document.createElement("a");
-    a.href    = `data:${mktMime};base64,${mktImage}`;
-    a.download = `visuel_${mktVisualType}_${Date.now()}.${ext}`;
+  const handleTelechargerInfog = (kind: "pdf" | "png") => {
+    if (!infogResult) return;
+    const b64 = kind === "pdf" ? infogResult.pdf_base64 : infogResult.png_base64;
+    const id  = kind === "pdf" ? infogResult.pdf_id     : infogResult.png_id;
+    if (!b64 || !id) { toast.error("Fichier indisponible"); return; }
+    const mime = kind === "pdf" ? "application/pdf" : "image/png";
+    const a = document.createElement("a");
+    a.href = `data:${mime};base64,${b64}`;
+    a.download = id;
     a.click();
   };
 
@@ -752,7 +792,7 @@ export const GenerateursPage = () => {
           { id: "slides",     icon: <Presentation className="w-4 h-4" />,  label: "PowerPoint" },
           { id: "conversion", icon: <RefreshCw className="w-4 h-4" />,     label: "Conversion" },
           { id: "modeles",    icon: <BookOpen className="w-4 h-4" />,      label: "Bibliothèque" },
-          { id: "marketing",  icon: <Palette className="w-4 h-4" />,      label: "Marketing Visuel" },
+          { id: "infographie", icon: <Palette className="w-4 h-4" />,     label: "Infographie Pro" },
         ] as const).map(({ id, icon, label }) => (
           <button
             key={id}
@@ -762,7 +802,7 @@ export const GenerateursPage = () => {
             }`}
           >
             {icon} {label}
-            {id === "marketing" && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-400 font-semibold">PRO</span>}
+            {id === "infographie" && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-400 font-semibold">PRO</span>}
           </button>
         ))}
       </div>
@@ -1112,152 +1152,265 @@ export const GenerateursPage = () => {
         </div>
       )}
 
-      {/* ── Tab Marketing Visuel ─────────────────────────────────────────── */}
-      {tab === "marketing" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* Formulaire — scrollable indépendamment */}
-          <form onSubmit={handleGenererVisuel} className="space-y-3">
-            {/* Ligne 1 : Type + Format */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-slate-400 mb-1 block">Type de visuel</label>
-                <select value={mktVisualType} onChange={e => setMktVisualType(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
-                  {MKT_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-400 mb-1 block">Format</label>
-                <select value={mktFormat} onChange={e => setMktFormat(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
-                  {MKT_FORMATS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
-                </select>
-              </div>
-            </div>
+      {/* ── Tab Infographie Pro (print-ready PDF + PNG preview) ───────────── */}
+      {tab === "infographie" && (
+        <div className="space-y-4">
+          {/* Étape 1 : choix du sous-mode */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {([
+              { id: "brief",  icon: <Wand2 className="w-4 h-4" />,      label: "Brief libre IA",       desc: "Décris, l'IA compose" },
+              { id: "manuel", icon: <Settings2 className="w-4 h-4" />,  label: "Spec manuelle",        desc: "Sans IA, contrôle total" },
+              { id: "modele", icon: <FileImage className="w-4 h-4" />,  label: "Depuis un modèle",     desc: "Upload + brief inspiré" },
+              { id: "custom", icon: <Maximize2 className="w-4 h-4" />,  label: "Format sur mesure",    desc: "Dimensions libres mm" },
+            ] as const).map(({ id, icon, label, desc }) => (
+              <button key={id} type="button" onClick={() => { setInfogMode(id); setInfogResult(null); }}
+                className={`flex flex-col items-start gap-1 p-3 rounded-xl border transition-all text-left ${
+                  infogMode === id
+                    ? "border-yukpo-500 bg-gradient-to-br from-purple-500/15 to-pink-500/10 text-white"
+                    : "border-slate-700/60 bg-slate-800/40 text-slate-400 hover:text-white hover:border-slate-600"
+                }`}>
+                <span className="flex items-center gap-2 text-sm font-semibold">{icon} {label}</span>
+                <span className="text-[11px] text-slate-500">{desc}</span>
+              </button>
+            ))}
+          </div>
 
-            {/* Thème — pills compactes */}
-            <div>
-              <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Thème visuel</label>
-              <div className="flex flex-wrap gap-1.5">
-                {MKT_THEMES.map(t => (
-                  <button key={t.id} type="button" onClick={() => setMktTheme(t.id)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${mktTheme === t.id ? "border-yukpo-500 bg-yukpo-500/15 text-white" : "border-slate-700 text-slate-400 hover:text-white"}`}>
-                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Titre + couleur marque */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="text-xs font-semibold text-slate-400 mb-1 block">Titre principal *</label>
-                <input value={mktTitle} onChange={e => setMktTitle(e.target.value)} required
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Ex: Formation Marketing Digital — Douala 2025" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-400 mb-1 block">Couleur marque</label>
-                <div className="flex gap-1.5">
-                  <input type="color" value={mktBrandColor} onChange={e => setMktBrandColor(e.target.value)}
-                    className="w-9 h-9 rounded cursor-pointer border-0 bg-transparent shrink-0" />
-                  <input type="text" value={mktBrandColor} onChange={e => setMktBrandColor(e.target.value)}
-                    className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-yukpo-500" placeholder="#7B3FE4" />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+            {/* Formulaire — 3 colonnes */}
+            <form onSubmit={handleGenererInfographie} className="space-y-3 lg:col-span-3">
+              {/* Étape 2 : sélection du gabarit (sauf custom) */}
+              {infogMode !== "custom" && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">
+                    Gabarit ({infogGabarits.length} disponibles)
+                  </label>
+                  <select value={infogGabarit} onChange={e => setInfogGabarit(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
+                    {Object.entries(gabaritsParCategorie).map(([cat, items]) => (
+                      <optgroup key={cat} label={cat.toUpperCase()}>
+                        {items.map(g => (
+                          <option key={g.cle} value={g.cle}>
+                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} FCFA
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  {gabaritCourant && (
+                    <p className="text-[11px] text-slate-500 mt-1">{gabaritCourant.description} · bleed {gabaritCourant.bleed_mm}mm</p>
+                  )}
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* ── BOUTON GÉNÉRER — visible ici, avant les champs optionnels ── */}
-            <button type="submit" disabled={mktLoading || !mktTitle.trim()}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
-              {mktLoading
-                ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro génère votre visuel…</>
-                : <><Sparkles className="w-4 h-4" /> Générer le visuel</>}
-            </button>
-
-            {/* Champs optionnels — séparés visuellement */}
-            <div className="border-t border-slate-700/60 pt-3">
-              <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wider">Champs optionnels</p>
-              <div className="grid grid-cols-2 gap-2.5">
-                <input value={mktSubtitle} onChange={e => setMktSubtitle(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Sous-titre / accroche" />
-                <input value={mktBrandName} onChange={e => setMktBrandName(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Nom marque / organisme" />
-                <input value={mktContact} onChange={e => setMktContact(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Contact / Lien" />
-                <input value={mktDate} onChange={e => setMktDate(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Date" />
-                <input value={mktLocation} onChange={e => setMktLocation(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Lieu" />
-                <input value={mktPrice} onChange={e => setMktPrice(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Tarif / Prix" />
-                <input value={mktBadge} onChange={e => setMktBadge(e.target.value)}
-                  className="col-span-2 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                  placeholder="Badge / Label (ex: GRATUIT · VIP · NOUVEAU)" />
-              </div>
-              <textarea value={mktDescription} onChange={e => setMktDescription(e.target.value)} rows={2}
-                className="mt-2 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                placeholder="Description (corps du visuel)" />
-              <div className="grid grid-cols-2 gap-2.5 mt-2">
-                <textarea value={mktBullets} onChange={e => setMktBullets(e.target.value)} rows={2}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                  placeholder={"Points clés (1 par ligne)"} />
-                <textarea value={mktHashtags} onChange={e => setMktHashtags(e.target.value)} rows={2}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                  placeholder={"#Hashtags (séparés par virgule)"} />
-              </div>
-            </div>
-          </form>
-
-          {/* Aperçu */}
-          <div className="flex flex-col gap-4">
-            {mktImage ? (
-              <Card className="p-4 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-white flex items-center gap-2"><ImageIcon className="w-4 h-4 text-pink-400" /> Aperçu</span>
-                  <div className="flex gap-2">
-                    <button onClick={handleTelechargerVisuel}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-yukpo-500/20 hover:bg-yukpo-500/30 text-yukpo-300 rounded-lg text-xs font-medium transition-all">
-                      <Download className="w-3.5 h-3.5" /> Télécharger
-                    </button>
-                    {mktDocId && (
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-xs font-medium">
-                        <Save className="w-3.5 h-3.5" /> Sauvegardé
-                      </span>
-                    )}
+              {/* Mode CUSTOM : dimensions */}
+              {infogMode === "custom" && (
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Largeur (mm)</label>
+                    <input type="number" min={10} max={3000} value={infogW} onChange={e => setInfogW(Number(e.target.value))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Hauteur (mm)</label>
+                    <input type="number" min={10} max={3000} value={infogH} onChange={e => setInfogH(Number(e.target.value))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Bleed (mm)</label>
+                    <input type="number" min={0} max={20} value={infogBleed} onChange={e => setInfogBleed(Number(e.target.value))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
                   </div>
                 </div>
-                <img src={`data:${mktMime};base64,${mktImage}`} alt="Visuel généré"
-                  className="w-full rounded-xl border border-white/10 object-contain max-h-[600px]" />
-              </Card>
-            ) : (
-              <Card className="flex flex-col items-center justify-center gap-4 p-12 border-dashed min-h-[400px]">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                  <Palette className="w-8 h-8 text-purple-400" />
+              )}
+
+              {/* Mode MODÈLE : upload */}
+              {infogMode === "modele" && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Image modèle (PNG/JPG/WEBP, max 10 Mo)</label>
+                  <input ref={infogModeleRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp"
+                    onChange={e => setInfogModele(e.target.files?.[0] || null)} className="hidden" />
+                  <button type="button" onClick={() => infogModeleRef.current?.click()}
+                    className="w-full flex items-center gap-2 px-3 py-2 border border-dashed border-slate-700 hover:border-yukpo-500 rounded-lg text-sm text-slate-400 hover:text-white transition-all">
+                    <Upload className="w-4 h-4" />
+                    {infogModele ? `${infogModele.name} (${(infogModele.size / 1024).toFixed(0)} Ko)` : "Uploader un visuel modèle (style, couleurs, layout)"}
+                  </button>
                 </div>
-                <div className="text-center">
-                  <p className="text-white font-semibold mb-1">Agent Marketing Visuel</p>
-                  <p className="text-slate-500 text-sm">Affiche · Flyer · Post social · Bannière · Invitation<br />Certificat · Carte de visite — niveau professionnel</p>
+              )}
+
+              {/* Étape 3 : champs spécifiques au mode */}
+              {(infogMode === "brief" || infogMode === "modele" || infogMode === "custom") && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Brief créatif *</label>
+                  <textarea value={infogBrief} onChange={e => setInfogBrief(e.target.value)} rows={5} required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
+                    placeholder="Ex: Flyer pour la formation 'Souscription Risques Industriels' organisée par YukpoAssurance Douala, le 15 mai 2026 à l'hôtel Hilton. Cible : courtiers et souscripteurs CIMA. Contact : +237 690 11 22 33. Style moderne et institutionnel." />
                 </div>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {["Poster", "Flyer", "Post social", "Bannière", "Certificat"].map(t => (
-                    <span key={t} className="px-2.5 py-1 bg-slate-800 rounded-full text-xs text-slate-400">{t}</span>
-                  ))}
+              )}
+
+              {infogMode === "manuel" && (
+                <>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="col-span-2">
+                      <label className="text-xs font-semibold text-slate-400 mb-1 block">Titre principal *</label>
+                      <input value={infogTitre} onChange={e => setInfogTitre(e.target.value)} required maxLength={60}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
+                    </div>
+                    <input value={infogSousTitre} onChange={e => setInfogSousTitre(e.target.value)} maxLength={80}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Sous-titre" />
+                    <select value={infogPalette} onChange={e => setInfogPalette(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
+                      {infogPalettes.map(p => <option key={p} value={p}>{p[0].toUpperCase() + p.slice(1)}</option>)}
+                    </select>
+                    <input value={infogOrg} onChange={e => setInfogOrg(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Nom de l'organisation" />
+                    <input value={infogContact} onChange={e => setInfogContact(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Tel / email / adresse" />
+                    <input value={infogDate} onChange={e => setInfogDate(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Date événement" />
+                    <input value={infogLieu} onChange={e => setInfogLieu(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Lieu" />
+                    <input value={infogSlogan} onChange={e => setInfogSlogan(e.target.value)}
+                      className="col-span-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
+                      placeholder="Slogan / accroche" />
+                  </div>
+                  <textarea value={infogCorps} onChange={e => setInfogCorps(e.target.value)} rows={2} maxLength={300}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
+                    placeholder="Corps de texte principal (max 300 caractères)" />
+                  <textarea value={infogDetails} onChange={e => setInfogDetails(e.target.value)} rows={3}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
+                    placeholder="Détails (1 par ligne, max 6 lignes)" />
+                </>
+              )}
+
+              {/* Pays cible (sauf manuel) */}
+              {infogMode !== "manuel" && (
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Pays cible</label>
+                    <select value={infogPays} onChange={e => setInfogPays(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
+                      <option value="CM">Cameroun</option>
+                      <option value="CI">Côte d'Ivoire</option>
+                      <option value="SN">Sénégal</option>
+                      <option value="TG">Togo</option>
+                      <option value="BJ">Bénin</option>
+                      <option value="BF">Burkina Faso</option>
+                      <option value="GA">Gabon</option>
+                      <option value="ML">Mali</option>
+                      <option value="NE">Niger</option>
+                      <option value="GN">Guinée</option>
+                      <option value="CG">Congo</option>
+                      <option value="CD">RDC</option>
+                      <option value="TD">Tchad</option>
+                    </select>
+                  </div>
                 </div>
-              </Card>
-            )}
+              )}
+
+              {/* Bouton générer */}
+              <button type="submit" disabled={infogLoading}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
+                {infogLoading
+                  ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro compose votre infographie…</>
+                  : <><Sparkles className="w-4 h-4" /> Générer l'infographie print-ready</>}
+              </button>
+              <p className="text-[11px] text-slate-500 text-center">PDF 300 DPI, traits de coupe, bleed inclus · PNG preview · sauvegarde automatique dans Mes Documents</p>
+            </form>
+
+            {/* Aperçu — 2 colonnes */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
+              {infogResult ? (
+                <Card className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-white flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-pink-400" /> Aperçu
+                    </span>
+                    <div className="flex gap-2 flex-wrap justify-end">
+                      {infogResult.png_id && (
+                        <button type="button" onClick={() => setInfogZoom(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-all">
+                          <Maximize2 className="w-3.5 h-3.5" /> Zoom
+                        </button>
+                      )}
+                      {infogResult.pdf_id && (
+                        <button type="button" onClick={() => handleTelechargerInfog("pdf")}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-yukpo-500/20 hover:bg-yukpo-500/30 text-yukpo-300 rounded-lg text-xs font-medium transition-all">
+                          <Download className="w-3.5 h-3.5" /> PDF print-ready
+                        </button>
+                      )}
+                      {infogResult.png_id && (
+                        <button type="button" onClick={() => handleTelechargerInfog("png")}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-all">
+                          <Download className="w-3.5 h-3.5" /> PNG
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {infogResult.png_base64 ? (
+                    <img src={`data:image/png;base64,${infogResult.png_base64}`} alt="Aperçu infographie"
+                      className="w-full rounded-xl border border-white/10 object-contain max-h-[520px] bg-white" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 p-8 bg-slate-800/40 rounded-xl text-slate-400 text-sm">
+                      <FileText className="w-8 h-8" />
+                      Preview PNG indisponible — téléchargez le PDF
+                    </div>
+                  )}
+                  {infogResult.specification && (
+                    <div className="text-xs text-slate-400 space-y-1 border-t border-slate-700/60 pt-2">
+                      <p><span className="text-slate-500">Titre :</span> {infogResult.specification.titre}</p>
+                      {infogResult.specification.palette && (
+                        <p><span className="text-slate-500">Palette :</span> {infogResult.specification.palette}</p>
+                      )}
+                      {typeof infogResult.prix_fcfa === "number" && infogResult.prix_fcfa > 0 && (
+                        <p><span className="text-slate-500">Tarif imprimé indicatif :</span> {infogResult.prix_fcfa.toLocaleString("fr-FR")} FCFA</p>
+                      )}
+                    </div>
+                  )}
+                  <span className="flex items-center gap-1.5 text-[11px] text-green-400">
+                    <Save className="w-3 h-3" /> Sauvegardé dans Mes Documents
+                  </span>
+                </Card>
+              ) : (
+                <Card className="flex flex-col items-center justify-center gap-4 p-12 border-dashed min-h-[400px]">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                    <Palette className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-semibold mb-1">Infographie Pro — Print-Ready</p>
+                    <p className="text-slate-500 text-sm">Cartes de visite · Flyers · Affiches · Diplômes<br />Faire-part · Roll-ups · Posts sociaux · Bâches</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center max-w-sm">
+                    {["Flyer A5", "Carte visite", "Diplôme", "Roll-up", "Insta Post", "Affiche A2"].map(t => (
+                      <span key={t} className="px-2.5 py-1 bg-slate-800 rounded-full text-xs text-slate-400">{t}</span>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
           </div>
+
+          {/* Modal zoom PNG */}
+          {infogZoom && infogResult?.png_base64 && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4" onClick={() => setInfogZoom(false)}>
+              <div className="relative max-w-5xl max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setInfogZoom(false)}
+                  className="absolute top-2 right-2 z-10 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white">
+                  <X className="w-4 h-4" />
+                </button>
+                <img src={`data:image/png;base64,${infogResult.png_base64}`} alt="Aperçu zoom"
+                  className="rounded-xl bg-white" />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <div className={`grid grid-cols-1 lg:grid-cols-5 gap-6 items-start ${tab === "modeles" || tab === "conversion" || tab === "marketing" ? "hidden" : ""}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-5 gap-6 items-start ${tab === "modeles" || tab === "conversion" || tab === "infographie" ? "hidden" : ""}`}>
         {/* Form */}
         <div className="lg:col-span-3 space-y-4">
           {tab === "rapport" ? (

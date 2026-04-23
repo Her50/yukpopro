@@ -7,11 +7,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FileText, Presentation, Download, Trash2, RefreshCw,
-  MessageSquare, Clock, Search, Filter, Plus, Palette, Image as ImageIcon,
+  MessageSquare, Clock, Search, Plus,
 } from "lucide-react";
 import { Card, Badge, Button, Spinner } from "@/components/ui";
-import { generateurApi, marketingApi } from "@/api/client";
-import type { VisuelSummary } from "@/api/client";
+import { generateurApi } from "@/api/client";
 import { useDocsStore, useCopiloteStore } from "@/store";
 import type { DocumentHistorique } from "@/types";
 import toast from "react-hot-toast";
@@ -30,7 +29,6 @@ const resolveIcon = (type: string): React.ReactNode => {
   if (type === "cv" || type === "lettre_emploi")
     return <span className="text-base">👤</span>;
   if (type === "traduction") return <span className="text-base">🌐</span>;
-  if (type === "visuel_marketing") return <span className="text-base">🎨</span>;
   if (type.startsWith("rapport") || type.startsWith("note") || type.startsWith("plan"))
     return <FileText className="w-4 h-4 text-blue-400" />;
   return <FileText className="w-4 h-4 text-slate-400" />;
@@ -43,7 +41,6 @@ const resolveColor = (type: string): string => {
   if (type.startsWith("lettre") || type.startsWith("courrier")) return "green";
   if (type === "cv" || type === "lettre_emploi") return "pink";
   if (type === "traduction") return "green";
-  if (type === "visuel_marketing") return "purple";
   if (type.startsWith("rapport") || type.startsWith("note") || type.startsWith("plan")) return "blue";
   return "secondary";
 };
@@ -82,10 +79,6 @@ export const HistoriqueDocumentsPage = () => {
   const [recherche, setRecherche] = useState("");
   const [filtreType, setFiltreType] = useState<string>("all");
   const [suppression, setSuppression] = useState<number | null>(null);
-  const [visuels, setVisuels] = useState<VisuelSummary[]>([]);
-  const [loadingVisuels, setLoadingVisuels] = useState(false);
-  const [suppressionVisuel, setSuppressionVisuel] = useState<number | null>(null);
-  const [activeSection, setActiveSection] = useState<"docs" | "visuels">("docs");
 
   const charger = async () => {
     setLoading(true);
@@ -99,41 +92,7 @@ export const HistoriqueDocumentsPage = () => {
     }
   };
 
-  const chargerVisuels = async () => {
-    setLoadingVisuels(true);
-    try {
-      const res = await marketingApi.listerVisuels();
-      setVisuels(res.visuels);
-    } catch {
-      toast.error("Impossible de charger les visuels");
-    } finally {
-      setLoadingVisuels(false);
-    }
-  };
-
-  useEffect(() => { charger(); chargerVisuels(); }, []);
-
-  const handleSupprimerVisuel = async (id: number) => {
-    setSuppressionVisuel(id);
-    try {
-      await marketingApi.supprimerVisuel(id);
-      setVisuels(prev => prev.filter(v => v.id !== id));
-      toast.success("Visuel supprimé");
-    } catch {
-      toast.error("Erreur lors de la suppression");
-    } finally {
-      setSuppressionVisuel(null);
-    }
-  };
-
-  const telechargerVisuel = (v: VisuelSummary) => {
-    if (!v.image_preview) return;
-    const ext = v.fichier?.endsWith(".jpg") ? "jpg" : "png";
-    const a   = document.createElement("a");
-    a.href    = `data:image/${ext === "jpg" ? "jpeg" : "png"};base64,${v.image_preview}`;
-    a.download = v.fichier || `visuel_${v.id}.${ext}`;
-    a.click();
-  };
+  useEffect(() => { charger(); }, []);
 
   // Ouvre le chat avec le contexte du document pour amélioration
   const ameliorerViaChat = (doc: DocumentHistorique) => {
@@ -214,85 +173,6 @@ export const HistoriqueDocumentsPage = () => {
         </div>
       </div>
 
-      {/* Sections */}
-      <div className="flex gap-2 bg-slate-800/50 p-1 rounded-xl w-fit">
-        <button onClick={() => setActiveSection("docs")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeSection === "docs" ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"}`}>
-          <FileText className="w-4 h-4" /> Documents
-          <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full">{documents.length}</span>
-        </button>
-        <button onClick={() => setActiveSection("visuels")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeSection === "visuels" ? "bg-gradient-to-r from-purple-600 to-pink-500 text-white" : "text-slate-400 hover:text-white"}`}>
-          <Palette className="w-4 h-4" /> Visuels Marketing
-          <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full">{visuels.length}</span>
-        </button>
-      </div>
-
-      {/* ── Section Visuels Marketing ───────────────────────────────────── */}
-      {activeSection === "visuels" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-slate-400 text-sm">{visuels.length} visuel{visuels.length !== 1 ? "s" : ""} sauvegardé{visuels.length !== 1 ? "s" : ""}</p>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={chargerVisuels}>Actualiser</Button>
-              <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => navigate("/generateurs")}>Nouveau visuel</Button>
-            </div>
-          </div>
-          {loadingVisuels ? (
-            <div className="flex justify-center py-16"><Spinner /></div>
-          ) : visuels.length === 0 ? (
-            <Card className="p-12 flex flex-col items-center gap-4 border-dashed">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                <Palette className="w-8 h-8 text-purple-400" />
-              </div>
-              <div className="text-center">
-                <p className="text-white font-semibold mb-1">Aucun visuel sauvegardé</p>
-                <p className="text-slate-500 text-sm">Créez des visuels marketing depuis Yukpo Studio → Marketing Visuel</p>
-              </div>
-              <Button variant="primary" size="sm" onClick={() => navigate("/generateurs")}>Créer un visuel</Button>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {visuels.map(v => (
-                <Card key={v.id} className="p-3 space-y-3 hover:border-purple-500/40 transition-colors">
-                  {/* Preview */}
-                  <div className="aspect-[4/3] bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center">
-                    {v.image_preview ? (
-                      <img src={`data:image/png;base64,${v.image_preview}`} alt={v.titre}
-                        className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-slate-600" />
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div>
-                    <p className="text-white text-sm font-medium truncate">{v.titre}</p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="text-xs bg-purple-500/15 text-purple-300 px-2 py-0.5 rounded-full">{v.visual_type}</span>
-                      <span className="text-xs text-slate-500">{v.dimensions}</span>
-                    </div>
-                    <p className="text-xs text-slate-600 mt-1">{new Date(v.cree_le).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                  </div>
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button onClick={() => telechargerVisuel(v)} disabled={!v.image_preview}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-yukpo-500/15 hover:bg-yukpo-500/25 text-yukpo-300 rounded-lg text-xs font-medium transition-all disabled:opacity-40">
-                      <Download className="w-3.5 h-3.5" /> Télécharger
-                    </button>
-                    <button onClick={() => handleSupprimerVisuel(v.id)} disabled={suppressionVisuel === v.id}
-                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
-                      {suppressionVisuel === v.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Section Documents ────────────────────────────────────────────── */}
-      {activeSection === "docs" && <>
       {/* Filtres */}
       <div className="flex gap-3 flex-wrap">
         {/* Recherche */}
@@ -424,7 +304,6 @@ export const HistoriqueDocumentsPage = () => {
           ))}
         </div>
       )}
-      </>}
     </div>
   );
 };
