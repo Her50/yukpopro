@@ -257,10 +257,10 @@ export const Spinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
 export const YukpoLogo = ({ size = 32, showText = true }: { size?: number; showText?: boolean }) => (
   <div className="flex items-center gap-3">
     <div style={{
-      width: size * 1.35, height: size * 1.35, background: "white",
-      borderRadius: size * 0.25, display: "flex", alignItems: "center",
-      justifyContent: "center", padding: size * 0.12, flexShrink: 0,
-      boxShadow: "0 0 0 1px rgba(0,84,166,0.35), 0 4px 12px rgba(0,84,166,0.2)",
+      width: size * 1.6, height: size * 1.6, background: "white",
+      borderRadius: size * 0.28, display: "flex", alignItems: "center",
+      justifyContent: "center", padding: size * 0.06, flexShrink: 0,
+      boxShadow: "0 0 0 1px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25)",
     }}>
       <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
     </div>

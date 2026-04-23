@@ -74,14 +74,14 @@ export const Sidebar = () => {
       >
         {collapsed ? (
           <div style={{
-            width: 34, height: 34, background: "white", borderRadius: 8,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 3,
-            boxShadow: "0 0 0 1px rgba(0,84,166,0.4), 0 4px 12px rgba(0,84,166,0.2)",
+            width: 40, height: 40, background: "white", borderRadius: 10,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 2,
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25)",
           }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
         ) : (
-          <YukpoLogo size={26} />
+          <YukpoLogo size={30} />
         )}
       </div>
 
