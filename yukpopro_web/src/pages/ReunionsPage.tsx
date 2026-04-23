@@ -398,7 +398,7 @@ const FormulaireReunion = ({
 
                 {/* Mode rapporteur-traducteur */}
                 {!recorder.isRecording && (
-                  <div className="bg-slate-900/40 rounded-lg p-2.5 border border-slate-700/60 space-y-2">
+                  <div className="bg-purple-500/10 rounded-lg p-2.5 border border-purple-500/30 space-y-2">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"

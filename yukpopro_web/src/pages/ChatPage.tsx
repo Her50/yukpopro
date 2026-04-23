@@ -407,8 +407,8 @@ export const ChatPage = () => {
                       className={cn(
                         "group flex items-center gap-2 mx-2 px-3 py-2.5 rounded-xl cursor-pointer text-sm transition-colors",
                         session.id === activeSessionId
-                          ? "bg-slate-700 text-white"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                          ? "bg-yukpo-500/20 border border-yukpo-400/40 text-white font-medium"
+                          : "text-slate-200 hover:bg-slate-800 hover:text-white"
                       )}
                       onClick={() => { selectSession(session.id); if (isMobile) setHistorySidebarOpen(false); }}
                     >
