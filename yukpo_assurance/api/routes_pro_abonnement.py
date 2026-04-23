@@ -166,19 +166,20 @@ async def mon_abonnement(
     """Retourne le plan actif, le quota restant et la date d'expiration."""
     # Les admins ont un accès illimité sans abonnement
     if current_user.role in ADMIN_ROLES:
-        from modules.pro.service_credits import CREDITS_PAR_PLAN, LABEL_CREDITS_PLAN, _forcer_plan_business
+        from modules.pro.service_credits import _forcer_plan_business
         try:
             await _forcer_plan_business(current_user.user_id, db)
         except Exception as _e:
             logger.warning(f"[Admin] _forcer_plan_business erreur: {_e}")
+        _ADMIN_CREDITS = 999_999
         return {
             "plan":               "business",
             "nom_plan":           "Admin — Accès Total",
             "statut":             "actif",
-            "credits_alloues":    CREDITS_PAR_PLAN["business"],
+            "credits_alloues":    _ADMIN_CREDITS,
             "credits_utilises":   0,
-            "credits_restants":   CREDITS_PAR_PLAN["business"],
-            "label_credits":      LABEL_CREDITS_PLAN["business"],
+            "credits_restants":   _ADMIN_CREDITS,
+            "label_credits":      "Illimité",
             "agents_illimites":   True,
             "date_fin":           None,
             "prix_fcfa":          0,
@@ -452,7 +453,7 @@ async def initier_recharge_credits(
         "numero":           req.numero_telephone,
         "montant":          pack["prix_fcfa"],
         "date_initiation":  datetime.utcnow().isoformat(),
-        "expire_a":         (datetime.utcnow() + timedelta(minutes=30)).isoformat(),
+        "expire_a":         (datetime.utcnow() + timedelta(hours=24)).isoformat(),
     }
     profil.preferences = prefs
     await db.commit()
@@ -467,7 +468,7 @@ async def initier_recharge_credits(
         "montant_fcfa":     pack["prix_fcfa"],
         "operateur":        OPERATEURS[req.operateur]["label"],
         "instructions":     instructions,
-        "expire_dans":      "30 minutes",
+        "expire_dans":      "24 heures",
     }
 
 
@@ -492,7 +493,7 @@ async def confirmer_recharge_credits(
 
     expire_a = datetime.fromisoformat(attente["expire_a"])
     if datetime.utcnow() > expire_a:
-        raise HTTPException(400, "Cette référence de recharge a expiré (30 min). Recommencez.")
+        raise HTTPException(400, "Cette référence de recharge a expiré (24h). Recommencez.")
 
     credits_a_ajouter = attente["credits"]
     pack_id = attente["pack_id"]

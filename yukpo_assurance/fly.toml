@@ -20,6 +20,7 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
   PYTHONPATH = "/app"
   WORKERS = "2"
   PORT = "8080"
+  ORASS_MODE = "production"
 
 [http_service]
   internal_port = 8080

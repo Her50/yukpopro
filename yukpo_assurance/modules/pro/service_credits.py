@@ -14,9 +14,10 @@ Tarifs modèles IA (prix public approximatif en USD/1M tokens) :
 
 Allocation mensuelle par plan :
   - gratuit  :    500 crédits/mois
-  - starter  :  5 000 crédits/mois
-  - pro      : 20 000 crédits/mois
-  - business : illimité (999 999)
+  - starter  :  1 000 crédits/mois
+  - pro      :  5 000 crédits/mois
+  - business : 50 000 crédits/mois
+  - admin    : illimité (999 999 — hors plans, via ADMIN_ROLES check)
 """
 import logging
 from datetime import datetime, timedelta
@@ -48,18 +49,18 @@ TARIFS_MODELES: dict[str, dict[str, float]] = {
 
 # ── Crédits mensuels par plan ──────────────────────────────────────────────────
 CREDITS_PAR_PLAN: dict[str, int] = {
-    "gratuit":  1_000,
-    "starter":  5_000,
-    "pro":      20_000,
-    "business": 999_999,
+    "gratuit":  500,
+    "starter":  1_000,
+    "pro":      5_000,
+    "business": 50_000,
 }
 
 # Label lisible pour l'interface
 LABEL_CREDITS_PLAN: dict[str, str] = {
-    "gratuit":  "1 000 crédits / mois",
-    "starter":  "5 000 crédits / mois",
-    "pro":      "20 000 crédits / mois",
-    "business": "Illimité",
+    "gratuit":  "500 crédits / mois",
+    "starter":  "1 000 crédits / mois",
+    "pro":      "5 000 crédits / mois",
+    "business": "50 000 crédits / mois",
 }
 
 

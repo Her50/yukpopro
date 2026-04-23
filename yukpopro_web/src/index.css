@@ -136,6 +136,17 @@
   *::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
   .dark *::-webkit-scrollbar-thumb { background-color: #374151; }
   .dark *::-webkit-scrollbar-thumb:hover { background-color: #4B5563; }
+
+  /* ── Focus ring — remplace le violet Tailwind par le bleu corporate Yukpo ── */
+  :root {
+    --tw-ring-color: rgba(0, 84, 166, 0.4);
+  }
+  .dark {
+    --tw-ring-color: rgba(0, 176, 240, 0.4);
+  }
+  /* accent-color — natif HTML (checkbox, radio, select, range) */
+  * { accent-color: #0054A6; }
+  .dark * { accent-color: #00B0F0; }
 }
 
 @layer components {

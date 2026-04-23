@@ -80,8 +80,18 @@ export const LoginPage = () => {
       const profil = await profilApi.create({ metier, pays, secteur, entreprise });
       setProfil(profil);
       navigate("/dashboard");
-    } catch {
-      toast.error("Erreur création profil");
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 409) {
+        // Profil déjà créé — on le récupère et on continue
+        try {
+          const profil = await profilApi.get();
+          setProfil(profil);
+          navigate("/dashboard");
+          return;
+        } catch {}
+      }
+      toast.error(err?.response?.data?.detail || "Erreur création profil");
     } finally {
       setLoading(false);
     }

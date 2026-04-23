@@ -1172,10 +1172,12 @@ export const GenerateursPage = () => {
               <button key={id} type="button" onClick={() => { setInfogMode(id); setInfogResult(null); }}
                 className={`flex flex-col items-start gap-1 p-3 rounded-xl border transition-all text-left ${
                   infogMode === id
-                    ? "border-yukpo-500 bg-gradient-to-br from-purple-500/15 to-pink-500/10 text-white"
-                    : "text-slate-400 hover:text-white hover:border-slate-600"
+                    ? "border-corp-500"
+                    : "hover:border-slate-600"
                 }`}
-                style={infogMode !== id ? { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" } : {}}>
+                style={infogMode === id
+                  ? { background: "rgba(0,84,166,0.12)", border: "1px solid #0054A6", color: "var(--ykp-text-primary)" }
+                  : { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)", color: "var(--ykp-text-secondary)" }}>
                 <span className="flex items-center gap-2 text-sm font-semibold">{icon} {label}</span>
                 <span className="text-[11px] text-slate-500">{desc}</span>
               </button>
