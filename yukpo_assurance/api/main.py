@@ -244,42 +244,34 @@ async def lifespan(app: FastAPI):
 
     # ── Création automatique du compte super_admin au premier démarrage ─────────
     async def _creer_super_admin():
-        import os as _os, secrets as _sec
-        from sqlalchemy.ext.asyncio import create_async_engine as _cae, AsyncSession as _AS
-        from sqlalchemy.orm import sessionmaker as _sm
-        from sqlalchemy import select as _sel
-        from passlib.context import CryptContext as _CC
+        import os as _os, secrets as _sec, bcrypt as _bcrypt
         from datetime import datetime as _dtt
-        from core.database import UtilisateurDB as _UDB
+        from core.database import UtilisateurDB as _UDB, async_session_maker as _asm2
+        from sqlalchemy import select as _sel2
 
         _admin_email = _os.environ.get("SUPER_ADMIN_EMAIL", "admin@yukpopro.cm")
         _admin_pwd   = _os.environ.get("SUPER_ADMIN_PASSWORD", "")
         _admin_nom   = _os.environ.get("SUPER_ADMIN_NOM",      "Yukpo Admin")
 
-        _engine = _cae(settings.DATABASE_URL, echo=False)
-        _Session = _sm(_engine, class_=_AS, expire_on_commit=False)
-        try:
-            async with _Session() as _sess:
-                _existing = (await _sess.execute(
-                    _sel(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
-                )).scalars().first()
+        async with _asm2() as _sess:
+            _existing = (await _sess.execute(
+                _sel2(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+            )).scalars().first()
 
-                if not _existing:
-                    _pwd = _admin_pwd or _sec.token_urlsafe(16)
-                    _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
-                    _uname = _admin_email.split("@")[0]
-                    _u = _UDB(
-                        username=_uname, email=_admin_email, nom=_admin_nom,
-                        hashed_password=_ctx.hash(_pwd), role="super_admin",
-                        compagnie_id=1, actif=True, cree_le=_dtt.utcnow(), cree_par=0,
-                    )
-                    _sess.add(_u)
-                    await _sess.commit()
-                    logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
-                else:
-                    logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
-        finally:
-            await _engine.dispose()
+            if not _existing:
+                _pwd = _admin_pwd or _sec.token_urlsafe(16)
+                _hashed = _bcrypt.hashpw(_pwd[:72].encode(), _bcrypt.gensalt()).decode()
+                _uname = _admin_email.split("@")[0]
+                _u = _UDB(
+                    username=_uname, email=_admin_email, nom=_admin_nom,
+                    hashed_password=_hashed, role="super_admin",
+                    compagnie_id=1, actif=True, cree_le=_dtt.utcnow(), cree_par=None,
+                )
+                _sess.add(_u)
+                await _sess.commit()
+                logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
+            else:
+                logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
 
     try:
         import asyncio as _aio
@@ -613,9 +605,8 @@ app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes 
 from fastapi import Body as _Body
 from core.database import async_session_maker as _asm, UtilisateurDB as _UDB
 from sqlalchemy import select as _sel
-from passlib.context import CryptContext as _CC
 from datetime import datetime as _dtt
-import os as _os
+import os as _os, bcrypt as _bcrypt_mod
 
 @app.post("/api/v1/setup/admin", tags=["Setup"], include_in_schema=False)
 async def setup_admin(
@@ -646,10 +637,10 @@ async def setup_admin(
         if existing:
             raise _HE(409, f"Admin déjà existant : {existing.email}. Utilisez /auth/login.")
 
-        _ctx = _CC(schemes=["bcrypt"], deprecated="auto")
+        _hashed = _bcrypt_mod.hashpw(password[:72].encode(), _bcrypt_mod.gensalt()).decode()
         _u = _UDB(
             username=email.split("@")[0], email=email,
-            nom="Yukpo Admin", hashed_password=_ctx.hash(password),
+            nom="Yukpo Admin", hashed_password=_hashed,
             role="super_admin", compagnie_id=1,
             actif=True, cree_le=_dtt.utcnow(), cree_par=None,
         )
