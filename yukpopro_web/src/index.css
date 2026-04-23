@@ -104,7 +104,13 @@
     color-scheme: dark;
   }
 
+  /* Light mode : subpixel AA — texte net et dense sur fond blanc */
   html {
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+  /* Dark mode : grayscale AA — évite les halos de couleur sur fond sombre */
+  html.dark {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
