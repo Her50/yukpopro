@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Card, Button, Textarea, Select, Badge } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi } from "@/api/client";
 import { useProfilStore } from "@/store";
 
@@ -162,6 +163,7 @@ export const TraductionPage = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto animate-fade-in">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-display font-bold text-white">Traduction Professionnelle</h1>
         <p className="text-slate-400 text-sm mt-1">

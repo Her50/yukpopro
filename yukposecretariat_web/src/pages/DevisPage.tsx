@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Receipt, Plus, Trash2, Loader2, Download } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface Ligne { description: string; quantite: number; prix_unitaire_fcfa: number; unite: string }
 
@@ -63,6 +64,7 @@ export default function DevisPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Receipt className="text-teal-600" size={24} />

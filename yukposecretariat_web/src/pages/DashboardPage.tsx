@@ -3,6 +3,7 @@ import { FileText, Scan, Mic, Image, KanbanSquare, Wallet, ArrowRight } from 'lu
 import { useNavigate } from 'react-router-dom'
 import { gestionAPI } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { DemoBanner } from '../components/DemoBanner'
 
 const ACCES_RAPIDES = [
   { label: 'Rédiger un document', icon: FileText, to: '/redaction', color: 'bg-blue-500', desc: '30+ types de documents IA' },
@@ -43,6 +44,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <DemoBanner />
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">

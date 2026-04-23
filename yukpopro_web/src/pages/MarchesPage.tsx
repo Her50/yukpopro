@@ -9,6 +9,7 @@ import {
   Search, Zap, Globe, Filter, X,
 } from "lucide-react";
 import { marchesApi, type MarchePublic } from "@/api/client";
+import { DemoBanner } from "@/components/DemoBanner";
 
 const formatDate = (iso?: string | null) => {
   if (!iso) return "–";
@@ -105,7 +106,7 @@ export const MarchesPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-
+      <DemoBanner />
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all

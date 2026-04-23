@@ -4,6 +4,7 @@ import { Bot, Send, Search, ChevronDown, ChevronUp, Clock, Shield, CreditCard, Z
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Card, Button, Textarea, Badge, Spinner } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { useProfilStore, useAuthStore } from "@/store";
 import { agentApi, abonnementApi } from "@/api/client";
 import type { AgentChatResponse } from "@/types";
@@ -112,6 +113,7 @@ export const AgentsPage = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
+      <DemoBanner />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Users, BarChart3, Cpu, RefreshCw, Search, Shield, TrendingUp, FileText } from "lucide-react";
 import { Button, Card, Badge, Spinner } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { adminApi } from "@/api/client";
 import { useAuthStore } from "@/store";
 import { useNavigate } from "react-router-dom";
@@ -94,6 +95,7 @@ export const AdminPage = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
+      <DemoBanner />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

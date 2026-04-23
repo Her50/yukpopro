@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Plus, Search, Phone, X, Loader2, MessageCircle } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface Client {
   id: number; nom: string; telephone: string; email?: string;
@@ -50,6 +51,7 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

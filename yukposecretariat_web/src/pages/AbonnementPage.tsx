@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CreditCard, Zap, CheckCircle2, Clock, Loader2, Package, Plus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { abonnementAPI } from '../api/client'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface Plan {
   id: string
@@ -143,6 +144,7 @@ export default function AbonnementPage() {
 
   return (
     <div className="space-y-6">
+      <DemoBanner />
       <header className="flex items-center gap-3">
         <CreditCard className="text-brand-600" size={28} />
         <div>

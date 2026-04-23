@@ -4,6 +4,7 @@ import { FileText, Presentation, Download, CheckCircle, Loader, BookOpen, ArrowR
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import { Card, Button, Textarea, Badge, Select } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi, infographieApi, GabaritInfographie, ResultatInfographieReponse } from "@/api/client";
 
 type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
@@ -775,6 +776,7 @@ export const GenerateursPage = () => {
 
   return (
     <div className="p-6 pb-24 space-y-6 max-w-5xl mx-auto animate-fade-in">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
           Yukpo Studio

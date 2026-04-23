@@ -4,6 +4,7 @@ import { ocrAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { DemoBanner } from '../components/DemoBanner'
 
 type Mode = 'scanner' | 'manuscrit'
 
@@ -80,6 +81,7 @@ export default function OcrPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Scan className="text-green-600" size={24} />

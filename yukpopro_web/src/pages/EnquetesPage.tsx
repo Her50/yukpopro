@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { enquetesApi } from "@/api/client";
+import { DemoBanner } from "@/components/DemoBanner";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -332,7 +333,7 @@ export const EnquetesPage = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[#0D1117]">
-
+      <DemoBanner className="mx-6 mt-4" />
       {/* ── Header ── */}
       <div className="flex-shrink-0 px-6 py-4 border-b border-white/[0.06]">
         <div className="flex items-start justify-between gap-4">
