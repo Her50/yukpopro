@@ -162,7 +162,15 @@ export const Sidebar = () => {
                     {!collapsed && (
                       <>
                         <span className="flex-1 truncate">{label}</span>
-                        {badge && <Badge variant="corp" size="sm">{badge}</Badge>}
+                        {badge && (
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, letterSpacing: "0.05em",
+                            padding: "2px 7px", borderRadius: 999,
+                            background: badge === "ADM" ? "rgba(239,68,68,0.22)" : badge === "NEW" ? "rgba(0,176,240,0.22)" : "rgba(0,84,166,0.28)",
+                            color: badge === "ADM" ? "#fca5a5" : "#00B0F0",
+                            border: `1px solid ${badge === "ADM" ? "rgba(239,68,68,0.35)" : "rgba(0,176,240,0.35)"}`,
+                          }}>{badge}</span>
+                        )}
                       </>
                     )}
                     {/* Tooltip collapsed */}

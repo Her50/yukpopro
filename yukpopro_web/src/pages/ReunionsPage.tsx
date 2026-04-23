@@ -1046,7 +1046,7 @@ export const ReunionsPage = () => {
               { icon: Sparkles,    title: "2. Rapport Yukpo",  desc: "Yukpo Pro génère un rapport structuré : participants, décisions, plan d'action avec responsables." },
               { icon: CheckCircle, title: "3. Suivi & Export", desc: "Téléchargez le rapport Markdown et suivez les recommandations et actions assignées." },
             ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50 text-center">
+              <div key={title} className="p-4 rounded-xl text-center" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
                   <Icon className="w-4 h-4 text-blue-400" />
                 </div>

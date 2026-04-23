@@ -23,8 +23,8 @@
        pour différencier du pur dark. */
     --ykp-sidebar-start: #2a3657;
     --ykp-sidebar-end: #1e2640;
-    --ykp-sidebar-text: #e2e8f0;
-    --ykp-sidebar-text-muted: #94a3b8;
+    --ykp-sidebar-text: #f1f5f9;
+    --ykp-sidebar-text-muted: #c8d5e3;
     --ykp-sidebar-border: rgba(255,255,255,0.08);
     --ykp-sidebar-hover: rgba(255,255,255,0.06);
     --ykp-sidebar-active-bg: linear-gradient(90deg, rgba(0,84,166,0.35) 0%, rgba(99,102,241,0.22) 100%);
