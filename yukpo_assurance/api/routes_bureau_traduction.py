@@ -149,8 +149,10 @@ async def traduire_fichier(
     if not ok_solde:
         raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
-    if fichier.size and fichier.size > 20 * 1024 * 1024:
-        raise HTTPException(400, detail="Fichier trop volumineux (max 20 MB)")
+    from config.settings import settings as _s
+    _limite_mo = getattr(_s, "MAX_DOC_SIZE_MB", 50)
+    if fichier.size and fichier.size > _limite_mo * 1024 * 1024:
+        raise HTTPException(400, detail=f"Fichier trop volumineux (max {_limite_mo} MB)")
 
     contenu_bytes = await fichier.read()
     ext = (fichier.filename or "").lower().rsplit(".", 1)[-1]

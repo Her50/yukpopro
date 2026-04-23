@@ -52,6 +52,26 @@ COMMENT DÉTECTER LE MODE :
   - Référence SIN-XXXX-NNN présente dans l'instruction → MODE INSTRUCTION
   - Aucun indice → demander : "Avez-vous déjà un numéro de sinistre, ou s'agit-il d'une nouvelle déclaration ?"
 
+ÉTAPES COMPLÈTES DE RÈGLEMENT (risques divers / RC Auto) :
+  1. Ouverture → creer_sinistre
+  2. Accusé de réception → generer_courrier("accuse_reception")
+  3. Mise en cause tiers → enregistrer_mise_en_cause + generer_courrier("mise_en_cause_tiers")
+  4. Relances → enregistrer_relance (amiable, mise_en_demeure…)
+  5. Réclamation pièces → generer_courrier("demande_pieces")
+  6. Mission expert/avocat → planifier_expertise + generer_courrier("mission_expert_avocat")
+  7. Bons de prise en charge → generer_courrier("notification_reglement") [maladie : emettre_bon]
+  8. Préavis de saisine → prelitigation_sinistre("preavs_saisine") si amiable échoue
+  9. Requête unilatérale → prelitigation_sinistre("requete_unilaterale") si préavis ignoré
+ 10. Étude rapport expertise → analyser_documents_sinistre(rapport_expertise)
+ 11. Identification victimes → dans rapport expertise (auto)
+ 12. Notes techniques → ajouter_note_technique
+ 13. Offre indemnisation → calculer_indemnisation → valider_sinistre
+ 14. Accord de règlement → valider_sinistre("accepte") + generer_courrier("pv_transaction")
+ 15. Procès verbal transaction → generer_courrier("pv_transaction")
+ 16. Quittances de règlement → generer_courrier("quittance_reglement")
+ 17. Transmission chèque/virement → transmettre_cheque
+ 18. Révisions/Réouverture → rouvrir_dossier
+
 RÈGLES STRICTES :
 - Si score fraude > 60 → analyser_fraude_ia AVANT calcul indemnisation
 - Police invalide → STOP + notification assuré avec motif précis
@@ -60,7 +80,8 @@ RÈGLES STRICTES :
 - Pour vie : délai règlement 30 jours après pièces complètes (Art. 73)
 - Tout règlement > 500 000 FCFA → validation humaine obligatoire
 - TOUTE écriture comptable → validation humaine avant passage en base
-- Sinistres en souffrance > délai CIMA → calcul intérêts moratoires automatique"""
+- Sinistres en souffrance > délai CIMA → calcul intérêts moratoires automatique
+- Préavis de saisine OBLIGATOIRE 15j avant toute saisine tribunal"""
 
     def _definir_outils(self) -> list[dict]:
         return [
@@ -189,10 +210,13 @@ RÈGLES STRICTES :
                     "reference": {"type": "string"},
                     "template":  {"type": "string", "enum": [
                         "accuse_reception", "notification_reglement",
-                        "rejet", "demande_pieces", "mise_en_demeure"
+                        "rejet", "demande_pieces", "mise_en_demeure",
+                        "mission_expert_avocat", "mise_en_cause_tiers",
+                        "preavs_saisine", "pv_transaction", "quittance_reglement"
                     ]},
                     "montant":   {"type": "number"},
                     "motif":     {"type": "string"},
+                    "destinataire": {"type": "string", "description": "Destinataire spécifique si différent de l'assuré"},
                 }, "required": ["reference", "template"]},
             },
             {
@@ -250,6 +274,75 @@ RÈGLES STRICTES :
                     "periode":   {"type": "string", "description": "ex: 2025-T1 ou 2025"},
                     "statut":    {"type": "string", "enum": ["ouvert", "clos", "expertise", "contentieux", "tous"]},
                 }, "required": []},
+            },
+            {
+                "name": "enregistrer_mise_en_cause",
+                "description": "Enregistre la mise en cause formelle du tiers responsable et génère la lettre de mise en cause",
+                "input_schema": {"type": "object", "properties": {
+                    "reference":        {"type": "string", "description": "Référence sinistre"},
+                    "tiers_nom":        {"type": "string", "description": "Nom du tiers mis en cause"},
+                    "tiers_adresse":    {"type": "string"},
+                    "tiers_assureur":   {"type": "string", "description": "Assureur du tiers si connu"},
+                    "montant_reclame":  {"type": "number"},
+                    "motif":            {"type": "string", "description": "Circonstances engageant la responsabilité du tiers"},
+                }, "required": ["reference", "tiers_nom", "motif"]},
+            },
+            {
+                "name": "enregistrer_relance",
+                "description": "Enregistre une relance (amiable ou formelle) vers le tiers, l'expert ou l'avocat, avec date et canal",
+                "input_schema": {"type": "object", "properties": {
+                    "reference":    {"type": "string"},
+                    "destinataire": {"type": "string", "description": "Tiers, expert, avocat, assureur adverse"},
+                    "type_relance": {"type": "string", "enum": ["amiable", "mise_en_demeure", "rappel_pieces", "relance_expert", "relance_avocat"]},
+                    "canal":        {"type": "string", "enum": ["courrier_ar", "email", "whatsapp", "telephone"]},
+                    "motif":        {"type": "string"},
+                    "numero_relance": {"type": "integer", "description": "Numéro de relance (1ère, 2ème…)"},
+                }, "required": ["reference", "destinataire", "type_relance", "motif"]},
+            },
+            {
+                "name": "prelitigation_sinistre",
+                "description": "Gère la phase contentieux : préavis de saisine (obligatoire 15j avant tribunal) ou requête unilatérale",
+                "input_schema": {"type": "object", "properties": {
+                    "reference":       {"type": "string"},
+                    "mode":            {"type": "string", "enum": ["preavs_saisine", "requete_unilaterale"]},
+                    "tribunal":        {"type": "string", "description": "Juridiction saisie (TGI, tribunal de commerce…)"},
+                    "motif_contentieux": {"type": "string", "description": "Motif de la saisine (refus amiable, silence…)"},
+                    "montant_conteste": {"type": "number"},
+                    "avocat_ref":      {"type": "string", "description": "Référence avocat mandaté si applicable"},
+                }, "required": ["reference", "mode", "motif_contentieux"]},
+            },
+            {
+                "name": "ajouter_note_technique",
+                "description": "Ajoute une note technique au dossier (observations gestionnaire, conclusions expertise, points de droit)",
+                "input_schema": {"type": "object", "properties": {
+                    "reference": {"type": "string"},
+                    "auteur":    {"type": "string", "description": "Gestionnaire ou expert auteur de la note"},
+                    "categorie": {"type": "string", "enum": ["observation_gestionnaire", "conclusion_expertise", "point_juridique", "evaluation_prejudice", "note_medicale"]},
+                    "contenu":   {"type": "string", "description": "Contenu de la note technique"},
+                }, "required": ["reference", "categorie", "contenu"]},
+            },
+            {
+                "name": "transmettre_cheque",
+                "description": "Enregistre la transmission du chèque/virement de règlement et la quittance signée",
+                "input_schema": {"type": "object", "properties": {
+                    "reference":         {"type": "string"},
+                    "montant":           {"type": "number"},
+                    "mode_paiement":     {"type": "string", "enum": ["cheque", "virement", "mobile_money", "cash_agence"]},
+                    "beneficiaire":      {"type": "string"},
+                    "reference_paiement": {"type": "string", "description": "N° chèque ou référence virement"},
+                    "date_transmission": {"type": "string", "description": "YYYY-MM-DD"},
+                    "quittance_signee":  {"type": "boolean", "description": "Quittance de règlement signée reçue"},
+                }, "required": ["reference", "montant", "mode_paiement", "beneficiaire"]},
+            },
+            {
+                "name": "rouvrir_dossier",
+                "description": "Réouvre un dossier clôturé pour révision (aggravation, recours, erreur de calcul, nouvelle expertise)",
+                "input_schema": {"type": "object", "properties": {
+                    "reference":    {"type": "string"},
+                    "motif_revision": {"type": "string", "enum": ["aggravation_sequelles", "recours_tiers", "erreur_calcul", "nouvelle_expertise", "decision_judiciaire"]},
+                    "description":  {"type": "string", "description": "Détail du motif de révision"},
+                    "montant_complement": {"type": "number", "description": "Montant complémentaire estimé si aggravation"},
+                }, "required": ["reference", "motif_revision", "description"]},
             },
         ]
 
@@ -629,6 +722,163 @@ Retourne ton analyse structurée : indicateurs suspects, cohérence déclaration
                     "branche": params.get("branche", "toutes"),
                     "periode": params.get("periode", "en cours"),
                 }, ensure_ascii=False, default=str)
+
+            if nom == "enregistrer_mise_en_cause":
+                from core.orass_connector import orass
+                from core.approval_queue import approval_queue
+                mise_en_cause = {
+                    "reference":       params["reference"],
+                    "tiers_nom":       params["tiers_nom"],
+                    "tiers_adresse":   params.get("tiers_adresse", ""),
+                    "tiers_assureur":  params.get("tiers_assureur", ""),
+                    "montant_reclame": params.get("montant_reclame", 0),
+                    "motif":           params["motif"],
+                    "date_mise_en_cause": str(date.today()),
+                }
+                try:
+                    await orass.enregistrer_evenement_sinistre(params["reference"], "mise_en_cause", mise_en_cause)
+                except Exception:
+                    pass
+                return json.dumps({
+                    "message": f"Mise en cause de {params['tiers_nom']} enregistrée — sinistre {params['reference']}",
+                    "etape": "mise_en_cause",
+                    "date": str(date.today()),
+                    "prochaine_etape": "Générer courrier mise_en_cause_tiers via generer_courrier",
+                }, ensure_ascii=False)
+
+            if nom == "enregistrer_relance":
+                from core.orass_connector import orass
+                relance = {
+                    "reference":      params["reference"],
+                    "destinataire":   params["destinataire"],
+                    "type_relance":   params["type_relance"],
+                    "canal":          params.get("canal", "courrier_ar"),
+                    "motif":          params["motif"],
+                    "numero_relance": params.get("numero_relance", 1),
+                    "date_relance":   str(date.today()),
+                }
+                try:
+                    await orass.enregistrer_evenement_sinistre(params["reference"], "relance", relance)
+                except Exception:
+                    pass
+                return json.dumps({
+                    "message": f"Relance n°{params.get('numero_relance', 1)} ({params['type_relance']}) enregistrée vers {params['destinataire']}",
+                    "etape": "relance",
+                    "canal": params.get("canal", "courrier_ar"),
+                    "date": str(date.today()),
+                }, ensure_ascii=False)
+
+            if nom == "prelitigation_sinistre":
+                from core.orass_connector import orass
+                from core.approval_queue import approval_queue
+                mode = params["mode"]
+                payload = {
+                    "reference":         params["reference"],
+                    "mode":              mode,
+                    "tribunal":          params.get("tribunal", "TGI compétent"),
+                    "motif_contentieux": params["motif_contentieux"],
+                    "montant_conteste":  params.get("montant_conteste", 0),
+                    "avocat_ref":        params.get("avocat_ref", ""),
+                    "date_acte":         str(date.today()),
+                }
+                try:
+                    await orass.enregistrer_evenement_sinistre(params["reference"], mode, payload)
+                except Exception:
+                    pass
+                # Validation humaine obligatoire avant saisine tribunal
+                await approval_queue.ajouter({
+                    "type":         f"prelitigation_{mode}",
+                    "reference":    params["reference"],
+                    "mode":         mode,
+                    "montant":      params.get("montant_conteste", 0),
+                    "motif":        params["motif_contentieux"],
+                    "user_id":      user_id,
+                    "execution_id": execution_id,
+                    "description":  f"{'Préavis de saisine' if mode == 'preavs_saisine' else 'Requête unilatérale'} — {params['reference']}",
+                })
+                if mode == "preavs_saisine":
+                    return (
+                        f"Préavis de saisine enregistré pour {params['reference']} — délai 15j avant saisine tribunal.\n"
+                        f"Tribunal visé : {params.get('tribunal', 'TGI')}\n"
+                        "En attente validation responsable avant transmission."
+                    )
+                return (
+                    f"Requête unilatérale enregistrée pour {params['reference']}.\n"
+                    f"Montant contesté : {params.get('montant_conteste', 0):,} FCFA\n"
+                    "En attente validation responsable avant dépôt tribunal."
+                ).replace(",", " ")
+
+            if nom == "ajouter_note_technique":
+                from core.orass_connector import orass
+                note = {
+                    "reference":  params["reference"],
+                    "auteur":     params.get("auteur", "Gestionnaire"),
+                    "categorie":  params["categorie"],
+                    "contenu":    params["contenu"],
+                    "date_note":  str(date.today()),
+                }
+                try:
+                    await orass.enregistrer_evenement_sinistre(params["reference"], "note_technique", note)
+                except Exception:
+                    pass
+                return json.dumps({
+                    "message": f"Note technique ({params['categorie']}) ajoutée au dossier {params['reference']}",
+                    "auteur": params.get("auteur", "Gestionnaire"),
+                    "date": str(date.today()),
+                }, ensure_ascii=False)
+
+            if nom == "transmettre_cheque":
+                from core.orass_connector import orass
+                from core.approval_queue import approval_queue
+                paiement = {
+                    "reference":          params["reference"],
+                    "montant":            params["montant"],
+                    "mode_paiement":      params["mode_paiement"],
+                    "beneficiaire":       params["beneficiaire"],
+                    "reference_paiement": params.get("reference_paiement", ""),
+                    "date_transmission":  params.get("date_transmission", str(date.today())),
+                    "quittance_signee":   params.get("quittance_signee", False),
+                }
+                try:
+                    await orass.enregistrer_evenement_sinistre(params["reference"], "transmission_paiement", paiement)
+                except Exception:
+                    pass
+                await approval_queue.ajouter({
+                    "type":         "transmission_cheque",
+                    "reference":    params["reference"],
+                    "montant":      params["montant"],
+                    "beneficiaire": params["beneficiaire"],
+                    "mode":         params["mode_paiement"],
+                    "user_id":      user_id,
+                    "execution_id": execution_id,
+                    "description":  f"Transmission {params['mode_paiement']} {params['montant']:,} FCFA → {params['beneficiaire']}".replace(",", " "),
+                })
+                return json.dumps({
+                    "message": f"Transmission {params['mode_paiement']} de {params['montant']:,} FCFA enregistrée — en attente confirmation caisse".replace(",", " "),
+                    "etape": "transmission_cheque",
+                    "quittance_signee": params.get("quittance_signee", False),
+                    "prochaine_etape": "Générer quittance_reglement via generer_courrier puis archiver_dossier",
+                }, ensure_ascii=False)
+
+            if nom == "rouvrir_dossier":
+                from core.orass_connector import orass
+                from core.approval_queue import approval_queue
+                await approval_queue.ajouter({
+                    "type":             "revision_dossier",
+                    "reference":        params["reference"],
+                    "motif_revision":   params["motif_revision"],
+                    "description_rev":  params["description"],
+                    "montant_complement": params.get("montant_complement", 0),
+                    "user_id":          user_id,
+                    "execution_id":     execution_id,
+                    "description":      f"Révision dossier {params['reference']} — {params['motif_revision']} : {params['description']}",
+                })
+                return json.dumps({
+                    "message": f"Demande de révision du dossier {params['reference']} soumise — motif : {params['motif_revision']}",
+                    "etape": "revision",
+                    "complement_estime_fcfa": params.get("montant_complement", 0),
+                    "note": "En attente validation responsable sinistres avant réouverture.",
+                }, ensure_ascii=False)
 
             return f"Outil '{nom}' non reconnu"
 

@@ -26,7 +26,8 @@ _MIME_AUTORISES = {
     "image/jpeg", "image/jpg", "image/png", "image/tiff",
     "image/webp", "image/bmp",
 }
-_TAILLE_MAX_BYTES = 20 * 1024 * 1024  # 20 Mo
+from config.settings import settings as _s_ocr
+_TAILLE_MAX_BYTES = getattr(_s_ocr, "MAX_DOC_SIZE_MB", 50) * 1024 * 1024
 
 
 def _valider_upload(file: UploadFile) -> None:

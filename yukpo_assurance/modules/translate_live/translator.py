@@ -11,6 +11,10 @@ from typing import Optional
 
 from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 from modules.translate_live.languages import nom_humain, normaliser_code_langue
+from modules.translate_live.nllb_translator import (
+    doit_utiliser_nllb,
+    traduire_nllb,
+)
 
 logger = logging.getLogger("yukpo_assurance.translate_live.translator")
 
@@ -43,6 +47,14 @@ async def traduire_texte(
         return ""
     if src != "auto" and src == tgt:
         return corps
+
+    # Langues africaines → NLLB-200 prioritaire si disponible (qualité supérieure
+    # à GPT-4o-mini pour wolof, yoruba, hausa, lingala, douala…)
+    if src != "auto" and doit_utiliser_nllb(src, tgt):
+        trad = await traduire_nllb(corps, source_lang=src, target_lang=tgt)
+        if trad:
+            return trad
+        logger.info(f"[Translator] NLLB échoué, fallback GPT pour {src}→{tgt}")
 
     prompt = (
         f"Traduis en {nom_humain(tgt)} le texte suivant. "

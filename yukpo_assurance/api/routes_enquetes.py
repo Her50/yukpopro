@@ -439,8 +439,10 @@ async def upload_protocole(
     content = await fichier.read()
     if len(content) == 0:
         raise HTTPException(400, "Fichier vide")
-    if len(content) > 20 * 1024 * 1024:
-        raise HTTPException(400, "Fichier trop volumineux (> 20 Mo)")
+    from config.settings import settings as _s
+    _limite_mo = getattr(_s, "MAX_DOC_SIZE_MB", 50)
+    if len(content) > _limite_mo * 1024 * 1024:
+        raise HTTPException(400, f"Fichier trop volumineux (> {_limite_mo} Mo)")
 
     try:
         texte = _extract_text_from_upload(fichier.filename or "", content)

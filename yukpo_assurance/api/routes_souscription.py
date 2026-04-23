@@ -127,3 +127,134 @@ async def lister_impayes(
     """Liste des contrats avec primes impayées (paginée)"""
     tous = await orass.lister_impayes(seuil_jours)
     return {"total": len(tous), "skip": skip, "limit": limit, "impayes": tous[skip:skip + limit]}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# KYC — OCR pièce d'identité et carte grise (appelé depuis le mobile)
+# ═══════════════════════════════════════════════════════════════════════════
+
+_MIMES_KYC = {"image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/tiff"}
+
+
+async def _pre_check_credits_kyc(user_id: int) -> None:
+    from modules.pro.service_credits import verifier_solde_suffisant
+    try:
+        ok, _r, _p, msg = await verifier_solde_suffisant(user_id)
+        if not ok:
+            raise HTTPException(402, msg)
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
+
+async def _debit_llm_kyc(user_id: int, reponse, module: str, fallback_tokens=(1200, 400)) -> None:
+    try:
+        from modules.pro.service_credits import verifier_et_debiter
+        await verifier_et_debiter(
+            user_id=user_id,
+            modele=getattr(reponse, "modele_utilise", None) or "claude-sonnet-4-6",
+            tokens_input=getattr(reponse, "tokens_input", None) or fallback_tokens[0],
+            tokens_output=getattr(reponse, "tokens_output", None) or fallback_tokens[1],
+            module=module,
+        )
+    except Exception:
+        pass
+
+
+async def _lire_image_upload(fichier: UploadFile) -> str:
+    mime = fichier.content_type or "application/octet-stream"
+    if mime not in _MIMES_KYC:
+        raise HTTPException(415, f"Type non supporté : {mime}. Formats : JPEG, PNG, WebP, HEIC, TIFF")
+    contenu = await fichier.read()
+    taille_mb = len(contenu) / (1024 * 1024)
+    if taille_mb > 10.0:
+        raise HTTPException(413, f"Image trop volumineuse : {taille_mb:.1f} Mo (max 10 Mo)")
+    return base64.standard_b64encode(contenu).decode()
+
+
+@router.post("/kyc/analyser-cni", summary="OCR carte nationale d'identité (KYC mobile)")
+async def analyser_cni(
+    fichier: UploadFile = File(..., description="Photo de la CNI (JPEG/PNG/WebP)"),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Extrait les données d'une CNI/passeport/permis via Claude Vision.
+    Utilisé par le flux KYC du mobile (Expo). Débit crédits au tarif réel.
+    """
+    await _pre_check_credits_kyc(current_user.user_id)
+    image_b64 = await _lire_image_upload(fichier)
+
+    from core.ia_client import ia_client, ModeIA
+    prompt = """Lis cette pièce d'identité et retourne UNIQUEMENT ce JSON :
+{
+  "type_piece": "CNI|passeport|permis",
+  "numero": "",
+  "nom": "",
+  "prenoms": "",
+  "date_naissance": "JJ/MM/AAAA",
+  "lieu_naissance": "",
+  "date_expiration": "JJ/MM/AAAA",
+  "valide": true,
+  "nationalite": "",
+  "confiance": "haute|moyenne|faible"
+}"""
+    try:
+        reponse = await ia_client.analyser_image_vision(
+            image_b64=image_b64, prompt=prompt, mode=ModeIA.PRECISION,
+        )
+        data = reponse.as_json()
+    except Exception as e:
+        raise HTTPException(500, f"OCR CNI échoué : {str(e)[:200]}")
+
+    await _debit_llm_kyc(current_user.user_id, reponse, "kyc_cni_mobile")
+    return {
+        "donnees_extraites": data,
+        "confiance": data.get("confiance"),
+        "valide": data.get("valide", False),
+        "modele": getattr(reponse, "modele_utilise", None),
+    }
+
+
+@router.post("/kyc/analyser-carte-grise", summary="OCR carte grise (KYC mobile)")
+async def analyser_carte_grise(
+    fichier: UploadFile = File(..., description="Photo de la carte grise (JPEG/PNG/WebP)"),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Extrait les données d'une carte grise (certificat d'immatriculation) via Claude Vision.
+    Utilisé par le flux souscription auto mobile. Débit crédits au tarif réel.
+    """
+    await _pre_check_credits_kyc(current_user.user_id)
+    image_b64 = await _lire_image_upload(fichier)
+
+    from core.ia_client import ia_client, ModeIA
+    prompt = """Lis cette carte grise (certificat d'immatriculation) et retourne UNIQUEMENT ce JSON :
+{
+  "immatriculation": "",
+  "marque": "",
+  "modele": "",
+  "annee": 0,
+  "cylindree": 0,
+  "puissance_fiscale": 0,
+  "nombre_places": 5,
+  "usage": "particulier|taxi|transport_commun|utilitaire",
+  "proprietaire_nom": "",
+  "chassis": "",
+  "date_mise_en_circulation": "JJ/MM/AAAA",
+  "confiance": "haute|moyenne|faible"
+}"""
+    try:
+        reponse = await ia_client.analyser_image_vision(
+            image_b64=image_b64, prompt=prompt, mode=ModeIA.PRECISION,
+        )
+        data = reponse.as_json()
+    except Exception as e:
+        raise HTTPException(500, f"OCR carte grise échoué : {str(e)[:200]}")
+
+    await _debit_llm_kyc(current_user.user_id, reponse, "kyc_carte_grise_mobile")
+    return {
+        "donnees_extraites": data,
+        "confiance": data.get("confiance"),
+        "modele": getattr(reponse, "modele_utilise", None),
+    }

@@ -1,6 +1,6 @@
 """Routes comptabilité — OCR pièces, rapprochement, reporting"""
 import base64
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional
 
@@ -9,6 +9,37 @@ from modules.comptabilite.rapprochement import rapprochement
 from core.auth import TokenData, get_current_user, require_permission
 
 router = APIRouter(dependencies=[Depends(require_permission("comptabilite"))])
+
+_MIMES_PIECE = {
+    "image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/tiff",
+    "application/pdf",
+}
+
+
+async def _pre_check_credits_piece(user_id: int) -> None:
+    from modules.pro.service_credits import verifier_solde_suffisant
+    try:
+        ok, _r, _p, msg = await verifier_solde_suffisant(user_id)
+        if not ok:
+            raise HTTPException(402, msg)
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
+
+async def _debit_llm_piece(user_id: int, module: str, fallback_tokens=(2000, 800)) -> None:
+    try:
+        from modules.pro.service_credits import verifier_et_debiter
+        await verifier_et_debiter(
+            user_id=user_id,
+            modele="claude-sonnet-4-6",
+            tokens_input=fallback_tokens[0],
+            tokens_output=fallback_tokens[1],
+            module=module,
+        )
+    except Exception:
+        pass
 
 
 class PieceRequest(BaseModel):
@@ -79,6 +110,55 @@ async def traiter_piece_upload(
         "anomalies": resultat.anomalies,
         "confiance": resultat.confiance,
         "validation_requise": resultat.validation_requise,
+    }
+
+
+@router.post("/analyser-piece", summary="OCR pièce comptable (mobile)")
+async def analyser_piece_mobile(
+    fichier: UploadFile = File(..., description="Image ou PDF de la pièce"),
+    type_document: str = Form(..., description="facture|recu|releve_bancaire|bordereau|autre"),
+    id_reference: Optional[str] = Form(None),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Analyse OCR + imputation automatique d'une pièce comptable (upload mobile).
+    Pré-check crédits → validation MIME/taille → pieces_processor → débit LLM.
+    """
+    await _pre_check_credits_piece(current_user.user_id)
+
+    from config.settings import settings
+    mime = fichier.content_type or "application/octet-stream"
+    if mime not in _MIMES_PIECE:
+        raise HTTPException(415, f"Type non supporté : {mime}. Formats : JPEG, PNG, WebP, HEIC, PDF, TIFF")
+
+    contenu = await fichier.read()
+    taille_mb = len(contenu) / (1024 * 1024)
+    est_pdf = mime == "application/pdf"
+    limite_mb = settings.MAX_PDF_SIZE_MB if est_pdf else settings.MAX_IMAGE_SIZE_MB
+    if taille_mb > limite_mb:
+        raise HTTPException(413, f"Fichier trop volumineux : {taille_mb:.1f} Mo (max {limite_mb} Mo)")
+
+    contenu_b64 = base64.standard_b64encode(contenu).decode()
+    piece = PieceComptable(
+        type_piece=type_document,
+        image_b64=None if est_pdf else contenu_b64,
+        pdf_b64=contenu_b64 if est_pdf else None,
+        id_reference=id_reference,
+    )
+    try:
+        resultat = await pieces_processor.traiter_piece(piece)
+    except Exception as e:
+        raise HTTPException(500, f"OCR pièce échoué : {str(e)[:200]}")
+
+    await _debit_llm_piece(current_user.user_id, "compta_analyser_piece_mobile")
+    return {
+        "type_document": resultat.type_piece,
+        "donnees_extraites": resultat.donnees_extraites,
+        "imputation_proposee": resultat.imputation_proposee,
+        "anomalies": resultat.anomalies,
+        "confiance": resultat.confiance,
+        "validation_requise": resultat.validation_requise,
+        "ecriture_orass": resultat.ecriture_orass,
     }
 
 

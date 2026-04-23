@@ -2,6 +2,7 @@
 import os
 import time
 import json
+import logging
 from collections import defaultdict
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, Request
@@ -14,7 +15,58 @@ from modules.documents.generateur import document_generateur
 from core.auth import TokenData, get_current_user, require_permission
 from config.settings import settings
 
+logger = logging.getLogger("yukpo_assurance.api.documents")
+
 router = APIRouter(dependencies=[Depends(require_permission("documents"))])
+
+
+async def _pre_check_credits_doc(user_id: int) -> None:
+    """Pré-check crédits avant traitement coûteux. Lève 402 CREDITS_EPUISES si épuisé."""
+    try:
+        from modules.pro.service_credits import verifier_solde_suffisant
+        ok, _r, _p, msg = await verifier_solde_suffisant(user_id)
+        if not ok:
+            raise HTTPException(status_code=402, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as _e:
+        logger.debug(f"[Credits/PreCheck] non bloquant: {_e}")
+
+
+async def _debiter_forfait_doc(user_id: int, cout_fcfa: float, module: str) -> None:
+    """Débite un forfait FCFA non-LLM (la marge 20× est appliquée par service_credits)."""
+    try:
+        from modules.pro.service_credits import debiter_forfait_fcfa
+        ok, _c, msg = await debiter_forfait_fcfa(user_id=user_id, cout_fcfa=cout_fcfa, module=module)
+        if not ok:
+            raise HTTPException(status_code=402, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as _e:
+        logger.debug(f"[Credits/Forfait/{module}] non bloquant: {_e}")
+
+
+async def _debiter_llm_doc(
+    user_id: int,
+    module: str,
+    tokens_input: int,
+    tokens_output: int,
+    modele: str = "claude-sonnet-4-6",
+) -> None:
+    """Débite la consommation LLM réelle (marge 20× appliquée par service_credits)."""
+    try:
+        from modules.pro.service_credits import verifier_et_debiter
+        ok, _c, msg = await verifier_et_debiter(
+            user_id=user_id, modele=modele,
+            tokens_input=tokens_input, tokens_output=tokens_output,
+            module=module,
+        )
+        if not ok:
+            raise HTTPException(status_code=402, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as _e:
+        logger.debug(f"[Credits/LLM/{module}] non bloquant: {_e}")
 
 # ─── Rate limiter simple en mémoire pour les endpoints documents ──────────────
 # (Redis-backed rate limiting est dans core/security.py pour les autres endpoints)
@@ -193,6 +245,7 @@ async def analyser_excel_upload(
     Analyse approfondie d'un fichier Excel uploadé.
     Retourne : statistiques, graphiques (base64), commentaire IA, alertes.
     """
+    await _pre_check_credits_doc(current_user.user_id)
     from modules.documents.analyseur_excel import analyser_excel
 
     nom = fichier.filename or "fichier.xlsx"
@@ -214,6 +267,18 @@ async def analyser_excel_upload(
         )
     except ValueError as e:
         raise HTTPException(422, str(e))
+
+    # Débit IA (commentaire Claude) + forfait non-LLM (pandas + matplotlib)
+    nb_graphs = len(resultat.graphiques) if getattr(resultat, "graphiques", None) else 0
+    nb_lignes = int(getattr(resultat, "nb_lignes", 0) or 0)
+    await _debiter_llm_doc(
+        user_id=current_user.user_id, module="analyse_excel",
+        tokens_input=max(2000, nb_lignes // 10),
+        tokens_output=3000, modele="claude-sonnet-4-6",
+    )
+    # Forfait : complexité ∝ (nb graphiques × 1 FCFA) + (lignes / 1000 FCFA)
+    cout = nb_graphs * 1.0 + max(0.5, nb_lignes / 1000.0)
+    await _debiter_forfait_doc(current_user.user_id, cout, "analyse_excel_stats")
 
     return {
         "nom_fichier": resultat.nom_fichier,
@@ -248,6 +313,7 @@ async def analyser_excel_depuis_si(
     Analyse un fichier Excel/CSV depuis le système de fichiers du SI.
     Le chemin doit être accessible depuis le serveur applicatif.
     """
+    await _pre_check_credits_doc(current_user.user_id)
     from modules.documents.analyseur_excel import analyser_excel_depuis_si as _analyser_si
 
     try:
@@ -261,6 +327,16 @@ async def analyser_excel_depuis_si(
         raise HTTPException(404, str(e))
     except ValueError as e:
         raise HTTPException(422, str(e))
+
+    nb_graphs = len(resultat.graphiques) if getattr(resultat, "graphiques", None) else 0
+    nb_lignes = int(getattr(resultat, "nb_lignes", 0) or 0)
+    await _debiter_llm_doc(
+        user_id=current_user.user_id, module="analyse_excel_si",
+        tokens_input=max(2000, nb_lignes // 10),
+        tokens_output=3000, modele="claude-sonnet-4-6",
+    )
+    cout = nb_graphs * 1.0 + max(0.5, nb_lignes / 1000.0)
+    await _debiter_forfait_doc(current_user.user_id, cout, "analyse_excel_si_stats")
 
     return {
         "nom_fichier": resultat.nom_fichier,
@@ -303,6 +379,7 @@ async def generer_rapport_activite(
     Génère un rapport d'activité PPT haute qualité avec graphiques Python.
     Retourne le fichier PPTX encodé en base64 + URL de téléchargement.
     """
+    await _pre_check_credits_doc(current_user.user_id)
     from modules.documents.generateur_rapports import generer_rapport_activite as _gen
 
     try:
@@ -316,6 +393,14 @@ async def generer_rapport_activite(
         )
     except Exception as e:
         raise HTTPException(500, f"Erreur génération rapport : {e}")
+
+    # Forfait PPTX avec graphiques matplotlib — coût proportionnel à la taille
+    taille_mo = max(1, len(pptx_bytes) // (1024 * 1024))
+    await _debiter_forfait_doc(
+        current_user.user_id,
+        cout_fcfa=2.0 * taille_mo,   # ~2 FCFA/Mo × 20× marge
+        module=f"rapport_activite_{req.type_rapport}",
+    )
 
     # Sauvegarder et retourner
     safe_nom = req.periode.replace(" ", "_").replace("—", "-")[:40]
@@ -360,6 +445,7 @@ async def generer_presentation_avancee(
     - mode "config" : structure fournie directement via slides_config
     Chaque slide peut contenir des graphiques matplotlib générés côté serveur.
     """
+    await _pre_check_credits_doc(current_user.user_id)
     from modules.documents.generateur_rapports import (
         generer_presentation_depuis_ia,
         generer_presentation_personnalisee,
@@ -386,6 +472,21 @@ async def generer_presentation_avancee(
             )
     except Exception as e:
         raise HTTPException(500, f"Erreur génération présentation : {e}")
+
+    # Débit : mode "ia" = IA + PPTX ; mode "config" = forfait seul
+    nb_slides = len(req.slides_config or []) or 10
+    if req.mode == "ia":
+        await _debiter_llm_doc(
+            user_id=current_user.user_id, module="presentation_avancee_ia",
+            tokens_input=2500, tokens_output=max(2000, nb_slides * 300),
+            modele="claude-sonnet-4-6",
+        )
+    taille_mo = max(1, len(pptx_bytes) // (1024 * 1024))
+    await _debiter_forfait_doc(
+        current_user.user_id,
+        cout_fcfa=2.0 * taille_mo + 0.5 * nb_slides,
+        module="presentation_avancee_render",
+    )
 
     nom_safe = req.demande.replace(" ", "_")[:50]
     nom_fichier = f"presentation_{nom_safe}.pptx"
@@ -427,10 +528,16 @@ async def ocr_image_upload(
     if not valide:
         raise HTTPException(status_code=400, detail=raison)
 
+    await _pre_check_credits_doc(current_user.user_id)
     resultat = await ocr_processor.traiter_image(
         image_bytes=content,
         nom_fichier=file.filename or "image",
         contexte={"compagnie_id": current_user.compagnie_id, "user_id": current_user.user_id},
+    )
+    # OCR image unique = 1 appel Claude Vision ≈ 1500 tokens in / 800 out
+    await _debiter_llm_doc(
+        user_id=current_user.user_id, module="ocr_image_documents",
+        tokens_input=1500, tokens_output=800, modele="claude-sonnet-4-6",
     )
     return {
         "type_document": resultat.type_document.value,
@@ -462,10 +569,18 @@ async def ocr_pdf_upload(
     if not valide:
         raise HTTPException(status_code=400, detail=raison)
 
+    await _pre_check_credits_doc(current_user.user_id)
     resultat = await ocr_processor.traiter_pdf(
         pdf_bytes=content,
         nom_fichier=file.filename or "document.pdf",
         contexte={"compagnie_id": current_user.compagnie_id},
+    )
+    # OCR PDF — débit par page traitée
+    nb_pages = int(getattr(resultat, "pages_traitees", 0) or 1)
+    await _debiter_llm_doc(
+        user_id=current_user.user_id, module="ocr_pdf_documents",
+        tokens_input=1500 * nb_pages, tokens_output=800 * nb_pages,
+        modele="claude-sonnet-4-6",
     )
     return {
         "type_document": resultat.type_document.value,
@@ -494,10 +609,17 @@ async def ocr_base64(
     if not data_b64:
         raise HTTPException(status_code=400, detail="Champ 'data_b64' requis")
 
+    await _pre_check_credits_doc(current_user.user_id)
     resultat = await ocr_processor.traiter_fichier_base64(
         data_b64=data_b64,
         nom_fichier=nom_fichier,
         contexte={**contexte, "compagnie_id": current_user.compagnie_id},
+    )
+    nb_pages = int(getattr(resultat, "pages_traitees", 0) or 1)
+    await _debiter_llm_doc(
+        user_id=current_user.user_id, module="ocr_base64",
+        tokens_input=1500 * nb_pages, tokens_output=800 * nb_pages,
+        modele="claude-sonnet-4-6",
     )
     return {
         "type_document": resultat.type_document.value,
@@ -744,25 +866,22 @@ async def supprimer_document(
 # Traduction de fichier (PDF, DOCX, TXT, images via OCR)
 # ─────────────────────────────────────────────────────────────
 
-async def _extraire_texte_fichier(nom: str, contenu: bytes) -> str:
-    """Extrait le texte d'un fichier selon son extension."""
+async def _extraire_texte_fichier(nom: str, contenu: bytes, user_id: Optional[int] = None) -> str:
+    """Extrait le texte d'un fichier selon son extension.
+    Si user_id fourni et PDF scanné, débite les crédits OCR par page."""
     ext = (nom.rsplit(".", 1)[-1] if "." in nom else "").lower()
 
     if ext == "txt" or ext == "md":
         return contenu.decode("utf-8", errors="replace")
 
     if ext == "pdf":
+        # Extraction native si texte exploitable, sinon OCR Claude Vision par lots
         try:
-            import io
-            from pypdf import PdfReader
-            reader = PdfReader(io.BytesIO(contenu))
-            texte = "\n".join(p.extract_text() or "" for p in reader.pages)
-            if texte.strip():
-                return texte
-        except Exception:
-            pass
-        # Fallback OCR Claude
-        return await _ocr_via_claude(contenu, nom)
+            from core.pdf_ocr_batch import extraire_texte_pdf
+            return await extraire_texte_pdf(contenu, user_id=user_id, module="pdf_ocr_upload_doc")
+        except Exception as e:
+            logger.warning(f"[Documents] extraire_texte_pdf échoué ({e}) → fallback OCR page unique")
+            return await _ocr_via_claude(contenu, nom)
 
     if ext in ("doc", "docx"):
         try:
@@ -855,41 +974,38 @@ async def traduire_fichier(
     Traduit un fichier uploadé (PDF, DOCX, TXT, images…).
     Extrait le texte, traduit via Claude, et retourne le résultat en texte ou DOCX.
     """
-    import anthropic
-
+    await _pre_check_credits_doc(current_user.user_id)
     nom = fichier.filename or "fichier"
     contenu = await fichier.read()
 
-    if len(contenu) > 20 * 1024 * 1024:
-        raise HTTPException(413, "Fichier trop volumineux (max 20 Mo)")
+    _limite_mo = getattr(settings, "MAX_DOC_SIZE_MB", 50)
+    if len(contenu) > _limite_mo * 1024 * 1024:
+        raise HTTPException(413, f"Fichier trop volumineux (max {_limite_mo} Mo)")
 
-    # 1. Extraction texte
-    texte_source = await _extraire_texte_fichier(nom, contenu)
+    # 1. Extraction texte (OCR par page débité si PDF scanné)
+    texte_source = await _extraire_texte_fichier(nom, contenu, user_id=current_user.user_id)
     if not texte_source.strip():
         raise HTTPException(422, "Impossible d'extraire le texte du fichier")
 
-    # Tronquer si trop long
-    if len(texte_source) > 30000:
-        texte_source = texte_source[:30000] + "\n\n[… document tronqué à 30 000 caractères …]"
-
-    # 2. Traduction via Claude
-    prompt_system = (
-        f"Tu es un traducteur professionnel spécialisé en assurance et documents d'entreprise. "
-        f"Traduis le texte suivant du {langue_source} vers le {langue_cible}. "
-        f"Conserve la mise en forme (titres, listes, tableaux en Markdown). "
-        f"Retourne uniquement la traduction, sans introduction ni commentaire."
+    # 2. Traduction via chunking (taille illimitée — lots parallèles Claude Sonnet)
+    from api.routes_pro_generateurs import _traduire_texte_en_chunks
+    texte_traduit = await _traduire_texte_en_chunks(
+        texte=texte_source,
+        src=langue_source,
+        dst=langue_cible,
+        metier=contexte_metier or "assurance et documents d'entreprise",
     )
-    if contexte_metier:
-        prompt_system += f"\nContexte : {contexte_metier}"
 
-    client = anthropic.Anthropic(api_key=settings.CLAUDE_API_KEY)
-    resp = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=8192,
-        system=prompt_system,
-        messages=[{"role": "user", "content": texte_source}],
+    # 3. Débit LLM (Claude Sonnet) proportionnel aux mots source+cible
+    nb_mots_src = len(texte_source.split())
+    nb_mots_dst = len(texte_traduit.split())
+    await _debiter_llm_doc(
+        user_id=current_user.user_id,
+        module="traduire_fichier_documents",
+        tokens_input=max(500, int(nb_mots_src * 1.3)),
+        tokens_output=max(400, int(nb_mots_dst * 1.3)),
+        modele="claude-sonnet-4-6",
     )
-    texte_traduit = resp.content[0].text if resp.content else ""
 
     # 3. Format sortie
     if format_sortie == "docx":

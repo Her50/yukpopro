@@ -603,7 +603,7 @@ class BaseAgent(ABC):
 
     def _appeler_claude_sync(self, messages: list, outils: list):
         """
-        Appel synchrone : GPT-4o en priorité (cohérent avec ia_client.py), Claude en fallback.
+        Appel synchrone : Claude en priorité (cohérent avec ia_client.py), GPT-4o en fallback.
         Exécuté dans un thread via asyncio.to_thread.
         """
         from config.settings import settings
@@ -611,7 +611,20 @@ class BaseAgent(ABC):
         openai_key = settings.OPENAI_API_KEY or ""
         claude_key = settings.CLAUDE_API_KEY or ""
 
-        # GPT-4o primaire — cohérent avec ia_client._choisir_modele()
+        # Claude primaire — cohérent avec ia_client._choisir_modele()
+        claude_ok = (
+            bool(claude_key)
+            and claude_key.startswith("sk-ant-")
+            and not claude_key.startswith("sk-ant-votre")
+            and len(claude_key) >= 40
+        )
+        if claude_ok:
+            try:
+                return self._appeler_claude_sync_anthropic(messages, outils)
+            except Exception as exc:
+                logger.warning(f"[{self.type_agent}] Claude échoué ({exc}) → fallback GPT-4o")
+
+        # GPT-4o en fallback si Claude indisponible ou en échec
         openai_ok = (
             bool(openai_key)
             and len(openai_key) >= 20
@@ -619,17 +632,13 @@ class BaseAgent(ABC):
             and "YOUR" not in openai_key.upper()
         )
         if openai_ok:
+            if not claude_ok:
+                logger.info(f"[{self.type_agent}] CLAUDE_API_KEY absente/invalide → fallback GPT-4o")
             return self._appeler_gpt_sync(messages, outils)
-
-        # Claude en fallback si OpenAI indisponible
-        claude_ok = bool(claude_key) and not claude_key.startswith("sk-ant-votre") and len(claude_key) >= 40
-        if claude_ok:
-            logger.info(f"[{self.type_agent}] OPENAI_API_KEY absente/invalide → fallback Claude")
-            return self._appeler_claude_sync_anthropic(messages, outils)
 
         raise RuntimeError(
             "❌ Aucune clé API IA valide.\n"
-            "Configurez OPENAI_API_KEY (prioritaire) ou CLAUDE_API_KEY dans yukpo_assurance/.env"
+            "Configurez CLAUDE_API_KEY (prioritaire) ou OPENAI_API_KEY dans yukpo_assurance/.env"
         )
 
     def _appeler_claude_sync_anthropic(self, messages: list, outils: list):

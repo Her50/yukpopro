@@ -26,6 +26,8 @@ export const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
   const [metier, setMetier] = useState(METIERS[0]?.value || "comptable");
@@ -56,14 +58,29 @@ export const LoginPage = () => {
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || !password || !nom) return;
+    if (password.length < 6) {
+      toast.error("Mot de passe trop court (minimum 6 caractères)");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
     setLoading(true);
     try {
       await authApi.register({ email, password, nom, prenom });
-      const data = await authApi.login(email, password);
-      const me = await authApi.me();
-      setAuth({ ...me, token: data.access_token }, data.access_token);
-      setMode("onboarding");
-      toast.success("Compte créé ! Complétez votre profil métier.");
+      // Auto-login après inscription
+      try {
+        const data = await authApi.login(email, password);
+        const me = await authApi.me();
+        setAuth({ ...me, token: data.access_token }, data.access_token);
+        setMode("onboarding");
+        toast.success("Compte créé ! Complétez votre profil métier.");
+      } catch {
+        // Inscription réussie mais login échoue → rediriger vers connexion
+        toast.success("Compte créé avec succès ! Connectez-vous maintenant.");
+        setMode("login");
+      }
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
         || "Erreur lors de la création du compte";
@@ -284,7 +301,7 @@ export const LoginPage = () => {
                     <Input
                       label="Mot de passe *"
                       type={showPassword ? "text" : "password"}
-                      placeholder="8 caractères minimum"
+                      placeholder="6 caractères minimum"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       icon={<Lock className="w-4 h-4" />}
@@ -296,7 +313,34 @@ export const LoginPage = () => {
                     </button>
                   </div>
 
-                  <Button type="submit" loading={loading} className="w-full" size="lg">
+                  <div className="relative">
+                    <Input
+                      label="Confirmer le mot de passe *"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Répétez votre mot de passe"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      icon={<Lock className="w-4 h-4" />}
+                      required
+                    />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-8 text-slate-500 hover:text-slate-300 transition-colors">
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs mt-1" style={{ color: "#f87171" }}>
+                        Les mots de passe ne correspondent pas
+                      </p>
+                    )}
+                    {confirmPassword && password === confirmPassword && password.length >= 6 && (
+                      <p className="text-xs mt-1" style={{ color: "#34d399" }}>
+                        ✓ Mots de passe identiques
+                      </p>
+                    )}
+                  </div>
+
+                  <Button type="submit" loading={loading} className="w-full" size="lg"
+                    disabled={!email || !password || !nom || password !== confirmPassword}>
                     Créer mon compte <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>

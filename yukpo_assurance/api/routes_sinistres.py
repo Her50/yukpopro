@@ -1,6 +1,9 @@
 """Routes sinistres — déclaration, instruction, fraude"""
 import base64
+import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+
+logger = logging.getLogger("yukpo_assurance.api.sinistres")
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -147,6 +150,17 @@ async def uploader_piece_sinistre(
     Taille max : 20 Mo.
     La pièce est analysée par IA (OCR + extraction de données clés).
     """
+    # Pré-check crédits avant l'analyse IA (sinon 402 CREDITS_EPUISES)
+    try:
+        from modules.pro.service_credits import verifier_solde_suffisant
+        ok_solde, _restants, _plan, msg = await verifier_solde_suffisant(current_user.user_id)
+        if not ok_solde:
+            raise HTTPException(402, msg)
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
     # Validation taille
     contenu = await fichier.read()
     taille_mb = len(contenu) / (1024 * 1024)
@@ -204,16 +218,18 @@ Retourne ce JSON :
         )
         analyse = reponse.as_json()
 
-        # Débit crédits (fire-and-forget)
-        import asyncio as _asyncio
-        from modules.pro.service_credits import verifier_et_debiter as _debiter
-        _asyncio.create_task(_debiter(
-            user_id=current_user.user_id,
-            modele=reponse.modele_utilise or "claude-sonnet-4-6",
-            tokens_input=reponse.tokens_input or 1500,
-            tokens_output=reponse.tokens_output or 500,
-            module="sinistres_analyse",
-        ))
+        # Débit crédits (attendu — marge 20× appliquée par service_credits)
+        try:
+            from modules.pro.service_credits import verifier_et_debiter
+            await verifier_et_debiter(
+                user_id=current_user.user_id,
+                modele=reponse.modele_utilise or "claude-sonnet-4-6",
+                tokens_input=reponse.tokens_input or 1500,
+                tokens_output=reponse.tokens_output or 500,
+                module="sinistres_analyse",
+            )
+        except Exception as _e:
+            logger.debug(f"[Sinistres/Credits] débit non bloquant: {_e}")
     except Exception as e:
         analyse = {"erreur": str(e), "message": "Analyse IA non disponible"}
 

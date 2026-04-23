@@ -170,6 +170,7 @@ class RapportReunionRequest(BaseModel):
     participants: Optional[str] = None   # liste libre, ex: "Jean, Marie, Ahmed"
     langue: str = "fr"
     contexte: Optional[str] = None       # secteur, entreprise, etc.
+    duree_secondes: Optional[int] = None # durée réelle d'enregistrement en secondes
 
 
 @router.post("/generer-rapport", summary="Génère un rapport structuré depuis la transcription")
@@ -210,6 +211,24 @@ async def generer_rapport_reunion(
         if participants_list else "- Participants : [Identifiés depuis la transcription]"
     )
 
+    # ── Durée formatée depuis l'enregistrement ────────────────────────────────
+    if req.duree_secondes and req.duree_secondes > 0:
+        h = req.duree_secondes // 3600
+        m = (req.duree_secondes % 3600) // 60
+        s = req.duree_secondes % 60
+        if h > 0:
+            duree_label = f"{h}h{m:02d}min"
+        elif m > 0:
+            duree_label = f"{m} min {s:02d} s" if s else f"{m} min"
+        else:
+            duree_label = f"{s} secondes"
+        duree_ligne = f"- Durée : {duree_label} (enregistrement)"
+    else:
+        duree_ligne = "- Durée : [déduire de la transcription si possible, sinon \"Non précisée\"]"
+
+    # ── Contexte additionnel (langue détectée, etc. — PAS la date) ────────────
+    contexte_str = f"\nCONTEXTE ADDITIONNEL : {req.contexte}" if req.contexte else ""
+
     # ── Prompt système strict — rapport anonymisé ──────────────────────────────
     prompt_systeme = (
         f"Tu es un expert en gestion de réunions professionnelles africaines (OHADA, CIMA, SYSCOHADA). "
@@ -222,10 +241,10 @@ async def generer_rapport_reunion(
         f"3. Si une information n'est pas dans la transcription, écris 'Non mentionné'. "
         f"4. N'invente aucune date, chiffre ou décision absente de la transcription. "
         f"5. Le rapport est rédigé en {langue_label}.\n"
-        f"6. Fais ressortir TOUS les points saillants et décisions concrètes."
+        f"6. Fais ressortir TOUS les points saillants et décisions concrètes.\n"
+        f"7. Pour 'Objet de la réunion' : déduis l'objet réel depuis la transcription (thème principal, "
+        f"enjeux abordés) — ne répète pas simplement le titre ni la date."
     )
-
-    contexte_str = f"\nCONTEXTE : {req.contexte}" if req.contexte else ""
 
     prompt = f"""Génère un rapport de réunion professionnel, structuré et anonymisé en **{langue_label}**.
 
@@ -242,10 +261,10 @@ Génère le rapport en Markdown avec EXACTEMENT cette structure :
 # Rapport de Réunion — {req.titre}
 
 ## Informations générales
-- Date : [extraite du contexte ou "Non mentionnée"]
+- Date : [extraite de la transcription ou "Non mentionnée"]
 {participants_section}
-- Durée estimée : [si déductible, sinon "Non précisée"]
-- Contexte / Objet : {req.contexte or "Réunion professionnelle"}
+{duree_ligne}
+- Objet de la réunion : [Déduit de la transcription — décris en 1-2 phrases le sujet central et les enjeux abordés]
 
 ## Synthèse exécutive
 [3-5 phrases résumant les points clés de la réunion — anonymisé, orienté résultats]
