@@ -156,9 +156,7 @@ export const Sidebar = () => {
                     <Icon
                       className={cn("w-4 h-4 flex-shrink-0 transition-colors")}
                       style={{
-                        color: isActive
-                          ? (isDark ? "#00B0F0" : "#4f46e5")
-                          : "var(--ykp-sidebar-text-muted)",
+                        color: isActive ? "#00B0F0" : "var(--ykp-sidebar-text-muted)",
                       }}
                     />
                     {!collapsed && (
@@ -195,9 +193,7 @@ export const Sidebar = () => {
         <div
           className="mx-4 my-1 h-px"
           style={{
-            background: isDark
-              ? "linear-gradient(90deg, transparent, rgba(0,84,166,0.4), transparent)"
-              : "linear-gradient(90deg, transparent, rgba(99,102,241,0.25), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(0,176,240,0.35), transparent)",
           }}
           aria-hidden="true"
         />
@@ -239,8 +235,8 @@ export const Sidebar = () => {
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all"
           style={{ color: "var(--ykp-sidebar-text-muted)" }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = isDark ? "rgba(153,27,27,0.15)" : "#fef2f2";
-            e.currentTarget.style.color = isDark ? "#fca5a5" : "#dc2626";
+            e.currentTarget.style.background = "rgba(153,27,27,0.18)";
+            e.currentTarget.style.color = "#fca5a5";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";

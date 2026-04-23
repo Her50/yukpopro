@@ -17,21 +17,24 @@
     --ykp-input-border: #cbd5e1;         /* slate-300 */
     --ykp-input-placeholder: #94a3b8;    /* slate-400 */
 
-    /* Sidebar — light pro (blanc, bord subtil, accent indigo au hover) */
-    --ykp-sidebar-start: #ffffff;
-    --ykp-sidebar-end: #f8fafc;
-    --ykp-sidebar-text: #334155;        /* slate-700 */
-    --ykp-sidebar-text-muted: #64748b;  /* slate-500 */
-    --ykp-sidebar-border: #e2e8f0;      /* slate-200 */
-    --ykp-sidebar-hover: #f1f5f9;       /* slate-100 */
-    --ykp-sidebar-active-bg: linear-gradient(90deg, rgba(99,102,241,0.10) 0%, rgba(0,176,240,0.06) 100%);
-    --ykp-sidebar-active-border: #4f46e5;
-    --ykp-sidebar-active-text: #0f172a;
-    --ykp-sidebar-profile-bg: #f8fafc;
-    --ykp-sidebar-profile-border: #e2e8f0;
+    /* Sidebar — navy corporate dans les 2 modes (identité de marque Yukpo,
+       pattern Linear/Slack/Vercel : sidebar sombre, workspace clair).
+       En light mode on utilise un navy légèrement plus doux (#2a3657)
+       pour différencier du pur dark. */
+    --ykp-sidebar-start: #2a3657;
+    --ykp-sidebar-end: #1e2640;
+    --ykp-sidebar-text: #e2e8f0;
+    --ykp-sidebar-text-muted: #94a3b8;
+    --ykp-sidebar-border: rgba(255,255,255,0.08);
+    --ykp-sidebar-hover: rgba(255,255,255,0.06);
+    --ykp-sidebar-active-bg: linear-gradient(90deg, rgba(0,84,166,0.35) 0%, rgba(99,102,241,0.22) 100%);
+    --ykp-sidebar-active-border: #00B0F0;
+    --ykp-sidebar-active-text: #ffffff;
+    --ykp-sidebar-profile-bg: rgba(255,255,255,0.05);
+    --ykp-sidebar-profile-border: rgba(255,255,255,0.08);
     --ykp-sidebar-tooltip-bg: #0f172a;
     --ykp-sidebar-tooltip-text: #f8fafc;
-    --ykp-sidebar-tooltip-border: rgba(99,102,241,0.3);
+    --ykp-sidebar-tooltip-border: rgba(0,176,240,0.35);
 
     /* Text */
     --ykp-text-primary: #0f172a;         /* slate-900 */
