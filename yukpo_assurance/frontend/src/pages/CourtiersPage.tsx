@@ -257,7 +257,7 @@ function PortailCourtier({ onEnvoi }: { onEnvoi: (d: DocumentCourtier) => void }
           <CheckCircleIcon className="h-10 w-10 text-green-600" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900">Document transmis avec succès</h3>
-        <p className="text-sm text-gray-500">La compagnie a reçu votre document. Yukpo IA va l'analyser automatiquement avant validation humaine.</p>
+        <p className="text-sm text-gray-500">La compagnie a reçu votre document. YukpoPro va l'analyser automatiquement avant validation humaine.</p>
         <button onClick={() => setSucces(false)}
           className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-primary-700">
           Envoyer un autre document
@@ -272,7 +272,7 @@ function PortailCourtier({ onEnvoi }: { onEnvoi: (d: DocumentCourtier) => void }
     <div className="space-y-5">
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-800">
         <p className="font-semibold mb-1">Portail courtier sécurisé</p>
-        <p className="text-xs">Transmettez vos documents scannés directement à la compagnie. Chaque pièce est analysée par Yukpo IA avant validation humaine et injection dans le SI.</p>
+        <p className="text-xs">Transmettez vos documents scannés directement à la compagnie. Chaque pièce est analysée par YukpoPro avant validation humaine et injection dans le SI.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -357,7 +357,7 @@ function PortailCourtier({ onEnvoi }: { onEnvoi: (d: DocumentCourtier) => void }
 
 const STATUT_CFG: Record<string, { label: string; icon: React.ReactNode; classes: string }> = {
   en_attente: { label: 'En attente', icon: <ClockIcon className="h-3.5 w-3.5" />, classes: 'bg-gray-100 text-gray-600' },
-  en_analyse: { label: 'Analyse IA', icon: <SparklesIcon className="h-3.5 w-3.5" />, classes: 'bg-blue-100 text-blue-700' },
+  en_analyse: { label: 'Analyse YukpoPro', icon: <SparklesIcon className="h-3.5 w-3.5" />, classes: 'bg-blue-100 text-blue-700' },
   valide: { label: 'Validé', icon: <CheckCircleIcon className="h-3.5 w-3.5" />, classes: 'bg-green-100 text-green-700' },
   rejete: { label: 'Rejeté', icon: <ExclamationTriangleIcon className="h-3.5 w-3.5" />, classes: 'bg-red-100 text-red-700' },
 }
@@ -455,7 +455,7 @@ function DocumentsRecus({
               {d.analyse_ia && (
                 <div className={clsx('mt-3 text-xs rounded-lg p-2.5',
                   (d.score_ia || 0) > 80 ? 'bg-green-50 text-green-800' : (d.score_ia || 0) > 60 ? 'bg-yellow-50 text-yellow-800' : 'bg-red-50 text-red-800')}>
-                  <span className="font-semibold">Yukpo IA : </span>{d.analyse_ia}
+                  <span className="font-semibold">YukpoPro : </span>{d.analyse_ia}
                 </div>
               )}
 
@@ -622,7 +622,7 @@ export function CourtiersPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Courtiers & Intermédiaires</h2>
+          <h1 className="text-xl font-bold text-gray-900">Courtiers & Intermédiaires</h1>
           <p className="text-sm text-gray-400">Production · Dématérialisation documents · Commissions</p>
         </div>
         {enAttente > 0 && (

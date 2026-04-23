@@ -195,7 +195,7 @@ Le CR doit inclure : résumé des discussions, décisions prises, actions à sui
                 <DocumentTextIcon className="h-3.5 w-3.5" /> Télécharger
               </button>
             )}
-            <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} aria-label="Fermer" className="p-1.5 text-gray-400 hover:text-gray-600">
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
@@ -204,7 +204,7 @@ Le CR doit inclure : résumé des discussions, décisions prises, actions à sui
           {loading ? (
             <div className="flex flex-col items-center py-12 space-y-3">
               <SparklesIcon className="h-8 w-8 text-primary-500 animate-pulse" />
-              <p className="text-sm font-medium text-gray-700">Yukpo IA rédige le compte rendu…</p>
+              <p className="text-sm font-medium text-gray-700">YukpoPro rédige le compte rendu…</p>
               <p className="text-xs text-gray-400">Analyse de l'ordre du jour et génération du CR en cours</p>
             </div>
           ) : (
@@ -256,7 +256,7 @@ PROCHAINE RÉUNION
 Suggérée dans 30 jours — même participants.
 Ordre du jour à définir en fonction de l'avancement des actions.
 
-CR rédigé automatiquement par Yukpo IA — à valider par le secrétaire de séance.`
+CR rédigé automatiquement par YukpoPro — à valider par le secrétaire de séance.`
 }
 
 // ─── Formulaire nouvelle réunion ──────────────────────────────────────────────
@@ -292,7 +292,7 @@ function NouvelleReunionForm({ onSave, onClose }: {
       <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b">
           <h3 className="font-bold text-gray-900">Planifier une réunion</h3>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600"><XMarkIcon className="h-5 w-5" /></button>
+          <button onClick={onClose} aria-label="Fermer" className="p-1.5 text-gray-400 hover:text-gray-600"><XMarkIcon className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-4">
           <div>

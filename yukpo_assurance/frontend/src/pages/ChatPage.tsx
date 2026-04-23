@@ -63,8 +63,8 @@ function SessionItem({
             className="flex-1 min-w-0 text-xs bg-white border border-primary-400 rounded px-2 py-1 text-gray-800 outline-none"
             autoFocus
           />
-          <button onClick={confirm} className="p-0.5 text-green-600 hover:text-green-700"><CheckIcon className="w-3.5 h-3.5" /></button>
-          <button onClick={cancel} className="p-0.5 text-red-500 hover:text-red-600"><XMarkIcon className="w-3.5 h-3.5" /></button>
+          <button onClick={confirm} aria-label="Confirmer le renommage" className="p-0.5 text-green-600 hover:text-green-700"><CheckIcon className="w-3.5 h-3.5" /></button>
+          <button onClick={cancel} aria-label="Annuler le renommage" className="p-0.5 text-red-500 hover:text-red-600"><XMarkIcon className="w-3.5 h-3.5" /></button>
         </div>
       ) : (
         <div className="flex items-center gap-1 px-3 py-2.5">

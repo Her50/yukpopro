@@ -126,7 +126,7 @@ export default function TrendsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <ArrowTrendingUpIcon className="h-6 w-6 text-primary-600" />
             Veille & Tendances
           </h2>

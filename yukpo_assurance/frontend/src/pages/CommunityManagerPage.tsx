@@ -134,11 +134,11 @@ export default function CommunityManagerPage() {
     <div className="p-6 space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
           <ChatBubbleLeftRightIcon className="h-6 w-6 text-primary-600" />
           Community Manager IA
-        </h2>
-        <p className="text-sm text-gray-500">Gérez vos réseaux sociaux avec l'IA — posts auto-générés, planification, analytics</p>
+        </h1>
+        <p className="text-sm text-gray-500">Gérez vos réseaux sociaux avec YukpoPro — posts auto-générés, planification, analytics</p>
       </div>
 
       {/* KPIs */}
@@ -161,7 +161,7 @@ export default function CommunityManagerPage() {
       <div className="bg-gradient-to-r from-primary-50 to-purple-50 rounded-xl border border-primary-100 p-5">
         <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <span className="text-lg">🤖</span>
-          Générer un post avec l'IA
+          Générer un post avec YukpoPro
         </h3>
         <div className="flex gap-3">
           <input

@@ -111,7 +111,7 @@ export function CIMAPage() {
           <ScaleIcon className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Réglementation CIMA</h2>
+          <h1 className="text-xl font-bold text-gray-900">Réglementation CIMA</h1>
           <p className="text-sm text-gray-400">Ratios prudentiels • Q&R réglementaire • Échéances</p>
         </div>
       </div>
