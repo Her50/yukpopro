@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * YukpoTranslate Live — client TypeScript.
  *
@@ -55,12 +56,21 @@ export interface TranslateEventError {
   code: string;
   message: string;
 }
+export interface TranslateEventAudio {
+  type: "audio";
+  utterance_id: string;
+  gender: "male" | "female";
+  format: "mp3";
+  audioBlob: Blob;
+}
+
 export type TranslateEvent =
   | TranslateEventReady
   | TranslateEventTranscript
   | TranslateEventTranslation
   | TranslateEventUsage
   | TranslateEventError
+  | TranslateEventAudio
   | { type: "pong" }
   | { type: "stopped" }
   | { type: "config_ack"; source: string; target: string };
@@ -218,14 +228,31 @@ export class TranslateLiveClient {
       };
 
       ws.onmessage = (ev) => {
+        // Message binaire : frame audio ElevenLabs
+        // Format : 4 octets (big-endian) longueur meta JSON + meta JSON + MP3
+        if (ev.data instanceof ArrayBuffer) {
+          try {
+            const buf  = new DataView(ev.data);
+            const metaLen = buf.getUint32(0, false);  // big-endian
+            const metaBytes = new Uint8Array(ev.data, 4, metaLen);
+            const meta = JSON.parse(new TextDecoder().decode(metaBytes)) as {
+              type: string; utterance_id: string; gender: "male"|"female"; format: string;
+            };
+            const audioBytes = new Uint8Array(ev.data, 4 + metaLen);
+            const audioBlob  = new Blob([audioBytes], { type: "audio/mpeg" });
+            if (meta.type === "audio") {
+              this.opts.onEvent({ ...meta, type: "audio", audioBlob } as TranslateEventAudio);
+            }
+          } catch {/* ignore malformed */}
+          return;
+        }
+
         if (typeof ev.data !== "string") return;
         try {
           const obj = JSON.parse(ev.data) as TranslateEvent;
           if (obj.type === "ready") {
             this.setStatus("ready");
             resolve();
-          } else if (obj.type === "error") {
-            this.opts.onEvent(obj);
           } else {
             this.opts.onEvent(obj);
           }

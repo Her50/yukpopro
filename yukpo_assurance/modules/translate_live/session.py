@@ -28,6 +28,12 @@ from modules.translate_live.deepgram_client import (
 )
 from modules.translate_live.translator import traduire_texte
 from modules.translate_live.languages import normaliser_code_langue
+from modules.translate_live.gender_detector import GenderBuffer
+from modules.translate_live.elevenlabs_tts import (
+    synthesize as elevenlabs_synthesize,
+    elevenlabs_disponible,
+    COUT_FCFA_PAR_UTTERANCE as EL_COUT_FCFA,
+)
 
 logger = logging.getLogger("yukpo_assurance.translate_live.session")
 
@@ -76,6 +82,7 @@ class TranslateLiveSession:
         user_plan: str = "gratuit",
         source_lang: str = "auto",
         target_lang: str = "fr",
+        elevenlabs_key: str = "",
     ):
         self.ws = websocket
         self.etat = _EtatSession(
@@ -88,6 +95,9 @@ class TranslateLiveSession:
         self._dg: Optional[DeepgramStreamingClient] = None
         self._tache_facturation: Optional[asyncio.Task] = None
         self._derniere_utterance_id = 0
+        self._el_key = elevenlabs_key
+        self._gender_buf = GenderBuffer()
+        self._current_gender: str = "female"  # défaut jusqu'à première détection
 
     # ── API publique ──────────────────────────────────────────────────────────
 
@@ -191,14 +201,20 @@ class TranslateLiveSession:
 
         src = normaliser_code_langue(langue, self.etat.source_lang or "auto")
         tgt = self.etat.target_lang
+
+        # Détection genre sur audio accumulé (mise à jour par utterance finale)
+        self._current_gender = self._gender_buf.detect()
+        self._gender_buf.clear()
+
         if src == tgt:
-            # Même langue → renvoyer identique, pas d'appel IA
+            # Même langue → pas de traduction, pas de TTS, pas de facturation EL
             await self._send_json({
                 "type": "translation",
                 "source_text": texte,
                 "translated_text": texte,
                 "source_lang": src,
                 "target_lang": tgt,
+                "gender": self._current_gender,
                 "utterance_id": utter_id,
                 "ts": time.time(),
             })
@@ -218,9 +234,44 @@ class TranslateLiveSession:
             "translated_text": traduit,
             "source_lang": src,
             "target_lang": tgt,
+            "gender": self._current_gender,
             "utterance_id": utter_id,
             "ts": time.time(),
         })
+
+        # ── TTS ElevenLabs — facturé seulement si traduction effective ────────
+        if elevenlabs_disponible(self._el_key) and traduit and traduit != texte:
+            audio_mp3 = await elevenlabs_synthesize(
+                text=traduit,
+                gender=self._current_gender,
+                api_key=self._el_key,
+            )
+            if audio_mp3:
+                # Envoie l'audio MP3 en binaire avec métadonnées en préambule JSON
+                meta = json.dumps({
+                    "type": "audio",
+                    "utterance_id": utter_id,
+                    "gender": self._current_gender,
+                    "format": "mp3",
+                }).encode()
+                # Format : 4 octets longueur meta (big-endian) + meta JSON + MP3
+                import struct
+                frame = struct.pack(">I", len(meta)) + meta + audio_mp3
+                try:
+                    await self.ws.send_bytes(frame)
+                except Exception:
+                    pass
+
+                # Facturation ElevenLabs (seulement si audio généré)
+                try:
+                    from modules.pro.service_credits import debiter_forfait_fcfa
+                    await debiter_forfait_fcfa(
+                        self.etat.user_id,
+                        cout_fcfa=EL_COUT_FCFA,
+                        module="translate_live_tts",
+                    )
+                except Exception as e:
+                    logger.warning(f"[TranslateLive] facturation TTS échouée : {e}")
 
     # ── Boucle de messages client ─────────────────────────────────────────────
 
@@ -231,9 +282,10 @@ class TranslateLiveSession:
             if t == "websocket.disconnect":
                 raise WebSocketDisconnect()
 
-            # Audio binaire → forward vers Deepgram
+            # Audio binaire → buffer gender + forward vers Deepgram
             if "bytes" in msg and msg["bytes"] is not None:
                 pcm = msg["bytes"]
+                self._gender_buf.push(pcm)
                 if self._dg:
                     await self._dg.send_audio(pcm)
                 continue

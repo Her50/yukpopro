@@ -18,7 +18,11 @@ from typing import Optional
 from fastapi import (
     APIRouter,
     Depends,
+    File,
+    Form,
+    HTTPException,
     Query,
+    UploadFile,
     WebSocket,
     WebSocketDisconnect,
 )
@@ -30,7 +34,9 @@ from modules.translate_live import (
     LANGUES_SUPPORTEES,
     TranslateLiveSession,
     deepgram_disponible,
+    traduire_texte,
 )
+from modules.translate_live.languages import normaliser_code_langue
 
 logger = logging.getLogger("yukpo_assurance.translate_live")
 router = APIRouter()
@@ -44,7 +50,7 @@ async def status(current_user: TokenData = Depends(get_current_user)) -> dict:
     return {
         "stt_available": deepgram_disponible(),
         "translator_available": True,  # GPT-4o-mini via ia_client — toujours dispo si clé OpenAI OK
-        "tts_available": False,        # Sprint 2
+        "tts_available": bool(getattr(__import__("config.settings", fromlist=["settings"]).settings, "ELEVENLABS_API_KEY", "")),
         "price_per_minute_fcfa": COUT_FCFA_PAR_MINUTE,
         "price_per_minute_credits": CREDITS_PAR_MINUTE,
     }
@@ -122,6 +128,7 @@ async def websocket_translate_live(
         pass  # Ne jamais bloquer en cas d'erreur DB
 
     # Accept + run session
+    from config.settings import settings
     await websocket.accept()
     session = TranslateLiveSession(
         websocket,
@@ -129,6 +136,7 @@ async def websocket_translate_live(
         user_plan=plan,
         source_lang=source,
         target_lang=target,
+        elevenlabs_key=settings.ELEVENLABS_API_KEY,
     )
     try:
         await session.run()
@@ -140,3 +148,103 @@ async def websocket_translate_live(
             await websocket.close(code=4100)
         except Exception:
             pass
+
+
+# ─── Endpoint batch (mobile : envoi de chunks audio via REST) ──────────────
+
+@router.post("/chunk")
+async def traduire_chunk_audio(
+    audio: UploadFile = File(..., description="Chunk audio (m4a, mp4, wav, webm, ogg, 2-10s)"),
+    source: str = Form("auto", description="ISO 639-1 ou 'auto'"),
+    target: str = Form("fr", description="ISO 639-1 langue cible"),
+    current_user: TokenData = Depends(get_current_user),
+) -> dict:
+    """
+    Transcription + traduction d'un chunk audio court (mobile friendly).
+    Contrairement au WebSocket, cet endpoint :
+      - accepte des formats compressés (M4A, WebM…)
+      - ne facture qu'en fin de traitement (durée du chunk)
+      - convient aux apps Expo/React Native qui ne peuvent streamer PCM raw
+    Retourne : {transcript, translation, source_lang, target_lang, duration_s}
+    """
+    from modules.pro.service_credits import (
+        debiter_forfait_fcfa,
+        verifier_solde_suffisant,
+    )
+
+    ok, _restants, _plan, msg = await verifier_solde_suffisant(current_user.user_id)
+    if not ok:
+        raise HTTPException(status_code=402, detail=msg)
+
+    contenu = await audio.read()
+    if len(contenu) < 500:
+        raise HTTPException(status_code=400, detail="Chunk audio trop court ou vide")
+    if len(contenu) > 8 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Chunk audio trop volumineux (max 8 MB / ~30s)")
+
+    src = normaliser_code_langue(source, "auto")
+    tgt = normaliser_code_langue(target, "fr")
+
+    # 1. Transcription via Deepgram (prerecorded API — gère M4A/WebM natif)
+    transcript_text = ""
+    detected_lang = src
+    duration_s = 0.0
+    if deepgram_disponible():
+        try:
+            from deepgram import DeepgramClient, PrerecordedOptions, FileSource
+            from config.settings import settings
+
+            client = DeepgramClient(settings.DEEPGRAM_API_KEY)
+            payload: FileSource = {"buffer": contenu}
+            options = PrerecordedOptions(
+                model="nova-3",
+                smart_format=True,
+                punctuate=True,
+                language="multi" if src == "auto" else src,
+                detect_language=(src == "auto"),
+            )
+            resp = await client.listen.asyncrest.v("1").transcribe_file(payload, options)
+            if resp and resp.results:
+                channel = resp.results.channels[0] if resp.results.channels else None
+                if channel and channel.alternatives:
+                    transcript_text = channel.alternatives[0].transcript or ""
+                    detected = getattr(channel, "detected_language", None)
+                    if detected:
+                        detected_lang = normaliser_code_langue(detected, src)
+                if resp.metadata:
+                    duration_s = float(getattr(resp.metadata, "duration", 0.0) or 0.0)
+        except Exception as e:
+            logger.warning(f"[TranslateLive/chunk] Deepgram échec : {e}")
+
+    # 2. Traduction si langue différente
+    translation_text = transcript_text
+    if transcript_text.strip() and detected_lang != tgt:
+        try:
+            translation_text = await traduire_texte(
+                transcript_text, source_lang=detected_lang, target_lang=tgt,
+            )
+        except Exception as e:
+            logger.warning(f"[TranslateLive/chunk] traduction échouée : {e}")
+
+    # 3. Facturation proportionnelle à la durée
+    if duration_s <= 0 and transcript_text:
+        # Fallback : ~0.6s par mot transcrit
+        duration_s = max(1.0, len(transcript_text.split()) * 0.6)
+    minutes = max(0.1, round(duration_s / 60.0, 2))
+    try:
+        await debiter_forfait_fcfa(
+            user_id=current_user.user_id,
+            cout_fcfa=COUT_FCFA_PAR_MINUTE * minutes,
+            module="translate_live_chunk",
+        )
+    except Exception as e:
+        logger.debug(f"[TranslateLive/chunk] débit non bloquant : {e}")
+
+    return {
+        "transcript": transcript_text,
+        "translation": translation_text,
+        "source_lang": detected_lang,
+        "target_lang": tgt,
+        "duration_s": round(duration_s, 2),
+        "credits_debited": int(CREDITS_PAR_MINUTE * minutes),
+    }

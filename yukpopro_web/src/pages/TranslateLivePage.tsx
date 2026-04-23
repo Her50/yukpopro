@@ -22,6 +22,7 @@ import {
   type TranslateEvent,
 } from "@/services/translate_live";
 import { getTTSSpeaker } from "@/services/tts_speaker";
+import type { TranslateEventAudio } from "@/services/translate_live";
 
 interface Langue {
   code: string;
@@ -38,6 +39,7 @@ interface Ligne {
   sourceLang: string;
   isFinal: boolean;
   ts: number;
+  gender?: "male" | "female";
 }
 
 export const TranslateLivePage = () => {
@@ -58,12 +60,15 @@ export const TranslateLivePage = () => {
   const [currentInterim, setCurrentInterim] = useState<string>("");
   const [minutesUsed, setMinutesUsed] = useState<number>(0);
   const [creditsUsed, setCreditsUsed] = useState<number>(0);
-  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(false);
+  const [ttsAvailable, setTtsAvailable] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+  const [lastGender, setLastGender] = useState<"male"|"female"|null>(null);
 
   const clientRef = useRef<TranslateLiveClient | null>(null);
   const lignesRef = useRef<HTMLDivElement>(null);
-  const ttsRef = useRef(getTTSSpeaker());
+  const ttsRef = useRef(getTTSSpeaker());  // fallback browser TTS si ElevenLabs absent
+  const audioQueueRef = useRef<HTMLAudioElement[]>([]);
+  const playingRef = useRef(false);
 
   // ── Chargement référentiel ───────────────────────────────────────────────
   useEffect(() => {
@@ -76,6 +81,7 @@ export const TranslateLivePage = () => {
         setLangues(langs.langues || []);
         setCreditsPerMin(st.price_per_minute_credits || 120);
         setCostFcfaPerMin(st.price_per_minute_fcfa || 6);
+        setTtsAvailable(!!st.tts_available);
       } catch {
         // silencieux — backend vérifie la clé au démarrage de la session
       }
@@ -143,17 +149,24 @@ export const TranslateLivePage = () => {
             },
           ]);
         } else if (ev.type === "translation") {
+          const gender = (ev as any).gender as "male"|"female"|undefined;
+          if (gender) setLastGender(gender);
           setLignes((prev) =>
             prev.map((l) =>
               l.utteranceId === ev.utterance_id
-                ? { ...l, translated: ev.translated_text, sourceLang: ev.source_lang }
+                ? { ...l, translated: ev.translated_text, sourceLang: ev.source_lang, gender: gender ?? l.gender }
                 : l,
             ),
           );
-          // Lecture vocale si activée
-          if (voiceEnabled && ev.translated_text && ev.source_lang !== ev.target_lang) {
+          // Fallback navigateur TTS si ElevenLabs absent
+          if (!ttsAvailable && ev.translated_text && ev.source_lang !== ev.target_lang) {
             ttsRef.current.speak(ev.translated_text, ev.target_lang);
           }
+        } else if (ev.type === "audio") {
+          // Audio ElevenLabs reçu → lecture immédiate en file d'attente
+          const audioEv = ev as TranslateEventAudio;
+          setLastGender(audioEv.gender);
+          playAudioBlob(audioEv.audioBlob);
         } else if (ev.type === "usage") {
           setMinutesUsed(ev.minutes);
           setCreditsUsed(ev.credits_debited_total);
@@ -175,14 +188,23 @@ export const TranslateLivePage = () => {
     await clientRef.current?.stop();
     clientRef.current = null;
     ttsRef.current.cancel();
+    audioQueueRef.current = [];
+    playingRef.current = false;
   };
 
-  const handleToggleVoice = () => {
-    const next = !voiceEnabled;
-    setVoiceEnabled(next);
-    ttsRef.current.setEnabled(next);
-    if (!next) ttsRef.current.cancel();
-    toast.success(next ? "Lecture vocale activée" : "Lecture vocale désactivée");
+  // Lecture audio ElevenLabs (file d'attente pour éviter chevauchement)
+  const playAudioBlob = (blob: Blob) => {
+    const url  = URL.createObjectURL(blob);
+    const elem = new Audio(url);
+    audioQueueRef.current.push(elem);
+    const playNext = () => {
+      if (audioQueueRef.current.length === 0) { playingRef.current = false; return; }
+      playingRef.current = true;
+      const next = audioQueueRef.current.shift()!;
+      next.onended = () => { URL.revokeObjectURL(next.src); playNext(); };
+      next.play().catch(() => playNext());
+    };
+    if (!playingRef.current) playNext();
   };
 
   const handleSauvegarderMesDocuments = async () => {
@@ -452,15 +474,18 @@ export const TranslateLivePage = () => {
             Transcription live — original (gauche) / traduit (droite)
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant={voiceEnabled ? "primary" : "ghost"}
-              size="sm"
-              icon={voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              onClick={handleToggleVoice}
-              title={voiceEnabled ? "Désactiver la voix" : "Activer la voix (lecture traduction)"}
-            >
-              {voiceEnabled ? "Voix ON" : "Voix"}
-            </Button>
+            {/* Indicateur TTS ElevenLabs / genre détecté */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium"
+              style={ttsAvailable
+                ? { background: "rgba(0,176,240,0.08)", border: "1px solid rgba(0,176,240,0.25)", color: "#7dd3fc" }
+                : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)", color: "#6b7280" }}>
+              {ttsAvailable
+                ? <Volume2 className="w-3.5 h-3.5" />
+                : <VolumeX className="w-3.5 h-3.5" />}
+              {ttsAvailable
+                ? (lastGender ? (lastGender === "male" ? "♂ Voix homme" : "♀ Voix femme") : "Voix TTS")
+                : "Voix TTS —"}
+            </div>
             <Button variant="ghost" size="sm" icon={<Copy className="w-4 h-4" />} onClick={handleCopierTranscription}
               disabled={lignes.length === 0}>Copier</Button>
             <Button variant="ghost" size="sm" icon={<Download className="w-4 h-4" />} onClick={handleTelechargerMd}
@@ -486,8 +511,14 @@ export const TranslateLivePage = () => {
               className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.05]"
             >
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-1 flex items-center gap-1.5">
                   {l.sourceLang}
+                  {l.gender && (
+                    <span className="text-[10px] px-1 rounded"
+                      style={{ background: "rgba(255,255,255,0.06)", color: l.gender === "male" ? "#7dd3fc" : "#f9a8d4" }}>
+                      {l.gender === "male" ? "♂" : "♀"}
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-gray-200">{l.source}</div>
               </div>
