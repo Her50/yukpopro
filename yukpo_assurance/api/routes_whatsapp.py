@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query, Request
@@ -196,7 +196,7 @@ async def _traiter_message_bg(
             )
 
             session.etat = nouvel_etat
-            session.derniere_activite = datetime.now(timezone.utc)
+            session.derniere_activite = datetime.utcnow()
             await db.commit()
 
             # Envoi de la réponse

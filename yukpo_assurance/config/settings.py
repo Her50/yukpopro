@@ -75,6 +75,17 @@ class Settings(BaseSettings):
     CLAUDE_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
 
+    # ─── Traduction Live (YukpoTranslate) ─────────────────────────
+    # STT streaming Deepgram Nova-3. Si vide, le module tourne en mode dégradé
+    # (WS accepté, pas de transcription) — pratique pour dev/UI sans facturer.
+    DEEPGRAM_API_KEY: str = ""
+    # TTS (Sprint 2) — encore optionnel
+    AZURE_SPEECH_KEY: str = ""
+    AZURE_SPEECH_REGION: str = ""
+    ELEVENLABS_API_KEY: str = ""
+    # Hugging Face Inference API (NLLB-200 pour langues africaines)
+    HUGGINGFACE_TOKEN: str = ""
+
     def __init__(self, **data):
         super().__init__(**data)
         # Correction : si les clés IA chargées depuis les variables système sont invalides,
@@ -89,10 +100,10 @@ class Settings(BaseSettings):
             if cle_env.startswith("sk-ant-") and len(cle_env) > 40 and "votre-cle" not in cle_env:
                 object.__setattr__(self, "CLAUDE_API_KEY", cle_env)
 
-    # Modèles par défaut
+    # Modèles par défaut — Claude primaire, GPT en fallback
     CLAUDE_MODEL_PRIMAIRE: str = "claude-sonnet-4-6"    # Chat — bon équilibre vitesse/qualité
     CLAUDE_MODEL_RAPIDE: str = "claude-haiku-4-5-20251001"  # Tâches simples, classification
-    GPT_MODEL_PRIMAIRE: str = "gpt-4o"                  # Modèle principal — qualité maximale
+    GPT_MODEL_PRIMAIRE: str = "gpt-4o"                  # Fallback principal si Claude indisponible
     GPT_MODEL_FALLBACK: str = "gpt-4o-mini"             # Fallback rapide pour classification/détection
 
     # Paramètres d'orchestration (inspiré de yukpomnang2/orchestration_ia.rs)
@@ -107,8 +118,9 @@ class Settings(BaseSettings):
 
     # Tailles max fichiers (en MB)
     MAX_IMAGE_SIZE_MB: int = 10
-    MAX_PDF_SIZE_MB: int = 20
-    MAX_EXCEL_SIZE_MB: int = 5
+    MAX_PDF_SIZE_MB: int = 100        # Élargi pour bilans financiers / rapports volumineux
+    MAX_EXCEL_SIZE_MB: int = 25       # Élargi pour analyses multi-feuilles
+    MAX_DOC_SIZE_MB: int = 50         # Limite générique upload (traduction, OCR)
 
     # ─── Base de données ──────────────────────────────────────────
     DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/yukpo_assurance"
@@ -246,12 +258,12 @@ class Settings(BaseSettings):
     def validate_production(self) -> list[str]:
         """Retourne la liste des problèmes bloquants pour la production."""
         issues = []
-        # GPT-4o est le modèle primaire — clé OpenAI obligatoire
-        if not self.OPENAI_API_KEY:
-            issues.append("OPENAI_API_KEY manquant — modèle primaire GPT-4o inaccessible")
-        # Claude = fallback optionnel
+        # Claude est le modèle primaire — clé CLAUDE_API_KEY obligatoire
         if not self.CLAUDE_API_KEY:
-            issues.append("CLAUDE_API_KEY manquant — fallback Claude désactivé (non bloquant)")
+            issues.append("CLAUDE_API_KEY manquant — modèle primaire Claude inaccessible")
+        # GPT-4o = fallback optionnel
+        if not self.OPENAI_API_KEY:
+            issues.append("OPENAI_API_KEY manquant — fallback GPT-4o désactivé (non bloquant)")
         if self.DATABASE_URL.startswith("postgresql") and "password" in self.DATABASE_URL:
             issues.append("DATABASE_URL contient le mot de passe en clair — utiliser un secret manager")
         if self.ORASS_MODE == "simulation":

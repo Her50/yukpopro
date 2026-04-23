@@ -50,22 +50,47 @@ async def _debiter_credits_generation(
     module: str,
     tokens_input: int = 2000,
     tokens_output: int = 3000,
-    modele: str = "gpt-4o",
+    modele: str = "claude-sonnet-4-6",
+    reponse_ia=None,
 ) -> None:
-    """Débite les crédits Yukpo après une génération. Non bloquant en cas d'erreur DB."""
+    """
+    Débite les crédits Yukpo après une génération.
+    Si `reponse_ia` (ReponseIA) est fourni, on utilise les tokens/modèle réels.
+    Non bloquant sur DB, mais lève 402 CREDITS_EPUISES si crédits épuisés.
+    """
     try:
         from modules.pro.service_credits import verifier_et_debiter
+        if reponse_ia is not None:
+            try:
+                tokens_input = int(getattr(reponse_ia, "tokens_input", tokens_input) or tokens_input)
+                tokens_output = int(getattr(reponse_ia, "tokens_output", tokens_output) or tokens_output)
+                modele = getattr(reponse_ia, "modele_utilise", modele) or modele
+            except Exception:
+                pass
         ok, _c, msg = await verifier_et_debiter(
             user_id=user_id, modele=modele,
             tokens_input=tokens_input, tokens_output=tokens_output,
             module=module, db=db,
         )
         if not ok:
-            raise HTTPException(status_code=429, detail=msg)
+            raise HTTPException(status_code=402, detail=msg)
     except HTTPException:
         raise
     except Exception as _e:
         logger.warning(f"[Credits] Débit {module} non bloquant : {_e}")
+
+
+async def _pre_check_credits(user_id: int) -> None:
+    """Vérifie le solde avant de lancer un traitement coûteux. Lève 402 si épuisé."""
+    try:
+        from modules.pro.service_credits import verifier_solde_suffisant
+        ok, restants, plan, msg = await verifier_solde_suffisant(user_id)
+        if not ok:
+            raise HTTPException(status_code=402, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as _e:
+        logger.debug(f"[Credits/PreCheck] non bloquant: {_e}")
 
 
 async def _sauvegarder_doc_genere(
@@ -165,6 +190,7 @@ async def generer_rapport(
     Génère un rapport professionnel Word (DOCX) ou Markdown.
     Le rapport est personnalisé selon le profil métier de l'utilisateur.
     """
+    await _pre_check_credits(current_user.user_id)
     from modules.pro.service_profil import get_or_create
     from modules.pro.report_writer_pro import ReportWriterPro
 
@@ -243,6 +269,7 @@ async def generer_slides(
     Génère une présentation PowerPoint (PPTX) professionnelle.
     Personnalisée selon le profil métier de l'utilisateur.
     """
+    await _pre_check_credits(current_user.user_id)
     from modules.pro.service_profil import get_or_create
     from modules.pro.slide_builder_pro import SlideBuilderPro
 
@@ -287,8 +314,10 @@ async def generer_slides(
 # Génération depuis fichiers uploadés (multipart)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _extraire_texte_upload(contenu: bytes, nom: str) -> str:
-    """Extrait le texte d'un fichier uploadé (PDF, DOCX, XLSX, CSV, TXT, PPTX)."""
+async def _extraire_texte_upload(contenu: bytes, nom: str, user_id: Optional[int] = None) -> str:
+    """Extrait le texte d'un fichier uploadé (PDF, DOCX, XLSX, CSV, TXT, PPTX).
+    Pour les PDF, bascule auto vers OCR Claude Vision si le texte natif est pauvre
+    (scannés). Si user_id fourni, débite les crédits OCR par page."""
     import io
     from pathlib import Path as _Path
     ext = _Path(nom).suffix.lower()
@@ -299,13 +328,18 @@ def _extraire_texte_upload(contenu: bytes, nom: str) -> str:
             return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
         elif ext == ".pdf":
             try:
-                import pdfplumber
-                with pdfplumber.open(io.BytesIO(contenu)) as pdf:
-                    return "\n".join(p.extract_text() or "" for p in pdf.pages)
-            except ImportError:
-                import PyPDF2
-                reader = PyPDF2.PdfReader(io.BytesIO(contenu))
-                return "\n".join(page.extract_text() or "" for page in reader.pages)
+                from core.pdf_ocr_batch import extraire_texte_pdf
+                return await extraire_texte_pdf(contenu, user_id=user_id, module="pdf_ocr_upload_gen")
+            except Exception as e:
+                logger.warning(f"[GenUpload] extraire_texte_pdf échoué ({e}) → fallback natif")
+                try:
+                    import pdfplumber
+                    with pdfplumber.open(io.BytesIO(contenu)) as pdf:
+                        return "\n".join(p.extract_text() or "" for p in pdf.pages)
+                except ImportError:
+                    import PyPDF2
+                    reader = PyPDF2.PdfReader(io.BytesIO(contenu))
+                    return "\n".join(page.extract_text() or "" for page in reader.pages)
         elif ext in (".xlsx", ".xls"):
             import pandas as pd
             xl = pd.ExcelFile(io.BytesIO(contenu))
@@ -361,6 +395,7 @@ async def analyser_et_generer(
     - Uploader un rapport existant + "présentation direction en 10 slides" → PPTX
     - Uploader un contrat PDF + "synthèse des points clés" → note de synthèse DOCX
     """
+    await _pre_check_credits(current_user.user_id)
     from modules.pro.service_profil import get_or_create
 
     if not instruction.strip():
@@ -373,7 +408,7 @@ async def analyser_et_generer(
     noms_fichiers_excel = []
     for f in fichiers:
         contenu_bytes = await f.read()
-        texte = _extraire_texte_upload(contenu_bytes, f.filename or "fichier")
+        texte = await _extraire_texte_upload(contenu_bytes, f.filename or "fichier", user_id=current_user.user_id)
         if texte and not texte.startswith("[Erreur"):
             textes_extraits.append(f"=== {f.filename} ===\n{texte[:80000]}\n")
             if (f.filename or "").lower().endswith((".xlsx", ".xls", ".csv")):
@@ -771,6 +806,7 @@ async def traduire_document(
     Supporte FR ↔ EN et autres langues. Génère optionnellement un DOCX.
     La traduction utilise Claude pour respecter la terminologie sectorielle africaine.
     """
+    await _pre_check_credits(current_user.user_id)
     from modules.pro.service_profil import get_or_create, incrementer_stat
     from core.ia_client import ModeIA, ia_client
 
@@ -818,7 +854,7 @@ async def traduire_document(
             user_id=current_user.user_id, db=db, module="traduction",
             tokens_input=max(500, nb_mots * 2),
             tokens_output=max(400, nb_mots * 2),
-            modele=getattr(reponse_ia, "modele_utilise", "gpt-4o"),
+            reponse_ia=reponse_ia,
         )
 
         # Générer DOCX si demandé
@@ -877,17 +913,62 @@ async def _extraire_texte_fichier(fichier: UploadFile, contenu: bytes) -> str:
     if nom.endswith(".pdf") or "pdf" in mime:
         try:
             import pypdf
-            import io
-            reader = pypdf.PdfReader(io.BytesIO(contenu))
+            import io as _io
+            reader = pypdf.PdfReader(_io.BytesIO(contenu))
+
+            # Vérifier si le PDF est protégé/chiffré
+            if reader.is_encrypted:
+                raise ValueError(
+                    "Le PDF est protégé par mot de passe et ne peut pas être lu. "
+                    "Déprotégez-le avant de le soumettre."
+                )
+
             texte = "\n\n".join(
                 page.extract_text() or "" for page in reader.pages
             ).strip()
+
             if not texte:
-                raise ValueError("PDF vide ou scanné")
+                # PDF scanné (image) : tenter l'OCR page par page via PyMuPDF si disponible
+                try:
+                    import fitz  # PyMuPDF
+                    doc_fitz = fitz.open(stream=contenu, filetype="pdf")
+                    pages_b64: list[str] = []
+                    import base64
+                    for page in doc_fitz:
+                        pix = page.get_pixmap(dpi=150)
+                        pages_b64.append(
+                            base64.standard_b64encode(pix.tobytes("png")).decode()
+                        )
+                    # OCR sur la première page (meilleure représentativité)
+                    if pages_b64:
+                        texte_ocr = await _ocr_via_claude(
+                            base64.standard_b64decode(pages_b64[0]), "image/png"
+                        )
+                        # OCR pages suivantes si nécessaire
+                        for pg_b64 in pages_b64[1:6]:
+                            t = await _ocr_via_claude(
+                                base64.standard_b64decode(pg_b64), "image/png"
+                            )
+                            if t:
+                                texte_ocr += "\n\n" + t
+                        if texte_ocr.strip():
+                            return texte_ocr[:50_000]
+                except ModuleNotFoundError:
+                    pass  # PyMuPDF non installé → message d'erreur clair
+                except Exception as _e_ocr:
+                    logger.warning(f"[TraductionFichier] OCR PDF échoué : {_e_ocr}")
+
+                raise ValueError(
+                    "Ce PDF ne contient pas de texte extractible (PDF scanné ou image). "
+                    "Convertissez-le d'abord en PDF avec texte sélectionnable, "
+                    "ou envoyez directement l'image (PNG/JPEG) pour l'OCR."
+                )
+
             return texte[:50_000]
-        except Exception:
-            # Fallback : OCR Claude Vision sur les pages
-            return await _ocr_via_claude(contenu, "image/png")
+        except ValueError:
+            raise
+        except Exception as e:
+            raise ValueError(f"Impossible de lire le PDF : {str(e)[:150]}")
 
     # ── DOCX ─────────────────────────────────────────────────────────────────
     if nom.endswith(".docx") or "wordprocessingml" in mime:
@@ -990,6 +1071,102 @@ async def _ocr_via_claude(image_bytes: bytes, mime_type: str) -> str:
         return resp.content[0].text if resp.content else ""
 
 
+# ── Constantes traduction grands documents ────────────────────────────────────
+_CHUNK_CHARS   = 18_000   # ~4 500 tokens input par lot LLM
+_BATCH_PARAS   = 60       # paragraphes max par lot DOCX/PPTX
+_TIMEOUT_TRAD  = 180.0    # 3 minutes par appel LLM traduction
+_MAX_TOK_TRAD  = 6_000    # tokens sortie par appel
+_PARALLEL_MAX  = 4        # lots simultanés (rate-limit friendly)
+
+
+async def _appeler_llm_traduction(prompt_sys: str, prompt_user: str) -> str:
+    """
+    Appel LLM dédié traduction : timeout 3 min, pas de retry,
+    priorité Claude → fallback GPT-4o selon disponibilité.
+    """
+    import asyncio
+    from config.settings import settings as _s
+
+    # 1. Claude primaire (timeout long)
+    key = getattr(_s, "CLAUDE_API_KEY", "") or ""
+    if key.startswith("sk-ant-"):
+        try:
+            import anthropic as _ant
+            client = _ant.AsyncAnthropic(api_key=key, timeout=_TIMEOUT_TRAD)
+            resp = await client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=_MAX_TOK_TRAD,
+                temperature=0.15,
+                system=prompt_sys,
+                messages=[{"role": "user", "content": prompt_user}],
+            )
+            return resp.content[0].text if resp.content else ""
+        except Exception as _e:
+            logger.warning(f"[Trad/Claude] échoué : {_e} → fallback GPT-4o")
+
+    # 2. GPT-4o fallback (timeout long)
+    if getattr(_s, "OPENAI_API_KEY", None):
+        import openai as _oa
+        client = _oa.AsyncOpenAI(api_key=_s.OPENAI_API_KEY, timeout=_TIMEOUT_TRAD, max_retries=0)
+        resp = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system",  "content": prompt_sys},
+                {"role": "user",    "content": prompt_user},
+            ],
+            max_tokens=_MAX_TOK_TRAD,
+            temperature=0.15,
+        )
+        return resp.choices[0].message.content or ""
+
+    raise RuntimeError("Aucun modèle IA disponible pour la traduction (clés manquantes ou épuisées)")
+
+
+async def _traduire_texte_en_chunks(
+    texte: str,
+    src: str,
+    dst: str,
+    metier: str,
+) -> str:
+    """
+    Traduit un texte de taille illimitée par lots parallèles (_CHUNK_CHARS par lot).
+    Préserve l'ordre et réassemble.
+    """
+    import asyncio, re
+
+    prompt_sys = (
+        f"Tu es un traducteur professionnel expert en terminologie d'affaires africaine. "
+        f"Tu traduis du {src} vers le {dst} avec une précision absolue. "
+        f"Terminologie : {metier or 'professionnel africain (OHADA, CIMA, SYSCOHADA)'}. "
+        f"Tu conserves titres, listes et tableaux. "
+        f"Réponds UNIQUEMENT avec le texte traduit, sans préambule ni commentaire."
+    )
+
+    # Découper en chunks
+    chunks = []
+    for i in range(0, max(1, len(texte)), _CHUNK_CHARS):
+        chunk = texte[i: i + _CHUNK_CHARS]
+        if chunk.strip():
+            chunks.append((len(chunks), chunk))
+
+    if not chunks:
+        return ""
+
+    sema = asyncio.Semaphore(_PARALLEL_MAX)
+
+    async def traduire_chunk(idx: int, texte_chunk: str) -> tuple[int, str]:
+        async with sema:
+            nb = len(chunks)
+            pfx = f" (partie {idx + 1}/{nb})" if nb > 1 else ""
+            prompt_user = f"Traduis du {src} vers le {dst}{pfx} :\n\n---\n{texte_chunk}\n---"
+            trad = await _appeler_llm_traduction(prompt_sys, prompt_user)
+            return idx, trad
+
+    resultats = await asyncio.gather(*[traduire_chunk(i, c) for i, c in chunks])
+    resultats_tries = sorted(resultats, key=lambda x: x[0])
+    return "\n\n".join(t for _, t in resultats_tries)
+
+
 def _remplacer_texte_paragraphe(para, nouveau_texte: str) -> None:
     """
     Remplace le texte d'un paragraphe python-docx EN PLACE.
@@ -1036,38 +1213,29 @@ async def _traduire_docx_avec_structure(
     langue_source: str,
     langue_cible: str,
     metier: str,
-) -> bytes:
+) -> tuple[bytes, str]:
     """
-    Traduit un DOCX en préservant TOUTE la mise en forme originale.
-    Stratégie : modification EN PLACE du document source (polices, tailles,
-    couleurs, styles de paragraphe, marges, en-têtes, pieds de page, images…
-    tout est conservé — seul le texte change).
+    Traduit un DOCX en préservant TOUTE la mise en forme (polices, tailles,
+    couleurs, tableaux, en-têtes, pieds de page…).
+    Supporte les documents de taille illimitée via batching + parallélisme.
+    Retourne (bytes_docx_traduit, apercu_texte_traduit).
     """
-    import io
-    import re
+    import io, re, asyncio
     from docx import Document
-    from core.ia_client import ModeIA, ia_client
 
-    # ── 1. Charger le document SOURCE (avec toute sa mise en forme) ────────────
     doc = Document(io.BytesIO(contenu))
 
-    # ── 2. Collecter tous les paragraphes à traduire ──────────────────────────
+    # ── Collecter tous les paragraphes ────────────────────────────────────────
     paras: list = []
-
-    # Corps principal
     for para in doc.paragraphs:
         if para.text.strip():
             paras.append(para)
-
-    # Cellules de tableau (y compris tableaux imbriqués)
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
                 for para in cell.paragraphs:
                     if para.text.strip():
                         paras.append(para)
-
-    # En-têtes et pieds de page (toutes les sections)
     for section in doc.sections:
         for hf in (section.header, section.footer,
                    section.even_page_header, section.even_page_footer,
@@ -1088,59 +1256,81 @@ async def _traduire_docx_avec_structure(
     if not paras:
         raise ValueError("Document vide ou aucun texte extractible")
 
-    # ── 3. Construire le prompt numéroté §N§ ──────────────────────────────────
     src = LANGUES_NOM.get(langue_source, langue_source)
     dst = LANGUES_NOM.get(langue_cible, langue_cible)
-
-    texte_balise = "\n".join(f"§{i}§ {p.text}" for i, p in enumerate(paras))
 
     prompt_sys = (
         f"Tu es un traducteur professionnel expert. Tu traduis du {src} vers le {dst}. "
         f"RÈGLE ABSOLUE : conserve EXACTEMENT les balises §N§ au début de chaque ligne. "
         f"Ne modifie jamais le format §N§. Traduis uniquement le texte après la balise. "
         f"Ne fusionne pas les lignes. Ne supprime aucune ligne balisée. "
-        f"Terminologie métier : {metier or 'professionnel africain (OHADA, CIMA, SYSCOHADA)'}."
+        f"Terminologie : {metier or 'professionnel africain (OHADA, CIMA, SYSCOHADA)'}."
     )
-    prompt_user = (
-        f"Traduis chaque ligne du {src} vers le {dst} en conservant les balises §N§ :\n\n"
-        f"{texte_balise[:35000]}"
-    )
-
-    # ── 4. Appel LLM ───────────────────────────────────────────────────────────
-    reponse_ia = await ia_client.appeler(
-        prompt=prompt_user,
-        mode=ModeIA.REDACTION,
-        systeme=prompt_sys,
-        max_tokens_override=8192,
-        utiliser_cache=False,
-    )
-    texte_trad_balise = reponse_ia.contenu if hasattr(reponse_ia, "contenu") else str(reponse_ia)
-
-    # ── 5. Parser les traductions ──────────────────────────────────────────────
     pat = re.compile(r"§(\d+)§\s*(.*)")
-    traduits: dict[int, str] = {}
-    for line in texte_trad_balise.split("\n"):
-        m = pat.match(line.strip())
-        if m:
-            traduits[int(m.group(1))] = m.group(2).strip()
 
-    # Fallback ligne-à-ligne si le LLM a ignoré les balises
-    if not traduits:
-        lines_trad = [l for l in texte_trad_balise.split("\n") if l.strip()]
-        for i in range(min(len(paras), len(lines_trad))):
-            traduits[i] = lines_trad[i]
+    # ── Découper en lots de _BATCH_PARAS paragraphes (ou _CHUNK_CHARS chars) ──
+    def faire_lots() -> list[list[tuple[int, object]]]:
+        lots, lot_courant, chars = [], [], 0
+        for i, p in enumerate(paras):
+            n = len(p.text)
+            if lot_courant and (len(lot_courant) >= _BATCH_PARAS or chars + n > _CHUNK_CHARS):
+                lots.append(lot_courant)
+                lot_courant, chars = [], 0
+            lot_courant.append((i, p))
+            chars += n
+        if lot_courant:
+            lots.append(lot_courant)
+        return lots
 
-    # ── 6. Appliquer les traductions EN PLACE ─────────────────────────────────
+    lots = faire_lots()
+    logger.info(f"[Trad/DOCX] {len(paras)} paragraphes → {len(lots)} lots")
+
+    sema = asyncio.Semaphore(_PARALLEL_MAX)
+
+    async def traduire_lot(lot: list[tuple[int, object]]) -> dict[int, str]:
+        texte_balise = "\n".join(f"§{i}§ {p.text}" for i, p in lot)
+        prompt_user = (
+            f"Traduis chaque ligne du {src} vers le {dst} en conservant les balises §N§ :\n\n"
+            f"{texte_balise}"
+        )
+        async with sema:
+            raw = await _appeler_llm_traduction(prompt_sys, prompt_user)
+
+        traduits: dict[int, str] = {}
+        for line in raw.split("\n"):
+            m = pat.match(line.strip())
+            if m:
+                traduits[int(m.group(1))] = m.group(2).strip()
+
+        # Fallback ligne-à-ligne si les balises sont ignorées
+        if not traduits:
+            lines_src = [p.text for _, p in lot]
+            lines_trad = [l for l in raw.split("\n") if l.strip()]
+            for (i, _), trad in zip(lot, lines_trad):
+                traduits[i] = trad
+
+        return traduits
+
+    resultats = await asyncio.gather(*[traduire_lot(lot) for lot in lots])
+    traduits_final: dict[int, str] = {}
+    for d in resultats:
+        traduits_final.update(d)
+
+    # ── Appliquer les traductions EN PLACE ────────────────────────────────────
     for i, para in enumerate(paras):
-        trad = traduits.get(i, para.text)
+        trad = traduits_final.get(i)
         if trad:
             _remplacer_texte_paragraphe(para, trad)
 
-    # ── 7. Sauvegarder et retourner ───────────────────────────────────────────
     buf = io.BytesIO()
     doc.save(buf)
     buf.seek(0)
-    return buf.read()
+
+    apercu = " ".join(
+        traduits_final.get(i, "") for i in range(min(80, len(paras)))
+        if traduits_final.get(i, "").strip()
+    )[:3000]
+    return buf.read(), apercu
 
 
 def _construire_docx_depuis_texte_traduit(texte: str, titre: str, src: str, dst: str) -> bytes:
@@ -1198,18 +1388,31 @@ async def _traduire_pptx_avec_structure(
     langue_source: str,
     langue_cible: str,
     metier: str,
-) -> bytes:
-    """Traduit un PPTX en préservant la structure des slides (titres, corps, notes)."""
+) -> tuple[bytes, str]:
+    """
+    Traduit un PPTX en préservant la structure des slides (titres, corps, notes).
+    Supporte les présentations de taille illimitée via batching + parallélisme.
+    Retourne (bytes_pptx_traduit, apercu_texte_traduit).
+    """
+    import asyncio
     import io
     import re
     from pptx import Presentation
-    from core.ia_client import ModeIA, ia_client
 
     prs = Presentation(io.BytesIO(contenu))
     src_name = LANGUES_NOM.get(langue_source, langue_source)
     dst_name = LANGUES_NOM.get(langue_cible, langue_cible)
 
-    # Extraire tous les textes indexés : §slide.shape.para§ texte
+    prompt_sys = (
+        f"Tu es un traducteur professionnel expert en terminologie d'affaires africaine. "
+        f"Tu traduis du {src_name} vers le {dst_name}. "
+        f"RÈGLE ABSOLUE : conserve EXACTEMENT les balises §N§ au début de chaque ligne. "
+        f"Ne modifie jamais le format §N§. Traduis uniquement le texte après la balise. "
+        f"Terminologie : {metier or 'professionnel africain (OHADA, CIMA, SYSCOHADA)'}."
+    )
+    pat = re.compile(r"§(\d+)§\s*(.*)")
+
+    # Extraire tous les textes indexés
     elements: list[dict] = []
     for si, slide in enumerate(prs.slides):
         for shape in slide.shapes:
@@ -1221,27 +1424,41 @@ async def _traduire_pptx_avec_structure(
                     elements.append({"si": si, "shape_id": shape.shape_id, "pi": pi, "text": txt})
 
     if not elements:
-        return contenu
+        return contenu, ""
 
-    # Construire le prompt numéroté
-    numbered = "\n".join(f"§{i}§ {e['text']}" for i, e in enumerate(elements))
-    prompt = (
-        f"Traduis chaque ligne du {src_name} vers le {dst_name}.\n"
-        f"Respecte EXACTEMENT le format §N§ en début de chaque ligne traduite.\n"
-        f"Terminologie {metier or 'professionnelle'} africaine. Réponds UNIQUEMENT avec les lignes.\n\n"
-        f"{numbered[:18000]}"
-    )
-    reponse = await ia_client.appeler(
-        prompt=prompt, mode=ModeIA.REDACTION, max_tokens_override=4096, utiliser_cache=False,
-    )
-    raw = reponse.contenu if hasattr(reponse, "contenu") else str(reponse)
+    # Découper en lots
+    lots: list[list[int]] = []
+    lot_courant: list[int] = []
+    chars_courant = 0
+    for i, elem in enumerate(elements):
+        taille = len(elem["text"])
+        if lot_courant and (len(lot_courant) >= _BATCH_PARAS or chars_courant + taille > _CHUNK_CHARS):
+            lots.append(lot_courant)
+            lot_courant, chars_courant = [], 0
+        lot_courant.append(i)
+        chars_courant += taille
+    if lot_courant:
+        lots.append(lot_courant)
 
-    # Parser les traductions
+    logger.info(f"[Trad/PPTX] {len(elements)} éléments → {len(lots)} lots")
+
     traductions: dict[int, str] = {}
-    for line in raw.split("\n"):
-        m = re.match(r"§(\d+)§\s*(.*)", line.strip())
-        if m:
-            traductions[int(m.group(1))] = m.group(2)
+    sema = asyncio.Semaphore(_PARALLEL_MAX)
+
+    async def traduire_lot(indices: list[int]) -> None:
+        numbered = "\n".join(f"§{i}§ {elements[i]['text']}" for i in indices)
+        prompt_user = (
+            f"Traduis chaque ligne ci-dessous du {src_name} vers le {dst_name} "
+            f"en conservant les balises §N§ :\n\n{numbered}"
+        )
+        async with sema:
+            raw = await _appeler_llm_traduction(prompt_sys, prompt_user)
+        for line in raw.split("\n"):
+            m = pat.match(line.strip())
+            if m:
+                traductions[int(m.group(1))] = m.group(2).strip()
+
+    await asyncio.gather(*[traduire_lot(lot) for lot in lots])
 
     # Réinjecter dans le PPTX
     for i, elem in enumerate(elements):
@@ -1263,7 +1480,12 @@ async def _traduire_pptx_avec_structure(
     buf = io.BytesIO()
     prs.save(buf)
     buf.seek(0)
-    return buf.read()
+
+    apercu = " ".join(
+        traductions.get(i, "") for i in range(min(80, len(elements)))
+        if traductions.get(i, "").strip()
+    )[:3000]
+    return buf.read(), apercu
 
 
 @router.post("/traduire-fichier", summary="Traduire un fichier uploadé")
@@ -1282,8 +1504,8 @@ async def traduire_fichier(
     - Traduit avec terminologie métier africaine préservée
     - Retourne la traduction + génère optionnellement un DOCX téléchargeable
     """
+    await _pre_check_credits(current_user.user_id)
     from modules.pro.service_profil import get_or_create, incrementer_stat
-    from core.ia_client import ModeIA, ia_client
 
     # Vérification taille
     contenu = await fichier.read()
@@ -1294,93 +1516,63 @@ async def traduire_fichier(
     if not fichier.filename:
         raise HTTPException(400, "Nom de fichier requis")
 
-    # Extraction du texte
-    try:
-        texte_source = await _extraire_texte_fichier(fichier, contenu)
-    except ValueError as e:
-        raise HTTPException(422, str(e))
-    except Exception as e:
-        logger.error(f"[TraductionFichier] Extraction échouée : {e}")
-        raise HTTPException(500, f"Erreur lors de la lecture du fichier : {str(e)[:200]}")
-
-    if not texte_source.strip():
-        raise HTTPException(422, "Aucun texte trouvé dans le fichier. Le fichier est peut-être vide ou chiffré.")
-
     # Récupération profil
     profil, _ = await get_or_create(current_user.user_id, db)
     metier = contexte_metier or getattr(profil, "metier", "") or ""
 
     src = LANGUES_NOM.get(langue_source, langue_source)
     dst = LANGUES_NOM.get(langue_cible, langue_cible)
-
-    prompt_sys = (
-        f"Tu es un traducteur professionnel expert en terminologie d'affaires africaine. "
-        f"Tu traduis du {src} vers le {dst} avec une précision absolue. "
-        f"Tu respectes la terminologie technique du secteur {metier or 'professionnel'}. "
-        f"Pour les termes spécifiques africains (SYSCOHADA, CIMA, OHADA, COBAC, UEMOA, CEMAC, FCFA), "
-        f"tu les traduis ou les expliques selon l'usage international. "
-        f"Tu conserves la mise en forme (titres, listes, tableaux). "
-        f"Tu réponds uniquement avec le texte traduit, sans préambule ni commentaire."
-    )
-    prompt_user = (
-        f"Traduis le texte suivant du {src} vers le {dst} :\n\n"
-        f"---\n{texte_source[:40_000]}\n---"
-    )
-
-    try:
-        reponse_ia = await ia_client.appeler(
-            prompt=prompt_user,
-            mode=ModeIA.REDACTION,
-            systeme=prompt_sys,
-            max_tokens_override=8192,
-            utiliser_cache=False,
-        )
-        texte_traduit = reponse_ia.contenu if hasattr(reponse_ia, "contenu") else str(reponse_ia)
-    except Exception as e:
-        logger.error(f"[TraductionFichier] IA échouée : {e}")
-        raise HTTPException(500, f"Erreur lors de la traduction : {str(e)[:200]}")
-
-    await incrementer_stat(current_user.user_id, "nb_traductions", db, xp_gain=2)
-    nb_mots_src = len(texte_source.split())
-    await _debiter_credits_generation(
-        user_id=current_user.user_id, db=db, module="traduction_fichier",
-        tokens_input=max(500, nb_mots_src * 2),
-        tokens_output=max(400, nb_mots_src * 2),
-        modele=getattr(reponse_ia, "modele_utilise", "gpt-4o"),
-    )
-
-    # Générer le fichier traduit — toujours, en respectant le format source quand possible
-    chemin_fichier_traduit = None
     nom_fichier_base = Path(fichier.filename).stem
     nom_ext = Path(fichier.filename).suffix.lower()
-    try:
-        _DATA_DIR.mkdir(parents=True, exist_ok=True)
-        reports_dir = _DATA_DIR / "pro_reports"
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
+    # Traduire + générer le fichier de sortie
+    chemin_fichier_traduit = None
+    texte_traduit = ""
+    texte_source = ""
+    sortie_bytes = b""
+    ext_out = ".docx"
+    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+
+    try:
         if nom_ext in (".docx", ".doc"):
-            # DOCX → DOCX traduit avec structure préservée
-            sortie_bytes = await _traduire_docx_avec_structure(
+            sortie_bytes, texte_traduit = await _traduire_docx_avec_structure(
                 contenu=contenu,
                 langue_source=langue_source,
                 langue_cible=langue_cible,
                 metier=metier,
             )
+            texte_source = texte_traduit
             ext_out = ".docx"
 
         elif nom_ext == ".pptx":
-            # PPTX → PPTX traduit avec structure préservée
-            sortie_bytes = await _traduire_pptx_avec_structure(
+            sortie_bytes, texte_traduit = await _traduire_pptx_avec_structure(
                 contenu=contenu,
                 langue_source=langue_source,
                 langue_cible=langue_cible,
                 metier=metier,
             )
+            texte_source = texte_traduit
             ext_out = ".pptx"
 
         else:
-            # PDF, TXT, CSV, XLSX, image → DOCX propre depuis le texte traduit
+            # PDF, TXT, CSV, XLSX, image → extraire le texte puis traduire en chunks
+            try:
+                texte_source = await _extraire_texte_fichier(fichier, contenu)
+            except ValueError as e:
+                raise HTTPException(422, str(e))
+            except Exception as e:
+                logger.error(f"[TraductionFichier] Extraction échouée : {e}")
+                raise HTTPException(500, f"Erreur lors de la lecture du fichier : {str(e)[:200]}")
+
+            if not texte_source.strip():
+                raise HTTPException(422, "Aucun texte trouvé dans le fichier. Le fichier est peut-être vide ou chiffré.")
+
+            texte_traduit = await _traduire_texte_en_chunks(
+                texte=texte_source,
+                src=src,
+                dst=dst,
+                metier=metier,
+            )
             sortie_bytes = _construire_docx_depuis_texte_traduit(
                 texte=texte_traduit,
                 titre=f"Traduction {src} → {dst} : {nom_fichier_base}",
@@ -1389,6 +1581,25 @@ async def traduire_fichier(
             )
             ext_out = ".docx"
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[TraductionFichier] Erreur : {e}")
+        raise HTTPException(500, f"Erreur lors de la traduction : {str(e)[:200]}")
+
+    await incrementer_stat(current_user.user_id, "nb_traductions", db, xp_gain=2)
+    nb_mots_src = len(texte_source.split()) if texte_source else 0
+    await _debiter_credits_generation(
+        user_id=current_user.user_id, db=db, module="traduction_fichier",
+        tokens_input=max(500, nb_mots_src * 2),
+        tokens_output=max(400, nb_mots_src * 2),
+        modele="claude-sonnet-4-6",
+    )
+
+    try:
+        _DATA_DIR.mkdir(parents=True, exist_ok=True)
+        reports_dir = _DATA_DIR / "pro_reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
         nom_out = f"traduction_{nom_fichier_base}_{langue_cible}_{ts}{ext_out}"
         chemin_out = reports_dir / nom_out
         chemin_out.write_bytes(sortie_bytes)
@@ -2136,6 +2347,7 @@ async def convertir_fichier(
     - Images → DOCX, TXT (via OCR Claude Vision)
     - TXT/MD → DOCX
     """
+    await _pre_check_credits(current_user.user_id)
     contenu = await fichier.read()
     if len(contenu) > 50 * 1024 * 1024:
         raise HTTPException(413, "Fichier trop volumineux (max 50 MB)")
@@ -2215,10 +2427,17 @@ async def convertir_fichier(
             meta={"format_source": ext_src, "format_cible": ext_cible, "fichier_source": nom},
         )
 
-        await _debiter_credits_generation(
-            user_id=current_user.user_id, db=db, module="conversion_fichier",
-            tokens_input=500, tokens_output=500, modele="gpt-4o-mini",
-        )
+        # Forfait non-LLM pour la conversion (I/O + python-docx) — complexité ∝ taille
+        try:
+            from modules.pro.service_credits import debiter_forfait_fcfa
+            taille_mo = max(1, len(sortie_bytes) // (1024 * 1024))
+            await debiter_forfait_fcfa(
+                user_id=current_user.user_id,
+                cout_fcfa=1.0 * taille_mo,      # ~1 FCFA/Mo × marge 20×
+                module="conversion_fichier",
+            )
+        except Exception as _e:
+            logger.debug(f"[Credits/Conversion] forfait non bloquant: {_e}")
 
         return {
             "fichier_converti": nom_sortie,

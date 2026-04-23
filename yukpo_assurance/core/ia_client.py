@@ -1,6 +1,6 @@
 """
 YukpoAssurance — Client IA multi-modèle  (v3 — Production-grade)
-Orchestration Claude (primaire) + GPT-4o (fallback)
+Orchestration Claude Sonnet (primaire) + GPT-4o (fallback)
 Inspiré de l'architecture app_ia.rs + orchestration_ia.rs de yukpomnang2
 
 v3 — Nouvelles fonctionnalités :
@@ -219,8 +219,8 @@ class IAClient:
     Client IA unifié pour YukpoAssurance.
 
     Stratégie d'orchestration :
-    1. GPT-4o en priorité — modèle primaire pour tous les modes
-    2. Claude Opus — fallback automatique si GPT indisponible
+    1. Claude (Sonnet 4.6) en priorité — modèle primaire pour tous les modes
+    2. GPT-4o — fallback automatique si Claude indisponible
     3. Claude Haiku — tâches légères si forcé explicitement
 
     Améliorations v2 :
@@ -231,10 +231,7 @@ class IAClient:
     """
 
     def __init__(self):
-        # GPT-4o est le modèle primaire — clé OpenAI obligatoire
-        # timeout=15s + max_retries=1 = 30s max → confortable dans la fenêtre copilote de 45s
-        self._gpt = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=15.0, max_retries=1)
-        # Claude = fallback uniquement — initialisé seulement si clé présente ET non-placeholder
+        # Claude est le modèle primaire — clé CLAUDE_API_KEY obligatoire
         _claude_key = settings.CLAUDE_API_KEY or ""
         _claude_valide = (
             _claude_key.startswith("sk-ant-")
@@ -248,6 +245,9 @@ class IAClient:
             if _claude_valide
             else None
         )
+        # GPT-4o = fallback si Claude indisponible
+        # timeout=15s + max_retries=1 = 30s max → confortable dans la fenêtre copilote de 45s
+        self._gpt = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=15.0, max_retries=1)
         self._metriques: dict[str, MetriquesModele] = {
             m.value: MetriquesModele() for m in ModelePrioritaire
         }
@@ -382,9 +382,20 @@ class IAClient:
             )
 
         try:
-            if modele in (ModelePrioritaire.CLAUDE_OPUS, ModelePrioritaire.CLAUDE_HAIKU):
+            if modele in (
+                ModelePrioritaire.CLAUDE_OPUS,
+                ModelePrioritaire.CLAUDE_SONNET,
+                ModelePrioritaire.CLAUDE_HAIKU,
+            ):
+                # Pour CLAUDE_SONNET, utiliser le modèle concret défini dans settings
+                # (peut être un alias comme claude-sonnet-4-6)
+                modele_concret = (
+                    settings.CLAUDE_MODEL_PRIMAIRE
+                    if modele == ModelePrioritaire.CLAUDE_SONNET
+                    else modele.value
+                )
                 reponse = await self._appel_claude(
-                    prompt=prompt, modele=modele.value, temperature=temperature,
+                    prompt=prompt, modele=modele_concret, temperature=temperature,
                     systeme=systeme, images_b64=images_b64, json_attendu=json_attendu,
                     max_tokens=max_tokens,
                 )
@@ -643,55 +654,57 @@ class IAClient:
         mode: ModeIA = ModeIA.PRECISION,
     ) -> ReponseIA:
         """
-        OCR/analyse d'image : GPT-4o en premier, Claude Opus en fallback.
+        OCR/analyse d'image : Claude Vision en premier, GPT-4o Vision en fallback.
         Un seul appel — pas de parallèle, pas de double coût.
         Suit la même stratégie que appeler() mais forcé sur Vision.
         """
         temperature = self._temperature_par_mode(mode)
-        cb_gpt = self._circuit_breakers[ModelePrioritaire.GPT4O.value]
+        cb_claude = self._circuit_breakers[ModelePrioritaire.CLAUDE_SONNET.value]
 
-        # 1. GPT-4o (primaire Vision)
-        if not cb_gpt.est_ouvert:
+        # 1. Claude Sonnet (primaire Vision)
+        if self._claude is not None and not cb_claude.est_ouvert:
             debut = time.monotonic()
             try:
-                reponse = await self._appel_gpt(
-                    prompt=prompt, temperature=temperature, systeme=None,
+                reponse = await self._appel_claude(
+                    prompt=prompt, modele=settings.CLAUDE_MODEL_PRIMAIRE,
+                    temperature=temperature, systeme=None,
                     images_b64=[image_b64], json_attendu=True,
                 )
-                self._enregistrer_succes(ModelePrioritaire.GPT4O.value, time.monotonic() - debut, reponse)
-                cb_gpt.enregistrer_succes()
+                self._enregistrer_succes(ModelePrioritaire.CLAUDE_SONNET.value, time.monotonic() - debut, reponse)
+                cb_claude.enregistrer_succes()
                 return reponse
             except Exception as e:
-                logger.warning(f"[IAClient/Vision] GPT-4o échoué: {e} → fallback Claude")
-                self._enregistrer_echec(ModelePrioritaire.GPT4O.value)
-                cb_gpt.enregistrer_echec()
+                logger.warning(f"[IAClient/Vision] Claude échoué: {e} → fallback GPT-4o")
+                self._enregistrer_echec(ModelePrioritaire.CLAUDE_SONNET.value)
+                cb_claude.enregistrer_echec()
 
-        # 2. Claude Opus (fallback Vision)
-        cb_claude = self._circuit_breakers[ModelePrioritaire.CLAUDE_OPUS.value]
-        if cb_claude.est_ouvert:
-            raise RuntimeError("Vision IA indisponible — GPT-4o et Claude en circuit ouvert")
+        # 2. GPT-4o (fallback Vision)
+        cb_gpt = self._circuit_breakers[ModelePrioritaire.GPT4O.value]
+        if cb_gpt.est_ouvert:
+            raise RuntimeError("Vision IA indisponible — Claude et GPT-4o en circuit ouvert")
 
         debut = time.monotonic()
-        reponse = await self._appel_claude(
-            prompt=prompt, modele=settings.CLAUDE_MODEL_PRIMAIRE,
-            temperature=temperature, systeme=None,
+        reponse = await self._appel_gpt(
+            prompt=prompt, temperature=temperature, systeme=None,
             images_b64=[image_b64], json_attendu=True,
         )
         reponse.fallback_utilise = True
-        self._enregistrer_succes(ModelePrioritaire.CLAUDE_OPUS.value, time.monotonic() - debut, reponse)
-        cb_claude.enregistrer_succes()
+        self._enregistrer_succes(ModelePrioritaire.GPT4O.value, time.monotonic() - debut, reponse)
+        cb_gpt.enregistrer_succes()
         return reponse
 
     # ─── Utilitaires internes ─────────────────────────────────────────────────
 
     def _choisir_modele(self, mode: ModeIA) -> ModelePrioritaire:
         """
-        Sélection du modèle — GPT-4o primaire sur tous les modes.
-        Claude Sonnet/Opus = fallback automatique si GPT-4o indisponible.
-        Claude Opus reste disponible via forcer_modele=ModelePrioritaire.CLAUDE_OPUS.
+        Sélection du modèle — Claude Sonnet primaire sur tous les modes.
+        GPT-4o = fallback automatique si Claude indisponible.
+        Claude Opus/Haiku disponibles via forcer_modele.
+        Si la clé Claude n'est pas valide, bascule directement sur GPT-4o.
         """
-        # GPT-4o primaire sur tous les modes — Claude en fallback si clé valide
-        return ModelePrioritaire.GPT4O
+        if self._claude is None:
+            return ModelePrioritaire.GPT4O
+        return ModelePrioritaire.CLAUDE_SONNET
 
     def _temperature_par_mode(self, mode: ModeIA) -> float:
         mapping = {
@@ -725,26 +738,26 @@ class IAClient:
         self, prompt, mode, systeme, images_b64, json_attendu, debut,
         max_tokens: int = 0,
     ) -> ReponseIA:
-        """Fallback : Claude si GPT-4o indisponible (clé CLAUDE_API_KEY requise)."""
-        if self._claude is None:
-            raise RuntimeError("Service IA indisponible — configurez CLAUDE_API_KEY comme fallback")
-        cb = self._circuit_breakers.get(settings.CLAUDE_MODEL_PRIMAIRE)
+        """Fallback : GPT-4o si Claude indisponible (clé OPENAI_API_KEY requise)."""
+        if not settings.OPENAI_API_KEY:
+            raise RuntimeError("Service IA indisponible — configurez OPENAI_API_KEY comme fallback")
+        cb = self._circuit_breakers.get(ModelePrioritaire.GPT4O.value)
         if cb and cb.est_ouvert:
             raise RuntimeError("Tous les modèles IA sont indisponibles (circuit breakers ouverts)")
         try:
-            reponse = await self._appel_claude(
+            reponse = await self._appel_gpt(
                 prompt=prompt,
-                modele=settings.CLAUDE_MODEL_PRIMAIRE,
                 temperature=self._temperature_par_mode(mode),
                 systeme=systeme,
                 images_b64=images_b64,
                 json_attendu=json_attendu,
                 max_tokens=max_tokens or settings.IA_MAX_TOKENS,
             )
-            self._enregistrer_succes(settings.CLAUDE_MODEL_PRIMAIRE, time.monotonic() - debut, reponse)
+            reponse.fallback_utilise = True
+            self._enregistrer_succes(ModelePrioritaire.GPT4O.value, time.monotonic() - debut, reponse)
             return reponse
         except Exception as e:
-            logger.error(f"[IAClient] Fallback Claude aussi échoué: {e}")
+            logger.error(f"[IAClient] Fallback GPT-4o aussi échoué: {e}")
             raise
 
     def _enregistrer_succes(self, modele: str, duree: float, reponse: ReponseIA):
@@ -891,6 +904,82 @@ class IAClient:
             },
         }
 
+    async def _appeler_avec_outils_claude(
+        self,
+        prompt: str,
+        outils: list[dict],
+        executeur_outil: Callable,
+        *,
+        mode: ModeIA,
+        systeme: Optional[str],
+        max_tours: int,
+    ) -> tuple[str, int, int, str]:
+        """Boucle tool-use native Claude (format anthropic tool_use/tool_result)."""
+        temperature = self._temperature_par_mode(mode)
+        tokens_in_total = 0
+        tokens_out_total = 0
+        modele_claude = settings.CLAUDE_MODEL_PRIMAIRE
+        messages: list[dict[str, Any]] = [{"role": "user", "content": prompt}]
+        texte_final = ""
+
+        for _ in range(max_tours):
+            kwargs: dict[str, Any] = {
+                "model": modele_claude,
+                "max_tokens": min(settings.IA_MAX_TOKENS, 8192),
+                "temperature": temperature,
+                "messages": messages,
+            }
+            if systeme:
+                kwargs["system"] = systeme
+            if outils:
+                kwargs["tools"] = outils
+
+            response = await self._claude.messages.create(**kwargs)
+            tokens_in_total += response.usage.input_tokens
+            tokens_out_total += response.usage.output_tokens
+
+            # Collecter texte et tool_use blocs
+            blocs_text: list[str] = []
+            tool_uses: list[Any] = []
+            for bloc in response.content:
+                if getattr(bloc, "type", None) == "text":
+                    blocs_text.append(bloc.text)
+                elif getattr(bloc, "type", None) == "tool_use":
+                    tool_uses.append(bloc)
+
+            # Message assistant (conserver tel quel pour le tour suivant)
+            messages.append({
+                "role": "assistant",
+                "content": [
+                    {"type": "text", "text": b.text} if getattr(b, "type", None) == "text"
+                    else {"type": "tool_use", "id": b.id, "name": b.name, "input": b.input}
+                    for b in response.content if getattr(b, "type", None) in ("text", "tool_use")
+                ],
+            })
+
+            if response.stop_reason != "tool_use" or not tool_uses:
+                texte_final = "\n".join(blocs_text).strip()
+                break
+
+            # Exécuter les outils en parallèle
+            async def _exec_un(tu):
+                try:
+                    res = await executeur_outil(tu.name, tu.input or {})
+                except Exception as exc:
+                    res = f"ERREUR outil {tu.name}: {exc}"
+                return tu.id, str(res)
+
+            resultats = await asyncio.gather(*[_exec_un(tu) for tu in tool_uses])
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "tool_result", "tool_use_id": tid, "content": r}
+                    for tid, r in resultats
+                ],
+            })
+
+        return texte_final, tokens_in_total, tokens_out_total, modele_claude
+
     async def appeler_avec_outils(
         self,
         prompt: str,
@@ -904,16 +993,40 @@ class IAClient:
         user_id: Optional[int] = None,
     ) -> "ReponseIA":
         """
-        Boucle tool-use async (GPT-4o primaire).
+        Boucle tool-use async (Claude primaire, GPT-4o fallback).
 
         Le LLM peut appeler plusieurs outils avant de produire sa réponse finale.
         Tous les tokens de tous les tours sont accumulés et persistés ensemble.
-        Fallback transparent vers appeler() sans outils si GPT-4o indisponible.
+        Fallback transparent vers appeler() sans outils si tout échoue.
         """
         temperature = self._temperature_par_mode(mode)
         debut = time.monotonic()
         tokens_input_total = 0
         tokens_output_total = 0
+
+        # 1. Claude primaire (tool-use natif Anthropic)
+        cb_claude = self._circuit_breakers[ModelePrioritaire.CLAUDE_SONNET.value]
+        if self._claude is not None and not cb_claude.est_ouvert:
+            try:
+                texte, tin, tout, modele_claude = await self._appeler_avec_outils_claude(
+                    prompt=prompt, outils=outils, executeur_outil=executeur_outil,
+                    mode=mode, systeme=systeme, max_tours=max_tours,
+                )
+                cb_claude.enregistrer_succes()
+                reponse = ReponseIA(
+                    contenu=texte,
+                    modele_utilise=modele_claude,
+                    tokens_input=tin,
+                    tokens_output=tout,
+                    temps_ms=(time.monotonic() - debut) * 1000,
+                )
+                asyncio.ensure_future(self._persister_cout(reponse, module, user_id))
+                return reponse
+            except Exception as exc:
+                logger.warning(f"[IAClient] Claude tool-use échoué ({exc}) → fallback GPT-4o")
+                cb_claude.enregistrer_echec()
+
+        # 2. Fallback GPT-4o (tool-use OpenAI function-calling)
         modele_utilise = getattr(settings, "GPT_MODEL_PRIMAIRE", settings.GPT_MODEL_FALLBACK)
         outils_gpt = [self._outil_anthropic_vers_openai(o) for o in outils] if outils else []
 
