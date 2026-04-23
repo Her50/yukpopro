@@ -88,7 +88,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#0f172a" }}>
+    <div className="dark min-h-screen flex" style={{ background: "#0f172a" }}>
 
       {/* ── Panneau gauche — identité Yukpo ──────────────────────────────── */}
       <div

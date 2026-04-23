@@ -3,64 +3,314 @@
 @tailwind utilities;
 
 @layer base {
+  /* ─────────────────────────────────────────────────────────
+     Design tokens — light (default, pro B2B)
+     ───────────────────────────────────────────────────────── */
+  :root {
+    /* Canvas & surfaces */
+    --ykp-canvas: #f1f5f9;               /* slate-100 */
+    --ykp-canvas-gradient: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+    --ykp-surface: #ffffff;
+    --ykp-surface-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    --ykp-elevated: #ffffff;
+    --ykp-input-bg: #ffffff;
+    --ykp-input-border: #cbd5e1;         /* slate-300 */
+    --ykp-input-placeholder: #94a3b8;    /* slate-400 */
+
+    /* Sidebar — light pro (blanc, bord subtil, accent indigo au hover) */
+    --ykp-sidebar-start: #ffffff;
+    --ykp-sidebar-end: #f8fafc;
+    --ykp-sidebar-text: #334155;        /* slate-700 */
+    --ykp-sidebar-text-muted: #64748b;  /* slate-500 */
+    --ykp-sidebar-border: #e2e8f0;      /* slate-200 */
+    --ykp-sidebar-hover: #f1f5f9;       /* slate-100 */
+    --ykp-sidebar-active-bg: linear-gradient(90deg, rgba(99,102,241,0.10) 0%, rgba(0,176,240,0.06) 100%);
+    --ykp-sidebar-active-border: #4f46e5;
+    --ykp-sidebar-active-text: #0f172a;
+    --ykp-sidebar-profile-bg: #f8fafc;
+    --ykp-sidebar-profile-border: #e2e8f0;
+    --ykp-sidebar-tooltip-bg: #0f172a;
+    --ykp-sidebar-tooltip-text: #f8fafc;
+    --ykp-sidebar-tooltip-border: rgba(99,102,241,0.3);
+
+    /* Text */
+    --ykp-text-primary: #0f172a;         /* slate-900 */
+    --ykp-text-secondary: #334155;       /* slate-700 */
+    --ykp-text-muted: #64748b;           /* slate-500 */
+    --ykp-text-faint: #94a3b8;           /* slate-400 */
+
+    /* Borders & dividers */
+    --ykp-border: #e2e8f0;               /* slate-200 */
+    --ykp-border-subtle: #f1f5f9;        /* slate-100 */
+
+    /* Overlays & toasts */
+    --ykp-toast-bg: #ffffff;
+    --ykp-toast-text: #0f172a;
+    --ykp-toast-border: #e2e8f0;
+
+    /* Shadows */
+    --ykp-shadow-card: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03);
+    --ykp-shadow-elevated: 0 10px 25px -5px rgba(15,23,42,0.08), 0 8px 10px -6px rgba(15,23,42,0.04);
+
+    color-scheme: light;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     Design tokens — dark (option utilisateur)
+     ───────────────────────────────────────────────────────── */
+  .dark {
+    --ykp-canvas: #162033;
+    --ykp-canvas-gradient: linear-gradient(160deg, #1e2640 0%, #162033 100%);
+    --ykp-surface: #243050;
+    --ykp-surface-gradient: linear-gradient(135deg, #243050 0%, #1e2640 100%);
+    --ykp-elevated: #2a3657;
+    --ykp-input-bg: rgba(255,255,255,0.05);
+    --ykp-input-border: rgba(255,255,255,0.09);
+    --ykp-input-placeholder: #475569;
+
+    --ykp-sidebar-start: #1e2640;
+    --ykp-sidebar-end: #162033;
+    --ykp-sidebar-text: #e2e8f0;
+    --ykp-sidebar-text-muted: #94a3b8;
+    --ykp-sidebar-border: rgba(255,255,255,0.06);
+    --ykp-sidebar-hover: rgba(255,255,255,0.05);
+    --ykp-sidebar-active-bg: linear-gradient(90deg, rgba(0,84,166,0.25) 0%, rgba(99,102,241,0.15) 100%);
+    --ykp-sidebar-active-border: #0054A6;
+    --ykp-sidebar-active-text: #ffffff;
+    --ykp-sidebar-profile-bg: rgba(255,255,255,0.05);
+    --ykp-sidebar-profile-border: rgba(255,255,255,0.07);
+    --ykp-sidebar-tooltip-bg: #1e2640;
+    --ykp-sidebar-tooltip-text: #f1f5f9;
+    --ykp-sidebar-tooltip-border: rgba(0,84,166,0.3);
+
+    --ykp-text-primary: #f8fafc;
+    --ykp-text-secondary: #cbd5e1;
+    --ykp-text-muted: #94a3b8;
+    --ykp-text-faint: #64748b;
+
+    --ykp-border: rgba(255,255,255,0.10);
+    --ykp-border-subtle: rgba(255,255,255,0.06);
+
+    --ykp-toast-bg: #243050;
+    --ykp-toast-text: #e2e8f0;
+    --ykp-toast-border: rgba(99,102,241,0.2);
+
+    --ykp-shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+    --ykp-shadow-elevated: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+
+    color-scheme: dark;
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: #111827;
-    color: #F9FAFB;
+    background-color: var(--ykp-canvas);
+    color: var(--ykp-text-primary);
     min-height: 100vh;
+    transition: background-color 150ms ease, color 150ms ease;
   }
 
   * {
     scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .dark * {
     scrollbar-color: #374151 transparent;
   }
 
   *::-webkit-scrollbar { width: 5px; height: 5px; }
   *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb { background-color: #374151; border-radius: 999px; }
-  *::-webkit-scrollbar-thumb:hover { background-color: #4B5563; }
+  *::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 999px; }
+  *::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+  .dark *::-webkit-scrollbar-thumb { background-color: #374151; }
+  .dark *::-webkit-scrollbar-thumb:hover { background-color: #4B5563; }
 }
 
 @layer components {
-  /* Prose pour réponses IA sur fond sombre */
-  .prose-yukpo {
-    --tw-prose-headings:      #F9FAFB;
-    --tw-prose-body:          #D1D5DB;
-    --tw-prose-bold:          #F9FAFB;
-    --tw-prose-links:         #A78BFA;
-    --tw-prose-code:          #A78BFA;
-    --tw-prose-counters:      #9CA3AF;
-    --tw-prose-bullets:       #6B7280;
-    --tw-prose-hr:            #374151;
-    --tw-prose-quotes:        #9CA3AF;
-    --tw-prose-quote-borders: #4B5563;
-    --tw-prose-captions:      #6B7280;
-    --tw-prose-pre-code:      #D1D5DB;
-    --tw-prose-pre-bg:        #0D1117;
-    --tw-prose-th-borders:    #374151;
-    --tw-prose-td-borders:    #1F2937;
+  /* ─────────────────────────────────────────────────────────
+     Utilitaires sémantiques (adoption progressive)
+     ───────────────────────────────────────────────────────── */
+  .ykp-canvas        { background: var(--ykp-canvas-gradient); }
+  .ykp-surface       { background: var(--ykp-surface); border: 1px solid var(--ykp-border); }
+  .ykp-surface-grad  { background: var(--ykp-surface-gradient); border: 1px solid var(--ykp-border); }
+  .ykp-elevated      { background: var(--ykp-elevated); border: 1px solid var(--ykp-border); }
+  .ykp-text-primary  { color: var(--ykp-text-primary); }
+  .ykp-text-secondary{ color: var(--ykp-text-secondary); }
+  .ykp-text-muted    { color: var(--ykp-text-muted); }
+  .ykp-text-faint    { color: var(--ykp-text-faint); }
+  .ykp-border        { border-color: var(--ykp-border); }
+
+  /* Remap automatique : classes slate/white utilisées dans les pages
+     → basculent selon le thème via CSS vars.
+     Ces overrides s'appliquent UNIQUEMENT dans .ykp-page (scope),
+     donc buttons/badges colorés restent intacts. */
+  .ykp-page .text-white,
+  .ykp-page .text-slate-100,
+  .ykp-page .text-slate-200 {
+    color: var(--ykp-text-primary);
+  }
+  .ykp-page .text-slate-300 {
+    color: var(--ykp-text-secondary);
+  }
+  .ykp-page .text-slate-400,
+  .ykp-page .text-slate-500 {
+    color: var(--ykp-text-muted);
+  }
+  .ykp-page .text-slate-600 {
+    color: var(--ykp-text-faint);
   }
 
-  /* Alias pour rétro-compatibilité */
-  .prose-invert {
-    --tw-prose-headings:      #F9FAFB;
-    --tw-prose-body:          #D1D5DB;
-    --tw-prose-bold:          #F9FAFB;
+  /* Remap automatique des borders/backgrounds translucides blancs
+     (utilisés pour dividers dans les pages dark d'origine)
+     → bordures slate discrètes en light, restent blanc translucide en dark. */
+  .ykp-page .border-white\/\[0\.06\],
+  .ykp-page .border-white\/\[0\.07\],
+  .ykp-page .border-white\/\[0\.08\],
+  .ykp-page .border-white\/\[0\.10\],
+  .ykp-page .border-white\/\[0\.12\] {
+    border-color: var(--ykp-border);
+  }
+  .dark .ykp-page .border-white\/\[0\.06\] { border-color: rgba(255,255,255,0.06); }
+  .dark .ykp-page .border-white\/\[0\.07\] { border-color: rgba(255,255,255,0.07); }
+  .dark .ykp-page .border-white\/\[0\.08\] { border-color: rgba(255,255,255,0.08); }
+  .dark .ykp-page .border-white\/\[0\.10\] { border-color: rgba(255,255,255,0.10); }
+  .dark .ykp-page .border-white\/\[0\.12\] { border-color: rgba(255,255,255,0.12); }
+
+  /* Syntaxe shorthand : border-white/5, border-white/10, border-white/20 */
+  .ykp-page .border-white\/5,
+  .ykp-page .border-white\/10,
+  .ykp-page .border-white\/20,
+  .ykp-page .border-white\/30 {
+    border-color: var(--ykp-border);
+  }
+  .dark .ykp-page .border-white\/5  { border-color: rgba(255,255,255,0.05); }
+  .dark .ykp-page .border-white\/10 { border-color: rgba(255,255,255,0.10); }
+  .dark .ykp-page .border-white\/20 { border-color: rgba(255,255,255,0.20); }
+  .dark .ykp-page .border-white\/30 { border-color: rgba(255,255,255,0.30); }
+
+  /* bg-black/xx (notes inline sur fond sombre) → surface élevée en light */
+  .ykp-page .bg-black\/10,
+  .ykp-page .bg-black\/20,
+  .ykp-page .bg-black\/30 {
+    background-color: var(--ykp-elevated);
+  }
+  .dark .ykp-page .bg-black\/10 { background-color: rgba(0,0,0,0.10); }
+  .dark .ykp-page .bg-black\/20 { background-color: rgba(0,0,0,0.20); }
+  .dark .ykp-page .bg-black\/30 { background-color: rgba(0,0,0,0.30); }
+
+  .ykp-page .bg-white\/\[0\.03\],
+  .ykp-page .bg-white\/\[0\.04\],
+  .ykp-page .bg-white\/\[0\.05\],
+  .ykp-page .bg-white\/\[0\.06\],
+  .ykp-page .bg-white\/\[0\.07\],
+  .ykp-page .bg-white\/\[0\.08\],
+  .ykp-page .bg-white\/\[0\.10\] {
+    background-color: var(--ykp-elevated);
+  }
+  .dark .ykp-page .bg-white\/\[0\.03\] { background-color: rgba(255,255,255,0.03); }
+  .dark .ykp-page .bg-white\/\[0\.04\] { background-color: rgba(255,255,255,0.04); }
+  .dark .ykp-page .bg-white\/\[0\.05\] { background-color: rgba(255,255,255,0.05); }
+  .dark .ykp-page .bg-white\/\[0\.06\] { background-color: rgba(255,255,255,0.06); }
+  .dark .ykp-page .bg-white\/\[0\.07\] { background-color: rgba(255,255,255,0.07); }
+  .dark .ykp-page .bg-white\/\[0\.08\] { background-color: rgba(255,255,255,0.08); }
+  .dark .ykp-page .bg-white\/\[0\.10\] { background-color: rgba(255,255,255,0.10); }
+
+  /* Classes Tailwind bg-gray-900/800 utilisées pour fonds sombres
+     → deviennent surface claire en light. */
+  .ykp-page .bg-gray-900,
+  .ykp-page .bg-gray-800,
+  .ykp-page .bg-slate-900,
+  .ykp-page .bg-slate-800,
+  .ykp-page .bg-navy-900,
+  .ykp-page .bg-navy-800,
+  .ykp-page .bg-navy-700 {
+    background-color: var(--ykp-elevated);
+  }
+  .dark .ykp-page .bg-gray-900  { background-color: #111827; }
+  .dark .ykp-page .bg-gray-800  { background-color: #1f2937; }
+  .dark .ykp-page .bg-slate-900 { background-color: #0f172a; }
+  .dark .ykp-page .bg-slate-800 { background-color: #1e293b; }
+  .dark .ykp-page .bg-navy-900  { background-color: #1e2640; }
+  .dark .ykp-page .bg-navy-800  { background-color: #243050; }
+  .dark .ykp-page .bg-navy-700  { background-color: #2a3657; }
+
+  /* MAIS : à l'intérieur d'un bouton/badge à fond coloré,
+     on restitue le text-white d'origine. */
+  .ykp-page [class*="bg-corp-"] .text-white,
+  .ykp-page [class*="bg-yukpo-"] .text-white,
+  .ykp-page [class*="bg-accent-"] .text-white,
+  .ykp-page [class*="bg-bright-"] .text-white,
+  .ykp-page [class*="bg-gold-"] .text-white,
+  .ykp-page [class*="bg-success-"] .text-white,
+  .ykp-page [class*="bg-warning-"] .text-white,
+  .ykp-page [class*="bg-danger-"] .text-white,
+  .ykp-page [class*="bg-blue-"] .text-white,
+  .ykp-page [class*="bg-indigo-"] .text-white,
+  .ykp-page [class*="bg-purple-"] .text-white,
+  .ykp-page [class*="bg-green-"] .text-white,
+  .ykp-page [class*="bg-red-"] .text-white,
+  .ykp-page [class*="bg-amber-"] .text-white,
+  .ykp-page [class*="bg-emerald-"] .text-white,
+  .ykp-page [class*="bg-pink-"] .text-white,
+  .ykp-page [class*="bg-cyan-"] .text-white,
+  .ykp-page button[class*="bg-gradient"] .text-white,
+  .ykp-page .bg-gradient-to-r .text-white,
+  .ykp-page .bg-gradient-to-br .text-white,
+  .ykp-page .bg-gradient-to-l .text-white,
+  .ykp-page .bg-gradient-to-tr .text-white,
+  .ykp-page .bg-gradient-to-tl .text-white,
+  .ykp-page button.text-white,
+  .ykp-page a.text-white {
+    color: #ffffff !important;
+  }
+
+  /* Prose pour réponses IA — adapte selon le thème */
+  .prose-yukpo {
+    --tw-prose-headings:      var(--ykp-text-primary);
+    --tw-prose-body:          var(--ykp-text-secondary);
+    --tw-prose-bold:          var(--ykp-text-primary);
+    --tw-prose-links:         #4f46e5;
+    --tw-prose-code:          #4f46e5;
+    --tw-prose-counters:      var(--ykp-text-muted);
+    --tw-prose-bullets:       var(--ykp-text-faint);
+    --tw-prose-hr:            var(--ykp-border);
+    --tw-prose-quotes:        var(--ykp-text-muted);
+    --tw-prose-quote-borders: var(--ykp-border);
+    --tw-prose-captions:      var(--ykp-text-muted);
+    --tw-prose-pre-code:      var(--ykp-text-secondary);
+    --tw-prose-pre-bg:        var(--ykp-elevated);
+    --tw-prose-th-borders:    var(--ykp-border);
+    --tw-prose-td-borders:    var(--ykp-border-subtle);
+  }
+
+  .dark .prose-yukpo {
     --tw-prose-links:         #A78BFA;
     --tw-prose-code:          #A78BFA;
-    --tw-prose-counters:      #9CA3AF;
-    --tw-prose-bullets:       #6B7280;
-    --tw-prose-hr:            #374151;
-    --tw-prose-quotes:        #9CA3AF;
-    --tw-prose-quote-borders: #4B5563;
-    --tw-prose-captions:      #6B7280;
-    --tw-prose-pre-code:      #D1D5DB;
-    --tw-prose-pre-bg:        #0D1117;
-    --tw-prose-th-borders:    #374151;
-    --tw-prose-td-borders:    #1F2937;
+  }
+
+  /* Alias rétro-compatibilité */
+  .prose-invert {
+    --tw-prose-headings:      var(--ykp-text-primary);
+    --tw-prose-body:          var(--ykp-text-secondary);
+    --tw-prose-bold:          var(--ykp-text-primary);
+    --tw-prose-links:         #4f46e5;
+    --tw-prose-code:          #4f46e5;
+    --tw-prose-counters:      var(--ykp-text-muted);
+    --tw-prose-bullets:       var(--ykp-text-faint);
+    --tw-prose-hr:            var(--ykp-border);
+    --tw-prose-quotes:        var(--ykp-text-muted);
+    --tw-prose-quote-borders: var(--ykp-border);
+    --tw-prose-captions:      var(--ykp-text-muted);
+    --tw-prose-pre-code:      var(--ykp-text-secondary);
+    --tw-prose-pre-bg:        var(--ykp-elevated);
+    --tw-prose-th-borders:    var(--ykp-border);
+    --tw-prose-td-borders:    var(--ykp-border-subtle);
+  }
+  .dark .prose-invert {
+    --tw-prose-links:         #A78BFA;
+    --tw-prose-code:          #A78BFA;
   }
 }

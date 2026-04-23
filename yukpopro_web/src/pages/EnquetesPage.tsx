@@ -332,7 +332,10 @@ export const EnquetesPage = () => {
   // ── Rendu ─────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#0D1117]">
+    <div
+      className="flex flex-col h-full overflow-hidden"
+      style={{ background: "var(--ykp-canvas)" }}
+    >
       <DemoBanner className="mx-6 mt-4" />
       {/* ── Header ── */}
       <div className="flex-shrink-0 px-6 py-4 border-b border-white/[0.06]">

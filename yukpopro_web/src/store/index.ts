@@ -306,19 +306,65 @@ export const useDocsStore = create<DocsState>()(
 
 // ── UI Store ──────────────────────────────────────────────────────────────────
 
+export type Theme = "light" | "dark" | "system";
+
+const applyThemeClass = (theme: Theme) => {
+  if (typeof document === "undefined") return;
+  const resolved =
+    theme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+  document.documentElement.classList.toggle("dark", resolved === "dark");
+  document.documentElement.dataset.theme = resolved;
+};
+
 interface UIState {
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (v: boolean) => void;
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+  toggleTheme: () => void;
 }
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       sidebarCollapsed: false,
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+      theme: "light",
+      setTheme: (t) => {
+        applyThemeClass(t);
+        set({ theme: t });
+      },
+      toggleTheme: () => {
+        const current = get().theme;
+        const next: Theme = current === "light" ? "dark" : "light";
+        applyThemeClass(next);
+        set({ theme: next });
+      },
     }),
-    { name: "yukpopro_ui" }
+    {
+      name: "yukpopro_ui",
+      onRehydrateStorage: () => (state) => {
+        if (state) applyThemeClass(state.theme);
+        else applyThemeClass("light");
+      },
+    }
   )
 );
+
+// Apply theme as early as possible (before React paints) to avoid flash
+if (typeof window !== "undefined") {
+  try {
+    const raw = localStorage.getItem("yukpopro_ui");
+    const parsed = raw ? JSON.parse(raw) : null;
+    const stored: Theme = parsed?.state?.theme ?? "light";
+    applyThemeClass(stored);
+  } catch {
+    applyThemeClass("light");
+  }
+}

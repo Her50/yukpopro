@@ -20,21 +20,21 @@ export const Button = ({
   const base = [
     "inline-flex items-center justify-center gap-2 font-semibold rounded-lg",
     "transition-all duration-150 focus:outline-none focus-visible:ring-2",
-    "focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950",
+    "focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-navy-950",
     "disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]",
   ].join(" ");
 
   const variants = {
     // Bleu corporate — CTA primaire DS
     primary:   "bg-corp-600 hover:bg-corp-700 text-white focus-visible:ring-corp-500 shadow-md shadow-corp-600/30",
-    // Surfaces navbar / secondaire
-    secondary: "bg-white/[0.07] hover:bg-white/[0.12] text-slate-200 border border-white/[0.10] focus-visible:ring-slate-500",
+    // Secondaire — gris clair en light, white/subtle en dark
+    secondary: "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-white/[0.07] dark:hover:bg-white/[0.12] dark:text-slate-200 dark:border-white/[0.10] focus-visible:ring-slate-400",
     // Ghost — actions tertiaires
-    ghost:     "bg-transparent hover:bg-white/[0.06] text-slate-400 hover:text-slate-100 focus-visible:ring-slate-500",
+    ghost:     "bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900 dark:hover:bg-white/[0.06] dark:text-slate-400 dark:hover:text-slate-100 focus-visible:ring-slate-400",
     // Danger / destructif
     danger:    "bg-danger-500 hover:bg-danger-600 text-white focus-visible:ring-danger-400",
     // Gold — crédits / premium
-    gold:      "bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold focus-visible:ring-gold-400 shadow-md shadow-gold-500/20",
+    gold:      "bg-gold-500 hover:bg-gold-600 text-slate-900 dark:text-navy-950 font-bold focus-visible:ring-gold-400 shadow-md shadow-gold-500/20",
   };
 
   const sizes = {
@@ -68,31 +68,40 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon, className, ...props }, ref) => (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase">
+        <label
+          className="text-xs font-semibold tracking-wide uppercase"
+          style={{ color: "var(--ykp-text-secondary)" }}
+        >
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+          <div
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: "var(--ykp-text-faint)" }}
+          >
             {icon}
           </div>
         )}
         <input
           ref={ref}
           className={cn(
-            "w-full rounded-lg text-slate-100 placeholder-slate-600",
+            "w-full rounded-lg",
             "px-4 py-2.5 text-sm transition-colors duration-150",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-corp-500/60 focus-visible:ring-offset-1 focus-visible:ring-offset-navy-900",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-corp-500/60 focus-visible:ring-offset-1",
             icon && "pl-10",
-            error ? "border-danger-500 focus-visible:ring-danger-400" : "border-white/[0.10]",
             className
           )}
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
+          style={{
+            background: "var(--ykp-input-bg)",
+            border: `1px solid ${error ? "#ef4444" : "var(--ykp-input-border)"}`,
+            color: "var(--ykp-text-primary)",
+          }}
           {...props}
         />
       </div>
-      {error && <p className="text-xs text-danger-400">{error}</p>}
+      {error && <p className="text-xs text-danger-500">{error}</p>}
     </div>
   )
 );
@@ -110,32 +119,35 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, options, error, className, ...props }, ref) => (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase">
+        <label
+          className="text-xs font-semibold tracking-wide uppercase"
+          style={{ color: "var(--ykp-text-secondary)" }}
+        >
           {label}
         </label>
       )}
       <select
         ref={ref}
         className={cn(
-          "w-full rounded-lg text-slate-100",
+          "w-full rounded-lg",
           "px-4 py-2.5 text-sm transition-colors duration-150",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-corp-500/60",
-          error && "border-danger-500",
           className
         )}
         style={{
-          background: "#1e2640",
-          border: "1px solid rgba(255,255,255,0.09)",
+          background: "var(--ykp-input-bg)",
+          border: `1px solid ${error ? "#ef4444" : "var(--ykp-input-border)"}`,
+          color: "var(--ykp-text-primary)",
         }}
         {...props}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} style={{ background: "#1e2640" }}>
+          <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
       </select>
-      {error && <p className="text-xs text-danger-400">{error}</p>}
+      {error && <p className="text-xs text-danger-500">{error}</p>}
     </div>
   )
 );
@@ -152,23 +164,29 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className, ...props }, ref) => (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase">
+        <label
+          className="text-xs font-semibold tracking-wide uppercase"
+          style={{ color: "var(--ykp-text-secondary)" }}
+        >
           {label}
         </label>
       )}
       <textarea
         ref={ref}
         className={cn(
-          "w-full rounded-lg text-slate-100 placeholder-slate-600",
+          "w-full rounded-lg",
           "px-4 py-3 text-sm resize-none transition-colors duration-150",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-corp-500/60",
-          error && "border-danger-500",
           className
         )}
-        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
+        style={{
+          background: "var(--ykp-input-bg)",
+          border: `1px solid ${error ? "#ef4444" : "var(--ykp-input-border)"}`,
+          color: "var(--ykp-text-primary)",
+        }}
         {...props}
       />
-      {error && <p className="text-xs text-danger-400">{error}</p>}
+      {error && <p className="text-xs text-danger-500">{error}</p>}
     </div>
   )
 );
@@ -182,9 +200,9 @@ export const Card = ({
   <div
     className={cn("rounded-xl", className)}
     style={{
-      background: "linear-gradient(135deg, #243050 0%, #1e2640 100%)",
-      border: "1px solid rgba(0,84,166,0.12)",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)",
+      background: "var(--ykp-surface-gradient)",
+      border: "1px solid var(--ykp-border)",
+      boxShadow: "var(--ykp-shadow-card)",
       ...style,
     }}
     {...props}
@@ -203,13 +221,13 @@ interface BadgeProps {
 
 export const Badge = ({ children, variant = "corp", size = "md" }: BadgeProps) => {
   const colors = {
-    corp:   "bg-corp-600/20 text-bright-400 border-corp-600/30",
-    purple: "bg-yukpo-500/20 text-yukpo-300 border-yukpo-500/30",
-    cyan:   "bg-accent-500/20 text-accent-400 border-accent-500/30",
-    gold:   "bg-gold-500/20 text-gold-400 border-gold-500/30",
-    green:  "bg-success-500/20 text-success-400 border-success-500/30",
-    red:    "bg-danger-500/20 text-danger-400 border-danger-500/30",
-    slate:  "bg-white/[0.07] text-slate-300 border-white/[0.10]",
+    corp:   "bg-corp-600/15 text-corp-700 border-corp-600/25 dark:bg-corp-600/20 dark:text-bright-400 dark:border-corp-600/30",
+    purple: "bg-yukpo-500/15 text-yukpo-700 border-yukpo-500/25 dark:bg-yukpo-500/20 dark:text-yukpo-300 dark:border-yukpo-500/30",
+    cyan:   "bg-accent-500/15 text-accent-700 border-accent-500/25 dark:bg-accent-500/20 dark:text-accent-400 dark:border-accent-500/30",
+    gold:   "bg-gold-500/15 text-gold-700 border-gold-500/25 dark:bg-gold-500/20 dark:text-gold-400 dark:border-gold-500/30",
+    green:  "bg-success-500/15 text-success-700 border-success-500/25 dark:bg-success-500/20 dark:text-success-400 dark:border-success-500/30",
+    red:    "bg-danger-500/15 text-danger-700 border-danger-500/25 dark:bg-danger-500/20 dark:text-danger-400 dark:border-danger-500/30",
+    slate:  "bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/[0.07] dark:text-slate-300 dark:border-white/[0.10]",
   };
   const sizes = { sm: "text-[10px] px-2 py-0.5", md: "text-xs px-2.5 py-1" };
   return (
@@ -227,7 +245,7 @@ export const Badge = ({ children, variant = "corp", size = "md" }: BadgeProps) =
 export const Spinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   const sizes = { sm: "w-4 h-4", md: "w-6 h-6", lg: "w-10 h-10" };
   return (
-    <svg className={cn("animate-spin text-corp-400", sizes[size])} fill="none" viewBox="0 0 24 24">
+    <svg className={cn("animate-spin text-corp-600 dark:text-corp-400", sizes[size])} fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>
@@ -248,10 +266,16 @@ export const YukpoLogo = ({ size = 32, showText = true }: { size?: number; showT
     </div>
     {showText && (
       <div className="flex flex-col leading-tight">
-        <span className="font-display font-bold text-white tracking-tight" style={{ fontSize: size * 0.56 }}>
+        <span
+          className="font-display font-bold tracking-tight"
+          style={{ fontSize: size * 0.56, color: "var(--ykp-sidebar-active-text)" }}
+        >
           Yukpo<span style={{ color: "#00B0F0" }}>Pro</span>
         </span>
-        <span className="text-slate-500 tracking-wide" style={{ fontSize: size * 0.24 }}>
+        <span
+          className="tracking-wide"
+          style={{ fontSize: size * 0.24, color: "var(--ykp-sidebar-text-muted)" }}
+        >
           Intelligence Africaine
         </span>
       </div>
@@ -269,17 +293,37 @@ export const PageHeader = ({
   actions?: ReactNode;
   icon?: React.ComponentType<{ className?: string }>;
 }) => (
-  <div className="flex items-start justify-between px-6 py-5 border-b border-white/[0.06]">
+  <div
+    className="flex items-start justify-between px-6 py-5"
+    style={{ borderBottom: "1px solid var(--ykp-border)" }}
+  >
     <div className="flex items-center gap-3">
       {Icon && (
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, rgba(0,84,166,0.3), rgba(99,102,241,0.2))", border: "1px solid rgba(0,176,240,0.2)" }}>
-          <Icon className="w-5 h-5 text-bright-400" />
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            background: "linear-gradient(135deg, rgba(0,84,166,0.12), rgba(99,102,241,0.10))",
+            border: "1px solid rgba(0,176,240,0.20)",
+          }}
+        >
+          <Icon className="w-5 h-5 text-corp-600 dark:text-bright-400" />
         </div>
       )}
       <div>
-        <h1 className="text-lg font-bold text-slate-100 leading-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+        <h1
+          className="text-lg font-bold leading-tight"
+          style={{ color: "var(--ykp-text-primary)" }}
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            className="text-xs mt-0.5"
+            style={{ color: "var(--ykp-text-muted)" }}
+          >
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
     {actions && <div className="flex items-center gap-2">{actions}</div>}
