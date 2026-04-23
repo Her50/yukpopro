@@ -771,7 +771,7 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
               ))}
             </div>
           )}
-          <div className="bg-yukpo-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed">
+          <div className="bg-yukpo-500/20 border border-yukpo-400/30 text-slate-100 rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed">
             {message.content as string}
           </div>
         </div>

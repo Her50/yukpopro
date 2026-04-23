@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import { Card, Button, Textarea, Badge, Select } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi, infographieApi, GabaritInfographie, ResultatInfographieReponse } from "@/api/client";
+import { useGenerateurStore } from "@/store/generateurStore";
 
 type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
 type InfogMode = "brief" | "manuel" | "modele" | "custom";
@@ -449,9 +450,21 @@ const FORMATS_SLIDES = new Set(["rapport_direction","bilan_activite","propositio
 export const GenerateursPage = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("rapport");
-  const [loading, setLoading] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
-  const [resultat, setResultat] = useState<{ fichier?: string; markdown?: string; chemin?: string } | null>(null);
+
+  // Persistance des jobs (survit à la navigation)
+  const runJob = useGenerateurStore((s) => s.run);
+  const clearJob = useGenerateurStore((s) => s.clear);
+  const storeLoading = useGenerateurStore((s) => s.loading);
+  const storeResultats = useGenerateurStore((s) => s.resultats);
+
+  // Pour les onglets rapport/slides/fichiers on partage le même "loading" + "resultat"
+  // selon l'onglet actif. Les jobs en arrière-plan restent indépendants par clé.
+  const currentJobKey: "rapport" | "slides" | "fichiers" =
+    tab === "slides" ? "slides" : tab === "conversion" ? "fichiers" : tab === "rapport" ? "rapport" : "fichiers";
+  const loading = storeLoading[currentJobKey];
+  const resultat = storeResultats[currentJobKey] as { fichier?: string; markdown?: string; chemin?: string } | null;
+  const setResultat = (v: any) => useGenerateurStore.getState().setResultat(currentJobKey, v);
 
   // Rapport
   const [sujetRapport, setSujetRapport] = useState("");
@@ -487,8 +500,9 @@ export const GenerateursPage = () => {
   const [infogPalettes, setInfogPalettes]       = useState<string[]>([]);
   const [infogGabarit, setInfogGabarit]         = useState<string>("flyer_a5");
   const [infogPays, setInfogPays]               = useState<string>("CM");
-  const [infogLoading, setInfogLoading]         = useState(false);
-  const [infogResult, setInfogResult]           = useState<ResultatInfographieReponse | null>(null);
+  const infogLoading = storeLoading.infographie;
+  const infogResult = storeResultats.infographie as ResultatInfographieReponse | null;
+  const setInfogResult = (v: ResultatInfographieReponse | null) => useGenerateurStore.getState().setResultat("infographie", v);
   const [infogZoom, setInfogZoom]               = useState(false);
   // Brief IA
   const [infogBrief, setInfogBrief]             = useState("");
@@ -531,16 +545,25 @@ export const GenerateursPage = () => {
 
   const handleGenererInfographie = async (e: FormEvent) => {
     e.preventDefault();
-    setInfogLoading(true);
-    setInfogResult(null);
-    try {
-      let res: ResultatInfographieReponse;
+    // Validations synchrones (avant de lancer le job)
+    if (infogMode === "brief" && infogBrief.trim().length < 10) {
+      toast.error("Décrivez votre besoin (min 10 caractères)"); return;
+    }
+    if (infogMode === "manuel" && !infogTitre.trim()) { toast.error("Titre requis"); return; }
+    if (infogMode === "modele") {
+      if (!infogModele) { toast.error("Choisissez une image modèle"); return; }
+      if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
+    }
+    if (infogMode === "custom") {
+      if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
+      if (infogW <= 0 || infogH <= 0) { toast.error("Dimensions invalides"); return; }
+    }
+
+    await runJob("infographie", async () => {
       if (infogMode === "brief") {
-        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
-        res = await infographieApi.genererDepuisBrief({ brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays });
+        return await infographieApi.genererDepuisBrief({ brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays });
       } else if (infogMode === "manuel") {
-        if (!infogTitre.trim()) { toast.error("Titre requis"); setInfogLoading(false); return; }
-        res = await infographieApi.genererManuel({
+        return await infographieApi.genererManuel({
           type_gabarit: infogGabarit,
           titre: infogTitre,
           sous_titre: infogSousTitre || undefined,
@@ -554,56 +577,50 @@ export const GenerateursPage = () => {
           lieu: infogLieu || undefined,
         });
       } else if (infogMode === "modele") {
-        if (!infogModele) { toast.error("Choisissez une image modèle"); setInfogLoading(false); return; }
-        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
-        res = await infographieApi.genererDepuisModele({
-          modele: infogModele, brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays,
+        return await infographieApi.genererDepuisModele({
+          modele: infogModele!, brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays,
         });
       } else {
-        if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); setInfogLoading(false); return; }
-        if (infogW <= 0 || infogH <= 0) { toast.error("Dimensions invalides"); setInfogLoading(false); return; }
-        res = await infographieApi.genererCustom({
+        return await infographieApi.genererCustom({
           width_mm: infogW, height_mm: infogH, bleed_mm: infogBleed, brief: infogBrief, pays: infogPays,
         });
       }
-      setInfogResult(res);
-      toast.success("Infographie générée et sauvegardée dans Mes Documents !");
-    } catch (err: any) {
-      const status = err?.response?.status;
-      const detail: string = err?.response?.data?.detail || "";
-      if (status === 402 && detail.startsWith("CREDITS_EPUISES")) {
-        // ex: "CREDITS_EPUISES|restants=120|plan=secretariat"
-        const restants = /restants=(\d+)/.exec(detail)?.[1] ?? "0";
-        const plan     = /plan=([^|]+)/.exec(detail)?.[1] ?? "—";
-        toast((t) => (
-          <span className="text-sm">
-            Crédits insuffisants ({restants} restants, plan {plan}).
-            <button
-              onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
-              className="ml-2 px-2 py-1 bg-yukpo-500 text-white rounded text-xs font-semibold"
-            >
-              Recharger / Upgrader
-            </button>
-          </span>
-        ), { duration: 8000, icon: "💳" });
-      } else if (status === 403 && detail.startsWith("MODULE_NON_AUTORISE")) {
-        toast((t) => (
-          <span className="text-sm">
-            Module Infographie non inclus dans votre plan.
-            <button
-              onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
-              className="ml-2 px-2 py-1 bg-purple-500 text-white rounded text-xs font-semibold"
-            >
-              Upgrader
-            </button>
-          </span>
-        ), { duration: 8000, icon: "🔒" });
-      } else {
-        toast.error(detail || "Erreur lors de la génération");
-      }
-    } finally {
-      setInfogLoading(false);
-    }
+    }, {
+      successMsg: "Infographie générée et sauvegardée dans Mes Documents !",
+      onError: (err) => {
+        const status = err?.response?.status;
+        const detail: string = err?.response?.data?.detail || "";
+        if (status === 402 && detail.startsWith("CREDITS_EPUISES")) {
+          const restants = /restants=(\d+)/.exec(detail)?.[1] ?? "0";
+          const plan     = /plan=([^|]+)/.exec(detail)?.[1] ?? "—";
+          toast((t) => (
+            <span className="text-sm">
+              Crédits insuffisants ({restants} restants, plan {plan}).
+              <button
+                onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+                className="ml-2 px-2 py-1 bg-yukpo-500 text-white rounded text-xs font-semibold"
+              >
+                Recharger / Upgrader
+              </button>
+            </span>
+          ), { duration: 8000, icon: "💳" });
+        } else if (status === 403 && detail.startsWith("MODULE_NON_AUTORISE")) {
+          toast((t) => (
+            <span className="text-sm">
+              Module Infographie non inclus dans votre plan.
+              <button
+                onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+                className="ml-2 px-2 py-1 bg-purple-500 text-white rounded text-xs font-semibold"
+              >
+                Upgrader
+              </button>
+            </span>
+          ), { duration: 8000, icon: "🔒" });
+        } else {
+          toast.error(detail || "Erreur lors de la génération");
+        }
+      },
+    });
   };
 
   const handleTelechargerInfog = (kind: "pdf" | "png") => {
@@ -621,8 +638,9 @@ export const GenerateursPage = () => {
   // ── Conversion de format ──────────────────────────────────────────────────
   const [fichierConv, setFichierConv] = useState<File | null>(null);
   const [formatCible, setFormatCible] = useState("docx");
-  const [loadingConv, setLoadingConv] = useState(false);
-  const [resultatConv, setResultatConv] = useState<{ fichier_converti: string; format_source: string; format_cible: string } | null>(null);
+  const loadingConv = storeLoading.conversion;
+  const resultatConv = storeResultats.conversion as { fichier_converti: string; format_source: string; format_cible: string } | null;
+  const setResultatConv = (v: any) => useGenerateurStore.getState().setResultat("conversion", v);
   const fileConvRef = useRef<HTMLInputElement>(null);
 
   const CONVERSIONS_MAP: Record<string, { label: string; cibles: { value: string; label: string }[] }> = {
@@ -645,17 +663,11 @@ export const GenerateursPage = () => {
   const handleConvertir = async (e: FormEvent) => {
     e.preventDefault();
     if (!fichierConv) return;
-    setLoadingConv(true);
-    setResultatConv(null);
-    try {
-      const res = await generateurApi.convertirFichier(fichierConv, formatCible);
-      setResultatConv(res);
-      toast.success("Conversion réussie !");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail ?? "Erreur lors de la conversion");
-    } finally {
-      setLoadingConv(false);
-    }
+    await runJob(
+      "conversion",
+      () => generateurApi.convertirFichier(fichierConv, formatCible),
+      { successMsg: "Conversion réussie !", errorMsg: "Erreur lors de la conversion" },
+    );
   };
 
   const ajouterFichiers = (nouv: FileList | null) => {
@@ -680,97 +692,62 @@ export const GenerateursPage = () => {
     e.preventDefault();
     if (!instructionFichiers.trim()) return toast.error("Décrivez ce que vous souhaitez générer");
     if (fichiers.length === 0) return toast.error("Ajoutez au moins un fichier source");
-    setLoading(true);
-    setResultat(null);
-    try {
-      const estSlides = FORMATS_SLIDES.has(typeSortieFichiers);
-      const res = await generateurApi.analyserEtGenerer({
-        instruction: instructionFichiers,
-        type_sortie: estSlides ? "slides" : "rapport",
-        type_doc: typeSortieFichiers,
-        mode: modeFichiers,
-        format_sortie: estSlides ? "pptx" : "docx",
-        fichiers,
-      });
-      setResultat(res);
-      toast.success(`Document généré depuis ${fichiers.length} fichier(s) !`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Erreur lors de la génération");
-    } finally {
-      setLoading(false);
-    }
+    const estSlides = FORMATS_SLIDES.has(typeSortieFichiers);
+    await runJob("fichiers", () => generateurApi.analyserEtGenerer({
+      instruction: instructionFichiers,
+      type_sortie: estSlides ? "slides" : "rapport",
+      type_doc: typeSortieFichiers,
+      mode: modeFichiers,
+      format_sortie: estSlides ? "pptx" : "docx",
+      fichiers,
+    }), { successMsg: `Document généré depuis ${fichiers.length} fichier(s) !` });
   };
 
   const handleGenererRapport = async (e: FormEvent) => {
     e.preventDefault();
     if (!sujetRapport.trim()) return;
-    setLoading(true);
-    setResultat(null);
-    try {
-      let res;
-      if (fichiersRapport.length > 0) {
-        // Utiliser l'analyse de fichiers si des fichiers sont joints
-        const instruction = [sujetRapport, contexteRapport].filter(Boolean).join("\n\n");
-        res = await generateurApi.analyserEtGenerer({
-          instruction,
-          type_sortie: "rapport",
-          type_doc: typeRapport,
-          mode: modeRapport,
-          format_sortie: "docx",
-          fichiers: fichiersRapport,
-        });
-        toast.success(`Rapport généré depuis ${fichiersRapport.length} fichier(s) !`);
-      } else {
-        res = await generateurApi.rapport({
-          sujet: sujetRapport,
-          type_rapport: typeRapport,
-          mode: modeRapport,
-          contexte: contexteRapport || undefined,
-          format_sortie: formatRapport as "docx" | "markdown",
-        });
-        toast.success("Rapport généré avec succès !");
-      }
-      setResultat(res);
-    } catch {
-      toast.error("Erreur lors de la génération");
-    } finally {
-      setLoading(false);
+    if (fichiersRapport.length > 0) {
+      const instruction = [sujetRapport, contexteRapport].filter(Boolean).join("\n\n");
+      await runJob("rapport", () => generateurApi.analyserEtGenerer({
+        instruction,
+        type_sortie: "rapport",
+        type_doc: typeRapport,
+        mode: modeRapport,
+        format_sortie: "docx",
+        fichiers: fichiersRapport,
+      }), { successMsg: `Rapport généré depuis ${fichiersRapport.length} fichier(s) !` });
+    } else {
+      await runJob("rapport", () => generateurApi.rapport({
+        sujet: sujetRapport,
+        type_rapport: typeRapport,
+        mode: modeRapport,
+        contexte: contexteRapport || undefined,
+        format_sortie: formatRapport as "docx" | "markdown",
+      }), { successMsg: "Rapport généré avec succès !" });
     }
   };
 
   const handleGenererSlides = async (e: FormEvent) => {
     e.preventDefault();
     if (!sujetSlides.trim()) return;
-    setLoading(true);
-    setResultat(null);
-    try {
-      let res;
-      if (fichiersSlides.length > 0) {
-        const instruction = [sujetSlides, contexteSlides].filter(Boolean).join("\n\n");
-        res = await generateurApi.analyserEtGenerer({
-          instruction,
-          type_sortie: "slides",
-          type_doc: typeSlides,
-          mode: modeSlides,
-          format_sortie: "pptx",
-          fichiers: fichiersSlides,
-        });
-        toast.success(`Présentation générée depuis ${fichiersSlides.length} fichier(s) !`);
-      } else {
-        res = await generateurApi.slides({
-          sujet: sujetSlides,
-          type_pres: typeSlides,
-          mode: modeSlides,
-          contexte: contexteSlides || undefined,
-          format_sortie: formatSlides as "pptx" | "markdown",
-        });
-        toast.success("Présentation générée !");
-      }
-      setResultat(res);
-    } catch {
-      toast.error("Erreur lors de la génération");
-    } finally {
-      setLoading(false);
+    if (fichiersSlides.length > 0) {
+      const instruction = [sujetSlides, contexteSlides].filter(Boolean).join("\n\n");
+      await runJob("slides", () => generateurApi.analyserEtGenerer({
+        instruction,
+        type_sortie: "slides",
+        type_doc: typeSlides,
+        mode: modeSlides,
+        format_sortie: "pptx",
+        fichiers: fichiersSlides,
+      }), { successMsg: `Présentation générée depuis ${fichiersSlides.length} fichier(s) !` });
+    } else {
+      await runJob("slides", () => generateurApi.slides({
+        sujet: sujetSlides,
+        type_pres: typeSlides,
+        mode: modeSlides,
+        contexte: contexteSlides || undefined,
+        format_sortie: formatSlides as "pptx" | "markdown",
+      }), { successMsg: "Présentation générée !" });
     }
   };
 
@@ -798,7 +775,7 @@ export const GenerateursPage = () => {
         ] as const).map(({ id, icon, label }) => (
           <button
             key={id}
-            onClick={() => { setTab(id as Tab); setResultat(null); }}
+            onClick={() => { setTab(id as Tab); }}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               tab === id ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"
             }`}

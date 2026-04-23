@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { reunionsApi } from "@/api/client";
 import { DemoBanner } from "@/components/DemoBanner";
+import { useAuthStore } from "@/store";
+import { useTranslateLiveStore } from "@/store/translateLiveStore";
+import { getRecorderStream } from "@/store/recorderStore";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -91,131 +94,24 @@ function buildPrompt(reunion: Reunion): string {
   return parts;
 }
 
-// ── Hook enregistrement audio ─────────────────────────────────────────────────
+// ── Hook enregistrement audio (persistant via recorderStore) ─────────────────
+import { useRecorderStore } from "@/store/recorderStore";
 
 function useAudioRecorder() {
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef        = useRef<Blob[]>([]);
-  const timerRef         = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const [isRecording, setIsRecording]   = useState(false);
-  const [isPaused,    setIsPaused]      = useState(false);
-  const [duration,    setDuration]      = useState(0);
-  const [audioBlob,   setAudioBlob]     = useState<Blob | null>(null);
-  const [supported,   setSupported]     = useState(true);
-
-  useEffect(() => {
-    if (!navigator.mediaDevices?.getUserMedia) setSupported(false);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const start = async () => {
-    try {
-      // Grande salle : stéréo, gain auto agressif, suppression bruit max
-      const audioConstraints: MediaTrackConstraints = {
-        echoCancellation: { ideal: true },
-        noiseSuppression: { ideal: true },
-        autoGainControl: { ideal: true },   // amplifie les voix lointaines
-        sampleRate: { ideal: 48000 },        // 48kHz — qualité audio optimale
-        channelCount: { ideal: 2 },          // stéréo pour capter toute la salle
-        // Désactiver les contraintes trop strictes qui bloquent sur certains navigateurs
-        ...(navigator.userAgent.includes("Chrome") ? {
-          googAutoGainControl: true,
-          googNoiseSuppression: true,
-          googHighpassFilter: true,
-          googAudioMirroring: false,
-        } as any : {}),
-      };
-
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-      } catch {
-        // Fallback contraintes minimales si le navigateur refuse les avancées
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-
-      // Choisir le format supporté — opus préféré pour Whisper
-      const mimeType = [
-        "audio/webm;codecs=opus",
-        "audio/ogg;codecs=opus",
-        "audio/webm",
-        "audio/mp4",
-      ].find(m => MediaRecorder.isTypeSupported(m)) || "";
-
-      // Bitrate élevé pour capter les voix lointaines dans la salle
-      const mrOptions: MediaRecorderOptions = mimeType ? { mimeType, audioBitsPerSecond: 128_000 } : {};
-      const mr = new MediaRecorder(stream, mrOptions);
-      mediaRecorderRef.current = mr;
-      chunksRef.current = [];
-      setAudioBlob(null);
-      setDuration(0);
-
-      mr.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mr.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mimeType || "audio/webm" });
-        setAudioBlob(blob);
-      };
-
-      mr.start(500); // chunk toutes les 500ms
-      setIsRecording(true);
-      setIsPaused(false);
-
-      timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
-    } catch (err: any) {
-      toast.error("Microphone inaccessible — vérifiez les permissions.");
-      setSupported(false);
-    }
+  const s = useRecorderStore();
+  return {
+    isRecording: s.isRecording,
+    isPaused: s.isPaused,
+    duration: s.duration,
+    audioBlob: s.audioBlob,
+    supported: s.supported,
+    liveSpeech: s.liveSpeech,
+    start: (langue: string = "auto") => s.start(langue).catch(() => toast.error("Microphone inaccessible — vérifiez les permissions.")),
+    pause: s.pause,
+    resume: s.resume,
+    stop: s.stop,
+    reset: s.reset,
   };
-
-  const pause = () => {
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.pause();
-      setIsPaused(true);
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-  };
-
-  const resume = () => {
-    if (mediaRecorderRef.current?.state === "paused") {
-      mediaRecorderRef.current.resume();
-      setIsPaused(false);
-      timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
-    }
-  };
-
-  const stop = (): Promise<Blob | null> => {
-    return new Promise((resolve) => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      const mr = mediaRecorderRef.current;
-      if (!mr || mr.state === "inactive") { resolve(null); return; }
-      mr.onstop = () => {
-        mr.stream?.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
-        setAudioBlob(blob);
-        setIsRecording(false);
-        setIsPaused(false);
-        resolve(blob);
-      };
-      mr.stop();
-    });
-  };
-
-  const reset = () => {
-    setAudioBlob(null);
-    setDuration(0);
-    setIsRecording(false);
-    setIsPaused(false);
-    chunksRef.current = [];
-  };
-
-  return { isRecording, isPaused, duration, audioBlob, supported, start, pause, resume, stop, reset };
 }
 
 // ── Composant formulaire création ─────────────────────────────────────────────
@@ -233,10 +129,17 @@ const FormulaireReunion = ({
   const [transcriptionDone, setTranscriptionDone] = useState(false);
 
   const recorder = useAudioRecorder();
+  const liveSpeech = recorder.liveSpeech;
 
-  // Live speech-to-text (pour affichage temps réel en mode SpeechRecognition)
-  const srRef = useRef<any>(null);
-  const [liveSpeech, setLiveSpeech] = useState("");
+  // Mode rapporteur-traducteur : traduit le même stream micro en direct
+  const token = useAuthStore((s) => s.token);
+  const [traduireLive, setTraduireLive] = useState(false);
+  const [langueCible, setLangueCible] = useState("fr");
+  const tLignes = useTranslateLiveStore((s) => s.lignes);
+  const tInterim = useTranslateLiveStore((s) => s.currentInterim);
+  const tActive = useTranslateLiveStore((s) => s.active);
+  const startTranslate = useTranslateLiveStore((s) => s.start);
+  const stopTranslate = useTranslateLiveStore((s) => s.stop);
 
   const addParticipant = () => setParticipants(prev => [...prev, { nom: "", role: "" }]);
   const removeParticipant = (i: number) => setParticipants(prev => prev.filter((_, idx) => idx !== i));
@@ -244,33 +147,29 @@ const FormulaireReunion = ({
     setParticipants(prev => prev.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
 
   const handleStartRecording = async () => {
-    setLiveSpeech("");
-    await recorder.start();
-
-    // SpeechRecognition pour affichage live (best-effort)
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SR) {
-      const r = new SR();
-      srRef.current = r;
-      r.lang = langue === "auto" ? navigator.language || "fr-FR" : `${langue}-${langue.toUpperCase()}`;
-      r.continuous = true;
-      r.interimResults = true;
-      r.onresult = (e: any) => {
-        const transcript = Array.from(e.results)
-          .map((res: any) => res[0].transcript)
-          .join(" ");
-        setLiveSpeech(transcript);
-      };
-      r.onerror = () => {};
-      r.onend = () => {};
-      try { r.start(); } catch (_) {}
+    await recorder.start(langue);
+    if (traduireLive && token) {
+      // Attendre un tick pour laisser le stream s'initialiser dans recorderStore
+      await new Promise((r) => setTimeout(r, 50));
+      const stream = getRecorderStream();
+      if (stream) {
+        await startTranslate({
+          token,
+          source: langue === "auto" ? "auto" : langue,
+          target: langueCible,
+          sourceMode: "microphone",
+          ttsAvailable: false,
+          externalStream: stream,
+          onError: (msg) => toast.error(msg),
+        });
+      } else {
+        toast.error("Stream micro indisponible pour la traduction");
+      }
     }
   };
 
   const handleStopRecording = async () => {
-    // Arrêter SpeechRecognition live
-    try { srRef.current?.stop(); } catch (_) {}
-
+    if (tActive) await stopTranslate();
     setTranscribing(true);
     const blob = await recorder.stop();
     if (!blob) { setTranscribing(false); return; }
@@ -290,20 +189,17 @@ const FormulaireReunion = ({
           : "";
       setNotes(prev => (prev.trim() ? prev + "\n\n--- Transcription ---\n" + texte + infos : texte + infos));
       setTranscriptionDone(true);
-      setLiveSpeech("");
       const msg = res.traduit
         ? `Transcrit depuis ${res.langue_detectee} et traduit en ${langue} — ${texte.length} caractères`
         : `Transcription réussie — ${texte.length} caractères (${res.langue_detectee})`;
       toast.success(msg);
     } catch (err: any) {
-      // Fallback : utiliser le texte live SpeechRecognition si disponible
       if (liveSpeech.trim()) {
         setNotes(prev => (prev.trim() ? prev + "\n\n--- Notes live ---\n" + liveSpeech : liveSpeech));
         toast("Transcription Yukpo indisponible — notes live utilisées", { icon: "⚠️" });
       } else {
         toast.error("Erreur de transcription. Le service YukpoPro est temporairement indisponible.");
       }
-      setLiveSpeech("");
     } finally {
       setTranscribing(false);
     }
@@ -483,6 +379,39 @@ const FormulaireReunion = ({
                   </div>
                 )}
 
+                {/* Mode rapporteur-traducteur */}
+                {!recorder.isRecording && (
+                  <div className="bg-slate-900/40 rounded-lg p-2.5 border border-slate-700/60 space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={traduireLive}
+                        onChange={(e) => setTraduireLive(e.target.checked)}
+                        className="rounded"
+                      />
+                      <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+                        <Languages className="w-3.5 h-3.5 text-purple-400" />
+                        Traduire en direct pendant la réunion
+                      </span>
+                    </label>
+                    {traduireLive && (
+                      <div className="flex items-center gap-2 pl-6">
+                        <span className="text-[11px] text-slate-500">Langue cible :</span>
+                        <select
+                          value={langueCible}
+                          onChange={(e) => setLangueCible(e.target.value)}
+                          className="bg-slate-800 border border-slate-600 rounded-md text-xs text-white px-2 py-1 focus:outline-none focus:border-purple-500"
+                        >
+                          {LANGUES.filter((l) => l.code !== "auto").map((l) => (
+                            <option key={l.code} value={l.code}>{l.label}</option>
+                          ))}
+                        </select>
+                        <span className="text-[10px] text-slate-600">(même micro, pas de 2e capture)</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Boutons enregistrement */}
                 <div className="flex gap-2">
                   {!recorder.isRecording ? (
@@ -519,6 +448,28 @@ const FormulaireReunion = ({
                   <div className="bg-slate-900/60 rounded-lg p-2 border border-slate-700">
                     <p className="text-xs text-slate-500 mb-1">Transcription live :</p>
                     <p className="text-slate-300 text-xs leading-relaxed">{liveSpeech}</p>
+                  </div>
+                )}
+
+                {/* Traduction live (mode rapporteur-traducteur) */}
+                {traduireLive && tActive && (
+                  <div className="bg-purple-950/30 rounded-lg p-2 border border-purple-700/40 max-h-48 overflow-y-auto space-y-1.5">
+                    <p className="text-xs text-purple-300 mb-1 flex items-center gap-1.5">
+                      <Languages className="w-3 h-3" /> Traduction live → {langueCible}
+                    </p>
+                    {tLignes.length === 0 && !tInterim && (
+                      <p className="text-slate-500 text-xs italic">En attente de parole…</p>
+                    )}
+                    {tLignes.slice(-6).map((l) => (
+                      <div key={l.utteranceId} className="text-xs">
+                        <span className="text-slate-500">[{l.sourceLang}]</span>{" "}
+                        <span className="text-slate-400">{l.source}</span>
+                        {l.translated && (
+                          <div className="text-purple-200 pl-3">→ {l.translated}</div>
+                        )}
+                      </div>
+                    ))}
+                    {tInterim && <p className="text-slate-500 italic text-xs">{tInterim}</p>}
                   </div>
                 )}
 

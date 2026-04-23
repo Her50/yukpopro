@@ -15,14 +15,8 @@ import { Card, Button, Select, Badge } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import http from "@/api/client";
 import { useAuthStore } from "@/store";
-import {
-  TranslateLiveClient,
-  type SourceMode,
-  type TranslateStatus,
-  type TranslateEvent,
-} from "@/services/translate_live";
-import { getTTSSpeaker } from "@/services/tts_speaker";
-import type { TranslateEventAudio } from "@/services/translate_live";
+import type { SourceMode } from "@/services/translate_live";
+import { useTranslateLiveStore } from "@/store/translateLiveStore";
 
 interface Langue {
   code: string;
@@ -30,16 +24,6 @@ interface Langue {
   flag: string;
   stt: boolean;
   trad: boolean;
-}
-
-interface Ligne {
-  utteranceId: string;
-  source: string;
-  translated: string;
-  sourceLang: string;
-  isFinal: boolean;
-  ts: number;
-  gender?: "male" | "female";
 }
 
 export const TranslateLivePage = () => {
@@ -54,20 +38,22 @@ export const TranslateLivePage = () => {
   const [sourceMode, setSourceMode] = useState<SourceMode>("microphone");
   const [consentOk, setConsentOk] = useState<boolean>(false);
 
-  const [status, setStatus] = useState<TranslateStatus>("idle");
-  const [statusMsg, setStatusMsg] = useState<string>("");
-  const [lignes, setLignes] = useState<Ligne[]>([]);
-  const [currentInterim, setCurrentInterim] = useState<string>("");
-  const [minutesUsed, setMinutesUsed] = useState<number>(0);
-  const [creditsUsed, setCreditsUsed] = useState<number>(0);
+  const status = useTranslateLiveStore((s) => s.status);
+  const statusMsg = useTranslateLiveStore((s) => s.statusMsg);
+  const lignes = useTranslateLiveStore((s) => s.lignes);
+  const currentInterim = useTranslateLiveStore((s) => s.currentInterim);
+  const minutesUsed = useTranslateLiveStore((s) => s.minutesUsed);
+  const creditsUsed = useTranslateLiveStore((s) => s.creditsUsed);
+  const lastGender = useTranslateLiveStore((s) => s.lastGender);
+  const startSession = useTranslateLiveStore((s) => s.start);
+  const stopSession = useTranslateLiveStore((s) => s.stop);
+  const setStoreTarget = useTranslateLiveStore((s) => s.setTarget);
+
   const [ttsAvailable, setTtsAvailable] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
-  const [lastGender, setLastGender] = useState<"male"|"female"|null>(null);
   const [tipsOpen, setTipsOpen] = useState<boolean>(false);
 
-  const clientRef = useRef<TranslateLiveClient | null>(null);
   const lignesRef = useRef<HTMLDivElement>(null);
-  const ttsRef = useRef(getTTSSpeaker());  // fallback browser TTS si ElevenLabs absent
 
   // ── Chargement référentiel ───────────────────────────────────────────────
   useEffect(() => {
@@ -92,12 +78,7 @@ export const TranslateLivePage = () => {
     lignesRef.current?.scrollTo({ top: lignesRef.current.scrollHeight, behavior: "smooth" });
   }, [lignes, currentInterim]);
 
-  // ── Clean up au démontage ────────────────────────────────────────────────
-  useEffect(() => {
-    return () => {
-      clientRef.current?.stop();
-    };
-  }, []);
+  // Pas de cleanup au démontage — la session continue en arrière-plan via le store.
 
   const languesCible = useMemo(
     () => langues.filter((l) => l.code !== "auto" && l.trad),
@@ -114,77 +95,18 @@ export const TranslateLivePage = () => {
       toast.error("Veuillez confirmer le consentement des interlocuteurs.");
       return;
     }
-    setLignes([]);
-    setCurrentInterim("");
-    setMinutesUsed(0);
-    setCreditsUsed(0);
-
-    const client = new TranslateLiveClient({
+    await startSession({
       token,
       source,
       target,
       sourceMode,
-      onStatus: (s, details) => {
-        setStatus(s);
-        setStatusMsg(details || "");
-        if (s === "error" && details) toast.error(details);
-      },
-      onEvent: (ev: TranslateEvent) => {
-        if (ev.type === "transcript") {
-          if (!ev.is_final) {
-            setCurrentInterim(ev.text);
-            return;
-          }
-          setCurrentInterim("");
-          setLignes((prev) => [
-            ...prev,
-            {
-              utteranceId: ev.utterance_id,
-              source: ev.text,
-              translated: "",
-              sourceLang: ev.lang,
-              isFinal: true,
-              ts: Date.now(),
-            },
-          ]);
-        } else if (ev.type === "translation") {
-          const gender = (ev as any).gender as "male"|"female"|undefined;
-          if (gender) setLastGender(gender);
-          setLignes((prev) =>
-            prev.map((l) =>
-              l.utteranceId === ev.utterance_id
-                ? { ...l, translated: ev.translated_text, sourceLang: ev.source_lang, gender: gender ?? l.gender }
-                : l,
-            ),
-          );
-          // Fallback navigateur TTS si ElevenLabs absent
-          if (!ttsAvailable && ev.translated_text && ev.source_lang !== ev.target_lang) {
-            ttsRef.current.speak(ev.translated_text, ev.target_lang);
-          }
-        } else if (ev.type === "audio") {
-          // Lecture gérée par TranslateLiveClient.playMp3Bytes — juste mettre à jour l'UI
-          setLastGender((ev as TranslateEventAudio).gender);
-        } else if (ev.type === "usage") {
-          setMinutesUsed(ev.minutes);
-          setCreditsUsed(ev.credits_debited_total);
-        } else if (ev.type === "error") {
-          toast.error(ev.message || "Erreur serveur");
-        }
-      },
+      ttsAvailable,
+      onError: (msg) => toast.error(msg),
     });
-    clientRef.current = client;
-
-    try {
-      await client.start();
-    } catch (err: any) {
-      toast.error(err?.message || "Impossible de démarrer la session");
-    }
   };
 
   const handleStop = async () => {
-    await clientRef.current?.stop();
-    clientRef.current = null;
-    ttsRef.current.cancel();
+    await stopSession();
   };
 
   const handleSauvegarderMesDocuments = async () => {
@@ -368,7 +290,7 @@ export const TranslateLivePage = () => {
               value={target}
               onChange={(e) => {
                 setTarget(e.target.value);
-                clientRef.current?.setTargetLanguage(e.target.value);
+                setStoreTarget(e.target.value);
               }}
               options={languesCible.map((l) => ({
                 value: l.code,

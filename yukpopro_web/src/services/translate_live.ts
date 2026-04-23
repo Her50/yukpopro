@@ -80,6 +80,8 @@ export interface TranslateLiveOptions {
   source: string;              // "auto" ou ISO 639-1
   target: string;              // ISO 639-1
   sourceMode: SourceMode;
+  /** Stream déjà capturé (ex. micro de réunion) — évite un 2e getUserMedia. */
+  externalStream?: MediaStream;
   onEvent: (e: TranslateEvent) => void;
   onStatus: (status: TranslateStatus, details?: string) => void;
 }
@@ -90,6 +92,7 @@ export class TranslateLiveClient {
   private playbackCtx: AudioContext | null = null;  // contexte dédié lecture TTS (déverrouillé pendant start())
   private workletNode: AudioWorkletNode | null = null;
   private mediaStream: MediaStream | null = null;
+  private ownsStream = true;  // false si externalStream fourni — on ne stoppe pas les tracks
   private heartbeat: number | null = null;
   private opts: TranslateLiveOptions;
   private status: TranslateStatus = "idle";
@@ -164,7 +167,9 @@ export class TranslateLiveClient {
     this._playQueue = [];
     this._playing = false;
     if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach((t) => t.stop());
+      if (this.ownsStream) {
+        this.mediaStream.getTracks().forEach((t) => t.stop());
+      }
       this.mediaStream = null;
     }
 
@@ -244,6 +249,16 @@ export class TranslateLiveClient {
   }
 
   private async _acquireMedia(): Promise<void> {
+    if (this.opts.externalStream) {
+      // Réutilise un stream existant (ex. micro déjà capturé par le module réunion).
+      const audioTracks = this.opts.externalStream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        throw new Error("Stream externe sans piste audio");
+      }
+      this.mediaStream = new MediaStream(audioTracks);
+      this.ownsStream = false;
+      return;
+    }
     if (this.opts.sourceMode === "display") {
       if (!(navigator.mediaDevices as any).getDisplayMedia) {
         throw new Error("Capture d'onglet non supportée par ce navigateur");
