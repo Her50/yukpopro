@@ -322,7 +322,7 @@ async def generer_specification_depuis_brief(
     brief: str,
     type_gabarit: str,
     pays: str = "CM",
-) -> SpecificationInfographie:
+) -> tuple[SpecificationInfographie, dict]:
     """
     Analyse un brief client en langage naturel et extrait la spécification structurée
     pour la génération de l'infographie.
@@ -369,7 +369,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire."""
         match = re.search(r'\{.*\}', reponse.contenu, re.DOTALL)
         data = json.loads(match.group()) if match else {}
 
-    return SpecificationInfographie(
+    spec = SpecificationInfographie(
         type_gabarit=type_gabarit,
         titre=data.get("titre", "Titre principal"),
         sous_titre=data.get("sous_titre"),
@@ -382,6 +382,12 @@ Retourne UNIQUEMENT le JSON, sans commentaire."""
         date_evenement=data.get("date_evenement"),
         lieu=data.get("lieu"),
     )
+    tokens_meta = {
+        "modele": reponse.modele_utilise,
+        "tokens_input": reponse.tokens_input,
+        "tokens_output": reponse.tokens_output,
+    }
+    return spec, tokens_meta
 
 
 def generer_pdf(spec: SpecificationInfographie, gabarit_info: Optional[dict] = None) -> bytes:
@@ -549,7 +555,11 @@ async def generer_infographie(
     if not gabarit:
         raise ValueError(f"Gabarit inconnu : {type_gabarit}. Disponibles : {list(_gabarits.keys())}")
 
-    spec = spec_override or await generer_specification_depuis_brief(brief, type_gabarit, pays)
+    tokens_meta: dict = {}
+    if spec_override:
+        spec = spec_override
+    else:
+        spec, tokens_meta = await generer_specification_depuis_brief(brief, type_gabarit, pays)
 
     # Génération PDF
     pdf_bytes: Optional[bytes] = None
@@ -576,7 +586,11 @@ async def generer_infographie(
         png_bytes=png_bytes,
         specification=spec,
         gabarit=type_gabarit,
-        meta={"gabarit_label": gabarit["label"], "prix_fcfa": gabarit.get("prix_fcfa", 5000)},
+        meta={
+            "gabarit_label": gabarit["label"],
+            "prix_fcfa": gabarit.get("prix_fcfa", 5000),
+            **tokens_meta,
+        },
     )
 
 
@@ -607,12 +621,12 @@ async def analyser_modele_image(image_bytes: bytes, mime_type: str = "image/jpeg
         "Retourne UNIQUEMENT le JSON."
     )
     try:
-        reponse = await ia_client.appeler_ia_vision(
-            prompt_sys + "\n" + prompt_user,
-            b64, mime_type,
+        reponse = await ia_client.analyser_image_vision(
+            image_b64=b64,
+            prompt=prompt_sys + "\n" + prompt_user,
             mode=ModeIA.CLAUDE_VISION,
         )
-        return reponse
+        return reponse.contenu
     except Exception as e:
         logger.warning(f"[Infographe] Analyse modèle image : {e}")
         return "{}"

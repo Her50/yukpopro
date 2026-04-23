@@ -107,6 +107,7 @@ from api.routes_bureau_infographie import router as bureau_infographie_router
 from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
+from api.routes_bureau_abonnement import router as bureau_abonnement_router
 from api.graphql_schema import creer_router_graphql
 from core.audit import AuditMiddleware
 from core.auth import auth_router
@@ -683,6 +684,7 @@ app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie"
 app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])
+app.include_router(bureau_abonnement_router, prefix="/api/v1/bureau/abonnement",  tags=["Secrétariat — Abonnement & Crédits"])
 
 # GraphQL (Strawberry) — optionnel selon installation
 _graphql_router = creer_router_graphql()

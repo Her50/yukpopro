@@ -72,6 +72,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <TabIcon name="grid-outline" color={color} size={size} />,
         }}
       />
+      <Tabs.Screen
+        name="abonnement"
+        options={{
+          title: 'Abonnement',
+          tabBarIcon: ({ color, size }) => <TabIcon name="card-outline" color={color} size={size} />,
+        }}
+      />
     </Tabs>
   )
 }

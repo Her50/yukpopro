@@ -97,7 +97,17 @@ async def generer_document(
     Retourne le contenu Markdown + (si python-docx disponible) le fichier .docx en base64.
     """
     from modules.bureau.redacteur import generer_document as _generer, DemandeDocument
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
     import base64
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "redaction")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     try:
         req = DemandeDocument(
@@ -123,6 +133,21 @@ async def generer_document(
         chemin.write_bytes(doc.contenu_word)
         word_b64 = base64.b64encode(doc.contenu_word).decode()
 
+    # Débit crédits : LLM + forfait DOCX
+    try:
+        meta = doc.meta or {}
+        await debiter_llm(
+            current_user.user_id,
+            modele=meta.get("modele", "default"),
+            tokens_input=int(meta.get("tokens_input", 0) or 0),
+            tokens_output=int(meta.get("tokens_output", 0) or 0),
+            module="redaction",
+        )
+        if doc.contenu_word:
+            await debiter_forfait(current_user.user_id, "docx_generation", module="redaction")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit redaction échoué : {_e}")
+
     return {
         "titre": doc.titre,
         "contenu_markdown": doc.contenu_markdown,
@@ -143,16 +168,37 @@ async def reformuler_texte(
 ):
     """Reformule un texte dans le registre administratif/juridique/commercial africain."""
     from modules.bureau.redacteur import reformuler_texte as _reformuler
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "redaction")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     registres_valides = {"admin", "juridique", "commercial", "academique", "simple"}
     if demande.registre not in registres_valides:
         raise HTTPException(status_code=400, detail=f"Registre invalide. Valides : {registres_valides}")
 
     try:
-        resultat = await _reformuler(demande.texte, demande.registre, demande.pays)
+        resultat, meta = await _reformuler(demande.texte, demande.registre, demande.pays)
     except Exception as e:
         logger.error(f"[Bureau Reformulation] Erreur : {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    try:
+        await debiter_llm(
+            current_user.user_id,
+            modele=meta.get("modele", "default"),
+            tokens_input=int(meta.get("tokens_input", 0) or 0),
+            tokens_output=int(meta.get("tokens_output", 0) or 0),
+            module="redaction",
+        )
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit reformulation échoué : {_e}")
 
     return {
         "texte_original": demande.texte,

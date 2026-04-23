@@ -85,6 +85,16 @@ async def generer_depuis_brief(
     L'IA extrait automatiquement : titre, palette, textes, layout selon le gabarit.
     """
     from modules.bureau.infographe import generer_infographie, GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     if demande.type_gabarit not in GABARITS:
         raise HTTPException(
@@ -101,6 +111,24 @@ async def generer_depuis_brief(
     except Exception as e:
         logger.error(f"[Bureau Infographie] Génération échouée : {e}")
         raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
+
+    # Débit crédits : LLM spec + forfait PDF
+    try:
+        meta = resultat.meta or {}
+        if meta.get("tokens_input") or meta.get("tokens_output"):
+            await debiter_llm(
+                current_user.user_id,
+                modele=meta.get("modele", "default"),
+                tokens_input=int(meta.get("tokens_input", 0) or 0),
+                tokens_output=int(meta.get("tokens_output", 0) or 0),
+                module="infographie",
+            )
+        if resultat.pdf_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
+        if resultat.png_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit infographie échoué : {_e}")
 
     ts = int(__import__("time").time())
     pdf_id = None
@@ -153,6 +181,16 @@ async def generer_manuel(
     from modules.bureau.infographe import (
         SpecificationInfographie, generer_pdf, GABARITS, PALETTES,
     )
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     if demande.type_gabarit not in GABARITS:
         raise HTTPException(status_code=400, detail=f"Gabarit inconnu : {demande.type_gabarit}")
@@ -183,6 +221,11 @@ async def generer_manuel(
     pdf_id = f"bureau_infog_{current_user.user_id}_{demande.type_gabarit}_{ts}.pdf"
     (_DATA_DIR / pdf_id).write_bytes(pdf_bytes)
 
+    try:
+        await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit infographie manuel échoué : {_e}")
+
     return {
         "gabarit": demande.type_gabarit,
         "pdf_id": pdf_id,
@@ -204,6 +247,16 @@ async def generer_depuis_modele_image(
     Formats acceptés : PNG, JPG, JPEG, WEBP (max 10 MB).
     """
     from modules.bureau.infographe import generer_infographie, analyser_modele_image, GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     if type_gabarit not in GABARITS:
         raise HTTPException(status_code=400, detail=f"Gabarit inconnu : {type_gabarit}")
@@ -256,6 +309,26 @@ async def generer_depuis_modele_image(
         (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
         png_b64 = _b64.b64encode(resultat.png_bytes).decode()
 
+    # Débit : vision modèle + LLM spec + forfaits PDF/PNG
+    try:
+        if analyse_style:
+            await debiter_forfait(current_user.user_id, "infographie_vision", module="infographie")
+        meta = resultat.meta or {}
+        if meta.get("tokens_input") or meta.get("tokens_output"):
+            await debiter_llm(
+                current_user.user_id,
+                modele=meta.get("modele", "default"),
+                tokens_input=int(meta.get("tokens_input", 0) or 0),
+                tokens_output=int(meta.get("tokens_output", 0) or 0),
+                module="infographie",
+            )
+        if resultat.pdf_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
+        if resultat.png_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit infographie modèle échoué : {_e}")
+
     spec = resultat.specification
     return {
         "gabarit": type_gabarit,
@@ -288,7 +361,17 @@ async def generer_format_custom(
 ):
     """Génère une infographie avec un format entièrement personnalisé (dimensions libres en mm)."""
     from modules.bureau.infographe import generer_infographie, creer_gabarit_custom, GABARITS as _GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
     import copy
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     gabarit_custom = creer_gabarit_custom(
         width_mm=demande.width_mm,
@@ -323,6 +406,23 @@ async def generer_format_custom(
         png_id = f"bureau_infog_{current_user.user_id}_custom_{ts}.png"
         (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
         png_b64 = _b64.b64encode(resultat.png_bytes).decode()
+
+    try:
+        meta = resultat.meta or {}
+        if meta.get("tokens_input") or meta.get("tokens_output"):
+            await debiter_llm(
+                current_user.user_id,
+                modele=meta.get("modele", "default"),
+                tokens_input=int(meta.get("tokens_input", 0) or 0),
+                tokens_output=int(meta.get("tokens_output", 0) or 0),
+                module="infographie",
+            )
+        if resultat.pdf_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_pdf", module="infographie")
+        if resultat.png_bytes:
+            await debiter_forfait(current_user.user_id, "infographie_png", module="infographie")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit infographie custom échoué : {_e}")
 
     spec = resultat.specification
     return {

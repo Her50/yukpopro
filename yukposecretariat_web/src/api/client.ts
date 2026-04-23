@@ -91,6 +91,22 @@ export const traductionAPI = {
     api.get(`/traduction/fichier/${fichier_id}`, { responseType: 'blob' }),
 }
 
+// ─── Abonnement & Crédits ─────────────────────────────────────────────────────
+export const abonnementAPI = {
+  plans: () => api.get('/abonnement/plans'),
+  monAbonnement: () => api.get('/abonnement/'),
+  initier: (data: { plan: string; operateur: string; numero_telephone: string; pays?: string }) =>
+    api.post('/abonnement/initier', data),
+  confirmer: (data: { reference_paiement: string; transaction_id?: string }) =>
+    api.post('/abonnement/confirmer', data),
+  packsCredits: () => api.get('/abonnement/packs-credits'),
+  initierRecharge: (data: { pack_id: string; operateur: string; numero_telephone: string; pays?: string }) =>
+    api.post('/abonnement/initier-recharge', data),
+  confirmerRecharge: (data: { reference_paiement: string; transaction_id?: string }) =>
+    api.post('/abonnement/confirmer-recharge', data),
+  historique: () => api.get('/abonnement/historique'),
+}
+
 // ─── Mes Documents ────────────────────────────────────────────────────────────
 export const documentsAPI = {
   lister: () => api.get('/documents/'),

@@ -165,6 +165,10 @@ async def creer_bon_travail(
     db: AsyncSession = Depends(get_db),
 ):
     """Crée un nouveau bon de travail (ticket Kanban)."""
+    from modules.bureau.service_credits_bureau import verifier_acces_module, debiter_forfait
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
+    if not autorise:
+        raise HTTPException(403, msg)
     try:
         from core.database import BureauBonTravailDB
         nouveau = BureauBonTravailDB(
@@ -183,6 +187,10 @@ async def creer_bon_travail(
         db.add(nouveau)
         await db.commit()
         await db.refresh(nouveau)
+        try:
+            await debiter_forfait(current_user.user_id, "kanban_action", module="gestion")
+        except Exception:
+            pass
         return {"id": nouveau.id, "statut": "en_attente", "message": "Bon de travail créé"}
     except ImportError:
         return {"id": None, "statut": "en_attente", "message": "Enregistrement temporaire (DB non migrée)"}
@@ -223,6 +231,11 @@ async def modifier_bon_travail(
             bon.echeance = mise_a_jour.echeance
         bon.modifie_le = datetime.utcnow()
         await db.commit()
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait
+            await debiter_forfait(current_user.user_id, "kanban_action", module="gestion")
+        except Exception:
+            pass
         return {"id": bon_id, "statut": bon.statut, "message": "Mis à jour"}
     except HTTPException:
         raise
@@ -239,6 +252,16 @@ async def generer_devis(
 ):
     """Génère un devis professionnel en PDF (FCFA, TVA 19.25%)."""
     from modules.bureau.gestionnaire import Devis, LigneDevis, generer_pdf_devis
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     lignes = [
         LigneDevis(
@@ -272,6 +295,11 @@ async def generer_devis(
     pdf_id = f"bureau_devis_{current_user.user_id}_{ts}.pdf"
     (_DATA_DIR / pdf_id).write_bytes(pdf_bytes)
 
+    try:
+        await debiter_forfait(current_user.user_id, "devis_pdf", module="gestion")
+    except Exception:
+        pass
+
     return {
         "pdf_id": pdf_id,
         "pdf_base64": base64.b64encode(pdf_bytes).decode(),
@@ -289,6 +317,16 @@ async def generer_facture(
 ):
     """Génère une facture PDF (même schéma que le devis, marquée FACTURE)."""
     from modules.bureau.gestionnaire import Devis, LigneDevis, generer_pdf_devis
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     lignes = [
         LigneDevis(
@@ -320,6 +358,11 @@ async def generer_facture(
     ts = int(__import__("time").time())
     pdf_id = f"bureau_facture_{current_user.user_id}_{ts}.pdf"
     (_DATA_DIR / pdf_id).write_bytes(pdf_bytes)
+
+    try:
+        await debiter_forfait(current_user.user_id, "facture_pdf", module="gestion")
+    except Exception:
+        pass
 
     return {
         "pdf_id": pdf_id,
@@ -428,6 +471,11 @@ async def enregistrer_transaction(
     if tx.mode_paiement not in modes_valides:
         raise HTTPException(status_code=400, detail=f"Mode invalide. Valides : {modes_valides}")
 
+    from modules.bureau.service_credits_bureau import verifier_acces_module, debiter_forfait
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
+    if not autorise:
+        raise HTTPException(403, msg)
+
     try:
         from core.database import BureauTransactionDB
         nouvelle = BureauTransactionDB(
@@ -442,6 +490,10 @@ async def enregistrer_transaction(
         db.add(nouvelle)
         await db.commit()
         await db.refresh(nouvelle)
+        try:
+            await debiter_forfait(current_user.user_id, "caisse_transaction", module="gestion")
+        except Exception:
+            pass
         return {"id": nouvelle.id, "message": "Transaction enregistrée"}
     except ImportError:
         return {"id": None, "message": "Enregistrement temporaire (DB non migrée)"}
@@ -496,6 +548,11 @@ async def creer_client(
     db: AsyncSession = Depends(get_db),
 ):
     """Crée une nouvelle fiche client."""
+    from modules.bureau.service_credits_bureau import verifier_acces_module, debiter_forfait
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
+    if not autorise:
+        raise HTTPException(403, msg)
+
     try:
         from core.database import BureauClientDB
         nouveau = BureauClientDB(
@@ -513,6 +570,10 @@ async def creer_client(
         db.add(nouveau)
         await db.commit()
         await db.refresh(nouveau)
+        try:
+            await debiter_forfait(current_user.user_id, "client_action", module="gestion")
+        except Exception:
+            pass
         return {"id": nouveau.id, "message": "Client créé"}
     except ImportError:
         return {"id": None, "message": "DB non migrée"}
@@ -576,6 +637,11 @@ async def url_whatsapp_client(
 
         fiche = FicheClient(id=c.id, nom=c.nom, telephone=c.telephone)
         url = formater_message_whatsapp(fiche, message)
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait
+            await debiter_forfait(current_user.user_id, "whatsapp_message", module="gestion")
+        except Exception:
+            pass
         return {"whatsapp_url": url, "telephone": c.telephone, "message": message}
     except HTTPException:
         raise

@@ -54,7 +54,17 @@ async def traduire_texte(
     current_user: TokenData = Depends(get_current_user),
 ):
     from core.ia_client import ia_client, ModeIA
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
     import time
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "traduction")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     ls = LANGUES.get(demande.langue_source, demande.langue_source)
     lc = LANGUES.get(demande.langue_cible, demande.langue_cible)
@@ -68,13 +78,25 @@ async def traduire_texte(
     )
 
     try:
-        texte_traduit = await ia_client.appeler_ia(
-            prompt_sys,
-            f"Traduis ce texte :\n\n{demande.contenu}",
+        reponse_ia = await ia_client.appeler(
+            prompt=f"Traduis ce texte :\n\n{demande.contenu}",
             mode=ModeIA.CLAUDE_RAPIDE,
+            systeme=prompt_sys,
         )
+        texte_traduit = reponse_ia.contenu
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur IA : {e}")
+
+    try:
+        await debiter_llm(
+            current_user.user_id,
+            modele=reponse_ia.modele_utilise,
+            tokens_input=reponse_ia.tokens_input,
+            tokens_output=reponse_ia.tokens_output,
+            module="traduction",
+        )
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit traduction échoué : {_e}")
 
     nb_mots_source = len(demande.contenu.split())
     nb_mots_cible = len(texte_traduit.split())
@@ -90,6 +112,10 @@ async def traduire_texte(
             doc.save(buf)
             fichier_id = f"bureau_trad_{current_user.user_id}_{int(time.time())}.docx"
             (_DATA_DIR / fichier_id).write_bytes(buf.getvalue())
+            try:
+                await debiter_forfait(current_user.user_id, "docx_generation", module="traduction")
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -111,7 +137,17 @@ async def traduire_fichier(
     contexte_metier: str = Form(""),
     current_user: TokenData = Depends(get_current_user),
 ):
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
     import time
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "traduction")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     if fichier.size and fichier.size > 20 * 1024 * 1024:
         raise HTTPException(400, detail="Fichier trop volumineux (max 20 MB)")
@@ -140,13 +176,18 @@ async def traduire_fichier(
 
         elif ext in ("png", "jpg", "jpeg", "webp"):
             import base64
-            from core.ia_client import ia_client, ModeIA
+            from core.ia_client import ia_client
             b64 = base64.b64encode(contenu_bytes).decode()
             mt = "image/png" if ext == "png" else "image/jpeg"
-            texte_source = await ia_client.appeler_ia_vision(
-                "Extrais tout le texte visible dans cette image. Retourne uniquement le texte extrait.",
-                b64, mt, mode=ModeIA.CLAUDE_VISION,
+            rep_vision = await ia_client.analyser_image_vision(
+                image_b64=b64,
+                prompt="Extrais tout le texte visible dans cette image. Retourne uniquement le texte extrait.",
             )
+            texte_source = rep_vision.contenu
+            try:
+                await debiter_forfait(current_user.user_id, "ocr_scan", module="traduction")
+            except Exception:
+                pass
         else:
             texte_source = contenu_bytes.decode("utf-8", errors="ignore")[:8000]
     except Exception as e:
@@ -167,13 +208,25 @@ async def traduire_fichier(
         "Retourne UNIQUEMENT la traduction."
     )
     try:
-        texte_traduit = await ia_client.appeler_ia(
-            prompt_sys,
-            f"Traduis ce texte :\n\n{texte_source[:6000]}",
+        reponse_ia = await ia_client.appeler(
+            prompt=f"Traduis ce texte :\n\n{texte_source[:6000]}",
             mode=ModeIA.CLAUDE_RAPIDE,
+            systeme=prompt_sys,
         )
+        texte_traduit = reponse_ia.contenu
     except Exception as e:
         raise HTTPException(500, detail=f"Erreur traduction : {e}")
+
+    try:
+        await debiter_llm(
+            current_user.user_id,
+            modele=reponse_ia.modele_utilise,
+            tokens_input=reponse_ia.tokens_input,
+            tokens_output=reponse_ia.tokens_output,
+            module="traduction",
+        )
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit traduction fichier échoué : {_e}")
 
     # Export DOCX
     fichier_id = None
@@ -190,6 +243,10 @@ async def traduire_fichier(
         nom_base = (fichier.filename or "traduction").rsplit(".", 1)[0]
         fichier_id = f"bureau_trad_{current_user.user_id}_{int(time.time())}_{nom_base[:20]}.docx"
         (_DATA_DIR / fichier_id).write_bytes(buf.getvalue())
+        try:
+            await debiter_forfait(current_user.user_id, "docx_generation", module="traduction")
+        except Exception:
+            pass
     except Exception:
         pass
 

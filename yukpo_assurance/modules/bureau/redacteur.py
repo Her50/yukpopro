@@ -410,11 +410,17 @@ Produis le document complet et professionnel."""
         type_doc=demande.type_doc,
         prix_fcfa=prix,
         nb_mots=nb_mots,
-        meta={"pays": pays, "tokens": reponse.tokens_total},
+        meta={
+            "pays": pays,
+            "tokens": reponse.tokens_input + reponse.tokens_output,
+            "tokens_input": reponse.tokens_input,
+            "tokens_output": reponse.tokens_output,
+            "modele": reponse.modele_utilise,
+        },
     )
 
 
-async def reformuler_texte(texte: str, registre: str, pays: str = "CM") -> str:
+async def reformuler_texte(texte: str, registre: str, pays: str = "CM") -> tuple[str, dict]:
     """
     Reformule un texte dans un registre donné (admin, juridique, commercial, academique).
     Utile pour corriger un brouillon client avant d'en faire un document propre.
@@ -440,7 +446,12 @@ Retourne uniquement le texte reformulé, sans commentaire."""
         mode=ModeIA.GENERATION,
         systeme=systeme,
     )
-    return reponse.contenu
+    meta = {
+        "modele": reponse.modele_utilise,
+        "tokens_input": reponse.tokens_input,
+        "tokens_output": reponse.tokens_output,
+    }
+    return reponse.contenu, meta
 
 
 def _formater_infos(infos: dict) -> str:

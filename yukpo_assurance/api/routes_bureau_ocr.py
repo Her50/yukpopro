@@ -49,6 +49,16 @@ async def scanner_image(
     Retourne le texte en Markdown + (optionnel) .docx en base64.
     """
     from modules.bureau.ocr_scanner import scanner_image as _scanner
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "ocr")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     _valider_upload(fichier)
     contenu = await fichier.read()
@@ -65,6 +75,13 @@ async def scanner_image(
     except Exception as e:
         logger.error(f"[Bureau OCR] Scan échoué : {e}")
         raise HTTPException(status_code=500, detail=f"OCR échoué : {e}")
+
+    try:
+        await debiter_forfait(current_user.user_id, "ocr_scan", module="ocr")
+        if resultat.contenu_word:
+            await debiter_forfait(current_user.user_id, "docx_generation", module="ocr")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit OCR échoué : {_e}")
 
     fichier_id = None
     word_b64 = None
@@ -95,6 +112,16 @@ async def scanner_manuscrit(
     Lit des notes manuscrites (écriture cursive africaine) et les formate en document propre.
     """
     from modules.bureau.ocr_scanner import scanner_notes_manuscrites
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "ocr")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     _valider_upload(fichier)
     contenu = await fichier.read()
@@ -114,6 +141,13 @@ async def scanner_manuscrit(
     except Exception as e:
         logger.error(f"[Bureau OCR Manuscrit] Erreur : {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+    try:
+        await debiter_forfait(current_user.user_id, "ocr_manuscrit", module="ocr")
+        if resultat.contenu_word:
+            await debiter_forfait(current_user.user_id, "docx_generation", module="ocr")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit OCR manuscrit échoué : {_e}")
 
     fichier_id = None
     word_b64 = None

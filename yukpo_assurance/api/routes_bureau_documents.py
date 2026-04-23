@@ -101,6 +101,13 @@ async def telecharger_document(
         "jpg": "image/jpeg",
     }
     media_type = mt_map.get(ext, "application/octet-stream")
+
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait
+        await debiter_forfait(current_user.user_id, "document_download", module="documents")
+    except Exception:
+        pass
+
     return Response(
         content=chemin.read_bytes(),
         media_type=media_type,
@@ -124,4 +131,9 @@ async def supprimer_document(
         raise HTTPException(403, detail="Accès refusé")
 
     chemin.unlink()
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait
+        await debiter_forfait(current_user.user_id, "document_suppression", module="documents")
+    except Exception:
+        pass
     return {"supprime": True, "fichier_id": fichier_id}

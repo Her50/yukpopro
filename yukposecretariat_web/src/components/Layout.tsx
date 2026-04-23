@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, FileText, Scan, Mic, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen,
+  Languages, FolderOpen, CreditCard,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
@@ -20,6 +20,7 @@ const NAV = [
   { to: '/devis',       label: 'Devis & Factures', icon: Receipt },
   { to: '/caisse',      label: 'Caisse',           icon: Wallet },
   { to: '/clients',     label: 'Clients',          icon: Users },
+  { to: '/abonnement',  label: 'Abonnement',       icon: CreditCard },
 ]
 
 export default function Layout() {

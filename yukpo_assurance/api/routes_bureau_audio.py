@@ -59,7 +59,17 @@ async def transcrire_audio(
     - Notes vocales → type_document_cible=dictee ou liste_taches
     """
     from modules.bureau.transcripteur import transcrire_audio as _transcrire, TYPES_DOCUMENT_CIBLE
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait, debiter_llm,
+    )
     import json as json_lib
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "audio")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
     if type_document_cible not in TYPES_DOCUMENT_CIBLE:
         raise HTTPException(
@@ -111,6 +121,27 @@ async def transcrire_audio(
         fichier_id = f"bureau_audio_{current_user.user_id}_{int(__import__('time').time())}.docx"
         (_DATA_DIR / fichier_id).write_bytes(resultat.contenu_word)
         word_b64 = base64.b64encode(resultat.contenu_word).decode()
+
+    # Débit crédits : forfait par minute audio + LLM reformatage + DOCX
+    try:
+        duree_min = max(1.0, (resultat.duree_secondes or 0) / 60.0)
+        await debiter_forfait(
+            current_user.user_id, "audio_transcription",
+            module="audio", multiplicateur=duree_min,
+        )
+        meta = resultat.meta or {}
+        if meta.get("tokens_input") or meta.get("tokens_output"):
+            await debiter_llm(
+                current_user.user_id,
+                modele=meta.get("modele", "default"),
+                tokens_input=int(meta.get("tokens_input", 0) or 0),
+                tokens_output=int(meta.get("tokens_output", 0) or 0),
+                module="audio",
+            )
+        if resultat.contenu_word:
+            await debiter_forfait(current_user.user_id, "docx_generation", module="audio")
+    except Exception as _e:
+        logger.warning(f"[Bureau/Crédits] Debit audio échoué : {_e}")
 
     return {
         "transcription_brute": resultat.transcription_brute,
