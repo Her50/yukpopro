@@ -8,6 +8,7 @@ import { Card, Button, Textarea, Select, Badge } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi } from "@/api/client";
 import { useProfilStore } from "@/store";
+import { useTraductionStore, type ResultatTraduction } from "@/store/traductionStore";
 
 const LANGUES = [
   { value: "fr", label: "🇫🇷 Français" },
@@ -37,21 +38,21 @@ const FORMATS_LABEL = "PDF, Word, TXT, CSV, Excel, PowerPoint, Image";
 
 type ModeTraduction = "texte" | "fichier";
 
-interface ResultatTraduction {
-  texte_traduit: string;
-  nb_mots_source: number;
-  nb_mots_cible: number;
-  chemin_docx?: string;
-  fichier_traduit?: string;
-  format_sortie?: string;
-  sauvegarde_mes_documents?: boolean;
-  fichier_source?: string;
-}
-
 export const TraductionPage = () => {
   const { profil } = useProfilStore();
-  const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<ModeTraduction>("texte");
+
+  const mode = useTraductionStore((s) => s.mode) as ModeTraduction;
+  const loadingTexte = useTraductionStore((s) => s.loading.texte);
+  const loadingFichier = useTraductionStore((s) => s.loading.fichier);
+  const resultatTexte = useTraductionStore((s) => s.resultats.texte);
+  const resultatFichier = useTraductionStore((s) => s.resultats.fichier);
+  const runTrad = useTraductionStore((s) => s.run);
+  const setMode = (m: ModeTraduction) => useTraductionStore.getState().setMode(m);
+  const setResultatStore = (m: ModeTraduction, r: ResultatTraduction | null) =>
+    useTraductionStore.getState().setResultat(m, r);
+
+  const loading = mode === "texte" ? loadingTexte : loadingFichier;
+  const resultat = mode === "texte" ? resultatTexte : resultatFichier;
 
   // Mode texte
   const [contenu, setContenu] = useState("");
@@ -65,7 +66,6 @@ export const TraductionPage = () => {
   const [langueCible, setLangueCible] = useState("en");
   const [contexteMetier, setContexteMetier] = useState(profil?.metier || "");
   const [formatSortie, setFormatSortie] = useState("docx");
-  const [resultat, setResultat] = useState<ResultatTraduction | null>(null);
   const [copie, setCopie] = useState(false);
 
   const inverserLangues = () => {
@@ -74,7 +74,7 @@ export const TraductionPage = () => {
     setLangueCible(tmp);
     if (resultat) {
       setContenu(resultat.texte_traduit);
-      setResultat(null);
+      setResultatStore(mode, null);
     }
   };
 
@@ -83,23 +83,17 @@ export const TraductionPage = () => {
   const handleTraduireTexte = async (e: FormEvent) => {
     e.preventDefault();
     if (!contenu.trim()) return;
-    setLoading(true);
-    setResultat(null);
-    try {
-      const res = await generateurApi.traduire({
+    await runTrad(
+      "texte",
+      () => generateurApi.traduire({
         contenu,
         langue_source: langueSource,
         langue_cible: langueCible,
         contexte_metier: contexteMetier || undefined,
         format_sortie: formatSortie,
-      });
-      setResultat(res);
-      toast.success("Traduction terminée !");
-    } catch {
-      toast.error("Erreur lors de la traduction");
-    } finally {
-      setLoading(false);
-    }
+      }),
+      { successMsg: "Traduction terminée !" },
+    );
   };
 
   // ── Traduction fichier ────────────────────────────────────────────────────
@@ -112,15 +106,13 @@ export const TraductionPage = () => {
         return;
       }
       setFichierSelectionne(f);
-      setResultat(null);
+      setResultatStore("fichier", null);
     }
   };
 
   const handleTraduireFichier = async (e: FormEvent) => {
     e.preventDefault();
     if (!fichierSelectionne) return;
-    setLoading(true);
-    setResultat(null);
 
     const formData = new FormData();
     formData.append("fichier", fichierSelectionne);
@@ -129,16 +121,11 @@ export const TraductionPage = () => {
     formData.append("contexte_metier", contexteMetier);
     formData.append("format_sortie", formatSortie);
 
-    try {
-      const res = await generateurApi.traduireFichier(formData);
-      setResultat(res);
-      toast.success("Fichier traduit avec succès !");
-    } catch (err: any) {
-      const detail = err?.response?.data?.detail || "Erreur lors de la traduction du fichier";
-      toast.error(detail.slice(0, 120));
-    } finally {
-      setLoading(false);
-    }
+    await runTrad(
+      "fichier",
+      () => generateurApi.traduireFichier(formData),
+      { successMsg: "Fichier traduit avec succès !", errorMsg: "Erreur lors de la traduction du fichier" },
+    );
   };
 
   const handleCopier = () => {
@@ -151,7 +138,7 @@ export const TraductionPage = () => {
 
   const supprimerFichier = () => {
     setFichierSelectionne(null);
-    setResultat(null);
+    setResultatStore("fichier", null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -174,7 +161,7 @@ export const TraductionPage = () => {
       {/* ── Sélecteur mode ──────────────────────────────────────────────────── */}
       <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         <button
-          onClick={() => { setMode("texte"); setResultat(null); }}
+          onClick={() => { setMode("texte"); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             mode === "texte" ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"
           }`}
@@ -182,7 +169,7 @@ export const TraductionPage = () => {
           <Languages className="w-4 h-4" /> Traduire du texte
         </button>
         <button
-          onClick={() => { setMode("fichier"); setResultat(null); }}
+          onClick={() => { setMode("fichier"); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             mode === "fichier" ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"
           }`}

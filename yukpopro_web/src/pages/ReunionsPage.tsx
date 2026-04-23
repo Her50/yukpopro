@@ -19,6 +19,7 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { useAuthStore } from "@/store";
 import { useTranslateLiveStore } from "@/store/translateLiveStore";
 import { getRecorderStream } from "@/store/recorderStore";
+import { useReunionFormStore } from "@/store/reunionFormStore";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -119,22 +120,36 @@ function useAudioRecorder() {
 const FormulaireReunion = ({
   onSave, onClose,
 }: { onSave: (r: Reunion) => void; onClose: () => void }) => {
-  const [titre,        setTitre]        = useState("");
-  const [date,         setDate]         = useState(today());
-  const [notes,        setNotes]        = useState("");
-  const [participants, setParticipants] = useState<Participant[]>([{ nom: "", role: "" }]);
-  const [langue,       setLangue]       = useState("auto");
+  const form = useReunionFormStore();
+  const titre = form.titre;
+  const date = form.date;
+  const notes = form.notes;
+  const participants = form.participants;
+  const langue = form.langue;
+  const transcriptionDone = form.transcriptionDone;
+  const traduireLive = form.traduireLive;
+  const langueCible = form.langueCible;
+
+  const setTitre = form.setTitre;
+  const setDate = form.setDate;
+  const setNotes = form.setNotes as (v: string | ((p: string) => string)) => void;
+  const setParticipants = (v: Participant[] | ((p: Participant[]) => Participant[])) => {
+    const next = typeof v === "function" ? (v as (p: Participant[]) => Participant[])(form.participants) : v;
+    form.setParticipants(next);
+  };
+  const setLangue = form.setLangue;
+  const setTranscriptionDone = form.setTranscriptionDone;
+  const setTraduireLive = form.setTraduireLive;
+  const setLangueCible = form.setLangueCible;
+
   const [showLangs,    setShowLangs]    = useState(false);
   const [transcribing, setTranscribing] = useState(false);
-  const [transcriptionDone, setTranscriptionDone] = useState(false);
 
   const recorder = useAudioRecorder();
   const liveSpeech = recorder.liveSpeech;
 
   // Mode rapporteur-traducteur : traduit le même stream micro en direct
   const token = useAuthStore((s) => s.token);
-  const [traduireLive, setTraduireLive] = useState(false);
-  const [langueCible, setLangueCible] = useState("fr");
   const tLignes = useTranslateLiveStore((s) => s.lignes);
   const tInterim = useTranslateLiveStore((s) => s.currentInterim);
   const tActive = useTranslateLiveStore((s) => s.active);
@@ -224,6 +239,8 @@ const FormulaireReunion = ({
       dureeEnregistrement: recorder.duration || undefined,
       langue: langue,
     });
+    form.reset();
+    recorder.reset();
   };
 
   const langueLabel = LANGUES.find(l => l.code === langue)?.label || "Détection auto";
@@ -887,7 +904,10 @@ function saveReunions(r: Reunion[]) {
 
 export const ReunionsPage = () => {
   const [reunions, setReunions]        = useState<Reunion[]>(loadReunions);
-  const [showForm, setShowForm]        = useState(false);
+  const showForm = useReunionFormStore((s) => s.isOpen);
+  const openForm = useReunionFormStore((s) => s.open);
+  const closeForm = useReunionFormStore((s) => s.close);
+  const setShowForm = (v: boolean) => (v ? openForm() : closeForm());
   const [selectedReunion, setSelected] = useState<Reunion | null>(null);
   const [editingReunion, setEditing]   = useState<Reunion | null>(null);
 
