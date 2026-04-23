@@ -21,18 +21,16 @@ interface KPI {
   couleur: string
 }
 
-const KPI_DEMO: KPI[] = [
-  { label: 'Primes nettes', value: '1.24 Md XAF', variation: '+8.2%', hausse: true, icon: 'cash-outline', couleur: '#3b82f6' },
-  { label: 'Ratio S/P', value: '64.3%', variation: '-2.1 pts', hausse: true, icon: 'analytics-outline', couleur: '#10b981' },
-  { label: 'Marge solvabilité', value: '142%', variation: '+5 pts', hausse: true, icon: 'shield-checkmark-outline', couleur: '#8b5cf6' },
-  { label: 'Polices actives', value: '12 847', variation: '+312', hausse: true, icon: 'document-text-outline', couleur: '#f59e0b' },
-]
+interface AlerteMobile {
+  type: 'error' | 'warning' | 'info'
+  message: string
+  date: string
+}
 
-const ALERTES_DEMO = [
-  { type: 'warning', message: 'Branche Automobile : S/P dépasse 80% ce mois', date: 'Aujourd\'hui 09:12' },
-  { type: 'error', message: '3 sinistres suspects — score fraude > 85', date: 'Hier 15:30' },
-  { type: 'info', message: 'État C5 transmis à la CRCA', date: '25/03/2024' },
-]
+interface PrimeParBranche {
+  branche: string
+  montant_millions: number
+}
 
 const CHART_CONFIG = {
   backgroundGradientFrom: '#fff',
@@ -47,16 +45,25 @@ const CHART_CONFIG = {
 export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [kpis, setKpis] = useState<KPI[]>(KPI_DEMO)
+  const [kpis, setKpis] = useState<KPI[]>([])
+  const [alertes, setAlertes] = useState<AlerteMobile[]>([])
+  const [primesBranches, setPrimesBranches] = useState<PrimeParBranche[]>([])
+  const [hasError, setHasError] = useState(false)
   const { user, logout } = useAuth()
   const router = useRouter()
 
   const chargerDonnees = async () => {
+    setHasError(false)
     try {
       const data = await analyticsAPI.getDashboard()
-      if (data?.kpis) setKpis(data.kpis)
+      setKpis(data?.kpis ?? [])
+      setAlertes(data?.alertes ?? [])
+      setPrimesBranches(data?.primes_par_branche ?? [])
     } catch {
-      // Garder les données démo
+      setHasError(true)
+      setKpis([])
+      setAlertes([])
+      setPrimesBranches([])
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -78,19 +85,46 @@ export default function DashboardScreen() {
       {/* Bandeau utilisateur */}
       <View style={styles.userBanner}>
         <View>
-          <Text style={styles.bonjour}>Bonjour, {user?.nom?.split(' ')[0] || 'Utilisateur'} 👋</Text>
+          <Text
+            style={styles.bonjour}
+            accessibilityRole="header"
+            accessibilityLevel={1}
+          >
+            Bonjour, {user?.nom?.split(' ')[0] || 'Utilisateur'} 👋
+          </Text>
           <Text style={styles.compagnie}>{user?.compagnie_nom || 'YukpoAssurance'}</Text>
         </View>
-        <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+        <TouchableOpacity onPress={logout} style={styles.logoutBtn} accessibilityLabel="Déconnexion">
           <Ionicons name="log-out-outline" size={22} color="#1e40af" />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#1d4ed8" />
+      ) : kpis.length === 0 && alertes.length === 0 && primesBranches.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Ionicons
+            name={hasError ? 'cloud-offline-outline' : 'bar-chart-outline'}
+            size={48}
+            color="#cbd5e1"
+          />
+          <Text style={styles.emptyTitle}>
+            {hasError ? 'Impossible de charger les données' : 'Aucune donnée disponible'}
+          </Text>
+          <Text style={styles.emptyDesc}>
+            {hasError
+              ? 'Vérifie ta connexion ou réessaie.'
+              : 'Importe ton portefeuille ou connecte ta source CIMA.'}
+          </Text>
+          <TouchableOpacity style={styles.emptyBtn} onPress={onRefresh}>
+            <Ionicons name="refresh-outline" size={16} color="#fff" />
+            <Text style={styles.emptyBtnText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <>
           {/* KPI Cards */}
+          {kpis.length > 0 && (
           <View style={styles.kpiGrid}>
             {kpis.map((k, i) => (
               <View key={i} style={styles.kpiCard}>
@@ -112,14 +146,16 @@ export default function DashboardScreen() {
               </View>
             ))}
           </View>
+          )}
 
           {/* Graphique Primes par branche */}
+          {primesBranches.length > 0 && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Primes par branche (M XAF)</Text>
             <BarChart
               data={{
-                labels: ['Auto', 'Incend.', 'RC', 'Vie', 'Transp.', 'Santé'],
-                datasets: [{ data: [125.4, 48.2, 22.8, 85.2, 18.6, 34.1] }],
+                labels: primesBranches.map((b) => b.branche),
+                datasets: [{ data: primesBranches.map((b) => b.montant_millions) }],
               }}
               width={CHART_WIDTH}
               height={180}
@@ -131,11 +167,13 @@ export default function DashboardScreen() {
               yAxisSuffix="M"
             />
           </View>
+          )}
 
           {/* Alertes CIMA */}
+          {alertes.length > 0 && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Alertes & Notifications</Text>
-            {ALERTES_DEMO.map((a, i) => (
+            {alertes.map((a, i) => (
               <View key={i} style={[styles.alerte, {
                 backgroundColor: a.type === 'error' ? '#fef2f2' : a.type === 'warning' ? '#fffbeb' : '#eff6ff',
                 borderLeftColor: a.type === 'error' ? '#ef4444' : a.type === 'warning' ? '#f59e0b' : '#3b82f6',
@@ -152,6 +190,7 @@ export default function DashboardScreen() {
               </View>
             ))}
           </View>
+          )}
 
           {/* Accès rapides */}
           <View style={styles.card}>
@@ -239,4 +278,16 @@ const styles = StyleSheet.create({
   quickBtn: { width: (SCREEN_WIDTH - 80) / 2, alignItems: 'center', gap: 8 },
   quickIcon: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   quickLabel: { fontSize: 12, color: '#374151', fontWeight: '600', textAlign: 'center' },
+  emptyState: {
+    margin: 16, padding: 32, backgroundColor: '#fff', borderRadius: 12,
+    alignItems: 'center', gap: 8,
+  },
+  emptyTitle: { fontSize: 14, fontWeight: '700', color: '#334155', marginTop: 8, textAlign: 'center' },
+  emptyDesc: { fontSize: 12, color: '#64748b', textAlign: 'center', lineHeight: 18 },
+  emptyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#1d4ed8', paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 8, marginTop: 12,
+  },
+  emptyBtnText: { color: '#fff', fontSize: 13, fontWeight: '600' },
 })
