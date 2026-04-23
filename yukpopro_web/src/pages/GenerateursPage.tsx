@@ -1036,9 +1036,9 @@ export const GenerateursPage = () => {
                 <a
                   href={generateurApi.telecharger(resultat.fichier)}
                   download={resultat.fichier}
-                  className="flex items-center gap-3 p-3 bg-yukpo-500/20 border border-yukpo-500/40 rounded-xl hover:bg-yukpo-500/30 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-[#0054A6]/10 dark:bg-yukpo-500/20 border border-[#0054A6]/30 dark:border-yukpo-500/40 rounded-xl hover:bg-[#0054A6]/15 dark:hover:bg-yukpo-500/30 transition-colors"
                 >
-                  <Download className="w-5 h-5 text-yukpo-400" />
+                  <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
                   <div>
                     <p className="text-sm font-medium text-white">{resultat.fichier}</p>
                     <p className="text-xs text-slate-400">Cliquer pour télécharger</p>
@@ -1138,9 +1138,9 @@ export const GenerateursPage = () => {
               <a
                 href={generateurApi.telecharger(resultatConv.fichier_converti)}
                 download={resultatConv.fichier_converti}
-                className="flex items-center gap-3 p-3 bg-yukpo-500/20 border border-yukpo-500/40 rounded-xl hover:bg-yukpo-500/30 transition-colors"
+                className="flex items-center gap-3 p-3 bg-[#0054A6]/10 dark:bg-yukpo-500/20 border border-[#0054A6]/30 dark:border-yukpo-500/40 rounded-xl hover:bg-[#0054A6]/15 dark:hover:bg-yukpo-500/30 transition-colors"
               >
-                <Download className="w-5 h-5 text-yukpo-400" />
+                <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
                 <div>
                   <p className="text-sm font-medium text-white">{resultatConv.fichier_converti}</p>
                   <p className="text-xs text-slate-400">Cliquer pour télécharger</p>
@@ -1625,7 +1625,7 @@ export const GenerateursPage = () => {
                   download={resultat.fichier}
                   className="flex items-center gap-3 p-3 bg-yukpo-500/20 border border-yukpo-500/40 rounded-xl hover:bg-yukpo-500/30 transition-colors group"
                 >
-                  <Download className="w-5 h-5 text-yukpo-400" />
+                  <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
                   <div>
                     <p className="text-sm font-medium text-white">{resultat.fichier}</p>
                     <p className="text-xs text-slate-400">Cliquer pour télécharger</p>

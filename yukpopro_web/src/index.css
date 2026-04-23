@@ -528,6 +528,20 @@ html:not(.dark) .bg-purple-600   { background-color: #003476 !important; }
 html:not(.dark) .bg-indigo-500   { background-color: #0054A6 !important; }
 html:not(.dark) .bg-indigo-600   { background-color: #003476 !important; }
 html:not(.dark) .hover\:bg-indigo-500:hover { background-color: #0054A6 !important; }
+/* yukpo-500 = #6366f1 (indigo/violet) → bleu corporate en light */
+html:not(.dark) .bg-yukpo-500    { background-color: #0054A6 !important; }
+html:not(.dark) .bg-yukpo-600    { background-color: #003476 !important; }
+html:not(.dark) .hover\:bg-yukpo-500:hover { background-color: #0054A6 !important; }
+html:not(.dark) .hover\:bg-yukpo-600:hover { background-color: #003476 !important; }
+html:not(.dark) .bg-yukpo-500\/10  { background-color: rgba(0,84,166,0.06) !important; }
+html:not(.dark) .bg-yukpo-500\/15  { background-color: rgba(0,84,166,0.08) !important; }
+html:not(.dark) .bg-yukpo-500\/20  { background-color: rgba(0,84,166,0.10) !important; }
+html:not(.dark) .bg-yukpo-500\/30  { background-color: rgba(0,84,166,0.14) !important; }
+html:not(.dark) .hover\:bg-yukpo-500\/30:hover { background-color: rgba(0,84,166,0.18) !important; }
+html:not(.dark) .border-yukpo-500  { border-color: rgba(0,84,166,0.60) !important; }
+html:not(.dark) .border-yukpo-500\/20 { border-color: rgba(0,84,166,0.20) !important; }
+html:not(.dark) .border-yukpo-500\/30 { border-color: rgba(0,84,166,0.30) !important; }
+html:not(.dark) .border-yukpo-500\/40 { border-color: rgba(0,84,166,0.40) !important; }
 
 /* Fonds semi-transparents violet/purple → bleu corporate léger */
 html:not(.dark) .bg-violet-500\/10  { background-color: rgba(0,84,166,0.08) !important; }

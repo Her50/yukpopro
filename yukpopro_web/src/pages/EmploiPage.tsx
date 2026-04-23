@@ -456,17 +456,17 @@ export const EmploiPage = () => {
 
       {/* ── Alerte profil manquant ────────────────────────────────────────── */}
       {!config?.profil_recherche_emploi && (
-        <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-          <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl">
+          <AlertCircle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-amber-300 text-sm font-semibold">Profil de recherche non configuré</p>
-            <p className="text-amber-400/70 text-xs mt-0.5">
+            <p className="text-amber-800 dark:text-amber-300 text-sm font-semibold">Profil de recherche non configuré</p>
+            <p className="text-amber-700 dark:text-amber-400/70 text-xs mt-0.5">
               Renseignez votre profil dans la configuration pour recevoir des offres pertinentes.
             </p>
           </div>
           <button
             onClick={() => setShowConfig(true)}
-            className="ml-auto text-amber-400 hover:text-amber-300 text-xs font-semibold whitespace-nowrap"
+            className="ml-auto text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 text-xs font-semibold whitespace-nowrap"
           >
             Configurer →
           </button>
