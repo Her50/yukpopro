@@ -1,5 +1,12 @@
 # Configuration Fly.io pour yukpopro-backend
 # Déployer : fly deploy (depuis yukpo_assurance/)
+#
+# Autoscaling :
+#   - min_machines_running = 1  → 1 machine toujours chaude (0 cold-start pour les users)
+#   - soft_limit = 50           → Fly démarre une nouvelle machine dès 50 req simultanées
+#   - hard_limit = 100          → max 100 req/machine avant refus (protection)
+#   - auto_stop_machines = "stop" → machines supplémentaires s'arrêtent après 5 min d'inactivité
+#   - Plafond : 5 machines max (fly scale count) = ~500 simultanés confortables
 
 app = "yukpopro-backend"
 primary_region = "cdg"  # Paris — plus proche du Cameroun
@@ -17,14 +24,14 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 1
+  auto_stop_machines = "stop"   # machines excédentaires s'arrêtent si idle > 5 min
+  auto_start_machines = true    # démarrage automatique sous charge
+  min_machines_running = 1      # toujours 1 machine chaude (pas de cold-start)
 
   [http_service.concurrency]
     type = "requests"
-    hard_limit = 50
-    soft_limit = 25
+    hard_limit = 100   # limite dure par machine
+    soft_limit = 50    # seuil → Fly lance une machine supplémentaire
 
 [[vm]]
   memory = "1gb"
