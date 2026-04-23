@@ -34,7 +34,13 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       {/* Mobile header */}
       <div className="md:hidden flex items-center justify-between bg-brand-700 text-white px-4 py-3 sticky top-0 z-40">
-        <span className="font-bold text-lg">YukpoSecrétariat</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center bg-white rounded-lg"
+               style={{ width: 34, height: 34, padding: 2, boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }}>
+            <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+          <span className="font-bold text-lg">Yukpo<span className="text-sky-300">Secrétariat</span></span>
+        </div>
         <button onClick={() => setOpen(o => !o)} className="p-1">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -46,8 +52,15 @@ export default function Layout() {
         open ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
       )}>
         {/* Logo desktop */}
-        <div className="hidden md:flex items-center gap-2 px-5 py-5 border-b border-brand-600">
-          <span className="text-xl font-bold">YukpoSecrétariat</span>
+        <div className="hidden md:flex items-center gap-3 px-5 py-5 border-b border-brand-600">
+          <div className="flex items-center justify-center bg-white rounded-xl flex-shrink-0"
+               style={{ width: 44, height: 44, padding: 3, boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }}>
+            <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-lg font-bold tracking-tight">Yukpo<span className="text-sky-300">Secrétariat</span></span>
+            <span className="text-[10px] tracking-wide text-brand-300">Back-office professionnel</span>
+          </div>
         </div>
 
         {/* User pill */}

@@ -27,8 +27,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-700 to-brand-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-brand-700">YukpoSecrétariat</h1>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="flex items-center justify-center bg-white rounded-2xl mb-3"
+               style={{ width: 72, height: 72, padding: 4, boxShadow: "0 0 0 1px rgba(0,84,166,0.15), 0 4px 14px rgba(0,84,166,0.15)" }}>
+            <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+          <h1 className="text-2xl font-bold text-brand-700">Yukpo<span className="text-sky-500">Secrétariat</span></h1>
           <p className="text-gray-500 text-sm mt-1">La solution pour secrétaires africains</p>
         </div>
 
