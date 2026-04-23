@@ -1,0 +1,70 @@
+# Données RAG volumineuses (~257MB) — chargées dynamiquement
+yukpo_assurance/data/rag_knowledge/
+
+# Données générées runtime
+yukpo_assurance/data/generated/
+yukpo_assurance/data/attestations/
+yukpo_assurance/data/contrats_generes/
+yukpo_assurance/data/ml_models/
+yukpo_assurance/data/orass_csv/
+yukpo_assurance/data/pki/
+
+# Frontends web compilés ou sources
+yukpopro_web/node_modules/
+yukpopro_web/src/
+yukposecretariat_web/node_modules/
+yukposecretariat_web/src/
+
+# Logs & artefacts
+yukpo_assurance/logs/
+*.log
+
+# Tests
+yukpo_assurance/tests/
+yukpo_assurance/test_*.py
+
+# Git / CI
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Venv
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs
+yukpo_assurance/docs/
+yukpo_assurance/scripts/
+yukpo_assurance/notebooks/
+yukpo_assurance/*.ipynb
+
+# Fichiers binaires lourds non nécessaires au build
+*.pdf
+*.docx
+*.xlsx
+*.zip
+*.tar.gz
+
+# Node.js
+node_modules/
