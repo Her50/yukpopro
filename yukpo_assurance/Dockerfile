@@ -73,8 +73,8 @@ CMD gunicorn api.main:app \
     --worker-class uvicorn.workers.UvicornWorker \
     --workers ${WORKERS} \
     --bind 0.0.0.0:${PORT} \
-    --timeout 120 \
-    --graceful-timeout 30 \
+    --timeout 360 \
+    --graceful-timeout 60 \
     --max-requests 1000 \
     --max-requests-jitter 100 \
     --access-logfile - \

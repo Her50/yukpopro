@@ -351,25 +351,49 @@ async def verifier_solde(user_id: int) -> Tuple[bool, float, int]:
         return True, 999999.0, 999999
 
 
+_PRO_PLAN_CACHE: dict[int, tuple[float, bool, str]] = {}
+_PRO_PLAN_TTL_S = 60.0
+
+
 async def _has_plan_pro_actif(user_id: int) -> tuple[bool, str]:
-    """Indique si l'utilisateur dispose d'un abonnement Pro payant ou business."""
+    """Indique si l'utilisateur dispose d'un abonnement Pro payant ou business.
+
+    Cache 60 s par user_id pour limiter la pression DB.
+    Sur erreur DB, on retourne le dernier état connu (sticky) plutôt que
+    de retomber silencieusement à 'gratuit' et provoquer un 402 abusif.
+    """
+    import time
     from core.database import async_session_maker
     from modules.pro.service_credits import get_ou_creer_credits as _get_pro
     from modules.pro.service_profil import get_or_create as _get_profil
-    try:
-        async with async_session_maker() as fresh:
-            credit = await _get_pro(user_id, fresh)
-            plan = credit.plan or "gratuit"
-            if plan == "gratuit":
-                try:
-                    profil, _ = await _get_profil(user_id, fresh)
-                    plan = (profil.preferences or {}).get("plan", "gratuit") or "gratuit"
-                except Exception:
-                    pass
-            return plan in ("starter", "pro", "business"), plan
-    except Exception as e:
-        logger.warning(f"[Bureau/Unifie] check Pro échoué user={user_id}: {e}")
-        return False, "gratuit"
+
+    now = time.monotonic()
+    cached = _PRO_PLAN_CACHE.get(user_id)
+    if cached and (now - cached[0]) < _PRO_PLAN_TTL_S:
+        return cached[1], cached[2]
+
+    last_err: Optional[Exception] = None
+    for tentative in range(2):
+        try:
+            async with async_session_maker() as fresh:
+                credit = await _get_pro(user_id, fresh)
+                plan = credit.plan or "gratuit"
+                if plan == "gratuit":
+                    try:
+                        profil, _ = await _get_profil(user_id, fresh)
+                        plan = (profil.preferences or {}).get("plan", "gratuit") or "gratuit"
+                    except Exception:
+                        pass
+                actif = plan in ("starter", "pro", "business")
+                _PRO_PLAN_CACHE[user_id] = (now, actif, plan)
+                return actif, plan
+        except Exception as e:
+            last_err = e
+
+    logger.warning(f"[Bureau/Unifie] check Pro échoué user={user_id}: {last_err}")
+    if cached:
+        return cached[1], cached[2]
+    return False, "gratuit"
 
 
 async def verifier_solde_unifie(user_id: int) -> tuple[bool, float, str, str]:

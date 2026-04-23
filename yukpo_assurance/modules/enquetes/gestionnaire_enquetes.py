@@ -219,7 +219,7 @@ TÂCHE — Effectue une analyse qualitative rigoureuse et retourne un JSON struc
 
 Extrait des citations TEXTUELLES du corpus. Sois rigoureux, précis, analytique."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
 
     try:
         debut = reponse.find("{")
@@ -611,7 +611,7 @@ Rédige le rapport avec ces sections :
 Utilise un style académique rigoureux, ancre tes analyses dans le contexte africain francophone.
 Intègre les citations verbatim pour illustrer chaque thème."""
 
-    rapport_texte = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+    rapport_texte = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
 
     rapport = {
         "etude_id": etude_id,
@@ -1285,7 +1285,7 @@ RÈGLES OBLIGATOIRES :
 
 Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
 
     try:
         debut = reponse.find("{")
@@ -1390,7 +1390,7 @@ Retourne un JSON structuré :
 
 Sois analytique, identifie les patterns réels dans les données."""
 
-        reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_PREMIUM)
+        reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
         try:
             debut = reponse.find("{")
             fin = reponse.rfind("}") + 1
@@ -1590,7 +1590,7 @@ Retourne un JSON :
 
 Limite : maximum 6 croisements ciblés. Retourne UNIQUEMENT le JSON."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.CLAUDE_STANDARD)
+    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.REDACTION)
 
     try:
         debut = reponse.find("{")
