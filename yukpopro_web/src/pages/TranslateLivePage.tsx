@@ -321,6 +321,20 @@ export const TranslateLivePage = () => {
                 Cochez <em>« Partager l'audio »</em> dans la boîte de dialogue du navigateur.
               </p>
             )}
+            {sourceMode === "microphone" && (
+              <div className="mt-2 rounded-lg p-2.5 space-y-1.5 text-[11px]"
+                style={{ background: "rgba(0,84,166,0.08)", border: "1px solid rgba(0,176,240,0.15)" }}>
+                <p className="text-bright-400 font-semibold flex items-center gap-1">
+                  <Info className="w-3 h-3" /> Conseil selon le contexte
+                </p>
+                <div className="text-slate-400 space-y-1">
+                  <p><span className="text-slate-300 font-medium">Réunion en ligne (Zoom/Teams)</span> — utilise plutôt le mode <em>Onglet / Écran</em> pour capter l'audio directement depuis l'application, sans dépendre du micro.</p>
+                  <p><span className="text-slate-300 font-medium">Réunion physique (petite salle, 1–4 personnes)</span> — le micro intégré de l'ordinateur suffit si tu es proche des interlocuteurs.</p>
+                  <p><span className="text-slate-300 font-medium">Grande salle / table de conférence</span> — connecte un micro USB omnidirectionnel au centre de la table (ex. Jabra Speak 510, Anker PowerConf S3). Il capte 360° jusqu'à 3–4 m et s'utilise sans installation.</p>
+                  <p className="text-amber-400/80">⚡ Active <strong>Voix 🔊</strong> + porte des écouteurs pour entendre la traduction sans déranger les autres participants.</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
