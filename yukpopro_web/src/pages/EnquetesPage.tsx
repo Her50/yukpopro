@@ -357,7 +357,7 @@ export const EnquetesPage = () => {
             <button
               onClick={() => setShowCreate(!showCreate)}
               className={`${btnBase} text-white`}
-              style={{ background: "linear-gradient(135deg,#7B3FE4,#06B6D4)" }}
+              style={{ background: "linear-gradient(135deg,#0054A6,#0083d6)" }}
             >
               <Plus className="w-4 h-4" /> Nouvelle étude
             </button>
@@ -411,7 +411,7 @@ export const EnquetesPage = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={creerEtude} disabled={creating} className={`${btnBase} text-white`} style={{ background: "#7B3FE4" }}>
+              <button onClick={creerEtude} disabled={creating} className={`${btnBase} text-white`} style={{ background: "#0054A6" }}>
                 {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                 Créer l'étude
               </button>
@@ -670,7 +670,7 @@ export const EnquetesPage = () => {
                                   </div>
                                 </div>
                                 <div className="flex gap-2 pt-1">
-                                  <button onClick={genererFormulaireIA} disabled={generatingForm} className={`${btnBase} text-white`} style={{ background: "#7B3FE4" }}>
+                                  <button onClick={genererFormulaireIA} disabled={generatingForm} className={`${btnBase} text-white`} style={{ background: "#0054A6" }}>
                                     {generatingForm ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
                                     {generatingForm ? "Génération en cours…" : "Générer le formulaire"}
                                   </button>
@@ -846,7 +846,7 @@ export const EnquetesPage = () => {
                         )}
 
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={genererRapport} disabled={generating || !detail.has_analyse} className={`${btnBase} text-white`} style={{ background: generating ? "#333" : "#7B3FE4" }}>
+                          <button onClick={genererRapport} disabled={generating || !detail.has_analyse} className={`${btnBase} text-white`} style={{ background: generating ? "#333" : "#0054A6" }}>
                             {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                             {generating ? "Génération en cours…" : detail.has_rapport ? "Regénérer le rapport" : "Générer le rapport académique"}
                           </button>
@@ -875,7 +875,7 @@ export const EnquetesPage = () => {
 // ── Sous-composants ───────────────────────────────────────────────────────────
 
 const COULEURS: Record<string, { bg: string; border: string; btn: string }> = {
-  yukpo: { bg: "rgba(123,63,228,0.06)", border: "rgba(123,63,228,0.2)", btn: "#7B3FE4" },
+  yukpo: { bg: "rgba(0,84,166,0.06)", border: "rgba(0,84,166,0.2)", btn: "#0054A6" },
   blue:  { bg: "rgba(96,165,250,0.06)", border: "rgba(96,165,250,0.2)", btn: "#3B82F6" },
   cyan:  { bg: "rgba(6,182,212,0.06)",  border: "rgba(6,182,212,0.2)",  btn: "#06B6D4" },
   amber: { bg: "rgba(251,191,36,0.06)", border: "rgba(251,191,36,0.2)", btn: "#D97706" },

@@ -147,6 +147,19 @@
   /* accent-color — natif HTML (checkbox, radio, select, range) */
   * { accent-color: #0054A6; }
   .dark * { accent-color: #00B0F0; }
+
+  /* ── Netteté texte — optimise le rendu des glyphes ──────────────── */
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-text-stroke: 0px;
+  }
+  /* Empêche les couches GPU (transform/opacity) de pixéliser le texte */
+  html:not(.dark) p, html:not(.dark) span, html:not(.dark) h1,
+  html:not(.dark) h2, html:not(.dark) h3, html:not(.dark) label,
+  html:not(.dark) a, html:not(.dark) button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 @layer components {
@@ -475,3 +488,106 @@
     --tw-prose-code:          #A78BFA;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   LIGHT MODE — Normalisation des couleurs vives
+   Remplace violet/purple/pink/indigo/cyan saturé par bleu corporate
+   N'affecte PAS le mode sombre (.dark) grâce à html:not(.dark)
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Textes colorés → bleu corporate sobre ───────────────────── */
+html:not(.dark) .text-purple-300 { color: #2563eb !important; }
+html:not(.dark) .text-purple-400 { color: #1d4ed8 !important; }
+html:not(.dark) .text-purple-500 { color: #1e40af !important; }
+html:not(.dark) .text-purple-600 { color: #1e3a8a !important; }
+html:not(.dark) .text-violet-300 { color: #2563eb !important; }
+html:not(.dark) .text-violet-400 { color: #0054A6 !important; }
+html:not(.dark) .text-violet-500 { color: #003476 !important; }
+html:not(.dark) .text-violet-600 { color: #002258 !important; }
+html:not(.dark) .text-indigo-300 { color: #2563eb !important; }
+html:not(.dark) .text-indigo-400 { color: #1d4ed8 !important; }
+html:not(.dark) .text-indigo-500 { color: #1e40af !important; }
+html:not(.dark) .text-indigo-600 { color: #1e3a8a !important; }
+html:not(.dark) .text-yukpo-300  { color: #2563eb !important; }
+html:not(.dark) .text-yukpo-400  { color: #0054A6 !important; }
+html:not(.dark) .text-yukpo-500  { color: #003476 !important; }
+html:not(.dark) .text-pink-300   { color: #0083d6 !important; }
+html:not(.dark) .text-pink-400   { color: #0054A6 !important; }
+html:not(.dark) .text-pink-500   { color: #003476 !important; }
+html:not(.dark) .text-cyan-300   { color: #0083d6 !important; }
+html:not(.dark) .text-cyan-400   { color: #0054A6 !important; }
+html:not(.dark) .text-bright-400 { color: #0083d6 !important; }
+
+/* ── Fonds colorés → bleu corporate sobre ───────────────────── */
+html:not(.dark) .bg-violet-500   { background-color: #0054A6 !important; }
+html:not(.dark) .bg-violet-600   { background-color: #003476 !important; }
+html:not(.dark) .hover\:bg-violet-500:hover { background-color: #0054A6 !important; }
+html:not(.dark) .hover\:bg-violet-600:hover { background-color: #002258 !important; }
+html:not(.dark) .bg-purple-500   { background-color: #0054A6 !important; }
+html:not(.dark) .bg-purple-600   { background-color: #003476 !important; }
+html:not(.dark) .bg-indigo-500   { background-color: #0054A6 !important; }
+html:not(.dark) .bg-indigo-600   { background-color: #003476 !important; }
+html:not(.dark) .hover\:bg-indigo-500:hover { background-color: #0054A6 !important; }
+
+/* Fonds semi-transparents violet/purple → bleu corporate léger */
+html:not(.dark) .bg-violet-500\/10  { background-color: rgba(0,84,166,0.08) !important; }
+html:not(.dark) .bg-violet-500\/15  { background-color: rgba(0,84,166,0.10) !important; }
+html:not(.dark) .bg-violet-500\/20  { background-color: rgba(0,84,166,0.12) !important; }
+html:not(.dark) .bg-violet-600\/20  { background-color: rgba(0,84,166,0.12) !important; }
+html:not(.dark) .bg-violet-600\/30  { background-color: rgba(0,84,166,0.15) !important; }
+html:not(.dark) .bg-violet-600\/40  { background-color: rgba(0,84,166,0.20) !important; }
+html:not(.dark) .bg-purple-500\/15  { background-color: rgba(0,84,166,0.10) !important; }
+html:not(.dark) .bg-purple-500\/20  { background-color: rgba(0,84,166,0.12) !important; }
+
+/* ── Bordures violettes → bleu corporate ────────────────────── */
+html:not(.dark) .border-violet-500  { border-color: rgba(0,84,166,0.5) !important; }
+html:not(.dark) .border-violet-500\/20 { border-color: rgba(0,84,166,0.2) !important; }
+html:not(.dark) .border-violet-500\/30 { border-color: rgba(0,84,166,0.3) !important; }
+html:not(.dark) .border-violet-500\/40 { border-color: rgba(0,84,166,0.4) !important; }
+html:not(.dark) .border-violet-500\/50 { border-color: rgba(0,84,166,0.5) !important; }
+html:not(.dark) .border-violet-500\/60 { border-color: rgba(0,84,166,0.6) !important; }
+html:not(.dark) .border-purple-500  { border-color: rgba(0,84,166,0.5) !important; }
+html:not(.dark) .border-indigo-500  { border-color: rgba(0,84,166,0.5) !important; }
+
+/* ── Gradients — from/to → bleu corporate sobre ──────────────── */
+/* Dégradé violet/indigo → bleu profond */
+html:not(.dark) .from-purple-500 { --tw-gradient-from: #1e40af; }
+html:not(.dark) .from-purple-600 { --tw-gradient-from: #1e3a8a; }
+html:not(.dark) .to-purple-500   { --tw-gradient-to: #1e3a8a; }
+html:not(.dark) .to-purple-600   { --tw-gradient-to: #1e3a8a; }
+html:not(.dark) .from-violet-500 { --tw-gradient-from: #0054A6; }
+html:not(.dark) .from-violet-600 { --tw-gradient-from: #003476; }
+html:not(.dark) .to-violet-500   { --tw-gradient-to: #003476; }
+html:not(.dark) .to-violet-600   { --tw-gradient-to: #002258; }
+html:not(.dark) .from-indigo-500 { --tw-gradient-from: #1e40af; }
+html:not(.dark) .from-indigo-600 { --tw-gradient-from: #1e3a8a; }
+html:not(.dark) .to-indigo-500   { --tw-gradient-to: #1e3a8a; }
+html:not(.dark) .to-indigo-600   { --tw-gradient-to: #1e3a8a; }
+/* Dégradé pink → bleu cyan */
+html:not(.dark) .from-pink-500   { --tw-gradient-from: #0083d6; }
+html:not(.dark) .from-pink-600   { --tw-gradient-from: #0054A6; }
+html:not(.dark) .to-pink-400     { --tw-gradient-to: #0083d6; }
+html:not(.dark) .to-pink-500     { --tw-gradient-to: #0054A6; }
+html:not(.dark) .to-pink-600     { --tw-gradient-to: #003476; }
+/* Dégradé teal/sky → bleu sobre */
+html:not(.dark) .from-teal-500   { --tw-gradient-from: #0d9488; }
+html:not(.dark) .to-teal-600     { --tw-gradient-to: #0f766e; }
+html:not(.dark) .from-sky-500    { --tw-gradient-from: #0083d6; }
+html:not(.dark) .to-sky-600      { --tw-gradient-to: #0054A6; }
+/* Dégradé cyan → bleu */
+html:not(.dark) .from-cyan-500   { --tw-gradient-from: #0083d6; }
+html:not(.dark) .to-cyan-600     { --tw-gradient-to: #0054A6; }
+/* yukpo-gradient → corporate blue */
+html:not(.dark) .from-yukpo-400  { --tw-gradient-from: #0083d6; }
+html:not(.dark) .from-yukpo-500  { --tw-gradient-from: #0054A6; }
+html:not(.dark) .from-yukpo-600  { --tw-gradient-from: #003476; }
+html:not(.dark) .to-yukpo-400    { --tw-gradient-to: #0083d6; }
+html:not(.dark) .to-yukpo-500    { --tw-gradient-to: #0054A6; }
+html:not(.dark) .to-yukpo-600    { --tw-gradient-to: #003476; }
+/* Couleurs "arc-en-ciel" de AgentsPage — toutes converties en tons bleu/teal sobres */
+html:not(.dark) .from-orange-500  { --tw-gradient-from: #0083d6; }
+html:not(.dark) .to-orange-600    { --tw-gradient-to: #0054A6; }
+html:not(.dark) .from-yellow-500  { --tw-gradient-from: #0d9488; }
+html:not(.dark) .to-yellow-600    { --tw-gradient-to: #0f766e; }
+html:not(.dark) .from-amber-500   { --tw-gradient-from: #b45309; }
+html:not(.dark) .to-amber-600     { --tw-gradient-to: #92400e; }

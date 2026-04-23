@@ -780,7 +780,7 @@ export const GenerateursPage = () => {
       <div>
         <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
           Yukpo Studio
-          <span className="text-xs font-semibold px-2 py-0.5 bg-violet-500/20 border border-violet-500/40 text-violet-300 rounded-full tracking-wide">PRO</span>
+          <span className="text-xs font-semibold px-2 py-0.5 bg-corp-600/15 border border-corp-600/30 text-corp-600 rounded-full tracking-wide">PRO</span>
         </h1>
         <p className="text-slate-400 text-sm mt-1">
           Rapports d'analyse · Présentations PowerPoint · Analyse de fichiers · Conversion · Bibliothèque de modèles
@@ -1323,7 +1323,7 @@ export const GenerateursPage = () => {
 
               {/* Bouton générer */}
               <button type="submit" disabled={infogLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-corp-600 to-corp-500 hover:from-corp-700 hover:to-corp-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
                 {infogLoading
                   ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro compose votre infographie…</>
                   : <><Sparkles className="w-4 h-4" /> Générer l'infographie print-ready</>}
@@ -1386,7 +1386,7 @@ export const GenerateursPage = () => {
                 </Card>
               ) : (
                 <Card className="flex flex-col items-center justify-center gap-4 p-12 border-dashed min-h-[400px]">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-corp-600/15 to-bright-400/10 flex items-center justify-center">
                     <Palette className="w-8 h-8 text-purple-400" />
                   </div>
                   <div className="text-center">
