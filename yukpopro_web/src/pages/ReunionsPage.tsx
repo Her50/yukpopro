@@ -466,7 +466,7 @@ const FormulaireReunion = ({
                 <p className="text-amber-300 text-xs">Microphone non disponible sur ce navigateur.</p>
               </div>
             ) : (
-              <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 space-y-3">
+              <div className="rounded-xl p-3 space-y-3" style={{ background: "var(--ykp-elevated)", border: "1px solid var(--ykp-border)" }}>
                 {/* Visualiseur */}
                 {recorder.isRecording && (
                   <div className="flex items-center justify-center gap-0.5 h-6">

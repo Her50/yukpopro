@@ -788,7 +788,7 @@ export const GenerateursPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-800/50 p-1 rounded-xl flex-wrap">
+      <div className="flex gap-1 p-1 rounded-xl flex-wrap" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         {([
           { id: "rapport",    icon: <FileText className="w-4 h-4" />,      label: "Rapports Word" },
           { id: "slides",     icon: <Presentation className="w-4 h-4" />,  label: "PowerPoint" },
@@ -821,7 +821,8 @@ export const GenerateursPage = () => {
               <div key={cat.categorie} className="rounded-xl border border-slate-700/60 overflow-hidden">
                 <button
                   onClick={() => setOpenCat(isOpen ? null : cat.categorie)}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-slate-800/60 hover:bg-slate-800 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800 transition-colors"
+                  style={{ background: "var(--ykp-surface)" }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{cat.emoji}</span>
@@ -844,7 +845,7 @@ export const GenerateursPage = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 p-3 bg-slate-900/40 border-t border-slate-700/40">
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 p-3" style={{ background: "var(--ykp-elevated)", borderTop: "1px solid var(--ykp-border)" }}>
                     {cat.templates.map((tpl) => (
                       <button
                         key={tpl.label}
@@ -866,7 +867,8 @@ export const GenerateursPage = () => {
                           setResultat(null);
                           toast.success(`Modèle "${tpl.label}" chargé`);
                         }}
-                        className="group text-left p-3 rounded-xl border border-slate-700/80 bg-slate-800/40 hover:border-yukpo-500/60 hover:bg-yukpo-500/5 transition-all"
+                        className="group text-left p-3 rounded-xl hover:border-yukpo-500/60 hover:bg-yukpo-500/5 transition-all"
+                        style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}
                       >
                         <div className="flex items-start justify-between gap-1.5 mb-1">
                           <p className="text-xs font-semibold text-white group-hover:text-yukpo-300 transition-colors leading-snug">
@@ -913,8 +915,9 @@ export const GenerateursPage = () => {
                       ? "border-yukpo-400 bg-yukpo-500/10"
                       : fichiers.length > 0
                         ? "border-yukpo-500/50 bg-yukpo-500/5"
-                        : "border-slate-600 hover:border-slate-500 bg-slate-800/40 hover:bg-slate-800/60"
+                        : "border-slate-600 hover:border-slate-500"
                   }`}
+                  style={!dragOver && fichiers.length === 0 ? { background: "var(--ykp-surface)" } : {}}
                 >
                   <div className="flex items-center gap-3">
                     <FolderOpen className={`w-6 h-6 shrink-0 ${fichiers.length > 0 ? "text-yukpo-400" : "text-slate-500"}`} />
@@ -1068,8 +1071,9 @@ export const GenerateursPage = () => {
             <div
               onClick={() => fileConvRef.current?.click()}
               className={`flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
-                fichierConv ? "border-yukpo-500/50 bg-yukpo-500/5" : "border-slate-600 hover:border-slate-500 bg-slate-800/40 hover:bg-slate-800/60"
+                fichierConv ? "border-yukpo-500/50 bg-yukpo-500/5" : "border-slate-600 hover:border-slate-500"
               }`}
+              style={!fichierConv ? { background: "var(--ykp-surface)" } : {}}
             >
               <RefreshCw className={`w-8 h-8 ${fichierConv ? "text-yukpo-400" : "text-slate-500"}`} />
               {fichierConv ? (
@@ -1169,8 +1173,9 @@ export const GenerateursPage = () => {
                 className={`flex flex-col items-start gap-1 p-3 rounded-xl border transition-all text-left ${
                   infogMode === id
                     ? "border-yukpo-500 bg-gradient-to-br from-purple-500/15 to-pink-500/10 text-white"
-                    : "border-slate-700/60 bg-slate-800/40 text-slate-400 hover:text-white hover:border-slate-600"
-                }`}>
+                    : "text-slate-400 hover:text-white hover:border-slate-600"
+                }`}
+                style={infogMode !== id ? { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" } : {}}>
                 <span className="flex items-center gap-2 text-sm font-semibold">{icon} {label}</span>
                 <span className="text-[11px] text-slate-500">{desc}</span>
               </button>
@@ -1357,7 +1362,7 @@ export const GenerateursPage = () => {
                     <img src={`data:image/png;base64,${infogResult.png_base64}`} alt="Aperçu infographie"
                       className="w-full rounded-xl border border-white/10 object-contain max-h-[520px] bg-white" />
                   ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 p-8 bg-slate-800/40 rounded-xl text-slate-400 text-sm">
+                    <div className="flex flex-col items-center justify-center gap-2 p-8 rounded-xl text-slate-400 text-sm" style={{ background: "var(--ykp-elevated)" }}>
                       <FileText className="w-8 h-8" />
                       Preview PNG indisponible — téléchargez le PDF
                     </div>

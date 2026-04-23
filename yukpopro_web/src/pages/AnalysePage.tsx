@@ -147,7 +147,7 @@ export const AnalysePage = () => {
               <h3 className="text-sm font-semibold text-white mb-3">Détail par colonne</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {Object.entries(stats as Record<string, Record<string, unknown>>).map(([col, st]) => (
-                  <div key={col} className="p-3 bg-slate-900/50 rounded-xl border border-slate-700/50">
+                  <div key={col} className="p-3 rounded-xl" style={{ background: "var(--ykp-elevated)", border: "1px solid var(--ykp-border)" }}>
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-sm font-medium text-white">{col}</span>
                       <Badge variant={(st as Record<string, unknown>).type === "numerique" ? "cyan" : "slate"} size="sm">

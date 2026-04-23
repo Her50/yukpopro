@@ -144,7 +144,7 @@ export const MarchesPage = () => {
       </div>
 
       {/* ── Barre de filtres ──────────────────────────────────────────────────── */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4 space-y-3">
+      <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         <div className="flex items-center gap-2 mb-1">
           <Filter size={14} className="text-blue-400" />
           <span className="text-slate-300 text-sm font-semibold">Filtrer les résultats</span>
@@ -217,7 +217,7 @@ export const MarchesPage = () => {
       </div>
 
       {/* Sources actives */}
-      <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4">
+      <div className="rounded-2xl p-4" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         <button
           onClick={() => setShowSources(!showSources)}
           className="w-full flex items-center justify-between text-left"
@@ -271,7 +271,7 @@ export const MarchesPage = () => {
 
       {/* Liste des appels d'offres */}
       {marches.length === 0 ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-10 text-center space-y-4">
+        <div className="rounded-2xl p-10 text-center space-y-4" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto">
             <Gavel className="text-blue-400" size={28} />
           </div>
@@ -292,7 +292,7 @@ export const MarchesPage = () => {
           </button>
         </div>
       ) : marchesFiltres.length === 0 ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 text-center space-y-3">
+        <div className="rounded-2xl p-8 text-center space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <p className="text-white font-semibold">Aucun résultat pour ces filtres</p>
           <p className="text-slate-400 text-sm">
             Essayez d'autres mots-clés ou supprimez les filtres actifs.
@@ -309,7 +309,8 @@ export const MarchesPage = () => {
           {marchesFiltres.map((m, i) => (
             <div
               key={i}
-              className="bg-slate-800/60 border border-slate-700/50 hover:border-blue-500/30 rounded-2xl p-5 transition-colors"
+              className="hover:border-blue-500/30 rounded-2xl p-5 transition-colors"
+              style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">

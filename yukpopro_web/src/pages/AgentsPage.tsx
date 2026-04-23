@@ -132,8 +132,9 @@ export const AgentsPage = () => {
           <div className={`flex items-center gap-3 rounded-xl px-4 py-2 border ${
             (abonnement.requetes_restantes as number) === 0
               ? "bg-red-500/10 border-red-500/30"
-              : "bg-slate-800/60 border-slate-700/50"
-          }`}>
+              : ""
+          }`}
+          style={(abonnement.requetes_restantes as number) !== 0 ? { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" } : {}}>
             <Zap className={`w-4 h-4 ${(abonnement.requetes_restantes as number) === 0 ? "text-red-400" : "text-yukpo-400"}`} />
             <span className="text-sm text-slate-300">
               <span className={`font-bold ${(abonnement.requetes_restantes as number) === 0 ? "text-red-400" : "text-white"}`}>
@@ -162,8 +163,9 @@ export const AgentsPage = () => {
                 className={`w-full text-left p-3 rounded-xl border transition-all ${
                   selectedAgent === agent.id
                     ? "bg-yukpo-500/20 border-yukpo-500/50 text-white"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
+                style={selectedAgent !== agent.id ? { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" } : {}}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{agent.icon}</span>

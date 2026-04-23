@@ -157,7 +157,7 @@ export const AbonnementPage = () => {
         <p className="text-slate-400 text-sm mt-1">
           Tous les 13 agents Yukpo sont accessibles à tous les utilisateurs. Seul le quota de crédits varie selon le plan.
         </p>
-        <div className="mt-3 flex items-start gap-2 bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3 max-w-2xl">
+        <div className="mt-3 flex items-start gap-2 rounded-xl px-4 py-3 max-w-2xl" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <span className="text-yukpo-400 text-sm">💡</span>
           <p className="text-slate-400 text-xs leading-relaxed">
             <strong className="text-white">Qu'est-ce qu'un crédit Yukpo ?</strong>{" "}
@@ -238,7 +238,7 @@ export const AbonnementPage = () => {
 
       {/* ── Section Recharge de crédits ── */}
       {!modeRecharge ? (
-        <div className="flex items-center justify-between bg-slate-800/40 border border-slate-700/50 rounded-2xl px-5 py-4">
+        <div className="flex items-center justify-between rounded-2xl px-5 py-4" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <div>
             <p className="text-white font-semibold">Recharger des crédits</p>
             <p className="text-slate-400 text-xs mt-0.5">Achetez des crédits supplémentaires sans changer de plan · 0,6 FCFA / crédit</p>

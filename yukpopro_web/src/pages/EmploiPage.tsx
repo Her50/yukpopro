@@ -275,14 +275,14 @@ export const EmploiPage = () => {
 
       {/* ── Panneau de configuration ──────────────────────────────────────── */}
       {showConfig && (
-        <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 space-y-5">
+        <div className="rounded-2xl p-6 space-y-5" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <h2 className="text-white font-bold text-base flex items-center gap-2">
             <Settings size={16} className="text-violet-400" />
             Configuration de la recherche
           </h2>
 
           {/* Veille on/off */}
-          <div className="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-700/50">
+          <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: "var(--ykp-elevated)", border: "1px solid var(--ykp-border)" }}>
             <div className="flex items-center gap-3">
               {config?.recherche_emploi_active
                 ? <Bell size={18} className="text-violet-400" />
@@ -504,7 +504,7 @@ export const EmploiPage = () => {
       {offres.length === 0 ? (
         <EmptyState onSearch={lancerRecherche} searching={searching} />
       ) : offresFiltrees.length === 0 ? (
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 text-center space-y-3">
+        <div className="rounded-2xl p-8 text-center space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <p className="text-white font-semibold">Aucune offre pour "{keyword}"</p>
           <p className="text-slate-400 text-sm">Essayez un autre mot-clé ou lancez une nouvelle recherche.</p>
           <button
@@ -542,7 +542,7 @@ export const EmploiPage = () => {
 const StatCard = ({ icon, label, value, color }: {
   icon: React.ReactNode; label: string; value: string; color: string;
 }) => (
-  <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 flex items-center gap-3">
+  <div className="rounded-xl p-4 flex items-center gap-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
     <div className="flex-shrink-0">{icon}</div>
     <div>
       <p className="text-slate-400 text-xs">{label}</p>
@@ -583,11 +583,12 @@ const OffreCard = ({ offre, expanded, onToggle }: {
 
   return (
     <div
-      className={`border rounded-2xl p-5 cursor-pointer transition-all ${
+      className={`rounded-2xl p-5 cursor-pointer transition-all ${
         isSimule
-          ? "bg-amber-900/10 border-amber-700/30 hover:border-amber-600/50"
-          : "bg-slate-800/60 border-slate-700/50 hover:border-slate-600"
+          ? "bg-amber-900/10 border border-amber-700/30 hover:border-amber-600/50"
+          : "hover:border-slate-600"
       }`}
+      style={!isSimule ? { background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" } : {}}
       onClick={onToggle}
     >
       {/* Badge simulation */}

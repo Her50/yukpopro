@@ -65,7 +65,7 @@ export const CopilotePage = () => {
   return (
     <div className="flex flex-col h-screen max-h-screen">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-900/50">
+      <div className="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between" style={{ background: "var(--ykp-surface)" }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-yukpo-gradient flex items-center justify-center shadow-yukpo">
             <svg width="20" height="20" viewBox="0 0 64 64" fill="none">
@@ -195,7 +195,7 @@ export const CopilotePage = () => {
       </div>
 
       {/* Input zone */}
-      <div className="px-6 py-4 border-t border-slate-700/50 bg-slate-900/50">
+      <div className="px-6 py-4 border-t border-slate-700/50" style={{ background: "var(--ykp-surface)" }}>
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3 bg-slate-800 rounded-2xl border border-slate-600/50 focus-within:border-yukpo-500/50 transition-colors p-2">
             <textarea

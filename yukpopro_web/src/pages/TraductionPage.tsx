@@ -172,7 +172,7 @@ export const TraductionPage = () => {
       </div>
 
       {/* ── Sélecteur mode ──────────────────────────────────────────────────── */}
-      <div className="flex gap-1 bg-slate-800/50 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         <button
           onClick={() => { setMode("texte"); setResultat(null); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
