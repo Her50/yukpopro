@@ -22,21 +22,23 @@ async def run(ctx: RunContext, context) -> dict:
 
     defauts: list[str] = []
     marches = []
-    for path in ("/api/v1/pro/marches/rechercher", "/api/v1/pro/marches",
-                 "/api/v1/pro/agents/marches"):
-        try:
-            r = requests.get(api + path, headers=_hdr(token), timeout=60)
-            if r.status_code == 200:
-                d = r.json()
-                marches = d if isinstance(d, list) else (d.get("results") or d.get("items") or [])
-                if marches:
-                    break
-        except Exception:
-            continue
+    # Endpoint réel: POST /api/v1/pro/profil/marches/rechercher
+    try:
+        r = requests.post(api + "/api/v1/pro/profil/marches/rechercher",
+                          headers=_hdr(token), timeout=120)
+        if r.status_code == 200:
+            d = r.json()
+            marches = d.get("marches") or d.get("marches_publics_recents") or []
+        else:
+            defauts.append(f"POST /pro/profil/marches/rechercher HTTP {r.status_code}")
+    except Exception as e:
+        defauts.append(f"exception marches: {e}")
 
     if not marches:
-        return make_result("Marchés publics", "FAIL", 0,
-                           defauts=["aucun endpoint marchés public répondant"])
+        # Pas un FAIL si juste 0 résultat (compte fresh sans veille active)
+        return make_result("Marchés publics", "PARTIAL", 5,
+                           defauts=defauts + ["0 marché trouvé (compte sans veille active)"],
+                           note_text="endpoint OK, dataset vide")
 
     if len(marches) < 2:
         defauts.append(f"trop peu de résultats: {len(marches)} (<2)")

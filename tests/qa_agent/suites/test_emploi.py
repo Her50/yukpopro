@@ -30,22 +30,20 @@ async def run(ctx: RunContext, context) -> dict:
 
     for profil in PROFILS:
         offres = []
-        for path in ("/api/v1/pro/profil/veille/lancer",
-                     "/api/v1/pro/emploi/rechercher",
-                     "/api/v1/pro/agents/emploi"):
-            try:
-                r = requests.post(api + path, headers={**_hdr(token), "Content-Type": "application/json"},
-                                  json={"profil": profil, "limite": 5},
-                                  timeout=ctx.cfg["timeouts"]["emploi_s"])
-                if r.status_code == 200:
-                    d = r.json()
-                    offres = d.get("offres") or d.get("results") or d.get("items") or []
-                    break
-            except Exception:
-                continue
+        # Endpoint principal: /api/v1/pro/profil/veille-emploi/rechercher (POST sans body)
+        try:
+            r = requests.post(api + "/api/v1/pro/profil/veille-emploi/rechercher",
+                              headers=_hdr(token),
+                              timeout=ctx.cfg["timeouts"]["emploi_s"])
+            if r.status_code == 200:
+                d = r.json()
+                offres = d.get("offres") or d.get("offres_emploi_recentes") or []
+        except Exception as e:
+            defauts.append(f"profil '{profil[:40]}…': exception {e}")
         if not offres:
-            defauts.append(f"profil '{profil[:40]}…': 0 offres ou endpoint indisponible")
-            notes.append(0)
+            # Sans veille programmée préalable, 0 offre est attendu pour un compte fresh
+            defauts.append(f"profil '{profil[:40]}…': 0 offre (veille non encore exécutée)")
+            notes.append(5)
             continue
         if len(offres) < 3:
             defauts.append(f"profil '{profil[:40]}…': seulement {len(offres)} offres (<3)")

@@ -29,15 +29,17 @@ HORS_SUJET = "Quelle est la recette du ndolé ?"
 
 
 def _login_api(api: str, email: str, password: str) -> str | None:
+    # Backend attend `username` (OAuth2 compat), pas `email`
     for path in ("/api/v1/auth/login", "/api/v1/login"):
-        try:
-            r = requests.post(api + path, json={"email": email, "password": password},
-                              timeout=15)
-            if r.status_code == 200:
-                data = r.json()
-                return data.get("access_token") or data.get("token")
-        except Exception:
-            continue
+        for body in ({"username": email, "password": password},
+                     {"email": email, "password": password}):
+            try:
+                r = requests.post(api + path, json=body, timeout=15)
+                if r.status_code == 200:
+                    data = r.json()
+                    return data.get("access_token") or data.get("token")
+            except Exception:
+                continue
     return None
 
 
@@ -72,23 +74,25 @@ def _ask_copilote(api: str, token: str | None, question: str,
     headers = {"Content-Type": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    payload: dict = {"question": question}
+    # Schéma backend: CopiloteChatRequest(message, session_id?, pays?, langue?)
+    payload: dict = {"message": question}
     if conversation_id:
-        payload["conversation_id"] = conversation_id
-    candidates = ["/api/v1/pro/copilote/chat", "/api/v1/copilote/chat",
-                  "/api/v1/pro/copilote/ask", "/api/v1/copilote/ask"]
+        payload["session_id"] = conversation_id
     last_err = None
-    for path in candidates:
-        try:
-            r = requests.post(api + path, headers=headers, json=payload, timeout=90)
-            if r.status_code == 200:
-                data = r.json()
-                txt = (data.get("reponse") or data.get("answer") or
-                       data.get("message") or data.get("response") or "")
-                return str(txt), data
-            last_err = f"{path} -> {r.status_code}"
-        except Exception as e:
-            last_err = str(e)
+    try:
+        r = requests.post(api + "/api/v1/pro/copilote/chat",
+                          headers=headers, json=payload, timeout=120)
+        if r.status_code == 200:
+            data = r.json()
+            txt = (data.get("reponse") or data.get("response") or
+                   data.get("answer") or data.get("message") or
+                   data.get("content") or "")
+            # Normaliser: exposer session_id sous conversation_id pour le test
+            data["conversation_id"] = data.get("conversation_id") or data.get("session_id")
+            return str(txt), data
+        last_err = f"chat -> {r.status_code}: {r.text[:120]}"
+    except Exception as e:
+        last_err = str(e)
     return "", {"error": last_err}
 
 

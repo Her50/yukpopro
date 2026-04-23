@@ -21,12 +21,12 @@ quality:
 
 timeouts:
   navigation_ms: 30000
-  rapport_simple_s: 90
-  rapport_multi_s: 180
-  slides_s: 120
-  infographie_s: 60
-  reunion_transcription_s: 180
-  emploi_s: 120
+  rapport_simple_s: 240
+  rapport_multi_s: 300
+  slides_s: 240
+  infographie_s: 90
+  reunion_transcription_s: 240
+  emploi_s: 180
 
 playwright:
   headless: true

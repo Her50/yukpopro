@@ -15,84 +15,79 @@ def _hdr(t): return {"Authorization": f"Bearer {t}"}
 
 async def run(ctx: RunContext, context) -> dict:
     api = ctx.cfg["api_url"]
-    creds = ctx.cfg["credentials"]
-    token = _login_api(api, creds["email"], creds["password"])
+    token = _login_api(api, ctx.cfg["credentials"]["email"], ctx.cfg["credentials"]["password"])
     if not token:
         return make_result("Réunions", "FAIL", 0, defauts=["login API impossible"])
 
     fdir = fixtures_dir()
-    audio = fdir / "reunion_60s_fr.m4a"
-    if not audio.exists():
-        audio = fdir / "reunion_60s_fr.mp3"
+    audio = next((fdir / f for f in ("reunion_60s_fr.m4a", "reunion_60s_fr.mp3")
+                  if (fdir / f).exists()), None)
     transcript_ref = fdir / "reunion_60s_fr.txt"
-    if not audio.exists() or not transcript_ref.exists():
+
+    if not audio or not transcript_ref.exists():
         return make_result("Réunions", "SKIP", None,
                            defauts=["fixtures audio réunion manquantes (edge-tts ou ffmpeg absent)"])
 
-    defauts: list[str] = []
-    notes: list[int] = []
-    artefacts: list[str] = []
-
-    files = [("fichier", (audio.name, audio.open("rb"), "audio/mpeg"))]
-    data = {
-        "titre": "Comité de souscription — Dossier Risque Industriel ACME",
-        "participants": "Directeur technique, Actuaire, Commercial",
-    }
+    defauts, notes, artefacts = [], [], []
     transcription_text = ""
-    rapport_id = None
-    for path in ("/api/v1/pro/reunions/transcrire", "/api/v1/pro/reunions/upload",
-                 "/api/v1/bureau/audio/transcrire"):
+
+    files = [("audio", (audio.name, audio.open("rb"), "audio/mpeg"))]
+    for path in ("/api/v1/pro/reunions/transcrire-direct",
+                 "/api/v1/reunions/transcrire"):
         try:
             r = requests.post(api + path, headers=_hdr(token),
-                              files=files, data=data,
+                              files=files, data={"langue": "auto"},
                               timeout=ctx.cfg["timeouts"]["reunion_transcription_s"])
-            if r.status_code in (200, 201):
+            if r.status_code == 200:
                 d = r.json()
-                transcription_text = (d.get("transcription") or
-                                      d.get("texte") or d.get("text") or "")
-                rapport_id = d.get("rapport_fichier_id") or d.get("fichier_id")
+                transcription_text = (d.get("transcription") or d.get("texte") or
+                                      d.get("text") or d.get("transcript") or "")
                 break
-        except Exception:
-            continue
+            elif r.status_code != 404:
+                defauts.append(f"transcrire-direct HTTP {r.status_code}: {r.text[:150]}")
+        except Exception as e:
+            defauts.append(f"exception transcrire: {e}")
+            break
     for f in files:
-        try:
-            f[1][1].close()
-        except Exception:
-            pass
+        try: f[1][1].close()
+        except: pass
 
     if not transcription_text:
-        defauts.append("aucun endpoint transcription disponible / réponse vide")
-        return make_result("Réunions", "FAIL", 1, defauts=defauts)
+        return make_result("Réunions", "FAIL", 1,
+                           defauts=defauts + ["transcription vide ou endpoint absent"])
 
     ref = transcript_ref.read_text(encoding="utf-8")
     sim = similarite_textes(ref, transcription_text)
-    if sim < ctx.cfg["quality"]["transcription_min_accuracy"]:
-        defauts.append(f"précision transcription faible: {sim:.2f} "
-                       f"(<{ctx.cfg['quality']['transcription_min_accuracy']})")
     notes.append(min(10, max(0, int(sim * 10))))
+    if sim < ctx.cfg["quality"]["transcription_min_accuracy"]:
+        defauts.append(f"précision transcription: {sim:.2f} (<{ctx.cfg['quality']['transcription_min_accuracy']})")
 
-    if rapport_id:
-        dst = ctx.downloads_dir / f"reunion_rapport_{safe_filename(str(rapport_id))}.md"
-        for path in (f"/api/v1/bureau/documents/telecharger/{rapport_id}",
-                     f"/api/v1/pro/documents/telecharger/{rapport_id}"):
-            try:
-                r = requests.get(api + path, headers=_hdr(token), timeout=30)
-                if r.status_code == 200:
-                    dst.write_bytes(r.content)
-                    break
-            except Exception:
-                continue
-        if dst.exists():
-            artefacts.append(str(dst.relative_to(ctx.artifacts_dir)))
-            eval_res = evaluer_artefact(dst, "Rapport réunion",
-                                         attendus={"sections": ["participants", "décisions",
-                                                                "plan d'action"],
-                                                   "format": "markdown"})
-            notes.append(eval_res.get("note", 5))
-            defauts.extend(eval_res.get("defauts", []))
+    # Générer rapport depuis la transcription
+    try:
+        r = requests.post(api + "/api/v1/pro/reunions/generer-rapport",
+                          headers={**_hdr(token), "Content-Type": "application/json"},
+                          json={"transcription": transcription_text,
+                                "titre": "Comité de souscription — Dossier Risque Industriel ACME",
+                                "participants": "Directeur technique, Actuaire, Commercial"},
+                          timeout=90)
+        if r.status_code == 200:
+            d = r.json()
+            rapport_text = d.get("rapport") or d.get("contenu") or d.get("markdown") or ""
+            if rapport_text:
+                dst = ctx.downloads_dir / "reunion_rapport.md"
+                dst.write_text(rapport_text, encoding="utf-8")
+                artefacts.append(str(dst.relative_to(ctx.artifacts_dir)))
+                eval_res = evaluer_artefact(dst, "Rapport réunion",
+                                             attendus={"sections": ["participants", "décisions", "actions"]})
+                notes.append(eval_res.get("note", 5))
+                defauts.extend(eval_res.get("defauts", []))
+        else:
+            defauts.append(f"generer-rapport HTTP {r.status_code}")
+    except Exception as e:
+        defauts.append(f"generer-rapport exception: {e}")
 
     moyenne = round(sum(notes) / max(1, len(notes)))
     status = "PASS" if moyenne >= 7 else "PARTIAL" if moyenne >= 5 else "FAIL"
     return make_result("Réunions (audio→rapport)", status, moyenne,
                        defauts=defauts, artefacts=artefacts,
-                       note_text=f"similarité transcription={sim:.2f}")
+                       note_text=f"similarité={sim:.2f}")
