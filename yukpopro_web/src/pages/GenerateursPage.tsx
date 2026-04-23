@@ -449,7 +449,9 @@ const FORMATS_SLIDES = new Set(["rapport_direction","bilan_activite","propositio
 
 export const GenerateursPage = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("rapport");
+  // Onglet persisté dans le store → survit à la navigation
+  const tab = useGenerateurStore((s) => s.tab) as Tab;
+  const setTab = (t: Tab) => useGenerateurStore.getState().setTab(t);
   const [openCat, setOpenCat] = useState<string | null>(null);
 
   // Persistance des jobs (survit à la navigation)

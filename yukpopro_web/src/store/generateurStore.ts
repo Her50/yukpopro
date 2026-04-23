@@ -10,9 +10,11 @@ import toast from "react-hot-toast";
 type JobKey = "rapport" | "slides" | "fichiers" | "conversion" | "infographie";
 
 interface GenerateurState {
+  tab: string;                         // onglet actif — persiste entre navigations
   loading: Record<JobKey, boolean>;
   resultats: Record<JobKey, any>;
 
+  setTab: (t: string) => void;
   run: <T>(
     key: JobKey,
     fn: () => Promise<T>,
@@ -30,8 +32,11 @@ const initialResultats: Record<JobKey, any> = {
 };
 
 export const useGenerateurStore = create<GenerateurState>((set, get) => ({
+  tab: "rapport",
   loading: { ...initialLoading },
   resultats: { ...initialResultats },
+
+  setTab: (t) => set({ tab: t }),
 
   run: async (key, fn, opts) => {
     if (get().loading[key]) return null;
