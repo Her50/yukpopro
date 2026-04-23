@@ -63,6 +63,7 @@ export const TranslateLivePage = () => {
   const [ttsAvailable, setTtsAvailable] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [lastGender, setLastGender] = useState<"male"|"female"|null>(null);
+  const [tipsOpen, setTipsOpen] = useState<boolean>(false);
 
   const clientRef = useRef<TranslateLiveClient | null>(null);
   const lignesRef = useRef<HTMLDivElement>(null);
@@ -344,18 +345,27 @@ export const TranslateLivePage = () => {
               </p>
             )}
             {sourceMode === "microphone" && (
-              <div className="mt-2 rounded-lg p-2.5 space-y-1.5 text-[11px]"
+              <div className="mt-2 rounded-lg text-[11px] overflow-hidden"
                 style={{ background: "rgba(0,84,166,0.08)", border: "1px solid rgba(0,176,240,0.15)" }}>
-                <p className="text-bright-400 font-semibold flex items-center gap-1">
-                  <Info className="w-3 h-3" /> Conseil selon le contexte
-                </p>
-                <div className="text-slate-400 space-y-1">
-                  <p><span className="text-slate-300 font-medium">Réunion en ligne (Zoom/Teams)</span> — utilise plutôt le mode <em>Onglet / Écran</em> pour capter l'audio directement depuis l'application, sans dépendre du micro.</p>
-                  <p><span className="text-slate-300 font-medium">Réunion physique (petite salle, 1–4 personnes)</span> — le micro intégré de l'ordinateur suffit si tu es proche des interlocuteurs.</p>
-                  <p><span className="text-slate-300 font-medium">Grande salle / table de conférence</span> — connecte un micro USB omnidirectionnel au centre de la table (ex. Jabra Speak 510, Anker PowerConf S3 — câble USB, plug-and-play). Il capte 360° jusqu'à 3–4 m sans driver. Version sans fil : Jabra Speak 710 (Bluetooth).</p>
-                  <p><span className="text-slate-300 font-medium">Plusieurs utilisateurs YukpoPro dans la même salle</span> — un seul micro au centre suffit pour tout le monde. Chaque participant lit les sous-titres sur son propre écran. Si tu actives la voix 🔊, utilise <strong>obligatoirement des écouteurs</strong> — sinon la voix TTS sort dans la salle, est recaptée par les autres micros et crée une boucle audio.</p>
-                  <p className="text-amber-400/80">⚡ Règle d'or : <strong>Voix 🔊 activée = écouteurs obligatoires</strong>. Sans écouteurs, reste en mode sous-titres uniquement.</p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setTipsOpen((o) => !o)}
+                  className="w-full flex items-center justify-between px-2.5 py-2 text-bright-400 font-semibold hover:bg-white/[0.03] transition"
+                >
+                  <span className="flex items-center gap-1">
+                    <Info className="w-3 h-3 flex-shrink-0" /> Conseil selon le contexte
+                  </span>
+                  <span className="text-gray-500 text-[10px]">{tipsOpen ? "▲" : "▼"}</span>
+                </button>
+                {tipsOpen && (
+                  <div className="px-2.5 pb-2.5 text-slate-400 space-y-1.5 border-t border-white/[0.06]">
+                    <p className="mt-1.5"><span className="text-slate-300 font-medium">Réunion en ligne (Zoom/Teams)</span> — utilise plutôt le mode <em>Onglet / Écran</em> pour capter l'audio directement depuis l'application, sans dépendre du micro.</p>
+                    <p><span className="text-slate-300 font-medium">Réunion physique (petite salle, 1–4 personnes)</span> — le micro intégré de l'ordinateur suffit si tu es proche des interlocuteurs.</p>
+                    <p><span className="text-slate-300 font-medium">Grande salle / table de conférence</span> — connecte un micro USB omnidirectionnel au centre de la table (ex. Jabra Speak 510, Anker PowerConf S3 — câble USB, plug-and-play). Il capte 360° jusqu'à 3–4 m sans driver. Version sans fil : Jabra Speak 710 (Bluetooth).</p>
+                    <p><span className="text-slate-300 font-medium">Plusieurs utilisateurs YukpoPro dans la même salle</span> — un seul micro au centre suffit pour tout le monde. Chaque participant lit les sous-titres sur son propre écran. Si tu actives la voix 🔊, utilise <strong>obligatoirement des écouteurs</strong> — sinon la voix TTS sort dans la salle et crée une boucle audio.</p>
+                    <p className="text-amber-400/80">⚡ <strong>Voix 🔊 activée = écouteurs obligatoires.</strong></p>
+                  </div>
+                )}
               </div>
             )}
           </div>
