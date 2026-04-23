@@ -4,6 +4,7 @@ import { KanbanSquare, Plus, Loader2, X, Check } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
+import { DemoBanner } from '../components/DemoBanner'
 
 type Statut = 'en_attente' | 'en_cours' | 'en_revision' | 'livre' | 'paye' | 'annule'
 
@@ -73,6 +74,7 @@ export default function KanbanPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

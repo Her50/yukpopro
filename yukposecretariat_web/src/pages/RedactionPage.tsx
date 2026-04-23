@@ -5,6 +5,7 @@ import { redactionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { DemoBanner } from '../components/DemoBanner'
 
 const PAYS = [
   { code: 'CM', label: '🇨🇲 Cameroun' },
@@ -86,6 +87,7 @@ export default function RedactionPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <FileText className="text-brand-600" size={24} />

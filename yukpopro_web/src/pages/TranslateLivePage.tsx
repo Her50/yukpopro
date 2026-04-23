@@ -12,6 +12,7 @@ import {
   Volume2, VolumeX, Save,
 } from "lucide-react";
 import { Card, Button, Select, Badge } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import http from "@/api/client";
 import { useAuthStore } from "@/store";
 import {
@@ -43,7 +44,6 @@ export const TranslateLivePage = () => {
   const token = useAuthStore((s) => s.token);
 
   const [langues, setLangues] = useState<Langue[]>([]);
-  const [sttAvailable, setSttAvailable] = useState<boolean | null>(null);
   const [creditsPerMin, setCreditsPerMin] = useState<number>(120);
   const [costFcfaPerMin, setCostFcfaPerMin] = useState<number>(6);
 
@@ -74,11 +74,10 @@ export const TranslateLivePage = () => {
           http.get("/translate/live/status"),
         ]);
         setLangues(langs.langues || []);
-        setSttAvailable(!!st.stt_available);
         setCreditsPerMin(st.price_per_minute_credits || 120);
         setCostFcfaPerMin(st.price_per_minute_fcfa || 6);
       } catch {
-        setSttAvailable(false);
+        // silencieux — backend vérifie la clé au démarrage de la session
       }
     })();
   }, []);
@@ -262,6 +261,7 @@ export const TranslateLivePage = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-5">
+      <DemoBanner />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -285,23 +285,6 @@ export const TranslateLivePage = () => {
           </div>
         </div>
       </div>
-
-      {/* Status banner */}
-      {sttAvailable === false && (
-        <Card className="p-4 border-amber-500/30 bg-amber-500/10">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-amber-200">
-              <div className="font-semibold">Mode dégradé : STT indisponible</div>
-              <div className="text-amber-300/80 mt-1">
-                Clé <code className="px-1 bg-black/30 rounded">DEEPGRAM_API_KEY</code> absente sur le serveur.
-                La connexion WebSocket fonctionne mais aucune transcription ne sera retournée.
-                Configurez la clé pour activer la traduction temps réel.
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Configuration */}
       <Card className="p-5 space-y-4">

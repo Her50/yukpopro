@@ -4,6 +4,7 @@ import {
   Zap, Star, Crown, Rocket, ArrowRight, RefreshCw, Copy, Check, PlusCircle,
 } from "lucide-react";
 import { Button, Card, Badge, Spinner } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { abonnementApi } from "@/api/client";
 import { useProfilStore } from "@/store";
 import { PLANS, OPERATEURS_MOBILE_MONEY, type PlanAbonnement } from "@/types";
@@ -149,6 +150,7 @@ export const AbonnementPage = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8 animate-fade-in">
+      <DemoBanner />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-display font-bold text-white">Abonnement & Paiement</h1>

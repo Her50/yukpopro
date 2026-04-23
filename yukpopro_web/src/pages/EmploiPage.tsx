@@ -18,6 +18,7 @@ import {
   AlertCircle, ChevronDown, ChevronUp, Zap, X,
 } from "lucide-react";
 import { emploiApi, type OffreEmploi, type ConfigEmploi } from "@/api/client";
+import { DemoBanner } from "@/components/DemoBanner";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -223,7 +224,7 @@ export const EmploiPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 pb-24 space-y-6">
-
+      <DemoBanner />
       {/* ── Toast ─────────────────────────────────────────────────────────── */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium transition-all

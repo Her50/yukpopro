@@ -10,6 +10,8 @@ import {
   MessageSquare, Clock, Search, Plus,
 } from "lucide-react";
 import { Card, Badge, Button, Spinner } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
+import { EmptyState } from "@/components/EmptyState";
 import { generateurApi } from "@/api/client";
 import { useDocsStore, useCopiloteStore } from "@/store";
 import type { DocumentHistorique } from "@/types";
@@ -150,6 +152,7 @@ export const HistoriqueDocumentsPage = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 animate-fade-in">
+      <DemoBanner />
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>

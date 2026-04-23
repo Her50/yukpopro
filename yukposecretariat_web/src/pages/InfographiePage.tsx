@@ -3,6 +3,7 @@ import { Image, Wand2, Loader2, Download, ChevronDown, Upload, Ruler } from 'luc
 import { useQuery } from '@tanstack/react-query'
 import { infographieAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { DemoBanner } from '../components/DemoBanner'
 
 const PAYS = [
   { code: 'CM', label: '🇨🇲 Cameroun' }, { code: 'SN', label: '🇸🇳 Sénégal' },
@@ -114,6 +115,7 @@ export default function InfographiePage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Image className="text-orange-500" size={24} />

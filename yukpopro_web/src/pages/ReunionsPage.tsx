@@ -15,6 +15,7 @@ import {
   Play, Pause, Pencil, RefreshCw,
 } from "lucide-react";
 import { reunionsApi } from "@/api/client";
+import { DemoBanner } from "@/components/DemoBanner";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -1016,7 +1017,7 @@ export const ReunionsPage = () => {
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       <div className="p-4 md:p-6 space-y-5 max-w-5xl mx-auto w-full">
-
+        <DemoBanner />
         {/* Header */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>

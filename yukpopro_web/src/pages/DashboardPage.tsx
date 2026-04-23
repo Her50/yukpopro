@@ -6,6 +6,7 @@ import {
   Gavel, ExternalLink,
 } from "lucide-react";
 import { Card, Badge, Spinner } from "@/components/ui";
+import { DemoBanner } from "@/components/DemoBanner";
 import { useProfilStore, useCopiloteStore, useAuthStore } from "@/store";
 import { profilApi, abonnementApi, emploiApi, marchesApi } from "@/api/client";
 import type { ProfilPro } from "@/types";
@@ -126,7 +127,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-6xl mx-auto overflow-y-auto h-full">
-
+      <DemoBanner />
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>

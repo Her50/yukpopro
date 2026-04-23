@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Languages, Loader2, Download, Upload, FileText, ArrowRight } from 'lucide-react'
 import { traductionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { DemoBanner } from '../components/DemoBanner'
 
 const LANGUES = [
   { code: 'fr', label: '🇫🇷 Français' }, { code: 'en', label: '🇬🇧 Anglais' },
@@ -97,6 +98,7 @@ export default function TraductionPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Languages className="text-orange-500" size={24} />

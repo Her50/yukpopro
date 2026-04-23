@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Mic, Upload, Download, Loader2, Square, Circle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { audioAPI } from '../api/client'
+import { DemoBanner } from '../components/DemoBanner'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -89,6 +90,7 @@ export default function AudioPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Mic className="text-purple-600" size={24} />

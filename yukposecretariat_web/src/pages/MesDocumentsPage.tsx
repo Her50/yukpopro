@@ -3,6 +3,7 @@ import { FolderOpen, Download, Trash2, Loader2, RefreshCw, Search } from 'lucide
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { documentsAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { DemoBanner } from '../components/DemoBanner'
 
 interface Document {
   fichier_id: string; type: string; type_label: string; icone: string;
@@ -69,6 +70,7 @@ export default function MesDocumentsPage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

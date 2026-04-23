@@ -5,6 +5,7 @@ import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { DemoBanner } from '../components/DemoBanner'
 
 const MODES_PAIEMENT = [
   { code: 'especes', label: '💵 Espèces' },
@@ -52,6 +53,7 @@ export default function CaissePage() {
 
   return (
     <div className="space-y-5">
+      <DemoBanner />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
