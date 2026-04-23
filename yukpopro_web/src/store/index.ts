@@ -53,7 +53,7 @@ export const useProfilStore = create<ProfilState>()((set) => ({
   clearProfil: () => set({ profil: null, profilCharge: false }),
 }));
 
-// ── Chat Store (Yukpo IA — interface unifiée) ─────────────────────────────────
+// ── Chat Store (YukpoPro — interface unifiée) ─────────────────────────────────
 
 export interface ChatSession {
   id: string;

@@ -12,6 +12,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Ionicons } from '@expo/vector-icons'
 import { ocrAPI } from '../../src/api/client'
+import { DemoBanner } from '../../src/components/DemoBanner'
 
 const SCREEN_W = Dimensions.get('window').width
 
@@ -53,7 +54,7 @@ const DEMO_OCR: Record<string, ResultatOCR> = {
   facture_garage: { type: 'Facture Garage', confiance: 0.88, champs: { FOURNISSEUR: 'Garage Toyota Douala', NUMERO: 'FAC-2024-0892', DATE: '15/03/2026', MONTANT_HT: '420 000 XAF', TVA: '65 000 XAF', MONTANT_TTC: '485 000 XAF' }, champs_orass: { SINISTRE_MONTANT: '485000', COMPTE_PCSA: '6150' } },
   facture_hopital: { type: 'Facture Médicale', confiance: 0.90, champs: { ETABLISSEMENT: 'Clinique Centrale YDE', PATIENT: 'MBARGA Jean', DATE_SOINS: '10/04/2026', ACTES: 'Consultation + Rx', MONTANT: '125 000 XAF' }, champs_orass: { SINISTRE_MONTANT: '125000', COMPTE_PCSA: '6180', BRANCHE: 'B80' } },
   constat_amiable: { type: 'Constat Amiable', confiance: 0.85, champs: { DATE_ACCIDENT: '08/04/2026', CONDUCTEUR_A: 'NKENG Paul — LT-456-DLA', CONDUCTEUR_B: 'FOGUE Henri — YA-789-CD', LIEU: 'Carrefour Nlongkak, Yaoundé', CIRCONSTANCES: 'Collision arrière au feu rouge' }, champs_orass: { SINISTRE_DATE: '08/04/2026', TIERS_NOM: 'FOGUE Henri', TIERS_VEHICULE: 'YA-789-CD' } },
-  default: { type: 'Document', confiance: 0.87, champs: { TYPE_DETECTE: 'Document standard', DATE: '10/04/2026', STATUT: 'Analysé par Yukpo IA' }, champs_orass: {} },
+  default: { type: 'Document', confiance: 0.87, champs: { TYPE_DETECTE: 'Document standard', DATE: '10/04/2026', STATUT: 'Analysé par YukpoPro' }, champs_orass: {} },
 }
 
 // ─── Overlay guidage scan ──────────────────────────────────────────────────────
@@ -114,9 +115,10 @@ function DocumentOverlay({ ratio, couleur, hint }: { ratio: number; couleur: str
 
 // ─── Résultat OCR ──────────────────────────────────────────────────────────────
 
-function ResultatOCRView({ resultat, onReset }: { resultat: ResultatOCR; onReset: () => void }) {
+function ResultatOCRView({ resultat, onReset, isDemo }: { resultat: ResultatOCR; onReset: () => void; isDemo: boolean }) {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+      {isDemo && <DemoBanner message="Résultat de démonstration — l'API OCR n'a pas répondu. Reprenez une photo ou vérifiez la connexion." />}
       {/* Header confiance */}
       <View style={[rs.confianceCard, { backgroundColor: resultat.confiance > 0.9 ? '#f0fdf4' : '#fffbeb', borderColor: resultat.confiance > 0.9 ? '#bbf7d0' : '#fde68a' }]}>
         <Ionicons name={resultat.confiance > 0.9 ? 'checkmark-circle' : 'alert-circle'} size={20} color={resultat.confiance > 0.9 ? '#16a34a' : '#92400e'} />
@@ -124,7 +126,7 @@ function ResultatOCRView({ resultat, onReset }: { resultat: ResultatOCR; onReset
           <Text style={[rs.confianceTitre, { color: resultat.confiance > 0.9 ? '#15803d' : '#78350f' }]}>
             {resultat.type} — Confiance {Math.round(resultat.confiance * 100)}%
           </Text>
-          <Text style={{ fontSize: 11, color: '#64748b' }}>Analyse Yukpo IA · Zone CIMA</Text>
+          <Text style={{ fontSize: 11, color: '#64748b' }}>Analyse Yukpo · Zone CIMA</Text>
         </View>
       </View>
 
@@ -177,6 +179,7 @@ export default function ScannerScreen() {
   const [typeSelectionne, setTypeSelectionne] = useState('cni')
   const [imageUri, setImageUri] = useState<string | null>(null)
   const [resultat, setResultat] = useState<ResultatOCR | null>(null)
+  const [isDemoResult, setIsDemoResult] = useState(false)
   const [loading, setLoading] = useState(false)
   const [cameraPermission, requestPermission] = useCameraPermissions()
   const [modeCamera, setModeCamera] = useState(false)
@@ -193,8 +196,10 @@ export default function ScannerScreen() {
       else if (typeSelectionne === 'carte_grise') data = await ocrAPI.analyserCarteGrise(uri)
       else data = await ocrAPI.analyserImage(uri, typeSelectionne)
       setResultat(data)
+      setIsDemoResult(false)
     } catch {
       setResultat(DEMO_OCR[typeSelectionne] ?? DEMO_OCR.default)
+      setIsDemoResult(true)
     } finally {
       setLoading(false)
     }
@@ -233,7 +238,7 @@ export default function ScannerScreen() {
     }
   }
 
-  const reset = () => { setImageUri(null); setResultat(null) }
+  const reset = () => { setImageUri(null); setResultat(null); setIsDemoResult(false) }
 
   // ── Mode caméra en plein écran ─────────────────────────────────────────────
   if (modeCamera) {
@@ -291,7 +296,7 @@ export default function ScannerScreen() {
 
   // ── Vue principale ─────────────────────────────────────────────────────────
   if (resultat && !loading) {
-    return <ResultatOCRView resultat={resultat} onReset={reset} />
+    return <ResultatOCRView resultat={resultat} onReset={reset} isDemo={isDemoResult} />
   }
 
   return (
@@ -356,7 +361,7 @@ export default function ScannerScreen() {
         <View style={styles.loadingCard}>
           <ActivityIndicator size="large" color="#1d4ed8" />
           <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginTop: 12 }}>Analyse OCR en cours…</Text>
-          <Text style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Powered by Yukpo IA · Expert CIMA</Text>
+          <Text style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Powered by Yukpo · Expert CIMA</Text>
         </View>
       )}
     </ScrollView>

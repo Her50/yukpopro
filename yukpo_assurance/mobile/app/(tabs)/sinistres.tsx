@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { sinistresAPI, ocrAPI, apiClient } from '../../src/api/client'
+import { DemoBanner } from '../../src/components/DemoBanner'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -335,7 +336,7 @@ function OngletDossiers() {
                   <View style={[styles.scanZone, { borderColor: typeChoisi?.couleur || '#94a3b8' }]}>
                     <Ionicons name={(typeChoisi?.icon || 'document-outline') as never} size={48} color={typeChoisi?.couleur || '#94a3b8'} />
                     <Text style={styles.scanHint}>Scanner : {typeChoisi?.label}</Text>
-                    <Text style={styles.scanSubHint}>{typeChoisi?.branche_cima} — Yukpo IA extrait automatiquement</Text>
+                    <Text style={styles.scanSubHint}>{typeChoisi?.branche_cima} — YukpoPro extrait automatiquement</Text>
                   </View>}
                 {scanLoading ? <ActivityIndicator size="large" color="#1d4ed8" style={{ marginTop: 16 }} /> : (
                   <View style={{ width: '100%', gap: 10, marginTop: 8 }}>
@@ -359,7 +360,7 @@ function OngletDossiers() {
               <View>
                 <View style={styles.iaBanner}>
                   <Ionicons name="sparkles" size={14} color="#1d4ed8" />
-                  <Text style={styles.iaBannerText}>Yukpo IA a extrait les informations — vérifiez avant de soumettre</Text>
+                  <Text style={styles.iaBannerText}>YukpoPro a extrait les informations — vérifiez avant de soumettre</Text>
                 </View>
                 {champsExtraits.map((c, i) => (
                   <View key={i} style={styles.champRow}>
@@ -555,7 +556,7 @@ function OngletLettresMobile() {
         <TouchableOpacity style={[styles.nextBtn, (!templateChoisi || loading) && { opacity: 0.5 }]}
           onPress={generer} disabled={!templateChoisi || loading}>
           {loading ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="sparkles" size={18} color="#fff" />}
-          <Text style={styles.nextBtnText}>{loading ? 'Génération…' : 'Générer avec Yukpo IA'}</Text>
+          <Text style={styles.nextBtnText}>{loading ? 'Génération…' : 'Générer avec YukpoPro'}</Text>
         </TouchableOpacity>
 
         {lettre ? (
@@ -715,6 +716,8 @@ export default function SinistresScreen() {
         ))}
       </View>
 
+      <DemoBanner style={{ marginHorizontal: 12, marginTop: 8 }} />
+
       {onglet === 'dossiers' && <OngletDossiers />}
       {onglet === 'recours' && <OngletRecoursMobile />}
       {onglet === 'lettres' && <OngletLettresMobile />}
@@ -752,7 +755,7 @@ function OngletCourtiersSinistres() {
             </View>
           </View>
           {d.score != null && (
-            <Text style={{ fontSize: 11, color: d.score > 70 ? '#166534' : '#dc2626', marginTop: 6, fontWeight: '600' }}>Score IA : {d.score}%</Text>
+            <Text style={{ fontSize: 11, color: d.score > 70 ? '#166534' : '#dc2626', marginTop: 6, fontWeight: '600' }}>Score : {d.score}%</Text>
           )}
           {d.statut === 'en_attente' && (
             <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1d4ed8', paddingVertical: 8, borderRadius: 8, marginTop: 10 }}>

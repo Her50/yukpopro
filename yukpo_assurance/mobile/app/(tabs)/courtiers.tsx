@@ -8,6 +8,7 @@ import { LineChart, BarChart } from 'react-native-chart-kit'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { courtiersAPI } from '../../src/api/client'
+import { DemoBanner } from '../../src/components/DemoBanner'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 
@@ -90,7 +91,7 @@ const TYPES_DOC: Record<CategorieDoc, string[]> = {
 
 const STATUT_CFG: Record<StatutDoc, { label: string; color: string; icon: string }> = {
   en_attente: { label: 'En attente', color: '#64748b', icon: 'time-outline' },
-  en_analyse: { label: 'Analyse IA', color: '#1d4ed8', icon: 'sparkles-outline' },
+  en_analyse: { label: 'Analyse YukpoPro', color: '#1d4ed8', icon: 'sparkles-outline' },
   valide: { label: 'Validé', color: '#16a34a', icon: 'checkmark-circle-outline' },
   rejete: { label: 'Rejeté', color: '#dc2626', icon: 'close-circle-outline' },
 }
@@ -165,7 +166,7 @@ function PortailCourtier({ onEnvoi }: { onEnvoi: (d: DocCourtier) => void }) {
           <Ionicons name="checkmark-circle" size={48} color="#16a34a" />
         </View>
         <Text style={styles.succesTitle}>Document transmis !</Text>
-        <Text style={styles.succesText}>La compagnie a reçu votre document. Yukpo IA va l'analyser automatiquement.</Text>
+        <Text style={styles.succesText}>La compagnie a reçu votre document. YukpoPro va l'analyser automatiquement.</Text>
         <TouchableOpacity style={styles.succesBtn} onPress={() => { setSucces(false); setFichierNom(null); setNomCourtier(''); setReference('') }}>
           <Text style={styles.succesBtnText}>Envoyer un autre document</Text>
         </TouchableOpacity>
@@ -177,7 +178,7 @@ function PortailCourtier({ onEnvoi }: { onEnvoi: (d: DocCourtier) => void }) {
     <View style={styles.portailContainer}>
       <View style={styles.infoBox}>
         <Ionicons name="shield-checkmark-outline" size={16} color="#1d4ed8" />
-        <Text style={styles.infoText}>Transmettez vos documents scannés directement à la compagnie. Yukpo IA analyse chaque pièce avant validation.</Text>
+        <Text style={styles.infoText}>Transmettez vos documents scannés directement à la compagnie. YukpoPro analyse chaque pièce avant validation.</Text>
       </View>
 
       <Text style={styles.fieldLabel}>Votre cabinet / raison sociale *</Text>
@@ -316,7 +317,7 @@ function DocumentsRecus({ documents, onUpdate }: { documents: DocCourtier[]; onU
             {d.score_ia != null && (
               <View style={[styles.scoreRow, { backgroundColor: d.score_ia > 80 ? '#dcfce7' : d.score_ia > 60 ? '#fef9c3' : '#fee2e2' }]}>
                 <Text style={[styles.scoreText, { color: d.score_ia > 80 ? '#166534' : d.score_ia > 60 ? '#854d0e' : '#991b1b' }]}>
-                  Score IA : {d.score_ia}%
+                  Score : {d.score_ia}%
                 </Text>
               </View>
             )}
@@ -405,6 +406,8 @@ export default function CourtiersScreen() {
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1d4ed8" />}
     >
+      <DemoBanner style={{ marginHorizontal: 12, marginTop: 8 }} />
+
       {/* KPI Cards */}
       <View style={styles.kpiGrid}>
         {kpis.map((k, i) => (

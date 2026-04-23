@@ -5,19 +5,57 @@ export default {
   theme: {
     extend: {
       colors: {
-        yukpo: {
-          50:  "#f3eeff",
-          100: "#e2d5ff",
-          200: "#c5aaff",
-          300: "#a87fff",
-          400: "#8b54ff",
-          500: "#7B3FE4",
-          600: "#6420cc",
-          700: "#4e18a3",
-          800: "#3a1278",
-          900: "#250b4f",
-          950: "#13062a",
+        // ── Marque Yukpo — corporate navy (sidebar, header) ────────────────
+        navy: {
+          700: "#2a3657",
+          800: "#243050",
+          900: "#1e2640",   // DS sidebar top
+          950: "#162033",   // DS sidebar bottom
         },
+        // ── Couleur corporate — bleu institutionnel Yukpo ──────────────────
+        corp: {
+          300: "#60a5fa",
+          400: "#3b82f6",
+          500: "#0083d6",
+          600: "#0054A6",   // DS Yukpo Deep — CTA primaire
+          700: "#003476",   // DS Yukpo Dark — hover/pressed
+          800: "#002258",
+        },
+        // ── Bright accent (highlights, liens, badges) ──────────────────────
+        bright: {
+          300: "#67d8f5",
+          400: "#00B0F0",   // DS Yukpo Bright
+          500: "#0094CC",
+        },
+        // ── YukpoPro — accent indigo (différentiateur produit) ─────────────
+        yukpo: {
+          50:  "#eef2ff",
+          100: "#e0e7ff",
+          200: "#c7d2fe",
+          300: "#a5b4fc",
+          400: "#818cf8",
+          500: "#6366f1",   // Indigo — accentuation YukpoPro
+          600: "#4f46e5",
+          700: "#4338ca",
+          800: "#3730a3",
+          900: "#312e81",
+          950: "#1e1b4b",
+        },
+        // ── Neutrals (echelle claire → foncée) ───────────────────────────
+        neutral: {
+          50:  "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#020617",
+        },
+        // ── Accent cyan ────────────────────────────────────────────────────
         accent: {
           50:  "#ecfeff",
           100: "#cffafe",
@@ -25,12 +63,18 @@ export default {
           500: "#06b6d4",
           600: "#0891b2",
         },
+        // ── Gold (XP, crédits) ─────────────────────────────────────────────
         gold: {
+          300: "#fcd34d",
           400: "#fbbf24",
           500: "#f59e0b",
           600: "#d97706",
         },
-        // Dark Pro — palette warm gray (Linear / GitHub Dark)
+        // ── Sémantiques ───────────────────────────────────────────────────
+        success: { 400: "#34d399", 500: "#10b981", 600: "#059669" },
+        warning: { 400: "#fbbf24", 500: "#f59e0b", 600: "#d97706" },
+        danger:  { 400: "#f87171", 500: "#ef4444", 600: "#dc2626" },
+        // ── Dark palette (héritage — à ne plus utiliser pour nouveaux écrans)
         dark: {
           50:  "#F9FAFB",
           100: "#F3F4F6",
@@ -40,10 +84,10 @@ export default {
           500: "#6B7280",
           600: "#4B5563",
           700: "#374151",
-          800: "#1F2937",   // cartes
-          850: "#192330",   // cartes élevées
-          900: "#111827",   // fond principal
-          950: "#0D1117",   // sidebar
+          800: "#1F2937",
+          850: "#192330",
+          900: "#111827",
+          950: "#0D1117",
         },
       },
       fontFamily: {
@@ -65,16 +109,25 @@ export default {
         typing:    { "0%,100%": { content: "'...'" }, "33%": { content: "'..'" }, "66%": { content: "'.'" } },
       },
       backgroundImage: {
-        "yukpo-gradient": "linear-gradient(135deg, #7B3FE4 0%, #4A90D9 50%, #06B6D4 100%)",
-        "pro-gradient":   "linear-gradient(135deg, #7B3FE4 0%, #9B5FFF 100%)",
-        "dark-gradient":  "linear-gradient(180deg, #111827 0%, #0D1117 100%)",
-        "card-glow":      "linear-gradient(135deg, rgba(123,63,228,0.08) 0%, rgba(6,182,212,0.04) 100%)",
+        // DS gradients signature
+        "sidebar-gradient": "linear-gradient(180deg, #1e2640 0%, #162033 100%)",
+        "header-gradient":  "linear-gradient(90deg, #0054A6 0%, #003476 50%, #1e2640 100%)",
+        "divider-gradient": "linear-gradient(90deg, #0054A6, #00B0F0, #0054A6)",
+        "avatar-gradient":  "linear-gradient(135deg, #00B0F0, #0054A6)",
+        // YukpoPro accent
+        "yukpo-gradient":   "linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%)",
+        "pro-gradient":     "linear-gradient(135deg, #0054A6 0%, #4f46e5 100%)",
+        "dark-gradient":    "linear-gradient(180deg, #1e2640 0%, #162033 100%)",
+        "card-glow":        "linear-gradient(135deg, rgba(79,70,229,0.06) 0%, rgba(0,84,166,0.04) 100%)",
       },
       boxShadow: {
-        "yukpo":    "0 0 30px rgba(123,63,228,0.25)",
-        "yukpo-lg": "0 0 60px rgba(123,63,228,0.35)",
-        "card":     "0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)",
+        "corp":     "0 0 24px rgba(0,84,166,0.3)",
+        "corp-lg":  "0 0 48px rgba(0,84,166,0.4)",
+        "yukpo":    "0 0 24px rgba(99,102,241,0.25)",
+        "yukpo-lg": "0 0 48px rgba(99,102,241,0.35)",
+        "card":     "0 1px 3px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04)",
         "card-lg":  "0 4px 16px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+        "nav-active":"inset 0 0 0 1px rgba(99,102,241,0.3), 0 0 12px rgba(99,102,241,0.15)",
       },
     },
   },

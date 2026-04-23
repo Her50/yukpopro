@@ -9,6 +9,7 @@ import { AdminPage } from "@/pages/AdminPage";
 import { AbonnementPage } from "@/pages/AbonnementPage";
 import { ReunionsPage } from "@/pages/ReunionsPage";
 import { TraductionPage } from "@/pages/TraductionPage";
+import { TranslateLivePage } from "@/pages/TranslateLivePage";
 import { GenerateursPage } from "@/pages/GenerateursPage";
 import { HistoriqueDocumentsPage } from "@/pages/HistoriqueDocumentsPage";
 import { EmploiPage } from "@/pages/EmploiPage";
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/admin"       element={<AdminPage />} />
             {/* Pages actives */}
             <Route path="/traduction"     element={<TraductionPage />} />
+            <Route path="/translate-live" element={<TranslateLivePage />} />
             <Route path="/generateurs"    element={<GenerateursPage />} />
             <Route path="/mes-documents"  element={<HistoriqueDocumentsPage />} />
             <Route path="/emploi"         element={<EmploiPage />} />

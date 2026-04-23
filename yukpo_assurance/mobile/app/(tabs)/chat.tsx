@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { chatAPI } from '../../src/api/client'
+import { DemoBanner } from '../../src/components/DemoBanner'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -97,7 +98,7 @@ function genererReponseDemos(question: string): string {
   if (q.includes('rapport') || q.includes('générer') || q.includes('document')) {
     return 'Je peux générer des rapports PDF, Excel et PowerPoint. Utilisez l\'onglet "Rapports" ⬆️ pour accéder aux templates spécialisés et générer vos documents directement depuis l\'app.'
   }
-  return `Votre question concerne "${question.slice(0, 50)}". En mode démo, Yukpo IA confirme que le Code CIMA contient 509 articles couvrant les Livres I-VI. Activez votre API pour une réponse complète et personnalisée.`
+  return `Votre question concerne "${question.slice(0, 50)}". En mode démo, YukpoPro confirme que le Code CIMA contient 509 articles couvrant les Livres I-VI. Activez votre API pour une réponse complète et personnalisée.`
 }
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
@@ -108,7 +109,7 @@ export default function ChatScreen() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [currentSessionTitre, setCurrentSessionTitre] = useState('Nouvelle conversation')
   const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'assistant', content: 'Bonjour ! Je suis Yukpo IA. Posez-moi toute question sur le Code CIMA, les provisions, les indemnités, ou utilisez l\'onglet Rapports pour générer des documents PDF/Excel/PPT.', timestamp: new Date().toISOString() },
+    { id: '0', role: 'assistant', content: 'Bonjour ! Je suis YukpoPro. Posez-moi toute question sur le Code CIMA, les provisions, les indemnités, ou utilisez l\'onglet Rapports pour générer des documents PDF/Excel/PPT.', timestamp: new Date().toISOString() },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -250,6 +251,8 @@ export default function ChatScreen() {
           <Ionicons name="pencil-outline" size={16} color="#64748b" />
         </TouchableOpacity>
       </View>
+
+      <DemoBanner message="Mode démonstration — les réponses sont générées localement. Connectez l'API Yukpo pour activer l'IA complète." style={{ marginHorizontal: 12, marginTop: 8 }} />
 
       {/* ── Onglets Chat / Rapports ────────────────────────────────────── */}
       <View style={s.tabBar}>

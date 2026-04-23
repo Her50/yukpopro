@@ -4,6 +4,7 @@ import {
   TextInput, Modal, ActivityIndicator, Dimensions, Alert,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { DemoBanner } from '../../src/components/DemoBanner'
 
 const SCREEN_W = Dimensions.get('window').width
 
@@ -270,7 +271,7 @@ function ModalDetail({
                 ? <ActivityIndicator size="small" color="#fff" />
                 : <Ionicons name="sparkles-outline" size={16} color="#fff" />
               }
-              <Text style={s.iaBtnText}>{genIA ? 'Génération…' : 'Générer avec Yukpo IA'}</Text>
+              <Text style={s.iaBtnText}>{genIA ? 'Génération…' : 'Générer avec YukpoPro'}</Text>
             </TouchableOpacity>
             {proposition ? (
               <View style={s.propositionBox}>
@@ -500,6 +501,8 @@ export default function CommercialScreen() {
           </TouchableOpacity>
         ))}
       </View>
+
+      <DemoBanner style={{ marginHorizontal: 12, marginTop: 8 }} />
 
       {/* ── Pipeline (kanban horizontal) ── */}
       {onglet === 'pipeline' && (

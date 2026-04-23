@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "YukpoTranslate Live — Sous-titres temps réel",
+  "short_name": "YukpoTranslate",
+  "version": "1.0.0",
+  "description": "Sous-titres traduits en direct pour Zoom, Google Meet, Microsoft Teams, YouTube et toute page web avec audio.",
+  "default_locale": "fr",
+  "permissions": [
+    "tabCapture",
+    "offscreen",
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_title": "YukpoTranslate Live",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["offscreen.html", "pcm-worklet.js", "overlay.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

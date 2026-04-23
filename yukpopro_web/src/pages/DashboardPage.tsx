@@ -17,9 +17,9 @@ const XPBar = ({ xp }: { xp: number }) => {
   const levels = [
     { name: "Starter", min: 0,    max: 100,      color: "bg-slate-500" },
     { name: "Junior",  min: 100,  max: 500,       color: "bg-accent-500" },
-    { name: "Senior",  min: 500,  max: 2000,      color: "bg-yukpo-500" },
+    { name: "Senior",  min: 500,  max: 2000,      color: "bg-corp-600" },
     { name: "Expert",  min: 2000, max: 5000,      color: "bg-gold-500" },
-    { name: "Master",  min: 5000, max: Infinity,  color: "bg-gradient-to-r from-yukpo-500 to-gold-400" },
+    { name: "Master",  min: 5000, max: Infinity,  color: "bg-gradient-to-r from-corp-600 to-gold-400" },
   ];
   const level = levels.find((l) => xp >= l.min && xp < l.max) || levels[levels.length - 1];
   const nextLevel = levels[levels.indexOf(level) + 1];
@@ -34,7 +34,7 @@ const XPBar = ({ xp }: { xp: number }) => {
         </div>
         <span className="text-sm text-slate-400">{xp.toLocaleString("fr-FR")} XP</span>
       </div>
-      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
         <div className={`h-full rounded-full transition-all duration-700 ${level.color}`} style={{ width: `${pct}%` }} />
       </div>
       {nextLevel && (
@@ -119,7 +119,7 @@ export const DashboardPage = () => {
   const quotaUsed   = abonnement?.requetes_utilisees || 0;
   const quotaTotal  = abonnement?.quota_jour || 10;
   const quotaPct    = Math.min(100, (quotaUsed / quotaTotal) * 100);
-  const quotaColor  = quotaPct > 85 ? "bg-red-500" : quotaPct > 60 ? "bg-amber-500" : "bg-yukpo-500";
+  const quotaColor  = quotaPct > 85 ? "bg-red-500" : quotaPct > 60 ? "bg-amber-500" : "bg-corp-600";
 
   // Dernières sessions (5 max)
   const recentSessions = [...sessions].slice(0, 5);
@@ -141,7 +141,7 @@ export const DashboardPage = () => {
         </div>
         <button
           onClick={() => navigate("/chat")}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white text-sm font-semibold transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-corp-600 hover:bg-corp-700 text-white text-sm font-semibold transition-colors shadow-md shadow-corp-600/30"
         >
           <Sparkles className="w-4 h-4" />
           Ouvrir Yukpo Pro
@@ -167,7 +167,7 @@ export const DashboardPage = () => {
               </h3>
               <button
                 onClick={() => navigate("/abonnement")}
-                className="text-xs text-yukpo-400 hover:text-yukpo-300 transition-colors"
+                className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
               >
                 Voir mon plan →
               </button>
@@ -179,7 +179,7 @@ export const DashboardPage = () => {
                   {quotaUsed} / {quotaTotal === 9999 ? "∞" : quotaTotal} requêtes
                 </span>
               </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${quotaColor}`}
                   style={{ width: `${quotaTotal === 9999 ? 5 : quotaPct}%` }}
@@ -208,7 +208,7 @@ export const DashboardPage = () => {
             icon={MessageSquare} label="Conversations"
             value={totalConvs}
             sub={`dont ${p?.nb_requetes_agent || 0} via agents`}
-            color="bg-yukpo-gradient"
+            color="bg-gradient-to-br from-corp-600 to-yukpo-600"
           />
           <StatCard
             icon={FileText} label="Documents générés"
@@ -236,12 +236,12 @@ export const DashboardPage = () => {
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-yukpo-400" />
+              <MessageSquare className="w-4 h-4 text-bright-400" />
               Conversations récentes
             </h3>
             <button
               onClick={() => navigate("/chat")}
-              className="text-xs text-yukpo-400 hover:text-yukpo-300 transition-colors"
+              className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
             >
               Voir tout →
             </button>
@@ -249,7 +249,7 @@ export const DashboardPage = () => {
           {recentSessions.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-4">
               Aucune conversation encore.{" "}
-              <button onClick={() => navigate("/chat")} className="text-yukpo-400 hover:underline">
+              <button onClick={() => navigate("/chat")} className="text-bright-400 hover:underline">
                 Démarrer
               </button>
             </p>
@@ -259,10 +259,10 @@ export const DashboardPage = () => {
                 <button
                   key={s.id}
                   onClick={() => navigate("/chat")}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.05] transition-colors text-left group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-yukpo-500/20 flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="w-3.5 h-3.5 text-yukpo-400" />
+                  <div className="w-8 h-8 rounded-lg bg-corp-600/20 flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-3.5 h-3.5 text-bright-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-slate-300 text-sm truncate group-hover:text-white">{s.title}</p>
@@ -282,15 +282,15 @@ export const DashboardPage = () => {
           </h3>
           <div className="space-y-2">
             {[
-              { icon: MessageSquare, label: "Yukpo Pro",      sub: "Assistant & agents spécialisés", path: "/chat",    color: "bg-yukpo-500/20 text-yukpo-400" },
-              { icon: Users,         label: "Réunions",      sub: "Rapports & suivi auto",      path: "/reunions",   color: "bg-blue-500/20 text-blue-400" },
+              { icon: MessageSquare, label: "Yukpo Pro",      sub: "Assistant & agents spécialisés", path: "/chat",    color: "bg-corp-600/20 text-bright-400" },
+              { icon: Users,         label: "Réunions",      sub: "Rapports & suivi auto",      path: "/reunions",   color: "bg-bright-400/15 text-bright-400" },
               { icon: TrendingUp,    label: "Mon Profil",     sub: "Personnaliser mon assistant", path: "/profil",    color: "bg-green-500/20 text-green-400" },
               { icon: Calendar,      label: "Abonnement",     sub: "Gérer mon plan",             path: "/abonnement", color: "bg-gold-500/20 text-gold-400" },
             ].map(({ icon: Icon, label, sub, path, color }) => (
               <button
                 key={path}
                 onClick={() => navigate(path)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group"
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.05] transition-colors text-left group"
               >
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
                   <Icon className="w-4 h-4" />
@@ -315,7 +315,7 @@ export const DashboardPage = () => {
           </h3>
           <button
             onClick={() => navigate("/emploi")}
-            className="text-xs text-yukpo-400 hover:text-yukpo-300 transition-colors"
+            className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
           >
             Voir tout →
           </button>
@@ -325,7 +325,7 @@ export const DashboardPage = () => {
             <p className="text-slate-500 text-sm">Aucune offre récente.</p>
             <button
               onClick={() => navigate("/emploi")}
-              className="text-xs text-yukpo-400 hover:text-yukpo-300 transition-colors"
+              className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
             >
               Configurer la veille emploi →
             </button>
@@ -336,7 +336,7 @@ export const DashboardPage = () => {
               const score = offre.score ?? 0;
               const scoreColor = score >= 75 ? "text-green-400" : score >= 50 ? "text-amber-400" : "text-red-400";
               return (
-                <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg transition-colors" style={{ background: "rgba(255,255,255,0.03)" }}>
                   <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Briefcase className="w-3.5 h-3.5 text-amber-400" />
                   </div>
@@ -369,7 +369,7 @@ export const DashboardPage = () => {
       <Card className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Gavel className="w-4 h-4 text-blue-400" />
+            <Gavel className="w-4 h-4 text-bright-400" />
             Marchés publics — Appels d'offres
           </h3>
           <span className="text-xs text-slate-500">Mis à jour toutes les 6h</span>
@@ -382,9 +382,9 @@ export const DashboardPage = () => {
         ) : (
           <div className="space-y-2">
             {marches.map((m, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/15 hover:border-blue-500/30 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Gavel className="w-3.5 h-3.5 text-blue-400" />
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl transition-colors" style={{ background: "rgba(0,84,166,0.06)", border: "1px solid rgba(0,84,166,0.18)" }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(0,176,240,0.12)" }}>
+                  <Gavel className="w-3.5 h-3.5 text-bright-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-slate-200 text-sm font-medium leading-snug line-clamp-2">{m.titre}</p>
@@ -395,7 +395,7 @@ export const DashboardPage = () => {
                       </span>
                     )}
                     {m.source && (
-                      <span className="text-xs text-blue-400/70">{m.source}</span>
+                      <span className="text-xs text-bright-400/70">{m.source}</span>
                     )}
                     {m.date_pub && (
                       <span className="text-xs text-slate-600 ml-auto">{m.date_pub}</span>
@@ -407,7 +407,7 @@ export const DashboardPage = () => {
                     href={m.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-shrink-0 text-blue-400 hover:text-blue-300 transition-colors mt-1"
+                    className="flex-shrink-0 text-bright-400 hover:text-bright-300 transition-colors mt-1"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>

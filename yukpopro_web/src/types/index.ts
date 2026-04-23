@@ -316,12 +316,12 @@ export const PLANS: PlanDetail[] = [
 ];
 
 export const OPERATEURS_MOBILE_MONEY = [
-  { id: "orange_money",  label: "Orange Money",   pays: ["CM","CI","SN","ML","BF","GN","CD","MG"], logo: "🟠" },
-  { id: "mtn_momo",     label: "MTN MoMo",        pays: ["CM","CI","BJ","GH","UG","RW"],           logo: "🟡" },
-  { id: "wave",         label: "Wave",             pays: ["SN","CI","ML","BF","GN"],               logo: "🔵" },
-  { id: "moov_money",   label: "Moov Money",       pays: ["CI","BJ","TG","NE","BF","TD","CF"],     logo: "🟢" },
-  { id: "airtel_money", label: "Airtel Money",     pays: ["CD","CG","TD","MG","RW","BI"],          logo: "🔴" },
-  { id: "expressunion", label: "Express Union",    pays: ["CM"],                                   logo: "🟤" },
+  { id: "orange_money",  label: "Orange Money",   pays: ["CM","CI","SN","ML","BF","GN","CD","MG"], logo: "https://logo.clearbit.com/orange.com" },
+  { id: "mtn_momo",     label: "MTN MoMo",        pays: ["CM","CI","BJ","GH","UG","RW"],           logo: "https://logo.clearbit.com/mtn.com" },
+  { id: "wave",         label: "Wave",             pays: ["SN","CI","ML","BF","GN"],               logo: "https://logo.clearbit.com/wave.com" },
+  { id: "moov_money",   label: "Moov Money",       pays: ["CI","BJ","TG","NE","BF","TD","CF"],     logo: "https://logo.clearbit.com/moov-africa.com" },
+  { id: "airtel_money", label: "Airtel Money",     pays: ["CD","CG","TD","MG","RW","BI"],          logo: "https://logo.clearbit.com/airtel.com" },
+  { id: "expressunion", label: "Express Union",    pays: ["CM"],                                   logo: "https://logo.clearbit.com/expressunion.cm" },
 ];
 
 // ── Documents générés (historique persisté) ──────────────────────────────────

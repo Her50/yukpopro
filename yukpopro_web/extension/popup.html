@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>YukpoTranslate Live</title>
+    <style>
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #0F172A;
+        color: #E5E7EB;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: #C4B5FD;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .subtitle { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; }
+      label { font-size: 11px; color: #9CA3AF; display: block; margin: 10px 0 4px; }
+      input, select {
+        width: 100%;
+        padding: 8px 10px;
+        background: #1E293B;
+        color: #E5E7EB;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+      .btn-primary { background: linear-gradient(90deg, #8B5CF6, #6366F1); color: white; }
+      .btn-danger { background: #DC2626; color: white; }
+      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+      .status {
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-align: center;
+      }
+      .status-idle { background: rgba(107, 114, 128, 0.2); color: #9CA3AF; }
+      .status-live { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
+      .status-error { background: rgba(239, 68, 68, 0.2); color: #F87171; }
+      .footer { font-size: 10px; color: #64748B; margin-top: 14px; text-align: center; }
+      .footer a { color: #8B5CF6; text-decoration: none; }
+      .live-sub {
+        margin-top: 8px;
+        padding: 10px;
+        background: rgba(139, 92, 246, 0.08);
+        border-radius: 6px;
+        font-size: 12px;
+        min-height: 40px;
+        max-height: 120px;
+        overflow-y: auto;
+      }
+      .live-sub .src { color: #D1D5DB; font-style: italic; }
+      .live-sub .dst { color: #E9D5FF; font-weight: 500; margin-top: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>🎙️ YukpoTranslate Live</h1>
+    <div class="subtitle">Sous-titres temps réel sur cet onglet</div>
+
+    <label>Token YukpoPro</label>
+    <input id="token" type="password" placeholder="Collez votre token…" />
+
+    <label>Serveur backend</label>
+    <input id="backend" type="text" placeholder="https://app.yukpoassurance.com" />
+
+    <label>Langue source (parlée)</label>
+    <select id="source">
+      <option value="auto">🌐 Détection auto</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="pt">🇵🇹 Português</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+
+    <label>Langue cible (traduction)</label>
+    <select id="target">
+      <option value="fr">🇫🇷 Français</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="pt">🇵🇹 Português</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="sw">🇰🇪 Kiswahili</option>
+      <option value="wo">🇸🇳 Wolof</option>
+      <option value="yo">🇳🇬 Yorùbá</option>
+      <option value="ha">🇳🇬 Hausa</option>
+    </select>
+
+    <button id="btn-start" class="btn-primary">Démarrer la traduction</button>
+    <div id="status" class="status status-idle">Prêt</div>
+    <div id="live-sub" class="live-sub" style="display:none"></div>
+
+    <div class="footer">
+      Connectez-vous sur <a href="https://app.yukpoassurance.com" target="_blank">app.yukpoassurance.com</a>
+      pour obtenir votre token · v1.0.0
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
