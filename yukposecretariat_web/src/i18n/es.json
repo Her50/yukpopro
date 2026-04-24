@@ -1,0 +1,6 @@
+{
+  "nav": { "dashboard": "Panel de Control", "redaction": "Redacción IA", "ocr": "Escanear → Texto", "audio": "Audio → Doc", "infographie": "Infografía", "traduction": "Traducción IA", "documents": "Mis Documentos", "kanban": "Cola de trabajo", "devis": "Presupuestos", "caisse": "Caja", "clients": "Clientes", "abonnement": "Suscripción", "logout": "Cerrar sesión" },
+  "common": { "loading": "Cargando…", "save": "Guardar", "cancel": "Cancelar", "delete": "Eliminar", "search": "Buscar", "download": "Descargar", "upload": "Subir", "generate": "Generar", "generating": "Generando…", "or": "o" },
+  "auth": { "login": "Iniciar Sesión", "loginTitle": "Bienvenido a Yukpo Secrétariat", "email": "Correo", "password": "Contraseña", "logout": "Cerrar sesión" },
+  "language": { "select": "Idioma", "fr": "Français", "en": "English", "es": "Español", "pt": "Português", "ar": "العربية" }
+}

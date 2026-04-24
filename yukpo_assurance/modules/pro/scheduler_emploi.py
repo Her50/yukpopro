@@ -155,6 +155,16 @@ async def rechercher_offres_pour_user(
     info = _info_pays(pays)
     logger.info(f"[SchedulerEmploi] Recherche: '{mots_cles}' · {info['nom']}")
 
+    # ── Débit crédits (forfait recherche emploi : 2 FCFA × 20 = 40 crédits) ──
+    try:
+        from modules.pro.service_credits import debiter_forfait_fcfa
+        ok, _, msg = await debiter_forfait_fcfa(user_id, cout_fcfa=2.0, module="recherche_emploi")
+        if not ok:
+            logger.warning(f"[SchedulerEmploi] Crédits insuffisants user {user_id}: {msg}")
+            return 0
+    except Exception as e:
+        logger.debug(f"[SchedulerEmploi] Débit crédits ignoré: {e}")
+
     # ── Collecte en parallèle depuis toutes les sources réelles ──────────────
     resultats = await asyncio.gather(
         _fetch_serpapi_google_jobs(mots_cles, pays, info),

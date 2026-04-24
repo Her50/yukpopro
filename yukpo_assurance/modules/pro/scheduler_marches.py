@@ -180,6 +180,16 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
     termes = _mots_cles_marches(profil)
     logger.info(f"[SchedulerMarches] user {user_id} · {info['nom']} · {termes}")
 
+    # ── Débit crédits (forfait recherche marchés : 2 FCFA × 20 = 40 crédits) ──
+    try:
+        from modules.pro.service_credits import debiter_forfait_fcfa
+        ok, _, msg = await debiter_forfait_fcfa(user_id, cout_fcfa=2.0, module="recherche_marches")
+        if not ok:
+            logger.warning(f"[SchedulerMarches] Crédits insuffisants user {user_id}: {msg}")
+            return 0
+    except Exception as e:
+        logger.debug(f"[SchedulerMarches] Débit crédits ignoré: {e}")
+
     resultats = await asyncio.gather(
         _fetch_serpapi_marches(termes, pays, info),
         _fetch_dgmarket(pays),

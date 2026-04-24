@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "redaction": "Rédaction IA",
+    "ocr": "Scan → Texte",
+    "audio": "Audio → Doc",
+    "infographie": "Infographie",
+    "traduction": "Traduction IA",
+    "documents": "Mes Documents",
+    "kanban": "File de travaux",
+    "devis": "Devis & Factures",
+    "caisse": "Caisse",
+    "clients": "Clients",
+    "abonnement": "Abonnement",
+    "logout": "Déconnexion"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "send": "Envoyer",
+    "sending": "Envoi…",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "uploading": "Téléversement…",
+    "yes": "Oui",
+    "no": "Non",
+    "error": "Erreur",
+    "success": "Succès",
+    "retry": "Réessayer",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "noResults": "Aucun résultat",
+    "generate": "Générer",
+    "generating": "Génération…",
+    "or": "ou"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "loginTitle": "Bienvenue sur Yukpo Secrétariat",
+    "loginSubtitle": "Back-office professionnel propulsé par l'IA",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "loggingIn": "Connexion…",
+    "loginError": "Email ou mot de passe incorrect",
+    "logout": "Déconnexion"
+  },
+  "language": {
+    "select": "Langue",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية"
+  },
+  "theme": {
+    "toggle": "Changer de thème"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "nav": { "dashboard": "لوحة التحكم", "redaction": "الكتابة بالذكاء الاصطناعي", "ocr": "المسح → نص", "audio": "صوت → وثيقة", "infographie": "الإنفوغرافيك", "traduction": "الترجمة بالذكاء الاصطناعي", "documents": "وثائقي", "kanban": "قائمة الأعمال", "devis": "عروض الأسعار", "caisse": "الصندوق", "clients": "العملاء", "abonnement": "الاشتراك", "logout": "تسجيل الخروج" },
+  "common": { "loading": "جاري التحميل…", "save": "حفظ", "cancel": "إلغاء", "search": "بحث", "download": "تحميل", "generate": "إنشاء", "or": "أو" },
+  "auth": { "login": "تسجيل الدخول", "loginTitle": "مرحباً بك في يوكبو سكرتارية", "email": "البريد الإلكتروني", "password": "كلمة المرور", "logout": "تسجيل الخروج" },
+  "language": { "select": "اللغة", "fr": "Français", "en": "English", "es": "Español", "pt": "Português", "ar": "العربية" }
+}

@@ -1,11 +1,13 @@
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { User, Save, Sparkles, ChevronDown, Search } from "lucide-react";
+import { User, Save, Sparkles, ChevronDown, Search, Upload, Trash2, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Card, Input } from "@/components/ui";
 import { useProfilStore } from "@/store";
-import { profilApi } from "@/api/client";
+import { profilApi, emploiApi } from "@/api/client";
 import { METIERS, PAYS_MONDE, SECTEURS_ACTIVITE } from "@/types";
+import { detectLanguageFromCountry } from "@/i18n";
 
 const NIVEAUX_EXPERTISE = [
   { value: "debutant",       label: "Débutant (0-2 ans)" },
@@ -119,11 +121,15 @@ const ComboSelect = ({
 };
 
 export const ProfilPage = () => {
+  const { t, i18n } = useTranslation();
   const { profil, setProfil } = useProfilStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isWelcome = searchParams.get("welcome") === "1";
   const [loading, setLoading] = useState(false);
+  const [cvUploading, setCvUploading] = useState(false);
+  const [cvAvailable, setCvAvailable] = useState(false);
+  const cvFileRef = useRef<HTMLInputElement>(null);
 
   const [metier, setMetier] = useState(profil?.metier || "");
   const [pays, setPays]     = useState(profil?.pays || "CM");
@@ -142,7 +148,52 @@ export const ProfilPage = () => {
 
   useEffect(() => {
     if (!profil) profilApi.get().then(setProfil).catch(console.error);
+    else setCvAvailable(profil.cv_disponible ?? false);
+  }, [profil]);
+
+  // Auto-détection pays + langue par IP si pas encore défini
+  useEffect(() => {
+    if (pays && pays !== "CM") return;
+    fetch("https://ipapi.co/json/")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.country_code && d.country_code !== pays) {
+          setPays(d.country_code);
+          // Auto-switch langue interface si pas encore changée par l'utilisateur
+          const stored = localStorage.getItem("yukpo_lang");
+          if (!stored) {
+            const lang = detectLanguageFromCountry(d.country_code);
+            i18n.changeLanguage(lang);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const handleCvFile = async (file: File) => {
+    if (!file) return;
+    setCvUploading(true);
+    try {
+      await emploiApi.uploadCVFichier(file);
+      setCvAvailable(true);
+      toast.success(t("profil.cvUploadSuccess"));
+    } catch {
+      toast.error(t("profil.cvUploadError"));
+    } finally {
+      setCvUploading(false);
+    }
+  };
+
+  const handleDeleteCv = async () => {
+    if (!window.confirm(t("profil.cvDeleteConfirm"))) return;
+    try {
+      await emploiApi.supprimerCV();
+      setCvAvailable(false);
+      toast.success(t("profil.cvDeleteSuccess"));
+    } catch {
+      toast.error(t("common.error"));
+    }
+  };
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -331,6 +382,71 @@ export const ProfilPage = () => {
                 />
               </div>
 
+              {/* ── Section CV ── */}
+              <div className="pt-2 border-t border-slate-700/50">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
+                  <FileText size={15} className="text-sky-400" />
+                  {t("profil.cv")}
+                </label>
+
+                {cvAvailable ? (
+                  <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-emerald-900/30 border border-emerald-500/30">
+                    <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                      <FileText size={15} />
+                      <span>{t("profil.cvUploaded")}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => cvFileRef.current?.click()}
+                        className="text-xs text-sky-400 hover:text-sky-300 underline"
+                      >
+                        {t("common.edit")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteCv}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center cursor-pointer hover:border-sky-500/60 transition-colors group"
+                    onClick={() => cvFileRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const f = e.dataTransfer.files?.[0];
+                      if (f) handleCvFile(f);
+                    }}
+                  >
+                    {cvUploading ? (
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <span className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-xs">{t("common.uploading")}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1.5">
+                        <Upload size={22} className="text-slate-500 group-hover:text-sky-400 transition-colors" />
+                        <span className="text-sm text-slate-400 group-hover:text-slate-300">{t("profil.dragDropFile")}</span>
+                        <span className="text-xs text-slate-500">{t("profil.cvUploadDesc")}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <input
+                  ref={cvFileRef}
+                  type="file"
+                  accept=".pdf,.docx,.doc,.txt"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCvFile(f); }}
+                />
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
@@ -341,7 +457,7 @@ export const ProfilPage = () => {
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                {loading ? "Enregistrement…" : isWelcome ? "Enregistrer et accéder à YukpoPro →" : "Enregistrer le profil"}
+                {loading ? t("common.saving") : isWelcome ? `${t("profil.saveBtn")} →` : t("profil.saveBtn")}
               </button>
 
             </form>

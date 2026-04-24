@@ -1,29 +1,77 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, FileText, Scan, Mic, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen, CreditCard,
+  Languages, FolderOpen, CreditCard, Globe, ChevronDown,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
+import { SUPPORTED_LANGUAGES } from '../i18n'
 
-const NAV = [
-  { to: '/dashboard',   label: 'Tableau de bord', icon: LayoutDashboard },
-  { to: '/redaction',   label: 'Rédaction IA',    icon: FileText },
-  { to: '/ocr',         label: 'Scan → Texte',    icon: Scan },
-  { to: '/audio',       label: 'Audio → Doc',     icon: Mic },
-  { to: '/infographie', label: 'Infographie',      icon: Image },
-  { to: '/traduction',  label: 'Traduction IA',    icon: Languages },
-  { to: '/documents',   label: 'Mes Documents',    icon: FolderOpen },
-  { to: '/kanban',      label: 'File de travaux',  icon: KanbanSquare },
-  { to: '/devis',       label: 'Devis & Factures', icon: Receipt },
-  { to: '/caisse',      label: 'Caisse',           icon: Wallet },
-  { to: '/clients',     label: 'Clients',          icon: Users },
-  { to: '/abonnement',  label: 'Abonnement',       icon: CreditCard },
+const NAV_KEYS = [
+  { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard },
+  { to: '/redaction',   key: 'redaction',   icon: FileText },
+  { to: '/ocr',         key: 'ocr',         icon: Scan },
+  { to: '/audio',       key: 'audio',       icon: Mic },
+  { to: '/infographie', key: 'infographie', icon: Image },
+  { to: '/traduction',  key: 'traduction',  icon: Languages },
+  { to: '/documents',   key: 'documents',   icon: FolderOpen },
+  { to: '/kanban',      key: 'kanban',      icon: KanbanSquare },
+  { to: '/devis',       key: 'devis',       icon: Receipt },
+  { to: '/caisse',      key: 'caisse',      icon: Wallet },
+  { to: '/clients',     key: 'clients',     icon: Users },
+  { to: '/abonnement',  key: 'abonnement',  icon: CreditCard },
 ]
 
+function LangMenu() {
+  const { i18n, t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const current = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language)
+    ?? SUPPORTED_LANGUAGES.find(l => l.code === i18n.language.split('-')[0])
+    ?? SUPPORTED_LANGUAGES[0]
+
+  const change = (code: string) => {
+    i18n.changeLanguage(code)
+    const dir = SUPPORTED_LANGUAGES.find(l => l.code === code)?.dir || 'ltr'
+    document.documentElement.dir = dir
+    document.documentElement.lang = code
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative px-4 py-2 border-t border-brand-600">
+      <button onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 text-sm text-brand-200 hover:text-white w-full">
+        <Globe size={16} />
+        <span className="flex-1 text-left">{current.flag} {current.label}</span>
+        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-2 right-2 mb-1 bg-brand-800 border border-brand-600 rounded-lg overflow-hidden shadow-xl z-50">
+          {SUPPORTED_LANGUAGES.map(lang => (
+            <button key={lang.code} onClick={() => change(lang.code)}
+              className={clsx('w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors',
+                current.code === lang.code ? 'bg-white/20 text-white' : 'text-brand-200 hover:bg-white/10 hover:text-white')}>
+              <span>{lang.flag}</span><span>{lang.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Layout() {
+  const { t } = useTranslation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -71,24 +119,25 @@ export default function Layout() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {NAV_KEYS.map(({ to, key, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setOpen(false)}
               className={({ isActive }) => clsx(
                 'flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg mx-2 transition-colors',
-                isActive
-                  ? 'bg-white/15 text-white'
-                  : 'text-brand-200 hover:bg-white/10 hover:text-white',
+                isActive ? 'bg-white/15 text-white' : 'text-brand-200 hover:bg-white/10 hover:text-white',
               )}
             >
               <Icon size={18} />
-              <span>{label}</span>
+              <span>{t(`nav.${key}`)}</span>
               <ChevronRight size={14} className="ml-auto opacity-40" />
             </NavLink>
           ))}
         </nav>
+
+        {/* Language switcher */}
+        <LangMenu />
 
         {/* Logout */}
         <button
@@ -96,7 +145,7 @@ export default function Layout() {
           className="flex items-center gap-3 px-4 py-3 text-sm text-brand-300 hover:text-white hover:bg-white/10 border-t border-brand-600 transition-colors"
         >
           <LogOut size={18} />
-          Déconnexion
+          {t('nav.logout')}
         </button>
       </aside>
 

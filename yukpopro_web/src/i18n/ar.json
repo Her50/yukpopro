@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "chat": "يوكبو برو",
+    "generateurs": "يوكبو ستوديو",
+    "reunions": "الاجتماعات",
+    "documents": "وثائقي",
+    "traduction": "الترجمة",
+    "translateLive": "الترجمة الفورية",
+    "emploi": "عروض العمل",
+    "marches": "المناقصات",
+    "enquetes": "الاستطلاعات",
+    "dashboard": "لوحة التحكم",
+    "profil": "ملفي الشخصي",
+    "abonnement": "الاشتراك",
+    "admin": "الإدارة",
+    "logout": "تسجيل الخروج",
+    "collapseMenu": "طي القائمة",
+    "expandMenu": "توسيع القائمة"
+  },
+  "common": {
+    "loading": "جاري التحميل…",
+    "save": "حفظ",
+    "saving": "جاري الحفظ…",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "search": "بحث",
+    "searching": "جاري البحث…",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "send": "إرسال",
+    "sending": "جاري الإرسال…",
+    "download": "تحميل",
+    "upload": "رفع",
+    "yes": "نعم",
+    "no": "لا",
+    "error": "خطأ",
+    "success": "نجاح",
+    "retry": "إعادة المحاولة",
+    "copy": "نسخ",
+    "copied": "تم النسخ!",
+    "noResults": "لا توجد نتائج",
+    "credits": "رصيد",
+    "or": "أو"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "loginTitle": "مرحباً بك في يوكبو برو",
+    "loginSubtitle": "مساعدك الذكي للمحترفين",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "بريدك@example.com",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "createAccount": "إنشاء حساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "register": "التسجيل",
+    "loggingIn": "جاري تسجيل الدخول…",
+    "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "logout": "تسجيل الخروج"
+  },
+  "chat": {
+    "placeholder": "اطرح سؤالك المهني…",
+    "newSession": "جلسة جديدة",
+    "thinking": "يوكبو يفكر…",
+    "welcomeTitle": "مرحباً، أنا مساعدك المهني",
+    "welcomeSubtitle": "اسألني أسئلتك المهنية والقانونية والضريبية والمحاسبية…"
+  },
+  "language": {
+    "select": "اللغة",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية"
+  },
+  "theme": {
+    "toggle": "تغيير المظهر"
+  }
+}

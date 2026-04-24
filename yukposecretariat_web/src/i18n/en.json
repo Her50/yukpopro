@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "redaction": "AI Writing",
+    "ocr": "Scan → Text",
+    "audio": "Audio → Doc",
+    "infographie": "Infographics",
+    "traduction": "AI Translation",
+    "documents": "My Documents",
+    "kanban": "Work Queue",
+    "devis": "Quotes & Invoices",
+    "caisse": "Cash Register",
+    "clients": "Clients",
+    "abonnement": "Subscription",
+    "logout": "Sign Out"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "send": "Send",
+    "sending": "Sending…",
+    "download": "Download",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error",
+    "success": "Success",
+    "retry": "Retry",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "noResults": "No results",
+    "generate": "Generate",
+    "generating": "Generating…",
+    "or": "or"
+  },
+  "auth": {
+    "login": "Sign In",
+    "loginTitle": "Welcome to Yukpo Secrétariat",
+    "loginSubtitle": "AI-powered professional back-office",
+    "email": "Email address",
+    "password": "Password",
+    "loggingIn": "Signing in…",
+    "loginError": "Invalid email or password",
+    "logout": "Sign Out"
+  },
+  "language": {
+    "select": "Language",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  }
+}
