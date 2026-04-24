@@ -1,6 +1,6 @@
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { User, Save, Sparkles } from "lucide-react";
+import { User, Save, Sparkles, ChevronDown, Search } from "lucide-react";
 import toast from "react-hot-toast";
 import { Card, Input } from "@/components/ui";
 import { useProfilStore } from "@/store";
@@ -14,15 +14,12 @@ const NIVEAUX_EXPERTISE = [
   { value: "expert",         label: "Expert (10+ ans)" },
 ];
 
-// Champ select stylé pour le thème sombre
+// Select simple pour pays + niveau (listes courtes)
 const FieldSelect = ({
   label, required, value, onChange, children,
 }: {
-  label: string;
-  required?: boolean;
-  value: string;
-  onChange: (v: string) => void;
-  children: React.ReactNode;
+  label: string; required?: boolean; value: string;
+  onChange: (v: string) => void; children: React.ReactNode;
 }) => (
   <div>
     <label className="block text-sm font-medium text-slate-300 mb-1.5">
@@ -37,6 +34,89 @@ const FieldSelect = ({
     </select>
   </div>
 );
+
+// Combobox avec recherche pour listes longues (Métier, Secteur)
+const ComboSelect = ({
+  label, required, value, onChange, options, placeholder,
+}: {
+  label: string; required?: boolean; value: string;
+  onChange: (v: string) => void;
+  options: readonly { value: string; label: string }[];
+  placeholder?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? "";
+
+  const filtered = options.filter((o) =>
+    o.label.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-sm font-medium text-slate-300 mb-1.5">
+        {label}{required && <span className="text-sky-400 ml-1">*</span>}
+      </label>
+      <button
+        type="button"
+        onClick={() => { setOpen((o) => !o); setSearch(""); }}
+        className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors text-left"
+      >
+        <span className={value ? "text-slate-100" : "text-slate-500"}>
+          {selectedLabel || placeholder || "— Sélectionner —"}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-lg bg-slate-800 border border-slate-600 shadow-xl overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700">
+            <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <input
+              autoFocus
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher…"
+              className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+            />
+          </div>
+          <ul className="max-h-52 overflow-y-auto py-1">
+            {filtered.length === 0 && (
+              <li className="px-3 py-2 text-sm text-slate-500 italic">Aucun résultat</li>
+            )}
+            {filtered.map((o) => (
+              <li
+                key={o.value}
+                onMouseDown={() => { onChange(o.value); setOpen(false); setSearch(""); }}
+                className={`px-3 py-2 text-sm cursor-pointer transition-colors ${
+                  o.value === value
+                    ? "bg-sky-600/30 text-sky-300"
+                    : "text-slate-200 hover:bg-slate-700"
+                }`}
+              >
+                {o.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const ProfilPage = () => {
   const { profil, setProfil } = useProfilStore();
@@ -175,12 +255,14 @@ export const ProfilPage = () => {
                 </h2>
               </div>
 
-              <FieldSelect label="Métier / Profession" required value={metier} onChange={setMetier}>
-                <option value="" className="bg-slate-800">— Sélectionner votre métier —</option>
-                {METIERS.map((m) => (
-                  <option key={m.value} value={m.value} className="bg-slate-800">{m.label}</option>
-                ))}
-              </FieldSelect>
+              <ComboSelect
+                label="Métier / Profession"
+                required
+                value={metier}
+                onChange={setMetier}
+                options={METIERS}
+                placeholder="— Rechercher votre métier —"
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <FieldSelect label="Pays" required value={pays} onChange={setPays}>
@@ -198,12 +280,13 @@ export const ProfilPage = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <FieldSelect label="Secteur d'activité" value={secteurSelect} onChange={setSecteurSelect}>
-                    <option value="" className="bg-slate-800">— Sélectionner —</option>
-                    {SECTEURS_ACTIVITE.map((s) => (
-                      <option key={s.value} value={s.value} className="bg-slate-800">{s.label}</option>
-                    ))}
-                  </FieldSelect>
+                  <ComboSelect
+                    label="Secteur d'activité"
+                    value={secteurSelect}
+                    onChange={setSecteurSelect}
+                    options={SECTEURS_ACTIVITE}
+                    placeholder="— Rechercher un secteur —"
+                  />
                   {secteurSelect === "autre" && (
                     <input
                       type="text"
