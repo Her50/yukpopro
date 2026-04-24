@@ -1607,37 +1607,26 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
 {f"▸ Civil        : {cadre['civil']}" if cadre.get('civil') else ''}
 {f"▸ Pénal        : {cadre['penal']}" if cadre.get('penal') else ''}
 
-CORPUS JURIDIQUE PRIORITAIRE POUR CE PROFIL ({metier.upper()}) :
+DOMAINES JURIDIQUES PRIORITAIRES POUR CE PROFIL ({metier.upper()}) :
    - {corpus_str}
-
-COUVERTURE DES DOCUMENTS RAG INDEXÉS (ce que Yukpo a réellement en base documentaire) :
-{"▸ CGI indexé : " + ", ".join(_RAG_COUVERTURE["CGI_indexé"]) if pays_code in _RAG_COUVERTURE["CGI_indexé"] else "▸ CGI : NON INDEXÉ pour " + pays_code + " → ta mémoire de formation est la source principale"}
-{"▸ Code du travail indexé" if pays_code in _RAG_COUVERTURE["travail_indexé"] else "▸ Code du travail : NON INDEXÉ pour " + pays_code}
-{"▸ Code pénal indexé" if pays_code in _RAG_COUVERTURE["penal_indexé"] else "▸ Code pénal : NON INDEXÉ pour " + pays_code}
-▸ OHADA : tous les actes uniformes indexés (AUS, AUDCG, SYSCOHADA, AUPCAP, AUSCGIE…)
-▸ Normes ISO 45001 (SST) + Conventions OIT : indexées
-→ IMPORTANT : si un corpus RAG est injecté dans le message, utilise-le en priorité pour les citations.
-→ Si aucun corpus n'est injecté pour ce pays/domaine, réponds avec ta mémoire de formation + label [Mémoire IA].
 
 ═══════════════════════════════════════════════════
   RÈGLES ANTI-HALLUCINATION — PRIORITÉ ABSOLUE
 ═══════════════════════════════════════════════════
 
-**RÈGLE 1 — CORPUS RAG (Si le message contient === CORPUS RÉGLEMENTAIRE === ou === ARTICLES CODE CIMA ===) :**
-→ Cite le texte EXACTEMENT tel qu'il apparaît dans le corpus, entre guillemets.
-→ Indique TOUJOURS la source : nom du texte + numéro d'article + pays.
-→ N'invente AUCUN article, n'extrapole PAS au-delà de ce qui est écrit.
-→ Si le corpus contient l'article demandé : tu dois reproduire le texte officiel mot pour mot, puis analyser.
-→ Format : **Article X [Nom du texte, {pays_nom}]** : "texte exact" → [ANALYSE] ton commentaire.
+**RÈGLE 1 — SOURCE UNIQUE = TA MÉMOIRE DE FORMATION :**
+→ Tu réponds TOUJOURS depuis ta connaissance des textes juridiques, fiscaux, comptables officiels.
+→ Tu as été formé sur les codes officiels : OHADA, CGI des pays francophones africains, codes du travail, codes civils et pénaux, SYSCOHADA, Code CIMA, normes ISO/OIT.
+→ NE PAS inventer d'article, de taux, de barème que tu ne connais pas — dis-le clairement si tu n'es pas sûr.
+→ Marque TOUJOURS : `[À vérifier — version officielle en vigueur]` pour tout article/taux dont tu n'es pas certain.
+→ Cite l'article précis et son texte tel que tu le connais — même avec la réserve, c'est utile.
+→ Précise TOUJOURS : "selon le [Code] {pays_nom} (base formation, vérifier la version à jour)"
+→ JAMAIS de réponse vague type "selon la loi" sans citer l'article précis ou au minimum le chapitre.
 
-**RÈGLE 2 — SOURCE PRINCIPALE = TA MÉMOIRE DE FORMATION (RAG = citation complémentaire) :**
-→ Ta connaissance de formation (Claude/GPT) EST LA SOURCE PRIMAIRE. Tu réponds TOUJOURS avec ta connaissance des textes juridiques, fiscaux, comptables officiels.
-→ Le corpus RAG (=== CORPUS RÉGLEMENTAIRE ===), QUAND IL EST PRÉSENT, est une source de citation officielle supplémentaire — utilise-le pour CITER mot pour mot avec références précises.
-→ NE PAS attendre du RAG pour répondre : si aucun corpus n'est injecté, réponds quand même avec ta mémoire de formation.
-→ MAIS marque systématiquement : `[Mémoire IA — vérifier la version officielle en vigueur]` pour toute affirmation sur articles/taux/barèmes non issus du corpus RAG injecté.
-→ Cite le numéro d'article et le texte exact tel que tu le connais — c'est utile même avec la réserve.
-→ Précise TOUJOURS la version/date si connue : "selon le Code du travail {pays_nom} (version estimée à la date de formation)"
-→ JAMAIS de réponse vague type "selon la loi" sans citer l'article précis ou au minimum le chapitre concerné.
+**RÈGLE 2 — PRÉCISION CONTEXTUELLE ABSOLUE :**
+→ Toute réponse juridique, fiscale, comptable ou RH doit être contextualisée à {pays_nom}.
+→ N'utilise JAMAIS les taux/règles d'un autre pays pour répondre — même si tu ne connais pas tous les détails de {pays_nom}, dis-le clairement et donne ce que tu sais.
+→ Si tu ne connais pas le droit local précis : dis "je ne suis pas certain du droit {pays_nom} sur ce point — voici ce que je sais + conseillez de vérifier avec un professionnel local".
 
 **RÈGLE 3 — COMPTABILITÉ (SYSCOHADA / IFRS / normes nationales) :**
 → Les réponses comptables DOIVENT référencer le plan comptable applicable : {cadre['comptable']}
@@ -2189,79 +2178,10 @@ async def copilote_chat(
     # on l'utilise quand même pour enrichir la réponse copilote.
     agent_detecte = _agent_orch if _intention == "agent_metier" else None
 
-    if not a_fichiers_joints and _intention in ("agent_metier", "conversation"):
-
-        async def _tache_rag() -> str:
-            if not _besoin_rag(req.message):
-                return ""
-            parties_rag = []
-
-            # 1. Recherche CIMA si question liée à l'assurance/CIMA
-            _MOTS_CIMA = {
-                "cima", "assurance", "sinistre", "prime", "garantie", "indemnisation",
-                "rc auto", "responsabilité civile", "vie", "capitalisation", "réassurance",
-                "microassurance", "police", "souscription assurance", "contrat assurance",
-                "couverture assurance", "branche assurance", "agrément", "solvabilité",
-                "provisions techniques", "compagnie d'assurance",
-                # Captures "article 13 nouveau" et toute question sur un article précis
-                "article", "art.", "art ",
-            }
-            msg_lower = req.message.lower()
-            if any(mot in msg_lower for mot in _MOTS_CIMA):
-                try:
-                    from modules.chat.cima_retriever import rechercher_articles
-                    res_cima = await asyncio.wait_for(
-                        asyncio.to_thread(rechercher_articles, req.message),
-                        timeout=5.0,
-                    )
-                    if res_cima and res_cima.strip():
-                        parties_rag.append(f"=== ARTICLES CODE CIMA ===\n{res_cima}")
-                except asyncio.TimeoutError:
-                    logger.warning("[Copilote] CIMA retriever timeout (>5s)")
-                except Exception as e:
-                    logger.warning(f"[Copilote] CIMA retriever indisponible: {e}")
-
-            # 2. Recherche corpus réglementaire (OHADA, fiscal, travail…)
-            # Priorité : TF-IDF cloud (toujours disponible) > sentence_transformers (local)
-            try:
-                from modules.rag.rag_tfidf_retriever import tfidf_retriever, rechercher_tfidf
-                from modules.rag.rag_embedder import rag_embedder_manager
-                metier_profil = getattr(profil, "metier", "") or ""
-
-                # S'assurer que l'index TF-IDF est initialisé (démarre si besoin)
-                if not tfidf_retriever.pret:
-                    rag_embedder_manager._charger_modele()  # active le TF-IDF en background
-
-                # Recherche via TF-IDF (mode cloud) ou sentence_transformers (mode local)
-                _rag_fn = (
-                    rechercher_tfidf if tfidf_retriever.pret
-                    else None
-                )
-                if not _rag_fn and rag_embedder_manager.modele_pret:
-                    from modules.rag.rag_retriever import rechercher_pour_metier, rechercher_corpus_reglementaire
-                    _rag_fn = lambda q, **kw: (rechercher_pour_metier(q, metier_profil, pays) if metier_profil else rechercher_corpus_reglementaire(q, pays))  # noqa
-
-                if _rag_fn is not None:
-                    res_rag = await asyncio.wait_for(
-                        asyncio.to_thread(
-                            rechercher_tfidf if tfidf_retriever.pret else _rag_fn,
-                            req.message,
-                            pays=pays,
-                            metier=metier_profil or None,
-                        ) if tfidf_retriever.pret else asyncio.to_thread(_rag_fn, req.message),
-                        timeout=6.0,
-                    )
-                    if res_rag:
-                        parties_rag.append(res_rag)
-
-            except asyncio.TimeoutError:
-                logger.warning("[Copilote] RAG timeout (>6s)")
-            except Exception as e:
-                logger.warning(f"[Copilote] RAG indisponible: {e}")
-
-            return "\n\n".join(parties_rag)
-
-        contexte_rag = await _tache_rag()
+    # Architecture LLM-first : on ne fait plus de RAG corpus documentaire.
+    # Le prompt système est hyper-contextualisé (pays, métier, cadre juridique).
+    # Le LLM répond depuis sa connaissance de formation, sans injection de documents.
+    contexte_rag = ""
 
     # ── Étape 1 : Appel agent spécialisé si pertinent ─────────────────────────
     # Le DAA peut traiter des fichiers joints (Excel, CSV) — les autres agents non.

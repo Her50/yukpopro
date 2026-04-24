@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { User, Save, Sparkles, PartyPopper, CheckCircle2, ArrowRight } from "lucide-react";
+import { User, Save, Sparkles, PartyPopper, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { Card, Button, Input, Select, Badge } from "@/components/ui";
 import { useProfilStore } from "@/store";
@@ -74,55 +74,29 @@ export const ProfilPage = () => {
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto animate-fade-in">
 
-      {/* ── Bannière de bienvenue — visible et orientante ─────────────────────── */}
+      {/* ── Bannière de bienvenue — compacte et lisible ──────────────────────── */}
       {isWelcome && (
         <div
-          className="relative overflow-hidden rounded-2xl p-5"
+          className="flex items-center gap-3 rounded-xl px-4 py-3 border-l-4"
           style={{
-            background: "linear-gradient(135deg, #0054A6 0%, #003476 50%, #00B0F0 100%)",
-            boxShadow: "0 4px 24px rgba(0,84,166,0.4)",
+            borderLeftColor: "#00B0F0",
+            background: "rgba(0,84,166,0.18)",
+            border: "1px solid rgba(0,176,240,0.25)",
+            borderLeft: "4px solid #00B0F0",
           }}
         >
-          {/* Cercle décoratif */}
-          <div
-            className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20"
-            style={{ background: "radial-gradient(circle, #00B0F0, transparent)" }}
-          />
-          <div className="relative flex items-start gap-4">
-            <div
-              className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.2)" }}
-            >
-              <PartyPopper className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white font-bold text-base leading-tight">
-                🎉 Bienvenue sur YukpoPro !
-              </p>
-              <p className="text-blue-100 text-sm mt-1 leading-relaxed">
-                Votre compte est créé. <strong className="text-white">Configurez votre profil métier</strong> ci-dessous
-                pour que votre assistant IA se spécialise dans votre domaine et votre pays.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[
-                  "Réponses adaptées à votre métier",
-                  "Corpus juridique de votre pays",
-                  "Agents spécialisés activés",
-                ].map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex items-center gap-1 text-xs text-blue-100 bg-white/15 rounded-full px-2.5 py-1"
-                  >
-                    <CheckCircle2 className="w-3 h-3 text-blue-200" />
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-200 font-medium">
-                <ArrowRight className="w-3.5 h-3.5" />
-                Remplissez le formulaire et cliquez sur <strong className="text-white ml-1">Enregistrer le profil</strong>
-              </div>
-            </div>
+          <PartyPopper className="w-5 h-5 text-blue-300 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-white font-semibold text-sm">
+              🎉 Compte créé avec succès !
+            </span>
+            <span className="text-slate-300 text-sm ml-2">
+              Configurez votre profil pour que YukpoPro se spécialise dans votre métier et pays.
+            </span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1 text-xs text-blue-300 whitespace-nowrap">
+            <ArrowRight className="w-3 h-3" />
+            Enregistrer le profil
           </div>
         </div>
       )}
