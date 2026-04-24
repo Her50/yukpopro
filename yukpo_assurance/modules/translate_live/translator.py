@@ -11,10 +11,17 @@ from typing import Optional
 
 from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 from modules.translate_live.languages import nom_humain, normaliser_code_langue
-from modules.translate_live.nllb_translator import (
-    doit_utiliser_nllb,
-    traduire_nllb,
-)
+try:
+    from modules.translate_live.nllb_translator import (
+        doit_utiliser_nllb,
+        traduire_nllb,
+    )
+except ImportError:
+    def doit_utiliser_nllb(source_lang: str, target_lang: str) -> bool:  # type: ignore[misc]
+        return False
+
+    async def traduire_nllb(texte: str, *, source_lang: str, target_lang: str, timeout: float = 20.0):  # type: ignore[misc]
+        return None
 
 logger = logging.getLogger("yukpo_assurance.translate_live.translator")
 
