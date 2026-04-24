@@ -79,6 +79,8 @@ export const infographieAPI = {
     api.post('/infographie/generer-custom', data),
   telecharger: (fichier_id: string) =>
     api.get(`/infographie/fichier/${fichier_id}`, { responseType: 'blob' }),
+  modifier: (data: { fichier_id: string; instructions: string; pays?: string }) =>
+    api.post('/infographie/modifier', data, { timeout: 120_000 }),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────

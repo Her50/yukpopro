@@ -157,14 +157,14 @@ export default function AbonnementPage() {
         <div className="bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl p-6 shadow-lg">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-brand-100 text-xs uppercase tracking-wide">Plan actif</div>
+              <div className="text-white/70 text-xs uppercase tracking-wide">Plan actif</div>
               <div className="text-3xl font-bold mt-1">{monAbo.nom_plan}</div>
-              <div className="text-brand-200 text-sm mt-1">{monAbo.label_credits}</div>
+              <div className="text-white/80 text-sm mt-1">{monAbo.label_credits}</div>
             </div>
             <div className="text-right">
-              <div className="text-brand-100 text-xs uppercase tracking-wide">Crédits restants</div>
+              <div className="text-white/70 text-xs uppercase tracking-wide">Crédits restants</div>
               <div className="text-3xl font-bold mt-1">{Math.round(monAbo.credits_restants).toLocaleString('fr-FR')}</div>
-              <div className="text-brand-200 text-sm mt-1">sur {monAbo.credits_alloues.toLocaleString('fr-FR')}</div>
+              <div className="text-white/80 text-sm mt-1">sur {monAbo.credits_alloues.toLocaleString('fr-FR')}</div>
             </div>
           </div>
           <div className="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">

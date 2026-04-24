@@ -251,10 +251,10 @@ export const ProfilPage = () => {
 
   const niveauPro = profil?.niveau_pro || "Starter";
   const niveauColor: Record<string, string> = {
-    Starter: "text-slate-400",
-    Junior:  "text-emerald-400",
-    Senior:  "text-sky-400",
-    Expert:  "text-amber-400",
+    Starter: "text-slate-200",
+    Junior:  "text-emerald-300",
+    Senior:  "text-sky-300",
+    Expert:  "text-amber-300",
     Master:  "text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-amber-400",
   };
 
@@ -448,7 +448,7 @@ export const ProfilPage = () => {
 
                 {cvAvailable ? (
                   <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-emerald-900/30 border border-emerald-500/30">
-                    <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                    <div className="flex items-center gap-2 text-emerald-200 text-sm">
                       <FileText size={15} />
                       <span>{t("profil.cvUploaded")}</span>
                     </div>
