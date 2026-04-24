@@ -378,6 +378,10 @@ export const abonnementApi = {
     const { data } = await http.post("/pro/abonnement/confirmer-recharge", { reference_paiement, numero_expediteur, transaction_id });
     return data;
   },
+  wallet: async (jours = 30) => {
+    const { data } = await http.get("/pro/abonnement/wallet", { params: { jours } });
+    return data;
+  },
 };
 
 // ── Admin — Paiements MoMo ───────────────────────────────────────────────────

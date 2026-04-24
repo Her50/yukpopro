@@ -466,6 +466,113 @@ async def historique_paiements(
     }
 
 
+@router.get("/wallet", summary="Wallet — solde + historique consommations détaillé")
+async def wallet_dashboard(
+    jours: int = 30,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Dashboard wallet complet :
+      - solde actuel (plan, crédits restants, renouvellement)
+      - historique consommations (N derniers jours)
+      - agrégats par module (top consommateurs)
+      - série temporelle quotidienne (graphique)
+      - équivalent FCFA + valeur marchande
+    """
+    from datetime import datetime, timedelta
+    from sqlalchemy import select, func, and_
+    from core.database import ConsommationTokenDB
+    from modules.pro.service_credits import solde_utilisateur, MULTIPLICATEUR_YUKPO
+
+    jours = max(1, min(365, jours))
+    since = datetime.utcnow() - timedelta(days=jours)
+
+    solde = await solde_utilisateur(current_user.user_id, db)
+
+    # Historique détaillé (limité à 200 dernières lignes)
+    rows = (await db.execute(
+        select(ConsommationTokenDB)
+        .where(and_(
+            ConsommationTokenDB.user_id == current_user.user_id,
+            ConsommationTokenDB.cree_le >= since,
+        ))
+        .order_by(ConsommationTokenDB.cree_le.desc())
+        .limit(200)
+    )).scalars().all()
+
+    historique = [{
+        "id": r.id,
+        "date": r.cree_le.isoformat() if r.cree_le else None,
+        "modele": r.modele,
+        "module": r.module or "inconnu",
+        "tokens_input": r.tokens_input or 0,
+        "tokens_output": r.tokens_output or 0,
+        "cout_fcfa": round(r.cout_fcfa or 0.0, 2),
+        "credits_debites": round(r.credits_debites or 0.0, 1),
+    } for r in rows]
+
+    # Agrégat par module (top consommateurs)
+    agg_module = (await db.execute(
+        select(
+            ConsommationTokenDB.module,
+            func.sum(ConsommationTokenDB.credits_debites).label("credits"),
+            func.count(ConsommationTokenDB.id).label("appels"),
+            func.sum(ConsommationTokenDB.tokens_input + ConsommationTokenDB.tokens_output).label("tokens"),
+        )
+        .where(and_(
+            ConsommationTokenDB.user_id == current_user.user_id,
+            ConsommationTokenDB.cree_le >= since,
+        ))
+        .group_by(ConsommationTokenDB.module)
+        .order_by(func.sum(ConsommationTokenDB.credits_debites).desc())
+    )).all()
+
+    top_modules = [{
+        "module": m or "inconnu",
+        "credits": round(c or 0.0, 1),
+        "appels": int(a or 0),
+        "tokens": int(t or 0),
+    } for (m, c, a, t) in agg_module]
+
+    # Série temporelle quotidienne
+    agg_jour = (await db.execute(
+        select(
+            func.date(ConsommationTokenDB.cree_le).label("jour"),
+            func.sum(ConsommationTokenDB.credits_debites).label("credits"),
+            func.count(ConsommationTokenDB.id).label("appels"),
+        )
+        .where(and_(
+            ConsommationTokenDB.user_id == current_user.user_id,
+            ConsommationTokenDB.cree_le >= since,
+        ))
+        .group_by(func.date(ConsommationTokenDB.cree_le))
+        .order_by(func.date(ConsommationTokenDB.cree_le))
+    )).all()
+
+    serie_jour = [{
+        "jour": str(j),
+        "credits": round(c or 0.0, 1),
+        "appels": int(a or 0),
+    } for (j, c, a) in agg_jour]
+
+    total_credits_periode = sum(m["credits"] for m in top_modules)
+    total_appels_periode = sum(m["appels"] for m in top_modules)
+
+    return {
+        "solde": solde,
+        "periode_jours": jours,
+        "totaux": {
+            "credits_consommes": round(total_credits_periode, 1),
+            "appels": total_appels_periode,
+            "valeur_fcfa_payee": round(total_credits_periode * 0.6, 0),  # pack rate: 0.6 FCFA/crédit
+        },
+        "top_modules": top_modules,
+        "serie_jour": serie_jour,
+        "historique": historique,
+    }
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _generer_instructions_paiement(operateur: str, montant: int, reference: str, numero: str) -> dict:

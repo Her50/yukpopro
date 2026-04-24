@@ -1,5 +1,6 @@
 import { useState, FormEvent, useRef, DragEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FileText, Presentation, Download, CheckCircle, Loader, BookOpen, ArrowRight, Upload, X, FolderOpen, RefreshCw, Palette, Sparkles, Image as ImageIcon, Save, ChevronDown, Wand2, Settings2, FileImage, Maximize2 } from "lucide-react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
@@ -449,9 +450,10 @@ const FORMATS_SLIDES = new Set(["rapport_direction","bilan_activite","propositio
 
 export const GenerateursPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // Onglet persisté dans le store → survit à la navigation
   const tab = useGenerateurStore((s) => s.tab) as Tab;
-  const setTab = (t: Tab) => useGenerateurStore.getState().setTab(t);
+  const setTab = (tt: Tab) => useGenerateurStore.getState().setTab(tt);
   const [openCat, setOpenCat] = useState<string | null>(null);
 
   // Persistance des jobs (survit à la navigation)
@@ -1015,19 +1017,20 @@ export const GenerateursPage = () => {
                 <a
                   href={generateurApi.telecharger(resultat.fichier)}
                   download={resultat.fichier}
-                  className="flex items-center gap-3 p-3 bg-[#0054A6]/10 dark:bg-yukpo-500/20 border border-[#0054A6]/30 dark:border-yukpo-500/40 rounded-xl hover:bg-[#0054A6]/15 dark:hover:bg-yukpo-500/30 transition-colors"
+                  className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-yukpo-500/20 border border-blue-200 dark:border-yukpo-500/40 rounded-xl hover:bg-blue-100 dark:hover:bg-yukpo-500/30 transition-colors group"
                 >
-                  <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
-                  <div>
-                    <p className="text-sm font-medium text-white">{resultat.fichier}</p>
-                    <p className="text-xs text-slate-400">Cliquer pour télécharger</p>
+                  <Download className="w-5 h-5 shrink-0 text-blue-600 dark:text-yukpo-400" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{resultat.fichier}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cliquer pour télécharger</p>
                   </div>
+                  <Download className="w-4 h-4 shrink-0 ml-auto text-blue-400 dark:text-yukpo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               )}
               {resultat.markdown && (
                 <div className="max-h-64 overflow-y-auto">
                   <p className="text-xs text-slate-500 mb-2">Aperçu :</p>
-                  <div className="p-3 bg-slate-900 rounded-xl border border-slate-700 text-xs">
+                  <div className="p-3 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                     <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                       {resultat.markdown.slice(0, 2000)}
                     </ReactMarkdown>
@@ -1117,12 +1120,12 @@ export const GenerateursPage = () => {
               <a
                 href={generateurApi.telecharger(resultatConv.fichier_converti)}
                 download={resultatConv.fichier_converti}
-                className="flex items-center gap-3 p-3 bg-[#0054A6]/10 dark:bg-yukpo-500/20 border border-[#0054A6]/30 dark:border-yukpo-500/40 rounded-xl hover:bg-[#0054A6]/15 dark:hover:bg-yukpo-500/30 transition-colors"
+                className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-yukpo-500/20 border border-blue-200 dark:border-yukpo-500/40 rounded-xl hover:bg-blue-100 dark:hover:bg-yukpo-500/30 transition-colors group"
               >
-                <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
-                <div>
-                  <p className="text-sm font-medium text-white">{resultatConv.fichier_converti}</p>
-                  <p className="text-xs text-slate-400">Cliquer pour télécharger</p>
+                <Download className="w-5 h-5 shrink-0 text-blue-600 dark:text-yukpo-400" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{resultatConv.fichier_converti}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cliquer pour télécharger</p>
                 </div>
               </a>
               <button
@@ -1178,7 +1181,7 @@ export const GenerateursPage = () => {
                       <optgroup key={cat} label={cat.toUpperCase()}>
                         {items.map(g => (
                           <option key={g.cle} value={g.cle}>
-                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} FCFA
+                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} crédits
                           </option>
                         ))}
                       </optgroup>
@@ -1602,12 +1605,12 @@ export const GenerateursPage = () => {
                 <a
                   href={generateurApi.telecharger(resultat.fichier)}
                   download={resultat.fichier}
-                  className="flex items-center gap-3 p-3 bg-yukpo-500/20 border border-yukpo-500/40 rounded-xl hover:bg-yukpo-500/30 transition-colors group"
+                  className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-yukpo-500/20 border border-blue-200 dark:border-yukpo-500/40 rounded-xl hover:bg-blue-100 dark:hover:bg-yukpo-500/30 transition-colors group"
                 >
-                  <Download className="w-5 h-5 text-[#0054A6] dark:text-yukpo-400" />
-                  <div>
-                    <p className="text-sm font-medium text-white">{resultat.fichier}</p>
-                    <p className="text-xs text-slate-400">Cliquer pour télécharger</p>
+                  <Download className="w-5 h-5 shrink-0 text-blue-600 dark:text-yukpo-400" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{resultat.fichier}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cliquer pour télécharger</p>
                   </div>
                 </a>
               )}
@@ -1616,7 +1619,7 @@ export const GenerateursPage = () => {
               {resultat.markdown && (
                 <div className="max-h-80 overflow-y-auto">
                   <p className="text-xs text-slate-500 mb-2">Aperçu :</p>
-                  <div className="p-3 bg-slate-900 rounded-xl border border-slate-700 text-xs">
+                  <div className="p-3 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                     <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                       {resultat.markdown.slice(0, 2000)}
                     </ReactMarkdown>

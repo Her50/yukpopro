@@ -4,12 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { infographieAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { DemoBanner } from '../components/DemoBanner'
+import { CountryPicker } from '../components/CountryPicker'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
-
-const PAYS = [
-  { code: 'CM', label: '🇨🇲 Cameroun' }, { code: 'SN', label: '🇸🇳 Sénégal' },
-  { code: 'CI', label: '🇨🇮 Côte d\'Ivoire' }, { code: 'TG', label: '🇹🇬 Togo' },
-]
 
 const CAT_LABELS: Record<string, string> = {
   print: '🖨️ Impression standard',
@@ -29,8 +25,8 @@ interface Gabarit {
 
 type Mode = 'brief' | 'modele' | 'custom'
 
-function formatFCFA(n: number) {
-  return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
+function formatCredits(n: number) {
+  return new Intl.NumberFormat('fr-FR').format(n) + ' crédits'
 }
 
 function b64download(b64: string, filename: string, mimeType: string) {
@@ -154,7 +150,7 @@ export default function InfographiePage() {
                   <optgroup key={cat} label={CAT_LABELS[cat] || cat}>
                     {gabarits.filter(g => g.categorie === cat).map(g => (
                       <option key={g.cle} value={g.cle}>
-                        {g.label} ({g.width_mm}×{g.height_mm}mm) — {formatFCFA(g.prix_fcfa)}
+                        {g.label} ({g.width_mm}×{g.height_mm}mm) — {formatCredits(g.prix_fcfa)}
                       </option>
                     ))}
                   </optgroup>
@@ -210,14 +206,7 @@ export default function InfographiePage() {
         )}
 
         {/* Pays */}
-        <div className="flex flex-wrap gap-2">
-          {PAYS.map(p => (
-            <button key={p.code} onClick={() => setPays(p.code)}
-              className={`px-3 py-1.5 rounded-lg text-sm ${pays === p.code ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
-              {p.label}
-            </button>
-          ))}
-        </div>
+        <CountryPicker label="Pays" value={pays} onChange={setPays} />
 
         {/* Brief */}
         <div>
