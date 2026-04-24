@@ -69,6 +69,32 @@ LABEL_CREDITS_PLAN: dict[str, str] = {
 }
 
 
+_ADMIN_CACHE: dict[int, tuple[float, bool]] = {}
+_ADMIN_CACHE_TTL = 300.0  # 5 minutes
+
+
+async def _is_admin(user_id: int) -> bool:
+    """Vérifie si l'utilisateur est admin (cache 5 min)."""
+    import time
+    now = time.monotonic()
+    cached = _ADMIN_CACHE.get(user_id)
+    if cached and (now - cached[0]) < _ADMIN_CACHE_TTL:
+        return cached[1]
+    try:
+        from core.database import async_session_maker, UtilisateurDB
+        from sqlalchemy import select
+        async with async_session_maker() as db:
+            row = await db.execute(
+                select(UtilisateurDB.role).where(UtilisateurDB.id == user_id)
+            )
+            role = row.scalar_one_or_none() or "agent"
+            is_adm = role in ("admin", "super_admin", "yukpo_owner")
+            _ADMIN_CACHE[user_id] = (now, is_adm)
+            return is_adm
+    except Exception:
+        return False
+
+
 def calculer_cout(modele: str, tokens_input: int, tokens_output: int) -> dict:
     """
     Calcule le coût réel et les crédits Yukpo pour un appel IA.
@@ -114,6 +140,9 @@ async def verifier_solde_suffisant(user_id: int) -> Tuple[bool, float, str, str]
     Retourne : (ok, credits_restants, plan, message).
     Ne débite rien — sert à retourner 402 CREDITS_EPUISES avant de commencer le travail.
     """
+    if await _is_admin(user_id):
+        return True, float(CREDITS_PAR_PLAN["business"]), "business", "ok"
+
     from core.database import async_session_maker
 
     try:
@@ -170,6 +199,30 @@ async def verifier_et_debiter(
     avec la session de requête principale.
     """
     from core.database import async_session_maker
+
+    # Bypass admin : log la consommation mais ne bloque jamais sur le solde
+    if await _is_admin(user_id):
+        calcul = calculer_cout(modele, tokens_input, tokens_output)
+        credits_debites = calcul["credits_debites"]
+        try:
+            async with async_session_maker() as adm_db:
+                credit = await get_ou_creer_credits(user_id, adm_db)
+                if credit.plan not in ("pro", "business"):
+                    credit.plan = "business"
+                    credit.credits_alloues = CREDITS_PAR_PLAN["business"]
+                credit.credits_utilises += credits_debites
+                credit.mise_a_jour = datetime.utcnow()
+                log = ConsommationTokenDB(
+                    user_id=user_id, modele=modele,
+                    tokens_input=tokens_input, tokens_output=tokens_output,
+                    cout_usd=calcul["cout_usd"], cout_fcfa=calcul["cout_fcfa"],
+                    credits_debites=credits_debites, module=module, session_id=session_id,
+                )
+                adm_db.add(log)
+                await adm_db.commit()
+        except Exception as _e:
+            logger.warning(f"[Credits/Admin] log échoué user={user_id}: {_e}")
+        return True, credits_debites, "ok"
 
     try:
         async with async_session_maker() as fresh_db:
@@ -269,6 +322,28 @@ async def debiter_forfait_fcfa(
     from core.database import async_session_maker, ConsommationTokenDB
 
     credits_debites = max(1.0, round(cout_fcfa * multiplicateur, 2))
+
+    if await _is_admin(user_id):
+        try:
+            async with async_session_maker() as adm_db:
+                credit = await get_ou_creer_credits(user_id, adm_db)
+                if credit.plan not in ("pro", "business"):
+                    credit.plan = "business"
+                    credit.credits_alloues = CREDITS_PAR_PLAN["business"]
+                credit.credits_utilises += credits_debites
+                credit.mise_a_jour = datetime.utcnow()
+                log = ConsommationTokenDB(
+                    user_id=user_id, modele="forfait", tokens_input=0, tokens_output=0,
+                    cout_usd=round(cout_fcfa / USD_TO_FCFA, 6),
+                    cout_fcfa=round(cout_fcfa, 4), credits_debites=credits_debites,
+                    module=module, session_id=None,
+                )
+                adm_db.add(log)
+                await adm_db.commit()
+        except Exception as _e:
+            logger.warning(f"[Credits/Admin/Forfait] log échoué user={user_id}: {_e}")
+        return True, credits_debites, "ok"
+
     try:
         async with async_session_maker() as fresh_db:
             credit = await get_ou_creer_credits(user_id, fresh_db)

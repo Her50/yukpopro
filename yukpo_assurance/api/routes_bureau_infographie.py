@@ -462,6 +462,121 @@ async def generer_format_custom(
     }
 
 
+class ModifierInfographieRequest(BaseModel):
+    fichier_id: str = Field(..., description="ID du fichier infographie à modifier")
+    instructions: str = Field(..., min_length=5, description="Instructions de modification en langage naturel")
+    pays: str = Field(default="CM")
+
+
+@router.post("/modifier", tags=["Bureau — Infographie"])
+async def modifier_infographie(
+    demande: ModifierInfographieRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Modifie un visuel existant via instructions en langage naturel.
+    L'IA analyse le PNG du visuel actuel et applique les modifications demandées.
+    """
+    import re
+    from modules.bureau.infographe import generer_infographie, analyser_modele_image, GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+
+    if f"_{current_user.user_id}_" not in demande.fichier_id and current_user.role != "admin":
+        raise HTTPException(403, "Accès refusé")
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Extraire le gabarit depuis le nom de fichier : bureau_pdf_{uid}_infographie_{gabarit}_{ts}.ext
+    gabarit = "flyer_a5"
+    m = re.search(r"_infographie_(.+?)_\d+\.", demande.fichier_id)
+    if m:
+        gabarit = m.group(1)
+    if gabarit not in GABARITS:
+        gabarit = next(iter(GABARITS), "flyer_a5")
+
+    # Préférer le PNG pour l'analyse visuelle
+    base_no_ext = demande.fichier_id.rsplit(".", 1)[0]
+    png_path = _DATA_DIR / (base_no_ext + ".png")
+    pdf_path = _DATA_DIR / demande.fichier_id
+    source_path = png_path if png_path.exists() else (pdf_path if pdf_path.exists() else None)
+
+    if source_path is None:
+        raise HTTPException(404, "Fichier source introuvable — le visuel a peut-être expiré")
+
+    # Analyser le visuel existant si c'est un PNG
+    analyse_style = ""
+    if source_path.suffix == ".png":
+        try:
+            analyse_style = await analyser_modele_image(source_path.read_bytes(), "image/png")
+        except Exception as e:
+            logger.warning(f"[Infographie/Modifier] Analyse PNG échouée : {e}")
+
+    brief_modification = (
+        f"MODIFICATION DU VISUEL EXISTANT.\n\n"
+        f"Instructions de modification : {demande.instructions}\n\n"
+    )
+    if analyse_style:
+        brief_modification += (
+            f"[VISUEL ACTUEL DÉTECTÉ]\n{analyse_style}\n\n"
+            "Conserve tous les éléments non concernés par les instructions "
+            "et applique uniquement les changements demandés."
+        )
+
+    try:
+        resultat = await generer_infographie(
+            brief=brief_modification,
+            type_gabarit=gabarit,
+            pays=demande.pays,
+        )
+    except Exception as e:
+        logger.error(f"[Infographie/Modifier] Génération échouée : {e}")
+        raise HTTPException(500, f"Modification échouée : {e}")
+
+    ts = int(__import__("time").time())
+    pdf_id = png_id = pdf_b64 = png_b64 = None
+
+    if resultat.pdf_bytes:
+        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{gabarit}_{ts}.pdf"
+        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
+        pdf_b64 = base64.b64encode(resultat.pdf_bytes).decode()
+
+    if resultat.png_bytes:
+        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{gabarit}_{ts}.png"
+        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
+        png_b64 = base64.b64encode(resultat.png_bytes).decode()
+
+    try:
+        if analyse_style:
+            await debiter_forfait(current_user.user_id, "infographie_vision", module="infographie")
+        meta = resultat.meta or {}
+        if meta.get("tokens_input") or meta.get("tokens_output"):
+            await debiter_llm(
+                current_user.user_id,
+                modele=meta.get("modele", "default"),
+                tokens_input=int(meta.get("tokens_input", 0) or 0),
+                tokens_output=int(meta.get("tokens_output", 0) or 0),
+                module="infographie",
+            )
+    except Exception as _e:
+        logger.warning(f"[Infographie/Modifier/Credits] {_e}")
+
+    return {
+        "pdf_id": pdf_id,
+        "png_id": png_id,
+        "pdf_base64": pdf_b64,
+        "png_base64": png_b64,
+        "gabarit": gabarit,
+        "titre": (resultat.specification.titre if resultat.specification else ""),
+    }
+
+
 @router.get("/fichier/{fichier_id}", tags=["Bureau — Infographie"])
 async def telecharger_infographie(
     fichier_id: str,

@@ -41,6 +41,11 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
   cpu_kind = "shared"
   cpus = 1
 
+[[mounts]]
+  source = "bureau_data"
+  destination = "/app/data/generated/bureau"
+  initial_size = "1gb"
+
 [checks]
   [checks.health]
     grace_period = "30s"

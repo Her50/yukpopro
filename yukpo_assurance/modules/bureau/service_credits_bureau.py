@@ -160,6 +160,15 @@ def module_autorise(plan: str, module: str) -> bool:
     return module in info.get("modules", [])
 
 
+async def _is_admin_bureau(user_id: int) -> bool:
+    """Réutilise le cache admin du module Pro."""
+    try:
+        from modules.pro.service_credits import _is_admin
+        return await _is_admin(user_id)
+    except Exception:
+        return False
+
+
 async def verifier_acces_module(user_id: int, module: str) -> Tuple[bool, str, str]:
     """
     Vérifie si l'utilisateur a accès au module bureau demandé.
@@ -322,6 +331,8 @@ async def debiter_forfait(
 
 
 async def verifier_solde(user_id: int) -> Tuple[bool, float, int]:
+    if await _is_admin_bureau(user_id):
+        return True, 999_999.0, 999_999
     """
     Vérifie rapidement si l'utilisateur a encore des crédits.
     Si abonnement YukpoPro actif, on regarde son solde Pro en priorité.
