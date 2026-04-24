@@ -11,6 +11,7 @@
     "enquetes": "Surveys",
     "dashboard": "Dashboard",
     "profil": "My Profile",
+    "parametres": "Settings",
     "wallet": "Wallet",
     "abonnement": "Subscription",
     "admin": "Administration",
@@ -94,6 +95,7 @@
     "passwordMismatch": "Passwords do not match"
   },
   "profil": {
+    "parametres": "Settings",
     "title": "My Professional Profile",
     "subtitle": "Customize your Yukpo Pro experience",
     "saveBtn": "Save Profile",

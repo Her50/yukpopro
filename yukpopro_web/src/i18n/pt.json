@@ -11,6 +11,7 @@
     "enquetes": "Inquéritos",
     "dashboard": "Painel",
     "profil": "Meu Perfil",
+    "parametres": "Configurações",
     "wallet": "Carteira",
     "abonnement": "Assinatura",
     "admin": "Administração",
@@ -73,6 +74,7 @@
     "logout": "Sair"
   },
   "profil": {
+    "parametres": "Configurações",
     "title": "Meu Perfil Profissional",
     "subtitle": "Personalize sua experiência Yukpo Pro",
     "saveBtn": "Salvar Perfil",
