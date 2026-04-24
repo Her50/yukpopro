@@ -210,7 +210,7 @@ export const ProfilPage = () => {
                       placeholder="Précisez votre secteur…"
                       value={secteurCustom}
                       onChange={(e) => setSecteurCustom(e.target.value)}
-                      className="mt-2 w-full rounded-lg px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors"
+                      className="mt-2 w-full rounded-lg px-3 py-2 text-sm text-slate-100 bg-slate-700/60 border border-slate-600 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors"
                     />
                   )}
                 </div>
