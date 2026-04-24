@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { Card, Input } from "@/components/ui";
 import { useProfilStore } from "@/store";
 import { profilApi } from "@/api/client";
-import { METIERS, PAYS_AFRIQUE, SECTEURS_ACTIVITE } from "@/types";
+import { METIERS, PAYS_MONDE, SECTEURS_ACTIVITE } from "@/types";
 
 const NIVEAUX_EXPERTISE = [
   { value: "debutant",       label: "Débutant (0-2 ans)" },
@@ -14,7 +14,7 @@ const NIVEAUX_EXPERTISE = [
   { value: "expert",         label: "Expert (10+ ans)" },
 ];
 
-// Select simple pour pays + niveau (listes courtes)
+// Select simple pour niveau (liste courte)
 const FieldSelect = ({
   label, required, value, onChange, children,
 }: {
@@ -28,7 +28,7 @@ const FieldSelect = ({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-100 bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors appearance-none"
+      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-900 bg-white border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors appearance-none"
     >
       {children}
     </select>
@@ -73,17 +73,17 @@ const ComboSelect = ({
       <button
         type="button"
         onClick={() => { setOpen((o) => !o); setSearch(""); }}
-        className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors text-left"
+        className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm bg-white border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors text-left"
       >
-        <span className={value ? "text-slate-100" : "text-slate-500"}>
+        <span className={value ? "text-slate-900" : "text-slate-400"}>
           {selectedLabel || placeholder || "— Sélectionner —"}
         </span>
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg bg-slate-800 border border-slate-600 shadow-xl overflow-hidden">
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700">
+        <div className="absolute z-50 mt-1 w-full rounded-lg bg-white border border-slate-300 shadow-xl overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-200">
             <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <input
               autoFocus
@@ -91,12 +91,12 @@ const ComboSelect = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher…"
-              className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
             />
           </div>
           <ul className="max-h-52 overflow-y-auto py-1">
             {filtered.length === 0 && (
-              <li className="px-3 py-2 text-sm text-slate-500 italic">Aucun résultat</li>
+              <li className="px-3 py-2 text-sm text-slate-400 italic">Aucun résultat</li>
             )}
             {filtered.map((o) => (
               <li
@@ -104,8 +104,8 @@ const ComboSelect = ({
                 onMouseDown={() => { onChange(o.value); setOpen(false); setSearch(""); }}
                 className={`px-3 py-2 text-sm cursor-pointer transition-colors ${
                   o.value === value
-                    ? "bg-sky-600/30 text-sky-300"
-                    : "text-slate-200 hover:bg-slate-700"
+                    ? "bg-sky-50 text-sky-700 font-medium"
+                    : "text-slate-800 hover:bg-slate-100"
                 }`}
               >
                 {o.label}
@@ -265,15 +265,18 @@ export const ProfilPage = () => {
               />
 
               <div className="grid grid-cols-2 gap-3">
-                <FieldSelect label="Pays" required value={pays} onChange={setPays}>
-                  {PAYS_AFRIQUE.map((p) => (
-                    <option key={p.value} value={p.value} className="bg-slate-800">{p.label}</option>
-                  ))}
-                </FieldSelect>
+                <ComboSelect
+                  label="Pays"
+                  required
+                  value={pays}
+                  onChange={setPays}
+                  options={PAYS_MONDE}
+                  placeholder="— Rechercher votre pays —"
+                />
 
                 <FieldSelect label="Niveau d'expertise" value={niveau} onChange={setNiveau}>
                   {NIVEAUX_EXPERTISE.map((n) => (
-                    <option key={n.value} value={n.value} className="bg-slate-800">{n.label}</option>
+                    <option key={n.value} value={n.value} className="bg-white">{n.label}</option>
                   ))}
                 </FieldSelect>
               </div>
@@ -293,7 +296,7 @@ export const ProfilPage = () => {
                       placeholder="Précisez votre secteur…"
                       value={secteurCustom}
                       onChange={(e) => setSecteurCustom(e.target.value)}
-                      className="mt-2 w-full rounded-lg px-3 py-2 text-sm text-slate-100 bg-slate-700/60 border border-slate-600 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors"
+                      className="mt-2 w-full rounded-lg px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors"
                     />
                   )}
                 </div>
