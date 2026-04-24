@@ -100,6 +100,16 @@ export const PAYS_AFRIQUE = [
 
 // ── Copilote ──────────────────────────────────────────────────────────────────
 
+export interface CoutLLM {
+  modele: string;
+  tokens_input: number;
+  tokens_output: number;
+  cout_reel_usd: number;
+  marge: number;
+  cout_app_usd: number;
+  cout_app_xaf: number;
+}
+
 export interface CopiloteMessage {
   id: string;
   role: "user" | "assistant";
@@ -108,7 +118,8 @@ export interface CopiloteMessage {
   agent_utilise?: string | null;
   loading?: boolean;
   fichiers?: string[];       // noms des fichiers attachés (user) ou générés (assistant)
-  document_ref?: { id: number; titre: string; type: string };  // référence document pour amélioration
+  document_ref?: { id: number; titre: string; type: string };
+  cout_llm?: CoutLLM | null;
 }
 
 export interface CopiloteResponse {
@@ -118,6 +129,7 @@ export interface CopiloteResponse {
   resultat_agent: string | null;
   nb_messages_session: number;
   profil_metier: string | null;
+  cout_llm?: CoutLLM | null;
 }
 
 // ── Agents ────────────────────────────────────────────────────────────────────

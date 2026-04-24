@@ -194,22 +194,41 @@ class RAGEmbedderManager:
     # ── Modèle (lazy, partagé) ─────────────────────────────────────────────
 
     def _charger_modele(self):
-        """Charge le modèle sentence-transformers une seule fois."""
+        """Charge le modèle sentence-transformers si disponible, sinon active le mode TF-IDF."""
         if self._model is not None:
             return
         with self._model_lock:
             if self._model is not None:
                 return
-            import os
-            os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-            from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer(_MODEL_NAME)
-            logger.info(f"[EmbedderManager] Modèle chargé : {_MODEL_NAME}")
+            try:
+                import os
+                os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+                from sentence_transformers import SentenceTransformer
+                self._model = SentenceTransformer(_MODEL_NAME)
+                logger.info(f"[EmbedderManager] Modèle dense chargé : {_MODEL_NAME}")
+            except ImportError:
+                # Mode cloud : sentence_transformers absent → déléguer au TF-IDF retriever
+                self._model = "TFIDF"
+                logger.info("[EmbedderManager] sentence_transformers absent → mode TF-IDF activé")
+                from modules.rag.rag_tfidf_retriever import construire_index_tfidf_background
+                construire_index_tfidf_background()
+
+    @property
+    def modele_pret(self) -> bool:
+        """True si le modèle est prêt (dense OU TF-IDF)."""
+        if self._model is None:
+            return False
+        if self._model == "TFIDF":
+            from modules.rag.rag_tfidf_retriever import tfidf_retriever
+            return tfidf_retriever.pret
+        return True
 
     def encoder_question(self, question: str) -> Optional[np.ndarray]:
-        """Encode une question en vecteur L2-normalisé."""
+        """Encode une question en vecteur L2-normalisé (mode dense uniquement)."""
         try:
             self._charger_modele()
+            if self._model == "TFIDF":
+                return None  # TF-IDF gère lui-même l'encodage
             return self._model.encode(
                 [question],
                 normalize_embeddings=True,
@@ -280,7 +299,22 @@ class RAGEmbedderManager:
         """
         Recherche dans un ou plusieurs documents.
         Résultats triés par score décroissant (inter-documents).
+        En mode TF-IDF (cloud) : délègue au tfidf_retriever.
         """
+        self._charger_modele()
+
+        # Mode TF-IDF (cloud sans sentence_transformers)
+        if self._model == "TFIDF":
+            from modules.rag.rag_tfidf_retriever import tfidf_retriever
+            if not tfidf_retriever.pret:
+                return []
+            return tfidf_retriever.rechercher(
+                question,
+                doc_ids=doc_ids,
+                top_k=top_k_global,
+                seuil=seuil_score if seuil_score < 0.3 else 0.08,
+            )
+
         vecteur = self.encoder_question(question)
         if vecteur is None:
             return []
@@ -405,8 +439,18 @@ rag_embedder_manager = RAGEmbedderManager()
 def prechauffer_index_rag() -> None:
     """
     Charge tous les index RAG disponibles sur disque.
-    Appeler dans le lifespan FastAPI (même pattern que prechauffer_index CIMA).
+    En mode cloud (sans sentence_transformers) : active le TF-IDF retriever.
     """
+    # Tenter de charger le modèle — active automatiquement le mode TF-IDF si sentence_transformers absent
+    rag_embedder_manager._charger_modele()
+
+    if rag_embedder_manager._model == "TFIDF":
+        # Mode cloud : l'index TF-IDF est construit dans un thread daemon séparé
+        # (déjà lancé dans _charger_modele)
+        logger.info("[RAG] Mode TF-IDF activé (sentence_transformers absent) — index en construction…")
+        return
+
+    # Mode dense (sentence_transformers disponible) : charger tous les index
     resultats = rag_embedder_manager.charger_tous_les_index()
     nb_ok = sum(1 for ok in resultats.values() if ok)
     nb_total = len(resultats)

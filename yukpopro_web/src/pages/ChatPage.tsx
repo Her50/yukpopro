@@ -127,6 +127,7 @@ export const ChatPage = () => {
         res.reponse,
         res.agent_utilise ?? null,
         res.fichiers_generes,
+        res.cout_llm ?? null,
       );
 
       // Sauvegarder les documents générés dans l'historique
@@ -838,6 +839,22 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
                 </a>
               );
             })}
+          </div>
+        )}
+
+        {/* Coût LLM (transparent, discret) */}
+        {message.cout_llm && !message.loading && (
+          <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+            <span title={`Modèle : ${message.cout_llm.modele} · ${message.cout_llm.tokens_input}+${message.cout_llm.tokens_output} tokens`}>
+              💡 {message.cout_llm.tokens_input + message.cout_llm.tokens_output} tokens
+            </span>
+            <span>·</span>
+            <span title={`Coût réel : $${message.cout_llm.cout_reel_usd.toFixed(5)} · Marge ×${message.cout_llm.marge}`}>
+              {message.cout_llm.cout_app_xaf > 0
+                ? `${message.cout_llm.cout_app_xaf.toFixed(0)} XAF`
+                : `$${message.cout_llm.cout_app_usd.toFixed(4)}`
+              }
+            </span>
           </div>
         )}
       </div>

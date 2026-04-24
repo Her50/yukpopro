@@ -79,7 +79,7 @@ interface ChatState {
   selectSession: (id: string) => void;
   deleteSession: (id: string) => void;
   addMessage: (msg: CopiloteMessage) => void;
-  updateLastAssistantMessage: (content: string, agentUtilise?: string | null, fichiers?: string[]) => void;
+  updateLastAssistantMessage: (content: string, agentUtilise?: string | null, fichiers?: string[], coutLlm?: import("@/types").CoutLLM | null) => void;
   setLoading: (loading: boolean) => void;
   setOpen: (open: boolean) => void;
   setFullscreen: (fs: boolean) => void;
@@ -158,7 +158,7 @@ export const useCopiloteStore = create<ChatState>()(
           };
         }),
 
-      updateLastAssistantMessage: (content, agentUtilise, fichiers) =>
+      updateLastAssistantMessage: (content, agentUtilise, fichiers, coutLlm) =>
         set(state => ({
           sessions: state.sessions.map(s =>
             s.id === state.activeSessionId
@@ -166,7 +166,7 @@ export const useCopiloteStore = create<ChatState>()(
                   ...s,
                   messages: s.messages.map((m, i) =>
                     i === s.messages.length - 1 && m.role === "assistant" && m.loading
-                      ? { ...m, content, loading: false, agent_utilise: agentUtilise, fichiers }
+                      ? { ...m, content, loading: false, agent_utilise: agentUtilise, fichiers, cout_llm: coutLlm }
                       : m
                   ),
                 }

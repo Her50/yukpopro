@@ -1898,28 +1898,41 @@ async def copilote_chat(
                 except Exception as e:
                     logger.warning(f"[Copilote] CIMA retriever indisponible: {e}")
 
-            # 2. Recherche corpus réglementaire général (OHADA, fiscal, travail…)
+            # 2. Recherche corpus réglementaire (OHADA, fiscal, travail…)
+            # Priorité : TF-IDF cloud (toujours disponible) > sentence_transformers (local)
             try:
+                from modules.rag.rag_tfidf_retriever import tfidf_retriever, rechercher_tfidf
                 from modules.rag.rag_embedder import rag_embedder_manager
-                from modules.rag.rag_retriever import rechercher_pour_metier, rechercher_corpus_reglementaire
                 metier_profil = getattr(profil, "metier", "") or ""
-                if rag_embedder_manager.modele_pret:
-                    if metier_profil:
-                        res = await asyncio.wait_for(
-                            asyncio.to_thread(rechercher_pour_metier, req.message, metier_profil, pays),
-                            timeout=4.0,
-                        )
-                        if res:
-                            parties_rag.append(res)
-                    if not parties_rag or not any("CODE CIMA" in p for p in parties_rag):
-                        res2 = await asyncio.wait_for(
-                            asyncio.to_thread(rechercher_corpus_reglementaire, req.message, pays),
-                            timeout=4.0,
-                        )
-                        if res2:
-                            parties_rag.append(res2)
+
+                # S'assurer que l'index TF-IDF est initialisé (démarre si besoin)
+                if not tfidf_retriever.pret:
+                    rag_embedder_manager._charger_modele()  # active le TF-IDF en background
+
+                # Recherche via TF-IDF (mode cloud) ou sentence_transformers (mode local)
+                _rag_fn = (
+                    rechercher_tfidf if tfidf_retriever.pret
+                    else None
+                )
+                if not _rag_fn and rag_embedder_manager.modele_pret:
+                    from modules.rag.rag_retriever import rechercher_pour_metier, rechercher_corpus_reglementaire
+                    _rag_fn = lambda q, **kw: (rechercher_pour_metier(q, metier_profil, pays) if metier_profil else rechercher_corpus_reglementaire(q, pays))  # noqa
+
+                if _rag_fn is not None:
+                    res_rag = await asyncio.wait_for(
+                        asyncio.to_thread(
+                            rechercher_tfidf if tfidf_retriever.pret else _rag_fn,
+                            req.message,
+                            pays=pays,
+                            metier=metier_profil or None,
+                        ) if tfidf_retriever.pret else asyncio.to_thread(_rag_fn, req.message),
+                        timeout=6.0,
+                    )
+                    if res_rag:
+                        parties_rag.append(res_rag)
+
             except asyncio.TimeoutError:
-                logger.warning("[Copilote] RAG timeout (>4s)")
+                logger.warning("[Copilote] RAG timeout (>6s)")
             except Exception as e:
                 logger.warning(f"[Copilote] RAG indisponible: {e}")
 
@@ -2121,16 +2134,19 @@ async def copilote_chat(
 
         # ── Débit crédits Yukpo selon tokens réels consommés ─────────────────
         try:
-            from modules.pro.service_credits import verifier_et_debiter
-            ok, _credits, msg_credits = await verifier_et_debiter(
-                user_id=current_user.user_id,
-                modele=getattr(reponse_ia, "modele_utilise", "gpt-4o"),
-                tokens_input=getattr(reponse_ia, "tokens_input", 500),
-                tokens_output=getattr(reponse_ia, "tokens_output", 200),
-                module="copilote",
-                session_id=session.get("session_id"),
-                db=db,
-            )
+            if current_user.role in ("admin", "super_admin", "yukpo_owner"):
+                ok, _credits, msg_credits = True, 0.0, "ok"
+            else:
+                from modules.pro.service_credits import verifier_et_debiter
+                ok, _credits, msg_credits = await verifier_et_debiter(
+                    user_id=current_user.user_id,
+                    modele=getattr(reponse_ia, "modele_utilise", "gpt-4o"),
+                    tokens_input=getattr(reponse_ia, "tokens_input", 500),
+                    tokens_output=getattr(reponse_ia, "tokens_output", 200),
+                    module="copilote",
+                    session_id=session.get("session_id"),
+                    db=db,
+                )
             if not ok:
                 # msg_credits = "CREDITS_EPUISES|utilises|alloues"
                 if msg_credits.startswith("CREDITS_EPUISES|"):
@@ -2167,14 +2183,49 @@ async def copilote_chat(
             # Nettoyer le tag HTML caché de la réponse affichée
             reponse_copilote = _re_files.sub(r"<!-- FICHIER_GENERE:.+? -->", "", reponse_copilote).strip()
 
+        # ── Calcul coût LLM réel + marge application ─────────────────────
+        _tokens_in  = getattr(reponse_ia, "tokens_input",  0) or 0
+        _tokens_out = getattr(reponse_ia, "tokens_output", 0) or 0
+        _modele_id  = getattr(reponse_ia, "modele_utilise", "") or ""
+        # Tarifs USD / 1M tokens (input / output)
+        _TARIFS = {
+            "claude-opus":        (15.0,  75.0),
+            "claude-sonnet":      (3.0,   15.0),
+            "claude-haiku":       (0.25,  1.25),
+            "gpt-4o":             (2.5,   10.0),
+            "gpt-4o-mini":        (0.15,  0.60),
+        }
+        _tarif_in, _tarif_out = next(
+            (v for k, v in _TARIFS.items() if k in _modele_id.lower()),
+            (3.0, 15.0),  # défaut : Sonnet
+        )
+        _cout_reel_usd = (
+            (_tokens_in  * _tarif_in  / 1_000_000) +
+            (_tokens_out * _tarif_out / 1_000_000)
+        )
+        _MARGE = 20.0
+        _cout_avec_marge_usd = _cout_reel_usd * _MARGE
+        # Conversion XAF (1 USD ≈ 600 XAF)
+        _cout_xaf = _cout_avec_marge_usd * 600
+
         return {
-            "session_id":       session["session_id"],
-            "reponse":          reponse_copilote,
-            "agent_utilise":    agent_utilise,
-            "resultat_agent":   resultat_agent,
+            "session_id":         session["session_id"],
+            "reponse":            reponse_copilote,
+            "agent_utilise":      agent_utilise,
+            "resultat_agent":     resultat_agent,
             "nb_messages_session": len(session["messages"]),
-            "profil_metier":    getattr(profil, "metier", None),
-            "fichiers_generes": fichiers_generes_copilote,
+            "profil_metier":      getattr(profil, "metier", None),
+            "fichiers_generes":   fichiers_generes_copilote,
+            # Coût LLM transparent
+            "cout_llm": {
+                "modele":        _modele_id,
+                "tokens_input":  _tokens_in,
+                "tokens_output": _tokens_out,
+                "cout_reel_usd": round(_cout_reel_usd, 6),
+                "marge":         _MARGE,
+                "cout_app_usd":  round(_cout_avec_marge_usd, 4),
+                "cout_app_xaf":  round(_cout_xaf, 0),
+            },
         }
 
     except HTTPException:
