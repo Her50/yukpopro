@@ -153,9 +153,14 @@ async def mettre_a_jour(
             setattr(profil, champ, data[champ])
 
     # JSON : merge au lieu de remplacer
+    prefs = profil.preferences or {}
+    if "bio" in data:
+        prefs["bio"] = data["bio"]
+    if "annees_experience" in data:
+        prefs["annees_experience"] = data["annees_experience"]
     if "preferences" in data:
-        prefs = profil.preferences or {}
         prefs.update(data["preferences"])
+    if prefs != (profil.preferences or {}):
         profil.preferences = prefs
 
     if "contexte_metier" in data:

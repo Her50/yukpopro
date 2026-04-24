@@ -55,20 +55,24 @@ class CreerProfilRequest(BaseModel):
 
 
 class MettreAJourProfilRequest(BaseModel):
-    metier:            Optional[str]  = None
-    pays:              Optional[str]  = None
-    secteur:           Optional[str]  = None
-    niveau:            Optional[str]  = None
-    specialite:        Optional[str]  = None
-    zone:              Optional[str]  = None
-    entreprise:        Optional[str]  = None
-    taille_entreprise: Optional[str]  = None
-    secteur_activite:  Optional[str]  = None
-    langue_reponse:    Optional[str]  = None
-    style_reponse:     Optional[str]  = None
-    format_prefere:    Optional[str]  = None
-    preferences:       Optional[dict] = None
-    contexte_metier:   Optional[dict] = None
+    metier:             Optional[str]  = None
+    pays:               Optional[str]  = None
+    secteur:            Optional[str]  = None       # secteur_activite alias (depuis frontend)
+    secteur_activite:   Optional[str]  = None
+    niveau:             Optional[str]  = None
+    niveau_expertise:   Optional[str]  = None       # alias frontend pour niveau
+    specialite:         Optional[str]  = None
+    zone:               Optional[str]  = None
+    entreprise:         Optional[str]  = None
+    taille_entreprise:  Optional[str]  = None
+    langue_reponse:     Optional[str]  = None
+    style_reponse:      Optional[str]  = None
+    format_prefere:     Optional[str]  = None
+    preferences:        Optional[dict] = None
+    contexte_metier:    Optional[dict] = None
+    bio:                Optional[str]  = None       # stocké dans preferences
+    annees_experience:  Optional[int]  = None       # stocké dans preferences
+    niveau_experience:  Optional[str]  = None       # alias mobile
 
 
 class AjouterMemoireRequest(BaseModel):
@@ -164,6 +168,18 @@ async def mettre_a_jour_mon_profil(
     # Auto-crée le profil si absent (cas onboarding simplifié)
     profil, _ = await get_or_create(current_user.user_id, db)
     data = req.model_dump(exclude_none=True)
+
+    # Normalisation aliases frontend → champs DB
+    if "niveau_expertise" in data:
+        data["niveau"] = data.pop("niveau_expertise")
+    if "niveau_experience" in data:  # alias mobile
+        data["niveau"] = data.pop("niveau_experience")
+    # secteur depuis frontend = secteur_activite en DB (secteur DB = "prive|public|ngo")
+    if "secteur" in data:
+        val = data.pop("secteur")
+        if val and val not in ("prive", "public", "ngo", "independant", ""):
+            data["secteur_activite"] = val
+
     if not data:
         return profil.to_dict()
     profil = await mettre_a_jour(current_user.user_id, data, db)

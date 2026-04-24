@@ -140,11 +140,17 @@ class ProfilProfessionnelDB(Base):
             "specialite":        self.specialite,
             "pays":              self.pays,
             "zone":              self.zone,
-            "secteur":           self.secteur,
+            # secteur = secteur_activite pour le frontend (ex: "finance_banque")
+            "secteur":           self.secteur_activite or "",
+            "secteur_type":      self.secteur,        # "prive|public|ngo" (usage interne)
+            "secteur_activite":  self.secteur_activite,
             "niveau":            self.niveau,
+            "niveau_expertise":  self.niveau,         # alias frontend
+            "niveau_experience": self.niveau,         # alias mobile
+            "bio":               (self.preferences or {}).get("bio"),
+            "annees_experience": (self.preferences or {}).get("annees_experience"),
             "entreprise":        self.entreprise,
             "taille_entreprise": self.taille_entreprise,
-            "secteur_activite":  self.secteur_activite,
             "langue_reponse":    self.langue_reponse,
             "style_reponse":     self.style_reponse,
             "format_prefere":    self.format_prefere,
@@ -152,7 +158,16 @@ class ProfilProfessionnelDB(Base):
             "stats_usage":       self.stats_usage or {},
             "badges":            self.badges or [],
             "points_xp":         self.points_xp,
+            "xp_points":         self.points_xp,        # alias frontend
             "niveau_xp":         self.niveau_xp,
+            "niveau_pro":        self.niveau_xp,        # alias frontend
+            # Compteurs usage (depuis stats_usage JSON)
+            "nb_requetes_copilote": (self.stats_usage or {}).get("nb_requetes_copilote", 0),
+            "nb_requetes_agent":    (self.stats_usage or {}).get("nb_requetes_agent", 0),
+            "nb_requetes_rag":      (self.stats_usage or {}).get("nb_requetes_rag", 0),
+            "nb_rapports_generes":  (self.stats_usage or {}).get("nb_rapports", 0),
+            "nb_slides_generes":    (self.stats_usage or {}).get("nb_slides", 0),
+            "nb_traductions":       (self.stats_usage or {}).get("nb_traductions", 0),
             "memoire_agent":     self.memoire_agent or [],
             "contexte_metier":   self.contexte_metier or {},
             "abonnement":                  self.abonnement,

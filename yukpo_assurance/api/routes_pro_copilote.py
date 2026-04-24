@@ -1516,18 +1516,205 @@ _CADRE_JURIDIQUE_PAYS: dict[str, dict] = {
         "assurance": "Insurance Act 2003 · NAICOM (National Insurance Commission)",
         "specificites": "Plus grande économie Afrique · Naira · Common law · Anglophone · Pétrole · Non OHADA",
     },
+    "ZA": {
+        "nom_complet": "Afrique du Sud",
+        "zone_eco": "SADC — G20 — BRICS",
+        "devise": "Rand sud-africain (ZAR)",
+        "banque_centrale": "South African Reserve Bank (SARB) / Pretoria",
+        "fiscal": "Income Tax Act 58/1962 · VAT Act 89/1991 (VAT 15%) · Corporate Tax 27% · SARS (South African Revenue Service)",
+        "travail": "Labour Relations Act 66/1995 · Basic Conditions of Employment Act · UIF · COIDA",
+        "commercial": "Companies Act 71/2008 · JSE (Johannesburg Stock Exchange) · FSCA",
+        "comptable": "IFRS / IFRS for SMEs · SAICA (South African Institute of Chartered Accountants)",
+        "assurance": "Insurance Act 18/2017 · FSCA (Financial Sector Conduct Authority)",
+        "civil": "Common law (héritage anglais + droit romano-hollandais)",
+        "specificites": "Rand (ZAR) · Common law + droit civil · JSE · Économie la plus industrialisée d'Afrique · 11 langues officielles",
+    },
+    "KE": {
+        "nom_complet": "Kenya",
+        "zone_eco": "CAE (Communauté d'Afrique de l'Est) — Commonwealth",
+        "devise": "Shilling kényan (KES)",
+        "banque_centrale": "Central Bank of Kenya (CBK) / Nairobi",
+        "fiscal": "Income Tax Act Cap 470 · VAT Act 2013 (16%) · Corporate Tax 30% · KRA (Kenya Revenue Authority)",
+        "travail": "Employment Act 2007 · Labour Relations Act 2007 · NSSF · NHIF",
+        "commercial": "Companies Act 2015 · Nairobi Securities Exchange (NSE) · CMA Kenya",
+        "comptable": "IFRS · ICPAK (Institute of Certified Public Accountants of Kenya)",
+        "assurance": "Insurance Act Cap 487 · IRA (Insurance Regulatory Authority)",
+        "specificites": "Shilling kényan · Common law · Hub financier Afrique de l'Est · Nairobi International Financial Centre",
+    },
+    "ET": {
+        "nom_complet": "Éthiopie",
+        "zone_eco": "IGAD — UA",
+        "devise": "Birr éthiopien (ETB)",
+        "banque_centrale": "National Bank of Ethiopia (NBE) / Addis-Abeba",
+        "fiscal": "Income Tax Proclamation 979/2016 · VAT 15% · Business Profit Tax 30% · ERCA",
+        "travail": "Labour Proclamation 1156/2019 · PSNP",
+        "commercial": "Commercial Code 2021 · Ethiopian Capital Market Authority",
+        "comptable": "IFRS (adoption progressive) · Normes nationales transitoires",
+        "assurance": "Insurance Business Proclamation 746/2012 · NBE supervision",
+        "specificites": "Birr · Droit civil (héritage franco-éthiopien) · 2ème population Afrique · Non anglophone",
+    },
+    "MU": {
+        "nom_complet": "Maurice (Île Maurice)",
+        "zone_eco": "COMESA — SADC — Commonwealth",
+        "devise": "Roupie mauricienne (MUR)",
+        "banque_centrale": "Bank of Mauritius / Port-Louis",
+        "fiscal": "Income Tax Act 1995 · VAT Act 1998 (15%) · Corporate Tax 15% · MRA (Mauritius Revenue Authority)",
+        "travail": "Workers' Rights Act 2019 · NPF (National Pensions Fund) · NSF",
+        "commercial": "Companies Act 2001 · Stock Exchange of Mauritius (SEM) · FSC",
+        "comptable": "IFRS · MIPA (Mauritius Institute of Professional Accountants)",
+        "assurance": "Insurance Act 2005 · FSC (Financial Services Commission)",
+        "specificites": "Roupie mauricienne · Common law + droit civil · Centre financier offshore · Bilingue français/anglais · Fiscalité attractive",
+    },
+    "FR": {
+        "nom_complet": "France",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR) — Banque centrale européenne (BCE)",
+        "banque_centrale": "Banque de France / Paris — sous tutelle BCE",
+        "fiscal": "Code général des impôts (CGI) France · TVA 20% (taux normal) · IS 25% (taux normal) · IRPP barème progressif · DGFiP · Liasse fiscale 2050-2058",
+        "travail": "Code du travail français (Partie législative L.) · URSSAF · CPAM · Retraite AGIRC-ARRCO · Conventions collectives (IDCC) · CSE (Comité Social et Économique)",
+        "commercial": "Code de commerce français · SA, SAS, SARL, EURL, SCI · AMF (Autorité des marchés financiers) · Euronext Paris",
+        "comptable": "Plan Comptable Général (PCG 2014) · Normes ANC · IFRS pour cotés en bourse · Commissaires aux comptes (CNCC) · Experts-comptables (CNOEC)",
+        "assurance": "Code des assurances français · ACPR (Autorité de Contrôle Prudentiel et de Résolution) · Solvabilité II",
+        "civil": "Code civil français (depuis 1804, réformé 2016) · Code de procédure civile",
+        "penal": "Code pénal français · Code de procédure pénale",
+        "specificites": "Droit civil (Code Napoléon) · Non OHADA · Zone Euro · Sécurité sociale universelle · Retraite obligatoire · Droit du travail très protecteur",
+    },
+    "BE": {
+        "nom_complet": "Belgique",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR)",
+        "banque_centrale": "Banque Nationale de Belgique (BNB) / Bruxelles — sous tutelle BCE",
+        "fiscal": "Code des impôts sur les revenus 1992 (CIR92) · TVA 21% · Impôt des sociétés 25% · SPF Finances · Précompte mobilier et immobilier",
+        "travail": "Code du travail belge · ONSS (Office National de Sécurité Sociale) · ONEM (chômage) · Fonds de sécurité d'existence · CP (commissions paritaires)",
+        "commercial": "Code des sociétés et associations (CSA 2019) · SA, SRL, SC, ASBL · FSMA · Euronext Bruxelles",
+        "comptable": "Droit comptable belge (loi du 17/07/1975) · Plan comptable minimum normalisé (PCMN) · IRE (Réviseurs d'entreprises) · ITAA (Experts-comptables)",
+        "assurance": "Code des assurances belge (loi du 4/04/2014) · BNB supervision assurance",
+        "specificites": "Euro · Trois régions (Bruxelles, Wallonie, Flandre) · Trois langues officielles · Non OHADA · Droit civil + common law influences",
+    },
+    "CH": {
+        "nom_complet": "Suisse",
+        "zone_eco": "Hors UE — AELE (Association Européenne de Libre-Échange)",
+        "devise": "Franc suisse (CHF)",
+        "banque_centrale": "Banque Nationale Suisse (BNS/SNB) / Berne-Zurich",
+        "fiscal": "Loi sur l'impôt fédéral direct (LIFD) · TVA 8.1% (taux normal) · Impôt cantonal et communal variable · AFC (Administration Fédérale des Contributions)",
+        "travail": "Code des obligations (CO) · Loi sur le travail (LTr) · AVS/AI/APG · LAA · LPP (prévoyance professionnelle 2e pilier)",
+        "commercial": "Code des obligations (CO) - Livre V · SA, Sàrl, SC · SIX Swiss Exchange · FINMA",
+        "comptable": "Swiss GAAP RPC (Recommandations relatives à la présentation des comptes) · IFRS pour cotés · EXPERTsuisse",
+        "assurance": "Loi sur le contrat d'assurance (LCA) · FINMA (Autorité de surveillance des marchés financiers)",
+        "specificites": "CHF (Franc suisse) · Non UE · Fédéralisme fiscal (impôt cantonal) · 4 langues · Secret bancaire allégé · Place financière mondiale · Non OHADA",
+    },
+    "DE": {
+        "nom_complet": "Allemagne",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR)",
+        "banque_centrale": "Deutsche Bundesbank / Francfort — sous tutelle BCE",
+        "fiscal": "Einkommensteuergesetz (EStG) · Körperschaftsteuergesetz (KStG) · IS 15% + Taxe solidarité 5.5% + Gewerbesteuer (~14%) = ~30% · TVA 19% · Finanzamt",
+        "travail": "Bürgerliches Gesetzbuch (BGB) - droit du travail · Betriebsverfassungsgesetz (BetrVG) · Deutsche Rentenversicherung · Bundesagentur für Arbeit",
+        "commercial": "Handelsgesetzbuch (HGB) · GmbH, AG, OHG · Deutsche Börse (DAX) · BaFin",
+        "comptable": "Handelsgesetzbuch (HGB) - 3e livre · Grundsätze ordnungsmäßiger Buchführung (GoB) · IFRS pour cotés · WPK (Wirtschaftsprüferkammer)",
+        "assurance": "Versicherungsaufsichtsgesetz (VAG) · BaFin supervision · Solvabilité II",
+        "specificites": "Euro · Droit civil germanique · Cogestion (Mitbestimmung) · Codétermination salariale · Bundesrat/Bundestag · Non OHADA",
+    },
+    "GB": {
+        "nom_complet": "Royaume-Uni",
+        "zone_eco": "Hors UE (post-Brexit) — Commonwealth",
+        "devise": "Livre sterling (GBP)",
+        "banque_centrale": "Bank of England / Londres",
+        "fiscal": "Income Tax Act 2007 · Corporation Tax 25% · VAT 20% · HMRC (His Majesty's Revenue and Customs) · PAYE",
+        "travail": "Employment Rights Act 1996 · National Minimum Wage Act 1998 · National Insurance · Pension Act 2008 · ACAS",
+        "commercial": "Companies Act 2006 · London Stock Exchange (LSE) · FCA (Financial Conduct Authority) · PRA",
+        "comptable": "UK GAAP (FRS 100-105) · IFRS UK · ICAEW (Institute of Chartered Accountants in England and Wales) · ICAS · ACCA",
+        "assurance": "Financial Services and Markets Act 2000 (FSMA) · FCA/PRA · Lloyd's of London",
+        "civil": "Common law (droit coutumier) · Equity · Précédent (stare decisis)",
+        "specificites": "GBP · Common law · Post-Brexit · Non UE · Non OHADA · Centre financier mondial (City of London)",
+    },
+    "US": {
+        "nom_complet": "États-Unis",
+        "zone_eco": "USMCA (ex-ALENA) — G7 — G20",
+        "devise": "Dollar américain (USD)",
+        "banque_centrale": "Federal Reserve (Fed) / Washington D.C.",
+        "fiscal": "Internal Revenue Code (IRC) · Corporate Tax 21% (TCJA 2017) · Sales Tax (État) · IRS · Form 1120 (société) · Form 1040 (particuliers)",
+        "travail": "Fair Labor Standards Act (FLSA) · National Labor Relations Act (NLRA) · FMLA · OSHA · Social Security Administration · At-will employment",
+        "commercial": "Uniform Commercial Code (UCC) · Delaware General Corporation Law · NYSE/NASDAQ · SEC (Securities and Exchange Commission)",
+        "comptable": "US GAAP (Generally Accepted Accounting Principles) · FASB · PCAOB · AICPA · CPA (Certified Public Accountant)",
+        "assurance": "Réglementation État par État · NAIC (National Association of Insurance Commissioners) · Surplus Lines",
+        "civil": "Common law + droit constitutionnel fédéral · Système fédéral (lois fédérales + 50 États)",
+        "specificites": "USD · Common law · Système fédéral · Non OHADA · Fiscalité par État · Marché financier mondial · Litiges class action",
+    },
+    "CA": {
+        "nom_complet": "Canada",
+        "zone_eco": "USMCA — G7 — Commonwealth",
+        "devise": "Dollar canadien (CAD)",
+        "banque_centrale": "Banque du Canada / Ottawa",
+        "fiscal": "Loi de l'impôt sur le revenu (LIR) · Impôt fédéral sociétés 15% + provincial ~12% = ~27% · TPS 5% + TVP/TVH provinciale · ARC (Agence du revenu du Canada)",
+        "travail": "Code canadien du travail (CCT) · Lois provinciales du travail · RPC/RRQ · AE (assurance-emploi) · CNESST (Québec)",
+        "commercial": "Loi canadienne sur les sociétés par actions (LCSA) · Loi sur les sociétés par actions (Québec) · TSX · ACVM",
+        "comptable": "IFRS (cotés) · NCECF (Normes comptables pour les entreprises à capital fermé) · CPA Canada",
+        "assurance": "Loi sur les sociétés d'assurances (fédérale) · BSIF · AMF (Québec)",
+        "specificites": "CAD · Système fédéral biculturel · Common law (hors Québec) + droit civil (Québec) · Bilingue français/anglais · Non OHADA",
+    },
+    "PT": {
+        "nom_complet": "Portugal",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR)",
+        "banque_centrale": "Banco de Portugal / Lisbonne — sous tutelle BCE",
+        "fiscal": "Código do IRC (Imposto sobre o Rendimento das Pessoas Coletivas) · IRC 21% · IVA 23% · AT (Autoridade Tributária e Aduaneira)",
+        "travail": "Código do Trabalho (CT 2009) · Segurança Social · CITE · ACT",
+        "commercial": "Código das Sociedades Comerciais (CSC) · SA, Lda · Euronext Lisbonne · CMVM",
+        "comptable": "SNC (Sistema de Normalização Contabilística) · IFRS pour cotés · OROC (Revisores Oficiais de Contas) · OCC",
+        "assurance": "Lei 147/2015 (Solvabilité II) · ASF (Autoridade de Supervisão de Seguros e Fundos de Pensões)",
+        "specificites": "Euro · Droit civil (Code Napoléon influence) · Lusophone · Liens historiques avec PALOP (Angola, Mozambique, Cap-Vert…) · Non OHADA",
+    },
+    "ES": {
+        "nom_complet": "Espagne",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR)",
+        "banque_centrale": "Banco de España / Madrid — sous tutelle BCE",
+        "fiscal": "Ley del Impuesto sobre Sociedades (LIS) · IS 25% · IVA 21% · IRPF · AEAT (Agencia Estatal de Administración Tributaria)",
+        "travail": "Estatuto de los Trabajadores (ET) · Seguridad Social · SEPE · Convenios Colectivos · ERE",
+        "commercial": "Ley de Sociedades de Capital (LSC) · SA, SL · BME (Bolsa y Mercados Españoles) · CNMV",
+        "comptable": "Plan General de Contabilidad (PGC 2007) · IFRS pour cotés · ICAC · REA (Registro de Economistas Auditores)",
+        "assurance": "Ley de Ordenación y Supervisión de los Seguros Privados · DGS (Dirección General de Seguros) · Solvabilité II",
+        "specificites": "Euro · Droit civil · Non OHADA · 17 Communautés autonomes · Langues officielles régionales · Hub ibéro-américain",
+    },
+    "IT": {
+        "nom_complet": "Italie",
+        "zone_eco": "Union Européenne — Zone Euro",
+        "devise": "Euro (EUR)",
+        "banque_centrale": "Banca d'Italia / Rome — sous tutelle BCE",
+        "fiscal": "TUIR (Testo Unico delle Imposte sui Redditi) · IRES 24% · IRAP ~3.9% · IVA 22% · Agenzia delle Entrate",
+        "travail": "Codice Civile (art. 2094+) · Statuto dei Lavoratori (L.300/1970) · INPS · INAIL · CCNL (contratti collettivi nazionali)",
+        "commercial": "Codice Civile (livre V) · SPA, SRL, SNC · Borsa Italiana (Euronext) · Consob · Banca d'Italia",
+        "comptable": "Codice Civile + OIC (Organismi Italiani di Contabilità) · IFRS pour cotés · CNDCEC (Commercialisti)",
+        "assurance": "Codice delle Assicurazioni Private (D.Lgs. 209/2005) · IVASS (Instituto per la Vigilanza sulle Assicurazioni) · Solvabilité II",
+        "specificites": "Euro · Droit civil romano-germanique · Non OHADA · G7 · PME/PMI nombreuses · Districts industriels",
+    },
+    "DZ": {
+        "nom_complet": "Algérie",
+        "zone_eco": "Afrique du Nord — Accord d'association UE — ZLECAf",
+        "devise": "Dinar algérien (DZD)",
+        "banque_centrale": "Banque d'Algérie / Alger",
+        "fiscal": "Code des impôts directs et taxes assimilées (CIDTA) · Code des taxes sur le chiffre d'affaires (CTCA) · TVA 19% · IBS 19-26% · DGI Alger",
+        "travail": "Code du travail algérien (Loi n°90-11 du 21/04/1990 + modifications) · CNAS · CASNOS · CNR",
+        "commercial": "Code de commerce algérien · EURL, SARL, SPA · Bourse d'Alger (SGBV)",
+        "comptable": "Système Comptable Financier (SCF 2010) — inspiré des normes IAS/IFRS · Conseil National de la Comptabilité (CNC) · ONEC",
+        "assurance": "Code des assurances algérien (Ordonnance n°95-07 modifiée) · CNA (Commission Nationale des Assurances)",
+        "civil": "Code civil algérien (Ordonnance n°75-58) — inspiré du droit civil français et du droit musulman",
+        "penal": "Code pénal algérien (Ordonnance n°66-156)",
+        "specificites": "DZD (Dinar algérien) · Non OHADA · Non FCFA · Droit civil mixte (civil français + droit musulman) · Hydrocarbures (pétrole, gaz) · Sonatrach",
+    },
     # Défaut générique pour les pays non listés
     "_DEFAULT": {
-        "nom_complet": "Pays africain",
-        "zone_eco": "Afrique subsaharienne",
-        "devise": "Monnaie locale",
+        "nom_complet": "Ce pays",
+        "zone_eco": "À préciser selon le pays",
+        "devise": "Monnaie nationale applicable",
         "banque_centrale": "Banque centrale nationale",
-        "fiscal": "Code des impôts national applicable",
-        "travail": "Code du travail national applicable",
-        "commercial": "Droit commercial national · OHADA si pays membre",
-        "comptable": "SYSCOHADA si pays OHADA, sinon normes comptables nationales",
-        "assurance": "Code CIMA si pays membre (zone CIMA), sinon réglementation nationale",
-        "specificites": "Vérifier le cadre juridique spécifique du pays concerné",
+        "fiscal": "Code des impôts national en vigueur — TVA, impôt société, impôt revenu selon les règles locales",
+        "travail": "Code du travail national applicable — conventions collectives, sécurité sociale",
+        "commercial": "Droit commercial national · Droit des sociétés local · Marchés boursiers nationaux",
+        "comptable": "Normes comptables nationales (IFRS si pays appliquant les standards internationaux, sinon plan comptable local)",
+        "assurance": "Réglementation nationale des assurances — autorité de supervision locale",
+        "specificites": "Appliquer le cadre juridique spécifique du pays de l'utilisateur — demander confirmation si nécessaire",
     },
 }
 
@@ -1685,9 +1872,11 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
     metier = getattr(profil, "metier", "") or "professionnel"
     nom = getattr(profil, "nom", "") or ""
     pays_code = (getattr(profil, "pays", "") or pays or "CM").upper()
-    secteur = getattr(profil, "secteur", "") or ""
-    niveau = getattr(profil, "niveau_expertise", "") or "intermediaire"
-    experience = getattr(profil, "annees_experience", None)
+    # secteur_activite = secteur économique réel ("finance_banque", etc.)
+    secteur = getattr(profil, "secteur_activite", "") or getattr(profil, "secteur", "") or ""
+    niveau = getattr(profil, "niveau", "") or "senior"
+    prefs = getattr(profil, "preferences", None) or {}
+    experience = prefs.get("annees_experience")
 
     # Récupérer le cadre juridique du pays
     cadre = _CADRE_JURIDIQUE_PAYS.get(pays_code, _CADRE_JURIDIQUE_PAYS["_DEFAULT"])
@@ -1703,10 +1892,12 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
 
     # Niveau d'expertise → ajuster le ton
     ton_niveau = {
+        "junior":        "Explique les concepts avec des exemples simples. Définis les termes techniques.",
         "debutant":      "Explique les concepts avec des exemples simples. Définis les termes techniques.",
         "intermediaire": "Réponds avec précision technique, en supposant une bonne base professionnelle.",
         "senior":        "Réponds de pair à pair, avec précision technique maximale et nuances pratiques.",
         "expert":        "Réponse d'expert à expert — détail technique complet, références précises, nuances jurisprudentielles.",
+        "dirigeant":     "Réponse synthétique orientée décision — enjeux, risques, arbitrages. Moins de détail technique, plus de vision stratégique.",
     }.get(niveau, "Réponds avec précision technique adaptée au profil.")
 
     exp_str = f", {experience} ans d'expérience" if experience else ""
@@ -1779,10 +1970,11 @@ DOMAINES JURIDIQUES PRIORITAIRES POUR CE PROFIL ({metier.upper()}) :
 → Tous les montants sont en {devise} sauf demande explicite de conversion.
 → Exemples concrets avec des montants réels en {devise.split('—')[0].strip()}.
 
-**RÈGLE 7 — HORS AFRIQUE / PAYS NON AFRICAINS :**
-→ Si l'utilisateur pose une question sur un autre pays (France, Belgique, etc.) :
-→ Réponds normalement avec ta connaissance de formation — tu es compétent sur tous les systèmes juridiques.
-→ Marque `[Hors corpus Yukpo — réponse mémoire IA]` pour rappeler que tu n'as pas de RAG spécifique à ce pays.
+**RÈGLE 7 — PAYS HORS CORPUS RAG INDEXÉ :**
+→ Le corpus RAG Yukpo couvre principalement les pays OHADA, CEMAC, UEMOA francophones.
+→ Pour tout autre pays : réponds avec ta connaissance de formation — tu es compétent sur tous les systèmes juridiques mondiaux.
+→ Marque `[Réponse mémoire IA — sans RAG local]` pour indiquer l'absence de documents indexés pour ce pays.
+→ Ne dis JAMAIS "je ne connais pas ce pays" — utilise ta formation sur le droit local de ce pays.
 
 ═══════════════════════════════════════════════════
   COMPORTEMENT ET STYLE
