@@ -4,6 +4,7 @@
  * Un seul chat intelligent qui orchestre tous les agents et outils.
  */
 import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,13 +36,14 @@ interface AttachedFile {
 // ── Composant principal ───────────────────────────────────────────────────────
 
 export const ChatPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { profil } = useProfilStore();
   const {
     sessions, activeSessionId, isLoading,
     newSession, selectSession, deleteSession,
     addMessage, updateLastAssistantMessage, setLoading, clearSession,
-    activeMessages, activeSession,
+    activeMessages, activeSession, activeDocument, setActiveDocument,
   } = useCopiloteStore();
   const { addDocument } = useDocsStore();
 
@@ -118,10 +120,17 @@ export const ChatPage = () => {
     addMessage(assistantMsg);
 
     try {
+      const activeDoc = activeDocument();
       const res = await chatApi.send({
         message: content.trim(),
         pays: profil?.pays,
         fichiers: files.map(f => ({ nom: f.name, contenu: f.content || "", type: f.type })),
+        document_ref: activeDoc ? {
+          id: activeDoc.id,
+          titre: activeDoc.titre,
+          type_doc: activeDoc.type_doc,
+          contenu_genere: activeDoc.contenu_genere,
+        } : undefined,
       });
 
       updateLastAssistantMessage(
@@ -385,7 +394,7 @@ export const ChatPage = () => {
                   className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white text-sm font-semibold transition-colors"
                 >
                   <Plus className="w-4 h-4" />
-                  Nouvelle conversation
+                  {t('chat.newConversation')}
                 </button>
                 {isMobile && (
                   <button
@@ -401,7 +410,7 @@ export const ChatPage = () => {
               <div className="flex-1 overflow-y-auto py-2">
                 {sessions.length === 0 ? (
                   <p className="text-center text-slate-500 text-xs mt-8 px-4">
-                    Vos conversations apparaîtront ici
+                    {t('chat.noConversations')}
                   </p>
                 ) : (
                   sessions.map((session) => (
@@ -461,10 +470,10 @@ export const ChatPage = () => {
           <button
             onClick={() => setProfilModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
-            title="Modifier mon profil professionnel"
+            title={t('chat.editProfile')}
           >
             <Pencil className="w-3.5 h-3.5" />
-            {messages.length === 0 && <span className="hidden sm:inline">Mon profil</span>}
+            {messages.length === 0 && <span className="hidden sm:inline">{t('chat.myProfile')}</span>}
           </button>
 
           {messages.length > 0 && (
@@ -473,7 +482,7 @@ export const ChatPage = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
             >
               <Plus className="w-3.5 h-3.5" />
-              Nouveau
+              {t('chat.new')}
             </button>
           )}
         </div>
@@ -504,6 +513,23 @@ export const ChatPage = () => {
         {/* ── Zone d'input ───────────────────────────────────────────────── */}
         <div className="flex-shrink-0 bg-slate-900 border-t border-slate-800 px-4 py-4">
           <div className="max-w-3xl mx-auto">
+
+            {/* Document en cours d'édition */}
+            {activeDocument() && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-yukpo-500/10 border border-yukpo-500/30 text-xs">
+                <Pencil className="w-3.5 h-3.5 text-yukpo-400 flex-shrink-0" />
+                <span className="text-slate-300">Édition du document :</span>
+                <span className="text-yukpo-300 font-medium truncate max-w-md">{activeDocument()?.titre}</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveDocument(null)}
+                  className="ml-auto text-slate-400 hover:text-red-400"
+                  title="Quitter le mode édition"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
 
             {/* Fichiers attachés */}
             {attachedFiles.length > 0 && (
@@ -569,8 +595,8 @@ export const ChatPage = () => {
                   onKeyDown={handleKeyDown}
                   placeholder={
                     attachedFiles.length > 0
-                      ? "Décrivez ce que vous voulez faire avec ce fichier..."
-                      : "Posez votre question, envoyez un document, demandez une traduction..."
+                      ? t('chat.attachPlaceholder')
+                      : t('chat.mainPlaceholder')
                   }
                   disabled={isLoading}
                   className="flex-1 bg-transparent text-white text-sm placeholder-slate-500 py-3 pr-2 resize-none focus:outline-none min-h-[48px] max-h-[160px] overflow-y-auto disabled:opacity-50"
@@ -592,7 +618,7 @@ export const ChatPage = () => {
             </form>
 
             <p className="text-center text-slate-600 text-xs mt-2">
-              Yukpo Pro peut faire des erreurs. Vérifiez les informations importantes.
+              {t('chat.disclaimer')}
             </p>
           </div>
         </div>
@@ -632,11 +658,11 @@ export const ChatPage = () => {
                 </div>
               </div>
 
-              <h3 className="text-white font-bold text-lg mb-1">Enregistrement en cours</h3>
+              <h3 className="text-white font-bold text-lg mb-1">{t('chat.recordingTitle')}</h3>
               <p className="text-slate-400 text-sm mb-3">
                 {recognitionRef.current
-                  ? "Parlez — votre message s'affiche en temps réel"
-                  : "Parlez clairement dans votre microphone"}
+                  ? t('chat.speakRealtime')
+                  : t('chat.speakClear')}
               </p>
 
               {/* Transcription en temps réel */}
@@ -657,14 +683,14 @@ export const ChatPage = () => {
                   onClick={() => { stopRecording(false); setInput(""); }}
                   className="flex-1 px-4 py-3 rounded-xl border border-slate-600 text-slate-400 hover:text-white hover:border-slate-500 transition-colors text-sm font-medium"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={() => stopRecording(true)}
                   className="flex-1 px-4 py-3 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white transition-colors text-sm font-bold flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
-                  Envoyer
+                  {t('common.send')}
                 </button>
               </div>
 
@@ -717,18 +743,18 @@ const WelcomeScreen = ({
   profil: any; user: any; metierCtx: typeof METIERS_CONFIG[string];
   suggestions: string[]; onSuggestion: (s: string) => void; onEditProfil: () => void;
 }) => {
+  const { t } = useTranslation();
   const prenom = user?.prenom || user?.nom?.split(" ")[0] || "";
   const welcomeText = buildWelcomeText(profil, metierCtx);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-xl mx-auto w-full text-center">
-      {/* Logo Yukpo Pro */}
       <div className="w-16 h-16 rounded-2xl bg-yukpo-gradient flex items-center justify-center mb-6 shadow-lg shadow-yukpo-500/20">
         <span className="text-2xl">{metierCtx.emoji}</span>
       </div>
 
       <h2 className="text-2xl font-display font-bold text-white mb-1">
-        {prenom ? `Bonjour, ${prenom} !` : "Bonjour !"}
+        {prenom ? t('chat.hello', { name: prenom }) : t('chat.helloDefault')}
       </h2>
 
       <p className="text-yukpo-400 text-xs font-semibold uppercase tracking-widest mb-5">
@@ -739,13 +765,12 @@ const WelcomeScreen = ({
         {welcomeText}
       </p>
 
-      {/* Lien modifier profil */}
       <button
         onClick={onEditProfil}
         className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-yukpo-400 transition-colors underline underline-offset-2"
       >
         <Pencil className="w-3 h-3" />
-        {profil?.metier ? "Modifier mon profil" : "Configurer mon profil pour des réponses personnalisées"}
+        {profil?.metier ? t('chat.editProfile') : t('chat.configureProfile')}
       </button>
     </div>
   );
@@ -912,6 +937,7 @@ const ProfilModal = ({
   onClose: () => void;
   onSaved: (updated: any) => void;
 }) => {
+  const { t } = useTranslation();
   const [metier, setMetier]     = useState(profil?.metier || "");
   const [pays, setPays]         = useState(profil?.pays || "CM");
   const [secteur, setSecteur]   = useState(profil?.secteur || "");
@@ -962,7 +988,7 @@ const ProfilModal = ({
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 flex-shrink-0">
           <div className="flex items-center gap-2">
             <UserIcon className="w-4 h-4 text-yukpo-400" />
-            <h2 className="text-white font-semibold text-sm">Mon profil professionnel</h2>
+            <h2 className="text-white font-semibold text-sm">{t('chat.modalTitle')}</h2>
           </div>
           <button
             onClick={onClose}
@@ -973,7 +999,7 @@ const ProfilModal = ({
         </div>
 
         <p className="px-5 py-3 text-xs text-slate-400 border-b border-slate-800 flex-shrink-0">
-          Votre profil configure Yukpo : plus il est précis, plus les réponses sont adaptées à votre contexte.
+          {t('chat.modalDesc')}
         </p>
 
         {/* Formulaire */}
@@ -981,7 +1007,7 @@ const ProfilModal = ({
           <form id="profil-form" onSubmit={handleSave} className="p-5 space-y-4">
             {/* Métier */}
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">Métier / Profession *</label>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('chat.profession')}</label>
               <select
                 value={metier}
                 onChange={(e) => setMetier(e.target.value)}
@@ -997,7 +1023,7 @@ const ProfilModal = ({
             {/* Pays + Niveau */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1.5">Pays</label>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.pays')}</label>
                 <select
                   value={pays}
                   onChange={(e) => setPays(e.target.value)}
@@ -1009,7 +1035,7 @@ const ProfilModal = ({
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1.5">Niveau</label>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.niveau')}</label>
                 <select
                   value={niveau}
                   onChange={(e) => setNiveau(e.target.value)}
@@ -1025,7 +1051,7 @@ const ProfilModal = ({
             {/* Secteur + Entreprise */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1.5">Secteur d'activité</label>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.secteur')}</label>
                 <input
                   type="text"
                   value={secteur}
@@ -1035,7 +1061,7 @@ const ProfilModal = ({
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-400 block mb-1.5">Entreprise</label>
+                <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.entreprise')}</label>
                 <input
                   type="text"
                   value={entreprise}
@@ -1048,7 +1074,7 @@ const ProfilModal = ({
 
             {/* Années d'expérience */}
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">Années d'expérience</label>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.annees')}</label>
               <input
                 type="number"
                 min="0"
@@ -1062,7 +1088,7 @@ const ProfilModal = ({
 
             {/* Bio */}
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-1.5">Bio professionnelle</label>
+              <label className="text-xs font-medium text-slate-400 block mb-1.5">{t('profil.bio')}</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
@@ -1081,7 +1107,7 @@ const ProfilModal = ({
             onClick={onClose}
             className="flex-1 px-4 py-2.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white hover:border-slate-500 text-sm transition-colors"
           >
-            Annuler
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -1093,7 +1119,7 @@ const ProfilModal = ({
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : <Save className="w-4 h-4" />
             }
-            {saving ? "Enregistrement…" : "Enregistrer"}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </motion.div>

@@ -73,7 +73,7 @@ const TYPE_LABELS: Record<string, string> = {};
 
 export const HistoriqueDocumentsPage = () => {
   const navigate = useNavigate();
-  const { newSession, addMessage } = useCopiloteStore();
+  const { newSession, addMessage, setActiveDocument } = useCopiloteStore();
   const { supprimerVersBackend } = useDocsStore();
 
   const [documents, setDocuments] = useState<DocumentHistorique[]>([]);
@@ -99,6 +99,12 @@ export const HistoriqueDocumentsPage = () => {
   // Ouvre le chat avec le contexte du document pour amélioration
   const ameliorerViaChat = (doc: DocumentHistorique) => {
     newSession();
+    setActiveDocument({
+      id: doc.id,
+      titre: doc.titre,
+      type_doc: doc.type_doc,
+      contenu_genere: doc.contenu_genere,
+    });
     const prompt = doc.contenu_source
       ? `Je souhaite améliorer ce document (ID #${doc.id}) : "${doc.titre}".\n\nDemande initiale : ${doc.contenu_source}\n\nQue souhaitez-vous modifier ou améliorer ?`
       : `Je souhaite améliorer le document "${doc.titre}". Que voulez-vous modifier ?`;

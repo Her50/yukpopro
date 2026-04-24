@@ -55,11 +55,19 @@ export const useProfilStore = create<ProfilState>()((set) => ({
 
 // ── Chat Store (YukpoPro — interface unifiée) ─────────────────────────────────
 
+export interface ActiveDocument {
+  id: number;
+  titre: string;
+  type_doc: string;
+  contenu_genere?: string;
+}
+
 export interface ChatSession {
   id: string;
   title: string;
   createdAt: string;
   messages: CopiloteMessage[];
+  activeDocument?: ActiveDocument | null;
 }
 
 interface ChatState {
@@ -84,6 +92,9 @@ interface ChatState {
   setOpen: (open: boolean) => void;
   setFullscreen: (fs: boolean) => void;
   clearSession: () => void;
+  // Document actif (édition depuis Mes Documents)
+  setActiveDocument: (doc: ActiveDocument | null) => void;
+  activeDocument: () => ActiveDocument | null;
   // Aliases
   setSessionId: (id: string) => void;
   setNbMessages: (n: number) => void;
@@ -173,6 +184,17 @@ export const useCopiloteStore = create<ChatState>()(
               : s
           ),
         })),
+
+      setActiveDocument: (doc) =>
+        set(state => ({
+          sessions: state.sessions.map(s =>
+            s.id === state.activeSessionId ? { ...s, activeDocument: doc } : s
+          ),
+        })),
+      activeDocument: () => {
+        const s = get().sessions.find(s => s.id === get().activeSessionId);
+        return s?.activeDocument ?? null;
+      },
 
       setLoading: (loading) => set({ isLoading: loading }),
       setOpen: (open) => set({ isOpen: open }),

@@ -93,12 +93,23 @@ class FichierChat(BaseModel):
     contenu: str   # base64 data URL (data:mime;base64,...)
     type:    str   # MIME type
 
+class DocumentRefChat(BaseModel):
+    id:             int
+    titre:          str
+    type_doc:       str
+    contenu_genere: Optional[str] = None
+
 class CopiloteChatRequest(BaseModel):
-    message:    str  = Field(..., min_length=1, max_length=8000)
-    session_id: Optional[str] = None
-    pays:       Optional[str] = None
-    langue:     str = Field("fr", description="fr ou en")
-    fichiers:   Optional[List[FichierChat]] = None
+    message:      str  = Field(..., min_length=1, max_length=8000)
+    session_id:   Optional[str] = None
+    pays:         Optional[str] = None
+    langue:       str = Field("fr", description="fr ou en")
+    fichiers:     Optional[List[FichierChat]] = None
+    document_ref: Optional[DocumentRefChat] = Field(
+        None,
+        description="Document existant à améliorer (depuis Mes Documents). "
+                    "Force l'intention 'generateur' en mode édition.",
+    )
 
 
 class NouvelleSessionRequest(BaseModel):
@@ -2075,6 +2086,24 @@ async def copilote_chat(
     _fc_orch        = orchestration.get("format_cible") or _format_orch
     _modules_llm    = orchestration.get("modules_suggeres") or []  # suggestions sémantiques LLM
 
+    # ── Étape 0b-bis : Mode édition document existant ──────────────────────
+    # Si l'utilisateur a ouvert un document depuis "Mes Documents" et demande
+    # une amélioration dans le chat, on bypass le classifier et on force la
+    # génération en mode édition avec le type et le contenu d'origine.
+    if req.document_ref is not None:
+        _intention  = "generateur"
+        _type_doc_o = req.document_ref.type_doc or _type_doc_o
+        if _type_doc_o.startswith("slides") or _type_doc_o in (
+            "bilan_activite", "rapport_direction", "proposition_client",
+            "pitch_projet", "formation", "analyse_marche",
+        ):
+            _sous_type = "slides"
+            _format_orch = "pptx"
+        elif _type_doc_o in ("cv", "lettre_emploi", "lettre_motivation"):
+            _sous_type = "cv"
+        else:
+            _sous_type = _sous_type or "rapport"
+
     # ── Étape 0c : Traduction ─────────────────────────────────────────────────
     texte_a_traduire_chat = contenu_fichiers
     if _intention == "traduction" and not texte_a_traduire_chat:
@@ -2331,6 +2360,25 @@ async def copilote_chat(
                 contexte_gen_parts.append(f"[Contexte de la conversation]\n{hist_conv}")
             if contenu_fichiers:
                 contexte_gen_parts.append(f"[Données des fichiers joints]\n{contenu_fichiers[:6000]}")
+
+            # Mode édition : on injecte le contenu source et les instructions utilisateur
+            _is_edit = req.document_ref is not None
+            if _is_edit:
+                dref = req.document_ref
+                contexte_gen_parts.insert(
+                    0,
+                    f"[Document source à améliorer — titre: {dref.titre}]\n"
+                    f"{(dref.contenu_genere or '')[:8000]}"
+                )
+                contexte_gen_parts.append(
+                    f"[Instructions d'amélioration demandées par l'utilisateur]\n{req.message}"
+                )
+                # Le "sujet" transmis au builder devient le titre original pour
+                # éviter que le prompt d'édition ne se retrouve dans le slug du fichier.
+                sujet_gen = dref.titre
+            else:
+                sujet_gen = req.message
+
             contexte_gen = "\n\n".join(contexte_gen_parts) or None
 
             if _sous_type == "slides":
@@ -2342,11 +2390,18 @@ async def copilote_chat(
                     "slides_proposition_client": "proposition_client",
                     "slides_pitch_projet": "pitch_projet",
                     "slides_formation": "formation",
+                    # alias directs (mode édition : type_doc stocké sans préfixe "slides_")
+                    "bilan_activite": "bilan_activite",
+                    "rapport_direction": "rapport_direction",
+                    "proposition_client": "proposition_client",
+                    "pitch_projet": "pitch_projet",
+                    "formation": "formation",
+                    "analyse_marche": "analyse_marche",
                 }
                 type_pres = type_pres_map.get(_type_doc_o, "rapport_direction")
                 res_doc = await asyncio.wait_for(
                     builder.generer(
-                        sujet=req.message,
+                        sujet=sujet_gen,
                         type_pres=type_pres,
                         mode="executive",
                         contexte=contexte_gen,
@@ -2362,7 +2417,7 @@ async def copilote_chat(
                 type_doc_gen = _type_doc_o or _detecter_type_document(req.message)
                 res_doc = await asyncio.wait_for(
                     writer.generer(
-                        sujet=req.message,
+                        sujet=sujet_gen,
                         type_rapport=type_doc_gen,
                         mode="standard",
                         contexte=contexte_gen,
@@ -2383,14 +2438,23 @@ async def copilote_chat(
             _ajouter_message(session, "user", req.message)
             _ajouter_message(session, "assistant", reponse_gen, {"agent_utilise": "generateur"})
             await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=3)
+            titre_sauv = (req.document_ref.titre if _is_edit else req.message)[:100]
+            meta_sauv = {
+                "source": "chat",
+                "format": ext.lower(),
+                "avec_fichiers": bool(contenu_fichiers),
+            }
+            if _is_edit:
+                meta_sauv["edited_from"] = req.document_ref.id
+                meta_sauv["instructions"] = req.message[:500]
             await _sauvegarder_doc_db(
                 db=db, user_id=current_user.user_id,
-                titre=req.message[:100],
+                titre=titre_sauv,
                 type_doc=type_doc_gen,
                 fichier=chemin_fichier,
                 contenu_genere=apercu,
                 session_id=session["session_id"],
-                meta={"source": "chat", "format": ext.lower(), "avec_fichiers": bool(contenu_fichiers)},
+                meta=meta_sauv,
             )
 
             return {

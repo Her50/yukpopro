@@ -81,7 +81,7 @@ export const profilApi = {
   },
 
   update: async (payload: Partial<ProfilPro>): Promise<ProfilPro> => {
-    const { data } = await http.patch("/pro/profil/", payload);
+    const { data } = await http.put("/pro/profil/", payload);
     return data;
   },
 };
@@ -98,6 +98,12 @@ export interface ChatSendRequest {
   message: string;
   pays?: string;
   fichiers?: UploadedFile[];
+  document_ref?: {
+    id: number;
+    titre: string;
+    type_doc: string;
+    contenu_genere?: string;
+  };
 }
 
 export interface ChatResponse {
