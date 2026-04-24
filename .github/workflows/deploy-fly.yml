@@ -20,6 +20,21 @@ jobs:
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
+      - name: Create volume bureau_data if missing
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          EXISTING=$(flyctl volumes list --app yukpopro-backend --json 2>/dev/null | grep -c '"bureau_data"' || echo 0)
+          if [ "$EXISTING" -lt 2 ]; then
+            MISSING=$((2 - EXISTING))
+            echo "Creating $MISSING volume(s) bureau_data in cdg..."
+            for i in $(seq 1 $MISSING); do
+              flyctl volumes create bureau_data --size 1 --region cdg --app yukpopro-backend --yes
+            done
+          else
+            echo "Volumes bureau_data already exist ($EXISTING), skipping."
+          fi
+
       - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
