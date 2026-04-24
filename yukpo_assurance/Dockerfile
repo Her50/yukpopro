@@ -54,6 +54,8 @@ COPY . .
 
 # Utilisateur non-root (sécurité — principle of least privilege)
 RUN useradd --system --uid 1001 --no-create-home appuser \
+    && mkdir -p /home/appuser \
+    && chown appuser:appuser /home/appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
@@ -75,8 +77,9 @@ CMD gunicorn api.main:app \
     --bind 0.0.0.0:${PORT} \
     --timeout 360 \
     --graceful-timeout 60 \
-    --max-requests 1000 \
-    --max-requests-jitter 100 \
+    --worker-tmp-dir /tmp \
+    --max-requests 2000 \
+    --max-requests-jitter 200 \
     --access-logfile - \
     --error-logfile - \
     --log-level info

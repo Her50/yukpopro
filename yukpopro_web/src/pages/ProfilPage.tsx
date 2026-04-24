@@ -447,8 +447,8 @@ export const ProfilPage = () => {
                 </label>
 
                 {cvAvailable ? (
-                  <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-emerald-900/30 border border-emerald-500/30">
-                    <div className="flex items-center gap-2 text-emerald-200 text-sm">
+                  <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-500/30">
+                    <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-200 text-sm font-medium">
                       <FileText size={15} />
                       <span>{t("profil.cvUploaded")}</span>
                     </div>
@@ -456,7 +456,7 @@ export const ProfilPage = () => {
                       <button
                         type="button"
                         onClick={() => cvFileRef.current?.click()}
-                        className="text-xs text-sky-400 hover:text-sky-300 underline"
+                        className="text-xs text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 underline font-medium"
                       >
                         {t("common.edit")}
                       </button>
