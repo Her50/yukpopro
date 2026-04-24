@@ -187,7 +187,7 @@ export const agentApi = {
 
 export const generateurApi = {
   rapport: async (req: GenererRapportRequest): Promise<GenerateurResult> => {
-    const { data } = await http.post("/pro/rapports/generer", req);
+    const { data } = await http.post("/pro/rapports/generer", req, { timeout: 270_000 });
     return data;
   },
 
@@ -197,7 +197,7 @@ export const generateurApi = {
   },
 
   slides: async (req: GenererSlidesRequest): Promise<GenerateurResult> => {
-    const { data } = await http.post("/pro/slides/generer", req);
+    const { data } = await http.post("/pro/slides/generer", req, { timeout: 270_000 });
     return data;
   },
 
@@ -226,18 +226,20 @@ export const generateurApi = {
     params.fichiers.forEach((f) => form.append("fichiers", f));
     const { data } = await http.post("/pro/analyser-et-generer", form, {
       headers: { "Content-Type": "multipart/form-data" },
+      timeout: 270_000,
     });
     return data;
   },
 
   traduire: async (req: TraductionRequest): Promise<TraductionResponse> => {
-    const { data } = await http.post("/pro/traduire", req);
+    const { data } = await http.post("/pro/traduire", req, { timeout: 270_000 });
     return data;
   },
 
   traduireFichier: async (formData: FormData): Promise<TraductionResponse & { fichier_source?: string }> => {
     const { data } = await http.post("/pro/traduire-fichier", formData, {
       headers: { "Content-Type": "multipart/form-data" },
+      timeout: 270_000,
     });
     return data;
   },
@@ -500,7 +502,7 @@ export const reunionsApi = {
     contexte?: string;
     duree_secondes?: number;
   }): Promise<{ rapport: string; titre: string; langue: string; fichier?: string; sauvegarde_mes_documents?: boolean }> => {
-    const { data } = await http.post("/pro/reunions/generer-rapport", payload);
+    const { data } = await http.post("/pro/reunions/generer-rapport", payload, { timeout: 180_000 });
     return data;
   },
 
@@ -510,7 +512,7 @@ export const reunionsApi = {
     participants?: string;
     date?: string;
   }): Promise<{ fichier: string; longueur: number }> => {
-    const { data } = await http.post("/pro/reunions/rapport-docx", payload);
+    const { data } = await http.post("/pro/reunions/rapport-docx", payload, { timeout: 180_000 });
     return data;
   },
 };

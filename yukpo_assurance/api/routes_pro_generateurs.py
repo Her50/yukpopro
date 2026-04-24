@@ -16,6 +16,7 @@ Endpoints :
   PATCH /api/v1/pro/documents/{doc_id}     — Mettre à jour un document (version améliorée)
   DELETE /api/v1/pro/documents/{doc_id}    — Supprimer un document de l'historique
 """
+import asyncio
 import base64
 import logging
 import mimetypes
@@ -54,12 +55,15 @@ async def _debiter_credits_generation(
     tokens_output: int = 3000,
     modele: str = "claude-sonnet-4-6",
     reponse_ia=None,
+    role: str = "",
 ) -> None:
     """
     Débite les crédits Yukpo après une génération.
     Si `reponse_ia` (ReponseIA) est fourni, on utilise les tokens/modèle réels.
     Non bloquant sur DB, mais lève 402 CREDITS_EPUISES si crédits épuisés.
     """
+    if role in _ADMIN_ROLES:
+        return
     try:
         from modules.pro.service_credits import verifier_et_debiter
         if reponse_ia is not None:
@@ -215,13 +219,16 @@ async def generer_rapport(
 
     writer = ReportWriterPro(profil=profil)
     try:
-        resultat = await writer.generer(
-            sujet=req.sujet,
-            type_rapport=req.type_rapport,
-            mode=req.mode,
-            contexte=req.contexte,
-            donnees=req.donnees,
-            format_sortie=req.format_sortie,
+        resultat = await asyncio.wait_for(
+            writer.generer(
+                sujet=req.sujet,
+                type_rapport=req.type_rapport,
+                mode=req.mode,
+                contexte=req.contexte,
+                donnees=req.donnees,
+                format_sortie=req.format_sortie,
+            ),
+            timeout=240,
         )
         # Sauvegarder + débiter crédits
         _chemin_r = resultat.get("chemin_fichier") or resultat.get("fichier")
@@ -237,12 +244,15 @@ async def generer_rapport(
         await _debiter_credits_generation(
             user_id=current_user.user_id, db=db, module="rapport",
             tokens_input=2500, tokens_output=3500,
+            role=current_user.role,
         )
         # Ajouter l'URL de téléchargement directement dans la réponse
         nom_fich = Path(_chemin_r or "").name if _chemin_r else None
         if nom_fich:
             resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
             resultat["fichier"] = nom_fich
+        if "contenu_markdown" in resultat and "markdown" not in resultat:
+            resultat["markdown"] = resultat["contenu_markdown"]
         return resultat
     except HTTPException:
         raise
@@ -296,13 +306,16 @@ async def generer_slides(
 
     builder = SlideBuilderPro(profil=profil)
     try:
-        resultat = await builder.generer(
-            sujet=req.sujet,
-            type_pres=req.type_pres,
-            mode=req.mode,
-            contexte=req.contexte,
-            donnees=req.donnees,
-            format_sortie=req.format_sortie,
+        resultat = await asyncio.wait_for(
+            builder.generer(
+                sujet=req.sujet,
+                type_pres=req.type_pres,
+                mode=req.mode,
+                contexte=req.contexte,
+                donnees=req.donnees,
+                format_sortie=req.format_sortie,
+            ),
+            timeout=240,
         )
         # Sauvegarder + débiter crédits
         _chemin_fich = resultat.get("chemin_fichier") or resultat.get("fichier")
@@ -318,11 +331,15 @@ async def generer_slides(
         await _debiter_credits_generation(
             user_id=current_user.user_id, db=db, module="slides",
             tokens_input=2000, tokens_output=2500,
+            role=current_user.role,
         )
         nom_fich = Path(resultat.get("chemin_fichier") or "").name if resultat.get("chemin_fichier") else None
         if nom_fich:
             resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
             resultat["fichier"] = nom_fich
+        # alias pour le frontend
+        if "contenu_markdown" in resultat and "markdown" not in resultat:
+            resultat["markdown"] = resultat["contenu_markdown"]
         return resultat
     except HTTPException:
         raise
@@ -495,23 +512,29 @@ async def analyser_et_generer(
                 "rapport_financier": "rapport_financier",
             }
             type_pres = type_pres_map.get(type_doc, "rapport_direction")
-            resultat = await builder.generer(
-                sujet=instruction,
-                type_pres=type_pres,
-                mode=mode or "executive",
-                contexte=contexte_fichiers,
-                format_sortie="pptx",
+            resultat = await asyncio.wait_for(
+                builder.generer(
+                    sujet=instruction,
+                    type_pres=type_pres,
+                    mode=mode or "executive",
+                    contexte=contexte_fichiers,
+                    format_sortie="pptx",
+                ),
+                timeout=210,
             )
             type_final = f"slides_{type_pres}"
         else:
             from modules.pro.report_writer_pro import ReportWriterPro
             writer = ReportWriterPro(profil=profil)
-            resultat = await writer.generer(
-                sujet=instruction,
-                type_rapport=type_doc or "rapport_analyse",
-                mode=mode or "standard",
-                contexte=contexte_fichiers,
-                format_sortie=format_sortie,
+            resultat = await asyncio.wait_for(
+                writer.generer(
+                    sujet=instruction,
+                    type_rapport=type_doc or "rapport_analyse",
+                    mode=mode or "standard",
+                    contexte=contexte_fichiers,
+                    format_sortie=format_sortie,
+                ),
+                timeout=210,
             )
             type_final = type_doc
 
@@ -899,6 +922,7 @@ async def traduire_document(
             tokens_input=max(500, nb_mots * 2),
             tokens_output=max(400, nb_mots * 2),
             reponse_ia=reponse_ia,
+            role=current_user.role,
         )
 
         # Générer DOCX si demandé
@@ -907,12 +931,15 @@ async def traduire_document(
             try:
                 from modules.pro.report_writer_pro import ReportWriterPro
                 writer = ReportWriterPro(profil=profil)
-                resultat_doc = await writer.generer(
-                    sujet=req.sujet or f"Traduction {src} → {dst}",
-                    type_rapport="note_de_synthese",
-                    mode="standard",
-                    contexte=texte_traduit,
-                    format_sortie="docx",
+                resultat_doc = await asyncio.wait_for(
+                    writer.generer(
+                        sujet=req.sujet or f"Traduction {src} → {dst}",
+                        type_rapport="note_de_synthese",
+                        mode="standard",
+                        contexte=texte_traduit,
+                        format_sortie="docx",
+                    ),
+                    timeout=120,
                 )
                 chemin_docx = resultat_doc.get("chemin_fichier")
             except Exception as e_doc:
@@ -1638,6 +1665,7 @@ async def traduire_fichier(
         tokens_input=max(500, nb_mots_src * 2),
         tokens_output=max(400, nb_mots_src * 2),
         modele="claude-sonnet-4-6",
+        role=current_user.role,
     )
 
     try:
