@@ -65,6 +65,13 @@ export const authApi = {
     const { data } = await http.get("/auth/me");
     return data;
   },
+
+  changerMotDePasse: async (ancien_mdp: string, nouveau_mdp: string) => {
+    const { data } = await http.post("/auth/change-password", null, {
+      params: { ancien_mdp, nouveau_mdp },
+    });
+    return data as { succes: boolean; message: string };
+  },
 };
 
 // ── Profil Pro ────────────────────────────────────────────────────────────────
@@ -83,6 +90,24 @@ export const profilApi = {
   update: async (payload: Partial<ProfilPro>): Promise<ProfilPro> => {
     const { data } = await http.put("/pro/profil/", payload);
     return data;
+  },
+
+  uploadPhoto: async (file: File): Promise<{ message: string; chemin: string }> => {
+    const form = new FormData();
+    form.append("fichier", file);
+    const { data } = await http.post("/pro/profil/photo", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
+  getPhotoBlobUrl: async (): Promise<string> => {
+    const response = await http.get("/pro/profil/photo", { responseType: "blob" });
+    return URL.createObjectURL(response.data);
+  },
+
+  supprimerPhoto: async (): Promise<void> => {
+    await http.delete("/pro/profil/photo");
   },
 };
 

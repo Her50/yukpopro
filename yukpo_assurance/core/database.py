@@ -983,6 +983,7 @@ async def init_db() -> None:
     # Chaque entrée : (table, colonne, type SQL, valeur DEFAULT optionnelle)
     _nouvelles_colonnes = [
         # ProfilProfessionnelDB — colonnes ajoutées après le déploiement initial
+        ("profils_pro", "photo_profil_chemin",        "VARCHAR(300)", None),
         ("profils_pro", "cv_texte",                   "TEXT",      None),
         ("profils_pro", "cv_fichier_chemin",          "VARCHAR(300)", None),
         ("profils_pro", "profil_recherche_emploi",    "TEXT",      None),

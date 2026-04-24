@@ -15,6 +15,7 @@ import { HistoriqueDocumentsPage } from "@/pages/HistoriqueDocumentsPage";
 import { EmploiPage } from "@/pages/EmploiPage";
 import { MarchesPage } from "@/pages/MarchesPage";
 import { EnquetesPage } from "@/pages/EnquetesPage";
+import { ParametresPage } from "@/pages/ParametresPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/emploi"         element={<EmploiPage />} />
             <Route path="/marches"        element={<MarchesPage />} />
             <Route path="/enquetes"       element={<EnquetesPage />} />
+            <Route path="/parametres"     element={<ParametresPage />} />
             {/* Redirections legacy */}
             <Route path="/copilote"    element={<Navigate to="/chat" replace />} />
             <Route path="/agents"      element={<Navigate to="/chat" replace />} />

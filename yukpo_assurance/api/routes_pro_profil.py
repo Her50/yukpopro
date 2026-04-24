@@ -350,6 +350,116 @@ async def supprimer_cv(
     return {"message": "CV supprimé"}
 
 
+@router.post("/photo", summary="Uploader la photo de profil")
+async def uploader_photo_profil(
+    fichier: UploadFile = File(...),
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload une photo de profil (JPEG/PNG/WebP, max 3 MB)."""
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+    from sqlalchemy import update, select
+
+    FORMATS = {".jpg", ".jpeg", ".png", ".webp"}
+    MAX_SIZE = 3 * 1024 * 1024
+
+    ext = Path(fichier.filename or "").suffix.lower()
+    if ext not in FORMATS:
+        raise HTTPException(status_code=415, detail="Format non supporté. Utilisez JPEG, PNG ou WebP.")
+
+    contenu = await fichier.read()
+    if len(contenu) > MAX_SIZE:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 3 Mo).")
+
+    photo_dir = Path(__file__).parents[1] / "data" / "photos_profil"
+    photo_dir.mkdir(parents=True, exist_ok=True)
+
+    # Supprimer l'ancienne photo si elle existe
+    result = await db.execute(
+        select(ProfilProfessionnelDB.photo_profil_chemin)
+        .where(ProfilProfessionnelDB.user_id == current_user.user_id)
+    )
+    old_chemin = result.scalar_one_or_none()
+    if old_chemin:
+        old_path = Path(__file__).parents[1] / old_chemin
+        if old_path.exists():
+            old_path.unlink(missing_ok=True)
+
+    nom = f"photo_{current_user.user_id}_{uuid.uuid4().hex[:8]}{ext}"
+    chemin = photo_dir / nom
+    chemin.write_bytes(contenu)
+    chemin_relatif = str(chemin.relative_to(Path(__file__).parents[1]))
+
+    await db.execute(
+        update(ProfilProfessionnelDB)
+        .where(ProfilProfessionnelDB.user_id == current_user.user_id)
+        .values(photo_profil_chemin=chemin_relatif)
+    )
+    await db.commit()
+    return {"message": "Photo mise à jour", "chemin": chemin_relatif}
+
+
+@router.get("/photo", summary="Récupérer la photo de profil")
+async def recuperer_photo_profil(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retourne la photo de profil de l'utilisateur connecté."""
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+    from sqlalchemy import select
+    from fastapi.responses import FileResponse
+
+    result = await db.execute(
+        select(ProfilProfessionnelDB.photo_profil_chemin)
+        .where(ProfilProfessionnelDB.user_id == current_user.user_id)
+    )
+    chemin_rel = result.scalar_one_or_none()
+    if not chemin_rel:
+        raise HTTPException(status_code=404, detail="Aucune photo de profil")
+
+    chemin = Path(__file__).parents[1] / chemin_rel
+    if not chemin.exists():
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+
+    media_type = "image/jpeg"
+    if chemin.suffix.lower() == ".png":
+        media_type = "image/png"
+    elif chemin.suffix.lower() == ".webp":
+        media_type = "image/webp"
+
+    return FileResponse(str(chemin), media_type=media_type, headers={
+        "Cache-Control": "private, max-age=86400",
+    })
+
+
+@router.delete("/photo", summary="Supprimer la photo de profil")
+async def supprimer_photo_profil(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Supprime la photo de profil de l'utilisateur."""
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+    from sqlalchemy import update, select
+
+    result = await db.execute(
+        select(ProfilProfessionnelDB.photo_profil_chemin)
+        .where(ProfilProfessionnelDB.user_id == current_user.user_id)
+    )
+    chemin_rel = result.scalar_one_or_none()
+    if chemin_rel:
+        chemin = Path(__file__).parents[1] / chemin_rel
+        if chemin.exists():
+            chemin.unlink(missing_ok=True)
+
+    await db.execute(
+        update(ProfilProfessionnelDB)
+        .where(ProfilProfessionnelDB.user_id == current_user.user_id)
+        .values(photo_profil_chemin=None)
+    )
+    await db.commit()
+    return {"message": "Photo supprimée"}
+
+
 @router.post("/veille-emploi/activer", summary="Activer la veille emploi automatique")
 async def activer_veille_emploi(
     current_user: TokenData = Depends(get_current_user),

@@ -98,6 +98,9 @@ class ProfilProfessionnelDB(Base):
     # Ex : {"logiciel_compta": "SAGE 100", "exercice": "2024",
     #        "plan_comptable": "SYSCOHADA", "nb_employes": 45}
 
+    # ── Photo de profil ───────────────────────────────────────────────────
+    photo_profil_chemin = Column(String(300), nullable=True)
+
     # ── CV et recherche d'emploi ──────────────────────────────────────────
     # Texte du CV stocké (extrait d'un upload ou saisi manuellement)
     cv_texte = Column(Text, nullable=True)
@@ -173,6 +176,8 @@ class ProfilProfessionnelDB(Base):
             "abonnement":                  self.abonnement,
             "actif":                       self.actif,
             # CV & emploi
+            "photo_profil_chemin":         self.photo_profil_chemin,
+            "has_photo":                   bool(self.photo_profil_chemin),
             "cv_disponible":               bool(self.cv_texte or self.cv_fichier_chemin),
             "cv_texte_extrait":            bool(self.cv_texte),
             "profil_recherche_emploi":     self.profil_recherche_emploi,

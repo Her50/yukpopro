@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { User, Save, Sparkles, ChevronDown, Search, Upload, Trash2, FileText } from "lucide-react";
+import { User, Save, Sparkles, ChevronDown, Search, Upload, Trash2, FileText, Camera } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Card, Input } from "@/components/ui";
@@ -130,6 +130,9 @@ export const ProfilPage = () => {
   const [cvUploading, setCvUploading] = useState(false);
   const [cvAvailable, setCvAvailable] = useState(false);
   const cvFileRef = useRef<HTMLInputElement>(null);
+  const photoFileRef = useRef<HTMLInputElement>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   const [metier, setMetier] = useState(profil?.metier || "");
   const [pays, setPays]     = useState(profil?.pays || "CM");
@@ -148,7 +151,12 @@ export const ProfilPage = () => {
 
   useEffect(() => {
     if (!profil) profilApi.get().then(setProfil).catch(console.error);
-    else setCvAvailable(profil.cv_disponible ?? false);
+    else {
+      setCvAvailable(profil.cv_disponible ?? false);
+      if ((profil as any).has_photo && !photoUrl) {
+        profilApi.getPhotoBlobUrl().then(setPhotoUrl).catch(() => {});
+      }
+    }
   }, [profil]);
 
   // Auto-détection pays + langue par IP si pas encore défini
@@ -169,6 +177,28 @@ export const ProfilPage = () => {
       })
       .catch(() => {});
   }, []);
+
+  const handlePhotoFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Fichier image requis"); return; }
+    setPhotoUploading(true);
+    try {
+      await profilApi.uploadPhoto(file);
+      const url = URL.createObjectURL(file);
+      setPhotoUrl(url);
+      toast.success("Photo de profil mise à jour");
+    } catch {
+      toast.error("Erreur lors de l'upload de la photo");
+    } finally { setPhotoUploading(false); }
+  };
+
+  const handleDeletePhoto = async () => {
+    if (!window.confirm("Supprimer la photo de profil ?")) return;
+    try {
+      await profilApi.supprimerPhoto();
+      setPhotoUrl(null);
+      toast.success("Photo supprimée");
+    } catch { toast.error("Erreur"); }
+  };
 
   const handleCvFile = async (file: File) => {
     if (!file) return;
@@ -238,8 +268,8 @@ export const ProfilPage = () => {
         </h1>
         <p className="text-slate-400 text-sm mt-0.5">
           {isWelcome
-            ? "Renseignez votre métier et votre pays pour personnaliser votre assistant IA."
-            : "Votre profil configure l'assistant IA Yukpo spécialisé pour vous."}
+            ? "Renseignez votre métier et votre pays pour personnaliser votre YukpoPro."
+            : "Votre profil configure YukpoPro, votre assistant spécialisé."}
         </p>
       </div>
 
@@ -248,11 +278,38 @@ export const ProfilPage = () => {
         {/* Colonne gauche — identité */}
         <div className="space-y-4">
           <Card className="p-5 text-center space-y-3 bg-slate-800/50 border border-slate-700">
-            <div className="w-14 h-14 rounded-xl mx-auto flex items-center justify-center bg-gradient-to-br from-sky-600 to-blue-700 shadow-md">
-              <span className="text-xl font-bold text-white">
-                {(profil?.metier || "P").charAt(0).toUpperCase()}
-              </span>
+            {/* Avatar cliquable avec photo ou initiale */}
+            <div className="relative mx-auto w-20 h-20 group cursor-pointer"
+                 onClick={() => photoFileRef.current?.click()}>
+              {photoUrl ? (
+                <img src={photoUrl} alt="Photo de profil"
+                     className="w-20 h-20 rounded-2xl object-cover shadow-md border-2 border-slate-600" />
+              ) : (
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-sky-600 to-blue-700 shadow-md">
+                  <span className="text-2xl font-bold text-white">
+                    {(profil?.metier || "P").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              {/* Overlay caméra au survol */}
+              <div className="absolute inset-0 rounded-2xl flex items-center justify-center
+                              bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                {photoUploading
+                  ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : <Camera className="w-6 h-6 text-white" />}
+              </div>
             </div>
+            <input ref={photoFileRef} type="file" accept="image/*" className="hidden"
+                   onChange={(e) => e.target.files?.[0] && handlePhotoFile(e.target.files[0])} />
+            {photoUrl && (
+              <button onClick={handleDeletePhoto}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors">
+                <Trash2 className="w-3 h-3 inline mr-1" />Supprimer la photo
+              </button>
+            )}
+            {!photoUrl && (
+              <p className="text-xs text-slate-500">Cliquez sur l'avatar pour ajouter une photo</p>
+            )}
             <div>
               <p className="text-white font-semibold text-sm">
                 {profil?.metier
