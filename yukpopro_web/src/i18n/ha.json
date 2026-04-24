@@ -1,0 +1,143 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "Tarurrawa",
+    "documents": "Takarduna Nawa",
+    "traduction": "Fassara",
+    "translateLive": "Fassara Kai tsaye",
+    "emploi": "Damar Aiki",
+    "marches": "Kira na Tayin",
+    "enquetes": "Bincike",
+    "dashboard": "Allon Aiki",
+    "profil": "Bayanan Nawa",
+    "wallet": "Wallet",
+    "abonnement": "Kudin Rubutu",
+    "admin": "Gudanarwa",
+    "adminPaiements": "MoMo Payments",
+    "logout": "Fita",
+    "collapseMenu": "Rufe menu",
+    "expandMenu": "Bude menu"
+  },
+  "common": {
+    "loading": "Ana lodi…",
+    "save": "Ajiye",
+    "saving": "Ana ajiyewa…",
+    "cancel": "Soke",
+    "confirm": "Tabbatar",
+    "delete": "Goge",
+    "edit": "Gyara",
+    "search": "Nema",
+    "searching": "Ana nema…",
+    "close": "Rufe",
+    "back": "Koma",
+    "next": "Ci gaba",
+    "send": "Aika",
+    "sending": "Ana aikawa…",
+    "download": "Sauke",
+    "upload": "Loda",
+    "uploading": "Ana lodawa…",
+    "yes": "I",
+    "no": "A'a",
+    "error": "Kuskure",
+    "success": "An yi nasara",
+    "retry": "Sake gwadawa",
+    "refresh": "Sake sabunta",
+    "copy": "Kwafi",
+    "copied": "An kwafi!",
+    "noResults": "Babu sakamako",
+    "noData": "Babu bayanai",
+    "credits": "kiredit",
+    "or": "ko"
+  },
+  "auth": {
+    "login": "Shiga",
+    "loginTitle": "Barka da zuwa Yukpo Pro",
+    "loginSubtitle": "Mataimakin AI naka na sana'a",
+    "email": "Adireshin imel",
+    "emailPlaceholder": "naka@imel.com",
+    "password": "Kalmar sirri",
+    "passwordPlaceholder": "Kalmar sirrin naka",
+    "forgotPassword": "Ka manta kalmar sirri?",
+    "noAccount": "Ba ka da asusun?",
+    "createAccount": "Ƙirƙiri asusun",
+    "alreadyHaveAccount": "Kana da asusun?",
+    "register": "Yi rajista",
+    "registerTitle": "Ƙirƙiri asusun Yukpo Pro",
+    "firstName": "Suna na farko",
+    "lastName": "Sunan iyali",
+    "loggingIn": "Ana shigowa…",
+    "registering": "Ana ƙirƙirar asusun…",
+    "loginError": "Imel ko kalmar sirri ba daidai ba",
+    "logout": "Fita"
+  },
+  "chat": {
+    "placeholder": "Tambaya tambayar sana'a naka…",
+    "newConversation": "Sabon zance",
+    "hello": "Sannu, {{name}}!",
+    "helloDefault": "Sannu!",
+    "disclaimer": "Yukpo Pro na iya kuskure. Tabbatar da muhimman bayanai.",
+    "thinking": "Yukpo na tunani…",
+    "updateSuccess": "An sabunta bayanan!",
+    "updateError": "Kuskure wajen sabuntawa"
+  },
+  "emploi": {
+    "title": "Damar Aiki",
+    "watchTitle": "Binciken Aiki",
+    "searchNow": "Nema yanzu",
+    "noOffers": "Babu damar har yanzu",
+    "emptyTitle": "Ba a sami damar ba",
+    "excellent": "Fifiko",
+    "good": "Kyau",
+    "partial": "Wani bangare",
+    "searching": "Ana nema…"
+  },
+  "marches": {
+    "title": "Kira na Tayin",
+    "searchNow": "Nema yanzu",
+    "noMarches": "Babu kiraye har yanzu",
+    "emptyTitle": "Ba a sami kiraye ba"
+  },
+  "dashboard": {
+    "title": "Allon Aiki",
+    "welcome": "Barka da zuwa, {{name}}!",
+    "openYukpo": "Bude Yukpo Pro"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "Ana ƙirƙira…",
+    "download": "Sauke"
+  },
+  "traduction": {
+    "title": "Fassarar Takarduna",
+    "translate": "Fassara",
+    "translating": "Ana fassarawa…"
+  },
+  "reunions": {
+    "title": "Tarurrawa",
+    "newMeeting": "Sabuwar taro"
+  },
+  "language": {
+    "select": "Harshe",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "Duhu",
+    "light": "Haske",
+    "toggle": "Canza"
+  }
+}

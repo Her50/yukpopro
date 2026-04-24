@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "Mikutano",
+    "documents": "Mikanda na ngai",
+    "traduction": "Kobongola",
+    "translateLive": "Kobongola en direct",
+    "emploi": "Mosala",
+    "marches": "Appel d'offres",
+    "enquetes": "Botatoli",
+    "dashboard": "Tableau de bord",
+    "profil": "Profil na ngai",
+    "wallet": "Wallet",
+    "abonnement": "Abonnement",
+    "admin": "Gestion",
+    "adminPaiements": "MoMo Payments",
+    "logout": "Kobima",
+    "collapseMenu": "Kakisa menu",
+    "expandMenu": "Yikisa menu"
+  },
+  "common": {
+    "loading": "Kotindika…",
+    "save": "Bebisa",
+    "saving": "Ko bebisa…",
+    "cancel": "Tika",
+    "confirm": "Yamba",
+    "delete": "Sila",
+    "edit": "Badisa",
+    "search": "Koluka",
+    "searching": "Ko luka…",
+    "close": "Kanga",
+    "back": "Zonga",
+    "send": "Tinda",
+    "sending": "Ko tinda…",
+    "download": "Kokita",
+    "yes": "Iyo",
+    "no": "Te",
+    "error": "Mpasi",
+    "success": "Elonga",
+    "copy": "Kopie",
+    "copied": "Kopiama!",
+    "noResults": "Eloko ezalaka te",
+    "credits": "crédit",
+    "or": "to"
+  },
+  "auth": {
+    "login": "Kokota",
+    "loginTitle": "Boyei na Yukpo Pro",
+    "loginSubtitle": "Mosuisi na yo ya AI",
+    "email": "Adresse email",
+    "emailPlaceholder": "yo@email.com",
+    "password": "Mot de passe",
+    "noAccount": "Ozali na konto te?",
+    "createAccount": "Sala konto",
+    "register": "Kokaba",
+    "firstName": "Nkombo ya liboso",
+    "lastName": "Nkombo ya libota",
+    "loggingIn": "Ko kota…",
+    "loginError": "Email to mot de passe ezali malamu te",
+    "logout": "Kobima"
+  },
+  "chat": {
+    "placeholder": "Tuna motuna na mosala…",
+    "newConversation": "Kosolola ya sika",
+    "hello": "Mbote, {{name}}!",
+    "helloDefault": "Mbote!",
+    "thinking": "Yukpo ekanisi…",
+    "updateSuccess": "Profil ebongwaki!",
+    "updateError": "Mpasi ya kobongola"
+  },
+  "emploi": {
+    "title": "Mosala",
+    "watchTitle": "Kolanda Mosala",
+    "searchNow": "Luka sikoyo",
+    "noOffers": "Eloko ezalaka te",
+    "excellent": "Kitoko mingi",
+    "good": "Malamu",
+    "partial": "Mwa moke"
+  },
+  "marches": {
+    "title": "Appel d'offres",
+    "searchNow": "Luka sikoyo",
+    "noMarches": "Eloko ezalaka te"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Boyei, {{name}}!",
+    "openYukpo": "Fungola Yukpo Pro"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "Ko sala…",
+    "download": "Kokita"
+  },
+  "traduction": {
+    "title": "Kobongola mikanda",
+    "translate": "Bongola",
+    "translating": "Ko bongola…"
+  },
+  "reunions": {
+    "title": "Mikutano",
+    "newMeeting": "Mikutano ya sika"
+  },
+  "language": {
+    "select": "Monoko",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "Molili",
+    "light": "Pɛtɛ",
+    "toggle": "Badisa"
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "Réunion yi",
+    "documents": "Nataal am",
+    "traduction": "Tekki",
+    "translateLive": "Tekki bu live",
+    "emploi": "Liggéey yu am",
+    "marches": "Appel d'offres",
+    "enquetes": "Seetanal",
+    "dashboard": "Bord",
+    "profil": "Profil am",
+    "wallet": "Wallet",
+    "abonnement": "Abonnement",
+    "admin": "Gestion",
+    "adminPaiements": "MoMo Payments",
+    "logout": "Fey",
+    "collapseMenu": "Planque menu bi",
+    "expandMenu": "Yeesal menu bi"
+  },
+  "common": {
+    "loading": "Di wax jëfe…",
+    "save": "Daral",
+    "saving": "Di daral…",
+    "cancel": "Ànd",
+    "confirm": "Seetante",
+    "delete": "Yokk",
+    "edit": "Soppal",
+    "search": "Lar",
+    "searching": "Di lar…",
+    "close": "Tëjël",
+    "back": "Dellu",
+    "next": "Gannaaw",
+    "send": "Yónnee",
+    "sending": "Di yónnee…",
+    "download": "Indi",
+    "upload": "Yónnee",
+    "yes": "Waaw",
+    "no": "Déet",
+    "error": "Njuumte",
+    "success": "Mën na",
+    "copy": "Copie",
+    "copied": "Copie nañu!",
+    "noResults": "Dara amul",
+    "credits": "crédit yi",
+    "or": "walla"
+  },
+  "auth": {
+    "login": "Dugg",
+    "loginTitle": "Jëm ci Yukpo Pro",
+    "loginSubtitle": "Kontaanal AI bi ngir profesionel yi",
+    "email": "Imeel",
+    "emailPlaceholder": "sa@imeel.com",
+    "password": "Kóddël",
+    "passwordPlaceholder": "Sa kóddël",
+    "noAccount": "Amul sa kont?",
+    "createAccount": "Def sa kont",
+    "register": "Bëgg",
+    "firstName": "Tur",
+    "lastName": "Gox",
+    "loggingIn": "Di dugg…",
+    "loginError": "Imeel walla kóddël du dëgël",
+    "logout": "Fey"
+  },
+  "chat": {
+    "placeholder": "Laaj sa laaj bi yu profesionel…",
+    "newConversation": "Xam-xam bu bees",
+    "hello": "Ma ngi fi, {{name}}!",
+    "helloDefault": "Ma ngi fi!",
+    "thinking": "Yukpo di xam xam…",
+    "updateSuccess": "Profil bi soppaloon!",
+    "updateError": "Njuumte bi soppal"
+  },
+  "emploi": {
+    "title": "Liggéey yu am",
+    "watchTitle": "Tëngeel Liggéey",
+    "searchNow": "Lar léegi",
+    "noOffers": "Dara amul",
+    "excellent": "Baax lool",
+    "good": "Baax",
+    "partial": "Ci kanam bi"
+  },
+  "marches": {
+    "title": "Appel d'offres",
+    "searchNow": "Lar léegi",
+    "noMarches": "Dara amul"
+  },
+  "dashboard": {
+    "title": "Bord",
+    "welcome": "Jëm ci, {{name}}!",
+    "openYukpo": "Ubbi Yukpo Pro"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "Di def…",
+    "download": "Indi"
+  },
+  "traduction": {
+    "title": "Tekki nataal",
+    "translate": "Tekki",
+    "translating": "Di tekki…"
+  },
+  "reunions": {
+    "title": "Réunion yi",
+    "newMeeting": "Réunion bu bees"
+  },
+  "language": {
+    "select": "Làkk",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "Safara bi muñ",
+    "light": "Safara bi tepp",
+    "toggle": "Soppal"
+  }
+}

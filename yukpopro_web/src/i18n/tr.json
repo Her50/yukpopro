@@ -1,0 +1,143 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "Toplantılar",
+    "documents": "Belgelerim",
+    "traduction": "Çeviri",
+    "translateLive": "Canlı Çeviri",
+    "emploi": "İş İlanları",
+    "marches": "İhaleler",
+    "enquetes": "Anketler",
+    "dashboard": "Kontrol Paneli",
+    "profil": "Profilim",
+    "wallet": "Cüzdan",
+    "abonnement": "Abonelik",
+    "admin": "Yönetim",
+    "adminPaiements": "MoMo Payments",
+    "logout": "Çıkış",
+    "collapseMenu": "Menüyü küçült",
+    "expandMenu": "Menüyü genişlet"
+  },
+  "common": {
+    "loading": "Yükleniyor…",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "search": "Ara",
+    "searching": "Aranıyor…",
+    "close": "Kapat",
+    "back": "Geri",
+    "next": "İleri",
+    "send": "Gönder",
+    "sending": "Gönderiliyor…",
+    "download": "İndir",
+    "upload": "Yükle",
+    "uploading": "Yükleniyor…",
+    "yes": "Evet",
+    "no": "Hayır",
+    "error": "Hata",
+    "success": "Başarı",
+    "retry": "Tekrar dene",
+    "refresh": "Yenile",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "noResults": "Sonuç yok",
+    "noData": "Veri yok",
+    "credits": "kredi",
+    "or": "veya"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "loginTitle": "Yukpo Pro'ya Hoş Geldiniz",
+    "loginSubtitle": "Profesyoneller için AI asistanınız",
+    "email": "E-posta adresi",
+    "emailPlaceholder": "sizin@email.com",
+    "password": "Şifre",
+    "passwordPlaceholder": "Şifreniz",
+    "forgotPassword": "Şifremi unuttum?",
+    "noAccount": "Hesabınız yok mu?",
+    "createAccount": "Hesap oluştur",
+    "alreadyHaveAccount": "Zaten hesabınız var mı?",
+    "register": "Kayıt Ol",
+    "registerTitle": "Yukpo Pro hesabı oluştur",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "loggingIn": "Giriş yapılıyor…",
+    "registering": "Hesap oluşturuluyor…",
+    "loginError": "Geçersiz e-posta veya şifre",
+    "logout": "Çıkış"
+  },
+  "chat": {
+    "placeholder": "Profesyonel sorunuzu sorun…",
+    "newConversation": "Yeni konuşma",
+    "hello": "Merhaba, {{name}}!",
+    "helloDefault": "Merhaba!",
+    "disclaimer": "Yukpo Pro hata yapabilir. Önemli bilgileri doğrulayın.",
+    "thinking": "Yukpo düşünüyor…",
+    "updateSuccess": "Profil güncellendi!",
+    "updateError": "Profil güncellenirken hata"
+  },
+  "emploi": {
+    "title": "İş İlanları",
+    "watchTitle": "İş Takibi",
+    "searchNow": "Şimdi ara",
+    "noOffers": "Henüz ilan yok",
+    "emptyTitle": "İlan bulunamadı",
+    "excellent": "Mükemmel",
+    "good": "İyi",
+    "partial": "Kısmi",
+    "searching": "Aranıyor…"
+  },
+  "marches": {
+    "title": "İhaleler",
+    "searchNow": "Şimdi ara",
+    "noMarches": "Henüz ihale yok",
+    "emptyTitle": "İhale bulunamadı"
+  },
+  "dashboard": {
+    "title": "Kontrol Paneli",
+    "welcome": "Hoş geldiniz, {{name}}!",
+    "openYukpo": "Yukpo Pro'yu Aç"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "Oluşturuluyor…",
+    "download": "İndir"
+  },
+  "traduction": {
+    "title": "Belge Çevirisi",
+    "translate": "Çevir",
+    "translating": "Çevriliyor…"
+  },
+  "reunions": {
+    "title": "Toplantılar",
+    "newMeeting": "Yeni Toplantı"
+  },
+  "language": {
+    "select": "Dil",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "Karanlık tema",
+    "light": "Açık tema",
+    "toggle": "Temayı değiştir"
+  }
+}

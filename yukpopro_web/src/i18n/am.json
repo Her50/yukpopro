@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "ስብሰባዎች",
+    "documents": "ሰነዶቼ",
+    "traduction": "ትርጉም",
+    "translateLive": "ቀጥታ ትርጉም",
+    "emploi": "የሥራ ዕድሎች",
+    "marches": "ጨረታዎች",
+    "enquetes": "ዳሰሳ",
+    "dashboard": "ዳሽቦርድ",
+    "profil": "መገለጫዬ",
+    "wallet": "ዋሌት",
+    "abonnement": "ደንበኝነት ምዝገባ",
+    "admin": "አስተዳደር",
+    "adminPaiements": "MoMo Payments",
+    "logout": "ውጣ",
+    "collapseMenu": "ምናሌ ሰብስብ",
+    "expandMenu": "ምናሌ ዘርጋ"
+  },
+  "common": {
+    "loading": "በመጫን ላይ…",
+    "save": "አስቀምጥ",
+    "saving": "በማስቀመጥ ላይ…",
+    "cancel": "ሰርዝ",
+    "confirm": "አረጋግጥ",
+    "delete": "ሰርዝ",
+    "edit": "አስተካክል",
+    "search": "ፈልግ",
+    "searching": "በመፈለግ ላይ…",
+    "close": "ዝጋ",
+    "back": "ተመለስ",
+    "send": "ላክ",
+    "sending": "በመላክ ላይ…",
+    "download": "አውርድ",
+    "yes": "አዎ",
+    "no": "አይ",
+    "error": "ስህተት",
+    "success": "ተሳክቷል",
+    "copy": "ቅዳ",
+    "copied": "ተቅድቷል!",
+    "noResults": "ውጤቶች የሉም",
+    "credits": "ክሬዲቶች",
+    "or": "ወይም"
+  },
+  "auth": {
+    "login": "ግባ",
+    "loginTitle": "ወደ Yukpo Pro እንኳን ደህና መጡ",
+    "loginSubtitle": "ለባለሙያዎች AI ረዳትዎ",
+    "email": "ኢሜይል አድራሻ",
+    "emailPlaceholder": "your@email.com",
+    "password": "የይለፍ ቃል",
+    "noAccount": "መለያ የለዎትም?",
+    "createAccount": "መለያ ፍጠር",
+    "register": "ይመዝገቡ",
+    "firstName": "ስም",
+    "lastName": "የአባት ስም",
+    "loggingIn": "በመግባት ላይ…",
+    "loginError": "ኢሜይል ወይም የይለፍ ቃል ልክ አይደለም",
+    "logout": "ውጣ"
+  },
+  "chat": {
+    "placeholder": "ሙያዊ ጥያቄዎን ያቅርቡ…",
+    "newConversation": "አዲስ ውይይት",
+    "hello": "ሰላም, {{name}}!",
+    "helloDefault": "ሰላም!",
+    "thinking": "Yukpo እያሰበ ነው…",
+    "updateSuccess": "መገለጫ ተዘምኗል!",
+    "updateError": "ማዘመን ስህተት"
+  },
+  "emploi": {
+    "title": "የሥራ ዕድሎች",
+    "watchTitle": "የሥራ ዕድል ክትትል",
+    "searchNow": "አሁን ፈልግ",
+    "noOffers": "ምንም ዕድሎች አልተገኙም",
+    "excellent": "በጣም ጥሩ",
+    "good": "ጥሩ",
+    "partial": "ከፊል"
+  },
+  "marches": {
+    "title": "ጨረታዎች",
+    "searchNow": "አሁን ፈልግ",
+    "noMarches": "ምንም ጨረታ አልተገኘም"
+  },
+  "dashboard": {
+    "title": "ዳሽቦርድ",
+    "welcome": "እንኳን ደህና መጡ, {{name}}!",
+    "openYukpo": "Yukpo Pro ክፈት"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "በማዘጋጀት ላይ…",
+    "download": "አውርድ"
+  },
+  "traduction": {
+    "title": "የሰነድ ትርጉም",
+    "translate": "ተርጉም",
+    "translating": "በትርጉም ላይ…"
+  },
+  "reunions": {
+    "title": "ስብሰባዎች",
+    "newMeeting": "አዲስ ስብሰባ"
+  },
+  "language": {
+    "select": "ቋንቋ",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "ጨለማ ገጽ",
+    "light": "ብርሃን ገጽ",
+    "toggle": "ገጽ ቀይር"
+  }
+}

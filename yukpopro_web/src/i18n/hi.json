@@ -1,0 +1,143 @@
+{
+  "nav": {
+    "chat": "Yukpo Pro",
+    "generateurs": "Yukpo Studio",
+    "reunions": "बैठकें",
+    "documents": "मेरे दस्तावेज़",
+    "traduction": "अनुवाद",
+    "translateLive": "लाइव अनुवाद",
+    "emploi": "नौकरी के अवसर",
+    "marches": "टेंडर",
+    "enquetes": "सर्वेक्षण",
+    "dashboard": "डैशबोर्ड",
+    "profil": "मेरी प्रोफ़ाइल",
+    "wallet": "वॉलेट",
+    "abonnement": "सदस्यता",
+    "admin": "प्रशासन",
+    "adminPaiements": "MoMo Payments",
+    "logout": "लॉगआउट",
+    "collapseMenu": "मेनू छुपाएं",
+    "expandMenu": "मेनू दिखाएं"
+  },
+  "common": {
+    "loading": "लोड हो रहा है…",
+    "save": "सहेजें",
+    "saving": "सहेज रहा है…",
+    "cancel": "रद्द करें",
+    "confirm": "पुष्टि करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "search": "खोजें",
+    "searching": "खोज रहा है…",
+    "close": "बंद करें",
+    "back": "वापस",
+    "next": "अगला",
+    "send": "भेजें",
+    "sending": "भेज रहा है…",
+    "download": "डाउनलोड करें",
+    "upload": "अपलोड करें",
+    "uploading": "अपलोड हो रहा है…",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "retry": "पुनः प्रयास करें",
+    "refresh": "रीफ़्रेश करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "noResults": "कोई परिणाम नहीं",
+    "noData": "कोई डेटा नहीं",
+    "credits": "क्रेडिट",
+    "or": "या"
+  },
+  "auth": {
+    "login": "लॉगिन करें",
+    "loginTitle": "Yukpo Pro में आपका स्वागत है",
+    "loginSubtitle": "पेशेवरों के लिए आपका AI सहायक",
+    "email": "ईमेल पता",
+    "emailPlaceholder": "आपका@ईमेल.com",
+    "password": "पासवर्ड",
+    "passwordPlaceholder": "आपका पासवर्ड",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "noAccount": "खाता नहीं है?",
+    "createAccount": "खाता बनाएं",
+    "alreadyHaveAccount": "पहले से खाता है?",
+    "register": "साइन अप करें",
+    "registerTitle": "Yukpo Pro खाता बनाएं",
+    "firstName": "पहला नाम",
+    "lastName": "अंतिम नाम",
+    "loggingIn": "लॉगिन हो रहा है…",
+    "registering": "खाता बन रहा है…",
+    "loginError": "अमान्य ईमेल या पासवर्ड",
+    "logout": "लॉगआउट"
+  },
+  "chat": {
+    "placeholder": "अपना पेशेवर प्रश्न पूछें…",
+    "newConversation": "नई बातचीत",
+    "hello": "नमस्ते, {{name}}!",
+    "helloDefault": "नमस्ते!",
+    "disclaimer": "Yukpo Pro गलतियाँ कर सकता है। महत्वपूर्ण जानकारी की जाँच करें।",
+    "thinking": "Yukpo सोच रहा है…",
+    "updateSuccess": "प्रोफ़ाइल अपडेट हो गई!",
+    "updateError": "प्रोफ़ाइल अपडेट में त्रुटि"
+  },
+  "emploi": {
+    "title": "नौकरी के अवसर",
+    "watchTitle": "नौकरी निगरानी",
+    "searchNow": "अभी खोजें",
+    "noOffers": "अभी तक कोई अवसर नहीं",
+    "emptyTitle": "कोई अवसर नहीं मिला",
+    "excellent": "उत्कृष्ट",
+    "good": "अच्छा",
+    "partial": "आंशिक",
+    "searching": "खोज रहा है…"
+  },
+  "marches": {
+    "title": "टेंडर",
+    "searchNow": "अभी खोजें",
+    "noMarches": "अभी तक कोई टेंडर नहीं",
+    "emptyTitle": "कोई टेंडर नहीं मिला"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "welcome": "स्वागत है, {{name}}!",
+    "openYukpo": "Yukpo Pro खोलें"
+  },
+  "generateurs": {
+    "title": "Yukpo Studio",
+    "generating": "बन रहा है…",
+    "download": "डाउनलोड करें"
+  },
+  "traduction": {
+    "title": "दस्तावेज़ अनुवाद",
+    "translate": "अनुवाद करें",
+    "translating": "अनुवाद हो रहा है…"
+  },
+  "reunions": {
+    "title": "बैठकें",
+    "newMeeting": "नई बैठक"
+  },
+  "language": {
+    "select": "भाषा",
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português",
+    "ar": "العربية",
+    "de": "Deutsch",
+    "zh": "中文",
+    "sw": "Kiswahili",
+    "ha": "Hausa",
+    "wo": "Wolof",
+    "ln": "Lingala",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "tr": "Türkçe",
+    "am": "አማርኛ"
+  },
+  "theme": {
+    "dark": "डार्क थीम",
+    "light": "लाइट थीम",
+    "toggle": "थीम बदलें"
+  }
+}

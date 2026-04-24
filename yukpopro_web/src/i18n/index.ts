@@ -7,20 +7,40 @@ import en from "./en.json";
 import es from "./es.json";
 import pt from "./pt.json";
 import ar from "./ar.json";
+import de from "./de.json";
+import zh from "./zh.json";
+import sw from "./sw.json";
+import ha from "./ha.json";
+import ru from "./ru.json";
+import hi from "./hi.json";
+import tr from "./tr.json";
+import wo from "./wo.json";
+import ln from "./ln.json";
+import am from "./am.json";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "fr", label: "Français",   flag: "🇫🇷", dir: "ltr" },
   { code: "en", label: "English",    flag: "🇬🇧", dir: "ltr" },
   { code: "es", label: "Español",    flag: "🇪🇸", dir: "ltr" },
-  { code: "pt", label: "Português",  flag: "🇵🇹", dir: "ltr" },
+  { code: "pt", label: "Português",  flag: "🇧🇷", dir: "ltr" },
   { code: "ar", label: "العربية",    flag: "🇸🇦", dir: "rtl" },
+  { code: "de", label: "Deutsch",    flag: "🇩🇪", dir: "ltr" },
+  { code: "zh", label: "中文",        flag: "🇨🇳", dir: "ltr" },
+  { code: "sw", label: "Kiswahili",  flag: "🇹🇿", dir: "ltr" },
+  { code: "ha", label: "Hausa",      flag: "🇳🇬", dir: "ltr" },
+  { code: "ru", label: "Русский",    flag: "🇷🇺", dir: "ltr" },
+  { code: "hi", label: "हिन्दी",      flag: "🇮🇳", dir: "ltr" },
+  { code: "tr", label: "Türkçe",     flag: "🇹🇷", dir: "ltr" },
+  { code: "wo", label: "Wolof",      flag: "🇸🇳", dir: "ltr" },
+  { code: "ln", label: "Lingala",    flag: "🇨🇩", dir: "ltr" },
+  { code: "am", label: "አማርኛ",       flag: "🇪🇹", dir: "ltr" },
 ];
 
 // Map country code → language code for auto-detection at registration
 export const COUNTRY_LANGUAGE_MAP: Record<string, string> = {
   // Francophone Africa + Europe
-  CM: "fr", CI: "fr", SN: "fr", TG: "fr", BJ: "fr", BF: "fr",
-  ML: "fr", GA: "fr", CG: "fr", CD: "fr", MG: "fr", RW: "fr",
+  CM: "fr", CI: "fr", TG: "fr", BJ: "fr", BF: "fr",
+  ML: "fr", GA: "fr", CG: "fr", MG: "fr",
   MR: "fr", NE: "fr", TD: "fr", GN: "fr", CF: "fr", DJ: "fr",
   FR: "fr", BE: "fr", CH: "fr", LU: "fr", MC: "fr",
   // Arabic
@@ -28,10 +48,10 @@ export const COUNTRY_LANGUAGE_MAP: Record<string, string> = {
   AE: "ar", QA: "ar", KW: "ar", BH: "ar", OM: "ar", JO: "ar",
   SY: "ar", IQ: "ar", LB: "ar", YE: "ar", SD: "ar",
   // English Africa + Anglophone
-  NG: "en", GH: "en", KE: "en", ZA: "en", TZ: "en", UG: "en",
-  RW: "en", ET: "en", MU: "en", SL: "en", LR: "en", GM: "en",
+  GH: "en", ZA: "en", UG: "en",
+  MU: "en", SL: "en", LR: "en", GM: "en",
   GB: "en", US: "en", CA: "en", AU: "en", NZ: "en", IE: "en",
-  IN: "en", PK: "en", SG: "en", ZW: "en", ZM: "en", MW: "en",
+  PK: "en", SG: "en", ZW: "en", ZM: "en", MW: "en",
   // Portuguese
   PT: "pt", BR: "pt", AO: "pt", MZ: "pt", CV: "pt", ST: "pt",
   GW: "pt", GQ: "pt",
@@ -39,7 +59,27 @@ export const COUNTRY_LANGUAGE_MAP: Record<string, string> = {
   ES: "es", MX: "es", AR: "es", CO: "es", CL: "es", PE: "es",
   VE: "es", EC: "es", BO: "es", PY: "es", UY: "es", CU: "es",
   DO: "es", GT: "es", HN: "es", SV: "es", NI: "es", CR: "es",
-  PA: "es", GQ: "es",
+  PA: "es",
+  // German
+  DE: "de", AT: "de",
+  // Chinese
+  CN: "zh", TW: "zh", HK: "zh",
+  // Swahili (East Africa)
+  TZ: "sw", KE: "sw",
+  // Hausa (West Africa)
+  NG: "ha",
+  // Russian
+  RU: "ru", BY: "ru", KZ: "ru", UA: "ru",
+  // Hindi
+  IN: "hi",
+  // Turkish
+  TR: "tr",
+  // Wolof (Senegal)
+  SN: "wo",
+  // Lingala (DRC/Congo)
+  CD: "ln",
+  // Amharic (Ethiopia)
+  ET: "am", RW: "fr",
 };
 
 export function detectLanguageFromCountry(countryCode: string): string {
@@ -56,9 +96,19 @@ i18n
       es: { translation: es },
       pt: { translation: pt },
       ar: { translation: ar },
+      de: { translation: de },
+      zh: { translation: zh },
+      sw: { translation: sw },
+      ha: { translation: ha },
+      ru: { translation: ru },
+      hi: { translation: hi },
+      tr: { translation: tr },
+      wo: { translation: wo },
+      ln: { translation: ln },
+      am: { translation: am },
     },
     fallbackLng: "fr",
-    supportedLngs: ["fr", "en", "es", "pt", "ar"],
+    supportedLngs: ["fr", "en", "es", "pt", "ar", "de", "zh", "sw", "ha", "ru", "hi", "tr", "wo", "ln", "am"],
     detection: {
       order: ["localStorage", "navigator", "htmlTag"],
       caches: ["localStorage"],
