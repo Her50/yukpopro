@@ -11,11 +11,11 @@ import { useAuthStore, useProfilStore, useUIStore } from "@/store";
 
 const NAV_ITEMS = [
   { path: "/chat",           icon: MessageSquare,   label: "Yukpo Pro",       badge: "PRO", adminOnly: false },
+  { path: "/generateurs",    icon: FileText,        label: "Yukpo Studio",     badge: null,  adminOnly: false },
+  { path: "/reunions",       icon: Users,           label: "Réunions",         badge: null,  adminOnly: false },
+  { path: "/mes-documents",  icon: FolderOpen,      label: "Mes Documents",    badge: null,  adminOnly: false },
   { path: "/traduction",     icon: Languages,       label: "Traduction",       badge: null,  adminOnly: false },
   { path: "/translate-live", icon: Radio,           label: "Traduction Live",  badge: "NEW", adminOnly: false },
-  { path: "/generateurs",    icon: FileText,        label: "Yukpo Studio",     badge: null,  adminOnly: false },
-  { path: "/mes-documents",  icon: FolderOpen,      label: "Mes Documents",    badge: null,  adminOnly: false },
-  { path: "/reunions",       icon: Users,           label: "Réunions",         badge: null,  adminOnly: false },
   { path: "/emploi",         icon: Briefcase,       label: "Offres d'emploi",  badge: null,  adminOnly: false },
   { path: "/marches",        icon: Gavel,           label: "Appels d'offres",  badge: null,  adminOnly: false },
   { path: "/enquetes",       icon: ClipboardList,   label: "Enquêtes",         badge: null,  adminOnly: false },
