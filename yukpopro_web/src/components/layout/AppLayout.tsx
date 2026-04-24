@@ -1,10 +1,12 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
-import { useAuthStore } from "@/store";
+import { useAuthStore, useUIStore } from "@/store";
 
 export const AppLayout = () => {
   const { isAuthenticated } = useAuthStore();
+  const setMobileSidebarOpen = useUIStore((s) => s.setMobileSidebarOpen);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
@@ -18,7 +20,33 @@ export const AppLayout = () => {
       {/* Zone contenu principale */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-        {/* Barre supérieure — gradient corporate DS (inchangé : identité de marque) */}
+        {/* Header mobile — visible uniquement sur < 640px */}
+        <div
+          className="sm:hidden flex items-center gap-3 px-4 h-14 flex-shrink-0 border-b"
+          style={{
+            background: "var(--ykp-sidebar-start)",
+            borderColor: "var(--ykp-sidebar-border)",
+          }}
+        >
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Ouvrir le menu"
+          >
+            <Menu size={20} />
+          </button>
+          <div className="flex items-center gap-2">
+            <div style={{
+              width: 30, height: 30, background: "white", borderRadius: 8,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 2,
+            }}>
+              <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </div>
+            <span className="text-white font-bold text-sm">YukpoPro</span>
+          </div>
+        </div>
+
+        {/* Barre supérieure — gradient corporate DS */}
         <header
           className="h-1.5 w-full flex-shrink-0"
           style={{ background: "linear-gradient(90deg, #0054A6 0%, #00B0F0 50%, #0054A6 100%)" }}

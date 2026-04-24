@@ -8,6 +8,7 @@ import { ProfilPage } from "@/pages/ProfilPage";
 import { AdminPage } from "@/pages/AdminPage";
 import { AdminPaiementsPage } from "@/pages/AdminPaiementsPage";
 import { AbonnementPage } from "@/pages/AbonnementPage";
+import { WalletPage } from "@/pages/WalletPage";
 import { ReunionsPage } from "@/pages/ReunionsPage";
 import { TraductionPage } from "@/pages/TraductionPage";
 import { TranslateLivePage } from "@/pages/TranslateLivePage";
@@ -17,6 +18,7 @@ import { EmploiPage } from "@/pages/EmploiPage";
 import { MarchesPage } from "@/pages/MarchesPage";
 import { EnquetesPage } from "@/pages/EnquetesPage";
 import { ParametresPage } from "@/pages/ParametresPage";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +29,7 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <PWAInstallBanner />
       <BrowserRouter>
         <Routes>
           {/* Public */}
@@ -40,6 +43,7 @@ export default function App() {
             <Route path="/reunions"    element={<ReunionsPage />} />
             <Route path="/dashboard"   element={<DashboardPage />} />
             <Route path="/profil"      element={<ProfilPage />} />
+            <Route path="/wallet"      element={<WalletPage />} />
             <Route path="/abonnement"  element={<AbonnementPage />} />
             <Route path="/admin"       element={<AdminPage />} />
             <Route path="/admin/paiements" element={<AdminPaiementsPage />} />

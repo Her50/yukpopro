@@ -20,6 +20,12 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (user, token) => {
+        // Si un autre user était connecté, vider son historique de chat
+        const prev = useAuthStore.getState().user;
+        if (prev && prev.user_id !== user.user_id) {
+          localStorage.removeItem("yukpopro_chat_v2");
+          localStorage.removeItem("yukpopro_docs_v2");
+        }
         localStorage.setItem("yukpopro_token", token);
         set({ user, token, isAuthenticated: true });
       },
@@ -27,6 +33,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         localStorage.removeItem("yukpopro_token");
         localStorage.removeItem("yukpopro_user");
+        // Vider le cache chat/docs pour éviter la fuite entre comptes
+        localStorage.removeItem("yukpopro_chat_v2");
+        localStorage.removeItem("yukpopro_docs_v2");
         set({ user: null, token: null, isAuthenticated: false });
       },
     }),
@@ -344,8 +353,10 @@ const applyThemeClass = (theme: Theme) => {
 
 interface UIState {
   sidebarCollapsed: boolean;
+  mobileSidebarOpen: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (v: boolean) => void;
+  setMobileSidebarOpen: (v: boolean) => void;
   theme: Theme;
   setTheme: (t: Theme) => void;
   toggleTheme: () => void;
@@ -355,8 +366,10 @@ export const useUIStore = create<UIState>()(
   persist(
     (set, get) => ({
       sidebarCollapsed: false,
+      mobileSidebarOpen: false,
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+      setMobileSidebarOpen: (v) => set({ mobileSidebarOpen: v }),
       theme: "light",
       setTheme: (t) => {
         applyThemeClass(t);

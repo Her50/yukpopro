@@ -24,6 +24,7 @@ const NAV_KEYS = [
   { path: "/dashboard",      icon: LayoutDashboard, key: "dashboard",      badge: null,  adminOnly: false },
   { path: "/profil",         icon: User,            key: "profil",         badge: null,  adminOnly: false },
   { path: "/parametres",     icon: Settings,        key: "parametres",     badge: null,  adminOnly: false },
+  { path: "/wallet",         icon: Wallet,          key: "wallet",         badge: null,  adminOnly: false },
   { path: "/abonnement",     icon: CreditCard,      key: "abonnement",     badge: null,  adminOnly: false },
   { path: "/admin",          icon: Shield,          key: "admin",          badge: "ADM", adminOnly: true  },
   { path: "/admin/paiements", icon: Wallet,         key: "adminPaiements", badge: "ADM", adminOnly: true  },
@@ -31,31 +32,48 @@ const NAV_KEYS = [
 
 export const Sidebar = () => {
   const { t } = useTranslation();
-  const collapsed           = useUIStore((s) => s.sidebarCollapsed);
-  const toggleSidebar       = useUIStore((s) => s.toggleSidebar);
-  const setSidebarCollapsed = useUIStore((s) => s.setSidebarCollapsed);
-  const theme               = useUIStore((s) => s.theme);
-  const toggleTheme         = useUIStore((s) => s.toggleTheme);
-  const { logout, user }    = useAuthStore();
-  const { profil }          = useProfilStore();
-  const navigate            = useNavigate();
+  const collapsed             = useUIStore((s) => s.sidebarCollapsed);
+  const toggleSidebar         = useUIStore((s) => s.toggleSidebar);
+  const setSidebarCollapsed   = useUIStore((s) => s.setSidebarCollapsed);
+  const mobileSidebarOpen     = useUIStore((s) => s.mobileSidebarOpen);
+  const setMobileSidebarOpen  = useUIStore((s) => s.setMobileSidebarOpen);
+  const theme                 = useUIStore((s) => s.theme);
+  const toggleTheme           = useUIStore((s) => s.toggleTheme);
+  const { logout, user }      = useAuthStore();
+  const { profil }            = useProfilStore();
+  const navigate              = useNavigate();
   const isAdmin = ["admin", "super_admin", "yukpo_owner"].includes(user?.role || "");
   const isDark = theme === "dark";
 
   useEffect(() => {
-    const check = () => { if (window.innerWidth < 768) setSidebarCollapsed(true); };
+    const check = () => { if (window.innerWidth < 640) setSidebarCollapsed(true); };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
   const handleLogout = () => { logout(); navigate("/login"); };
+  const handleNavClick = () => { if (window.innerWidth < 640) setMobileSidebarOpen(false); };
 
   return (
+    <>
+      {/* Backdrop mobile — clic ferme le drawer */}
+      {mobileSidebarOpen && (
+        <div
+          className="sm:hidden fixed inset-0 bg-black/60 z-40"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
     <aside
       className={cn(
-        "flex flex-col h-screen flex-shrink-0 transition-all duration-300 ease-in-out",
-        collapsed ? "w-16" : "w-64"
+        "flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out",
+        // Mobile : fixed drawer depuis la gauche
+        "max-sm:fixed max-sm:top-0 max-sm:left-0 max-sm:h-full max-sm:w-72 max-sm:z-50",
+        mobileSidebarOpen ? "max-sm:translate-x-0" : "max-sm:-translate-x-full",
+        // Desktop : sidebar classique
+        "sm:relative sm:h-screen",
+        collapsed ? "sm:w-16" : "sm:w-64",
       )}
       style={{
         background: "linear-gradient(180deg, var(--ykp-sidebar-start) 0%, var(--ykp-sidebar-end) 100%)",
@@ -143,6 +161,7 @@ export const Sidebar = () => {
               <li key={path}>
                 <NavLink
                   to={path}
+                  onClick={handleNavClick}
                   className={({ isActive }) => cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
                     "transition-all duration-150 group relative",
@@ -268,5 +287,6 @@ export const Sidebar = () => {
         </div>{/* end space-y-0.5 */}
       </div>{/* end footer */}
     </aside>
+    </>
   );
 };
