@@ -14,10 +14,11 @@ import {
   FileText, Image, Table, Globe, BarChart2,
   Pencil, Save, User as UserIcon, Mic, MicOff,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
 import { chatApi, profilApi, type UploadedFile } from "@/api/client";
 import { cn } from "@/components/ui";
-import type { CopiloteMessage } from "@/types";
+import type { CopiloteMessage, NavigationSuggestion } from "@/types";
 import { METIERS, PAYS_AFRIQUE } from "@/types";
 import { METIERS_CONFIG } from "@/data/metiers-config";
 
@@ -126,8 +127,9 @@ export const ChatPage = () => {
       updateLastAssistantMessage(
         res.reponse,
         res.agent_utilise ?? null,
-        res.fichiers_generes,
+        res.fichiers_generes ?? undefined,
         res.cout_llm ?? null,
+        res.navigation_suggestions ?? [],
       );
 
       // Sauvegarder les documents générés dans l'historique
@@ -751,6 +753,33 @@ const WelcomeScreen = ({
 
 // ── Bulle de message ──────────────────────────────────────────────────────────
 
+const NavSuggestionButtons = ({ suggestions }: { suggestions: NavigationSuggestion[] }) => {
+  const navigate = useNavigate();
+  if (!suggestions || suggestions.length === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {suggestions.map((s) => (
+        <button
+          key={s.route}
+          onClick={() => navigate(s.route)}
+          title={s.description}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+          style={{
+            background: "rgba(0,84,166,0.15)",
+            borderColor: "rgba(0,176,240,0.35)",
+            color: "#00B0F0",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,84,166,0.3)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,84,166,0.15)"; }}
+        >
+          <span>→</span>
+          {s.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
   const isUser = message.role === "user";
 
@@ -840,6 +869,11 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
               );
             })}
           </div>
+        )}
+
+        {/* Boutons de navigation vers les modules */}
+        {message.navigation_suggestions && message.navigation_suggestions.length > 0 && !message.loading && (
+          <NavSuggestionButtons suggestions={message.navigation_suggestions} />
         )}
 
         {/* Coût LLM (transparent, discret) */}

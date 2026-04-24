@@ -1547,6 +1547,89 @@ _RAG_COUVERTURE = {
 }
 
 
+# ── Navigation modules — suggestions contextuelles ───────────────────────────
+_NAVIGATION_MAP = [
+    {
+        "keywords": ["réunion", "reunion", "procès-verbal", "proces verbal", "pv réunion",
+                     "ordre du jour", "compte rendu réunion", "rédiger pv", "rapport réunion"],
+        "label": "Module Réunions", "route": "/reunions", "icon": "users",
+        "description": "Gérer vos réunions, générer PV et rapports automatiquement",
+    },
+    {
+        "keywords": ["traduire", "traduction", "translate", "traducteur", "version anglaise",
+                     "version française", "document traduit"],
+        "label": "Traduction Documents", "route": "/traduction", "icon": "languages",
+        "description": "Traduire des documents dans plusieurs langues",
+    },
+    {
+        "keywords": ["traduction live", "interprétation", "simultané", "microphone traduction",
+                     "traduction temps réel", "interprète"],
+        "label": "Traduction Live", "route": "/translate-live", "icon": "mic",
+        "description": "Interprétation en temps réel via microphone",
+    },
+    {
+        "keywords": ["rapport word", "générer rapport", "creer rapport", "document word",
+                     "fichier docx", "slides powerpoint", "présentation ppt", "business plan",
+                     "générer document", "yukpo studio", "studio", "mes generateurs"],
+        "label": "Yukpo Studio", "route": "/generateurs", "icon": "file-text",
+        "description": "Générer rapports, contrats, slides et autres documents téléchargeables",
+    },
+    {
+        "keywords": ["emploi", "recrutement", "offre emploi", "cherche emploi",
+                     "candidature", "cv", "lettre de motivation", "poste disponible"],
+        "label": "Offres d'emploi", "route": "/emploi", "icon": "briefcase",
+        "description": "Rechercher des offres d'emploi et préparer votre candidature",
+    },
+    {
+        "keywords": ["marché public", "appel d'offres", "appel offres", "dao", "dossier appel",
+                     "marchés publics", "soumission", "avis d'appel"],
+        "label": "Marchés Publics", "route": "/marches", "icon": "building-2",
+        "description": "Suivre les appels d'offres et marchés publics",
+    },
+    {
+        "keywords": ["enquête", "sondage", "questionnaire", "formulaire enquête",
+                     "collecter données", "survey"],
+        "label": "Module Enquêtes", "route": "/enquetes", "icon": "clipboard-list",
+        "description": "Créer et gérer des enquêtes et sondages professionnels",
+    },
+    {
+        "keywords": ["mes documents", "historique documents", "documents générés",
+                     "télécharger mes fichiers", "retrouver document"],
+        "label": "Mes Documents", "route": "/mes-documents", "icon": "folder-open",
+        "description": "Retrouver et télécharger tous vos documents générés",
+    },
+    {
+        "keywords": ["tableau de bord", "dashboard", "statistiques", "mes stats",
+                     "mon activité", "xp points"],
+        "label": "Dashboard", "route": "/dashboard", "icon": "bar-chart-2",
+        "description": "Voir vos statistiques d'utilisation et votre progression",
+    },
+]
+
+
+def _suggestions_modules(message: str, intention: str = "") -> list[dict]:
+    """Retourne 0-2 suggestions de navigation contextuelle selon le message."""
+    msg = message.lower()
+    suggestions = []
+    for entry in _NAVIGATION_MAP:
+        if any(kw in msg for kw in entry["keywords"]):
+            suggestions.append({
+                "label":       entry["label"],
+                "route":       entry["route"],
+                "icon":        entry["icon"],
+                "description": entry["description"],
+            })
+        if len(suggestions) >= 2:
+            break
+    # Si intention generateur → toujours ajouter Studio si pas déjà là
+    if intention == "generateur" and not any(s["route"] == "/generateurs" for s in suggestions):
+        suggestions.append({
+            "label": "Yukpo Studio", "route": "/generateurs",
+            "icon": "file-text", "description": "Générateur de documents avancé",
+        })
+    return suggestions[:2]
+
+
 def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
     """
     Construit le prompt système hyper-contextualisé du copilote.
@@ -1683,6 +1766,22 @@ Analyser directement ce contenu — JAMAIS prétendre ne pas avoir accès au fic
 
 **AGENTS SPÉCIALISÉS (activés automatiquement) :**
 DRH · Comptable · DAF · Banquier · Juriste · Commercial · DAA · Ingénieur · Microfinance · ONG · Douanier · CV/Emploi
+
+═══════════════════════════════════════════════════
+  MODULES DE L'APPLICATION — GUIDE D'ORIENTATION
+═══════════════════════════════════════════════════
+▸ **Chat Yukpo Pro**      : vous êtes ici — assistant IA conversationnel polyvalent
+▸ **Yukpo Studio**        : `/generateurs` — génère rapports, contrats, slides, business plans en Word/PowerPoint
+▸ **Réunions**            : `/reunions` — gestion réunions, génération PV automatique, rapports de réunion
+▸ **Traduction Documents**: `/traduction` — traduction de documents dans plusieurs langues
+▸ **Traduction Live**     : `/translate-live` — interprétation simultanée en temps réel (microphone)
+▸ **Offres d'emploi**     : `/emploi` — recherche d'emploi, CV, lettres de motivation
+▸ **Marchés Publics**     : `/marches` — appels d'offres, DAO, suivi marchés publics
+▸ **Enquêtes**            : `/enquetes` — création de sondages et questionnaires professionnels
+▸ **Mes Documents**       : `/mes-documents` — retrouver et télécharger tous les documents générés
+▸ **Dashboard**           : `/dashboard` — statistiques d'utilisation et progression
+
+RÈGLE ORIENTATION : Quand l'utilisateur pose une question sur une fonctionnalité spécifique ou que son besoin correspond à un module, mentionnez le module par son nom dans votre réponse. Le système ajoutera automatiquement un bouton d'accès rapide.
 """.strip()
 
 
@@ -2056,19 +2155,51 @@ async def copilote_chat(
             )
 
             return {
-                "session_id":          session["session_id"],
-                "reponse":             reponse_gen,
-                "agent_utilise":       "generateur",
-                "resultat_agent":      None,
-                "nb_messages_session": len(session["messages"]),
-                "profil_metier":       getattr(profil, "metier", None),
-                "fichiers_generes":    [chemin_fichier] if chemin_fichier else None,
+                "session_id":           session["session_id"],
+                "reponse":              reponse_gen,
+                "agent_utilise":        "generateur",
+                "resultat_agent":       None,
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     [chemin_fichier] if chemin_fichier else None,
+                "navigation_suggestions": [],
             }
         except asyncio.TimeoutError:
-            logger.warning("[Copilote-Gen] Timeout génération document — réponse texte")
+            logger.warning("[Copilote-Gen] Timeout génération document")
+            _msg_err = (
+                "⚠️ **La génération du document a pris trop de temps.** Essayez avec une demande plus courte, "
+                "ou utilisez **Yukpo Studio** qui offre plus de contrôle sur la génération."
+            )
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", _msg_err, {"agent_utilise": "generateur"})
+            return {
+                "session_id":           session["session_id"],
+                "reponse":              _msg_err,
+                "agent_utilise":        "generateur",
+                "resultat_agent":       None,
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     None,
+                "navigation_suggestions": [{"label": "Yukpo Studio", "route": "/generateurs", "icon": "file-text", "description": "Générer des documents avec plus de contrôle"}],
+            }
         except Exception as e:
             logger.warning(f"[Copilote-Gen] Génération échouée: {e}")
-            # Fallback : le copilote répond avec le contenu en texte
+            _msg_err2 = (
+                f"⚠️ **Erreur lors de la génération du document.** "
+                f"Essayez de reformuler votre demande, ou utilisez **Yukpo Studio** pour plus de contrôle."
+            )
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", _msg_err2, {"agent_utilise": "generateur"})
+            return {
+                "session_id":           session["session_id"],
+                "reponse":              _msg_err2,
+                "agent_utilise":        "generateur",
+                "resultat_agent":       None,
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     None,
+                "navigation_suggestions": [{"label": "Yukpo Studio", "route": "/generateurs", "icon": "file-text", "description": "Générer des documents avec plus de contrôle"}],
+            }
 
     # ── Étape 0e : Génération CV / Lettre de motivation ──────────────────────
     if _intention == "generateur" and _sous_type == "cv":
@@ -2153,20 +2284,34 @@ async def copilote_chat(
             )
 
             return {
-                "session_id":          session["session_id"],
-                "reponse":             reponse_cv,
-                "agent_utilise":       "cv_emploi",
-                "resultat_agent":      None,
-                "nb_messages_session": len(session["messages"]),
-                "profil_metier":       getattr(profil, "metier", None),
-                "fichiers_generes":    [chemin_cv] if chemin_cv else None,
+                "session_id":           session["session_id"],
+                "reponse":              reponse_cv,
+                "agent_utilise":        "cv_emploi",
+                "resultat_agent":       None,
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     [chemin_cv] if chemin_cv else None,
+                "navigation_suggestions": [{"label": "Offres d'emploi", "route": "/emploi", "icon": "briefcase", "description": "Trouver des offres et gérer vos candidatures"}],
             }
 
-        except asyncio.TimeoutError:
-            logger.warning("[Copilote-CV] Timeout génération document CV — fallback texte")
-        except Exception as e_cv:
+        except (asyncio.TimeoutError, Exception) as e_cv:
             logger.warning(f"[Copilote-CV] Génération CV échouée: {e_cv}")
-            # Fallback : le copilote répond en texte (boucle normale)
+            _msg_cv_err = (
+                "⚠️ **Erreur lors de la génération du document.** Reformulez votre demande "
+                "ou accédez au module **Offres d'emploi** pour générer votre CV avec plus d'options."
+            )
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", _msg_cv_err, {"agent_utilise": "cv_emploi"})
+            return {
+                "session_id":           session["session_id"],
+                "reponse":              _msg_cv_err,
+                "agent_utilise":        "cv_emploi",
+                "resultat_agent":       None,
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     None,
+                "navigation_suggestions": [{"label": "Offres d'emploi", "route": "/emploi", "icon": "briefcase", "description": "Générer CV et lettres de motivation"}],
+            }
 
     # ── Étape 0f : RAG en parallèle (contexte réglementaire) ─────────────────
     # L'agent est déjà connu via l'orchestrateur (_agent_orch).
@@ -2464,13 +2609,14 @@ async def copilote_chat(
             _cout_local = None  # pas de conversion → afficher USD côté client
 
         return {
-            "session_id":         session["session_id"],
-            "reponse":            reponse_copilote,
-            "agent_utilise":      agent_utilise,
-            "resultat_agent":     resultat_agent,
-            "nb_messages_session": len(session["messages"]),
-            "profil_metier":      getattr(profil, "metier", None),
-            "fichiers_generes":   fichiers_generes_copilote,
+            "session_id":           session["session_id"],
+            "reponse":              reponse_copilote,
+            "agent_utilise":        agent_utilise,
+            "resultat_agent":       resultat_agent,
+            "nb_messages_session":  len(session["messages"]),
+            "profil_metier":        getattr(profil, "metier", None),
+            "fichiers_generes":     fichiers_generes_copilote,
+            "navigation_suggestions": _suggestions_modules(req.message, _intention),
             # Coût LLM transparent
             "cout_llm": {
                 "modele":        _modele_id,

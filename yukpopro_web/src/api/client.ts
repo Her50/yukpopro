@@ -104,8 +104,10 @@ export interface ChatResponse {
   reponse: string;
   agent_utilise?: string;
   session_id?: string;
-  fichiers_generes?: string[];
+  fichiers_generes?: string[] | null;
   actions?: Array<{ label: string; action: string }>;
+  cout_llm?: import("@/types").CoutLLM | null;
+  navigation_suggestions?: import("@/types").NavigationSuggestion[];
 }
 
 export const chatApi = {

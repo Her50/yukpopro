@@ -111,6 +111,13 @@ export interface CoutLLM {
   devise_cout: string | null;    // "XAF" | "XOF" | null (null → afficher USD)
 }
 
+export interface NavigationSuggestion {
+  label: string;
+  route: string;
+  icon: string;
+  description: string;
+}
+
 export interface CopiloteMessage {
   id: string;
   role: "user" | "assistant";
@@ -121,6 +128,7 @@ export interface CopiloteMessage {
   fichiers?: string[];       // noms des fichiers attachés (user) ou générés (assistant)
   document_ref?: { id: number; titre: string; type: string };
   cout_llm?: CoutLLM | null;
+  navigation_suggestions?: NavigationSuggestion[];
 }
 
 export interface CopiloteResponse {
@@ -130,7 +138,9 @@ export interface CopiloteResponse {
   resultat_agent: string | null;
   nb_messages_session: number;
   profil_metier: string | null;
+  fichiers_generes?: string[] | null;
   cout_llm?: CoutLLM | null;
+  navigation_suggestions?: NavigationSuggestion[];
 }
 
 // ── Agents ────────────────────────────────────────────────────────────────────
