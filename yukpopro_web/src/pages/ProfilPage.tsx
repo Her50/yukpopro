@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { Card, Input } from "@/components/ui";
 import { useProfilStore } from "@/store";
 import { profilApi } from "@/api/client";
-import { METIERS, PAYS_AFRIQUE } from "@/types";
+import { METIERS, PAYS_AFRIQUE, SECTEURS_ACTIVITE } from "@/types";
 
 const NIVEAUX_EXPERTISE = [
   { value: "debutant",       label: "Débutant (0-2 ans)" },
@@ -47,7 +47,14 @@ export const ProfilPage = () => {
 
   const [metier, setMetier] = useState(profil?.metier || "");
   const [pays, setPays]     = useState(profil?.pays || "CM");
-  const [secteur, setSecteur]     = useState(profil?.secteur || "");
+
+  // Secteur : si valeur en base n'est pas dans la liste → "autre" + custom
+  const _secteurInitial = profil?.secteur || "";
+  const _inList = SECTEURS_ACTIVITE.some((s) => s.value === _secteurInitial);
+  const [secteurSelect, setSecteurSelect] = useState(_inList ? _secteurInitial : (_secteurInitial ? "autre" : ""));
+  const [secteurCustom, setSecteurCustom] = useState(!_inList ? _secteurInitial : "");
+  const secteur = secteurSelect === "autre" ? secteurCustom : secteurSelect;
+
   const [entreprise, setEntreprise] = useState(profil?.entreprise || "");
   const [niveau, setNiveau] = useState<string>(profil?.niveau_expertise || "intermediaire");
   const [annees, setAnnees] = useState(String(profil?.annees_experience || ""));
@@ -190,12 +197,23 @@ export const ProfilPage = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label="Secteur d'activité"
-                  placeholder="Finance, BTP, Agro…"
-                  value={secteur}
-                  onChange={(e) => setSecteur(e.target.value)}
-                />
+                <div>
+                  <FieldSelect label="Secteur d'activité" value={secteurSelect} onChange={setSecteurSelect}>
+                    <option value="" className="bg-slate-800">— Sélectionner —</option>
+                    {SECTEURS_ACTIVITE.map((s) => (
+                      <option key={s.value} value={s.value} className="bg-slate-800">{s.label}</option>
+                    ))}
+                  </FieldSelect>
+                  {secteurSelect === "autre" && (
+                    <input
+                      type="text"
+                      placeholder="Précisez votre secteur…"
+                      value={secteurCustom}
+                      onChange={(e) => setSecteurCustom(e.target.value)}
+                      className="mt-2 w-full rounded-lg px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors"
+                    />
+                  )}
+                </div>
                 <Input
                   label="Entreprise / Organisation"
                   placeholder="Nom de l'organisation"
@@ -223,7 +241,7 @@ export const ProfilPage = () => {
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Décrivez votre expertise, vos spécialités, votre contexte…"
                   rows={3}
-                  className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 resize-none transition-colors"
+                  className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 bg-white border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 resize-none transition-colors"
                 />
               </div>
 

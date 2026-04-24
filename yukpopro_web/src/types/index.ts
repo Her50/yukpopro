@@ -74,6 +74,32 @@ export const METIERS = [
   { value: "douanier",              label: "Douanier / Agent transit" },
   { value: "medecin",               label: "Médecin / Professionnel de santé" },
   { value: "pharmacien",            label: "Pharmacien" },
+  { value: "autre",                 label: "Autre" },
+] as const;
+
+export const SECTEURS_ACTIVITE = [
+  { value: "finance_banque",         label: "Finance / Banque" },
+  { value: "assurance",              label: "Assurance" },
+  { value: "comptabilite_audit",     label: "Comptabilité / Audit / Fiscal" },
+  { value: "juridique_notariat",     label: "Juridique / Notariat" },
+  { value: "ressources_humaines",    label: "Ressources humaines" },
+  { value: "btp_construction",       label: "BTP / Construction" },
+  { value: "immobilier",             label: "Immobilier" },
+  { value: "commerce_distribution",  label: "Commerce / Distribution" },
+  { value: "agriculture_agro",       label: "Agriculture / Agro-industrie" },
+  { value: "sante_pharmacie",        label: "Santé / Pharmacie" },
+  { value: "education_formation",    label: "Éducation / Formation" },
+  { value: "technologie_numerique",  label: "Technologie / Numérique" },
+  { value: "energie_mines",          label: "Énergie / Mines / Environnement" },
+  { value: "transport_logistique",   label: "Transport / Logistique" },
+  { value: "industrie_manufacture",  label: "Industrie / Manufacture" },
+  { value: "telecom_medias",         label: "Télécommunications / Médias" },
+  { value: "tourisme_hotellerie",    label: "Tourisme / Hôtellerie" },
+  { value: "microfinance_imf",       label: "Microfinance / IMF" },
+  { value: "ong_developpement",      label: "ONG / Développement / Humanitaire" },
+  { value: "administration_publique",label: "Administration publique" },
+  { value: "recherche_conseil",      label: "Recherche / Conseil" },
+  { value: "autre",                  label: "Autre" },
 ] as const;
 
 export const PAYS_AFRIQUE = [
