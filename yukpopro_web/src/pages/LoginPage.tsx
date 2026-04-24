@@ -45,9 +45,9 @@ export const LoginPage = () => {
       localStorage.setItem("yukpopro_token", data.access_token);
       const me = await authApi.me();
       setAuth({ ...me, token: data.access_token }, data.access_token);
-      const profil = await profilApi.get().catch(() => null);
-      if (profil) { setProfil(profil); navigate("/dashboard"); }
-      else setMode("onboarding");
+      // Charger le profil en arrière-plan — ne jamais bloquer l'accès à l'app
+      profilApi.get().then((p) => setProfil(p)).catch(() => {});
+      navigate("/chat");
     } catch (err: unknown) {
       localStorage.removeItem("yukpopro_token");
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
@@ -78,8 +78,9 @@ export const LoginPage = () => {
         localStorage.setItem("yukpopro_token", data.access_token);
         const me = await authApi.me();
         setAuth({ ...me, token: data.access_token }, data.access_token);
-        setMode("onboarding");
-        toast.success("Compte créé ! Complétez votre profil métier.");
+        profilApi.get().then((p) => setProfil(p)).catch(() => {});
+        toast.success("Bienvenue ! Complétez votre profil dans Mon Profil.");
+        navigate("/chat");
       } catch {
         // Inscription réussie mais login échoue → rediriger vers connexion
         toast.success("Compte créé avec succès ! Connectez-vous maintenant.");
