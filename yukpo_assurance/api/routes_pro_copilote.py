@@ -887,8 +887,21 @@ FORMAT: "docx" pour Word, "pptx" pour PowerPoint
 LANGUE_CIBLE (si traduction): fr, en, es, pt, ar
 FORMAT_CIBLE (si conversion): docx, pdf, pptx, xlsx, csv, txt, jpg
 
+MODULES DISPONIBLES (pour modules_suggeres) :
+- "reunions"       : gestion de réunions, PV, ordre du jour, compte rendu de réunion
+- "traduction"     : traduction de documents
+- "translate_live" : interprétation simultanée, traduction en temps réel
+- "generateur"     : générer Word/PowerPoint/PDF (rapports, contrats, slides, business plans)
+- "emploi"         : offres d'emploi, CV, lettres de motivation, recrutement
+- "marches"        : marchés publics, appels d'offres, DAO
+- "enquetes"       : enquêtes, sondages, questionnaires
+- "mes_documents"  : retrouver, consulter ou télécharger des documents générés
+- "dashboard"      : statistiques d'utilisation, tableau de bord
+
+modules_suggeres : liste de 0 à 2 clés de modules dont la pertinence est évidente pour ce message. Laisser [] si aucun module n'est spécifiquement adapté à la demande (conversation générale, question juridique, etc.).
+
 JSON REQUIS (tous les champs, null si non applicable):
-{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "langue_cible": null, "format_cible": null, "confiance": 0.9}}"""
+{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "langue_cible": null, "format_cible": null, "confiance": 0.9, "modules_suggeres": []}}"""
 
     try:
         reponse = await asyncio.wait_for(
@@ -896,9 +909,9 @@ JSON REQUIS (tous les champs, null si non applicable):
                 prompt=prompt,
                 mode=ModeIA.PRECISION,
                 utiliser_cache=False,
-                max_tokens_override=100,
+                max_tokens_override=150,
             ),
-            timeout=6.0,
+            timeout=8.0,
         )
         raw = reponse.contenu.strip() if hasattr(reponse, "contenu") else str(reponse).strip()
         # Extraire le JSON même s'il est entouré de markdown
@@ -1607,26 +1620,59 @@ _NAVIGATION_MAP = [
 ]
 
 
-def _suggestions_modules(message: str, intention: str = "") -> list[dict]:
-    """Retourne 0-2 suggestions de navigation contextuelle selon le message."""
-    msg = message.lower()
-    suggestions = []
-    for entry in _NAVIGATION_MAP:
-        if any(kw in msg for kw in entry["keywords"]):
-            suggestions.append({
-                "label":       entry["label"],
-                "route":       entry["route"],
-                "icon":        entry["icon"],
-                "description": entry["description"],
-            })
-        if len(suggestions) >= 2:
-            break
-    # Si intention generateur → toujours ajouter Studio si pas déjà là
-    if intention == "generateur" and not any(s["route"] == "/generateurs" for s in suggestions):
-        suggestions.append({
-            "label": "Yukpo Studio", "route": "/generateurs",
-            "icon": "file-text", "description": "Générateur de documents avancé",
-        })
+# Table de résolution : clé LLM → entrée _NAVIGATION_MAP
+_MODULE_KEY_TO_ROUTE = {
+    "reunions":       "/reunions",
+    "traduction":     "/traduction",
+    "translate_live": "/translate-live",
+    "generateur":     "/generateurs",
+    "emploi":         "/emploi",
+    "marches":        "/marches",
+    "enquetes":       "/enquetes",
+    "mes_documents":  "/mes-documents",
+    "dashboard":      "/dashboard",
+}
+
+
+def _suggestions_modules(
+    message: str,
+    intention: str = "",
+    modules_llm: list[str] | None = None,
+) -> list[dict]:
+    """
+    Retourne 0-2 suggestions de navigation.
+    Priorité : résultat LLM (modules_llm) → fallback mots-clés.
+    """
+    # Construire l'index route → entrée pour lookups rapides
+    _route_map = {e["route"]: e for e in _NAVIGATION_MAP}
+
+    suggestions: list[dict] = []
+
+    # 1. Suggestions issues de l'orchestrateur LLM (compréhension sémantique)
+    if modules_llm:
+        for key in modules_llm:
+            route = _MODULE_KEY_TO_ROUTE.get(key)
+            if route and route in _route_map:
+                e = _route_map[route]
+                suggestions.append({
+                    "label": e["label"], "route": e["route"],
+                    "icon": e["icon"],   "description": e["description"],
+                })
+            if len(suggestions) >= 2:
+                break
+
+    # 2. Fallback mots-clés si le LLM n'a rien retourné
+    if not suggestions:
+        msg = message.lower()
+        for entry in _NAVIGATION_MAP:
+            if any(kw in msg for kw in entry["keywords"]):
+                suggestions.append({
+                    "label": entry["label"], "route": entry["route"],
+                    "icon": entry["icon"],   "description": entry["description"],
+                })
+            if len(suggestions) >= 2:
+                break
+
     return suggestions[:2]
 
 
@@ -1828,13 +1874,14 @@ async def copilote_chat(
         a_fichiers=bool(req.fichiers),
         contenu_fichiers=contenu_fichiers,
     )
-    _intention    = orchestration["intention"]
-    _sous_type    = orchestration.get("sous_type") or ""
-    _type_doc_o   = orchestration.get("type_doc") or ""
-    _agent_orch   = orchestration.get("agent")
-    _format_orch  = orchestration.get("format") or "docx"
-    _lc_orch      = orchestration.get("langue_cible") or "en"
-    _fc_orch      = orchestration.get("format_cible") or _format_orch
+    _intention      = orchestration["intention"]
+    _sous_type      = orchestration.get("sous_type") or ""
+    _type_doc_o     = orchestration.get("type_doc") or ""
+    _agent_orch     = orchestration.get("agent")
+    _format_orch    = orchestration.get("format") or "docx"
+    _lc_orch        = orchestration.get("langue_cible") or "en"
+    _fc_orch        = orchestration.get("format_cible") or _format_orch
+    _modules_llm    = orchestration.get("modules_suggeres") or []  # suggestions sémantiques LLM
 
     # ── Étape 0c : Traduction ─────────────────────────────────────────────────
     texte_a_traduire_chat = contenu_fichiers
@@ -2113,7 +2160,7 @@ async def copilote_chat(
                         contexte=contexte_gen,
                         format_sortie="pptx",
                     ),
-                    timeout=90.0,
+                    timeout=240.0,
                 )
                 ext = "PPTX"
                 type_doc_gen = _type_doc_o or "slides"
@@ -2129,7 +2176,7 @@ async def copilote_chat(
                         contexte=contexte_gen,
                         format_sortie="docx",
                     ),
-                    timeout=90.0,
+                    timeout=240.0,
                 )
                 ext = "DOCX"
 
@@ -2228,7 +2275,7 @@ async def copilote_chat(
                 )
                 rep_cv = await asyncio.wait_for(
                     ia_cv.appeler(prompt=prompt_cv, mode=ModeIAcv.REDACTION, max_tokens_override=4096),
-                    timeout=60.0,
+                    timeout=120.0,
                 )
                 contenu_doc = rep_cv.contenu if hasattr(rep_cv, "contenu") else str(rep_cv)
                 nom_base    = "cv_yukpo"
@@ -2239,7 +2286,7 @@ async def copilote_chat(
                 )
                 rep_lm = await asyncio.wait_for(
                     ia_cv.appeler(prompt=prompt_lm, mode=ModeIAcv.REDACTION, max_tokens_override=2048),
-                    timeout=60.0,
+                    timeout=120.0,
                 )
                 contenu_doc = rep_lm.contenu if hasattr(rep_lm, "contenu") else str(rep_lm)
                 nom_base    = "lettre_motivation_yukpo"
@@ -2250,12 +2297,12 @@ async def copilote_chat(
             if type_doc == "cv":
                 res_cv = await asyncio.wait_for(
                     builder_cv.generer_cv(contenu_doc, nom_base=nom_base, format_sortie=format_sortie_cv),
-                    timeout=20.0,
+                    timeout=60.0,
                 )
             else:
                 res_cv = await asyncio.wait_for(
                     builder_cv.generer_lettre(contenu_doc, nom_base=nom_base, format_sortie=format_sortie_cv),
-                    timeout=20.0,
+                    timeout=60.0,
                 )
 
             chemin_cv = res_cv.get("chemin_fichier")
@@ -2616,7 +2663,7 @@ async def copilote_chat(
             "nb_messages_session":  len(session["messages"]),
             "profil_metier":        getattr(profil, "metier", None),
             "fichiers_generes":     fichiers_generes_copilote,
-            "navigation_suggestions": _suggestions_modules(req.message, _intention),
+            "navigation_suggestions": _suggestions_modules(req.message, _intention, _modules_llm),
             # Coût LLM transparent
             "cout_llm": {
                 "modele":        _modele_id,

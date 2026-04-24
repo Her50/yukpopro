@@ -241,13 +241,13 @@ class IAClient:
             and "CLE" not in _claude_key.upper()
         )
         self._claude = (
-            anthropic.AsyncAnthropic(api_key=_claude_key, timeout=20.0)
+            anthropic.AsyncAnthropic(api_key=_claude_key, timeout=120.0)
             if _claude_valide
             else None
         )
         # GPT-4o = fallback si Claude indisponible
-        # timeout=15s + max_retries=1 = 30s max → confortable dans la fenêtre copilote de 45s
-        self._gpt = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=15.0, max_retries=1)
+        # timeout=90s pour génération de documents longs (multi-sections)
+        self._gpt = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=90.0, max_retries=1)
         self._metriques: dict[str, MetriquesModele] = {
             m.value: MetriquesModele() for m in ModelePrioritaire
         }
