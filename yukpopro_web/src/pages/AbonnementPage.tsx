@@ -32,6 +32,7 @@ export const AbonnementPage = () => {
   const [transactionId, setTransactionId] = useState("");
   const [paiementLoading, setPaiementLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [numeroExpediteur, setNumeroExpediteur] = useState("");
 
   const pays = (profil as any)?.pays || "CM";
 
@@ -81,12 +82,15 @@ export const AbonnementPage = () => {
 
   const handleConfirmerPaiement = async () => {
     if (!reference) { toast.error("Référence manquante"); return; }
+    if (!numeroExpediteur || numeroExpediteur.length < 8) {
+      toast.error("Le numéro MoMo utilisé pour le paiement est obligatoire"); return;
+    }
     setPaiementLoading(true);
     try {
-      await abonnementApi.confirmerPaiement(reference, transactionId || undefined);
+      await abonnementApi.confirmerPaiement(reference, numeroExpediteur, transactionId || undefined);
       setEtape("succes");
       await charger();
-      toast.success("Abonnement activé !");
+      toast.success("Abonnement activé provisoirement — vérification sous 3h");
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || "Référence invalide ou expirée");
     } finally {
@@ -131,9 +135,10 @@ export const AbonnementPage = () => {
 
   const handleConfirmerRecharge = async () => {
     if (!refR) { toast.error("Référence manquante"); return; }
+    if (!telephoneR || telephoneR.length < 8) { toast.error("Numéro MoMo expéditeur obligatoire"); return; }
     setLoadingR(true);
     try {
-      await abonnementApi.confirmerRecharge(refR, txIdR || undefined);
+      await abonnementApi.confirmerRecharge(refR, telephoneR, txIdR || undefined);
       setEtapeR("succes");
       await charger();
       toast.success("Crédits ajoutés à votre solde !");
@@ -323,10 +328,13 @@ export const AbonnementPage = () => {
 
           {etapeR === "confirmation" && (
             <>
-              <input type="text" placeholder="YKP-RC-XXXXXXXX" value={refR} onChange={(e) => setRefR(e.target.value.toUpperCase())}
+              <input type="text" placeholder="YYMMDD-NNN-XXXX" value={refR} onChange={(e) => setRefR(e.target.value.toUpperCase())}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono tracking-widest placeholder-slate-600 focus:outline-none focus:border-green-500" />
+              <input type="tel" placeholder="Numéro MoMo expéditeur (obligatoire)" value={telephoneR} onChange={(e) => setTelephoneR(e.target.value.replace(/\D/g, ""))}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500" />
               <input type="text" placeholder="ID Transaction Mobile Money (optionnel)" value={txIdR} onChange={(e) => setTxIdR(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500" />
+              <p className="text-xs text-amber-300">⚠️ Activation provisoire — vérifiée sous 3h. Annulation auto si non reçu.</p>
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setEtapeR("instructions")}>Retour</Button>
                 <Button variant="primary" className="flex-1" loading={loadingR} disabled={!refR} onClick={handleConfirmerRecharge}>
@@ -545,11 +553,25 @@ export const AbonnementPage = () => {
             <label className="text-slate-400 text-sm block mb-2">Référence de paiement *</label>
             <input
               type="text"
-              placeholder="YKP-XXXXXXXX"
+              placeholder="YYMMDD-NNN-XXXX"
               value={reference}
               onChange={(e) => setReference(e.target.value.toUpperCase())}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono tracking-widest placeholder-slate-600 focus:outline-none focus:border-green-500"
             />
+          </div>
+
+          <div>
+            <label className="text-slate-400 text-sm block mb-2">
+              Numéro MoMo utilisé pour le paiement <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="tel"
+              placeholder="6XXXXXXXX (numéro depuis lequel vous avez payé)"
+              value={numeroExpediteur}
+              onChange={(e) => setNumeroExpediteur(e.target.value.replace(/\D/g, ""))}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500"
+            />
+            <p className="text-xs text-slate-500 mt-1">Obligatoire — sert à vérifier la réception de votre paiement.</p>
           </div>
 
           <div>
@@ -561,6 +583,12 @@ export const AbonnementPage = () => {
               onChange={(e) => setTransactionId(e.target.value)}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500"
             />
+          </div>
+
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-300 leading-relaxed">
+            ⚠️ <strong>Activation provisoire.</strong> Votre abonnement sera activé immédiatement mais vérifié sous 3h.
+            Si le paiement n'est pas reçu sur notre compte MoMo, l'abonnement sera automatiquement annulé.
+            Le paiement direct intégré arrive bientôt.
           </div>
 
           <div className="flex gap-3">

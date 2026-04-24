@@ -6,6 +6,7 @@ import { ChatPage } from "@/pages/ChatPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { ProfilPage } from "@/pages/ProfilPage";
 import { AdminPage } from "@/pages/AdminPage";
+import { AdminPaiementsPage } from "@/pages/AdminPaiementsPage";
 import { AbonnementPage } from "@/pages/AbonnementPage";
 import { ReunionsPage } from "@/pages/ReunionsPage";
 import { TraductionPage } from "@/pages/TraductionPage";
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/profil"      element={<ProfilPage />} />
             <Route path="/abonnement"  element={<AbonnementPage />} />
             <Route path="/admin"       element={<AdminPage />} />
+            <Route path="/admin/paiements" element={<AdminPaiementsPage />} />
             {/* Pages actives */}
             <Route path="/traduction"     element={<TraductionPage />} />
             <Route path="/translate-live" element={<TranslateLivePage />} />

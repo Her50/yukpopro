@@ -142,7 +142,28 @@ class InitierPaiementRequest(BaseModel):
 
 class ConfirmerPaiementRequest(BaseModel):
     reference_paiement: str = Field(..., min_length=4)
+    numero_expediteur:  str = Field(..., min_length=8, max_length=20, description="N° MoMo avec lequel l'utilisateur a effectivement payé (obligatoire)")
     transaction_id:     Optional[str] = None
+
+
+# N° MoMo marchands YukpoPro (à configurer en production)
+NUMEROS_MARCHANDS = {
+    "orange_money":  "+237 690 00 00 01",
+    "mtn_momo":      "+237 677 00 00 01",
+    "wave":          "+237 600 00 00 01",
+    "moov_money":    "+237 560 00 00 01",
+    "airtel_money":  "+237 770 00 00 01",
+    "expressunion":  "+237 930 00 00 01",
+}
+
+AVERTISSEMENT_PAIEMENT = (
+    "⚠️ Important : votre abonnement est activé immédiatement mais de manière PROVISOIRE. "
+    "Notre équipe vérifie la réception effective du paiement sur notre compte MoMo sous 3 heures. "
+    "Si aucun paiement n'est reçu à votre numéro, votre abonnement (ou achat de crédits) "
+    "sera automatiquement annulé après vérification. "
+    "Le paiement direct intégré dans l'application sera bientôt disponible. "
+    "Vous DEVEZ renseigner le numéro MoMo utilisé pour le paiement."
+)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -276,48 +297,35 @@ async def initier_paiement(
         raise HTTPException(status_code=400, detail=f"Opérateur non supporté. Disponibles : {', '.join(OPERATEURS.keys())}")
 
     plan_info = PLANS[req.plan]
-    reference = f"YKP-{uuid.uuid4().hex[:8].upper()}"
     operateur_info = OPERATEURS[req.operateur]
+    numero_marchand = NUMEROS_MARCHANDS.get(req.operateur, "+237 6XX XX XX XX")
 
-    # En production, ici on appellerait l'API de l'opérateur Mobile Money
-    # Ex: Orange Money API (Cameroun) : POST /openapi/mm/v1/payments/...
-    # Ex: MTN MoMo API : POST /collection/v1_0/requesttopay
-    # Pour l'instant on génère les instructions manuelles
-
-    instructions = _generer_instructions_paiement(
+    from modules.pro.service_paiement_commande import creer_commande
+    cmd = await creer_commande(
+        user_id=current_user.user_id,
+        type_cmd="abonnement",
+        plan_ou_pack=req.plan,
+        montant_fcfa=plan_info["prix_fcfa"],
         operateur=req.operateur,
-        montant=plan_info["prix_fcfa"],
-        reference=reference,
-        numero=req.numero_telephone,
+        numero_destinataire=numero_marchand,
+        db=db,
     )
 
-    # Sauvegarder la demande en attente
-    from modules.pro.service_profil import get_or_create
-    profil, _ = await get_or_create(current_user.user_id, db)
-    prefs = dict(profil.preferences or {})
-    prefs["paiement_en_attente"] = {
-        "reference": reference,
-        "plan": req.plan,
-        "operateur": req.operateur,
-        "numero": req.numero_telephone,
-        "montant": plan_info["prix_fcfa"],
-        "date_initiation": datetime.utcnow().isoformat(),
-        "expire_a": (datetime.utcnow() + timedelta(minutes=30)).isoformat(),
-    }
-    profil.preferences = prefs
-    await db.commit()
-
-    logger.info(f"[Abonnement] Paiement initié: user={current_user.user_id} plan={req.plan} ref={reference}")
-
     return {
-        "reference":         reference,
-        "plan":              req.plan,
-        "montant_fcfa":      plan_info["prix_fcfa"],
-        "operateur":         operateur_info["label"],
-        "numero_telephone":  req.numero_telephone,
-        "instructions":      instructions,
-        "expire_dans":       "30 minutes",
-        "prochaine_etape":   f"Après paiement, utilisez POST /api/v1/pro/abonnement/confirmer avec votre référence : {reference}",
+        "reference":            cmd.reference,
+        "plan":                 req.plan,
+        "montant_fcfa":         plan_info["prix_fcfa"],
+        "operateur":            operateur_info["label"],
+        "numero_marchand":      numero_marchand,
+        "numero_telephone":     req.numero_telephone,
+        "deadline":             cmd.deadline.isoformat(),
+        "delai_heures":         3,
+        "avertissement":        AVERTISSEMENT_PAIEMENT,
+        "prochaine_etape":      (
+            f"Envoyez {plan_info['prix_fcfa']:,} FCFA au {numero_marchand} via "
+            f"{operateur_info['label']}, en indiquant la référence {cmd.reference} "
+            f"dans le motif. Puis confirmez sur l'app avec votre numéro MoMo expéditeur."
+        ),
     }
 
 
@@ -332,82 +340,30 @@ async def confirmer_paiement(
     En mode simulation : active l'abonnement immédiatement.
     En mode production : vérifie la transaction auprès de l'opérateur.
     """
-    from modules.pro.service_profil import get_or_create
-    from config.settings import settings
-
-    profil, _ = await get_or_create(current_user.user_id, db)
-    prefs = dict(profil.preferences or {})
-    attente = prefs.get("paiement_en_attente", {})
-
-    # Vérifier que la référence correspond
-    if not attente or attente.get("reference") != req.reference_paiement:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Référence de paiement invalide. Référence attendue : {attente.get('reference', 'Aucune demande en attente')}",
-        )
-
-    # Vérifier expiration (30 min)
-    expire_str = attente.get("expire_a")
-    if expire_str:
-        try:
-            if datetime.utcnow() > datetime.fromisoformat(expire_str):
-                raise HTTPException(status_code=400, detail="La demande de paiement a expiré. Réinitiez le processus.")
-        except ValueError:
-            pass
-
-    plan = attente["plan"]
-    plan_info = PLANS.get(plan, PLANS["gratuit"])
-
-    # En mode simulation : on fait confiance à l'utilisateur (à valider manuellement par admin)
-    # En mode prod : vérifier l'API de l'opérateur avec le transaction_id
-
-    # Activer l'abonnement
-    date_debut = datetime.utcnow()
-    date_fin = date_debut + timedelta(days=plan_info["duree_jours"])
-
-    prefs["plan"] = plan
-    prefs["abonnement_debut"] = date_debut.isoformat()
-    prefs["abonnement_fin"] = date_fin.isoformat()
-    prefs["operateur_paiement"] = attente.get("operateur")
-    prefs["numero_telephone"] = attente.get("numero")
-    prefs["derniere_reference"] = req.reference_paiement
-
-    # Historique des paiements
-    historique = prefs.get("historique_paiements", [])
-    historique.append({
-        "reference": req.reference_paiement,
-        "plan": plan,
-        "montant_fcfa": plan_info["prix_fcfa"],
-        "operateur": attente.get("operateur"),
-        "date": date_debut.isoformat(),
-        "statut": "confirme",
-        "transaction_id": req.transaction_id,
-    })
-    prefs["historique_paiements"] = historique[-20:]  # Garder les 20 derniers
-
-    # Effacer la demande en attente
-    prefs.pop("paiement_en_attente", None)
-    profil.preferences = prefs
-    await db.commit()
-
-    # ── Synchroniser les crédits IA selon le nouveau plan ──────────────────
+    from modules.pro.service_paiement_commande import confirmer_commande
     try:
-        from modules.pro.service_credits import synchroniser_plan
-        await synchroniser_plan(current_user.user_id, plan, db)
-    except Exception as e_credits:
-        logger.warning(f"[Abonnement] Sync crédits échoué (non bloquant) : {e_credits}")
+        cmd = await confirmer_commande(
+            user_id=current_user.user_id,
+            reference=req.reference_paiement,
+            numero_expediteur=req.numero_expediteur,
+            tx_id=req.transaction_id,
+            db=db,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    logger.info(f"[Abonnement] Activé: user={current_user.user_id} plan={plan} ref={req.reference_paiement}")
-
+    plan_info = PLANS.get(cmd.plan_ou_pack, PLANS["gratuit"])
     from modules.pro.service_credits import CREDITS_PAR_PLAN, LABEL_CREDITS_PLAN
     return {
-        "succes":           True,
-        "message":          f"Abonnement {plan_info['nom']} activé avec succès !",
-        "plan":             plan,
-        "date_debut":       date_debut.isoformat(),
-        "date_fin":         date_fin.isoformat(),
-        "credits_alloues":  CREDITS_PAR_PLAN.get(plan, 500),
-        "label_credits":    LABEL_CREDITS_PLAN.get(plan, "500 crédits / mois"),
+        "succes":         True,
+        "message":        f"Abonnement {plan_info['nom']} activé provisoirement. Vérification en cours.",
+        "reference":      cmd.reference,
+        "statut":         "provisoire",
+        "plan":           cmd.plan_ou_pack,
+        "deadline":       cmd.deadline.isoformat(),
+        "credits_alloues": CREDITS_PAR_PLAN.get(cmd.plan_ou_pack, 500),
+        "label_credits":  LABEL_CREDITS_PLAN.get(cmd.plan_ou_pack, ""),
+        "avertissement":  AVERTISSEMENT_PAIEMENT,
     }
 
 
@@ -433,42 +389,30 @@ async def initier_recharge_credits(
         raise HTTPException(400, f"Opérateur non supporté : {', '.join(OPERATEURS.keys())}")
 
     pack = PACKS_CREDITS[req.pack_id]
-    reference = f"YKP-RC-{uuid.uuid4().hex[:8].upper()}"
+    numero_marchand = NUMEROS_MARCHANDS.get(req.operateur, "+237 6XX XX XX XX")
 
-    instructions = _generer_instructions_paiement(
+    from modules.pro.service_paiement_commande import creer_commande
+    cmd = await creer_commande(
+        user_id=current_user.user_id,
+        type_cmd="recharge",
+        plan_ou_pack=req.pack_id,
+        montant_fcfa=pack["prix_fcfa"],
         operateur=req.operateur,
-        montant=pack["prix_fcfa"],
-        reference=reference,
-        numero=req.numero_telephone,
+        numero_destinataire=numero_marchand,
+        db=db,
     )
 
-    from modules.pro.service_profil import get_or_create
-    profil, _ = await get_or_create(current_user.user_id, db)
-    prefs = dict(profil.preferences or {})
-    prefs["recharge_en_attente"] = {
-        "reference":        reference,
-        "pack_id":          req.pack_id,
-        "credits":          pack["credits"],
-        "operateur":        req.operateur,
-        "numero":           req.numero_telephone,
-        "montant":          pack["prix_fcfa"],
-        "date_initiation":  datetime.utcnow().isoformat(),
-        "expire_a":         (datetime.utcnow() + timedelta(hours=24)).isoformat(),
-    }
-    profil.preferences = prefs
-    await db.commit()
-
-    logger.info(f"[Recharge] Initié: user={current_user.user_id} pack={req.pack_id} ref={reference}")
-
     return {
-        "reference":        reference,
+        "reference":        cmd.reference,
         "pack_id":          req.pack_id,
         "pack_nom":         pack["nom"],
         "credits":          pack["credits"],
         "montant_fcfa":     pack["prix_fcfa"],
         "operateur":        OPERATEURS[req.operateur]["label"],
-        "instructions":     instructions,
-        "expire_dans":      "24 heures",
+        "numero_marchand":  numero_marchand,
+        "deadline":         cmd.deadline.isoformat(),
+        "delai_heures":     3,
+        "avertissement":    AVERTISSEMENT_PAIEMENT,
     }
 
 
@@ -482,57 +426,28 @@ async def confirmer_recharge_credits(
     Confirme l'achat de crédits supplémentaires.
     Ajoute les crédits directement au solde de l'utilisateur.
     """
-    from modules.pro.service_profil import get_or_create
-
-    profil, _ = await get_or_create(current_user.user_id, db)
-    prefs = dict(profil.preferences or {})
-    attente = prefs.get("recharge_en_attente", {})
-
-    if not attente or attente.get("reference") != req.reference_paiement:
-        raise HTTPException(400, "Référence de recharge invalide ou expirée.")
-
-    expire_a = datetime.fromisoformat(attente["expire_a"])
-    if datetime.utcnow() > expire_a:
-        raise HTTPException(400, "Cette référence de recharge a expiré (24h). Recommencez.")
-
-    credits_a_ajouter = attente["credits"]
-    pack_id = attente["pack_id"]
-    pack = PACKS_CREDITS.get(pack_id, {})
-
-    # Créditer le solde
+    from modules.pro.service_paiement_commande import confirmer_commande
     try:
-        from modules.pro.service_credits import get_ou_creer_credits
-        from core.database import async_session_maker
-        async with async_session_maker() as fresh_db:
-            credit = await get_ou_creer_credits(current_user.user_id, fresh_db)
-            credit.credits_alloues += credits_a_ajouter
-            credit.mise_a_jour = datetime.utcnow()
-            await fresh_db.commit()
-    except Exception as e_cred:
-        logger.error(f"[Recharge] Crédit échoué user={current_user.user_id}: {e_cred}")
-        raise HTTPException(500, "Erreur lors de l'ajout des crédits.")
+        cmd = await confirmer_commande(
+            user_id=current_user.user_id,
+            reference=req.reference_paiement,
+            numero_expediteur=req.numero_expediteur,
+            tx_id=req.transaction_id,
+            db=db,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    # Historique
-    historique = prefs.get("historique_recharges", [])
-    historique.insert(0, {
-        "reference":   req.reference_paiement,
-        "pack_nom":    pack.get("nom", pack_id),
-        "credits":     credits_a_ajouter,
-        "montant":     attente["montant"],
-        "date":        datetime.utcnow().strftime("%d/%m/%Y %H:%M"),
-    })
-    prefs["historique_recharges"] = historique[:20]
-    prefs.pop("recharge_en_attente", None)
-    profil.preferences = prefs
-    await db.commit()
-
-    logger.info(f"[Recharge] Confirmée: user={current_user.user_id} pack={pack_id} +{credits_a_ajouter} crédits")
-
+    pack = PACKS_CREDITS.get(cmd.plan_ou_pack, {})
     return {
-        "succes":           True,
-        "message":          f"{credits_a_ajouter:,} crédits ajoutés à votre solde !",
-        "credits_ajoutes":  credits_a_ajouter,
-        "pack_nom":         pack.get("nom", pack_id),
+        "succes":          True,
+        "message":         f"{pack.get('credits', 0):,} crédits ajoutés provisoirement. Vérification sous 3h.",
+        "reference":       cmd.reference,
+        "statut":          "provisoire",
+        "credits_ajoutes": pack.get("credits", 0),
+        "pack_nom":        pack.get("nom", cmd.plan_ou_pack),
+        "deadline":        cmd.deadline.isoformat(),
+        "avertissement":   AVERTISSEMENT_PAIEMENT,
     }
 
 

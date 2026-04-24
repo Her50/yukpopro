@@ -358,8 +358,8 @@ export const abonnementApi = {
     const { data } = await http.post("/pro/abonnement/initier", payload);
     return data;
   },
-  confirmerPaiement: async (reference_paiement: string, transaction_id?: string) => {
-    const { data } = await http.post("/pro/abonnement/confirmer", { reference_paiement, transaction_id });
+  confirmerPaiement: async (reference_paiement: string, numero_expediteur: string, transaction_id?: string) => {
+    const { data } = await http.post("/pro/abonnement/confirmer", { reference_paiement, numero_expediteur, transaction_id });
     return data;
   },
   historique: async () => {
@@ -374,8 +374,41 @@ export const abonnementApi = {
     const { data } = await http.post("/pro/abonnement/initier-recharge", payload);
     return data;
   },
-  confirmerRecharge: async (reference_paiement: string, transaction_id?: string) => {
-    const { data } = await http.post("/pro/abonnement/confirmer-recharge", { reference_paiement, transaction_id });
+  confirmerRecharge: async (reference_paiement: string, numero_expediteur: string, transaction_id?: string) => {
+    const { data } = await http.post("/pro/abonnement/confirmer-recharge", { reference_paiement, numero_expediteur, transaction_id });
+    return data;
+  },
+};
+
+// ── Admin — Paiements MoMo ───────────────────────────────────────────────────
+
+export const adminPaiementsApi = {
+  pending: async () => {
+    const { data } = await http.get("/admin/paiements/pending");
+    return data;
+  },
+  all: async () => {
+    const { data } = await http.get("/admin/paiements/all");
+    return data;
+  },
+  valider: async (id: number) => {
+    const { data } = await http.post(`/admin/paiements/${id}/valider`);
+    return data;
+  },
+  rejeter: async (id: number, motif: string) => {
+    const { data } = await http.post(`/admin/paiements/${id}/rejeter`, { motif });
+    return data;
+  },
+  uploadReleve: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const { data } = await http.post("/admin/paiements/upload-releve", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+  cronAutoAnnulation: async () => {
+    const { data } = await http.post("/admin/paiements/cron/auto-annulation");
     return data;
   },
 };

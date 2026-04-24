@@ -971,6 +971,34 @@ class ConsommationBureauDB(Base):
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+class CommandePaiementDB(Base):
+    """
+    Commande de paiement MoMo (abonnement ou recharge de crédits).
+    Activation provisoire immédiate, validée manuellement ou via auto-match
+    de relevé uploadé par l'admin dans les 3h.
+    """
+    __tablename__ = "commandes_paiement"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    reference = Column(String(40), nullable=False, unique=True, index=True)
+    type = Column(String(20), nullable=False)          # abonnement | recharge
+    plan_ou_pack = Column(String(50), nullable=False)   # starter|pro|business|pack_500|...
+    montant_fcfa = Column(Integer, nullable=False)
+    operateur = Column(String(40), nullable=True)
+    numero_destinataire = Column(String(30), nullable=True)  # n° marchand YukpoPro
+    numero_expediteur = Column(String(30), nullable=True)    # n° payeur (requis à la confirmation)
+    tx_id = Column(String(80), nullable=True)
+    statut = Column(String(20), nullable=False, default="attente", index=True)
+    # attente | provisoire | valide | rejete | annule
+    motif_rejet = Column(String(300), nullable=True)
+    valide_par = Column(Integer, nullable=True)         # user_id admin
+    valide_le = Column(DateTime, nullable=True)
+    match_source = Column(String(30), nullable=True)    # manuel | releve_ia | cron
+    cree_le = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    deadline = Column(DateTime, nullable=False)
+
+
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:

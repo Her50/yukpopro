@@ -89,6 +89,7 @@ from api.routes_pro_generateurs import router as pro_generateurs_router
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_pro_abonnement import router as pro_abonnement_router
+from api.routes_admin_paiements import router as admin_paiements_router
 from api.routes_pro_reunions import router as pro_reunions_router
 from api.routes_mrh import router as mrh_router
 from api.routes_enquetes import router as enquetes_router
@@ -362,6 +363,25 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"  [Emploi] Scheduler veille emploi non démarré: {e}")
 
+    # ── Auto-annulation paiements MoMo provisoires > 3h ───────────────────────
+    try:
+        import asyncio as _asyncio
+        from modules.pro.service_paiement_commande import annuler_commandes_expirees
+
+        async def _cron_paiements():
+            while True:
+                await _asyncio.sleep(900)  # 15 min
+                try:
+                    async with async_session_maker() as s:
+                        await annuler_commandes_expirees(s)
+                except Exception as _e:
+                    logger.warning(f"[PaiementCron] Erreur: {_e}")
+
+        _asyncio.create_task(_cron_paiements())
+        logger.info("  [Paiement] CRON auto-annulation démarré — cycle 15min")
+    except Exception as e:
+        logger.warning(f"  [Paiement] CRON non démarré: {e}")
+
     # ── Veille marchés publics automatique (Pro) ──────────────────────────────
     try:
         from modules.pro.scheduler_marches import demarrer_scheduler_marches
@@ -598,6 +618,7 @@ app.include_router(pro_generateurs_router, prefix="/api/v1/pro", tags=["Platefor
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])
 app.include_router(pro_abonnement_router, prefix="/api/v1/pro/abonnement",  tags=["Plateforme Pro — Abonnements"])
+app.include_router(admin_paiements_router, prefix="/api/v1/admin/paiements", tags=["Admin — Paiements MoMo"])
 app.include_router(pro_reunions_router,   prefix="/api/v1/pro/reunions",    tags=["Plateforme Pro — Réunions & Transcription"])
 app.include_router(enquetes_router, prefix="/api/v1/enquetes", tags=["Enquêtes & Études qualitatives/quantitatives"])
 
