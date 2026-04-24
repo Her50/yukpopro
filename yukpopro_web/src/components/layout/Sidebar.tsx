@@ -37,6 +37,7 @@ export const Sidebar = () => {
   const setSidebarCollapsed   = useUIStore((s) => s.setSidebarCollapsed);
   const mobileSidebarOpen     = useUIStore((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen  = useUIStore((s) => s.setMobileSidebarOpen);
+  const showLabels            = !collapsed || mobileSidebarOpen;
   const theme                 = useUIStore((s) => s.theme);
   const toggleTheme           = useUIStore((s) => s.toggleTheme);
   const { logout, user }      = useAuthStore();
@@ -109,7 +110,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Profil utilisateur */}
-      {!collapsed && (
+      {showLabels && (
         <div
           className="mx-3 my-2.5 p-3 rounded-xl"
           style={{
@@ -183,7 +184,7 @@ export const Sidebar = () => {
                         className={cn("w-4 h-4 flex-shrink-0 transition-colors")}
                         style={{ color: isActive ? "#00B0F0" : "var(--ykp-sidebar-text-muted)" }}
                       />
-                      {!collapsed && (
+                      {showLabels && (
                         <>
                           <span className="flex-1 truncate">{label}</span>
                           {badge && (
@@ -197,7 +198,7 @@ export const Sidebar = () => {
                           )}
                         </>
                       )}
-                      {collapsed && (
+                      {!showLabels && (
                         <div
                           className="absolute left-full ml-3 px-3 py-1.5 text-xs rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-50 pointer-events-none transition-opacity duration-150"
                           style={{
@@ -221,7 +222,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Diviseur graphique */}
-      {!collapsed && (
+      {showLabels && (
         <div
           className="mx-4 my-1 h-px"
           style={{
@@ -234,7 +235,7 @@ export const Sidebar = () => {
       {/* Footer */}
       <div className="p-2 flex-shrink-0">
         {/* Section label Paramètres */}
-        {!collapsed && (
+        {showLabels && (
           <p className="px-2 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-widest"
              style={{ color: "var(--ykp-sidebar-text-muted)", opacity: 0.6 }}>
             {t("settings.label", "Paramètres")}
@@ -254,7 +255,7 @@ export const Sidebar = () => {
           title={t("theme.toggle")}
         >
           {isDark ? <Sun className="w-4 h-4 flex-shrink-0" /> : <Moon className="w-4 h-4 flex-shrink-0" />}
-          {!collapsed && <span>{isDark ? t("theme.light") : t("theme.dark")}</span>}
+          {showLabels && <span>{isDark ? t("theme.light") : t("theme.dark")}</span>}
         </button>
 
         <button
@@ -264,9 +265,9 @@ export const Sidebar = () => {
           onMouseEnter={(e) => (e.currentTarget.style.background = "var(--ykp-sidebar-hover)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
         >
-          {collapsed
-            ? <ChevronRight className="w-4 h-4 mx-auto" />
-            : <><ChevronLeft className="w-4 h-4" /><span>{t("nav.collapseMenu")}</span></>}
+          {showLabels
+            ? <><ChevronLeft className="w-4 h-4" /><span>{t("nav.collapseMenu")}</span></>
+            : <ChevronRight className="w-4 h-4 mx-auto" />}
         </button>
         <button
           onClick={handleLogout}
@@ -282,7 +283,7 @@ export const Sidebar = () => {
           }}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>{t("nav.logout")}</span>}
+          {showLabels && <span>{t("nav.logout")}</span>}
         </button>
         </div>{/* end space-y-0.5 */}
       </div>{/* end footer */}

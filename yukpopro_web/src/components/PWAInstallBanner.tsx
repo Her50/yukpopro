@@ -7,6 +7,32 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+const DISMISS_KEY = 'pwa_dismissed_until'
+const INSTALLED_KEY = 'pwa_installed'
+const DISMISS_DAYS = 30
+
+function isDismissed(): boolean {
+  const val = localStorage.getItem(DISMISS_KEY)
+  if (!val) return false
+  return Date.now() < Number(val)
+}
+
+function markDismissed() {
+  localStorage.setItem(DISMISS_KEY, String(Date.now() + DISMISS_DAYS * 86400_000))
+}
+
+function isMarkedInstalled(): boolean {
+  return !!localStorage.getItem(INSTALLED_KEY)
+}
+
+function markInstalled() {
+  localStorage.setItem(INSTALLED_KEY, '1')
+}
+
+function clearInstalled() {
+  localStorage.removeItem(INSTALLED_KEY)
+}
+
 export function PWAInstallBanner() {
   const { i18n } = useTranslation()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
@@ -14,9 +40,17 @@ export function PWAInstallBanner() {
   const [installing, setInstalling] = useState(false)
 
   useEffect(() => {
-    // Ne pas afficher si déjà installé (standalone) ou si déjà refusé cette session
+    // Running as installed PWA — never show
     if (window.matchMedia('(display-mode: standalone)').matches) return
-    if (sessionStorage.getItem('pwa_banner_dismissed')) return
+
+    // Dismissed recently — don't show
+    if (isDismissed()) return
+
+    // If marked installed but not in standalone mode → user likely uninstalled
+    // Clear the flag so the banner can appear again when browser fires beforeinstallprompt
+    if (isMarkedInstalled()) {
+      clearInstalled()
+    }
 
     const handler = (e: Event) => {
       e.preventDefault()
@@ -32,13 +66,16 @@ export function PWAInstallBanner() {
     setInstalling(true)
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') setVisible(false)
+    if (outcome === 'accepted') {
+      markInstalled()
+      setVisible(false)
+    }
     setInstalling(false)
     setDeferredPrompt(null)
   }
 
   const handleDismiss = () => {
-    sessionStorage.setItem('pwa_banner_dismissed', '1')
+    markDismissed()
     setVisible(false)
   }
 

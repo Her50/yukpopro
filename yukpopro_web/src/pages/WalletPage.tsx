@@ -102,7 +102,7 @@ export const WalletPage = () => {
             <Wallet className="w-7 h-7 text-yukpo-500" />
             Mon Wallet
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm mt-1" style={{ color: "var(--ykp-text-muted)" }}>
             Solde, consommations et historique de crédits IA
           </p>
         </div>
@@ -110,7 +110,8 @@ export const WalletPage = () => {
           <select
             value={jours}
             onChange={(e) => setJours(Number(e.target.value))}
-            className="px-3 py-2 rounded-lg border text-sm bg-card"
+            className="px-3 py-2 rounded-lg border text-sm"
+            style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }}
           >
             <option value={7}>7 jours</option>
             <option value={30}>30 jours</option>
@@ -130,42 +131,42 @@ export const WalletPage = () => {
       }}>
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Solde disponible</p>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Solde disponible</p>
             <p className="text-4xl font-bold mt-2" style={{ color: PLAN_COLORS[solde.plan] || "#0054A6" }}>
               {solde.credits_restants.toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">crédits Yukpo</p>
-            <p className="text-sm font-medium mt-3">
+            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>crédits Yukpo</p>
+            <p className="text-sm font-medium mt-3" style={{ color: "var(--ykp-text-primary)" }}>
               ≈ {(solde.credits_restants * 0.6).toLocaleString(undefined, { maximumFractionDigits: 0 })} FCFA de valeur
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Plan actif</p>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Plan actif</p>
             <div className="mt-2 flex items-center gap-2">
               <Badge variant={solde.plan === "gratuit" ? "outline" : "default"} className="uppercase">{solde.plan}</Badge>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">{solde.label_plan}</p>
+            <p className="text-sm mt-2" style={{ color: "var(--ykp-text-secondary)" }}>{solde.label_plan}</p>
             {solde.renouvellement_le && (
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+              <p className="text-xs mt-2 flex items-center gap-1" style={{ color: "var(--ykp-text-muted)" }}>
                 <Calendar className="w-3 h-3" /> Renouvellement : {solde.renouvellement_le}
               </p>
             )}
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Utilisation</p>
-            <div className="mt-3 h-3 rounded-full bg-muted overflow-hidden">
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Utilisation</p>
+            <div className="mt-3 h-3 rounded-full overflow-hidden" style={{ background: "var(--ykp-elevated)" }}>
               <div className="h-full transition-all" style={{ width: `${pct}%`, background: pctColor }} />
             </div>
             <div className="flex justify-between mt-2 text-xs">
-              <span className="text-muted-foreground">{solde.credits_utilises.toLocaleString()} utilisés</span>
+              <span style={{ color: "var(--ykp-text-muted)" }}>{solde.credits_utilises.toLocaleString()} utilisés</span>
               <span className="font-semibold" style={{ color: pctColor }}>{pct}%</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">sur {solde.credits_alloues.toLocaleString()} alloués</p>
+            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>sur {solde.credits_alloues.toLocaleString()} alloués</p>
           </div>
         </div>
 
         {/* Raccourcis */}
-        <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-border/50">
+        <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t" style={{ borderColor: "var(--ykp-border)" }}>
           <Link to="/abonnement">
             <Button size="sm" className="gap-1">
               <CreditCard className="w-4 h-4" /> Gérer abonnement <ArrowRight className="w-3 h-3" />
@@ -182,34 +183,34 @@ export const WalletPage = () => {
       {/* KPIs période */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
             <Activity className="w-3 h-3" /> Consommés
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.credits_consommes.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">crédits sur {jours}j</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">crédits sur {jours}j</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
             <Zap className="w-3 h-3" /> Appels IA
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.appels.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">requêtes</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">requêtes</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
             <TrendingDown className="w-3 h-3" /> Valeur FCFA
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.valeur_fcfa_payee.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">FCFA équiv.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">FCFA équiv.</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
             <TrendingUp className="w-3 h-3" /> Moyenne/jour
           </div>
           <p className="text-2xl font-bold mt-2">
             {Math.round(data.totaux.credits_consommes / Math.max(1, jours)).toLocaleString()}
           </p>
-          <p className="text-xs text-muted-foreground">crédits/jour</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">crédits/jour</p>
         </Card>
       </div>
 
@@ -220,10 +221,10 @@ export const WalletPage = () => {
             <h2 className="font-bold flex items-center gap-2">
               <BarChart3 className="w-5 h-5" /> Consommation quotidienne
             </h2>
-            <span className="text-xs text-muted-foreground">{data.serie_jour.length} jours actifs</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{data.serie_jour.length} jours actifs</span>
           </div>
           {data.serie_jour.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">Aucune consommation sur la période.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">Aucune consommation sur la période.</p>
           ) : (
             <div className="flex items-end gap-1 h-48">
               {data.serie_jour.slice(-30).map((s) => {
@@ -253,18 +254,18 @@ export const WalletPage = () => {
             <PieChart className="w-5 h-5" /> Top consommateurs
           </h2>
           {data.top_modules.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">Aucune donnée.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">Aucune donnée.</p>
           ) : (
             <div className="space-y-3">
               {data.top_modules.slice(0, 8).map((m) => (
                 <div key={m.module}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="font-medium">{MODULE_LABELS[m.module] || m.module}</span>
-                    <span className="text-muted-foreground">
+                    <span className="text-slate-500 dark:text-slate-400">
                       {m.credits.toLocaleString()} cr · {m.appels} appel(s)
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--ykp-elevated)" }}">
                     <div
                       className="h-full transition-all"
                       style={{
@@ -286,15 +287,15 @@ export const WalletPage = () => {
           <h2 className="font-bold flex items-center gap-2">
             <Activity className="w-5 h-5" /> Historique détaillé
           </h2>
-          <span className="text-xs text-muted-foreground">{data.historique.length} dernière(s)</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{data.historique.length} dernière(s)</span>
         </div>
         {data.historique.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Aucune consommation enregistrée.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">Aucune consommation enregistrée.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-muted-foreground uppercase border-b">
+                <tr className="text-left text-xs text-slate-500 dark:text-slate-400 uppercase border-b">
                   <th className="py-2 pr-2">Date</th>
                   <th className="py-2 pr-2">Module</th>
                   <th className="py-2 pr-2">Modèle</th>
@@ -305,13 +306,13 @@ export const WalletPage = () => {
               </thead>
               <tbody>
                 {data.historique.map((h) => (
-                  <tr key={h.id} className="border-b border-border/40 hover:bg-muted/30">
+                  <tr key={h.id} className="border-b border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5">
                     <td className="py-2 pr-2 text-xs">{new Date(h.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td>
                     <td className="py-2 pr-2">
                       <Badge variant="outline" className="text-xs">{MODULE_LABELS[h.module] || h.module}</Badge>
                     </td>
-                    <td className="py-2 pr-2 text-xs font-mono text-muted-foreground">{h.modele}</td>
-                    <td className="py-2 pr-2 text-right text-xs text-muted-foreground">
+                    <td className="py-2 pr-2 text-xs font-mono text-slate-500 dark:text-slate-400">{h.modele}</td>
+                    <td className="py-2 pr-2 text-right text-xs text-slate-500 dark:text-slate-400">
                       {(h.tokens_input + h.tokens_output).toLocaleString()}
                     </td>
                     <td className="py-2 pr-2 text-right text-xs">{h.cout_fcfa.toFixed(2)} F</td>
