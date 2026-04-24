@@ -47,17 +47,22 @@ TARIFS_MODELES: dict[str, dict[str, float]] = {
     "default":                 {"input":  3.00, "output": 15.00},
 }
 
-# ── Crédits mensuels par plan ──────────────────────────────────────────────────
+# ── Crédits par plan ──────────────────────────────────────────────────────────
+# Gratuit : 3 000 crédits ONE-TIME (pas de renouvellement — épuisés → abonnement obligatoire)
+# Plans payants : renouvellement mensuel
 CREDITS_PAR_PLAN: dict[str, int] = {
-    "gratuit":  500,
+    "gratuit":  3_000,
     "starter":  1_000,
     "pro":      5_000,
     "business": 50_000,
 }
 
+# Plans avec renouvellement mensuel automatique (le gratuit EST EXCLU)
+PLANS_AVEC_RENOUVELLEMENT = {"starter", "pro", "business"}
+
 # Label lisible pour l'interface
 LABEL_CREDITS_PLAN: dict[str, str] = {
-    "gratuit":  "500 crédits / mois",
+    "gratuit":  "3 000 crédits offerts (sans renouvellement)",
     "starter":  "1 000 crédits / mois",
     "pro":      "5 000 crédits / mois",
     "business": "50 000 crédits / mois",
@@ -133,7 +138,7 @@ async def verifier_solde_suffisant(user_id: int) -> Tuple[bool, float, str, str]
             if credit.plan == "business":
                 return True, float("inf"), credit.plan, "ok"
 
-            if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
+            if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
                 credit.credits_utilises = 0
                 credit.periode_debut = datetime.utcnow()
                 credit.periode_fin = datetime.utcnow() + timedelta(days=30)
@@ -190,8 +195,8 @@ async def verifier_et_debiter(
             if credit.plan == "business":
                 return True, 0.0, "ok"
 
-            # Renouvellement mensuel automatique
-            if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
+            # Renouvellement mensuel automatique (plans payants uniquement)
+            if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
                 credit.credits_utilises = 0
                 credit.periode_debut = datetime.utcnow()
                 credit.periode_fin = datetime.utcnow() + timedelta(days=30)
@@ -278,7 +283,7 @@ async def debiter_forfait_fcfa(
             if credit.plan == "business":
                 return True, 0.0, "ok"
 
-            if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
+            if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
                 credit.credits_utilises = 0
                 credit.periode_debut = datetime.utcnow()
                 credit.periode_fin = datetime.utcnow() + timedelta(days=30)
@@ -339,8 +344,8 @@ async def solde_utilisateur(user_id: int, db: AsyncSession) -> dict:
     """Retourne le solde complet d'un utilisateur."""
     credit = await get_ou_creer_credits(user_id, db)
 
-    # Renouvellement automatique
-    if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
+    # Renouvellement automatique (plans payants uniquement)
+    if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
         credit.credits_utilises = 0
         credit.periode_debut = datetime.utcnow()
         credit.periode_fin = datetime.utcnow() + timedelta(days=30)
@@ -356,9 +361,10 @@ async def solde_utilisateur(user_id: int, db: AsyncSession) -> dict:
         "credits_restants": round(restants, 1),
         "pct_utilise": round(pct_utilise, 1),
         "label_plan": LABEL_CREDITS_PLAN.get(credit.plan, "Gratuit"),
+        "renouvellement_auto": credit.plan in PLANS_AVEC_RENOUVELLEMENT,
         "periode_debut": credit.periode_debut.isoformat() if credit.periode_debut else None,
         "periode_fin": credit.periode_fin.isoformat() if credit.periode_fin else None,
-        "renouvellement_le": credit.periode_fin.strftime("%d/%m/%Y") if credit.periode_fin else None,
+        "renouvellement_le": credit.periode_fin.strftime("%d/%m/%Y") if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin else None,
         # Equivalents lisibles
         "credits_en_fcfa_equiv": round(restants / MULTIPLICATEUR_YUKPO, 0),
         "explication": (

@@ -163,7 +163,7 @@ export const AbonnementPage = () => {
             <strong className="text-white">Qu'est-ce qu'un crédit Yukpo ?</strong>{" "}
             Chaque échange avec Yukpo consomme des crédits selon la complexité de la demande.
             Une question simple coûte ~5 crédits, une analyse de document ~20-50 crédits, un rapport complet ~100-300 crédits.
-            Vos crédits se renouvellent automatiquement chaque mois.
+            Les plans payants se renouvellent chaque mois. Le plan gratuit offre 3 000 crédits uniques sans renouvellement.
           </p>
         </div>
       </div>
@@ -205,10 +205,12 @@ export const AbonnementPage = () => {
                     />
                   </div>
                   <p className="text-xs text-slate-500">
-                    {((abonnement.credits_utilises as number) ?? 0).toLocaleString()} crédits Yukpo utilisés ce mois
-                    {abonnement.renouvellement_le && (
+                    {((abonnement.credits_utilises as number) ?? 0).toLocaleString()} crédits Yukpo utilisés
+                    {abonnement.renouvellement_le ? (
                       <span className="text-slate-600"> · Renouvellement le {abonnement.renouvellement_le as string}</span>
-                    )}
+                    ) : planActuel === "gratuit" ? (
+                      <span className="text-amber-600"> · Sans renouvellement</span>
+                    ) : null}
                   </p>
                   {/* Équivalence FCFA */}
                   <p className="text-xs text-slate-600 italic">
