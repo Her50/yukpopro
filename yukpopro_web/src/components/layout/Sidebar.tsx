@@ -211,7 +211,15 @@ export const Sidebar = () => {
       )}
 
       {/* Footer */}
-      <div className="p-2 space-y-0.5 flex-shrink-0">
+      <div className="p-2 flex-shrink-0">
+        {/* Section label Paramètres */}
+        {!collapsed && (
+          <p className="px-2 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-widest"
+             style={{ color: "var(--ykp-sidebar-text-muted)", opacity: 0.6 }}>
+            {t("settings.label", "Paramètres")}
+          </p>
+        )}
+        <div className="space-y-0.5">
         {/* Language switcher */}
         <LanguageSwitcher collapsed={collapsed} />
 
@@ -255,7 +263,8 @@ export const Sidebar = () => {
           <LogOut className="w-4 h-4 flex-shrink-0" />
           {!collapsed && <span>{t("nav.logout")}</span>}
         </button>
-      </div>
+        </div>{/* end space-y-0.5 */}
+      </div>{/* end footer */}
     </aside>
   );
 };

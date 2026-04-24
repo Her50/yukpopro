@@ -106,7 +106,7 @@
 
   /* Light mode : subpixel AA — texte net et dense sur fond blanc */
   html {
-    -webkit-font-smoothing: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
   }
   /* Dark mode : grayscale AA — évite les halos de couleur sur fond sombre */
@@ -153,12 +153,12 @@
     text-rendering: optimizeLegibility;
     -webkit-text-stroke: 0px;
   }
-  /* Empêche les couches GPU (transform/opacity) de pixéliser le texte */
+  /* Subpixel AA pour tout le texte en light — plus de lissage greedy */
   html:not(.dark) p, html:not(.dark) span, html:not(.dark) h1,
   html:not(.dark) h2, html:not(.dark) h3, html:not(.dark) label,
   html:not(.dark) a, html:not(.dark) button {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
   }
 }
 
@@ -641,9 +641,9 @@ html:not(.dark) h3.text-white,
 html:not(.dark) p.text-white,
 html:not(.dark) span.text-white:not([class*="bg-"]) { color: var(--ykp-text-primary) !important; }
 
-/* ── Renforcemement netteté texte ─────────────────────────── */
+/* ── Netteté texte light mode — subpixel AA + legibility ─── */
 html:not(.dark) * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
   text-rendering: optimizeLegibility;
 }

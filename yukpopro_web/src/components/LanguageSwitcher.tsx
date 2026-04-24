@@ -46,7 +46,12 @@ export const LanguageSwitcher = ({ collapsed = false }: Props) => {
           hover:bg-white/10 text-slate-300 hover:text-white`}
       >
         <Globe size={16} className="flex-shrink-0" />
-        {!collapsed && (
+        {collapsed ? (
+          /* En mode réduit : affiche le code langue sur 2 lettres pour identifier */
+          <span className="text-[9px] font-bold uppercase tracking-wide opacity-70 -ml-0.5">
+            {current.code.slice(0, 2)}
+          </span>
+        ) : (
           <>
             <span className="flex-1 text-left truncate">
               {current.flag} {current.label}
@@ -61,17 +66,25 @@ export const LanguageSwitcher = ({ collapsed = false }: Props) => {
           className={`absolute z-50 bottom-full mb-2 ${collapsed ? "left-full ml-2" : "left-0 right-0"}
             bg-slate-800 border border-slate-600 rounded-xl shadow-xl overflow-hidden min-w-[160px]`}
         >
+          <div className="px-3 py-2 border-b border-slate-700">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              {t("language.select")}
+            </p>
+          </div>
           {SUPPORTED_LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors text-left
+              className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors text-left
                 ${current.code === lang.code
-                  ? "bg-sky-700/40 text-sky-300"
+                  ? "bg-sky-700/40 text-sky-200 font-medium"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
             >
-              <span>{lang.flag}</span>
-              <span>{lang.label}</span>
+              <span className="text-base">{lang.flag}</span>
+              <span className="flex-1">{lang.label}</span>
+              {current.code === lang.code && (
+                <span className="text-[10px] text-sky-300 font-semibold">✓</span>
+              )}
             </button>
           ))}
         </div>
