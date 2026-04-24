@@ -15,7 +15,7 @@ interface Gabarit {
 type Mode = 'brief' | 'modele' | 'custom'
 
 function formatFCFA(n: number) {
-  return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
+  return new Intl.NumberFormat('fr-FR').format(n) + ' crédits'
 }
 
 const PAYS = ['CM', 'SN', 'CI', 'TG']
