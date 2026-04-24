@@ -1073,23 +1073,47 @@ def _besoin_rag(message: str) -> bool:
     if _RE_LOI_RAG.search(msg_lower):
         return True
 
-    # Mots-clés réglementaires sectoriels
+    # Mots-clés réglementaires, juridiques, comptables, fiscaux
     mots_cles_reglementaires = [
-        "ohada", "syscohada", "acte uniforme", "brvm",
-        "code cima", "cima", "crca",
-        "cgi", "code général des impôts", "code des impôts",
-        "code du travail", "droit du travail",
-        "cobac", "bceao", "cemac", "uemoa", "cnps", "lacobac",
-        "tva", "irpp", "imposition", "déclaration fiscale",
-        "exonération fiscale", "crédit d'impôt",
-        "sarl", "suarl",
-        "marge de solvabilité", "provision technique", "état c",
-        "traité de réassurance",
-        "selon le code", "texte de loi", "texte officiel",
-        "quelle est la loi", "est-ce légal", "est-ce conforme",
-        "selon la réglementation", "réglementairement",
-        "incoterm", "droits de douane",
-        "jurisprudence", "tribunal", "cour", "jugement", "arrêt",
+        # OHADA / Droit des affaires
+        "ohada", "syscohada", "acte uniforme", "audcg", "aus ", "aucap", "aupcap", "auscoop",
+        "brvm", "rccm", "sarl", "suarl", "sa ", "sas ", "gic ", "coopérative",
+        # CIMA / Assurance
+        "code cima", "cima", "crca", "sinistre", "indemnisation", "prime d'assurance",
+        "marge de solvabilité", "provision technique", "branche vie", "branche iard",
+        "traité de réassurance", "agent général", "courtier assurance",
+        # Fiscal
+        "cgi", "code général des impôts", "code des impôts", "loi de finances",
+        "tva", "irpp", "is ", "bnc ", "bic ", "imposition", "déclaration fiscale",
+        "exonération fiscale", "crédit d'impôt", "droit d'enregistrement",
+        "retenue à la source", "précompte", "acompte provisionnel",
+        "taxe professionnelle", "patente", "impôt foncier",
+        # Comptabilité SYSCOHADA
+        "syscohada", "plan comptable", "pcg", "journal", "grand livre", "bilan",
+        "compte de résultat", "flux de trésorerie", "amortissement", "provision",
+        "immobilisation", "stock", "créance", "dette fournisseur", "charge", "produit",
+        "dotation aux amortissements", "réévaluation", "consolidation", "normes ifrs",
+        "commissaire aux comptes", "expert comptable agréé",
+        # Droit du travail / RH
+        "code du travail", "droit du travail", "cnps", "cnss", "ipres", "inps", "ssnit",
+        "contrat de travail", "licenciement", "indemnité", "préavis", "congé annuel",
+        "heure supplémentaire", "salaire minimum", "smig", "convention collective",
+        "règlement intérieur", "accident du travail", "maladie professionnelle",
+        # Bancaire / BEAC-BCEAO
+        "cobac", "bceao", "beac", "cemac", "uemoa", "bank al-maghrib", "bcrg",
+        "ratio de solvabilité", "tier 1", "ration cooke", "réserve obligatoire",
+        "crédit documentaire", "lettre de garantie", "nantissement",
+        # Procédures judiciaires
+        "selon le code", "texte de loi", "texte officiel", "disposition légale",
+        "quelle est la loi", "est-ce légal", "est-ce conforme", "est légal",
+        "selon la réglementation", "réglementairement", "infraction", "sanction pénale",
+        "jurisprudence", "tribunal", "cour d'appel", "jugement", "arrêt", "décision de justice",
+        # Douane / Commerce international
+        "incoterm", "droits de douane", "tarif extérieur commun", "tec ", "valeur en douane",
+        "régime douanier", "transit", "entrepôt sous douane", "admission temporaire",
+        # Marchés publics
+        "marché public", "appel d'offres", "dao ", "cahier des charges", "attribution marché",
+        "bon de commande", "délégation de service public",
     ]
     return any(mot in msg_lower for mot in mots_cles_reglementaires)
 
@@ -1272,105 +1296,381 @@ def _extraire_images_fichiers(fichiers: list) -> list[str]:
     return images_b64
 
 
+
+# ── Référentiels juridiques par pays ─────────────────────────────────────────
+# Injectés dans le prompt système pour hyper-contextualiser les réponses LLM
+_CADRE_JURIDIQUE_PAYS: dict[str, dict] = {
+    "CM": {
+        "nom_complet": "Cameroun",
+        "zone_eco": "CEMAC (Communauté Économique et Monétaire de l'Afrique Centrale)",
+        "devise": "Franc CFA BEAC (XAF) — 1 EUR ≈ 655,957 XAF",
+        "banque_centrale": "BEAC (Banque des États de l'Afrique Centrale) / COBAC (supervision bancaire)",
+        "fiscal": "CGI Cameroun (Code Général des Impôts) + loi de finances annuelle · TVA 19,25% · IS 30% · IRPP barème progressif · TF, TP, TPF · Taxe spéciale sur les revenus · DGI Yaoundé",
+        "travail": "Code du travail du Cameroun (Loi n°92/007 du 14 août 1992 + modifications) · CNPS (retraite, AT, allocations familiales) · FASS · Convention collective applicable par secteur",
+        "commercial": "Actes uniformes OHADA : AUDCG, AUS (sociétés commerciales), AUCAP, AUPCAP, AUSCOOP, AUPSRVE, AUDT · Registre du Commerce de Yaoundé/Douala (RCCM)",
+        "comptable": "SYSCOHADA Révisé (Règlement n°01/2017/CM/OHADA du 30/11/2017) · Plan Comptable Général OHADA · Commissaires aux comptes (ONECCA Cameroun)",
+        "assurance": "Code des assurances CIMA (Conférence Interafricaine des Marchés d'Assurances) · CRCA Cameroun · Branches IARD, Vie, Réassurance",
+        "bancaire": "Réglementation COBAC · Lois sur le crédit · BEAC instruments de politique monétaire",
+        "civil": "Code civil camerounais (héritage du Code civil français 1804 + adaptations camerounaises)",
+        "penal": "Code pénal camerounais (Loi n°2016/007 du 12 juillet 2016)",
+        "constitutionnel": "Constitution du Cameroun du 2 juin 1972, révisée le 18 janvier 1996",
+        "specificites": "Système bijuridique (droit civil francophone + common law anglophone) · Zones francophones et anglophones · 10 régions",
+    },
+    "CI": {
+        "nom_complet": "Côte d'Ivoire",
+        "zone_eco": "UEMOA (Union Économique et Monétaire Ouest Africaine)",
+        "devise": "Franc CFA BCEAO (XOF) — 1 EUR ≈ 655,957 XOF",
+        "banque_centrale": "BCEAO (Banque Centrale des États de l'Afrique de l'Ouest) / BCEAO Abidjan",
+        "fiscal": "CGI Côte d'Ivoire (Code Général des Impôts CI) · TVA 18% · BIC 25% · BNC · IRVM · Contribution employeur · DGI Abidjan",
+        "travail": "Code du travail de Côte d'Ivoire (Loi n°2015-532 du 20 juillet 2015) · CNPS CI · Convention collective interprofessionnelle",
+        "commercial": "Actes uniformes OHADA · RCCM Abidjan · Bourse Régionale des Valeurs Mobilières (BRVM Abidjan)",
+        "comptable": "SYSCOHADA Révisé · ONECCA-CI (Ordre National des Experts-Comptables et Comptables Agréés de CI)",
+        "assurance": "Code CIMA · CRCA Côte d'Ivoire",
+        "civil": "Code civil ivoirien",
+        "penal": "Code pénal de Côte d'Ivoire (Loi n°2019-574 du 26 juin 2019)",
+        "specificites": "Principale économie UEMOA · Zone FCFA Ouest · BRVM pour les marchés financiers",
+    },
+    "SN": {
+        "nom_complet": "Sénégal",
+        "zone_eco": "UEMOA",
+        "devise": "Franc CFA BCEAO (XOF)",
+        "banque_centrale": "BCEAO / Agence principale de Dakar",
+        "fiscal": "CGI Sénégal · TVA 18% · IS 30% · DGE (Direction des Grandes Entreprises) · DGID Dakar",
+        "travail": "Code du travail sénégalais (Loi n°97-17 du 1er décembre 1997) · IPRES · CSS (sécurité sociale)",
+        "commercial": "Actes uniformes OHADA · RCCM Dakar",
+        "comptable": "SYSCOHADA Révisé · ONECCA Sénégal",
+        "assurance": "Code CIMA · DRASS (Direction de la Réglementation et de la Supervision des Assurances)",
+        "civil": "Code de la famille sénégalais (Loi n°72-61 du 12 juin 1972)",
+        "penal": "Code pénal sénégalais",
+        "specificites": "Hub régional UEMOA · Port de Dakar · Pôle financier Dakar",
+    },
+    "TG": {
+        "nom_complet": "Togo",
+        "zone_eco": "UEMOA",
+        "devise": "Franc CFA BCEAO (XOF)",
+        "banque_centrale": "BCEAO / Agence principale de Lomé",
+        "fiscal": "CGI Togo · TVA 18% · IS 27% · Direction Générale des Impôts Lomé",
+        "travail": "Code du travail togolais (Loi n°2021-012 du 18 juin 2021) · CNSS Togo",
+        "commercial": "Actes uniformes OHADA · RCCM Lomé",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA · DSARS Togo",
+        "penal": "Code pénal togolais (Loi n°2015-010 du 24 novembre 2015)",
+        "specificites": "Port franc de Lomé · Zone de libre-échange",
+    },
+    "BJ": {
+        "nom_complet": "Bénin",
+        "zone_eco": "UEMOA",
+        "devise": "Franc CFA BCEAO (XOF)",
+        "banque_centrale": "BCEAO / Cotonou",
+        "fiscal": "CGI Bénin · TVA 18% · IS 30%",
+        "travail": "Code du travail béninois (Loi n°98-004 du 27 janvier 1998) · CNSS Bénin",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA",
+        "specificites": "Commerce régional Afrique de l'Ouest",
+    },
+    "BF": {
+        "nom_complet": "Burkina Faso",
+        "zone_eco": "UEMOA",
+        "devise": "Franc CFA BCEAO (XOF)",
+        "banque_centrale": "BCEAO / Ouagadougou",
+        "fiscal": "CGI Burkina Faso · TVA 18% · IS 27,5%",
+        "travail": "Code du travail du Burkina Faso (Loi n°028-2008/AN du 13 mai 2008) · CNSS BF",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA",
+        "specificites": "Mines (or) · Agriculture · Sahel",
+    },
+    "ML": {
+        "nom_complet": "Mali",
+        "zone_eco": "UEMOA",
+        "devise": "Franc CFA BCEAO (XOF)",
+        "banque_centrale": "BCEAO / Bamako",
+        "fiscal": "CGI Mali · TVA 18% · IS 30%",
+        "travail": "Code du travail malien (Loi n°2017-021) · INPS Mali",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA",
+        "specificites": "Mines (or) · Agriculture · Secteur minier actif",
+    },
+    "GA": {
+        "nom_complet": "Gabon",
+        "zone_eco": "CEMAC",
+        "devise": "Franc CFA BEAC (XAF)",
+        "banque_centrale": "BEAC / Libreville · COBAC",
+        "fiscal": "CGI Gabon · TVA 18% · IS 30%",
+        "travail": "Code du travail gabonais (Loi n°3/94 du 21 novembre 1994) · CNSS Gabon",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA",
+        "specificites": "Pétrole · Mines · Forêts · Revenu par tête élevé en Afrique subsaharienne",
+    },
+    "CG": {
+        "nom_complet": "République du Congo (Congo-Brazzaville)",
+        "zone_eco": "CEMAC",
+        "devise": "Franc CFA BEAC (XAF)",
+        "banque_centrale": "BEAC / Brazzaville · COBAC",
+        "fiscal": "CGI Congo · TVA 18,9% · IS 30%",
+        "travail": "Code du travail congolais (Loi n°6-96 du 6 mars 1996) · CNSS Congo",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Code CIMA",
+        "specificites": "Pétrole · CEMAC · Congo-Brazzaville (distinct de RDC)",
+    },
+    "GN": {
+        "nom_complet": "Guinée (Conakry)",
+        "zone_eco": "Hors UEMOA/CEMAC — CEDEAO",
+        "devise": "Franc guinéen (GNF)",
+        "banque_centrale": "BCRG (Banque Centrale de la République de Guinée)",
+        "fiscal": "Code général des impôts Guinée · TVA 18% · IS 35%",
+        "travail": "Code du travail guinéen (Loi L/2014/072/CNT du 10 janvier 2014) · CNSS Guinée",
+        "commercial": "Actes uniformes OHADA",
+        "comptable": "SYSCOHADA Révisé",
+        "assurance": "Non zone CIMA — réglementation nationale",
+        "specificites": "Mines (bauxite, or) · Monnaie propre (GNF) · Non membre UEMOA ni CEMAC",
+    },
+    "CD": {
+        "nom_complet": "République Démocratique du Congo (RDC)",
+        "zone_eco": "SADC / CEEAC — hors OHADA jusqu'à récemment",
+        "devise": "Franc congolais (CDF)",
+        "banque_centrale": "Banque Centrale du Congo (BCC) / Kinshasa",
+        "fiscal": "Code général des impôts RDC · TVA 16% · IS 30%",
+        "travail": "Code du travail RDC (Loi n°015-2002 du 16 octobre 2002)",
+        "commercial": "Actes uniformes OHADA (adhésion 2012) · Droit commercial congolais",
+        "comptable": "SYSCOHADA Révisé (depuis adoption OHADA)",
+        "assurance": "Réglementation ARCA (Autorité de Régulation et de Contrôle des Assurances)",
+        "specificites": "Mines (cuivre, cobalt, coltan) · Vaste territoire · Franc congolais (pas FCFA)",
+    },
+    "MG": {
+        "nom_complet": "Madagascar",
+        "zone_eco": "SADC — hors OHADA",
+        "devise": "Ariary malgache (MGA)",
+        "banque_centrale": "Banque Centrale de Madagascar (BFM) / Antananarivo",
+        "fiscal": "CGI Madagascar · TVA 20% · IS 20%",
+        "travail": "Code du travail malgache (Loi n°2003-044)",
+        "commercial": "Droit commercial national (non OHADA)",
+        "comptable": "Plan Comptable Général 2005 (propre)",
+        "assurance": "Réglementation nationale des assurances (ARO/NY HAVANA)",
+        "specificites": "Île — hors zone FCFA · Ariary · Non membre OHADA",
+    },
+    "MA": {
+        "nom_complet": "Maroc",
+        "zone_eco": "Afrique du Nord — Accord Agadir · Zone de libre-échange Afrique",
+        "devise": "Dirham marocain (MAD)",
+        "banque_centrale": "Bank Al-Maghrib / Rabat",
+        "fiscal": "CGI Maroc (Loi de finances annuelle) · TVA 20% · IS 31% · IR barème progressif · DGI Rabat",
+        "travail": "Code du travail marocain (Loi n°65-99) · CNSS Maroc · AMO (assurance maladie)",
+        "commercial": "Code de commerce marocain · Loi sur les SA · Loi SARL · Bourse de Casablanca",
+        "comptable": "Code Général de la Normalisation Comptable (CGNC) · Plan Comptable Général marocain · ISCAE",
+        "assurance": "Code des assurances marocain (Loi n°17-99) · ACAPS (Autorité de Contrôle des Assurances et de la Prévoyance Sociale)",
+        "civil": "Code de la famille (Moudawwana) · Dahir des obligations et contrats (DOC)",
+        "penal": "Code pénal marocain",
+        "specificites": "Dirham (non FCFA) · Casablanca Finance City · Non membre OHADA · Liens forts avec Europe",
+    },
+    "TN": {
+        "nom_complet": "Tunisie",
+        "zone_eco": "Afrique du Nord — Accord d'association UE",
+        "devise": "Dinar tunisien (TND)",
+        "banque_centrale": "Banque Centrale de Tunisie (BCT) / Tunis",
+        "fiscal": "Code de l'IRPP et de l'IS Tunisie · TVA 19% · IS 15-25% · DGE Tunis",
+        "travail": "Code du travail tunisien (Loi n°66-27 du 30 avril 1966) · CNSS Tunisie · CNAM",
+        "commercial": "Code des sociétés commerciales (CSC) de 2000 · Bourse de Tunis",
+        "comptable": "Système comptable des entreprises (SCE) tunisien · Norme comptable NC · OECT",
+        "assurance": "Code des assurances tunisien · Comité Général des Assurances (CGA)",
+        "specificites": "Dinar tunisien · Non membre OHADA · Proximité Europe · Offshore banking",
+    },
+    "GH": {
+        "nom_complet": "Ghana",
+        "zone_eco": "CEDEAO — Commonwealth",
+        "devise": "Cedi ghanéen (GHS)",
+        "banque_centrale": "Bank of Ghana / Accra",
+        "fiscal": "Income Tax Act 2015 (Act 896) · VAT 15% · Corporate Tax 25% · GRA (Ghana Revenue Authority)",
+        "travail": "Labour Act 2003 (Act 651) · SSNIT (pension)",
+        "commercial": "Companies Act 2019 (Act 992) · Ghana Stock Exchange · SEC Ghana",
+        "comptable": "IFRS (International Financial Reporting Standards) · ICAG (Institute of Chartered Accountants Ghana)",
+        "assurance": "Insurance Act 2021 (Act 1061) · NIC (National Insurance Commission)",
+        "specificites": "Anglophone · Common law · Cedi (non FCFA) · Pétrole, cacao, or · Non OHADA",
+    },
+    "NG": {
+        "nom_complet": "Nigeria",
+        "zone_eco": "CEDEAO — Commonwealth — Anglophone",
+        "devise": "Naira nigérian (NGN)",
+        "banque_centrale": "Central Bank of Nigeria (CBN) / Abuja",
+        "fiscal": "Companies Income Tax Act (CITA) · VAT 7.5% · Corporate Tax 30% · FIRS (Federal Inland Revenue Service)",
+        "travail": "Labour Act Cap L1 LFN 2004 · Pension Reform Act 2014 · PENCOM",
+        "commercial": "Companies and Allied Matters Act 2020 (CAMA) · Nigerian Stock Exchange (NGX)",
+        "comptable": "IFRS / IPSAS · ICAN (Institute of Chartered Accountants of Nigeria)",
+        "assurance": "Insurance Act 2003 · NAICOM (National Insurance Commission)",
+        "specificites": "Plus grande économie Afrique · Naira · Common law · Anglophone · Pétrole · Non OHADA",
+    },
+    # Défaut générique pour les pays non listés
+    "_DEFAULT": {
+        "nom_complet": "Pays africain",
+        "zone_eco": "Afrique subsaharienne",
+        "devise": "Monnaie locale",
+        "banque_centrale": "Banque centrale nationale",
+        "fiscal": "Code des impôts national applicable",
+        "travail": "Code du travail national applicable",
+        "commercial": "Droit commercial national · OHADA si pays membre",
+        "comptable": "SYSCOHADA si pays OHADA, sinon normes comptables nationales",
+        "assurance": "Code CIMA si pays membre (zone CIMA), sinon réglementation nationale",
+        "specificites": "Vérifier le cadre juridique spécifique du pays concerné",
+    },
+}
+
+# Mapping métier → domaines juridiques prioritaires
+_METIER_CORPUS_PRIORITAIRE: dict[str, list[str]] = {
+    "expert_comptable":    ["comptable (SYSCOHADA, Plan Comptable)", "fiscal (CGI, TVA, IS, IRPP)", "commercial (OHADA-AUS, AUDCG)", "social (Code du travail, CNPS)"],
+    "juriste":             ["commercial (Actes uniformes OHADA)", "civil (Code civil)", "pénal (Code pénal)", "procédures (AUPSRVE, AUDT)", "travail (Code du travail)"],
+    "fiscal":              ["fiscal (CGI, TVA, IS, IRPP, droits d'enregistrement)", "comptable (lien comptabilité-fiscalité)", "commercial (optimisation fiscale)"],
+    "auditeur":            ["comptable (SYSCOHADA, normes audit)", "fiscal (conformité CGI)", "commercial (governance OHADA)"],
+    "conseiller_assurance":["assurance (Code CIMA, branches, provisions techniques)", "commercial (contrats assurance)", "fiscal (fiscalité assurances)"],
+    "banquier":            ["bancaire (réglementation COBAC/BCEAO)", "commercial (crédit, garanties OHADA)", "fiscal (TVA bancaire, retenues à la source)"],
+    "charge_projets_ong":  ["travail (Code du travail, conventions collectives)", "commercial (marchés publics)", "fiscal (exonérations ONG)"],
+    "responsable_microfinance": ["bancaire (réglementation SFD/IMF BCEAO/COBAC)", "commercial (droit des sûretés OHADA)", "travail (Code du travail)"],
+    "transitaire":         ["commercial (incoterms, code douanier, CEMAC/UEMOA TEC)", "fiscal (droits de douane, TVA import)"],
+    "consultant":          ["commercial (contrats de prestation, OHADA)", "fiscal (facturation, TVA, BNC)", "travail (statut consultant vs salarié)"],
+    "entrepreneur":        ["commercial (création SARL/SA, statuts OHADA)", "fiscal (régimes d'imposition, CGI)", "travail (droit du travail employeur)"],
+    "autre":               ["commercial (OHADA)", "fiscal (CGI)", "travail (Code du travail)"],
+}
+
+
 def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
-    """Construit le prompt système personnalisé du copilote."""
+    """
+    Construit le prompt système hyper-contextualisé du copilote.
+    Injecte le cadre juridique précis du pays + profil métier pour
+    éliminer les hallucinations et garantir des réponses précises et localisées.
+    """
     metier = getattr(profil, "metier", "") or "professionnel"
     nom = getattr(profil, "nom", "") or ""
-    pays_profil = getattr(profil, "pays", "") or pays or "Afrique francophone"
+    pays_code = (getattr(profil, "pays", "") or pays or "CM").upper()
     secteur = getattr(profil, "secteur", "") or ""
+    niveau = getattr(profil, "niveau_expertise", "") or "intermediaire"
+    experience = getattr(profil, "annees_experience", None)
 
-    identite = f"Tu es **Yukpo Copilote**, l'assistant personnel de {nom or 'votre collaborateur'}" if nom else "Tu es **Yukpo Copilote**, l'assistant personnel intelligent"
+    # Récupérer le cadre juridique du pays
+    cadre = _CADRE_JURIDIQUE_PAYS.get(pays_code, _CADRE_JURIDIQUE_PAYS["_DEFAULT"])
+    pays_nom = cadre["nom_complet"]
+    zone_eco = cadre["zone_eco"]
+    devise = cadre["devise"]
+    banque_centrale = cadre["banque_centrale"]
+    specificites = cadre.get("specificites", "")
 
-    return f"""
-{identite}, un professionnel en {metier}{' dans le secteur ' + secteur if secteur else ''} basé en {pays_profil}.
+    # Corpus prioritaire selon le métier
+    corpus_metier = _METIER_CORPUS_PRIORITAIRE.get(metier, _METIER_CORPUS_PRIORITAIRE["autre"])
+    corpus_str = "\n   - ".join(corpus_metier)
 
-**Qui tu es :**
-Tu es un assistant IA de très haut niveau, comme avoir un conseiller expert, un ami brillant et polyvalent
-qui comprend à la fois le monde des affaires africain et international.
-Tu combines la profondeur d'un expert métier avec la chaleur d'une conversation naturelle.
+    # Niveau d'expertise → ajuster le ton
+    ton_niveau = {
+        "debutant":      "Explique les concepts avec des exemples simples. Définis les termes techniques.",
+        "intermediaire": "Réponds avec précision technique, en supposant une bonne base professionnelle.",
+        "senior":        "Réponds de pair à pair, avec précision technique maximale et nuances pratiques.",
+        "expert":        "Réponse d'expert à expert — détail technique complet, références précises, nuances jurisprudentielles.",
+    }.get(niveau, "Réponds avec précision technique adaptée au profil.")
 
-**Ce que tu fais :**
-- Tu réponds à TOUTES les questions : métier, actualité, rédaction, calculs, conseils stratégiques, culture générale
-- Tu t'exprimes de façon naturelle, directe, sans jargon inutile sauf si le professionnel en a besoin
-- Tu connais parfaitement le contexte africain francophone : droit OHADA, SYSCOHADA, CIMA, marchés africains, UEMOA, CEMAC
-- Tu adaptes tes réponses au niveau et au contexte de {metier}
-- Quand tu fais un calcul ou une analyse complexe, tu expliques le raisonnement clairement
-- Tu mémorises le contexte de la conversation et y fais référence naturellement
+    exp_str = f", {experience} ans d'expérience" if experience else ""
 
-**Ton style :**
-- Comme deux collègues qui se parlent franchement, pas comme un chatbot formel
-- Concis quand la réponse est simple, détaillé quand la profondeur est utile
-- Tu utilises des exemples concrets tirés de l'environnement {pays_profil}
-- Langue principale : {"anglais" if langue == "en" else "français"} professionnel africain
+    return f"""Tu es **Yukpo Copilote**, l'assistant personnel de {nom or 'ce professionnel'} — {metier.replace('_', ' ')}{f' dans le secteur {secteur}' if secteur else ''}{exp_str}.
 
-**Agents spécialisés intégrés dans Yukpo Pro (13 agents, appelés automatiquement selon le contexte) :**
-- **Agent DRH** : paie, bulletins de salaire, CNPS, contrats de travail, recrutement, évaluation, plan de formation
-- **Agent Comptable** : SYSCOHADA, déclarations fiscales, TVA, IRPP, bilans, trésorerie, comptabilité analytique
-- **Agent DAF** : tableau de bord financier, budget, trésorerie, reporting, contrôle de gestion, directeur financier
-- **Agent Banquier** : crédit, analyse financière, TEG, KYC, scoring, tableaux d'amortissement, ratios
-- **Agent Juriste** : droit OHADA, textes de loi, contrats, actionnariat, litiges, recherche juridique
-- **Agent Commercial** : business plan, stratégie vente, étude de marché, marketing, proposition commerciale
-- **Agent DAA** : analyse de données, statistiques, KPI, tableaux de bord, data science, visualisation
-- **Agent Ingénieur** : gestion de projet, BTP, cahiers des charges, appels d'offres, planning, architecture
-- **Agent Microfinance** : PAR30, portefeuille crédit, SFD, IMF, crédit solidaire
-- **Agent ONG** : logframe, bailleurs de fonds, M&E, reporting, indicateurs, développement
-- **Agent Douanier** : incoterms, droits de douane, régimes douaniers, import/export, transit, commerce international
-- **Agent CV/Emploi** : rédaction CV, lettre de motivation, préparation entretien, candidature
-- **Agent Recherche Emploi** : veille offres d'emploi, job search, opportunités professionnelles
+═══════════════════════════════════════════════════
+  CONTEXTE UTILISATEUR — LOCALISATION PRÉCISE
+═══════════════════════════════════════════════════
+▸ Pays         : {pays_nom} ({pays_code})
+▸ Zone économique : {zone_eco}
+▸ Devise       : {devise}
+▸ Banque centrale : {banque_centrale}
+▸ Métier       : {metier.replace('_', ' ').title()}
+▸ Secteur      : {secteur or 'Non spécifié'}
+▸ Niveau       : {niveau}
+{f'▸ Spécificités  : {specificites}' if specificites else ''}
 
-**CAPACITÉS DE GÉNÉRATION DE DOCUMENTS (CRITIQUE) :**
-Yukpo Pro PEUT générer et télécharger directement depuis ce chat :
-- **Contrats** : bail, travail, prestation, vente, convention, avenant, protocole
-- **Lettres** : officielle, commerciale, mise en demeure, résiliation, offre d'emploi
-- **Attestations** : attestation de travail, de salaire, certificats
-- **Documents RH** : règlement intérieur, statuts, procès-verbaux
-- **Rapports** : financier, RH, audit, analyse, note de synthèse, plan d'action
-- **Présentations PowerPoint** : pour direction, conseil d'administration, clients
-- **Traductions** : tout document en FR/EN/ES/PT avec export DOCX
+═══════════════════════════════════════════════════
+  CADRE JURIDIQUE ET RÉGLEMENTAIRE APPLICABLE
+═══════════════════════════════════════════════════
+▸ Fiscal       : {cadre['fiscal']}
+▸ Travail      : {cadre['travail']}
+▸ Commercial   : {cadre['commercial']}
+▸ Comptable    : {cadre['comptable']}
+▸ Assurance    : {cadre['assurance']}
+{f"▸ Civil        : {cadre['civil']}" if cadre.get('civil') else ''}
+{f"▸ Pénal        : {cadre['penal']}" if cadre.get('penal') else ''}
 
-RÈGLE ABSOLUE : Quand l'utilisateur demande de générer/créer/rédiger un document,
-tu NE DIS JAMAIS "je ne peux pas" — le backend génère automatiquement le fichier.
-Si un lien `/api/v1/...` ou un nom de fichier apparaît dans le résultat de l'agent ci-dessous,
-cite-le tel quel comme lien de téléchargement.
-NE JAMAIS inventer ou promettre un lien de téléchargement si aucun lien réel n'est fourni dans le résultat.
+CORPUS JURIDIQUE PRIORITAIRE POUR CE PROFIL ({metier.upper()}) :
+   - {corpus_str}
 
-**FORMATAGE MARKDOWN OBLIGATOIRE :**
-- Utilise **gras** pour les termes clés, montants, noms propres importants
-- Utilise des listes à puces (- ou •) quand tu énumères 3+ éléments
-- Utilise des titres (## ou ###) pour structurer les réponses longues
-- Utilise `code` pour les formules, articles de loi, références réglementaires
-- Met en forme les tableaux en markdown quand tu présentes des données comparatives
-- Chaque réponse doit être visuellement structurée, pas du texte brut
+═══════════════════════════════════════════════════
+  RÈGLES ANTI-HALLUCINATION — PRIORITÉ ABSOLUE
+═══════════════════════════════════════════════════
 
-**Ton style de réponse :**
-- Expert du contexte africain : OHADA, SYSCOHADA, CIMA, droit du travail camerounais/ivoirien/sénégalais
-- Tu cites des articles de loi, des montants FCFA concrets, des procédures réelles
-- Tu poses des questions de clarification si besoin pour personnaliser le document
-- Pas de préambule vide ("Bien sûr !", "Je serais ravi de...") — va droit au contenu
+**RÈGLE 1 — CORPUS RAG (Si le message contient === CORPUS RÉGLEMENTAIRE === ou === ARTICLES CODE CIMA ===) :**
+→ Cite le texte EXACTEMENT tel qu'il apparaît dans le corpus, entre guillemets.
+→ Indique TOUJOURS la source : nom du texte + numéro d'article + pays.
+→ N'invente AUCUN article, n'extrapole PAS au-delà de ce qui est écrit.
+→ Si le corpus contient l'article demandé : tu dois reproduire le texte officiel mot pour mot, puis analyser.
+→ Format : **Article X [Nom du texte, {pays_nom}]** : "texte exact" → [ANALYSE] ton commentaire.
 
-**CODE CIMA / OHADA / TEXTES JURIDIQUES — RÈGLE :**
-1. Si le contexte contient des articles (=== ARTICLES CODE CIMA === ou === CORPUS RÉGLEMENTAIRE ===) :
-   → Cite les articles avec leurs numéros EXACTS et le texte fourni, puis donne ton analyse.
-2. Si aucun article n'est fourni dans le contexte mais l'utilisateur pose une question juridique précise :
-   → Réponds depuis ta connaissance de formation, en indiquant clairement :
-   "[Réponse depuis mémoire IA — non indexé dans le corpus Yukpo, vérifier le texte officiel]"
-   → Fournis quand même le texte de l'article tel que tu le connais, avec son numéro et sa portée.
-3. NE JAMAIS refuser de répondre sur un article juridique — toujours apporter une réponse utile.
+**RÈGLE 2 — SANS CORPUS RAG (question juridique/réglementaire non couverte par le RAG) :**
+→ Tu peux utiliser ta connaissance de formation — Claude/GPT ont été entraînés sur les textes officiels.
+→ MAIS tu DOIS marquer systématiquement : `[Mémoire IA — vérifier la version officielle en vigueur]`
+→ Cite quand même le numéro d'article et le texte tel que tu le connais — c'est utile même avec la réserve.
+→ Précise TOUJOURS la version/date si connue : "selon le Code du travail {pays_nom} (version 2024 estimée)"
+→ JAMAIS de réponse vague type "selon la loi" sans citer l'article précis.
 
-**Interdictions absolues :**
-- NE JAMAIS dire "je ne peux pas générer un document" — le backend génère tout
-- NE JAMAIS dire "copiez ce texte dans Word" — Yukpo génère le fichier téléchargeable
-- NE JAMAIS donner une liste de formules Excel à copier — générer le rapport directement
-- NE JAMAIS demander à l'utilisateur d'aller dans un autre module
-- NE JAMAIS répondre en texte brut sans aucun formatage markdown
-- NE JAMAIS dire "je ne peux pas lire ce fichier Excel/CSV/Word" — le backend extrait automatiquement le contenu des fichiers joints et te le transmet. Si tu vois [Données des fichiers joints] dans le prompt, lis et analyse-les directement.
-- NE JAMAIS dire "je n'ai pas accès au fichier" — quand un fichier est joint, son contenu textuel est inclus dans ce message.
+**RÈGLE 3 — COMPTABILITÉ (SYSCOHADA / IFRS / normes nationales) :**
+→ Les réponses comptables DOIVENT référencer le plan comptable applicable : {cadre['comptable']}
+→ Cite les numéros de comptes SYSCOHADA exacts (ex : "Compte 601 — Achats de marchandises")
+→ Indique les journaux concernés (Achats, Ventes, Trésorerie, OD)
+→ Précise les règles d'évaluation/amortissement applicables à {pays_nom}
+→ Si SYSCOHADA ne s'applique pas ({pays_nom}) : utilise les normes indiquées ci-dessus.
 
-**ANALYSE DE FICHIERS (FICHIERS JOINTS) :**
-Quand l'utilisateur joint un fichier (Excel, CSV, Word, PDF), son contenu est extrait et fourni
-dans la section [Données des fichiers joints] ou [Voici le contenu des fichiers joints].
-Tu DOIS analyser ce contenu directement et répondre avec précision sur les données réelles du fichier.
-Ne jamais prétendre ne pas avoir accès au fichier.
+**RÈGLE 4 — FISCALITÉ (CGI / TVA / IS) :**
+→ Toute réponse fiscale doit préciser : le taux exact en vigueur à {pays_nom}, la base imposable, les exonérations éventuelles.
+→ Cite l'article du CGI {pays_nom} concerné si tu le connais, avec `[Mémoire IA]` si non indexé.
+→ Les taux et seuils : utilise ceux de {pays_nom} tels que définis dans {cadre['fiscal']}.
+→ JAMAIS mélanger des taux d'un autre pays.
+
+**RÈGLE 5 — DROIT DU TRAVAIL :**
+→ Applique EXCLUSIVEMENT le {cadre['travail']}.
+→ Les indemnités, préavis, congés payés doivent être calculés selon les barèmes de {pays_nom}.
+→ Si la convention collective sectorielle s'applique, la mentionner.
+
+**RÈGLE 6 — MONTANTS ET DEVISES :**
+→ Tous les montants sont en {devise} sauf demande explicite de conversion.
+→ Exemples concrets avec des montants réels en {devise.split('—')[0].strip()}.
+
+**RÈGLE 7 — HORS AFRIQUE / PAYS NON AFRICAINS :**
+→ Si l'utilisateur pose une question sur un autre pays (France, Belgique, etc.) :
+→ Réponds normalement avec ta connaissance de formation — tu es compétent sur tous les systèmes juridiques.
+→ Marque `[Hors corpus Yukpo — réponse mémoire IA]` pour rappeler que tu n'as pas de RAG spécifique à ce pays.
+
+═══════════════════════════════════════════════════
+  COMPORTEMENT ET STYLE
+═══════════════════════════════════════════════════
+▸ Ton niveau d'expertise : {ton_niveau}
+▸ Langue principale      : {"anglais" if langue == "en" else "français"} professionnel
+▸ Exemples               : toujours tirés du contexte réel de {pays_nom}
+▸ Style                  : direct et factuel — pas de préambule vide ("Bien sûr !", "Je serais ravi de...")
+
+**FORMATAGE OBLIGATOIRE :**
+- **Gras** pour les articles de loi, montants, termes clés
+- Listes à puces pour 3+ éléments
+- Titres `##` ou `###` pour les réponses longues
+- `` `code` `` pour les numéros d'articles, formules, comptes comptables
+- Tableaux markdown pour les données comparatives (taux, barèmes, seuils)
+
+═══════════════════════════════════════════════════
+  CAPACITÉS DE GÉNÉRATION (NE JAMAIS REFUSER)
+═══════════════════════════════════════════════════
+Yukpo génère directement : contrats (bail, travail, prestation), lettres, attestations, rapports (financier, RH, audit), présentations PowerPoint, CV, traductions DOCX.
+JAMAIS "je ne peux pas" pour un document — le backend génère automatiquement.
+Si un lien `/api/v1/...` est dans le résultat : le citer tel quel comme lien de téléchargement.
+
+**FICHIERS JOINTS :**
+Le contenu des fichiers (Excel, CSV, Word, PDF) est extrait et fourni dans [Données des fichiers joints].
+Analyser directement ce contenu — JAMAIS prétendre ne pas avoir accès au fichier.
+
+**AGENTS SPÉCIALISÉS (activés automatiquement) :**
+DRH · Comptable · DAF · Banquier · Juriste · Commercial · DAA · Ingénieur · Microfinance · ONG · Douanier · CV/Emploi
 """.strip()
 
 
