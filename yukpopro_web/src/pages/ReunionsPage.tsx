@@ -4,6 +4,7 @@
  * Identifie les participants, décisions, actions et suivi recommandations.
  */
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -163,9 +164,18 @@ const FormulaireReunion = ({
     setParticipants(prev => prev.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
 
   const handleStartRecording = async () => {
+    // Priming TTS : utter silencieuse pendant le clic utilisateur pour débloquer
+    // speechSynthesis sur Chrome/Safari (sinon appels ultérieurs depuis WebSocket bloqués).
+    if (traduireLive && typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        const primer = new SpeechSynthesisUtterance(" ");
+        primer.volume = 0;
+        window.speechSynthesis.speak(primer);
+      } catch { /* ignore */ }
+    }
+
     await recorder.start(langue);
     if (traduireLive && token) {
-      // Attendre un tick pour laisser le stream s'initialiser dans recorderStore
       await new Promise((r) => setTimeout(r, 50));
       const stream = getRecorderStream();
       if (stream) {
@@ -185,7 +195,8 @@ const FormulaireReunion = ({
   };
 
   const handleStopRecording = async () => {
-    if (tActive) await stopTranslate();
+    // Stop translate en fire-and-forget : ne bloque pas l'arrêt de l'enregistrement
+    if (tActive) { void stopTranslate(); }
     setTranscribing(true);
     const blob = await recorder.stop();
     if (!blob) { setTranscribing(false); return; }
@@ -480,7 +491,7 @@ const FormulaireReunion = ({
                       <button
                         onClick={handleStopRecording}
                         disabled={transcribing}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
                       >
                         <Square className="w-3.5 h-3.5" />
                         {transcribing ? "Transcription…" : "Arrêter et transcrire"}
@@ -499,24 +510,36 @@ const FormulaireReunion = ({
 
                 {/* Traduction live (mode rapporteur-traducteur) */}
                 {traduireLive && tActive && (
-                  <div className="bg-purple-950/30 rounded-lg p-2 border border-purple-700/40 max-h-48 overflow-y-auto space-y-1.5">
-                    <p className="text-xs text-purple-300 mb-1 flex items-center gap-1.5">
-                      <Languages className="w-3 h-3" /> Traduction live → {langueCible}
-                    </p>
-                    {tLignes.length === 0 && !tInterim && (
-                      <p className="text-slate-500 text-xs italic">En attente de parole…</p>
+                  <>
+                    <div className="bg-purple-950/30 rounded-lg p-2 border border-purple-700/40 max-h-48 overflow-y-auto space-y-1.5">
+                      <p className="text-xs text-purple-300 mb-1 flex items-center gap-1.5">
+                        <Languages className="w-3 h-3" /> Traduction live → {langueCible}
+                      </p>
+                      {tLignes.length === 0 && !tInterim && (
+                        <p className="text-slate-500 text-xs italic">En attente de parole…</p>
+                      )}
+                      {tLignes.slice(-6).map((l) => (
+                        <div key={l.utteranceId} className="text-xs">
+                          <span className="text-slate-500">[{l.sourceLang}]</span>{" "}
+                          <span className="text-slate-400">{l.source}</span>
+                          {l.translated && (
+                            <div className="text-purple-200 pl-3">→ {l.translated}</div>
+                          )}
+                        </div>
+                      ))}
+                      {tInterim && <p className="text-slate-500 italic text-xs">{tInterim}</p>}
+                    </div>
+                    {recorder.isRecording && (
+                      <button
+                        onClick={handleStopRecording}
+                        disabled={transcribing}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+                      >
+                        <Square className="w-3.5 h-3.5" />
+                        {transcribing ? "Transcription…" : "Terminer l'enregistrement"}
+                      </button>
                     )}
-                    {tLignes.slice(-6).map((l) => (
-                      <div key={l.utteranceId} className="text-xs">
-                        <span className="text-slate-500">[{l.sourceLang}]</span>{" "}
-                        <span className="text-slate-400">{l.source}</span>
-                        {l.translated && (
-                          <div className="text-purple-200 pl-3">→ {l.translated}</div>
-                        )}
-                      </div>
-                    ))}
-                    {tInterim && <p className="text-slate-500 italic text-xs">{tInterim}</p>}
-                  </div>
+                  </>
                 )}
 
                 {transcribing && (
@@ -932,6 +955,7 @@ function saveReunions(r: Reunion[]) {
 }
 
 export const ReunionsPage = () => {
+  const { t } = useTranslation();
   const [reunions, setReunions]        = useState<Reunion[]>(loadReunions);
   const showForm = useReunionFormStore((s) => s.isOpen);
   const openForm = useReunionFormStore((s) => s.open);
@@ -1023,7 +1047,7 @@ export const ReunionsPage = () => {
           <div>
             <h1 className="text-xl md:text-2xl font-display font-bold text-white flex items-center gap-2">
               <Users className="w-6 h-6 text-blue-400" />
-              Réunions Yukpo
+              {t('reunions.title')}
             </h1>
             <p className="text-slate-400 text-sm mt-1">
               Enregistrez, transcrivez (15+ langues) et générez des rapports percutants avec plan d'action.
@@ -1034,7 +1058,7 @@ export const ReunionsPage = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Nouvelle réunion
+            {t('reunions.newMeeting')}
           </button>
         </div>
 
@@ -1105,7 +1129,7 @@ export const ReunionsPage = () => {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
               <Users className="w-7 h-7 text-blue-400" />
             </div>
-            <p className="text-slate-400 text-sm mb-4">Aucune réunion enregistrée.</p>
+            <p className="text-slate-400 text-sm mb-4">{t('reunions.noMeetings')}</p>
             <button
               onClick={() => setShowForm(true)}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
