@@ -13,10 +13,10 @@ Tarifs modèles IA (prix public approximatif en USD/1M tokens) :
   - gpt-4o-mini         : $0.15 input  / $0.60  output
 
 Allocation mensuelle par plan :
-  - gratuit  :    500 crédits/mois
-  - starter  :  1 000 crédits/mois
-  - pro      :  5 000 crédits/mois
-  - business : 50 000 crédits/mois
+  - gratuit  :    3 000 crédits (one-time)
+  - starter  :    5 000 crédits/mois
+  - pro      :   20 000 crédits/mois
+  - business :  100 000 crédits/mois
   - admin    : illimité (999 999 — hors plans, via ADMIN_ROLES check)
 """
 import logging
@@ -52,9 +52,9 @@ TARIFS_MODELES: dict[str, dict[str, float]] = {
 # Plans payants : renouvellement mensuel
 CREDITS_PAR_PLAN: dict[str, int] = {
     "gratuit":  3_000,
-    "starter":  1_000,
-    "pro":      5_000,
-    "business": 50_000,
+    "starter":  5_000,
+    "pro":      20_000,
+    "business": 100_000,
 }
 
 # Plans avec renouvellement mensuel automatique (le gratuit EST EXCLU)
@@ -63,9 +63,9 @@ PLANS_AVEC_RENOUVELLEMENT = {"starter", "pro", "business"}
 # Label lisible pour l'interface
 LABEL_CREDITS_PLAN: dict[str, str] = {
     "gratuit":  "3 000 crédits offerts (sans renouvellement)",
-    "starter":  "1 000 crédits / mois",
-    "pro":      "5 000 crédits / mois",
-    "business": "50 000 crédits / mois",
+    "starter":  "5 000 crédits / mois",
+    "pro":      "20 000 crédits / mois",
+    "business": "100 000 crédits / mois",
 }
 
 
@@ -135,9 +135,6 @@ async def verifier_solde_suffisant(user_id: int) -> Tuple[bool, float, str, str]
                 except Exception:
                     pass
 
-            if credit.plan == "business":
-                return True, float("inf"), credit.plan, "ok"
-
             if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
                 credit.credits_utilises = 0
                 credit.periode_debut = datetime.utcnow()
@@ -190,10 +187,6 @@ async def verifier_et_debiter(
                         await fresh_db.flush()
                 except Exception:
                     pass
-
-            # Plan business = illimité, pas de vérification ni débit
-            if credit.plan == "business":
-                return True, 0.0, "ok"
 
             # Renouvellement mensuel automatique (plans payants uniquement)
             if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
@@ -279,9 +272,6 @@ async def debiter_forfait_fcfa(
     try:
         async with async_session_maker() as fresh_db:
             credit = await get_ou_creer_credits(user_id, fresh_db)
-
-            if credit.plan == "business":
-                return True, 0.0, "ok"
 
             if credit.plan in PLANS_AVEC_RENOUVELLEMENT and credit.periode_fin and datetime.utcnow() > credit.periode_fin:
                 credit.credits_utilises = 0

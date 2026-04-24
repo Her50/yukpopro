@@ -5,7 +5,7 @@ Plans :
   - gratuit   : 5 req/jour, 3 agents suggérés
   - starter   : 50 req/jour, tous agents — 3 000 FCFA/mois
   - pro       : 200 req/jour, tous agents + extras — 7 500 FCFA/mois
-  - business  : illimité, API, multi-users — 20 000 FCFA/mois
+  - business  : 100 000 crédits/mois, API, multi-users — 20 000 FCFA/mois
 
 Endpoints :
   GET    /api/v1/pro/abonnement/         — Mon abonnement actif
@@ -70,7 +70,7 @@ PLANS = {
         "id": "business",
         "nom": "Business",
         "prix_fcfa": 20000,
-        "quota_jour": 99999,
+        "quota_jour": 1000,
         "duree_jours": 30,
         "agents_illimites": True,
         "nb_agents_max": 11,
