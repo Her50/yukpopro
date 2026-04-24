@@ -17,6 +17,17 @@ api.interceptors.response.use(
       localStorage.removeItem('bureau_token')
       window.location.href = '/login'
     }
+    if (err.response?.status === 402) {
+      const detail = err.response?.data?.detail
+      const msg = typeof detail === 'object' ? detail?.message : (typeof detail === 'string' && detail.startsWith('CREDITS_EPUISES') ? 'Crédits épuisés — rechargez ou changez de plan.' : detail)
+      import('react-hot-toast').then(({ default: toast }) => {
+        toast.error(msg || 'Crédits épuisés', {
+          duration: 6000,
+          icon: '💳',
+        })
+        setTimeout(() => { window.location.href = '/abonnement' }, 2000)
+      })
+    }
     return Promise.reject(err)
   },
 )

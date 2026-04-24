@@ -77,6 +77,27 @@ async def instruire_agent(
     user_id = int(current_user.user_id)
     execution_id = str(uuid.uuid4())
 
+    # ── Vérification solde AVANT appel agent ──────────────────────────────────
+    try:
+        from modules.pro.service_credits import verifier_solde_suffisant
+        from core.database import async_session_maker
+        async with async_session_maker() as _db_solde:
+            _ok_s, _s, _p, _msg_s = await verifier_solde_suffisant(
+                user_id=user_id, cout_estime_usd=0.20, db=_db_solde,
+            )
+        if not _ok_s:
+            parts = _msg_s.split("|")
+            raise HTTPException(status_code=402, detail={
+                "code":    "CREDITS_EPUISES",
+                "message": f"Crédits Yukpo épuisés ({parts[1] if len(parts)>1 else '?'}/{parts[2] if len(parts)>2 else '?'} ce mois).",
+                "action":  "Rechargez vos crédits ou changez de plan pour continuer.",
+                "url":     "/abonnement",
+            })
+    except HTTPException:
+        raise
+    except Exception as _e_pre:
+        logger.warning(f"[Credits] Pré-check agent non bloquant : {_e_pre}")
+
     # Déterminer le type d'agent
     try:
         agent_type = TypeAgent(body.agent_type) if body.agent_type != "auto" else TypeAgent.AUTO
@@ -91,6 +112,26 @@ async def instruire_agent(
             agent_type=agent_type,
             contexte=body.contexte or {},
         )
+
+        # ── Débit crédits selon coût IA réel ─────────────────────────────────
+        if resultat.cout_ia_usd and resultat.cout_ia_usd > 0:
+            try:
+                from modules.pro.service_credits import verifier_et_debiter
+                from core.database import async_session_maker
+                # Estimation tokens depuis le coût USD (Sonnet ~$3/$15 per 1M)
+                _tokens_out = int(resultat.cout_ia_usd / 0.000015)
+                _tokens_in  = int(resultat.cout_ia_usd / 0.000003)
+                async with async_session_maker() as _db_debit:
+                    await verifier_et_debiter(
+                        user_id=user_id,
+                        modele="claude-sonnet-4-5",
+                        tokens_input=_tokens_in,
+                        tokens_output=_tokens_out,
+                        module="agent",
+                        db=_db_debit,
+                    )
+            except Exception as _e_debit:
+                logger.warning(f"[Credits] Débit agent non bloquant : {_e_debit}")
 
         # Archiver dans l'historique
         entree = {

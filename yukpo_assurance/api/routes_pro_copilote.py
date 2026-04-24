@@ -2801,6 +2801,29 @@ async def copilote_chat(
         except Exception:
             pass
 
+        # ── Vérification solde AVANT appel IA (évite de brûler des $ inutilement) ──
+        try:
+            from modules.pro.service_credits import verifier_solde_suffisant
+            _ok_solde, _solde, _plan_solde, _msg_solde = await verifier_solde_suffisant(
+                user_id=current_user.user_id,
+                cout_estime_usd=0.10,
+                db=db,
+            )
+            if not _ok_solde:
+                if _msg_solde.startswith("CREDITS_EPUISES"):
+                    parts = _msg_solde.split("|")
+                    raise HTTPException(status_code=402, detail={
+                        "code":    "CREDITS_EPUISES",
+                        "message": f"Crédits Yukpo épuisés ({parts[1] if len(parts)>1 else '?'}/{parts[2] if len(parts)>2 else '?'} ce mois).",
+                        "action":  "Rechargez vos crédits ou changez de plan pour continuer.",
+                        "url":     "/abonnement",
+                    })
+                raise HTTPException(status_code=402, detail=_msg_solde)
+        except HTTPException:
+            raise
+        except Exception as _e_solde:
+            logger.warning(f"[Credits] Pré-check copilote non bloquant : {_e_solde}")
+
         # Appel IA via ia_client singleton — timeout global de 45s
         # Si images présentes → vision (Claude Opus / GPT-4o), timeout +10s
         _timeout_ia = 55.0 if images_b64_chat else 45.0
@@ -2825,11 +2848,8 @@ async def copilote_chat(
 
         # ── Débit crédits Yukpo selon tokens réels consommés ─────────────────
         try:
-            if current_user.role in ("admin", "super_admin", "yukpo_owner"):
-                ok, _credits, msg_credits = True, 0.0, "ok"
-            else:
-                from modules.pro.service_credits import verifier_et_debiter
-                ok, _credits, msg_credits = await verifier_et_debiter(
+            from modules.pro.service_credits import verifier_et_debiter
+            ok, _credits, msg_credits = await verifier_et_debiter(
                     user_id=current_user.user_id,
                     modele=getattr(reponse_ia, "modele_utilise", "gpt-4o"),
                     tokens_input=getattr(reponse_ia, "tokens_input", 500),
