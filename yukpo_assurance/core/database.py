@@ -12,7 +12,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy import (
     Boolean, Column, DateTime, Float, ForeignKey,
-    Integer, JSON, String, Text,
+    Integer, JSON, String, Text, text,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession, async_sessionmaker, create_async_engine,
@@ -974,10 +974,42 @@ class ConsommationBureauDB(Base):
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:
-    """Crée toutes les tables si elles n'existent pas. À appeler au démarrage."""
+    """Crée toutes les tables et ajoute les colonnes manquantes (migrations sans Alembic)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("[DB] Tables initialisées")
+
+    # ── Migrations colonnes manquantes (ALTER TABLE IF NOT EXISTS) ─────────────
+    # PostgreSQL 9.6+ supporte ADD COLUMN IF NOT EXISTS.
+    # Chaque entrée : (table, colonne, type SQL, valeur DEFAULT optionnelle)
+    _nouvelles_colonnes = [
+        # ProfilProfessionnelDB — colonnes ajoutées après le déploiement initial
+        ("profils_pro", "cv_texte",                   "TEXT",      None),
+        ("profils_pro", "cv_fichier_chemin",          "VARCHAR(300)", None),
+        ("profils_pro", "profil_recherche_emploi",    "TEXT",      None),
+        ("profils_pro", "recherche_emploi_active",    "BOOLEAN",   "FALSE"),
+        ("profils_pro", "frequence_recherche_heures", "INTEGER",   "24"),
+        ("profils_pro", "derniere_recherche_emploi",  "TIMESTAMP", None),
+        ("profils_pro", "offres_emploi_recentes",     "JSONB",     "'[]'"),
+        ("profils_pro", "marches_publics_recents",    "JSONB",     "'[]'"),
+        ("profils_pro", "derniere_recherche_marches", "TIMESTAMP", None),
+        ("profils_pro", "secteur_activite",           "VARCHAR(100)", None),
+        ("profils_pro", "derniere_activite",          "TIMESTAMP", None),
+        # UtilisateurDB
+        ("utilisateurs",         "bloque_jusqu_au",            "TIMESTAMP", None),
+        ("utilisateurs",         "tentatives_echec",           "INTEGER",   "0"),
+        ("utilisateurs",         "totp_secret",                "VARCHAR(64)", None),
+        ("utilisateurs",         "totp_active",                "BOOLEAN",   "FALSE"),
+    ]
+    async with engine.begin() as conn:
+        for table, col, col_type, default in _nouvelles_colonnes:
+            default_clause = f" DEFAULT {default}" if default else ""
+            sql = f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_type}{default_clause}"
+            try:
+                await conn.execute(text(sql))
+            except Exception as e:
+                logger.warning(f"[DB] Migration colonne {table}.{col} ignorée: {e}")
+
+    logger.info("[DB] Tables initialisées + migrations colonnes appliquées")
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
