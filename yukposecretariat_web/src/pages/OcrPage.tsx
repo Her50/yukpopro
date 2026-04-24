@@ -1,27 +1,31 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { Scan, Upload, Download, Loader2, FileText } from 'lucide-react'
 import { ocrAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DemoBanner } from '../components/DemoBanner'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 type Mode = 'scanner' | 'manuscrit'
+type OcrResult = {
+  texte_structure: string; type_document: string; confiance: number;
+  word_base64?: string; titre?: string
+}
 
 const FORMATS_VALIDES = ['lettre', 'formulaire', 'recu', 'manuscrit', 'tableau']
 const FORMATS_MANUSCRIT = ['lettre', 'rapport', 'liste', 'paragraphe']
 
 export default function OcrPage() {
-  const [mode, setMode] = useState<Mode>('scanner')
-  const [fichier, setFichier] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
-  const [typeAttendu, setTypeAttendu] = useState('')
-  const [formaterEn, setFormaterEn] = useState('paragraphe')
-  const [loading, setLoading] = useState(false)
-  const [resultat, setResultat] = useState<{
-    texte_structure: string; type_document: string; confiance: number;
-    word_base64?: string; titre?: string
-  } | null>(null)
+  const [mode, setMode] = useLongOpField<Mode>('ocr', 'mode', 'scanner')
+  const [fichier, setFichier] = useLongOpField<File | null>('ocr', 'fichier', null)
+  const [preview, setPreview] = useLongOpField<string | null>('ocr', 'preview', null)
+  const [typeAttendu, setTypeAttendu] = useLongOpField<string>('ocr', 'typeAttendu', '')
+  const [formaterEn, setFormaterEn] = useLongOpField<string>('ocr', 'formaterEn', 'paragraphe')
+  const loading = useLongOps((s) => s.loading.ocr)
+  const resultat = useLongOps((s) => s.resultats.ocr) as OcrResult | null
+  const setResultat = (r: OcrResult | null) => useLongOps.getState().setResultat('ocr', r)
+  const runOp = useLongOps((s) => s.run)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const selectionnerFichier = (f: File) => {
@@ -39,32 +43,26 @@ export default function OcrPage() {
 
   const scanner = async () => {
     if (!fichier) { toast.error('Sélectionnez une image'); return }
-    setLoading(true)
     try {
-      const fd = new FormData()
-      fd.append('fichier', fichier)
-      if (typeAttendu) fd.append('type_attendu', typeAttendu)
-      fd.append('export_word', 'true')
-
-      const r = mode === 'scanner'
-        ? await ocrAPI.scanner(fd)
-        : await ocrAPI.manuscrit(new FormData() as FormData)
-
-      if (mode === 'manuscrit') {
-        const fd2 = new FormData()
-        fd2.append('fichier', fichier)
-        fd2.append('formater_en', formaterEn)
-        const r2 = await ocrAPI.manuscrit(fd2)
-        setResultat(r2.data)
-      } else {
-        setResultat(r.data)
-      }
+      await runOp<OcrResult>('ocr', async () => {
+        if (mode === 'manuscrit') {
+          const fd2 = new FormData()
+          fd2.append('fichier', fichier)
+          fd2.append('formater_en', formaterEn)
+          const r2 = await ocrAPI.manuscrit(fd2)
+          return r2.data as OcrResult
+        }
+        const fd = new FormData()
+        fd.append('fichier', fichier)
+        if (typeAttendu) fd.append('type_attendu', typeAttendu)
+        fd.append('export_word', 'true')
+        const r = await ocrAPI.scanner(fd)
+        return r.data as OcrResult
+      })
       toast.success('Numérisation terminée !')
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur OCR')
-    } finally {
-      setLoading(false)
     }
   }
 

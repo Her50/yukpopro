@@ -1,31 +1,39 @@
-import { useState } from 'react'
 import { Receipt, Plus, Trash2, Loader2, Download } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { DemoBanner } from '../components/DemoBanner'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 interface Ligne { description: string; quantite: number; prix_unitaire_fcfa: number; unite: string }
+
+type DevisInfos = {
+  client_nom: string; client_contact: string; nom_secretariat: string;
+  adresse_secretariat: string; tel_secretariat: string; notes: string; validite_jours: number
+}
+type DevisResult = { pdf_base64: string; sous_total: number; tva: number; total_ttc: number }
+
+const INFOS_DEFAUT: DevisInfos = {
+  client_nom: '', client_contact: '', nom_secretariat: 'Mon Secrétariat',
+  adresse_secretariat: '', tel_secretariat: '', notes: '', validite_jours: 15,
+}
+const LIGNES_DEFAUT: Ligne[] = [{ description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' }]
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
 }
 
 export default function DevisPage() {
-  const [mode, setMode] = useState<'devis' | 'facture'>('devis')
-  const [infos, setInfos] = useState({
-    client_nom: '', client_contact: '', nom_secretariat: 'Mon Secrétariat',
-    adresse_secretariat: '', tel_secretariat: '', notes: '', validite_jours: 15,
-  })
-  const [lignes, setLignes] = useState<Ligne[]>([
-    { description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' },
-  ])
-  const [loading, setLoading] = useState(false)
-  const [resultat, setResultat] = useState<{ pdf_base64: string; sous_total: number; tva: number; total_ttc: number } | null>(null)
+  const [mode, setMode] = useLongOpField<'devis' | 'facture'>('devis', 'mode', 'devis')
+  const [infos, setInfos] = useLongOpField<DevisInfos>('devis', 'infos', INFOS_DEFAUT)
+  const [lignes, setLignes] = useLongOpField<Ligne[]>('devis', 'lignes', LIGNES_DEFAUT)
+  const loading = useLongOps((s) => s.loading.devis)
+  const resultat = useLongOps((s) => s.resultats.devis) as DevisResult | null
+  const runOp = useLongOps((s) => s.run)
 
-  const ajouterLigne = () => setLignes(l => [...l, { description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' }])
-  const supprimerLigne = (i: number) => setLignes(l => l.filter((_, idx) => idx !== i))
+  const ajouterLigne = () => setLignes([...lignes, { description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' }])
+  const supprimerLigne = (i: number) => setLignes(lignes.filter((_, idx) => idx !== i))
   const modifierLigne = (i: number, key: keyof Ligne, val: string | number) =>
-    setLignes(l => l.map((x, idx) => idx === i ? { ...x, [key]: val } : x))
+    setLignes(lignes.map((x, idx) => idx === i ? { ...x, [key]: val } : x))
 
   const sousTotal = lignes.reduce((s, l) => s + l.quantite * l.prix_unitaire_fcfa, 0)
   const tva = Math.round(sousTotal * 0.1925)
@@ -34,19 +42,18 @@ export default function DevisPage() {
   const generer = async () => {
     if (!infos.client_nom) { toast.error('Nom du client requis'); return }
     if (lignes.some(l => !l.description)) { toast.error('Toutes les lignes doivent avoir une description'); return }
-    setLoading(true)
     try {
-      const payload = { ...infos, lignes, validite_jours: +infos.validite_jours }
-      const r = mode === 'devis'
-        ? await gestionAPI.genererDevis(payload)
-        : await gestionAPI.genererFacture(payload)
-      setResultat(r.data)
+      await runOp<DevisResult>('devis', async () => {
+        const payload = { ...infos, lignes, validite_jours: +infos.validite_jours }
+        const r = mode === 'devis'
+          ? await gestionAPI.genererDevis(payload)
+          : await gestionAPI.genererFacture(payload)
+        return r.data as DevisResult
+      })
       toast.success(`${mode === 'devis' ? 'Devis' : 'Facture'} généré(e) !`)
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur de génération')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -99,7 +106,7 @@ export default function DevisPage() {
               <input
                 type="text"
                 value={infos[key as keyof typeof infos]}
-                onChange={e => setInfos(i => ({ ...i, [key]: e.target.value }))}
+                onChange={e => setInfos({ ...infos, [key]: e.target.value })}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
             </div>

@@ -6,23 +6,28 @@ import { DemoBanner } from '../components/DemoBanner'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 const PAYS = [
   { code: 'CM', label: '🇨🇲 CM' }, { code: 'SN', label: '🇸🇳 SN' },
   { code: 'CI', label: '🇨🇮 CI' }, { code: 'TG', label: '🇹🇬 TG' },
 ]
 
+type AudioResult = {
+  transcription_brute: string; document_formate: string; duree_secondes?: number;
+  word_base64?: string; type_document: string
+}
+
 export default function AudioPage() {
-  const [fichier, setFichier] = useState<File | null>(null)
-  const [typeDoc, setTypeDoc] = useState('dictee')
-  const [pays, setPays] = useState('CM')
-  const [contexte, setContexte] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [fichier, setFichier] = useLongOpField<File | null>('audio', 'fichier', null)
+  const [typeDoc, setTypeDoc] = useLongOpField<string>('audio', 'typeDoc', 'dictee')
+  const [pays, setPays] = useLongOpField<string>('audio', 'pays', 'CM')
+  const [contexte, setContexte] = useLongOpField<string>('audio', 'contexte', '')
+  const loading = useLongOps((s) => s.loading.audio)
+  const resultat = useLongOps((s) => s.resultats.audio) as AudioResult | null
+  const setResultat = (r: AudioResult | null) => useLongOps.getState().setResultat('audio', r)
+  const runOp = useLongOps((s) => s.run)
   const [recording, setRecording] = useState(false)
-  const [resultat, setResultat] = useState<{
-    transcription_brute: string; document_formate: string; duree_secondes?: number;
-    word_base64?: string; type_document: string
-  } | null>(null)
   const mediaRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
@@ -59,21 +64,20 @@ export default function AudioPage() {
 
   const transcrire = async () => {
     if (!fichier) { toast.error('Sélectionnez ou enregistrez un audio'); return }
-    setLoading(true)
     try {
-      const fd = new FormData()
-      fd.append('fichier', fichier)
-      fd.append('type_document_cible', typeDoc)
-      fd.append('pays', pays)
-      if (contexte) fd.append('contexte', contexte)
-      const r = await audioAPI.transcrire(fd)
-      setResultat(r.data)
+      await runOp<AudioResult>('audio', async () => {
+        const fd = new FormData()
+        fd.append('fichier', fichier)
+        fd.append('type_document_cible', typeDoc)
+        fd.append('pays', pays)
+        if (contexte) fd.append('contexte', contexte)
+        const r = await audioAPI.transcrire(fd)
+        return r.data as AudioResult
+      })
       toast.success('Transcription terminée !')
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur de transcription')
-    } finally {
-      setLoading(false)
     }
   }
 

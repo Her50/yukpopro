@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { Languages, Loader2, Download, Upload, FileText, ArrowRight } from 'lucide-react'
 import { traductionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { DemoBanner } from '../components/DemoBanner'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 const LANGUES = [
   { code: 'fr', label: '🇫🇷 Français' }, { code: 'en', label: '🇬🇧 Anglais' },
@@ -25,19 +26,22 @@ const CONTEXTES = [
 ]
 
 type Mode = 'texte' | 'fichier'
+type TradResult = {
+  texte_traduit: string; nb_mots_source: number; nb_mots_cible: number; fichier_id?: string
+}
 
 export default function TraductionPage() {
-  const [mode, setMode] = useState<Mode>('texte')
-  const [langSource, setLangSource] = useState('fr')
-  const [langCible, setLangCible] = useState('en')
-  const [contexte, setContexte] = useState('')
-  const [contenu, setContenu] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [resultat, setResultat] = useState<{
-    texte_traduit: string; nb_mots_source: number; nb_mots_cible: number; fichier_id?: string
-  } | null>(null)
+  const [mode, setMode] = useLongOpField<Mode>('traduction', 'mode', 'texte')
+  const [langSource, setLangSource] = useLongOpField<string>('traduction', 'langSource', 'fr')
+  const [langCible, setLangCible] = useLongOpField<string>('traduction', 'langCible', 'en')
+  const [contexte, setContexte] = useLongOpField<string>('traduction', 'contexte', '')
+  const [contenu, setContenu] = useLongOpField<string>('traduction', 'contenu', '')
+  const loading = useLongOps((s) => s.loading.traduction)
+  const resultat = useLongOps((s) => s.resultats.traduction) as TradResult | null
+  const setResultat = (r: TradResult | null) => useLongOps.getState().setResultat('traduction', r)
+  const runOp = useLongOps((s) => s.run)
   const fileRef = useRef<HTMLInputElement>(null)
-  const [fichierNom, setFichierNom] = useState('')
+  const [fichierNom, setFichierNom] = useLongOpField<string>('traduction', 'fichierNom', '')
 
   const swapLangues = () => {
     setLangSource(langCible)
@@ -47,47 +51,45 @@ export default function TraductionPage() {
   const traduireTexte = async () => {
     if (!contenu.trim()) { toast.error('Saisissez un texte à traduire'); return }
     if (langSource === langCible) { toast.error('La langue source et cible doivent être différentes'); return }
-    setLoading(true)
     try {
-      const r = await traductionAPI.traduireTexte({
-        contenu, langue_source: langSource, langue_cible: langCible,
-        contexte_metier: contexte, format_sortie: 'docx',
+      await runOp<TradResult>('traduction', async () => {
+        const r = await traductionAPI.traduireTexte({
+          contenu, langue_source: langSource, langue_cible: langCible,
+          contexte_metier: contexte, format_sortie: 'docx',
+        })
+        return r.data as TradResult
       })
-      setResultat(r.data)
       toast.success('Traduction terminée !')
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur de traduction')
-    } finally {
-      setLoading(false)
     }
   }
 
   const traduireFichier = async () => {
     const file = fileRef.current?.files?.[0]
     if (!file) { toast.error('Sélectionnez un fichier'); return }
-    setLoading(true)
-    const fd = new FormData()
-    fd.append('fichier', file)
-    fd.append('langue_source', langSource)
-    fd.append('langue_cible', langCible)
-    fd.append('contexte_metier', contexte)
     try {
-      const r = await traductionAPI.traduireFichier(fd)
-      setResultat(r.data)
+      await runOp<TradResult>('traduction', async () => {
+        const fd = new FormData()
+        fd.append('fichier', file)
+        fd.append('langue_source', langSource)
+        fd.append('langue_cible', langCible)
+        fd.append('contexte_metier', contexte)
+        const r = await traductionAPI.traduireFichier(fd)
+        return r.data as TradResult
+      })
       toast.success('Fichier traduit !')
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur de traduction')
-    } finally {
-      setLoading(false)
     }
   }
 
   const telecharger = async (fichier_id: string) => {
     try {
       const r = await traductionAPI.telecharger(fichier_id)
-      const url = URL.createObjectURL(new Blob([r.data]))
+      const url = URL.createObjectURL(new Blob([r.data as BlobPart]))
       const a = document.createElement('a')
       a.href = url; a.download = fichier_id; a.click()
       URL.revokeObjectURL(url)

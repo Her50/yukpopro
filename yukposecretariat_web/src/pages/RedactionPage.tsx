@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, Download, Loader2, ChevronDown, Wand2 } from 'lucide-react'
 import { redactionAPI } from '../api/client'
@@ -6,6 +5,7 @@ import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DemoBanner } from '../components/DemoBanner'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 const PAYS = [
   { code: 'CM', label: '🇨🇲 Cameroun' },
@@ -21,16 +21,19 @@ function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
 }
 
+type RedactionResult = {
+  titre: string; contenu_markdown: string; prix_fcfa: number; nb_mots: number;
+  fichier_id?: string; word_base64?: string
+}
+
 export default function RedactionPage() {
-  const [typeDoc, setTypeDoc] = useState('')
-  const [pays, setPays] = useState('CM')
-  const [informations, setInformations] = useState('')
-  const [reformuler, setReformuler] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [resultat, setResultat] = useState<{
-    titre: string; contenu_markdown: string; prix_fcfa: number; nb_mots: number;
-    fichier_id?: string; word_base64?: string
-  } | null>(null)
+  const [typeDoc, setTypeDoc] = useLongOpField<string>('redaction', 'typeDoc', '')
+  const [pays, setPays] = useLongOpField<string>('redaction', 'pays', 'CM')
+  const [informations, setInformations] = useLongOpField<string>('redaction', 'informations', '')
+  const [reformuler, setReformuler] = useLongOpField<string>('redaction', 'reformuler', '')
+  const loading = useLongOps((s) => s.loading.redaction)
+  const resultat = useLongOps((s) => s.resultats.redaction) as RedactionResult | null
+  const runOp = useLongOps((s) => s.run)
 
   const { data: typesData } = useQuery({
     queryKey: ['redaction-types'],
@@ -51,21 +54,20 @@ export default function RedactionPage() {
 
   const generer = async () => {
     if (!typeDoc) { toast.error('Choisissez un type de document'); return }
-    setLoading(true)
     try {
-      const r = await redactionAPI.generer({
-        type_doc: typeDoc,
-        informations: infosParsed(),
-        pays,
-        reformuler_texte: reformuler || undefined,
+      await runOp<RedactionResult>('redaction', async () => {
+        const r = await redactionAPI.generer({
+          type_doc: typeDoc,
+          informations: infosParsed(),
+          pays,
+          reformuler_texte: reformuler || undefined,
+        })
+        return r.data as RedactionResult
       })
-      setResultat(r.data)
       toast.success('Document généré !')
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
       toast.error(err.response?.data?.detail || 'Erreur de génération')
-    } finally {
-      setLoading(false)
     }
   }
 

@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { Image, Wand2, Loader2, Download, ChevronDown, Upload, Ruler } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { infographieAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { DemoBanner } from '../components/DemoBanner'
+import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 const PAYS = [
   { code: 'CM', label: '🇨🇲 Cameroun' }, { code: 'SN', label: '🇸🇳 Sénégal' },
@@ -42,26 +43,30 @@ function b64download(b64: string, filename: string, mimeType: string) {
   URL.revokeObjectURL(url)
 }
 
+type InfographieResult = {
+  pdf_base64?: string; png_base64?: string; titre?: string;
+  palette?: string; prix_fcfa?: number; analyse_modele?: string
+  dimensions_mm?: { width: number; height: number }
+}
+
 export default function InfographiePage() {
-  const [mode, setMode] = useState<Mode>('brief')
-  const [gabarit, setGabarit] = useState('')
-  const [brief, setBrief] = useState('')
-  const [pays, setPays] = useState('CM')
-  const [loading, setLoading] = useState(false)
-  const [resultat, setResultat] = useState<{
-    pdf_base64?: string; png_base64?: string; titre?: string;
-    palette?: string; prix_fcfa?: number; analyse_modele?: string
-    dimensions_mm?: { width: number; height: number }
-  } | null>(null)
+  const [mode, setMode] = useLongOpField<Mode>('infographie', 'mode', 'brief')
+  const [gabarit, setGabarit] = useLongOpField<string>('infographie', 'gabarit', '')
+  const [brief, setBrief] = useLongOpField<string>('infographie', 'brief', '')
+  const [pays, setPays] = useLongOpField<string>('infographie', 'pays', 'CM')
+  const loading = useLongOps((s) => s.loading.infographie)
+  const resultat = useLongOps((s) => s.resultats.infographie) as InfographieResult | null
+  const setResultat = (r: InfographieResult | null) => useLongOps.getState().setResultat('infographie', r)
+  const runOp = useLongOps((s) => s.run)
 
   // Mode modèle image
   const fileRef = useRef<HTMLInputElement>(null)
-  const [modeleNom, setModeleNom] = useState('')
+  const [modeleNom, setModeleNom] = useLongOpField<string>('infographie', 'modeleNom', '')
 
   // Mode custom
-  const [customW, setCustomW] = useState(210)
-  const [customH, setCustomH] = useState(297)
-  const [customBleed, setCustomBleed] = useState(3)
+  const [customW, setCustomW] = useLongOpField<number>('infographie', 'customW', 210)
+  const [customH, setCustomH] = useLongOpField<number>('infographie', 'customH', 297)
+  const [customBleed, setCustomBleed] = useLongOpField<number>('infographie', 'customBleed', 3)
 
   const { data: gabaritsData } = useQuery({
     queryKey: ['infographie-gabarits'],
@@ -75,34 +80,32 @@ export default function InfographiePage() {
   const generer = async () => {
     if (mode !== 'custom' && !gabarit) { toast.error('Choisissez un gabarit'); return }
     if (!brief.trim()) { toast.error('Décrivez votre besoin'); return }
-    setLoading(true)
     setResultat(null)
     try {
-      let r
-      if (mode === 'brief') {
-        r = await infographieAPI.generer({ brief, type_gabarit: gabarit, pays })
-      } else if (mode === 'modele') {
-        const file = fileRef.current?.files?.[0]
-        if (!file) { toast.error('Sélectionnez une image modèle'); setLoading(false); return }
-        const fd = new FormData()
-        fd.append('modele', file)
-        fd.append('brief', brief)
-        fd.append('type_gabarit', gabarit)
-        fd.append('pays', pays)
-        r = await infographieAPI.genererDepuisModele(fd)
-        if (r.data.analyse_modele) {
-          toast.success('Style analysé — infographie générée !')
+      const data = await runOp<InfographieResult>('infographie', async () => {
+        if (mode === 'brief') {
+          const r = await infographieAPI.generer({ brief, type_gabarit: gabarit, pays })
+          return r.data as InfographieResult
         }
-      } else {
-        r = await infographieAPI.genererCustom({ width_mm: customW, height_mm: customH, bleed_mm: customBleed, brief, pays })
-      }
-      setResultat(r.data)
-      if (mode !== 'modele') toast.success('Infographie générée !')
+        if (mode === 'modele') {
+          const file = fileRef.current?.files?.[0]
+          if (!file) throw new Error('Sélectionnez une image modèle')
+          const fd = new FormData()
+          fd.append('modele', file)
+          fd.append('brief', brief)
+          fd.append('type_gabarit', gabarit)
+          fd.append('pays', pays)
+          const r = await infographieAPI.genererDepuisModele(fd)
+          return r.data as InfographieResult
+        }
+        const r = await infographieAPI.genererCustom({ width_mm: customW, height_mm: customH, bleed_mm: customBleed, brief, pays })
+        return r.data as InfographieResult
+      })
+      if (data?.analyse_modele) toast.success('Style analysé — infographie générée !')
+      else toast.success('Infographie générée !')
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de génération')
-    } finally {
-      setLoading(false)
+      const err = e as { response?: { data?: { detail?: string } }; message?: string }
+      toast.error(err.response?.data?.detail || err.message || 'Erreur de génération')
     }
   }
 
