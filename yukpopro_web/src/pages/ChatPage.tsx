@@ -700,7 +700,7 @@ export const ChatPage = () => {
 
 // ── Construit le message de bienvenue contextuel ─────────────────────────────
 
-function buildWelcomeText(profil: any, metierCtx: typeof METIER_CONTEXT[string]): string {
+function buildWelcomeText(profil: any, metierCtx: typeof METIERS_CONFIG[string]): string {
   if (!profil?.metier) {
     return "Je suis Yukpo Pro, votre assistant professionnel intelligent. Posez-moi une question, envoyez un document à analyser ou traduire, ou demandez-moi de générer un rapport — je comprends le langage naturel et m'adapte à votre demande.";
   }
@@ -714,7 +714,7 @@ function buildWelcomeText(profil: any, metierCtx: typeof METIER_CONTEXT[string])
 const WelcomeScreen = ({
   profil, user, metierCtx, onEditProfil,
 }: {
-  profil: any; user: any; metierCtx: typeof METIER_CONTEXT[string];
+  profil: any; user: any; metierCtx: typeof METIERS_CONFIG[string];
   suggestions: string[]; onSuggestion: (s: string) => void; onEditProfil: () => void;
 }) => {
   const prenom = user?.prenom || user?.nom?.split(" ")[0] || "";

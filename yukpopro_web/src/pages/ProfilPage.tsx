@@ -49,7 +49,7 @@ export const ProfilPage = () => {
   const [pays, setPays]     = useState(profil?.pays || "CM");
   const [secteur, setSecteur]     = useState(profil?.secteur || "");
   const [entreprise, setEntreprise] = useState(profil?.entreprise || "");
-  const [niveau, setNiveau] = useState(profil?.niveau_expertise || "intermediaire");
+  const [niveau, setNiveau] = useState<string>(profil?.niveau_expertise || "intermediaire");
   const [annees, setAnnees] = useState(String(profil?.annees_experience || ""));
   const [bio, setBio]       = useState(profil?.bio || "");
 
