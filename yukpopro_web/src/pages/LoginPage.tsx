@@ -45,9 +45,10 @@ export const LoginPage = () => {
       localStorage.setItem("yukpopro_token", data.access_token);
       const me = await authApi.me();
       setAuth({ ...me, token: data.access_token }, data.access_token);
-      // Charger le profil en arrière-plan — ne jamais bloquer l'accès à l'app
-      profilApi.get().then((p) => setProfil(p)).catch(() => {});
-      navigate("/chat");
+      // 1ère connexion : pas de profil → configurer d'abord ; sinon → chat
+      const profil = await profilApi.get().catch(() => null);
+      if (profil) { setProfil(profil); navigate("/chat"); }
+      else navigate("/profil?welcome=1");
     } catch (err: unknown) {
       localStorage.removeItem("yukpopro_token");
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
@@ -78,9 +79,7 @@ export const LoginPage = () => {
         localStorage.setItem("yukpopro_token", data.access_token);
         const me = await authApi.me();
         setAuth({ ...me, token: data.access_token }, data.access_token);
-        profilApi.get().then((p) => setProfil(p)).catch(() => {});
-        toast.success("Bienvenue ! Complétez votre profil dans Mon Profil.");
-        navigate("/chat");
+        navigate("/profil?welcome=1");
       } catch {
         // Inscription réussie mais login échoue → rediriger vers connexion
         toast.success("Compte créé avec succès ! Connectez-vous maintenant.");

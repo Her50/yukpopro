@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from "react";
-import { User, Save, Sparkles, Award, BarChart2 } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { User, Save, Sparkles, Award, BarChart2, PartyPopper } from "lucide-react";
 import toast from "react-hot-toast";
 import { Card, Button, Input, Select, Badge } from "@/components/ui";
 import { useProfilStore } from "@/store";
@@ -15,6 +16,9 @@ const NIVEAUX_EXPERTISE = [
 
 export const ProfilPage = () => {
   const { profil, setProfil } = useProfilStore();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const isWelcome = searchParams.get("welcome") === "1";
   const [loading, setLoading] = useState(false);
 
   const [metier, setMetier] = useState(profil?.metier || "");
@@ -45,7 +49,12 @@ export const ProfilPage = () => {
         bio,
       });
       setProfil(updated);
-      toast.success("Profil mis à jour !");
+      if (isWelcome) {
+        toast.success("Profil configuré ! Bienvenue sur YukpoPro.");
+        navigate("/chat");
+      } else {
+        toast.success("Profil mis à jour !");
+      }
     } catch {
       toast.error("Erreur lors de la mise à jour");
     } finally {
@@ -64,6 +73,17 @@ export const ProfilPage = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto animate-fade-in">
+      {isWelcome && (
+        <div className="flex items-start gap-3 p-4 rounded-xl border border-yukpo-500/30 bg-yukpo-500/10">
+          <PartyPopper className="w-5 h-5 text-yukpo-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-white font-semibold text-sm">Bienvenue sur YukpoPro !</p>
+            <p className="text-slate-300 text-xs mt-0.5">
+              Configurez votre profil métier pour personnaliser votre assistant IA. Cliquez sur <strong>Enregistrer le profil</strong> pour accéder à l'application.
+            </p>
+          </div>
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-display font-bold text-white">Mon Profil</h1>
         <p className="text-slate-400 text-sm mt-1">Votre profil configure l'agent Yukpo spécialisé qui vous assiste.</p>
