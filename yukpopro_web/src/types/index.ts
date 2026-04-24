@@ -107,7 +107,8 @@ export interface CoutLLM {
   cout_reel_usd: number;
   marge: number;
   cout_app_usd: number;
-  cout_app_xaf: number;
+  cout_app_xaf: number | null;   // null si hors zone CFA
+  devise_cout: string | null;    // "XAF" | "XOF" | null (null → afficher USD)
 }
 
 export interface CopiloteMessage {

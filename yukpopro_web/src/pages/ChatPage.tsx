@@ -850,8 +850,8 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
             </span>
             <span>·</span>
             <span title={`Coût réel : $${message.cout_llm.cout_reel_usd.toFixed(5)} · Marge ×${message.cout_llm.marge}`}>
-              {message.cout_llm.cout_app_xaf > 0
-                ? `${message.cout_llm.cout_app_xaf.toFixed(0)} XAF`
+              {message.cout_llm.cout_app_xaf != null && message.cout_llm.devise_cout
+                ? `${(message.cout_llm.cout_app_xaf as number).toFixed(0)} ${message.cout_llm.devise_cout}`
                 : `$${message.cout_llm.cout_app_usd.toFixed(4)}`
               }
             </span>

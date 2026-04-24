@@ -1534,6 +1534,18 @@ _METIER_CORPUS_PRIORITAIRE: dict[str, list[str]] = {
     "autre":               ["commercial (OHADA)", "fiscal (CGI)", "travail (Code du travail)"],
 }
 
+# Couverture réelle des documents RAG indexés par pays/domaine
+# Utilisé dans le prompt pour que le LLM sache quand attendre du contexte RAG vs sa mémoire
+_RAG_COUVERTURE = {
+    "CGI_indexé":    ["CM", "CI", "SN", "TG", "BF", "CG", "GN"],
+    "travail_indexé": ["CM", "CI", "SN", "TG", "BF", "CG", "GA", "CF"],
+    "penal_indexé":  ["CM", "CI", "SN", "TG", "BF", "CG", "GA", "GN", "CD", "MG", "CF"],
+    "OHADA_indexé":  ["tous les pays OHADA (AUS, AUDCG, AUPCAP, AUSCOOP, AUSCGIE, AUA, SYSCOHADA)"],
+    "normes_ISO":    ["ISO 45001 (SST) — applicable à tous pays"],
+    "normes_OIT":    ["Conventions OIT — applicables à tous membres"],
+    "non_couvert":   ["MA", "TN", "GH", "NG", "CD (partiel)", "MG"],
+}
+
 
 def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
     """
@@ -1598,6 +1610,15 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
 CORPUS JURIDIQUE PRIORITAIRE POUR CE PROFIL ({metier.upper()}) :
    - {corpus_str}
 
+COUVERTURE DES DOCUMENTS RAG INDEXÉS (ce que Yukpo a réellement en base documentaire) :
+{"▸ CGI indexé : " + ", ".join(_RAG_COUVERTURE["CGI_indexé"]) if pays_code in _RAG_COUVERTURE["CGI_indexé"] else "▸ CGI : NON INDEXÉ pour " + pays_code + " → ta mémoire de formation est la source principale"}
+{"▸ Code du travail indexé" if pays_code in _RAG_COUVERTURE["travail_indexé"] else "▸ Code du travail : NON INDEXÉ pour " + pays_code}
+{"▸ Code pénal indexé" if pays_code in _RAG_COUVERTURE["penal_indexé"] else "▸ Code pénal : NON INDEXÉ pour " + pays_code}
+▸ OHADA : tous les actes uniformes indexés (AUS, AUDCG, SYSCOHADA, AUPCAP, AUSCGIE…)
+▸ Normes ISO 45001 (SST) + Conventions OIT : indexées
+→ IMPORTANT : si un corpus RAG est injecté dans le message, utilise-le en priorité pour les citations.
+→ Si aucun corpus n'est injecté pour ce pays/domaine, réponds avec ta mémoire de formation + label [Mémoire IA].
+
 ═══════════════════════════════════════════════════
   RÈGLES ANTI-HALLUCINATION — PRIORITÉ ABSOLUE
 ═══════════════════════════════════════════════════
@@ -1609,12 +1630,14 @@ CORPUS JURIDIQUE PRIORITAIRE POUR CE PROFIL ({metier.upper()}) :
 → Si le corpus contient l'article demandé : tu dois reproduire le texte officiel mot pour mot, puis analyser.
 → Format : **Article X [Nom du texte, {pays_nom}]** : "texte exact" → [ANALYSE] ton commentaire.
 
-**RÈGLE 2 — SANS CORPUS RAG (question juridique/réglementaire non couverte par le RAG) :**
-→ Tu peux utiliser ta connaissance de formation — Claude/GPT ont été entraînés sur les textes officiels.
-→ MAIS tu DOIS marquer systématiquement : `[Mémoire IA — vérifier la version officielle en vigueur]`
-→ Cite quand même le numéro d'article et le texte tel que tu le connais — c'est utile même avec la réserve.
-→ Précise TOUJOURS la version/date si connue : "selon le Code du travail {pays_nom} (version 2024 estimée)"
-→ JAMAIS de réponse vague type "selon la loi" sans citer l'article précis.
+**RÈGLE 2 — SOURCE PRINCIPALE = TA MÉMOIRE DE FORMATION (RAG = citation complémentaire) :**
+→ Ta connaissance de formation (Claude/GPT) EST LA SOURCE PRIMAIRE. Tu réponds TOUJOURS avec ta connaissance des textes juridiques, fiscaux, comptables officiels.
+→ Le corpus RAG (=== CORPUS RÉGLEMENTAIRE ===), QUAND IL EST PRÉSENT, est une source de citation officielle supplémentaire — utilise-le pour CITER mot pour mot avec références précises.
+→ NE PAS attendre du RAG pour répondre : si aucun corpus n'est injecté, réponds quand même avec ta mémoire de formation.
+→ MAIS marque systématiquement : `[Mémoire IA — vérifier la version officielle en vigueur]` pour toute affirmation sur articles/taux/barèmes non issus du corpus RAG injecté.
+→ Cite le numéro d'article et le texte exact tel que tu le connais — c'est utile même avec la réserve.
+→ Précise TOUJOURS la version/date si connue : "selon le Code du travail {pays_nom} (version estimée à la date de formation)"
+→ JAMAIS de réponse vague type "selon la loi" sans citer l'article précis ou au minimum le chapitre concerné.
 
 **RÈGLE 3 — COMPTABILITÉ (SYSCOHADA / IFRS / normes nationales) :**
 → Les réponses comptables DOIVENT référencer le plan comptable applicable : {cadre['comptable']}
@@ -2505,8 +2528,20 @@ async def copilote_chat(
         )
         _MARGE = 20.0
         _cout_avec_marge_usd = _cout_reel_usd * _MARGE
-        # Conversion XAF (1 USD ≈ 600 XAF)
-        _cout_xaf = _cout_avec_marge_usd * 600
+        # Conversion locale : XAF/XOF (zone FCFA) ≈ 655.957 XAF per EUR ≈ 601 per USD
+        # Pour les autres devises (MAD, GHS, NGN, GNF…) on ne convertit pas → affiche USD
+        _pays_code_cout = (getattr(profil, "pays", "") or pays or "CM").upper()
+        _cadre_cout = _CADRE_JURIDIQUE_PAYS.get(_pays_code_cout, _CADRE_JURIDIQUE_PAYS["_DEFAULT"])
+        _devise_str = _cadre_cout.get("devise", "")
+        # Extraire l'ISO code de la devise (ex: "Franc CFA BEAC (XAF)" → "XAF")
+        import re as _re_devise
+        _devise_iso_match = _re_devise.search(r"\(([A-Z]{3})\)", _devise_str)
+        _devise_iso = _devise_iso_match.group(1) if _devise_iso_match else "USD"
+        _CFA_DEVISES = {"XAF", "XOF"}
+        if _devise_iso in _CFA_DEVISES:
+            _cout_local = round(_cout_avec_marge_usd * 601, 0)  # 1 USD ≈ 601 FCFA
+        else:
+            _cout_local = None  # pas de conversion → afficher USD côté client
 
         return {
             "session_id":         session["session_id"],
@@ -2524,7 +2559,8 @@ async def copilote_chat(
                 "cout_reel_usd": round(_cout_reel_usd, 6),
                 "marge":         _MARGE,
                 "cout_app_usd":  round(_cout_avec_marge_usd, 4),
-                "cout_app_xaf":  round(_cout_xaf, 0),
+                "cout_app_xaf":  _cout_local,   # None si hors zone CFA
+                "devise_cout":   _devise_iso if _devise_iso in _CFA_DEVISES else None,
             },
         }
 
