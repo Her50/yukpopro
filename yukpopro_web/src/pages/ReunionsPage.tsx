@@ -419,25 +419,31 @@ const FormulaireReunion = ({
                           <button
                             type="button"
                             onClick={() => setShowLangsCible((o) => !o)}
-                            className="flex items-center justify-between gap-2 min-w-[140px] bg-slate-800 border border-purple-500/40 rounded-md px-2 py-1 text-xs text-white hover:border-purple-400 focus:outline-none"
+                            style={{ backgroundColor: "#1e293b", color: "#ffffff", borderColor: "rgba(168,85,247,0.5)" }}
+                            className="flex items-center justify-between gap-2 min-w-[140px] border rounded-md px-2 py-1 text-xs hover:border-purple-400 focus:outline-none"
                           >
-                            <span>
+                            <span style={{ color: "#ffffff" }}>
                               {LANGUES.find((l) => l.code === langueCible)?.label || "Français"}
                             </span>
-                            <ChevronDown className={`w-3.5 h-3.5 text-slate-300 transition-transform ${showLangsCible ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showLangsCible ? "rotate-180" : ""}`} style={{ color: "#cbd5e1" }} />
                           </button>
                           <AnimatePresence>
                             {showLangsCible && (
                               <motion.div
-                                initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                                className="absolute z-50 top-full mt-1 left-0 min-w-[160px] bg-slate-800 border border-slate-700 rounded-md shadow-xl overflow-hidden max-h-60 overflow-y-auto"
+                                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+                                style={{ backgroundColor: "#1e293b", borderColor: "#334155" }}
+                                className="absolute z-50 bottom-full mb-1 left-0 min-w-[160px] border rounded-md shadow-xl overflow-hidden max-h-60 overflow-y-auto"
                               >
                                 {LANGUES.filter((l) => l.code !== "auto").map((l) => (
                                   <button
                                     key={l.code}
                                     type="button"
                                     onClick={() => { setLangueCible(l.code); setShowLangsCible(false); }}
-                                    className={`w-full text-left px-2.5 py-1.5 text-xs hover:bg-slate-700 transition-colors ${langueCible === l.code ? "text-purple-300 bg-purple-500/10" : "text-white"}`}
+                                    style={{
+                                      color: langueCible === l.code ? "#d8b4fe" : "#ffffff",
+                                      backgroundColor: langueCible === l.code ? "rgba(168,85,247,0.1)" : "transparent",
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 text-xs hover:!bg-slate-700 transition-colors"
                                   >
                                     {l.label}
                                   </button>
