@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   Wallet, TrendingUp, TrendingDown, Zap, ArrowRight, RefreshCw,
@@ -60,6 +61,7 @@ const MODULE_LABELS: Record<string, string> = {
 };
 
 export const WalletPage = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
   const [jours, setJours] = useState(30);
@@ -100,10 +102,10 @@ export const WalletPage = () => {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Wallet className="w-7 h-7 text-yukpo-500" />
-            Mon Wallet
+            {t("wallet.title")}
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--ykp-text-muted)" }}>
-            Solde, consommations et historique de crédits IA
+            {t("wallet.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -113,13 +115,13 @@ export const WalletPage = () => {
             className="px-3 py-2 rounded-lg border text-sm"
             style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }}
           >
-            <option value={7}>7 jours</option>
-            <option value={30}>30 jours</option>
-            <option value={90}>90 jours</option>
-            <option value={365}>1 an</option>
+            <option value={7}>{t("wallet.period7")}</option>
+            <option value={30}>{t("wallet.period30")}</option>
+            <option value={90}>{t("wallet.period90")}</option>
+            <option value={365}>{t("wallet.period365")}</option>
           </select>
           <Button variant="outline" size="sm" onClick={charger}>
-            <RefreshCw className="w-4 h-4 mr-1" /> Actualiser
+            <RefreshCw className="w-4 h-4 mr-1" /> {t("wallet.refresh")}
           </Button>
         </div>
       </div>
@@ -131,37 +133,37 @@ export const WalletPage = () => {
       }}>
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Solde disponible</p>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.available")}</p>
             <p className="text-4xl font-bold mt-2" style={{ color: PLAN_COLORS[solde.plan] || "#0054A6" }}>
               {solde.credits_restants.toLocaleString()}
             </p>
-            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>crédits Yukpo</p>
+            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.credits")}</p>
             <p className="text-sm font-medium mt-3" style={{ color: "var(--ykp-text-primary)" }}>
-              ≈ {(solde.credits_restants * 0.6).toLocaleString(undefined, { maximumFractionDigits: 0 })} FCFA de valeur
+              ≈ {(solde.credits_restants * 0.6).toLocaleString(undefined, { maximumFractionDigits: 0 })} {t("wallet.fcfaValue")}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Plan actif</p>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.activePlan")}</p>
             <div className="mt-2 flex items-center gap-2">
               <Badge variant={solde.plan === "gratuit" ? "outline" : "default"} className="uppercase">{solde.plan}</Badge>
             </div>
             <p className="text-sm mt-2" style={{ color: "var(--ykp-text-secondary)" }}>{solde.label_plan}</p>
             {solde.renouvellement_le && (
               <p className="text-xs mt-2 flex items-center gap-1" style={{ color: "var(--ykp-text-muted)" }}>
-                <Calendar className="w-3 h-3" /> Renouvellement : {solde.renouvellement_le}
+                <Calendar className="w-3 h-3" /> {t("wallet.renewal")} : {solde.renouvellement_le}
               </p>
             )}
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Utilisation</p>
+            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.usage")}</p>
             <div className="mt-3 h-3 rounded-full overflow-hidden" style={{ background: "var(--ykp-elevated)" }}>
               <div className="h-full transition-all" style={{ width: `${pct}%`, background: pctColor }} />
             </div>
             <div className="flex justify-between mt-2 text-xs">
-              <span style={{ color: "var(--ykp-text-muted)" }}>{solde.credits_utilises.toLocaleString()} utilisés</span>
+              <span style={{ color: "var(--ykp-text-muted)" }}>{solde.credits_utilises.toLocaleString()} {t("wallet.used")}</span>
               <span className="font-semibold" style={{ color: pctColor }}>{pct}%</span>
             </div>
-            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>sur {solde.credits_alloues.toLocaleString()} alloués</p>
+            <p className="text-xs mt-1" style={{ color: "var(--ykp-text-muted)" }}>{t("common.on", { defaultValue: "sur" })} {solde.credits_alloues.toLocaleString()} {t("wallet.allocated")}</p>
           </div>
         </div>
 
@@ -169,12 +171,12 @@ export const WalletPage = () => {
         <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t" style={{ borderColor: "var(--ykp-border)" }}>
           <Link to="/abonnement">
             <Button size="sm" className="gap-1">
-              <CreditCard className="w-4 h-4" /> Gérer abonnement <ArrowRight className="w-3 h-3" />
+              <CreditCard className="w-4 h-4" /> {t("wallet.manageSubscription")} <ArrowRight className="w-3 h-3" />
             </Button>
           </Link>
           <Link to="/abonnement">
             <Button size="sm" variant="outline" className="gap-1">
-              <PlusCircle className="w-4 h-4" /> Recharger crédits
+              <PlusCircle className="w-4 h-4" /> {t("wallet.recharge")}
             </Button>
           </Link>
         </div>
@@ -184,33 +186,33 @@ export const WalletPage = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
-            <Activity className="w-3 h-3" /> Consommés
+            <Activity className="w-3 h-3" /> {t("wallet.consumed")}
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.credits_consommes.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">crédits sur {jours}j</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.creditsPerPeriod", { days: jours })}</p>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
-            <Zap className="w-3 h-3" /> Appels IA
+            <Zap className="w-3 h-3" /> {t("wallet.aiCalls")}
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.appels.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">requêtes</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.requests")}</p>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
-            <TrendingDown className="w-3 h-3" /> Valeur FCFA
+            <TrendingDown className="w-3 h-3" /> {t("wallet.valueLabel")}
           </div>
           <p className="text-2xl font-bold mt-2">{data.totaux.valeur_fcfa_payee.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">FCFA équiv.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.fcfaEquiv")}</p>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
-            <TrendingUp className="w-3 h-3" /> Moyenne/jour
+            <TrendingUp className="w-3 h-3" /> {t("wallet.avgPerDay")}
           </div>
           <p className="text-2xl font-bold mt-2">
             {Math.round(data.totaux.credits_consommes / Math.max(1, jours)).toLocaleString()}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">crédits/jour</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.creditsPerDay")}</p>
         </Card>
       </div>
 
@@ -219,12 +221,12 @@ export const WalletPage = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" /> Consommation quotidienne
+              <BarChart3 className="w-5 h-5" /> {t("wallet.dailyConsumption")}
             </h2>
-            <span className="text-xs text-slate-500 dark:text-slate-400">{data.serie_jour.length} jours actifs</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{data.serie_jour.length} {t("wallet.activeDays")}</span>
           </div>
           {data.serie_jour.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">Aucune consommation sur la période.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">{t("wallet.noConsumption")}</p>
           ) : (
             <div className="flex items-end gap-1 h-48">
               {data.serie_jour.slice(-30).map((s) => {
@@ -251,10 +253,10 @@ export const WalletPage = () => {
         {/* Top modules consommateurs */}
         <Card className="p-6">
           <h2 className="font-bold flex items-center gap-2 mb-4">
-            <PieChart className="w-5 h-5" /> Top consommateurs
+            <PieChart className="w-5 h-5" /> {t("wallet.topConsumers")}
           </h2>
           {data.top_modules.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">Aucune donnée.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">{t("wallet.noData")}</p>
           ) : (
             <div className="space-y-3">
               {data.top_modules.slice(0, 8).map((m) => (
@@ -265,7 +267,7 @@ export const WalletPage = () => {
                       {m.credits.toLocaleString()} cr · {m.appels} appel(s)
                     </span>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--ykp-elevated)" }}">
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--ykp-elevated)" }}>
                     <div
                       className="h-full transition-all"
                       style={{
@@ -285,23 +287,23 @@ export const WalletPage = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold flex items-center gap-2">
-            <Activity className="w-5 h-5" /> Historique détaillé
+            <Activity className="w-5 h-5" /> {t("wallet.history")}
           </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400">{data.historique.length} dernière(s)</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{data.historique.length} {t("wallet.historyCount")}</span>
         </div>
         {data.historique.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">Aucune consommation enregistrée.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">{t("wallet.noHistory")}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-slate-500 dark:text-slate-400 uppercase border-b">
-                  <th className="py-2 pr-2">Date</th>
-                  <th className="py-2 pr-2">Module</th>
-                  <th className="py-2 pr-2">Modèle</th>
-                  <th className="py-2 pr-2 text-right">Tokens</th>
-                  <th className="py-2 pr-2 text-right">Coût</th>
-                  <th className="py-2 text-right">Crédits</th>
+                  <th className="py-2 pr-2">{t("wallet.colDate")}</th>
+                  <th className="py-2 pr-2">{t("wallet.colModule")}</th>
+                  <th className="py-2 pr-2">{t("wallet.colModel")}</th>
+                  <th className="py-2 pr-2 text-right">{t("wallet.colTokens")}</th>
+                  <th className="py-2 pr-2 text-right">{t("wallet.colCost")}</th>
+                  <th className="py-2 text-right">{t("wallet.colCredits")}</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Lock, Bell, Palette, AlertTriangle, Eye, EyeOff, CheckCircle, Sun, Moon } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui";
 import { authApi } from "@/api/client";
 import { useUIStore } from "@/store";
@@ -18,10 +19,10 @@ const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; tit
 );
 
 export const ParametresPage = () => {
+  const { t } = useTranslation();
   const { theme, toggleTheme } = useUIStore();
   const isDark = theme === "dark";
 
-  // Changement de mot de passe
   const [ancienMdp, setAncienMdp] = useState("");
   const [nouveauMdp, setNouveauMdp] = useState("");
   const [confirmMdp, setConfirmMdp] = useState("");
@@ -29,12 +30,12 @@ export const ParametresPage = () => {
   const [showNouveau, setShowNouveau] = useState(false);
   const [mdpLoading, setMdpLoading] = useState(false);
 
-  // Notifications (stockées en localStorage pour l'instant)
   const [notifEmail, setNotifEmail] = useState(() => localStorage.getItem("yukpo_notif_email") !== "false");
   const [notifPush, setNotifPush]   = useState(() => localStorage.getItem("yukpo_notif_push") !== "false");
 
-  // Danger zone
   const [confirmSuppression, setConfirmSuppression] = useState("");
+
+  const confirmWord = t("parametres.confirmWord");
 
   const mdpValide = nouveauMdp.length >= 8
     && /[A-Z]/.test(nouveauMdp)
@@ -47,10 +48,10 @@ export const ParametresPage = () => {
     setMdpLoading(true);
     try {
       await authApi.changerMotDePasse(ancienMdp, nouveauMdp);
-      toast.success("Mot de passe modifié avec succès");
+      toast.success(t("parametres.passwordSuccess"));
       setAncienMdp(""); setNouveauMdp(""); setConfirmMdp("");
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || "Erreur lors du changement de mot de passe");
+      toast.error(err?.response?.data?.detail || t("parametres.passwordError"));
     } finally { setMdpLoading(false); }
   };
 
@@ -60,25 +61,24 @@ export const ParametresPage = () => {
   };
 
   const regleMdp = [
-    { label: "8 caractères minimum",    ok: nouveauMdp.length >= 8 },
-    { label: "Une majuscule",            ok: /[A-Z]/.test(nouveauMdp) },
-    { label: "Un chiffre",              ok: /[0-9]/.test(nouveauMdp) },
-    { label: "Les mots de passe correspondent", ok: nouveauMdp === confirmMdp && confirmMdp.length > 0 },
+    { label: t("parametres.rules.minLength"), ok: nouveauMdp.length >= 8 },
+    { label: t("parametres.rules.uppercase"),  ok: /[A-Z]/.test(nouveauMdp) },
+    { label: t("parametres.rules.number"),     ok: /[0-9]/.test(nouveauMdp) },
+    { label: t("parametres.rules.match"),      ok: nouveauMdp === confirmMdp && confirmMdp.length > 0 },
   ];
 
   return (
     <div className="p-6 space-y-5 max-w-2xl mx-auto animate-fade-in">
       <div>
-        <h1 className="text-xl font-bold text-white">Paramètres</h1>
-        <p className="text-slate-400 text-sm mt-0.5">Sécurité, apparence et préférences de votre compte</p>
+        <h1 className="text-xl font-bold text-white">{t("parametres.title")}</h1>
+        <p className="text-slate-400 text-sm mt-0.5">{t("parametres.subtitle")}</p>
       </div>
 
-      {/* Sécurité — Changement de mot de passe */}
-      <Section icon={Lock} title="Sécurité">
+      {/* Sécurité */}
+      <Section icon={Lock} title={t("parametres.security")}>
         <form onSubmit={handleChangerMdp} className="space-y-4">
-          {/* Ancien mot de passe */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Mot de passe actuel</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">{t("parametres.currentPassword")}</label>
             <div className="relative">
               <input
                 type={showAncien ? "text" : "password"}
@@ -97,9 +97,8 @@ export const ParametresPage = () => {
             </div>
           </div>
 
-          {/* Nouveau mot de passe */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Nouveau mot de passe</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">{t("parametres.newPassword")}</label>
             <div className="relative">
               <input
                 type={showNouveau ? "text" : "password"}
@@ -118,9 +117,8 @@ export const ParametresPage = () => {
             </div>
           </div>
 
-          {/* Confirmer */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirmer le nouveau mot de passe</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">{t("parametres.confirmPassword")}</label>
             <input
               type="password"
               value={confirmMdp}
@@ -133,7 +131,6 @@ export const ParametresPage = () => {
             />
           </div>
 
-          {/* Règles de validation */}
           {nouveauMdp && (
             <ul className="space-y-1">
               {regleMdp.map(({ label, ok }) => (
@@ -152,17 +149,17 @@ export const ParametresPage = () => {
                        bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {mdpLoading ? "Mise à jour…" : "Changer le mot de passe"}
+            {mdpLoading ? t("parametres.updating") : t("parametres.changePassword")}
           </button>
         </form>
       </Section>
 
       {/* Apparence */}
-      <Section icon={Palette} title="Apparence">
+      <Section icon={Palette} title={t("parametres.appearance")}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-200">Mode d'affichage</p>
-            <p className="text-xs text-slate-500 mt-0.5">{isDark ? "Mode sombre activé" : "Mode clair activé"}</p>
+            <p className="text-sm font-medium text-slate-200">{t("parametres.displayMode")}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{isDark ? t("parametres.darkModeOn") : t("parametres.lightModeOn")}</p>
           </div>
           <button
             onClick={toggleTheme}
@@ -173,22 +170,22 @@ export const ParametresPage = () => {
           </button>
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-          <Sun className="w-4 h-4" /><span>Clair</span>
+          <Sun className="w-4 h-4" /><span>{t("parametres.light")}</span>
           <div className="flex-1 h-px bg-slate-700" />
-          <span>Sombre</span><Moon className="w-4 h-4" />
+          <span>{t("parametres.dark")}</span><Moon className="w-4 h-4" />
         </div>
       </Section>
 
       {/* Notifications */}
-      <Section icon={Bell} title="Notifications">
+      <Section icon={Bell} title={t("parametres.notifications")}>
         {[
-          { label: "Notifications par email", sub: "Résumés hebdomadaires, alertes de sécurité", val: notifEmail, key: "email" as const },
-          { label: "Notifications push",      sub: "Alertes en temps réel dans le navigateur",  val: notifPush,  key: "push"  as const },
-        ].map(({ label, sub, val, key }) => (
+          { labelKey: "parametres.notifEmail", subKey: "parametres.notifEmailDesc", val: notifEmail, key: "email" as const },
+          { labelKey: "parametres.notifPush",  subKey: "parametres.notifPushDesc",  val: notifPush,  key: "push"  as const },
+        ].map(({ labelKey, subKey, val, key }) => (
           <div key={key} className="flex items-center justify-between py-1">
             <div>
-              <p className="text-sm font-medium text-slate-200">{label}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
+              <p className="text-sm font-medium text-slate-200">{t(labelKey)}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{t(subKey)}</p>
             </div>
             <button
               onClick={() => toggleNotif(key, !val)}
@@ -201,32 +198,30 @@ export const ParametresPage = () => {
         ))}
       </Section>
 
-      {/* Danger zone */}
-      <Section icon={AlertTriangle} title="Zone de danger">
-        <p className="text-sm text-slate-400">
-          La suppression de votre compte est irréversible. Toutes vos données (profil, documents, historique) seront définitivement effacées.
-        </p>
+      {/* Zone de danger */}
+      <Section icon={AlertTriangle} title={t("parametres.dangerZone")}>
+        <p className="text-sm text-slate-400">{t("parametres.dangerDesc")}</p>
         <div className="space-y-2">
           <label className="block text-sm font-medium text-slate-300">
-            Tapez <span className="text-red-400 font-mono">SUPPRIMER</span> pour confirmer
+            {t("parametres.typeToConfirm")} <span className="text-red-400 font-mono">{confirmWord}</span> {t("parametres.toConfirm")}
           </label>
           <input
             type="text"
             value={confirmSuppression}
             onChange={(e) => setConfirmSuppression(e.target.value)}
-            placeholder="SUPPRIMER"
+            placeholder={t("parametres.confirmPlaceholder")}
             className="w-full rounded-lg px-3 py-2.5 text-sm bg-slate-700/50 border border-red-800/50
                        text-white placeholder-slate-600 focus:outline-none focus:border-red-500
                        focus:ring-1 focus:ring-red-500/40 transition-colors"
           />
           <button
-            disabled={confirmSuppression !== "SUPPRIMER"}
-            onClick={() => toast.error("Contactez le support à support@yukpomnang.com pour supprimer votre compte.")}
+            disabled={confirmSuppression !== confirmWord}
+            onClick={() => toast.error(t("parametres.deleteContactSupport"))}
             className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all
                        bg-red-700/60 hover:bg-red-700 border border-red-600/50
                        disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            Supprimer définitivement mon compte
+            {t("parametres.deleteAccount")}
           </button>
         </div>
       </Section>

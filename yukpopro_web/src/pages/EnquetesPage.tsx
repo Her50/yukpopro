@@ -4,6 +4,7 @@
  * → génération IA (XLSForm ODK/KoBoCollect) → analyses multiples → rapport académique
  */
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Plus, Upload, Play, FileText, BarChart2, Download, ChevronDown, ChevronUp,
   Mic, Loader2, ClipboardList, Users, MapPin, BookOpen, Wand2, Link,
@@ -75,6 +76,7 @@ const sentimentColor = (s: string) => ({
 // ── Composant principal ────────────────────────────────────────────────────────
 
 export const EnquetesPage = () => {
+  const { t } = useTranslation();
   const [etudes,     setEtudes]     = useState<Etude[]>([]);
   const [loaded,     setLoaded]     = useState(false);
   const [loading,    setLoading]    = useState(false);
@@ -125,7 +127,7 @@ export const EnquetesPage = () => {
       const res = await enquetesApi.lister();
       setEtudes(res.etudes || []);
       setLoaded(true);
-    } catch { toast.error("Impossible de charger les études"); }
+    } catch { toast.error(t("enquetes.errorLoad")); }
     finally { setLoading(false); }
   }, []);
 
@@ -138,23 +140,23 @@ export const EnquetesPage = () => {
     setTranscriptions([]); setFormulaire(null); setFormDonnees(null);
     setAnalyseResult(null); setRapport(null); setGenIAMode(false);
     try {
-      const [d, t] = await Promise.all([
+      const [d, tr] = await Promise.all([
         enquetesApi.getEtude(etude.etude_id),
         enquetesApi.listerTranscriptions(etude.etude_id).catch(() => ({ transcriptions: [] })),
       ]);
       setDetail(d);
-      setTranscriptions(t.transcriptions || []);
-    } catch { toast.error("Erreur chargement étude"); }
+      setTranscriptions(tr.transcriptions || []);
+    } catch { toast.error(t("enquetes.errorStudy")); }
   };
 
   const refreshDetail = async (id: string) => {
     try {
-      const [d, t] = await Promise.all([
+      const [d, tr] = await Promise.all([
         enquetesApi.getEtude(id),
         enquetesApi.listerTranscriptions(id).catch(() => ({ transcriptions: [] })),
       ]);
       setDetail(d);
-      setTranscriptions(t.transcriptions || []);
+      setTranscriptions(tr.transcriptions || []);
       setEtudes(prev => prev.map(e => e.etude_id === id ? { ...e, ...d } : e));
     } catch {}
   };
@@ -162,7 +164,7 @@ export const EnquetesPage = () => {
   // ── Création étude ────────────────────────────────────────────────────────────
 
   const creerEtude = async () => {
-    if (!form.titre.trim()) { toast.error("Titre requis"); return; }
+    if (!form.titre.trim()) { toast.error(t("enquetes.titleRequired")); return; }
     setCreating(true);
     try {
       await enquetesApi.creer({
@@ -170,7 +172,7 @@ export const EnquetesPage = () => {
         mode: form.mode, population_cible: form.population_cible, terrain: form.terrain,
         questions_recherche: form.questions_recherche.split("\n").map(s => s.trim()).filter(Boolean),
       });
-      toast.success("Étude créée !");
+      toast.success(t("enquetes.studyCreated"));
       setShowCreate(false);
       setForm({ titre: "", contexte: "", methodologie: "exploratoire", mode: "qualitatif", population_cible: "", terrain: "", questions_recherche: "" });
       chargerEtudes();
@@ -341,17 +343,15 @@ export const EnquetesPage = () => {
       <div className="flex-shrink-0 px-6 py-4 border-b border-white/[0.06]">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-white">Enquêtes & Études</h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Terrain · Transcription · Formulaire ODK · Analyse IA · Rapport académique
-            </p>
+            <h1 className="text-xl font-bold text-white">{t("enquetes.title")}</h1>
+            <p className="text-xs text-gray-500 mt-0.5">{t("enquetes.subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">
             {loaded && etudes.length > 0 && (
               <div className="hidden sm:flex items-center gap-4 text-xs text-gray-500 border border-white/[0.06] rounded-xl px-4 py-2">
-                <span><span className="text-white font-semibold">{etudes.length}</span> études</span>
-                <span><span className="text-green-400 font-semibold">{etudes.filter(e => e.statut === "rapport_pret").length}</span> rapports</span>
-                <span><span className="text-yukpo-400 font-semibold">{etudes.reduce((s, e) => s + e.n_transcriptions, 0)}</span> audios</span>
+                <span><span className="text-white font-semibold">{etudes.length}</span> {t("enquetes.studies")}</span>
+                <span><span className="text-green-400 font-semibold">{etudes.filter(e => e.statut === "rapport_pret").length}</span> {t("enquetes.reports")}</span>
+                <span><span className="text-yukpo-400 font-semibold">{etudes.reduce((s, e) => s + e.n_transcriptions, 0)}</span> {t("enquetes.audios")}</span>
               </div>
             )}
             <button
@@ -359,7 +359,7 @@ export const EnquetesPage = () => {
               className={`${btnBase} text-white`}
               style={{ background: "linear-gradient(135deg,#0054A6,#0083d6)" }}
             >
-              <Plus className="w-4 h-4" /> Nouvelle étude
+              <Plus className="w-4 h-4" /> {t("enquetes.newStudy")}
             </button>
           </div>
         </div>
@@ -370,24 +370,24 @@ export const EnquetesPage = () => {
         {/* ── Formulaire création ── */}
         {showCreate && (
           <div className="rounded-2xl border border-yukpo-500/20 p-5 space-y-4" style={{ background: "rgba(123,63,228,0.06)" }}>
-            <h2 className="text-sm font-bold text-white">Nouvelle étude de terrain</h2>
+            <h2 className="text-sm font-bold text-white">{t("enquetes.newStudyTitle")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className={labelCls}>Titre *</label>
+                <label className={labelCls}>{t("enquetes.form.title")} *</label>
                 <input className={inputCls} placeholder="Perceptions des services de santé au Cameroun" value={form.titre} onChange={e => setForm(f => ({ ...f, titre: e.target.value }))} />
               </div>
               <div>
-                <label className={labelCls}>Terrain / Zone géographique</label>
+                <label className={labelCls}>{t("enquetes.form.terrain")}</label>
                 <input className={inputCls} placeholder="Yaoundé — quartiers périphériques" value={form.terrain} onChange={e => setForm(f => ({ ...f, terrain: e.target.value }))} />
               </div>
               <div>
-                <label className={labelCls}>Méthodologie</label>
+                <label className={labelCls}>{t("enquetes.form.methodologie")}</label>
                 <select className={inputCls} value={form.methodologie} onChange={e => setForm(f => ({ ...f, methodologie: e.target.value }))}>
                   {METHODOLOGIES.map(m => <option key={m.value} value={m.value} style={{ background: "var(--ykp-elevated)", color: "var(--ykp-text-primary)" }}>{m.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Mode d'étude</label>
+                <label className={labelCls}>{t("enquetes.form.modeEtude")}</label>
                 <div className="flex gap-2">
                   {MODES.map(m => (
                     <button key={m.value} onClick={() => setForm(f => ({ ...f, mode: m.value }))}
@@ -398,24 +398,24 @@ export const EnquetesPage = () => {
                 </div>
               </div>
               <div className="md:col-span-2">
-                <label className={labelCls}>Population cible</label>
+                <label className={labelCls}>{t("enquetes.form.population")}</label>
                 <input className={inputCls} placeholder="Femmes rurales 25–45 ans, ménages à faible revenu" value={form.population_cible} onChange={e => setForm(f => ({ ...f, population_cible: e.target.value }))} />
               </div>
               <div className="md:col-span-2">
-                <label className={labelCls}>Contexte & objectif de l'étude</label>
+                <label className={labelCls}>{t("enquetes.form.contexte")}</label>
                 <textarea rows={2} className={inputCls + " resize-none"} placeholder="Décrivez la problématique, le contexte et les objectifs de votre étude…" value={form.contexte} onChange={e => setForm(f => ({ ...f, contexte: e.target.value }))} />
               </div>
               <div className="md:col-span-2">
-                <label className={labelCls}>Questions de recherche <span className="text-gray-600 font-normal">(une par ligne)</span></label>
+                <label className={labelCls}>{t("enquetes.form.questions")} <span className="text-gray-600 font-normal">{t("enquetes.form.questionsHint")}</span></label>
                 <textarea rows={3} className={inputCls + " resize-none"} placeholder={"Quels sont les obstacles à l'accès aux soins ?\nComment les ménages gèrent-ils les dépenses de santé ?"} value={form.questions_recherche} onChange={e => setForm(f => ({ ...f, questions_recherche: e.target.value }))} />
               </div>
             </div>
             <div className="flex gap-2">
               <button onClick={creerEtude} disabled={creating} className={`${btnBase} text-white`} style={{ background: "#0054A6" }}>
                 {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                Créer l'étude
+                {creating ? t("enquetes.creating") : t("enquetes.create")}
               </button>
-              <button onClick={() => setShowCreate(false)} className={`${btnBase} text-gray-400 border border-white/[0.08] hover:bg-white/[0.05]`}>Annuler</button>
+              <button onClick={() => setShowCreate(false)} className={`${btnBase} text-gray-400 border border-white/[0.08] hover:bg-white/[0.05]`}>{t("common.cancel")}</button>
             </div>
           </div>
         )}
@@ -427,7 +427,7 @@ export const EnquetesPage = () => {
         {loaded && etudes.length === 0 && (
           <div className="text-center py-16">
             <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-700" />
-            <p className="text-sm text-gray-500">Aucune étude — créez votre première étude de terrain.</p>
+            <p className="text-sm text-gray-500">{t("enquetes.noStudies")}</p>
           </div>
         )}
 
@@ -474,7 +474,12 @@ export const EnquetesPage = () => {
                   {/* Onglets */}
                   <div className="flex border-b border-white/[0.06] px-4">
                     {(["audio", "formulaire", "analyse", "rapport"] as DetailTab[]).map(tab => {
-                      const labels: Record<DetailTab, string> = { audio: "🎙 Audios", formulaire: "📋 Formulaire", analyse: "🔍 Analyse", rapport: "📄 Rapport" };
+                      const labels: Record<DetailTab, string> = {
+                        audio: `🎙 ${t("enquetes.tabs.audio")}`,
+                        formulaire: `📋 ${t("enquetes.tabs.formulaire")}`,
+                        analyse: `🔍 ${t("enquetes.tabs.analyse")}`,
+                        rapport: `📄 ${t("enquetes.tabs.rapport")}`,
+                      };
                       const alerts: Record<DetailTab, boolean> = {
                         audio: detail.n_transcriptions === 0,
                         formulaire: detail.mode !== "qualitatif" && detail.n_reponses === 0,
@@ -517,8 +522,8 @@ export const EnquetesPage = () => {
                             ? <div className="flex flex-col items-center gap-2"><Loader2 className="w-8 h-8 text-yukpo-400 animate-spin" /><p className="text-xs text-gray-400">Transcription Yukpo en cours…</p></div>
                             : <div className="flex flex-col items-center gap-2">
                                 <div className="w-10 h-10 rounded-xl bg-yukpo-500/10 flex items-center justify-center group-hover:bg-yukpo-500/20 transition-all"><Upload className="w-5 h-5 text-yukpo-400" /></div>
-                                <p className="text-xs text-gray-300 font-medium">Uploader un audio terrain</p>
-                                <p className="text-xs text-gray-600">MP3, M4A, WAV, OGG, WebM · Yukpo transcrit automatiquement</p>
+                                <p className="text-xs text-gray-300 font-medium">{t("enquetes.audio.uploadAudio")}</p>
+                                <p className="text-xs text-gray-600">{t("enquetes.audio.uploadDesc")}</p>
                               </div>}
                         </div>
 
@@ -544,7 +549,7 @@ export const EnquetesPage = () => {
                         {transcriptions.length === 0 && (
                           <div className="flex items-center gap-2 text-xs text-gray-600 bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            Uploadez au moins un entretien pour lancer l'analyse.
+                            {t("enquetes.audio.noAudio")}
                           </div>
                         )}
                       </div>
@@ -768,7 +773,7 @@ export const EnquetesPage = () => {
                         {detail.n_transcriptions === 0 && detail.n_reponses === 0 && (
                           <div className="flex items-center gap-2 text-xs text-yellow-400 bg-yellow-400/[0.06] rounded-xl p-3 border border-yellow-400/20">
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            Uploadez des audios (mode qualitatif) ou collectez des réponses formulaire avant d'analyser.
+                            {t("enquetes.analyse.noDataWarning")}
                           </div>
                         )}
 
@@ -776,13 +781,13 @@ export const EnquetesPage = () => {
                         {detail.mode !== "quantitatif" && (
                           <AnalyseCard
                             icon={<Brain className="w-5 h-5 text-yukpo-400" />}
-                            titre="Codage thématique"
-                            desc="Yukpo identifie les thèmes émergents, catégories et patterns dans vos entretiens. Analyse phénoménologique complète avec saturation théorique."
+                            titre={t("enquetes.analyse.thematic")}
+                            desc={t("enquetes.analyse.thematicDesc")}
                             couleur="yukpo"
                             disabled={detail.n_transcriptions === 0}
                             loading={analysing === "qualitative"}
                             done={detail.has_analyse}
-                            onLancer={() => lancerAnalyse("qualitative")}
+                            onLancer={() => lancerAnalyse("qualitative")} labelLancer={t("enquetes.analyse.launch")} labelRelancer={t("enquetes.analyse.relaunch")}
                           />
                         )}
 
@@ -790,13 +795,13 @@ export const EnquetesPage = () => {
                         {detail.mode !== "qualitatif" && (
                           <AnalyseCard
                             icon={<BarChart2 className="w-5 h-5 text-blue-400" />}
-                            titre="Analyse statistique"
-                            desc="Fréquences, distributions, statistiques descriptives sur toutes les questions fermées de votre formulaire."
+                            titre={t("enquetes.analyse.statistical")}
+                            desc={t("enquetes.analyse.statisticalDesc")}
                             couleur="blue"
                             disabled={detail.n_reponses === 0}
                             loading={analysing === "quantitative"}
                             done={false}
-                            onLancer={() => lancerAnalyse("quantitative")}
+                            onLancer={() => lancerAnalyse("quantitative")} labelLancer={t("enquetes.analyse.launch")} labelRelancer={t("enquetes.analyse.relaunch")}
                           />
                         )}
 
@@ -804,13 +809,13 @@ export const EnquetesPage = () => {
                         {detail.mode !== "qualitatif" && (
                           <AnalyseCard
                             icon={<TrendingUp className="w-5 h-5 text-cyan-400" />}
-                            titre="Analyse ciblée Yukpo"
-                            desc="Yukpo lit votre contexte et vos questions de recherche, puis décide quelles croisements et corrélations sont réellement pertinents. Chi², Cramér's V, graphiques ciblés."
+                            titre={t("enquetes.analyse.targeted")}
+                            desc={t("enquetes.analyse.targetedDesc")}
                             couleur="cyan"
                             disabled={detail.n_reponses < 5}
                             loading={analysing === "intelligente"}
                             done={false}
-                            onLancer={() => lancerAnalyse("intelligente")}
+                            onLancer={() => lancerAnalyse("intelligente")} labelLancer={t("enquetes.analyse.launch")} labelRelancer={t("enquetes.analyse.relaunch")}
                           />
                         )}
 
@@ -818,13 +823,13 @@ export const EnquetesPage = () => {
                         {detail.mode !== "qualitatif" && (
                           <AnalyseCard
                             icon={<MessageSquareText className="w-5 h-5 text-amber-400" />}
-                            titre="Analyse questions ouvertes"
-                            desc="Yukpo analyse les réponses libres de votre formulaire : thèmes dominants, sentiments, citations représentatives."
+                            titre={t("enquetes.analyse.openEnded")}
+                            desc={t("enquetes.analyse.openEndedDesc")}
                             couleur="amber"
                             disabled={detail.n_reponses === 0}
                             loading={analysing === "commentaires"}
                             done={false}
-                            onLancer={() => lancerAnalyse("commentaires")}
+                            onLancer={() => lancerAnalyse("commentaires")} labelLancer={t("enquetes.analyse.launch")} labelRelancer={t("enquetes.analyse.relaunch")}
                           />
                         )}
 
@@ -841,18 +846,18 @@ export const EnquetesPage = () => {
                         {!detail.has_analyse && (
                           <div className="flex items-center gap-2 text-xs text-yellow-400 bg-yellow-400/[0.06] rounded-xl p-3 border border-yellow-400/20">
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            Lancez une analyse (onglet Analyse) avant de générer le rapport.
+                            {t("enquetes.rapport.needAnalysis")}
                           </div>
                         )}
 
                         <div className="flex flex-wrap gap-2">
                           <button onClick={genererRapport} disabled={generating || !detail.has_analyse} className={`${btnBase} text-white`} style={{ background: generating ? "#333" : "#0054A6" }}>
                             {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
-                            {generating ? "Génération en cours…" : detail.has_rapport ? "Regénérer le rapport" : "Générer le rapport académique"}
+                            {generating ? t("enquetes.rapport.generating") : detail.has_rapport ? t("enquetes.rapport.regenBtn") : t("enquetes.rapport.generateBtn")}
                           </button>
                           {rapport && (
                             <button onClick={telechargerDocx} className={`${btnBase} text-green-400 border border-green-500/20 hover:bg-green-500/[0.08]`}>
-                              <Download className="w-3.5 h-3.5" /> Télécharger Word (.docx)
+                              <Download className="w-3.5 h-3.5" /> {t("enquetes.rapport.downloadWord")}
                             </button>
                           )}
                         </div>
@@ -881,9 +886,10 @@ const COULEURS: Record<string, { bg: string; border: string; btn: string }> = {
   amber: { bg: "rgba(251,191,36,0.06)", border: "rgba(251,191,36,0.2)", btn: "#D97706" },
 };
 
-const AnalyseCard = ({ icon, titre, desc, couleur, disabled, loading, done, onLancer }: {
+const AnalyseCard = ({ icon, titre, desc, couleur, disabled, loading, done, onLancer, labelLancer, labelRelancer }: {
   icon: React.ReactNode; titre: string; desc: string; couleur: string;
   disabled: boolean; loading: boolean; done: boolean; onLancer: () => void;
+  labelLancer?: string; labelRelancer?: string;
 }) => {
   const c = COULEURS[couleur] ?? COULEURS.yukpo;
   return (
@@ -904,7 +910,7 @@ const AnalyseCard = ({ icon, titre, desc, couleur, disabled, loading, done, onLa
           style={{ background: c.btn }}
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-          {loading ? "…" : done ? "Relancer" : "Lancer"}
+          {loading ? "…" : done ? (labelRelancer ?? "↺") : (labelLancer ?? "▶")}
         </button>
       </div>
     </div>
