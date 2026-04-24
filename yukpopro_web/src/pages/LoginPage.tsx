@@ -41,12 +41,15 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const data = await authApi.login(email, password);
+      // Stocker le token AVANT d'appeler me() — l'intercepteur Axios lit localStorage
+      localStorage.setItem("yukpopro_token", data.access_token);
       const me = await authApi.me();
       setAuth({ ...me, token: data.access_token }, data.access_token);
       const profil = await profilApi.get().catch(() => null);
       if (profil) { setProfil(profil); navigate("/dashboard"); }
       else setMode("onboarding");
     } catch (err: unknown) {
+      localStorage.removeItem("yukpopro_token");
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
         || "Email ou mot de passe incorrect";
       toast.error(message);
@@ -72,6 +75,7 @@ export const LoginPage = () => {
       // Auto-login après inscription
       try {
         const data = await authApi.login(email, password);
+        localStorage.setItem("yukpopro_token", data.access_token);
         const me = await authApi.me();
         setAuth({ ...me, token: data.access_token }, data.access_token);
         setMode("onboarding");
