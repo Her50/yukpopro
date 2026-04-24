@@ -20,36 +20,32 @@ jobs:
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Create volume bureau_data if missing
+      - name: Scale to 1 machine and ensure volume exists
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          for i in 1 2; do
-            EXISTING=$(flyctl volumes list --app yukpopro-backend --json 2>/dev/null \
-              | python3 -c "import sys,json; print(sum(1 for v in json.load(sys.stdin) if v.get('name')=='bureau_data'))" \
-              2>/dev/null || echo 0)
-            echo "Volumes existants: $EXISTING (besoin: $i)"
-            if [ "${EXISTING:-0}" -lt "$i" ]; then
-              echo "Création volume bureau_data #$i..."
-              flyctl volumes create bureau_data --size 1 --region cdg --app yukpopro-backend --yes
-            fi
-          done
+          flyctl scale count 1 --app yukpopro-backend --yes || true
+          EXISTING=$(flyctl volumes list --app yukpopro-backend --json 2>/dev/null \
+            | python3 -c "import sys,json; print(sum(1 for v in json.load(sys.stdin) if v.get('name')=='bureau_data'))" \
+            2>/dev/null || echo 0)
+          echo "Volumes existants: ${EXISTING:-0}"
+          if [ "${EXISTING:-0}" -lt 1 ]; then
+            echo "Création volume bureau_data..."
+            flyctl volumes create bureau_data --size 1 --region cdg --app yukpopro-backend --yes
+          fi
 
       - name: Deploy to Fly.io
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only --wait-timeout 300
 
-      - name: Force restart machine if stopped
+      - name: Show status and health check
         if: always()
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
           echo "=== Machine status ==="
           flyctl status --app yukpopro-backend || true
-          echo "=== Restarting app ==="
-          flyctl restart --app yukpopro-backend || true
-          sleep 20
           echo "=== Health check ==="
           curl -sf https://yukpopro-backend.fly.dev/health || true
 

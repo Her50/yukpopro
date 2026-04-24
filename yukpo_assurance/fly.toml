@@ -48,7 +48,7 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
 
 [checks]
   [checks.health]
-    grace_period = "30s"
+    grace_period = "60s"
     interval = "15s"
     method = "get"
     path = "/health"
