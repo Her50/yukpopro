@@ -143,6 +143,7 @@ const FormulaireReunion = ({
   const setLangueCible = form.setLangueCible;
 
   const [showLangs,    setShowLangs]    = useState(false);
+  const [showLangsCible, setShowLangsCible] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
   const recorder = useAudioRecorder();
@@ -413,17 +414,39 @@ const FormulaireReunion = ({
                     </label>
                     {traduireLive && (
                       <div className="flex items-center gap-2 pl-6">
-                        <span className="text-[11px] text-slate-500">Langue cible :</span>
-                        <select
-                          value={langueCible}
-                          onChange={(e) => setLangueCible(e.target.value)}
-                          className="bg-slate-800 border border-slate-600 rounded-md text-xs text-white px-2 py-1 focus:outline-none focus:border-purple-500"
-                        >
-                          {LANGUES.filter((l) => l.code !== "auto").map((l) => (
-                            <option key={l.code} value={l.code}>{l.label}</option>
-                          ))}
-                        </select>
-                        <span className="text-[10px] text-slate-600">(même micro, pas de 2e capture)</span>
+                        <span className="text-[11px] text-slate-300">Langue cible :</span>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setShowLangsCible((o) => !o)}
+                            className="flex items-center justify-between gap-2 min-w-[140px] bg-slate-800 border border-purple-500/40 rounded-md px-2 py-1 text-xs text-white hover:border-purple-400 focus:outline-none"
+                          >
+                            <span>
+                              {LANGUES.find((l) => l.code === langueCible)?.label || "Français"}
+                            </span>
+                            <ChevronDown className={`w-3.5 h-3.5 text-slate-300 transition-transform ${showLangsCible ? "rotate-180" : ""}`} />
+                          </button>
+                          <AnimatePresence>
+                            {showLangsCible && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                                className="absolute z-50 top-full mt-1 left-0 min-w-[160px] bg-slate-800 border border-slate-700 rounded-md shadow-xl overflow-hidden max-h-60 overflow-y-auto"
+                              >
+                                {LANGUES.filter((l) => l.code !== "auto").map((l) => (
+                                  <button
+                                    key={l.code}
+                                    type="button"
+                                    onClick={() => { setLangueCible(l.code); setShowLangsCible(false); }}
+                                    className={`w-full text-left px-2.5 py-1.5 text-xs hover:bg-slate-700 transition-colors ${langueCible === l.code ? "text-purple-300 bg-purple-500/10" : "text-white"}`}
+                                  >
+                                    {l.label}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <span className="text-[10px] text-slate-400">(même micro, pas de 2e capture)</span>
                       </div>
                     )}
                   </div>
