@@ -1,8 +1,8 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { User, Save, Sparkles, PartyPopper, ArrowRight } from "lucide-react";
+import { User, Save, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
-import { Card, Button, Input, Select, Badge } from "@/components/ui";
+import { Card, Input } from "@/components/ui";
 import { useProfilStore } from "@/store";
 import { profilApi } from "@/api/client";
 import { METIERS, PAYS_AFRIQUE } from "@/types";
@@ -14,6 +14,30 @@ const NIVEAUX_EXPERTISE = [
   { value: "expert",         label: "Expert (10+ ans)" },
 ];
 
+// Champ select stylé pour le thème sombre
+const FieldSelect = ({
+  label, required, value, onChange, children,
+}: {
+  label: string;
+  required?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  children: React.ReactNode;
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+      {label}{required && <span className="text-sky-400 ml-1">*</span>}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-100 bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 transition-colors appearance-none"
+    >
+      {children}
+    </select>
+  </div>
+);
+
 export const ProfilPage = () => {
   const { profil, setProfil } = useProfilStore();
   const [searchParams] = useSearchParams();
@@ -22,17 +46,15 @@ export const ProfilPage = () => {
   const [loading, setLoading] = useState(false);
 
   const [metier, setMetier] = useState(profil?.metier || "");
-  const [pays, setPays] = useState(profil?.pays || "CM");
-  const [secteur, setSecteur] = useState(profil?.secteur || "");
+  const [pays, setPays]     = useState(profil?.pays || "CM");
+  const [secteur, setSecteur]     = useState(profil?.secteur || "");
   const [entreprise, setEntreprise] = useState(profil?.entreprise || "");
   const [niveau, setNiveau] = useState(profil?.niveau_expertise || "intermediaire");
   const [annees, setAnnees] = useState(String(profil?.annees_experience || ""));
-  const [bio, setBio] = useState(profil?.bio || "");
+  const [bio, setBio]       = useState(profil?.bio || "");
 
   useEffect(() => {
-    if (!profil) {
-      profilApi.get().then(setProfil).catch(console.error);
-    }
+    if (!profil) profilApi.get().then(setProfil).catch(console.error);
   }, []);
 
   const handleSave = async (e: FormEvent) => {
@@ -40,10 +62,7 @@ export const ProfilPage = () => {
     setLoading(true);
     try {
       const updated = await profilApi.update({
-        metier,
-        pays,
-        secteur,
-        entreprise,
+        metier, pays, secteur, entreprise,
         niveau_expertise: niveau as "debutant" | "intermediaire" | "senior" | "expert",
         annees_experience: annees ? parseInt(annees) : undefined,
         bio,
@@ -63,178 +82,123 @@ export const ProfilPage = () => {
   };
 
   const niveauPro = profil?.niveau_pro || "Starter";
-  const niveauColor = {
+  const niveauColor: Record<string, string> = {
     Starter: "text-slate-400",
-    Junior:  "text-accent-400",
-    Senior:  "text-yukpo-400",
-    Expert:  "text-gold-400",
-    Master:  "text-transparent bg-clip-text bg-gradient-to-r from-yukpo-400 to-gold-400",
-  }[niveauPro] || "text-slate-400";
+    Junior:  "text-emerald-400",
+    Senior:  "text-sky-400",
+    Expert:  "text-amber-400",
+    Master:  "text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-amber-400",
+  };
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto animate-fade-in">
+    <div className="p-6 space-y-5 max-w-4xl mx-auto animate-fade-in">
 
-      {/* ── Bannière de bienvenue — compacte et lisible ──────────────────────── */}
-      {isWelcome && (
-        <div
-          className="flex items-center gap-3 rounded-xl px-4 py-3 border-l-4"
-          style={{
-            borderLeftColor: "#00B0F0",
-            background: "rgba(0,84,166,0.18)",
-            border: "1px solid rgba(0,176,240,0.25)",
-            borderLeft: "4px solid #00B0F0",
-          }}
-        >
-          <PartyPopper className="w-5 h-5 text-blue-300 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <span className="text-white font-semibold text-sm">
-              🎉 Compte créé avec succès !
-            </span>
-            <span className="text-slate-300 text-sm ml-2">
-              Configurez votre profil pour que YukpoPro se spécialise dans votre métier et pays.
-            </span>
-          </div>
-          <div className="hidden sm:flex items-center gap-1 text-xs text-blue-300 whitespace-nowrap">
-            <ArrowRight className="w-3 h-3" />
-            Enregistrer le profil
-          </div>
-        </div>
-      )}
-
+      {/* En-tête page */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white">Mon Profil</h1>
-        <p className="text-slate-400 text-sm mt-1">Votre profil configure l'agent Yukpo spécialisé qui vous assiste.</p>
+        <h1 className="text-xl font-bold text-white">
+          {isWelcome ? "🎉 Bienvenue ! Configurez votre profil" : "Mon Profil"}
+        </h1>
+        <p className="text-slate-400 text-sm mt-0.5">
+          {isWelcome
+            ? "Renseignez votre métier et votre pays pour personnaliser votre assistant IA."
+            : "Votre profil configure l'assistant IA Yukpo spécialisé pour vous."}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Colonne gauche : carte identité + stats ─────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* Colonne gauche — identité */}
         <div className="space-y-4">
-          {/* Carte identité */}
-          <Card className="p-5 text-center space-y-3" style={{ border: "1px solid rgba(0,176,240,0.2)" }}>
-            <div
-              className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center shadow-lg"
-              style={{ background: "linear-gradient(135deg, #0054A6, #00B0F0)" }}
-            >
-              <span className="text-2xl font-bold text-white">
+          <Card className="p-5 text-center space-y-3 bg-slate-800/50 border border-slate-700">
+            <div className="w-14 h-14 rounded-xl mx-auto flex items-center justify-center bg-gradient-to-br from-sky-600 to-blue-700 shadow-md">
+              <span className="text-xl font-bold text-white">
                 {(profil?.metier || "P").charAt(0).toUpperCase()}
               </span>
             </div>
             <div>
-              <p className="text-white font-bold text-base">
+              <p className="text-white font-semibold text-sm">
                 {profil?.metier
-                  ? profil.metier.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                  ? profil.metier.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
                   : "Professionnel"}
               </p>
-              <p className="text-slate-400 text-sm mt-0.5">
+              <p className="text-slate-400 text-xs mt-0.5">
                 {[profil?.pays, profil?.secteur].filter(Boolean).join(" · ") || "Profil à configurer"}
               </p>
             </div>
-            <div className="flex items-center justify-center gap-2 py-1 px-4 rounded-full mx-auto w-fit"
-              style={{ background: "rgba(255,193,7,0.1)", border: "1px solid rgba(255,193,7,0.3)" }}>
-              <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-              <span className={`text-sm font-bold ${niveauColor}`}>{niveauPro}</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-700/60 border border-slate-600">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span className={`text-xs font-semibold ${niveauColor[niveauPro] || "text-slate-400"}`}>
+                {niveauPro}
+              </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-500">
               {(profil?.xp_points || 0).toLocaleString("fr-FR")} XP
             </p>
           </Card>
 
-          {/* Stats utilisation */}
-          <Card className="p-4 space-y-2.5" style={{ border: "1px solid rgba(0,176,240,0.15)" }}>
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3">Utilisation</h3>
+          <Card className="p-4 space-y-2 bg-slate-800/50 border border-slate-700">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Utilisation</p>
             {[
-              { icon: "💬", label: "Copilote", value: profil?.nb_requetes_copilote || 0 },
-              { icon: "🤖", label: "Agents Yukpo", value: profil?.nb_requetes_agent || 0 },
-              { icon: "📄", label: "Rapports", value: profil?.nb_rapports_generes || 0 },
-              { icon: "📊", label: "Slides", value: profil?.nb_slides_generes || 0 },
-              { icon: "🌍", label: "Traductions", value: profil?.nb_traductions || 0 },
+              { icon: "💬", label: "Copilote",      value: profil?.nb_requetes_copilote || 0 },
+              { icon: "🤖", label: "Agents",         value: profil?.nb_requetes_agent || 0 },
+              { icon: "📄", label: "Rapports",       value: profil?.nb_rapports_generes || 0 },
+              { icon: "📊", label: "Slides",         value: profil?.nb_slides_generes || 0 },
+              { icon: "🌍", label: "Traductions",    value: profil?.nb_traductions || 0 },
             ].map(({ icon, label, value }) => (
-              <div key={label} className="flex items-center justify-between py-0.5">
+              <div key={label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{icon}</span>
+                  <span className="text-sm">{icon}</span>
                   <span className="text-sm text-slate-300">{label}</span>
                 </div>
-                <span className="text-sm font-bold text-white tabular-nums">
-                  {value.toLocaleString("fr-FR")}
-                </span>
+                <span className="text-sm font-semibold text-white tabular-nums">{value}</span>
               </div>
             ))}
           </Card>
         </div>
 
-        {/* ── Formulaire ─────────────────────────────────────────────────────── */}
+        {/* Formulaire */}
         <div className="lg:col-span-2">
-          <Card className="p-6" style={{ border: "1px solid rgba(0,176,240,0.2)" }}>
-            <form onSubmit={handleSave} className="space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-700/60">
-                <User className="w-4 h-4 text-blue-400" />
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+          <Card className="p-5 bg-slate-800/50 border border-slate-700">
+            <form onSubmit={handleSave} className="space-y-4">
+
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-700">
+                <User className="w-4 h-4 text-sky-400" />
+                <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
                   Informations professionnelles
                 </h2>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold text-slate-200 block mb-2">
-                  Métier / Profession <span className="text-blue-400">*</span>
-                </label>
-                <select
-                  value={metier}
-                  onChange={(e) => setMetier(e.target.value)}
-                  className="w-full rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{
-                    background: "rgba(15,23,42,0.8)",
-                    border: "1px solid rgba(100,116,139,0.5)",
-                    color: metier ? "white" : "rgb(148,163,184)",
-                  }}
-                >
-                  <option value="" style={{ background: "#1e293b" }}>— Sélectionner votre métier —</option>
-                  {METIERS.map((m) => (
-                    <option key={m.value} value={m.value} style={{ background: "#1e293b" }}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
+              <FieldSelect label="Métier / Profession" required value={metier} onChange={setMetier}>
+                <option value="" className="bg-slate-800">— Sélectionner votre métier —</option>
+                {METIERS.map((m) => (
+                  <option key={m.value} value={m.value} className="bg-slate-800">{m.label}</option>
+                ))}
+              </FieldSelect>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-slate-200 block mb-2">
-                    Pays <span className="text-blue-400">*</span>
-                  </label>
-                  <select
-                    value={pays}
-                    onChange={(e) => setPays(e.target.value)}
-                    className="w-full rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(100,116,139,0.5)" }}
-                  >
-                    {PAYS_AFRIQUE.map((p) => (
-                      <option key={p.value} value={p.value} style={{ background: "#1e293b" }}>{p.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-200 block mb-2">Niveau d'expertise</label>
-                  <select
-                    value={niveau}
-                    onChange={(e) => setNiveau(e.target.value)}
-                    className="w-full rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(100,116,139,0.5)" }}
-                  >
-                    {NIVEAUX_EXPERTISE.map((n) => (
-                      <option key={n.value} value={n.value} style={{ background: "#1e293b" }}>{n.label}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <FieldSelect label="Pays" required value={pays} onChange={setPays}>
+                  {PAYS_AFRIQUE.map((p) => (
+                    <option key={p.value} value={p.value} className="bg-slate-800">{p.label}</option>
+                  ))}
+                </FieldSelect>
+
+                <FieldSelect label="Niveau d'expertise" value={niveau} onChange={setNiveau}>
+                  {NIVEAUX_EXPERTISE.map((n) => (
+                    <option key={n.value} value={n.value} className="bg-slate-800">{n.label}</option>
+                  ))}
+                </FieldSelect>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <Input
                   label="Secteur d'activité"
-                  placeholder="Finance, BTP, Agroalimentaire…"
+                  placeholder="Finance, BTP, Agro…"
                   value={secteur}
                   onChange={(e) => setSecteur(e.target.value)}
                 />
                 <Input
-                  label="Entreprise"
-                  placeholder="Nom de votre organisation"
+                  label="Entreprise / Organisation"
+                  placeholder="Nom de l'organisation"
                   value={entreprise}
                   onChange={(e) => setEntreprise(e.target.value)}
                 />
@@ -245,35 +209,28 @@ export const ProfilPage = () => {
                 type="number"
                 min="0"
                 max="50"
-                placeholder="Ex: 8"
+                placeholder="Ex : 8"
                 value={annees}
                 onChange={(e) => setAnnees(e.target.value)}
               />
 
               <div>
-                <label className="text-sm font-semibold text-slate-200 block mb-2">Bio professionnelle</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  Bio professionnelle
+                </label>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Décrivez votre expertise, vos spécialités, votre contexte de travail…"
+                  placeholder="Décrivez votre expertise, vos spécialités, votre contexte…"
                   rows={3}
-                  className="w-full rounded-xl text-white placeholder-slate-500 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ background: "rgba(15,23,42,0.8)", border: "1px solid rgba(100,116,139,0.5)" }}
+                  className="w-full rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 bg-slate-700/60 border border-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40 resize-none transition-colors"
                 />
               </div>
 
-              {/* Bouton de sauvegarde — prominent pour le mode welcome */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white text-sm transition-all"
-                style={{
-                  background: loading
-                    ? "rgba(0,84,166,0.5)"
-                    : "linear-gradient(135deg, #0054A6, #00B0F0)",
-                  boxShadow: loading ? "none" : "0 4px 16px rgba(0,84,166,0.4)",
-                  opacity: loading ? 0.7 : 1,
-                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold text-white transition-all bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -282,6 +239,7 @@ export const ProfilPage = () => {
                 )}
                 {loading ? "Enregistrement…" : isWelcome ? "Enregistrer et accéder à YukpoPro →" : "Enregistrer le profil"}
               </button>
+
             </form>
           </Card>
         </div>
