@@ -34,6 +34,9 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
     hard_limit = 100   # limite dure par machine
     soft_limit = 50    # seuil → Fly lance une machine supplémentaire
 
+  [http_service.http_options]
+    response_timeout = 300  # 5 min — génération IA peut prendre 2-3 min (expert mode)
+
 [[vm]]
   memory = "1gb"
   cpu_kind = "shared"
