@@ -791,5 +791,38 @@
     "dark": "Thème sombre",
     "light": "Thème clair",
     "toggle": "Changer de thème"
+  },
+  "payment": {
+    "enterPhoneTitle": "Numéro de paiement",
+    "enterPhoneDesc": "Saisissez le numéro Mobile Money ou international.",
+    "choosePaymentTitle": "Choisissez votre opérateur",
+    "confirmTitle": "Confirmer le paiement",
+    "amount": "Montant",
+    "phone": "Téléphone",
+    "method": "Méthode",
+    "payNow": "Payer maintenant",
+    "processingTitle": "Confirmez sur votre téléphone",
+    "statusLabel": "Statut",
+    "successTitle": "Paiement réussi",
+    "successDesc": "Votre abonnement est maintenant actif.",
+    "failedTitle": "Paiement non confirmé",
+    "failedDesc": "Vous pouvez réessayer ou utiliser un autre moyen.",
+    "tryAgain": "Réessayer",
+    "errorInit": "Erreur d'initiation",
+    "detectingProviders": "Détection des opérateurs disponibles...",
+    "noProviders": "Aucun opérateur détecté. Saisissez votre numéro.",
+    "showManualFallback": "Aucun opérateur ne fonctionne ? Mode manuel",
+    "providers": {
+      "mtn_momo": "MTN Mobile Money",
+      "orange_money": "Orange Money",
+      "campay": "Campay",
+      "wave": "Wave",
+      "cinetpay": "CinetPay",
+      "flutterwave": "Flutterwave",
+      "notchpay": "NotchPay",
+      "stripe": "Carte bancaire (Stripe)",
+      "paypal": "PayPal",
+      "legacy_manual": "Validation manuelle"
+    }
   }
 }

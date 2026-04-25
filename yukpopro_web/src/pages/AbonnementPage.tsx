@@ -10,6 +10,7 @@ import { abonnementApi } from "@/api/client";
 import { useProfilStore } from "@/store";
 import { PLANS, OPERATEURS_MOBILE_MONEY, type PlanAbonnement } from "@/types";
 import toast from "react-hot-toast";
+import { PaymentFlowV2 } from "@/components/payment/PaymentFlowV2";
 
 const PLAN_ICONS: Record<PlanAbonnement, typeof Zap> = {
   gratuit:  Zap,
@@ -35,6 +36,12 @@ export const AbonnementPage = () => {
   const [paiementLoading, setPaiementLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [numeroExpediteur, setNumeroExpediteur] = useState("");
+  // Paiement v2 — modal multi-provider (MTN/Orange/Stripe/PayPal/CinetPay/...)
+  const [v2Modal, setV2Modal] = useState<{
+    type: "abonnement" | "recharge";
+    plan_ou_pack: string;
+    amount: number;
+  } | null>(null);
 
   const pays = (profil as any)?.pays || "CM";
 
@@ -56,7 +63,14 @@ export const AbonnementPage = () => {
   const handleChoisirPlan = (plan: PlanAbonnement) => {
     if (plan === "gratuit") return;
     setPlanChoisi(plan);
-    setEtape("operateur");
+    // Ouvre le flux v2 (multi-provider intelligent). Le legacy reste accessible
+    // via le mode "manuel" (LegacyManualProvider) au sein du selector.
+    const planInfo = PLANS.find((p) => p.id === plan);
+    if (planInfo) {
+      setV2Modal({ type: "abonnement", plan_ou_pack: plan, amount: planInfo.prix });
+    } else {
+      setEtape("operateur");
+    }
   };
 
   const handleInitierPaiement = async () => {
@@ -273,7 +287,18 @@ export const AbonnementPage = () => {
                   </div>
                 ))}
               </div>
-              <Button variant="primary" disabled={!packChoisi} onClick={() => setEtapeR("operateur")}>
+              <Button
+                variant="primary"
+                disabled={!packChoisi}
+                onClick={() => {
+                  const pack = PACKS.find((p) => p.id === packChoisi);
+                  if (pack) {
+                    setV2Modal({ type: "recharge", plan_ou_pack: pack.id, amount: pack.prix });
+                  } else {
+                    setEtapeR("operateur");
+                  }
+                }}
+              >
                 {t('common.next')} <ArrowRight className="w-4 h-4" />
               </Button>
             </>
@@ -620,6 +645,26 @@ export const AbonnementPage = () => {
       {/* Historique paiements */}
       {etape === "plans" && (
         <HistoriquePaiements />
+      )}
+
+      {/* Modal Paiement v2 — multi-provider intelligent */}
+      {v2Modal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <PaymentFlowV2
+              type={v2Modal.type}
+              planOuPack={v2Modal.plan_ou_pack}
+              amount={v2Modal.amount}
+              currency="XAF"
+              countryCode={pays}
+              defaultPhone={(profil as any)?.telephone || ""}
+              customerEmail={(profil as any)?.email}
+              customerName={(profil as any)?.nom}
+              onCancel={() => setV2Modal(null)}
+              onSuccess={() => { setV2Modal(null); charger(); toast.success(t("payment.successDesc", "Paiement réussi")); }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

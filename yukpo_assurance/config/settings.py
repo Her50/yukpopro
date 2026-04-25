@@ -103,8 +103,9 @@ class Settings(BaseSettings):
     # Modèles par défaut — Claude primaire, GPT en fallback
     CLAUDE_MODEL_PRIMAIRE: str = "claude-sonnet-4-6"    # Chat — bon équilibre vitesse/qualité
     CLAUDE_MODEL_RAPIDE: str = "claude-haiku-4-5-20251001"  # Tâches simples, classification
-    GPT_MODEL_PRIMAIRE: str = "gpt-4o"                  # Fallback principal si Claude indisponible
-    GPT_MODEL_FALLBACK: str = "gpt-4o-mini"             # Fallback rapide pour classification/détection
+    GPT_MODEL_PRIMAIRE: str = "gpt-5.5"                  # Fallback principal — plus intelligent, moins de tokens
+    GPT_MODEL_VISION:   str = "gpt-4o"                  # Vision/OCR uniquement (gpt-5.5 vision à confirmer)
+    GPT_MODEL_FALLBACK: str = "gpt-4o-mini"             # Fallback léger pour tâches simples / COPILOTE
 
     # Paramètres d'orchestration (inspiré de yukpomnang2/orchestration_ia.rs)
     IA_TEMPERATURE_PRECISION: float = 0.1   # États réglementaires, calculs CIMA
@@ -112,9 +113,11 @@ class Settings(BaseSettings):
     IA_TEMPERATURE_CREATIVE: float = 0.7    # Offres commerciales
     IA_MAX_TOKENS: int = 4096             # Chat conversationnel — 4096 suffisant, réduit la latence
     IA_MAX_TOKENS_DOCUMENT: int = 16384   # Pour génération de documents longs (rapports CIMA)
+    IA_MAX_TOKENS_INFOGRAPHIE_PRO: int = 32000  # Spec projet multi-page complexe (livret 8p, brochure...)
     IA_CONFIDENCE_THRESHOLD: float = 0.85
     IA_MAX_RETRIES: int = 3
-    IA_TIMEOUT_SECONDS: int = 120         # Augmenté pour documents longs (was 60s)
+    IA_TIMEOUT_SECONDS: int = 120         # Standard documents
+    IA_TIMEOUT_INFOGRAPHIE_PRO: int = 300 # Projets infographie multi-page (livret, brochure, livre photo)
 
     # Tailles max fichiers (en MB)
     MAX_IMAGE_SIZE_MB: int = 10
@@ -145,8 +148,9 @@ class Settings(BaseSettings):
     META_WHATSAPP_PHONE_ID: str = ""            # Phone Number ID Meta Business
     META_WHATSAPP_TOKEN: str = ""               # Access Token permanent Meta
 
-    # ─── Paiement Mobile Money ────────────────────────────────────
-    # Paramètres globaux — peuvent être surchargés par CompagnieDB
+    # ─── Paiement Mobile Money — v1 legacy (fallback manuel) ───────
+    # Conservés pour rétro-compat. Le système v2 (modules/paiement/v2)
+    # lit les secrets via secrets_loader (env > GCP Secret Manager > settings).
     CINETPAY_API_KEY: str = ""
     CINETPAY_SITE_ID: str = ""
     MTN_MOMO_API_KEY: str = ""
@@ -157,6 +161,54 @@ class Settings(BaseSettings):
     ORANGE_MONEY_MERCHANT_KEY: str = ""
     WAVE_API_KEY: str = ""
 
+    # ─── Paiement v2 — providers étendus ─────────────────────────
+    # En prod : injecter via `fly secrets set` (synchronisé depuis GCP).
+    # Dev : .env local. Toutes ces vars sont aussi lues via secrets_loader.
+    GCP_PAYMENT_PROJECT: str = "yukpo-project"  # Source GCP Secret Manager
+    PAYMENT_CALLBACK_HOST: str = "https://yukpopro-backend.fly.dev"
+
+    # MTN MoMo — paramètres complémentaires (Collections API)
+    MTN_MOMO_API_USER: str = ""                  # UUID api_user créé via /apiuser
+    MTN_MOMO_CALLBACK_HOST: str = ""             # défaut: PAYMENT_CALLBACK_HOST
+
+    # Orange Money — environnement et callback
+    ORANGE_MONEY_ENVIRONMENT: str = "sandbox"
+    ORANGE_MONEY_CALLBACK_HOST: str = ""
+
+    # CinetPay — secret + password (en plus de API_KEY/SITE_ID)
+    CINETPAY_SECRET_KEY: str = ""
+    CINETPAY_API_PASSWORD: str = ""
+    CINETPAY_CALLBACK_HOST: str = ""
+
+    # Flutterwave — Pan-African
+    FLUTTERWAVE_PUBLIC_KEY: str = ""
+    FLUTTERWAVE_SECRET_KEY: str = ""
+    FLUTTERWAVE_WEBHOOK_HASH: str = ""
+    FLUTTERWAVE_CALLBACK_HOST: str = ""
+
+    # Stripe — cartes internationales
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+
+    # PayPal
+    PAYPAL_CLIENT_ID: str = ""
+    PAYPAL_CLIENT_SECRET: str = ""
+    PAYPAL_WEBHOOK_ID: str = ""
+    PAYPAL_SANDBOX: bool = True
+
+    # NotchPay — Afrique de l'Ouest
+    NOTCHPAY_PUBLIC_KEY: str = ""
+    NOTCHPAY_SECRET_KEY: str = ""
+    NOTCHPAY_CALLBACK_HOST: str = ""
+
+    # Campay — fintech 100% camerounaise (MTN+Orange CM agrégés)
+    CAMPAY_USERNAME: str = ""
+    CAMPAY_PASSWORD: str = ""
+    CAMPAY_PERMANENT_TOKEN: str = ""
+    CAMPAY_ENV: str = "sandbox"
+    CAMPAY_CALLBACK_HOST: str = ""
+
     # ─── Community Manager / Social AI ───────────────────────────
     META_FB_APP_ID: str = ""              # Facebook App ID (pour OAuth)
     META_FB_APP_SECRET: str = ""          # Facebook App Secret
@@ -166,8 +218,9 @@ class Settings(BaseSettings):
     META_IG_USER_ID: str = ""             # Instagram Business Account ID
     META_GRAPH_API_VERSION: str = "v19.0"
 
-    # ─── TrendPulse — Sources externes ────────────────────────────
-    SERPAPI_KEY: str = ""                 # SerpAPI (Google Trends)
+    # ─── TrendPulse / Veille — Sources externes ───────────────────
+    SERPER_API_KEY: str = ""              # Serper.dev (Google Search + Jobs) — prod
+    SERPAPI_KEY: str = ""                 # SerpAPI (legacy / Google Trends) — optionnel
     YOUTUBE_API_KEY: str = ""             # YouTube Data API v3
     NEWSAPI_KEY: str = ""                 # NewsAPI.org
     REDDIT_CLIENT_ID: str = ""

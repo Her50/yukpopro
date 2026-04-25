@@ -390,6 +390,65 @@ export const abonnementApi = {
   },
 };
 
+// ── Paiement v2 — multi-provider unifié ──────────────────────────────────────
+
+export type ProviderName =
+  | "mtn_momo" | "orange_money" | "cinetpay" | "flutterwave"
+  | "notchpay" | "stripe" | "paypal" | "campay" | "wave" | "legacy_manual";
+
+export type PaymentMethod = "mobile_money" | "card" | "bank_transfer" | "wallet" | "paypal";
+
+export interface PaymentInitiatePayload {
+  type: "abonnement" | "recharge" | "service";
+  plan_ou_pack?: string;
+  amount: number;
+  currency?: string;
+  customer_phone: string;
+  customer_email?: string;
+  customer_name?: string;
+  country_code?: string;
+  method?: PaymentMethod;
+  preferred_provider?: ProviderName;
+  return_url?: string;
+  cancel_url?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PaymentInitiateResponse {
+  reference: string;
+  provider: ProviderName;
+  status: string;
+  payment_url?: string;
+  ussd_instructions?: string;
+  provider_reference?: string;
+  error_message?: string;
+}
+
+export const paiementV2Api = {
+  initier: async (payload: PaymentInitiatePayload): Promise<PaymentInitiateResponse> => {
+    const { data } = await http.post("/paiement/v2/initier", payload);
+    return data;
+  },
+  statut: async (reference: string) => {
+    const { data } = await http.get(`/paiement/v2/transactions/${reference}`);
+    return data;
+  },
+  providersDispo: async (phone: string, country?: string): Promise<{
+    country: string | null;
+    providers: ProviderName[];
+    fallback_manual: ProviderName;
+  }> => {
+    const { data } = await http.get("/paiement/v2/providers", {
+      params: { phone, country },
+    });
+    return data;
+  },
+  health: async () => {
+    const { data } = await http.get("/paiement/v2/health");
+    return data;
+  },
+};
+
 // ── Admin — Paiements MoMo ───────────────────────────────────────────────────
 
 export const adminPaiementsApi = {

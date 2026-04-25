@@ -139,5 +139,38 @@
     "dark": "ጨለማ ገጽ",
     "light": "ብርሃን ገጽ",
     "toggle": "ገጽ ቀይር"
+  },
+  "payment": {
+    "enterPhoneTitle": "Payment number",
+    "enterPhoneDesc": "Enter your Mobile Money or international number.",
+    "choosePaymentTitle": "Choose your provider",
+    "confirmTitle": "Confirm payment",
+    "amount": "Amount",
+    "phone": "Phone",
+    "method": "Method",
+    "payNow": "Pay now",
+    "processingTitle": "Confirm on your phone",
+    "statusLabel": "Status",
+    "successTitle": "Payment successful",
+    "successDesc": "Your subscription is now active.",
+    "failedTitle": "Payment not confirmed",
+    "failedDesc": "You can try again or use another payment method.",
+    "tryAgain": "Try again",
+    "errorInit": "Initiation error",
+    "detectingProviders": "Detecting available providers...",
+    "noProviders": "No provider detected. Please enter your number.",
+    "showManualFallback": "No provider works? Manual mode",
+    "providers": {
+      "mtn_momo": "MTN Mobile Money",
+      "orange_money": "Orange Money",
+      "campay": "Campay",
+      "wave": "Wave",
+      "cinetpay": "CinetPay",
+      "flutterwave": "Flutterwave",
+      "notchpay": "NotchPay",
+      "stripe": "Credit card (Stripe)",
+      "paypal": "PayPal",
+      "legacy_manual": "Manual validation"
+    }
   }
 }

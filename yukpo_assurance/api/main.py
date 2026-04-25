@@ -74,6 +74,7 @@ from api.routes_commercial import router as commercial_router
 from api.routes_collaboration import router as collaboration_router
 from api.routes_whatsapp import router as whatsapp_router
 from api.routes_paiement import router as paiement_router
+from api.routes_paiement_v2 import router as paiement_v2_router
 from api.routes_contrats_clients import router as contrats_clients_router
 from api.routes_secteur import router as secteur_router
 from api.routes_community_manager import router as cm_router
@@ -327,6 +328,22 @@ async def lifespan(app: FastAPI):
         await charger_reunions_depuis_db(limite=100)
     except Exception as e:
         logger.warning(f"  [Réunions] Rechargement: {e}")
+
+    # Warm-up études Enquêtes depuis la DB
+    try:
+        from modules.enquetes.persistence import charger_toutes_etudes
+        n_etudes = await charger_toutes_etudes()
+        logger.info(f"  [Enquêtes] {n_etudes} étude(s) chargée(s) en mémoire")
+    except Exception as e:
+        logger.warning(f"  [Enquêtes] Warm-up études: {e}")
+
+    # Warm-up sessions Copilote depuis la DB
+    try:
+        from modules.copilote.persistence import charger_toutes_sessions
+        n_cop = await charger_toutes_sessions()
+        logger.info(f"  [Copilote] {n_cop} session(s) chargée(s) en mémoire")
+    except Exception as e:
+        logger.warning(f"  [Copilote] Warm-up sessions: {e}")
 
     # Vérification Redis (non bloquante)
     try:
@@ -595,6 +612,7 @@ app.include_router(commercial_router, prefix="/api/v1/commercial", tags=["Commer
 app.include_router(collaboration_router, prefix="/api/v1/collaboration", tags=["Collaboration Documentaire"])
 app.include_router(whatsapp_router, prefix="/api/v1", tags=["WhatsApp Chatbot Client"])
 app.include_router(paiement_router, prefix="/api/v1", tags=["Paiement Mobile Money"])
+app.include_router(paiement_v2_router, prefix="/api/v1", tags=["Paiement v2 (multi-provider)"])
 app.include_router(contrats_clients_router, prefix="/api/v1", tags=["Contrats Clients PDF"])
 app.include_router(secteur_router, prefix="/api/v1", tags=["Secteur & Multi-activité"])
 app.include_router(cm_router, prefix="/api/v1", tags=["Community Manager IA"])
