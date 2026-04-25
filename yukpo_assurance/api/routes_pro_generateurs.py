@@ -217,24 +217,57 @@ async def generer_rapport(
 
     profil, _ = await get_or_create(current_user.user_id, db)
 
+    # Si le "sujet" reçu ressemble à une question/instruction (point d'interrogation,
+    # amorce verbale, longueur excessive), on dérive un vrai titre via LLM.
+    # Sans ça, la page de garde, l'en-tête et le filename héritent de la phrase brute.
+    sujet_clean = (req.sujet or "").strip()
+    _looks_like_question = (
+        "?" in sujet_clean
+        or len(sujet_clean) > 90
+        or sujet_clean.lower().startswith((
+            "est-ce", "est ce", "peux-tu", "peux tu", "pourrais",
+            "j'aimerais", "jaimerais", "il me faut", "il faut",
+            "génère", "genere", "rédige", "redige", "fais ", "crée ", "cree ",
+            "donne-moi", "donne moi", "écris", "ecris", "prépare", "prepare",
+            "monte-moi", "monte moi", "produis",
+        ))
+    )
+    if _looks_like_question:
+        try:
+            from core.ia_client import ia_client
+            from api.routes_pro_copilote import _generer_titre_document
+            sujet_clean = await _generer_titre_document(
+                message=req.sujet,
+                type_doc=req.type_rapport,
+                contexte=(req.contexte or "")[:1500],
+                ia_client=ia_client,
+            )
+        except Exception as e:
+            logger.warning(f"[generer_rapport] dérivation titre échouée: {e}")
+
     writer = ReportWriterPro(profil=profil)
+    # Timeouts adaptatifs — lots parallélisés. Avec chunking standard (3/lot)
+    # + recherche web (~50s) le mode standard peut dépasser 240s sur Fly.
+    _TIMEOUT_PAR_MODE = {"flash": 150, "standard": 360, "complet": 600, "expert": 900}
+    _tmo = _TIMEOUT_PAR_MODE.get(req.mode, 360)
     try:
         resultat = await asyncio.wait_for(
             writer.generer(
-                sujet=req.sujet,
+                sujet=sujet_clean,
                 type_rapport=req.type_rapport,
                 mode=req.mode,
                 contexte=req.contexte,
                 donnees=req.donnees,
                 format_sortie=req.format_sortie,
+                instruction_utilisateur=req.sujet,
             ),
-            timeout=240,
+            timeout=_tmo,
         )
         # Sauvegarder + débiter crédits
         _chemin_r = resultat.get("chemin_fichier") or resultat.get("fichier")
         await _sauvegarder_doc_genere(
             db=db, user_id=current_user.user_id,
-            titre=req.sujet[:100],
+            titre=sujet_clean[:100],
             type_doc=req.type_rapport,
             fichier=Path(_chemin_r).name if _chemin_r else None,
             contenu_genere=resultat.get("contenu_markdown", ""),
@@ -257,6 +290,22 @@ async def generer_rapport(
     except HTTPException:
         raise
     except Exception as e:
+        from modules.pro.report_writer_pro import SourcesInsuffisantesError
+        if isinstance(e, SourcesInsuffisantesError):
+            logger.info(f"[GenRapport] Refus sources insuffisantes user={current_user.user_id}: {e.raison}")
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code":     "sources_insuffisantes",
+                    "message":  e.raison,
+                    "sources_essayees": e.sources_essayees,
+                    "action_recommandee": (
+                        "Veuillez joindre un document source vérifiable "
+                        "(rapport annuel, états financiers, état CIMA, données comptables) "
+                        "pour permettre une rédaction factuelle."
+                    ),
+                },
+            )
         logger.error(f"[GenRapport] Erreur user={current_user.user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur génération : {str(e)[:200]}")
 
@@ -305,6 +354,8 @@ async def generer_slides(
     profil, _ = await get_or_create(current_user.user_id, db)
 
     builder = SlideBuilderPro(profil=profil)
+    _TIMEOUT_SLIDES = {"executive": 180, "detaille": 360, "pitch": 240, "expert": 540}
+    _tmo = _TIMEOUT_SLIDES.get(req.mode, 240)
     try:
         resultat = await asyncio.wait_for(
             builder.generer(
@@ -315,7 +366,7 @@ async def generer_slides(
                 donnees=req.donnees,
                 format_sortie=req.format_sortie,
             ),
-            timeout=240,
+            timeout=_tmo,
         )
         # Sauvegarder + débiter crédits
         _chemin_fich = resultat.get("chemin_fichier") or resultat.get("fichier")
@@ -497,6 +548,11 @@ async def analyser_et_generer(
         except Exception as _e:
             logger.warning(f"[AnalyserGenerer] Pré-analyse LLM non bloquante : {_e}")
 
+    # Timeout adaptatif selon le mode (expert = chunking parallèle côté writer)
+    _TIMEOUT_AG = {"flash": 150, "standard": 240, "complet": 480, "executive": 180,
+                   "detaille": 360, "pitch": 240, "expert": 600, "complet_plus": 480}
+    _tmo_gen = _TIMEOUT_AG.get(mode, 300)
+
     # ── Génération selon le type de sortie demandé ──────────────────────────
     try:
         if type_sortie == "slides" or format_sortie == "pptx":
@@ -520,7 +576,7 @@ async def analyser_et_generer(
                     contexte=contexte_fichiers,
                     format_sortie="pptx",
                 ),
-                timeout=210,
+                timeout=_tmo_gen,
             )
             type_final = f"slides_{type_pres}"
         else:
@@ -534,7 +590,7 @@ async def analyser_et_generer(
                     contexte=contexte_fichiers,
                     format_sortie=format_sortie,
                 ),
-                timeout=210,
+                timeout=_tmo_gen,
             )
             type_final = type_doc
 
@@ -672,7 +728,8 @@ async def analyser_dataset_json(
         raise HTTPException(status_code=503, detail=f"pandas non installé : {e}")
     except Exception as e:
         logger.error(f"[AnalyseData] {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_pro_generateurs.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
 
 
 @router.post("/data/upload", summary="Upload CSV/Excel/PDF pour analyse DAA multi-feuilles")
@@ -2187,12 +2244,13 @@ async def _convertir_vers_docx(contenu: bytes, nom: str, ext_src: str) -> bytes:
     elif ext_src in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
         # OCR via Claude Vision
         import base64
-        from core.ia_client import ia_client, ModeIA
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
         b64 = base64.b64encode(contenu).decode()
         reponse = await ia_client.appeler(
             prompt="Extrait tout le texte visible dans cette image, en préservant la structure (titres, listes, tableaux).",
-            mode=ModeIA.VISION,
-            images=[{"type": "base64", "media_type": f"image/{ext_src.lstrip('.')}",  "data": b64}],
+            mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.GPT4O,
+            images_b64=[f"data:image/{ext_src.lstrip('.')};base64,{b64}"],
             max_tokens_override=4000,
         )
         texte = reponse.contenu if hasattr(reponse, "contenu") else str(reponse)

@@ -68,18 +68,16 @@ async def _debiter_llm_doc(
     except Exception as _e:
         logger.debug(f"[Credits/LLM/{module}] non bloquant: {_e}")
 
-# ─── Rate limiter simple en mémoire pour les endpoints documents ──────────────
-# (Redis-backed rate limiting est dans core/security.py pour les autres endpoints)
-_DOC_IA_RATE: dict[str, list[float]] = defaultdict(list)
-_DOC_IA_MAX_PAR_MINUTE = 6   # 6 générations IA par minute max par utilisateur
+# ─── Rate limiter par user_id (pas par IP) ────────────────────────────────────
+# Clé = user_id → isolation par tenant, résistant aux proxies/NAT partagés
+_DOC_IA_RATE: dict[int, list[float]] = defaultdict(list)
+_DOC_IA_MAX_PAR_MINUTE = 6   # 6 générations IA par minute par utilisateur
 
 
-def _verifier_rate_limit_documents(request: Request) -> None:
-    """Rate limit : max 6 générations documents IA par minute par IP."""
-    ip = request.client.host if request.client else "unknown"
+def _verifier_rate_limit_documents(user_id: int) -> None:
+    """Rate limit : max 6 générations documents IA par minute par user_id."""
     maintenant = time.time()
-    historique = _DOC_IA_RATE[ip]
-    # Nettoyer les entrées > 60 secondes
+    historique = _DOC_IA_RATE[user_id]
     historique[:] = [t for t in historique if maintenant - t < 60]
     if len(historique) >= _DOC_IA_MAX_PAR_MINUTE:
         raise HTTPException(
@@ -132,13 +130,16 @@ async def generer_document(req: GenerationRequest):
 
 
 @router.post("/generer-depuis-prompt")
-async def generer_depuis_prompt(req: GenerationIARequest, request: Request):
+async def generer_depuis_prompt(
+    req: GenerationIARequest,
+    current_user: TokenData = Depends(get_current_user),
+):
     """
     Génère un document depuis une description en langage naturel.
     L'IA crée la structure, puis génère le fichier.
     Exemple : "Génère un rapport de sinistralité auto pour le T1 2025"
     """
-    _verifier_rate_limit_documents(request)
+    _verifier_rate_limit_documents(current_user.user_id)
     doc = await document_generateur.generer_depuis_prompt_ia(
         demande=req.demande,
         document_type=req.document_type,
@@ -519,7 +520,7 @@ async def ocr_image_upload(
     """
     from core.security import security_service
     content = await file.read()
-    valide, raison = security_service.valider_fichier_upload(
+    valide, safe_filename, raison = security_service.valider_fichier_upload(
         filename=file.filename or "upload",
         content=content,
         max_size_mb=10.0,
@@ -560,7 +561,7 @@ async def ocr_pdf_upload(
     """
     from core.security import security_service
     content = await file.read()
-    valide, raison = security_service.valider_fichier_upload(
+    valide, safe_filename, raison = security_service.valider_fichier_upload(
         filename=file.filename or "upload.pdf",
         content=content,
         max_size_mb=20.0,

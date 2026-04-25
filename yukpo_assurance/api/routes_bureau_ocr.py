@@ -141,7 +141,8 @@ async def scanner_manuscrit(
         )
     except Exception as e:
         logger.error(f"[Bureau OCR Manuscrit] Erreur : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_bureau_ocr.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
     try:
         await debiter_forfait(current_user.user_id, "ocr_manuscrit", module="ocr")

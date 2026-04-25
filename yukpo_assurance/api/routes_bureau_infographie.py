@@ -25,10 +25,25 @@ _DATA_DIR = Path(__file__).parent.parent / "data" / "generated" / "bureau"
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
+class ProfilInfographie(BaseModel):
+    """Contexte utilisateur transmis au LLM pour contextualiser le visuel."""
+    metier: Optional[str] = None
+    secteur: Optional[str] = None
+    nom_organisation: Optional[str] = None
+    audience: Optional[str] = None
+    ton: Optional[str] = Field(default=None, description="formel | chaleureux | jeune | premium | sobre")
+    couleur_primaire_hex: Optional[str] = Field(default=None, description="Couleur de marque principale #RRGGBB")
+    couleurs_accents_hex: Optional[list[str]] = Field(default=None, description="Couleurs d'accent de marque")
+
+
 class DemandeBrief(BaseModel):
     brief: str = Field(..., min_length=10, description="Description libre du besoin en langage naturel")
     type_gabarit: str = Field(..., description="Type de gabarit (ex: flyer_a5, carte_visite, diplome)")
     pays: str = Field(default="CM")
+    profil: Optional[ProfilInfographie] = None
+    export_cmyk: bool = Field(default=True, description="Générer aussi une version PDF CMJN (print offset)")
+    export_svg: bool = Field(default=True, description="Générer aussi un export SVG vectoriel")
+    dpi_preview: int = Field(default=300, ge=72, le=600, description="DPI du rendu PNG principal")
 
 
 class DemandeManuelle(BaseModel):
@@ -37,12 +52,16 @@ class DemandeManuelle(BaseModel):
     sous_titre: Optional[str] = None
     corps: Optional[str] = None
     details: list[str] = Field(default_factory=list)
-    palette: str = Field(default="classique", description="classique | cameroun | senegal | elegance | moderne")
+    palette: str = Field(default="classique", description="classique | cameroun | senegal | elegance | moderne | ...")
     nom_organisation: Optional[str] = None
     contact: Optional[str] = None
     slogan: Optional[str] = None
     date_evenement: Optional[str] = None
     lieu: Optional[str] = None
+    couleur_primaire_hex: Optional[str] = None
+    couleurs_accents_hex: Optional[list[str]] = None
+    export_cmyk: bool = Field(default=True)
+    export_svg: bool = Field(default=True)
 
 
 class DemandeCustom(BaseModel):
@@ -51,6 +70,77 @@ class DemandeCustom(BaseModel):
     bleed_mm: float = Field(default=3, ge=0, le=20, description="Fond perdu en mm")
     brief: str = Field(..., min_length=10)
     pays: str = Field(default="CM")
+    profil: Optional[ProfilInfographie] = None
+    export_cmyk: bool = Field(default=True)
+    export_svg: bool = Field(default=True)
+
+
+class DemandeVariantes(BaseModel):
+    brief: str = Field(..., min_length=10)
+    type_gabarit: str
+    pays: str = Field(default="CM")
+    profil: Optional[ProfilInfographie] = None
+    nombre: int = Field(default=4, ge=2, le=4)
+
+
+def _persister_artefacts(user_id, type_gabarit: str, ts: int, resultat) -> dict:
+    """
+    Sauve sur disque tous les artefacts disponibles (PDF RGB, PDF CMJN, PNG 300dpi,
+    PNG web 150dpi, SVG) et retourne le dict {ids, base64} pour la réponse API.
+    """
+    base = f"bureau_pdf_{user_id}_infographie_{type_gabarit}_{ts}"
+    out = {
+        "pdf_id": None, "pdf_base64": None,
+        "pdf_cmyk_id": None, "pdf_cmyk_base64": None,
+        "png_id": None, "png_base64": None,
+        "png_preview_id": None, "png_preview_base64": None,
+        "svg_id": None, "svg_base64": None,
+    }
+    if resultat.pdf_bytes:
+        fid = f"{base}.pdf"
+        (_DATA_DIR / fid).write_bytes(resultat.pdf_bytes)
+        out["pdf_id"] = fid
+        out["pdf_base64"] = base64.b64encode(resultat.pdf_bytes).decode()
+    if resultat.pdf_cmyk_bytes:
+        fid = f"{base}_cmyk.pdf"
+        (_DATA_DIR / fid).write_bytes(resultat.pdf_cmyk_bytes)
+        out["pdf_cmyk_id"] = fid
+        out["pdf_cmyk_base64"] = base64.b64encode(resultat.pdf_cmyk_bytes).decode()
+    if resultat.png_bytes:
+        fid = f"{base}.png"
+        (_DATA_DIR / fid).write_bytes(resultat.png_bytes)
+        out["png_id"] = fid
+        out["png_base64"] = base64.b64encode(resultat.png_bytes).decode()
+    if resultat.png_preview_bytes and resultat.png_preview_bytes != resultat.png_bytes:
+        fid = f"{base}_web.png"
+        (_DATA_DIR / fid).write_bytes(resultat.png_preview_bytes)
+        out["png_preview_id"] = fid
+        out["png_preview_base64"] = base64.b64encode(resultat.png_preview_bytes).decode()
+    if resultat.svg_bytes:
+        fid = f"{base}.svg"
+        (_DATA_DIR / fid).write_bytes(resultat.svg_bytes)
+        out["svg_id"] = fid
+        out["svg_base64"] = base64.b64encode(resultat.svg_bytes).decode()
+    return out
+
+
+def _serialiser_spec(spec) -> Optional[dict]:
+    if not spec:
+        return None
+    return {
+        "titre": spec.titre,
+        "sous_titre": spec.sous_titre,
+        "corps": spec.corps,
+        "details": spec.details,
+        "palette": spec.palette,
+        "nom_organisation": spec.nom_organisation,
+        "contact": spec.contact,
+        "slogan": spec.slogan,
+        "date_evenement": spec.date_evenement,
+        "lieu": spec.lieu,
+        "justification": (spec.meta or {}).get("justification"),
+        "variante": (spec.meta or {}).get("variante_hint"),
+    }
 
 
 @router.get("/gabarits", tags=["Bureau — Infographie"])
@@ -102,11 +192,16 @@ async def generer_depuis_brief(
             detail=f"Gabarit inconnu. Disponibles : {list(GABARITS.keys())}",
         )
 
+    profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     try:
         resultat = await generer_infographie(
             brief=demande.brief,
             type_gabarit=demande.type_gabarit,
             pays=demande.pays,
+            profil=profil_dict,
+            export_cmyk=demande.export_cmyk,
+            export_svg=demande.export_svg,
+            dpi_preview=demande.dpi_preview,
         )
     except Exception as e:
         logger.error(f"[Bureau Infographie] Génération échouée : {e}")
@@ -129,48 +224,21 @@ async def generer_depuis_brief(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+                multiplicateur=prix_gabarit / 20.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie échoué : {_e}")
 
     ts = int(__import__("time").time())
-    pdf_id = None
-    png_id = None
-    pdf_b64 = None
-    png_b64 = None
-
-    if resultat.pdf_bytes:
-        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.pdf"
-        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
-        pdf_b64 = base64.b64encode(resultat.pdf_bytes).decode()
-
-    if resultat.png_bytes:
-        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.png"
-        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
-        png_b64 = base64.b64encode(resultat.png_bytes).decode()
+    artefacts = _persister_artefacts(current_user.user_id, demande.type_gabarit, ts, resultat)
 
     spec = resultat.specification
     return {
         "gabarit": demande.type_gabarit,
         "titre": spec.titre if spec else "",
         "palette": spec.palette if spec else "classique",
-        "specification": {
-            "titre": spec.titre,
-            "sous_titre": spec.sous_titre,
-            "corps": spec.corps,
-            "details": spec.details,
-            "palette": spec.palette,
-            "nom_organisation": spec.nom_organisation,
-            "contact": spec.contact,
-            "slogan": spec.slogan,
-            "date_evenement": spec.date_evenement,
-            "lieu": spec.lieu,
-        } if spec else None,
-        "pdf_id": pdf_id,
-        "png_id": png_id,
-        "pdf_base64": pdf_b64,
-        "png_base64": png_b64,
+        "specification": _serialiser_spec(spec),
+        **artefacts,
         "prix_fcfa": resultat.meta.get("prix_fcfa", 0),
         "meta": resultat.meta,
     }
@@ -201,6 +269,14 @@ async def generer_manuel(
     if demande.palette not in PALETTES:
         raise HTTPException(status_code=400, detail=f"Palette inconnue : {demande.palette}")
 
+    from modules.bureau.infographe import _palette_personnalisee_depuis_hex, generer_infographie
+    meta_spec: dict = {}
+    if demande.couleur_primaire_hex:
+        meta_spec["palette_custom"] = _palette_personnalisee_depuis_hex(
+            demande.couleur_primaire_hex,
+            demande.couleurs_accents_hex or [],
+        )
+
     spec = SpecificationInfographie(
         type_gabarit=demande.type_gabarit,
         titre=demande.titre,
@@ -213,17 +289,26 @@ async def generer_manuel(
         slogan=demande.slogan,
         date_evenement=demande.date_evenement,
         lieu=demande.lieu,
+        meta=meta_spec,
     )
 
     try:
-        pdf_bytes = generer_pdf(spec)
+        # On passe par generer_infographie avec spec_override pour bénéficier
+        # automatiquement du PDF CMJN + PNG 300 DPI + SVG.
+        resultat = await generer_infographie(
+            brief="(spécification manuelle — aucun brief IA)",
+            type_gabarit=demande.type_gabarit,
+            spec_override=spec,
+            export_cmyk=demande.export_cmyk,
+            export_svg=demande.export_svg,
+        )
     except Exception as e:
         logger.error(f"[Bureau Infographie Manuel] Erreur : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_bureau_infographie.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
     ts = int(__import__("time").time())
-    pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{demande.type_gabarit}_{ts}.pdf"
-    (_DATA_DIR / pdf_id).write_bytes(pdf_bytes)
+    artefacts = _persister_artefacts(current_user.user_id, demande.type_gabarit, ts, resultat)
 
     try:
         prix_gabarit = float(GABARITS[demande.type_gabarit].get("prix_fcfa", 0) or 0)
@@ -232,16 +317,17 @@ async def generer_manuel(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+                multiplicateur=prix_gabarit / 20.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie manuel échoué : {_e}")
 
     return {
         "gabarit": demande.type_gabarit,
-        "pdf_id": pdf_id,
-        "pdf_base64": base64.b64encode(pdf_bytes).decode(),
+        "specification": _serialiser_spec(resultat.specification),
+        **artefacts,
         "prix_fcfa": GABARITS[demande.type_gabarit]["prix_fcfa"],
+        "meta": resultat.meta,
     }
 
 
@@ -307,20 +393,8 @@ async def generer_depuis_modele_image(
         raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
 
     ts = int(__import__("time").time())
-    import base64 as _b64
-    pdf_id = png_id = pdf_b64 = png_b64 = None
+    artefacts = _persister_artefacts(current_user.user_id, type_gabarit, ts, resultat)
 
-    if resultat.pdf_bytes:
-        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{type_gabarit}_{ts}.pdf"
-        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
-        pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
-
-    if resultat.png_bytes:
-        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{type_gabarit}_{ts}.png"
-        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
-        png_b64 = _b64.b64encode(resultat.png_bytes).decode()
-
-    # Débit : vision modèle + LLM spec + création (prix_fcfa du gabarit)
     try:
         if analyse_style:
             await debiter_forfait(current_user.user_id, "infographie_vision", module="infographie")
@@ -339,31 +413,16 @@ async def generer_depuis_modele_image(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+                multiplicateur=prix_gabarit / 20.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie modèle échoué : {_e}")
 
-    spec = resultat.specification
     return {
         "gabarit": type_gabarit,
         "analyse_modele": analyse_style,
-        "specification": {
-            "titre": spec.titre,
-            "sous_titre": spec.sous_titre,
-            "corps": spec.corps,
-            "details": spec.details,
-            "palette": spec.palette,
-            "nom_organisation": spec.nom_organisation,
-            "contact": spec.contact,
-            "slogan": spec.slogan,
-            "date_evenement": spec.date_evenement,
-            "lieu": spec.lieu,
-        } if spec else None,
-        "pdf_id": pdf_id,
-        "png_id": png_id,
-        "pdf_base64": pdf_b64,
-        "png_base64": png_b64,
+        "specification": _serialiser_spec(resultat.specification),
+        **artefacts,
         "prix_fcfa": resultat.meta.get("prix_fcfa", 0),
         "meta": resultat.meta,
     }
@@ -397,30 +456,23 @@ async def generer_format_custom(
 
     _GABARITS_PATCHED = {**_GABARITS, gabarit_key: gabarit_custom}
 
+    profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     try:
         resultat = await generer_infographie(
             brief=demande.brief,
             type_gabarit=gabarit_key,
             pays=demande.pays,
             gabarits_override=_GABARITS_PATCHED,
+            profil=profil_dict,
+            export_cmyk=demande.export_cmyk,
+            export_svg=demande.export_svg,
         )
     except Exception as e:
         logger.error(f"[Bureau Infographie Custom] Génération échouée : {e}")
         raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
 
     ts = int(__import__("time").time())
-    import base64 as _b64
-    pdf_id = png_id = pdf_b64 = png_b64 = None
-
-    if resultat.pdf_bytes:
-        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_custom_{ts}.pdf"
-        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
-        pdf_b64 = _b64.b64encode(resultat.pdf_bytes).decode()
-
-    if resultat.png_bytes:
-        png_id = f"bureau_pdf_{current_user.user_id}_infographie_custom_{ts}.png"
-        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
-        png_b64 = _b64.b64encode(resultat.png_bytes).decode()
+    artefacts = _persister_artefacts(current_user.user_id, "custom", ts, resultat)
 
     try:
         meta = resultat.meta or {}
@@ -438,27 +490,92 @@ async def generer_format_custom(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,  # 1 crédit Yukpo = 1 FCFA gabarit (annule le ×20 du multiplicateur global)
+                multiplicateur=prix_gabarit / 20.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie custom échoué : {_e}")
 
-    spec = resultat.specification
     return {
         "gabarit": gabarit_key,
         "dimensions_mm": {"width": demande.width_mm, "height": demande.height_mm, "bleed": demande.bleed_mm},
-        "specification": {
-            "titre": spec.titre,
-            "sous_titre": spec.sous_titre,
-            "corps": spec.corps,
-            "details": spec.details,
-            "palette": spec.palette,
-        } if spec else None,
-        "pdf_id": pdf_id,
-        "png_id": png_id,
-        "pdf_base64": pdf_b64,
-        "png_base64": png_b64,
+        "specification": _serialiser_spec(resultat.specification),
+        **artefacts,
         "meta": resultat.meta,
+    }
+
+
+@router.post("/generer-variantes", tags=["Bureau — Infographie"])
+async def generer_variantes(
+    demande: DemandeVariantes,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Génère N (2-4) variantes créatives distinctes en parallèle.
+    Utilisé pour proposer plusieurs directions artistiques à l'utilisateur
+    avant qu'il ne choisisse celle à finaliser.
+    """
+    from modules.bureau.infographe import generer_variantes_parallele, GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    if demande.type_gabarit not in GABARITS:
+        raise HTTPException(400, f"Gabarit inconnu : {demande.type_gabarit}")
+
+    profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
+
+    try:
+        resultats = await generer_variantes_parallele(
+            brief=demande.brief,
+            type_gabarit=demande.type_gabarit,
+            pays=demande.pays,
+            profil=profil_dict,
+            nombre=demande.nombre,
+        )
+    except Exception as e:
+        logger.error(f"[Bureau Infographie Variantes] Génération échouée : {e}")
+        raise HTTPException(500, f"Génération variantes échouée : {e}")
+
+    ts = int(__import__("time").time())
+    variantes_payload = []
+    for idx, resultat in enumerate(resultats):
+        artefacts = _persister_artefacts(
+            current_user.user_id, f"{demande.type_gabarit}_v{idx+1}", ts, resultat,
+        )
+        # Débit LLM par variante (4 × tokens)
+        try:
+            meta = resultat.meta or {}
+            if meta.get("tokens_input") or meta.get("tokens_output"):
+                await debiter_llm(
+                    current_user.user_id,
+                    modele=meta.get("modele", "default"),
+                    tokens_input=int(meta.get("tokens_input", 0) or 0),
+                    tokens_output=int(meta.get("tokens_output", 0) or 0),
+                    module="infographie",
+                )
+        except Exception as _e:
+            logger.warning(f"[Bureau/Crédits] Débit variante {idx} : {_e}")
+
+        variantes_payload.append({
+            "index": idx,
+            "variante": (resultat.meta or {}).get("variante") or (resultat.meta or {}).get("variante_hint"),
+            "specification": _serialiser_spec(resultat.specification),
+            **artefacts,
+            "meta": resultat.meta,
+        })
+
+    return {
+        "gabarit": demande.type_gabarit,
+        "nombre_variantes": len(variantes_payload),
+        "variantes": variantes_payload,
+        "note": "Seule la variante sélectionnée sera débitée en forfait gabarit lors de la validation finale.",
     }
 
 
@@ -540,17 +657,7 @@ async def modifier_infographie(
         raise HTTPException(500, f"Modification échouée : {e}")
 
     ts = int(__import__("time").time())
-    pdf_id = png_id = pdf_b64 = png_b64 = None
-
-    if resultat.pdf_bytes:
-        pdf_id = f"bureau_pdf_{current_user.user_id}_infographie_{gabarit}_{ts}.pdf"
-        (_DATA_DIR / pdf_id).write_bytes(resultat.pdf_bytes)
-        pdf_b64 = base64.b64encode(resultat.pdf_bytes).decode()
-
-    if resultat.png_bytes:
-        png_id = f"bureau_pdf_{current_user.user_id}_infographie_{gabarit}_{ts}.png"
-        (_DATA_DIR / png_id).write_bytes(resultat.png_bytes)
-        png_b64 = base64.b64encode(resultat.png_bytes).decode()
+    artefacts = _persister_artefacts(current_user.user_id, gabarit, ts, resultat)
 
     try:
         if analyse_style:
@@ -568,12 +675,10 @@ async def modifier_infographie(
         logger.warning(f"[Infographie/Modifier/Credits] {_e}")
 
     return {
-        "pdf_id": pdf_id,
-        "png_id": png_id,
-        "pdf_base64": pdf_b64,
-        "png_base64": png_b64,
+        **artefacts,
         "gabarit": gabarit,
         "titre": (resultat.specification.titre if resultat.specification else ""),
+        "specification": _serialiser_spec(resultat.specification),
     }
 
 
@@ -597,6 +702,7 @@ async def telecharger_infographie(
     media_types = {
         ".pdf": "application/pdf",
         ".png": "image/png",
+        ".svg": "image/svg+xml",
     }
     media_type = media_types.get(suffix, "application/octet-stream")
 

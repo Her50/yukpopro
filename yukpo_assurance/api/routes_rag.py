@@ -52,7 +52,8 @@ async def statut_corpus():
     try:
         return stats_corpus()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_rag.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 @router.get("/sources", summary="Liste des sources configurées")
@@ -138,7 +139,8 @@ async def rechercher(req: RechercheRAGRequest):
         }
     except Exception as e:
         logger.error(f"[routes_rag] Recherche échouée : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_rag.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

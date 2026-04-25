@@ -267,29 +267,58 @@ class SecurityService:
             logger.error(f"[Security] Déchiffrement PII échoué: {e}")
             return "[ERREUR DÉCHIFFREMENT]"
 
+    @staticmethod
+    def sanitiser_nom_fichier(filename: str) -> str:
+        """
+        Nettoie un nom de fichier pour prévenir le path traversal.
+        - Extrait uniquement le basename (supprime tout chemin)
+        - Rejette les patterns dangereux (../, ..\, chemins absolus, null bytes)
+        - Conserve uniquement les caractères alphanumériques, tirets, underscores, points
+        """
+        import os, re as _re, unicodedata
+        # Normalise Unicode pour éviter les bypasses encodés
+        filename = unicodedata.normalize("NFKC", filename)
+        # Null bytes
+        filename = filename.replace("\x00", "")
+        # Extrait uniquement le basename (bloque ../../etc/passwd)
+        filename = os.path.basename(filename.replace("\\", "/"))
+        # Rejet patterns traversal résiduels
+        if ".." in filename or filename.startswith("/") or filename.startswith("\\"):
+            return "fichier_upload"
+        # Conserve uniquement les caractères sûrs
+        filename = _re.sub(r"[^\w.\-]", "_", filename)
+        # Limite la longueur
+        if len(filename) > 200:
+            name, _, ext = filename.rpartition(".")
+            filename = name[:195] + "." + ext if ext else filename[:200]
+        return filename or "fichier_upload"
+
     def valider_fichier_upload(
         self,
         filename: str,
         content: bytes,
         max_size_mb: float = 20.0,
         types_autorises: Optional[list[str]] = None,
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, str, Optional[str]]:
         """
         Valide un fichier uploadé : taille, extension, magic bytes.
-        Retourne (valide, raison_si_invalide).
+        Retourne (valide, filename_sanitisé, raison_si_invalide).
         """
         if types_autorises is None:
             types_autorises = ["pdf", "png", "jpg", "jpeg", "xlsx", "docx", "csv", "tiff", "bmp"]
 
+        # Sanitisation nom fichier (path traversal)
+        filename = self.sanitiser_nom_fichier(filename)
+
         # Taille
         taille_mb = len(content) / (1024 * 1024)
         if taille_mb > max_size_mb:
-            return False, f"Fichier trop volumineux ({taille_mb:.1f} MB > {max_size_mb} MB)"
+            return False, filename, f"Fichier trop volumineux ({taille_mb:.1f} MB > {max_size_mb} MB)"
 
         # Extension
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         if ext not in types_autorises:
-            return False, f"Extension '.{ext}' non autorisée. Extensions acceptées : {types_autorises}"
+            return False, filename, f"Extension non autorisée."
 
         # Magic bytes (vérification du vrai type MIME)
         MAGIC_BYTES = {
@@ -310,16 +339,16 @@ class SecurityService:
             else:
                 valid_magic = content[:4].startswith(expected_magic[:4])
             if not valid_magic:
-                return False, f"Contenu du fichier ne correspond pas à l'extension '.{ext}' (magic bytes invalides)"
+                return False, filename, "Contenu du fichier invalide."
 
-        # Scan basique virus (patterns binaires suspects)
+        # Scan basique (patterns suspects dans les fichiers texte)
         PATTERNS_SUSPECTS = [b"<script", b"javascript:", b"eval(", b"exec("]
         if ext in ("csv", "txt"):
             for pattern in PATTERNS_SUSPECTS:
                 if pattern in content[:1024]:
-                    return False, f"Contenu suspect détecté dans le fichier"
+                    return False, filename, "Contenu suspect détecté dans le fichier."
 
-        return True, None
+        return True, filename, None
 
     def comparer_hmac_constant(self, attendu: str, recu: str) -> bool:
         """
@@ -346,7 +375,7 @@ class SecurityService:
         Redis : compte les tentatives sur 15 minutes.
         """
         cle = f"bf:{action}:{user_id}"
-        max_tentatives = 5
+        max_tentatives = 10
         try:
             import redis as redis_lib
             r = redis_lib.from_url(settings.REDIS_URL, socket_connect_timeout=1)

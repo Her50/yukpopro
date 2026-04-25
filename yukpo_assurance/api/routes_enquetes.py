@@ -2,10 +2,13 @@
 Routes Enquêtes & Études — Analyse qualitative IA + collecte quantitative (KoBoCollect-like)
 """
 import base64
+import logging
 import re
 import time as _time
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger("yukpo_assurance.api.enquetes")
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
@@ -13,8 +16,15 @@ from pydantic import BaseModel
 
 from core.auth import TokenData, get_current_user, require_permission
 from modules.enquetes import gestionnaire_enquetes as ge
+from modules.enquetes import helpers_dictionnaire_plan as hdp
+from modules.enquetes import facturation as fact
+from modules.enquetes.persistence import (
+    sauvegarder_etude, charger_etudes_user, charger_toutes_etudes,
+)
+from api._routes_enquetes_extra import extra_router
 
 router = APIRouter(dependencies=[Depends(require_permission("enquetes"))])
+router.include_router(extra_router)
 
 AUDIO_MIMES = {"audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg",
                "audio/webm", "audio/x-m4a", "application/octet-stream"}
@@ -78,7 +88,7 @@ def _extract_text_from_upload(filename: str, content: bytes) -> str:
 
 class NouvelleEtudeRequest(BaseModel):
     titre: str
-    contexte: str
+    contexte: str = ""
     questions_recherche: list[str] = []
     methodologie: str = "exploratoire"  # phénoménologique | théorie ancrée | ethnographique | exploratoire
     population_cible: str = ""
@@ -91,11 +101,29 @@ class QuestionFormulaireIn(BaseModel):
     type_question: str = "text"
     options: list[str] = []
     obligatoire: bool = True
+    # Champs XLSForm étendus (optionnels — exposés à l'éditeur visuel)
+    hint: str = ""
+    section_id: str = ""
+    section_label: str = ""
+    relevant: str = ""
+    constraint: str = ""
+    constraint_message: str = ""
+    appearance: str = ""
+    parameters: str = ""
+    name_xlsform: str = ""
+    ordre: int = 0
 
 
 class NouveauFormulaireRequest(BaseModel):
     titre: str
     description: str = ""
+    questions: list[QuestionFormulaireIn]
+
+
+class MajFormulaireRequest(BaseModel):
+    titre: Optional[str] = None
+    description: Optional[str] = None
+    actif: Optional[bool] = None
     questions: list[QuestionFormulaireIn]
 
 
@@ -106,15 +134,23 @@ async def creer_etude(
     payload: NouvelleEtudeRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
-    etude = ge.creer_etude(
-        titre=payload.titre,
-        contexte=payload.contexte,
-        questions_recherche=payload.questions_recherche,
-        methodologie=payload.methodologie,
-        population_cible=payload.population_cible,
-        terrain=payload.terrain,
-        mode=payload.mode,
-    )
+    await fact.precheck(current_user.user_id)
+    await charger_etudes_user(current_user.user_id)
+    try:
+        etude = ge.creer_etude(
+            titre=payload.titre,
+            contexte=payload.contexte,
+            questions_recherche=payload.questions_recherche,
+            methodologie=payload.methodologie,
+            population_cible=payload.population_cible,
+            terrain=payload.terrain,
+            mode=payload.mode,
+        )
+    except Exception:
+        logger.exception(f"[Enquêtes] Échec création étude user={current_user.user_id}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne lors de la création")
+    await sauvegarder_etude(etude, current_user.user_id)
+    await fact.debiter(current_user.user_id, "etude_create")
     return {
         "etude_id": etude.etude_id,
         "titre": etude.titre,
@@ -126,6 +162,9 @@ async def creer_etude(
 
 @router.get("/", summary="Lister toutes les études")
 async def lister_etudes(current_user: TokenData = Depends(get_current_user)):
+    # Charger les études de cet utilisateur depuis la DB si pas encore en RAM
+    await charger_etudes_user(current_user.user_id)
+    await fact.debiter(current_user.user_id, "etude_list")
     return {"etudes": ge.lister_etudes()}
 
 
@@ -134,6 +173,7 @@ async def get_etude(etude_id: str, current_user: TokenData = Depends(get_current
     etude = ge.get_etude(etude_id)
     if not etude:
         raise HTTPException(404, "Étude introuvable")
+    await fact.debiter(current_user.user_id, "etude_get")
     return {
         "etude_id": etude.etude_id,
         "titre": etude.titre,
@@ -167,6 +207,7 @@ async def uploader_audio(
     etude = ge.get_etude(etude_id)
     if not etude:
         raise HTTPException(404, "Étude introuvable")
+    await fact.precheck(current_user.user_id)
 
     contenu = await audio.read()
     mime = audio.content_type or "audio/mpeg"
@@ -185,6 +226,8 @@ async def uploader_audio(
         )
         etude.transcriptions.append(transcription)
         etude.statut = "transcription"
+        await sauvegarder_etude(etude, current_user.user_id)
+        await fact.debiter(current_user.user_id, "audio_transcription")
 
         return {
             "locuteur": transcription.locuteur,
@@ -204,6 +247,7 @@ async def lister_transcriptions(etude_id: str, current_user: TokenData = Depends
     etude = ge.get_etude(etude_id)
     if not etude:
         raise HTTPException(404, "Étude introuvable")
+    await fact.debiter(current_user.user_id, "transcription_list")
     return {
         "etude_id": etude_id,
         "n_transcriptions": len(etude.transcriptions),
@@ -228,15 +272,19 @@ async def analyser(etude_id: str, current_user: TokenData = Depends(get_current_
     etude = ge.get_etude(etude_id)
     if not etude:
         raise HTTPException(404, "Étude introuvable")
+    await fact.precheck(current_user.user_id)
 
     try:
         if etude.mode in ("qualitatif", "mixte"):
             analyse = await ge.analyser_qualitatif(etude_id)
+            await fact.debiter(current_user.user_id, "analyse_qualitative")
         elif etude.mode == "quantitatif":
             analyse = await ge.analyser_quantitatif(etude_id)
+            await fact.debiter(current_user.user_id, "analyse_quantitative")
         else:
             analyse = {}
 
+        await sauvegarder_etude(etude, current_user.user_id)
         return {
             "statut": "analyse_terminee",
             "n_themes": len(etude.themes),
@@ -252,13 +300,18 @@ async def analyser(etude_id: str, current_user: TokenData = Depends(get_current_
 
 @router.post("/{etude_id}/analyser-quantitatif", summary="Analyse statistique des données collectées")
 async def analyser_quantitatif(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    await fact.precheck(current_user.user_id)
     try:
         resultats = await ge.analyser_quantitatif(etude_id)
+        etude = ge.get_etude(etude_id)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+        await fact.debiter(current_user.user_id, "analyse_quantitative")
         return {
             "statut": "analyse_quantitative_terminee",
             "n_reponses": resultats.get("n_reponses", 0),
             "n_questions_analysees": len(resultats.get("questions", [])),
-            "graphiques": list(ge.get_etude(etude_id).graphiques.keys()),
+            "graphiques": list(etude.graphiques.keys()) if etude else [],
         }
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -276,10 +329,14 @@ async def generer_rapport(
 ):
     if format_rapport not in ("json", "docx", "pdf"):
         raise HTTPException(400, "Format invalide : json | docx | pdf")
+    await fact.precheck(current_user.user_id)
     try:
         rapport = await ge.generer_rapport(etude_id, format_rapport)
-        # Persister rapport DOCX/PDF dans Mes Documents
+        await fact.debiter(current_user.user_id, "rapport")
         etude = ge.get_etude(etude_id)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+        # Persister rapport DOCX/PDF dans Mes Documents
         titre = etude.titre if etude else "rapport"
         try:
             if format_rapport == "docx" and rapport.get("fichier_docx"):
@@ -306,6 +363,7 @@ async def get_rapport(etude_id: str, current_user: TokenData = Depends(get_curre
         raise HTTPException(404, "Étude introuvable")
     if not etude.rapport_genere:
         raise HTTPException(404, "Aucun rapport généré — POST /rapport d'abord")
+    await fact.debiter(current_user.user_id, "rapport_get")
     return etude.rapport_genere
 
 
@@ -317,6 +375,7 @@ async def creer_formulaire(
     payload: NouveauFormulaireRequest,
     current_user: TokenData = Depends(get_current_user),
 ):
+    await fact.precheck(current_user.user_id)
     try:
         form = ge.creer_formulaire(
             etude_id=etude_id,
@@ -324,6 +383,10 @@ async def creer_formulaire(
             description=payload.description,
             questions=[q.model_dump() for q in payload.questions],
         )
+        etude = ge.get_etude(etude_id)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+        await fact.debiter(current_user.user_id, "formulaire_create")
         return {
             "formulaire_id": form.formulaire_id,
             "titre": form.titre,
@@ -352,9 +415,52 @@ async def afficher_formulaire(formulaire_id: str):
                 "type_question": q.type_question,
                 "options": q.options,
                 "obligatoire": q.obligatoire,
+                "ordre": q.ordre,
+                "hint": q.hint,
+                "section_id": q.section_id,
+                "section_label": q.section_label,
+                "relevant": q.relevant,
+                "constraint": q.constraint,
+                "constraint_message": q.constraint_message,
+                "appearance": q.appearance,
+                "parameters": q.parameters,
+                "name_xlsform": q.name_xlsform,
             }
             for q in sorted(form.questions, key=lambda x: x.ordre)
         ],
+    }
+
+
+@router.put("/formulaire/{formulaire_id}/structure", summary="Mettre à jour la structure d'un formulaire")
+async def maj_formulaire(
+    formulaire_id: str,
+    payload: MajFormulaireRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    await fact.precheck(current_user.user_id)
+    form = ge.mettre_a_jour_formulaire(
+        formulaire_id=formulaire_id,
+        titre=payload.titre,
+        description=payload.description,
+        actif=payload.actif,
+        questions=[q.model_dump() for q in payload.questions],
+    )
+    if not form:
+        raise HTTPException(404, "Formulaire introuvable")
+    # Retrouver l'étude parente et persister
+    etude_id_for_form = ge._formulaires_publics.get(formulaire_id)
+    if etude_id_for_form:
+        etude = ge.get_etude(etude_id_for_form)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+    await fact.debiter(current_user.user_id, "formulaire_maj")
+    return {
+        "formulaire_id": form.formulaire_id,
+        "titre": form.titre,
+        "description": form.description,
+        "actif": form.actif,
+        "n_questions": len(form.questions),
+        "message": "Formulaire mis à jour.",
     }
 
 
@@ -364,6 +470,23 @@ async def soumettre_reponses(formulaire_id: str, reponses: dict):
     ok = ge.soumettre_reponse(formulaire_id, reponses)
     if not ok:
         raise HTTPException(404, "Formulaire introuvable ou fermé")
+    # Persister la nouvelle réponse (endpoint public — pas de user_id, on cherche le propriétaire)
+    from core.database import async_session_maker, EtudeDB
+    from sqlalchemy import select as _sel
+    etude_id_for_form = ge._formulaires_publics.get(formulaire_id)
+    if etude_id_for_form:
+        etude = ge.get_etude(etude_id_for_form)
+        if etude:
+            try:
+                async with async_session_maker() as _s:
+                    _row = (await _s.execute(
+                        _sel(EtudeDB).where(EtudeDB.etude_id == etude_id_for_form)
+                    )).scalars().first()
+                    owner_id = _row.user_id if _row else 0
+                if owner_id:
+                    await sauvegarder_etude(etude, owner_id)
+            except Exception:
+                pass
     return {"message": "Réponses enregistrées. Merci pour votre participation."}
 
 
@@ -374,11 +497,54 @@ async def donnees_formulaire(etude_id: str, current_user: TokenData = Depends(ge
         raise HTTPException(404, "Étude introuvable")
     if not etude.formulaire:
         raise HTTPException(404, "Aucun formulaire créé pour cette étude")
+    await fact.debiter(current_user.user_id, "formulaire_donnees")
     return {
         "formulaire_id": etude.formulaire.formulaire_id,
         "n_reponses": len(etude.formulaire.reponses),
         "reponses": etude.formulaire.reponses,
     }
+
+
+@router.get(
+    "/{etude_id}/formulaire/donnees.csv",
+    summary="Exporter les réponses collectées au format CSV",
+    response_class=Response,
+)
+async def exporter_donnees_csv(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    import csv
+    import io
+    etude = ge.get_etude(etude_id)
+    if not etude:
+        raise HTTPException(404, "Étude introuvable")
+    if not etude.formulaire:
+        raise HTTPException(404, "Aucun formulaire créé pour cette étude")
+    await fact.precheck(current_user.user_id)
+
+    form = etude.formulaire
+    questions = sorted(form.questions, key=lambda q: q.ordre)
+    col_ids = [q.question_id for q in questions]
+    col_names = [q.name_xlsform or q.libelle[:40] or q.question_id for q in questions]
+
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    writer.writerow(col_names + ["_soumis_le"])
+    for r in form.reponses:
+        row = []
+        for qid in col_ids:
+            val = r.get(qid, "")
+            if isinstance(val, (list, dict)):
+                val = str(val)
+            row.append(val)
+        row.append(r.get("_soumis_le", ""))
+        writer.writerow(row)
+
+    nom = f"yukpopro_{_slug(etude.titre)}_donnees.csv"
+    await fact.debiter(current_user.user_id, "csv_export")
+    return Response(
+        content=("\ufeff" + buf.getvalue()).encode("utf-8"),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{nom}"'},
+    )
 
 
 # ─── XLSForm export ───────────────────────────────────────────────────────────
@@ -392,6 +558,7 @@ async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(g
     etude = ge.get_etude(etude_id)
     if not etude:
         raise HTTPException(404, "Étude introuvable")
+    await fact.precheck(current_user.user_id)
     try:
         xlsx_bytes = ge.generer_xlsform_bytes(etude_id)
         nom = f"yukpopro_{_slug(etude.titre)}.xlsx"
@@ -400,6 +567,7 @@ async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(g
             _save_bureau(current_user.user_id, "xls", etude.titre, "xlsx", xlsx_bytes)
         except Exception:
             pass
+        await fact.debiter(current_user.user_id, "xlsform_export")
         return Response(
             content=xlsx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -436,6 +604,7 @@ async def upload_protocole(
     current_user: TokenData = Depends(get_current_user),
 ):
     """Workflow pro : uploader le protocole d'enquête → Claude construit le formulaire complet."""
+    await fact.precheck(current_user.user_id)
     content = await fichier.read()
     if len(content) == 0:
         raise HTTPException(400, "Fichier vide")
@@ -474,6 +643,7 @@ async def upload_protocole(
             population=population or "Population cible",
             n_questions=n_questions,
         )
+        await fact.debiter(current_user.user_id, "protocole_upload")
     except Exception as e:
         raise HTTPException(500, f"Erreur IA : {e}")
 
@@ -488,6 +658,9 @@ async def upload_protocole(
                 sections=resultat.get("sections_metadata", []),
             )
             formulaire_id = form.formulaire_id
+            etude_after = ge.get_etude(etude_id)
+            if etude_after:
+                await sauvegarder_etude(etude_after, current_user.user_id)
             # Persister le XLSForm dans Mes Documents
             try:
                 xls_bytes = ge.generer_xlsform_bytes(etude_id)
@@ -529,6 +702,7 @@ async def generer_formulaire_ia(
     payload: GenFormulaireIARequest,
     current_user: TokenData = Depends(get_current_user),
 ):
+    await fact.precheck(current_user.user_id)
     try:
         resultat = await ge.generer_formulaire_ia(
             description=payload.description,
@@ -537,6 +711,7 @@ async def generer_formulaire_ia(
             population=payload.population,
             n_questions=payload.n_questions,
         )
+        await fact.debiter(current_user.user_id, "formulaire_ia")
 
         # Si un etude_id est fourni, créer le formulaire directement dans l'étude
         formulaire_id = None
@@ -550,6 +725,9 @@ async def generer_formulaire_ia(
                     sections=resultat.get("sections_metadata", []),
                 )
                 formulaire_id = form.formulaire_id
+                etude_after = ge.get_etude(payload.creer_dans_etude)
+                if etude_after:
+                    await sauvegarder_etude(etude_after, current_user.user_id)
                 # Persister XLSForm dans Mes Documents
                 try:
                     xls_bytes = ge.generer_xlsform_bytes(payload.creer_dans_etude)
@@ -583,8 +761,13 @@ async def generer_formulaire_ia(
     summary="Analyse IA des questions ouvertes — thèmes, sentiments, citations représentatives",
 )
 async def analyser_commentaires(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    await fact.precheck(current_user.user_id)
     try:
         resultats = await ge.analyser_commentaires(etude_id)
+        etude = ge.get_etude(etude_id)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+        await fact.debiter(current_user.user_id, "analyse_commentaires")
         return resultats
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -607,8 +790,13 @@ async def analyser_quantitatif_intelligent(
     puis sélectionne les croisements et analyses les plus pertinents.
     Résultats : croisements ciblés + Chi² + descriptives prioritaires + graphiques.
     """
+    await fact.precheck(current_user.user_id)
     try:
         resultats = await ge.analyser_quantitatif_intelligent(etude_id)
+        etude = ge.get_etude(etude_id)
+        if etude:
+            await sauvegarder_etude(etude, current_user.user_id)
+        await fact.debiter(current_user.user_id, "analyse_intelligente")
         return {
             "statut": "analyse_intelligente_terminee",
             "n_reponses": resultats["n_reponses"],

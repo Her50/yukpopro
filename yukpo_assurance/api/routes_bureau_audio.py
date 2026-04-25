@@ -110,7 +110,8 @@ async def transcrire_audio(
             informations_contexte=informations_contexte,
         )
     except RuntimeError as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        logger.error(f"[routes_bureau_audio.py] {e}")
+        raise HTTPException(status_code=502, detail="Service externe indisponible")
     except Exception as e:
         logger.error(f"[Bureau Audio] Transcription échouée : {e}")
         raise HTTPException(status_code=500, detail=f"Transcription échouée : {e}")

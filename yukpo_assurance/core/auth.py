@@ -243,12 +243,13 @@ async def get_current_user_optional(
 def require_role(*roles: str):
     """Dépendance factory : vérifie que l'utilisateur a l'un des rôles requis."""
     async def _check(current_user: TokenData = Depends(get_current_user)) -> TokenData:
-        if current_user.role not in roles and "admin" not in roles:
-            if current_user.role != "admin":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Rôle requis : {', '.join(roles)}. Votre rôle : {current_user.role}",
-                )
+        # Admin bypass uniquement si "admin" est explicitement dans la liste des rôles autorisés
+        # OU si l'utilisateur est admin (super-utilisateur global)
+        if current_user.role != "admin" and current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Rôle requis : {', '.join(roles)}.",
+            )
         return current_user
     return _check
 
@@ -462,15 +463,15 @@ async def _login_db(req: "LoginRequest", response: "Response") -> "TokenResponse
         from passlib.context import CryptContext
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         if not pwd_context.verify(req.password, user.hashed_password):
-            # Incrémenter les échecs
+            # Incrémenter les échecs DB
             user.tentatives_echec = (user.tentatives_echec or 0) + 1
-            # Auto-verrouilage après 5 tentatives échouées
-            if user.tentatives_echec >= 5:
+            # Auto-verrouilage après 10 tentatives échouées (DB-level)
+            if user.tentatives_echec >= 10:
                 from datetime import timedelta
                 user.bloque_jusqu_au = _dt.utcnow() + timedelta(minutes=30)
-                logger.warning(f"[Auth] Compte verrouillé 30min après 5 échecs: {req.username}")
+                logger.warning(f"[Auth] Compte verrouillé 30min après 10 échecs DB: {req.username}")
             await session.commit()
-            security_service.detecter_tentatives_brute_force(req.username, "login")
+            # Ne pas ré-incrémenter le compteur Redis — déjà fait en début de fonction
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Identifiants incorrects",
@@ -801,6 +802,46 @@ class _SetupYukpoRequest(BaseModel):
     email: str
     password: str
     nom: str = "Yukpo Admin"
+
+
+class _UnlockRequest(BaseModel):
+    setup_secret: str
+    username: str   # email ou username à débloquer
+
+
+@auth_router.post("/unlock-account", include_in_schema=False)
+async def unlock_account(body: "_UnlockRequest"):
+    """
+    Débloque un compte bloqué par brute-force (Redis + DB).
+    Protégé par SETUP_YUKPO_SECRET. Usage maintenance uniquement.
+    """
+    import os
+    expected = os.environ.get("SETUP_YUKPO_SECRET", "")
+    if not expected or body.setup_secret != expected:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # Reset Redis brute-force
+    from core.security import security_service
+    security_service.reinitialiser_tentatives(body.username, "login")
+
+    # Reset DB lock
+    from sqlalchemy import select, update
+    from core.database import async_session_maker, UtilisateurDB
+    from datetime import datetime as _dt
+
+    async with async_session_maker() as session:
+        await session.execute(
+            update(UtilisateurDB)
+            .where(
+                (UtilisateurDB.username == body.username)
+                | (UtilisateurDB.email == body.username)
+            )
+            .values(bloque_jusqu_au=None, tentatives_echec=0)
+        )
+        await session.commit()
+
+    logger.info(f"[Auth] Compte débloqué par admin: {body.username}")
+    return {"succes": True, "message": f"Compte {body.username} débloqué."}
 
 
 @auth_router.post("/setup-yukpo", include_in_schema=False)

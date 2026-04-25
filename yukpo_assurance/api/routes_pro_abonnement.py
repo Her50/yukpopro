@@ -350,7 +350,8 @@ async def confirmer_paiement(
             db=db,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_pro_abonnement.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
 
     plan_info = PLANS.get(cmd.plan_ou_pack, PLANS["gratuit"])
     from modules.pro.service_credits import CREDITS_PAR_PLAN, LABEL_CREDITS_PLAN
@@ -436,7 +437,8 @@ async def confirmer_recharge_credits(
             db=db,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_pro_abonnement.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
 
     pack = PACKS_CREDITS.get(cmd.plan_ou_pack, {})
     return {

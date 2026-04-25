@@ -151,10 +151,12 @@ async def creer_mon_profil(
         )
         return profil.to_dict()
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        logger.warning(f"[routes_pro_profil.py] {e}")
+        raise HTTPException(status_code=409, detail="Conflit de données")
 
 
 @router.put("/", summary="Mettre à jour mon profil professionnel")
+@router.patch("/", summary="Mettre à jour mon profil professionnel (PATCH)")
 async def mettre_a_jour_mon_profil(
     req: MettreAJourProfilRequest,
     current_user: TokenData = Depends(get_current_user),

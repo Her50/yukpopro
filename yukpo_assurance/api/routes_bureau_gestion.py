@@ -289,7 +289,8 @@ async def generer_devis(
         pdf_bytes = generer_pdf_devis(devis, est_facture=False)
     except Exception as e:
         logger.error(f"[Gestion Devis] Erreur PDF : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_bureau_gestion.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
     ts = int(__import__("time").time())
     pdf_id = f"bureau_devis_{current_user.user_id}_{ts}.pdf"
@@ -353,7 +354,8 @@ async def generer_facture(
     try:
         pdf_bytes = generer_pdf_devis(devis, est_facture=True)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_bureau_gestion.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
     ts = int(__import__("time").time())
     pdf_id = f"bureau_facture_{current_user.user_id}_{ts}.pdf"

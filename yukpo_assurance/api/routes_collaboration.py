@@ -426,16 +426,19 @@ async def websocket_endpoint(
     WebSocket pour les notifications temps réel.
     Connexion : ws://host/api/v1/collaboration/ws/{compagnie_id}/{user_id}?token=<jwt>
     """
-    # Vérification JWT
-    if token:
-        try:
-            td = _decoder_token(token)
-            if td.user_id != user_id or td.compagnie_id != compagnie_id:
-                await websocket.close(code=4003)
-                return
-        except Exception:
-            await websocket.close(code=4001)
+    # Token JWT obligatoire — rejet immédiat si absent
+    if not token:
+        await websocket.close(code=4001)
+        return
+    try:
+        td = _decoder_token(token)
+        # user_id et compagnie_id doivent correspondre exactement au JWT
+        if td.user_id != user_id or td.compagnie_id != compagnie_id:
+            await websocket.close(code=4003)
             return
+    except Exception:
+        await websocket.close(code=4001)
+        return
 
     await websocket.accept()
     await gestionnaire_ws.connecter(websocket, user_id, compagnie_id)

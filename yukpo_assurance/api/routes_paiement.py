@@ -12,11 +12,16 @@ Routes FastAPI — Paiement Mobile Money.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import logging
 import uuid
 from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+
+logger = logging.getLogger("yukpo_assurance.paiement")
 from pydantic import BaseModel
 from sqlalchemy import func, select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,6 +70,19 @@ class PenaliteSchema(BaseModel):
 async def _get_compagnie(compagnie_id: int, db: AsyncSession) -> Optional[CompagnieDB]:
     result = await db.execute(select(CompagnieDB).where(CompagnieDB.id == compagnie_id))
     return result.scalar_one_or_none()
+
+
+def _verifier_signature_webhook(
+    body: bytes,
+    secret: str,
+    signature_recue: Optional[str],
+    algo: str = "sha256",
+) -> bool:
+    """Vérifie la signature HMAC d'un webhook en temps constant."""
+    if not secret or not signature_recue:
+        return False
+    attendu = hmac.new(secret.encode(), body, getattr(hashlib, algo)).hexdigest()
+    return hmac.compare_digest(attendu, signature_recue.lower().lstrip("sha256="))
 
 
 def _build_config(compagnie: CompagnieDB) -> dict:
@@ -307,12 +325,31 @@ async def callback_cinetpay(
     compagnie_id: int,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    x_cinetpay_signature: Optional[str] = Header(None),
 ):
     """Webhook CinetPay — confirmation de paiement."""
-    data = await request.json()
+    body = await request.body()
 
     compagnie = await _get_compagnie(compagnie_id, db)
     if not compagnie:
+        return {"status": "ignored"}
+
+    # Vérification signature HMAC si la compagnie a configuré un secret webhook
+    webhook_secret = getattr(compagnie, "webhook_secret", None) or ""
+    if webhook_secret:
+        if not _verifier_signature_webhook(body, webhook_secret, x_cinetpay_signature):
+            logger.warning(f"[Webhook CinetPay] Signature invalide compagnie={compagnie_id}")
+            raise HTTPException(status_code=403, detail="Signature webhook invalide")
+
+    try:
+        import json
+        data = json.loads(body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Corps JSON invalide")
+
+    # CinetPay : vérifier que le site_id correspond à la compagnie
+    if compagnie.cinetpay_site_id and str(data.get("cpm_site_id", "")) != str(compagnie.cinetpay_site_id):
+        logger.warning(f"[Webhook CinetPay] site_id mismatch compagnie={compagnie_id}")
         return {"status": "ignored"}
 
     config = _build_config(compagnie)
@@ -343,13 +380,26 @@ async def callback_mtn(
     request: Request,
     db: AsyncSession = Depends(get_db),
     x_reference_id: Optional[str] = Header(None),
+    x_signature: Optional[str] = Header(None),
 ):
     """Webhook MTN MoMo — confirmation de paiement."""
-    data = await request.json()
+    body = await request.body()
 
     compagnie = await _get_compagnie(compagnie_id, db)
     if not compagnie:
         return {"status": "ignored"}
+
+    webhook_secret = getattr(compagnie, "webhook_secret", None) or ""
+    if webhook_secret:
+        if not _verifier_signature_webhook(body, webhook_secret, x_signature):
+            logger.warning(f"[Webhook MTN] Signature invalide compagnie={compagnie_id}")
+            raise HTTPException(status_code=403, detail="Signature webhook invalide")
+
+    try:
+        import json
+        data = json.loads(body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Corps JSON invalide")
 
     config = _build_config(compagnie)
     gestionnaire = GestionnairePaiement(config)
@@ -378,9 +428,27 @@ async def callback_orange(
     compagnie_id: int,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    x_orange_signature: Optional[str] = Header(None),
 ):
     """Webhook Orange Money — confirmation de paiement."""
-    data = await request.json()
+    body = await request.body()
+
+    compagnie = await _get_compagnie(compagnie_id, db)
+    if not compagnie:
+        return {"status": "ignored"}
+
+    webhook_secret = getattr(compagnie, "webhook_secret", None) or ""
+    if webhook_secret:
+        if not _verifier_signature_webhook(body, webhook_secret, x_orange_signature):
+            logger.warning(f"[Webhook Orange] Signature invalide compagnie={compagnie_id}")
+            raise HTTPException(status_code=403, detail="Signature webhook invalide")
+
+    try:
+        import json
+        data = json.loads(body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Corps JSON invalide")
+
     ref_externe = data.get("pay_token") or data.get("transaction_id", "")
 
     if ref_externe:

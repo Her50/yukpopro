@@ -164,7 +164,8 @@ async def instruire_agent(
         }
     except Exception as e:
         logger.error(f"[routes_agent] Erreur instruire : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 @router.get("/stream")
@@ -431,10 +432,12 @@ async def approuver_validation(
         return response
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
     except Exception as e:
         logger.error(f"[routes_agent] Erreur approbation {item_id} : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 @router.post("/rejeter/{item_id}")
@@ -479,10 +482,12 @@ async def rejeter_validation(
         return response
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
     except Exception as e:
         logger.error(f"[routes_agent] Erreur rejet {item_id} : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 class RepondreRequest(BaseModel):
@@ -581,10 +586,12 @@ async def _traiter_reponse_question(
         return response
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
     except Exception as e:
         logger.error(f"[routes_agent] Erreur réponse question {item_id} : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_agent.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 @router.post("/repondre/{item_id}")

@@ -135,7 +135,8 @@ async def valider(
     try:
         cmd = await valider_commande(commande_id, current_user.user_id, "manuel", db)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.warning(f"[routes_admin_paiements.py] {e}")
+        raise HTTPException(status_code=404, detail="Ressource introuvable")
     return {"succes": True, "commande": _serialiser_commande(cmd)}
 
 
@@ -150,7 +151,8 @@ async def rejeter(
     try:
         cmd = await rejeter_commande(commande_id, current_user.user_id, req.motif, db)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_admin_paiements.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
     return {"succes": True, "commande": _serialiser_commande(cmd)}
 
 

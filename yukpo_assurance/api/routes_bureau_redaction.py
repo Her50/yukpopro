@@ -120,7 +120,8 @@ async def generer_document(
         )
         doc = await _generer(req)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"[routes_bureau_redaction.py] {e}")
+        raise HTTPException(status_code=400, detail="Données invalides")
     except Exception as e:
         logger.error(f"[Bureau Rédaction] Erreur génération : {e}")
         raise HTTPException(status_code=500, detail=f"Génération échouée : {e}")
@@ -187,7 +188,8 @@ async def reformuler_texte(
         resultat, meta = await _reformuler(demande.texte, demande.registre, demande.pays)
     except Exception as e:
         logger.error(f"[Bureau Reformulation] Erreur : {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_bureau_redaction.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
     try:
         await debiter_llm(

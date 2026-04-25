@@ -11,8 +11,8 @@ from datetime import datetime
 from typing import AsyncGenerator
 
 from sqlalchemy import (
-    Boolean, Column, DateTime, Float, ForeignKey,
-    Integer, JSON, String, Text, text,
+    BigInteger, Boolean, Column, DateTime, Float, ForeignKey,
+    Integer, JSON, Numeric, String, Text, text,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession, async_sessionmaker, create_async_engine,
@@ -270,6 +270,7 @@ class CompagnieDB(Base):
     orange_money_api_key = Column(String, nullable=True)
     cinetpay_api_key = Column(String, nullable=True)
     cinetpay_site_id = Column(String, nullable=True)
+    webhook_secret = Column(String, nullable=True)   # HMAC-SHA256 pour vérification webhooks paiement
     # SMTP pour envoi emails
     smtp_host = Column(String, nullable=True)
     smtp_port = Column(Integer, default=587)
@@ -999,6 +1000,109 @@ class CommandePaiementDB(Base):
     deadline = Column(DateTime, nullable=False)
 
 
+# ─── PAIEMENT v2 — multi-provider unifié ──────────────────────────────────────
+
+class WalletYukpoProDB(Base):
+    """Portefeuille interne YukpoPro (crédits IA + cash optionnel)."""
+    __tablename__ = "wallet_yukpopro"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    compagnie_id = Column(BigInteger, nullable=False, index=True)
+    user_id = Column(BigInteger, nullable=True, index=True)
+    solde_credits_yukpo = Column(BigInteger, nullable=False, default=0)
+    solde_cash_fcfa = Column(BigInteger, nullable=False, default=0)
+    devise = Column(String(8), nullable=False, default="XAF")
+    kyc_verifie = Column(Boolean, nullable=False, default=False)
+    statut = Column(String(16), nullable=False, default="actif")
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class PaymentTransactionV2DB(Base):
+    """Transaction multi-provider unifiée (succède à TransactionPaiementDB+CommandePaiementDB)."""
+    __tablename__ = "payment_transactions_v2"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    reference = Column(String(64), nullable=False, unique=True, index=True)
+    compagnie_id = Column(BigInteger, nullable=False, index=True)
+    user_id = Column(BigInteger, nullable=True, index=True)
+    type = Column(String(24), nullable=False)  # abonnement | recharge | service
+    plan_ou_pack = Column(String(32), nullable=True)
+    amount = Column(Numeric(14, 2), nullable=False)
+    currency = Column(String(8), nullable=False, default="XAF")
+    country_code = Column(String(2), nullable=True)
+    customer_phone = Column(String(24), nullable=True, index=True)
+    customer_email = Column(String(120), nullable=True)
+    provider = Column(String(24), nullable=True, index=True)
+    provider_reference = Column(String(120), nullable=True, index=True)
+    payment_method = Column(String(24), nullable=True)
+    status = Column(String(16), nullable=False, default="pending", index=True)
+    payment_url = Column(Text, nullable=True)
+    ussd_instructions = Column(Text, nullable=True)
+    error_message = Column(Text, nullable=True)
+    metadata_json = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
+
+class PaymentAttemptDB(Base):
+    """Tentative individuelle (cascade : un transaction_id → N attempts)."""
+    __tablename__ = "payment_attempts"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    transaction_id = Column(BigInteger, ForeignKey("payment_transactions_v2.id", ondelete="CASCADE"), nullable=False, index=True)
+    provider = Column(String(24), nullable=False)
+    provider_reference = Column(String(120), nullable=True)
+    status = Column(String(16), nullable=False)
+    error_message = Column(Text, nullable=True)
+    response_payload = Column(JSON, nullable=True)
+    attempted_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class PaymentWebhookEventDB(Base):
+    """Audit log de tous les webhooks reçus (pour debug + replay)."""
+    __tablename__ = "payment_webhook_events"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    provider = Column(String(24), nullable=False, index=True)
+    provider_reference = Column(String(120), nullable=True, index=True)
+    transaction_id = Column(BigInteger, ForeignKey("payment_transactions_v2.id", ondelete="SET NULL"), nullable=True, index=True)
+    status_received = Column(String(16), nullable=True)
+    signature_valid = Column(Boolean, nullable=False, default=True)
+    raw_payload = Column(JSON, nullable=True)
+    received_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+
+# ─── ENQUÊTES — persistance JSON blob ────────────────────────────────────────
+
+class SessionCopiloteDB(Base):
+    """Session conversationnelle du copilote assistant — historique + contexte actif."""
+    __tablename__ = "copilote_sessions"
+
+    user_id        = Column(Integer, primary_key=True, index=True)
+    role           = Column(String(50), nullable=False, default="agent")
+    historique     = Column(JSON, nullable=False, default=list)   # list[dict] — 100 derniers échanges
+    contexte_actif = Column(String(200), nullable=True)
+    modifie_le     = Column(DateTime, default=datetime.utcnow)
+
+
+class EtudeDB(Base):
+    """
+    Persistance complète d'une étude + formulaire + transcriptions + analyses.
+    Sérialisée en JSON pour éviter ~20 tables relationnelles et rester simple.
+    """
+    __tablename__ = "enquetes_etudes"
+
+    etude_id    = Column(String(36), primary_key=True, index=True)
+    user_id     = Column(Integer, nullable=False, index=True)
+    titre       = Column(String(300), nullable=False, index=True)
+    statut      = Column(String(50), nullable=False, default="brouillon", index=True)
+    data        = Column(JSON, nullable=False)  # Dump complet du dataclass Etude
+    cree_le     = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:
@@ -1028,6 +1132,11 @@ async def init_db() -> None:
         ("utilisateurs",         "tentatives_echec",           "INTEGER",   "0"),
         ("utilisateurs",         "totp_secret",                "VARCHAR(64)", None),
         ("utilisateurs",         "totp_active",                "BOOLEAN",   "FALSE"),
+        # SessionCopiloteDB (table créée par create_all — colonnes ajoutées si migration partielle)
+        ("copilote_sessions",    "contexte_actif",             "VARCHAR(200)", None),
+        ("copilote_sessions",    "modifie_le",                 "TIMESTAMP", None),
+        # CompagnieDB — webhook HMAC secret
+        ("compagnies",           "webhook_secret",             "VARCHAR(128)", None),
     ]
     async with engine.begin() as conn:
         for table, col, col_type, default in _nouvelles_colonnes:

@@ -2,18 +2,18 @@
 SchedulerEmploi v2 — Veille emploi réelle, multi-sources.
 
 Sources actives (ordre de priorité) :
-  1. SerpAPI Google Jobs  — agrège LinkedIn, Indeed, Glassdoor + sites locaux par pays
-     → Variable : SERPAPI_KEY (déjà dans .env)
-  2. Adzuna API           — UK/International, gratuit 250 req/mois
+  1. Serper.dev Google Jobs — agrège LinkedIn, Indeed, Glassdoor + sites locaux par pays
+     → Variable : SERPER_API_KEY  ← PRINCIPALE SOURCE, 2500 req/mois gratuits sur serper.dev
+  2. Sites emploi locaux africains via Serper (FNE, 237jobs, ANPE…)
+     → Variable : SERPER_API_KEY
+  3. Adzuna API           — International, gratuit 250 req/mois
      → Variables : ADZUNA_APP_ID + ADZUNA_APP_KEY
-  3. Remotive.io          — Emplois remote/tech, API publique gratuite (sans clé)
-  4. Jobicy.com           — Remote, API publique gratuite (sans clé)
-  5. Jooble API           — Afrique + international
+  4. Remotive.io          — Remote tech/finance uniquement (catégorie, pas recherche libre)
+     → Gratuit sans clé. Note : paramètre `search` ignoré côté API, on utilise `category`.
+  5. Jobicy.com           — Remote, par tag métier (pas par mot-clé)
+     → Gratuit sans clé. Note : paramètre `keyword` retourne 0, on utilise `tag`.
+  6. Jooble API           — Afrique + international
      → Variable : JOOBLE_API_KEY
-
-Fallback IA (uniquement si 0 offre réelle trouvée) :
-  → Marqué source_type="simule" dans chaque offre
-  → Badge orange visible dans l'UI — l'utilisateur sait que c'est de l'IA
 """
 from __future__ import annotations
 
@@ -167,7 +167,7 @@ async def rechercher_offres_pour_user(
 
     # ── Collecte en parallèle depuis toutes les sources réelles ──────────────
     resultats = await asyncio.gather(
-        _fetch_serpapi_google_jobs(mots_cles, pays, info),
+        _fetch_serper_google_jobs(mots_cles, pays, info),
         _fetch_sites_locaux(mots_cles, pays, info),
         _fetch_adzuna(mots_cles, pays, info),
         _fetch_remotive(mots_cles),
@@ -177,7 +177,7 @@ async def rechercher_offres_pour_user(
     )
 
     offres_brutes: list[dict] = []
-    noms_sources = ["SerpAPI Google Jobs", "Sites locaux/agences", "Adzuna", "Remotive", "Jobicy", "Jooble"]
+    noms_sources = ["Serper Google Jobs", "Sites locaux/agences", "Adzuna", "Remotive", "Jobicy", "Jooble"]
     for nom, res in zip(noms_sources, resultats):
         if isinstance(res, list):
             logger.info(f"[SchedulerEmploi] {nom}: {len(res)} offres")
@@ -197,7 +197,6 @@ async def rechercher_offres_pour_user(
     nb_reelles = len(offres_uniques)
     logger.info(f"[SchedulerEmploi] {nb_reelles} offres réelles uniques pour user {user_id}")
 
-    # Aucun fallback IA : si 0 résultats, on retourne 0 proprement
     if not offres_uniques:
         logger.warning(f"[SchedulerEmploi] Aucune offre trouvée pour user {user_id} — sources indisponibles")
         await _sauvegarder_offres(user_id, [])
@@ -212,66 +211,87 @@ async def rechercher_offres_pour_user(
     return len(offres_finales)
 
 
-# ── Source 1 : SerpAPI Google Jobs ────────────────────────────────────────────
+# ── Source 1 : Serper.dev Google Jobs ─────────────────────────────────────────
 # Agrège LinkedIn, Indeed, Glassdoor, AfricaJobs, Rekrute, etc. en temps réel.
 # Couvre TOUS les pays. La source la plus puissante.
+# POST https://google.serper.dev/jobs  (header X-API-KEY, body JSON)
 
-async def _fetch_serpapi_google_jobs(mots_cles: str, pays: str, info: dict) -> list[dict]:
-    api_key = os.getenv("SERPAPI_KEY", "")
+async def _fetch_serper_google_jobs(mots_cles: str, pays: str, info: dict) -> list[dict]:
+    api_key = os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
     if not api_key or api_key.startswith("VOTRE"):
         return []
 
     try:
         import httpx
         offres: list[dict] = []
-
-        # Deux requêtes : locale + internationale (remote)
-        queries = [
-            f"{mots_cles} {info['nom']}",
-            f"{mots_cles} afrique francophone",
-        ]
+        headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
 
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
-            for q in queries:
-                params = {
-                    "engine":  "google_jobs",
-                    "q":       q,
-                    "gl":      info["gl"],
-                    "hl":      info["hl"],
-                    "api_key": api_key,
-                    "num":     20,
-                    "chips":   "date_posted:week",  # offres de la semaine
-                }
-                resp = await client.get("https://serpapi.com/search", params=params)
+            # ── Tentative 1 : endpoint /jobs (plan Pro+) ─────────────────────
+            jobs_ok = False
+            for q in [f"{mots_cles} {info['nom']}", f"{mots_cles} afrique francophone"]:
+                resp = await client.post(
+                    "https://google.serper.dev/jobs",
+                    json={"q": q, "gl": info["gl"], "hl": info["hl"], "num": 20, "datePosted": "week"},
+                    headers=headers,
+                )
+                if resp.status_code == 404:
+                    break  # Endpoint non disponible sur ce plan → fallback /search
                 if resp.status_code != 200:
                     continue
-                data = resp.json()
-                jobs = data.get("jobs_results", [])
-
-                for job in jobs:
-                    # Extraire le meilleur lien direct
-                    apply_options = job.get("apply_options", [])
-                    url = apply_options[0].get("link", "") if apply_options else job.get("share_link", "")
-
-                    ext = job.get("detected_extensions", {})
+                jobs_ok = True
+                for job in resp.json().get("jobs", []):
                     offres.append({
-                        "titre":            job.get("title", "")[:150],
-                        "entreprise":       job.get("company_name", "Non précisé"),
-                        "lieu":             job.get("location", info["nom"]),
-                        "resume":           (job.get("description", "") or "")[:600],
-                        "url":              url,
-                        "source":           job.get("via", "Google Jobs"),
+                        "titre":            (job.get("title") or "")[:150],
+                        "entreprise":       job.get("company") or "Non précisé",
+                        "lieu":             job.get("location") or info["nom"],
+                        "resume":           (job.get("description") or job.get("snippet") or "")[:600],
+                        "url":              job.get("link") or job.get("applyLink") or "",
+                        "source":           job.get("via") or "Google Jobs",
                         "source_type":      "reel",
-                        "date_publication": ext.get("posted_at", "Récent"),
-                        "type_contrat":     ext.get("schedule_type", "Non précisé"),
-                        "salaire":          ext.get("salary", ""),
+                        "date_publication": (job.get("datePosted") or "")[:10],
+                        "type_contrat":     job.get("jobType") or "Non précisé",
+                        "salaire":          job.get("salary") or "",
                         "score":            0,
                     })
+
+            # ── Fallback : /search classique si /jobs non disponible ──────────
+            if not jobs_ok:
+                _JOB_KWS = ["emploi", "poste", "recrutement", "offre", "job", "cdi", "cdd", "stage"]
+                for q in [f"{mots_cles} offre emploi {info['nom']}", f"{mots_cles} recrutement {info['nom']}"]:
+                    resp = await client.post(
+                        "https://google.serper.dev/search",
+                        json={"q": q, "gl": info["gl"], "hl": info["hl"], "num": 10},
+                        headers=headers,
+                    )
+                    if resp.status_code != 200:
+                        continue
+                    for r in resp.json().get("organic", []):
+                        titre   = r.get("title", "").strip()
+                        lien    = r.get("link", "")
+                        snippet = r.get("snippet", "")
+                        if not titre or not lien:
+                            continue
+                        if not any(kw in titre.lower() or kw in snippet.lower() for kw in _JOB_KWS):
+                            continue
+                        offres.append({
+                            "titre":            titre[:150],
+                            "entreprise":       (r.get("displayedLink", "") or "").split("/")[0] or "Non précisé",
+                            "lieu":             info["nom"],
+                            "resume":           snippet[:600],
+                            "url":              lien,
+                            "source":           "Google (Serper)",
+                            "source_type":      "reel",
+                            "date_publication": (r.get("date") or "")[:10],
+                            "type_contrat":     "Non précisé",
+                            "salaire":          "",
+                            "score":            0,
+                        })
 
         return offres
 
     except Exception as e:
-        logger.debug(f"[SchedulerEmploi] SerpAPI erreur: {e}")
+        logger.debug(f"[SchedulerEmploi] Serper erreur: {e}")
         return []
 
 
@@ -323,13 +343,32 @@ async def _fetch_adzuna(mots_cles: str, pays: str, info: dict) -> list[dict]:
 
 
 # ── Source 3 : Remotive.io ────────────────────────────────────────────────────
-# API publique gratuite. Idéale pour profils tech, digital, remote.
+# DÉSACTIVÉ : le paramètre `search` de l'API Remotive est ignoré côté serveur —
+# retourne toujours les mêmes 20 postes tech US quelle que soit la requête.
+# Réactivé uniquement via `category` si le profil est tech/dev.
+
+_REMOTIVE_CATEGORY: dict[str, str] = {
+    "developpeur": "software-dev", "informaticien": "software-dev",
+    "data": "data", "designer": "design",
+    "marketing": "marketing", "product": "product",
+    "devops": "devops-sysadmin", "finance": "finance-legal",
+    "comptable": "finance-legal", "auditeur": "finance-legal",
+    "rh": "human-resources", "support": "customer-support",
+}
 
 async def _fetch_remotive(mots_cles: str) -> list[dict]:
+    # Détecter une catégorie Remotive correspondant aux mots-clés
+    mots_lower = mots_cles.lower()
+    category = next(
+        (cat for kw, cat in _REMOTIVE_CATEGORY.items() if kw in mots_lower),
+        None,
+    )
+    if not category:
+        return []  # Pas de catégorie pertinente → ne pas retourner de hors-sujet
+
     try:
         import httpx
-        q = urllib.parse.quote(mots_cles)
-        url = f"https://remotive.com/api/remote-jobs?search={q}&limit=20"
+        url = f"https://remotive.com/api/remote-jobs?category={category}&limit=10"
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
             resp = await client.get(url)
         if resp.status_code != 200:
@@ -358,15 +397,34 @@ async def _fetch_remotive(mots_cles: str) -> list[dict]:
 
 
 # ── Source 4 : Jobicy.com ─────────────────────────────────────────────────────
-# API publique gratuite. Remote + international.
+# API publique gratuite. Paramètre `tag` (pas `keyword` qui retourne 0).
+
+_JOBICY_TAG: dict[str, str] = {
+    "comptable": "accounting", "auditeur": "finance", "financier": "finance",
+    "actuaire": "finance", "fiscaliste": "finance", "tresorier": "finance",
+    "juriste": "legal", "avocat": "legal",
+    "ingenieur": "engineering", "developpeur": "engineering",
+    "informaticien": "engineering", "data": "engineering",
+    "marketing": "marketing", "commercial": "sales", "vente": "sales",
+    "directeur": "management", "manager": "management", "drh": "hr",
+    "medecin": "health", "infirmier": "health",
+    "designer": "design", "graphiste": "design",
+}
 
 async def _fetch_jobicy(mots_cles: str) -> list[dict]:
+    mots_lower = mots_cles.lower()
+    tag = next(
+        (t for kw, t in _JOBICY_TAG.items() if kw in mots_lower),
+        None,
+    )
+    if not tag:
+        return []
+
     try:
         import httpx
-        q = urllib.parse.quote(mots_cles)
-        url = f"https://jobicy.com/api/v2/remote-jobs?count=15&keyword={q}"
+        url = f"https://jobicy.com/api/v2/remote-jobs?count=10&tag={tag}"
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
-            resp = await client.get(url)
+            resp = await client.get(url, headers={"User-Agent": "YukpoBot/2.0"})
         if resp.status_code != 200:
             return []
 
@@ -392,7 +450,7 @@ async def _fetch_jobicy(mots_cles: str) -> list[dict]:
         return []
 
 
-# ── Source 5b : Sites emploi africains locaux (via SerpAPI ciblé) ────────────
+# ── Source 5b : Sites emploi africains locaux (via Serper ciblé) ─────────────
 # Cible spécifiquement les agences publiques et sites locaux par pays.
 # Cameroun : FNE, NinaJob, 237jobs | CI : ANPE | SN : ANPEJ | MA : ANAPEC…
 
@@ -432,8 +490,8 @@ _NOM_AGENCE: dict[str, str] = {
 }
 
 async def _fetch_sites_locaux(mots_cles: str, pays: str, info: dict) -> list[dict]:
-    """Recherche ciblée sur les sites d'emploi locaux et agences nationales via SerpAPI."""
-    api_key = os.getenv("SERPAPI_KEY", "")
+    """Recherche ciblée sur les sites d'emploi locaux et agences nationales via Serper.dev."""
+    api_key = os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
     if not api_key or api_key.startswith("VOTRE"):
         return []
 
@@ -443,25 +501,21 @@ async def _fetch_sites_locaux(mots_cles: str, pays: str, info: dict) -> list[dic
 
     try:
         import httpx
-        # Construire la requête site: pour Google
         site_query = " OR ".join(f"site:{s}" for s in sites[:6])
         q = f"{mots_cles} emploi ({site_query})"
 
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
-            resp = await client.get("https://serpapi.com/search", params={
-                "engine":  "google",
-                "q":       q,
-                "gl":      info["gl"],
-                "hl":      info["hl"],
-                "num":     20,
-                "api_key": api_key,
-            })
+            resp = await client.post(
+                "https://google.serper.dev/search",
+                json={"q": q, "gl": info["gl"], "hl": info["hl"], "num": 20},
+                headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+            )
         if resp.status_code != 200:
             return []
 
         data = resp.json()
         offres = []
-        for r in data.get("organic_results", []):
+        for r in data.get("organic", []):
             url = r.get("link", "")
             # Identifier la source depuis l'URL
             source_nom = next(

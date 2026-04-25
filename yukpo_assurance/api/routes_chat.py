@@ -3,6 +3,8 @@ import asyncio
 import base64
 import json
 import logging
+import secrets
+import time
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
@@ -21,6 +23,28 @@ from config.settings import settings
 logger = logging.getLogger("yukpo_assurance.chat")
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
+
+# ── Tokens SSE courte durée de vie (60s, usage unique) ────────────────────────
+# Remplace le JWT long-lived dans l'URL SSE, qui s'expose dans les logs serveur.
+_SSE_TOKENS: dict[str, tuple[TokenData, float]] = {}  # token → (user, expires_at)
+_SSE_TTL = 60  # secondes
+
+
+def _creer_token_sse(user: TokenData) -> str:
+    token = secrets.token_urlsafe(32)
+    _SSE_TOKENS[token] = (user, time.time() + _SSE_TTL)
+    return token
+
+
+def _consommer_token_sse(token: str) -> Optional[TokenData]:
+    """Consomme un token SSE (usage unique) et vérifie son expiration."""
+    entry = _SSE_TOKENS.pop(token, None)
+    if not entry:
+        return None
+    user, expires_at = entry
+    if time.time() > expires_at:
+        return None
+    return user
 
 
 class MessageRequest(BaseModel):
@@ -92,12 +116,19 @@ async def envoyer_message(
     if req.session_id:
         session = get_session(req.session_id)
         if not session:
-            raise HTTPException(404, f"Session {req.session_id} introuvable")
-        # Vérifier que la session appartient bien à l'utilisateur (sauf admin)
-        if session.user_id != current_user.user_id and current_user.role != "admin":
-            raise HTTPException(403, "Session appartenant à un autre utilisateur")
+            raise HTTPException(404, f"Session introuvable")
+        # Vérifier user_id ET compagnie_id (isolation multi-tenant)
+        if current_user.role != "admin" and (
+            session.user_id != current_user.user_id
+            or (session.compagnie_id != 0 and session.compagnie_id != current_user.compagnie_id)
+        ):
+            raise HTTPException(403, "Accès refusé")
     else:
-        session = creer_session(user_id=current_user.user_id, role=current_user.role)
+        session = creer_session(
+            user_id=current_user.user_id,
+            role=current_user.role,
+            compagnie_id=current_user.compagnie_id,
+        )
         if req.ecran_contexte:
             session.ecran_contexte = req.ecran_contexte
 
@@ -114,6 +145,16 @@ async def envoyer_message(
         }
 
 
+@router.post("/sse-token", dependencies=[Depends(get_current_user)])
+async def obtenir_token_sse(current_user: TokenData = Depends(get_current_user)):
+    """
+    Émet un token SSE à usage unique (TTL 60s) pour l'endpoint GET /message-stream.
+    Évite d'exposer le JWT long-lived dans l'URL (logs serveur/proxy).
+    Usage : POST /sse-token → {"sse_token": "..."} → GET /message-stream?token=...
+    """
+    return {"sse_token": _creer_token_sse(current_user), "expires_in": _SSE_TTL}
+
+
 @router.get("/message-stream", dependencies=[])
 async def envoyer_message_stream_get(
     session_id: Optional[str] = None,
@@ -122,25 +163,38 @@ async def envoyer_message_stream_get(
 ):
     """
     GET endpoint SSE pour EventSource (navigateurs).
-    Le token JWT est passé en query param car EventSource ne supporte pas les headers.
+    Accepte un token SSE à usage unique (POST /sse-token) en priorité,
+    ou un JWT direct en fallback (rétrocompatibilité).
     """
-    # Authentification via query param
     if not token:
         raise HTTPException(401, "Token requis")
-    try:
-        current_user = _decoder_token(token)
-    except Exception:
-        raise HTTPException(401, "Token invalide")
+
+    # Priorité 1 : token SSE court (usage unique, 60s)
+    current_user = _consommer_token_sse(token)
+
+    # Priorité 2 : JWT complet (fallback rétrocompatible)
+    if current_user is None:
+        try:
+            current_user = _decoder_token(token)
+        except Exception:
+            raise HTTPException(401, "Token invalide ou expiré")
 
     # Résolution / création de session
     if session_id:
         session = get_session(session_id)
         if not session:
-            raise HTTPException(404, f"Session {session_id} introuvable")
-        if session.user_id != current_user.user_id and current_user.role != "admin":
-            raise HTTPException(403, "Session appartenant à un autre utilisateur")
+            raise HTTPException(404, "Session introuvable")
+        if current_user.role != "admin" and (
+            session.user_id != current_user.user_id
+            or (session.compagnie_id != 0 and session.compagnie_id != current_user.compagnie_id)
+        ):
+            raise HTTPException(403, "Accès refusé")
     else:
-        session = creer_session(user_id=current_user.user_id, role=current_user.role)
+        session = creer_session(
+            user_id=current_user.user_id,
+            role=current_user.role,
+            compagnie_id=current_user.compagnie_id,
+        )
 
     return await _stream_response(session, content, current_user)
 
@@ -160,11 +214,18 @@ async def envoyer_message_stream(
     if req.session_id:
         session = get_session(req.session_id)
         if not session:
-            raise HTTPException(404, f"Session {req.session_id} introuvable")
-        if session.user_id != current_user.user_id and current_user.role != "admin":
-            raise HTTPException(403, "Session appartenant à un autre utilisateur")
+            raise HTTPException(404, "Session introuvable")
+        if current_user.role != "admin" and (
+            session.user_id != current_user.user_id
+            or (session.compagnie_id != 0 and session.compagnie_id != current_user.compagnie_id)
+        ):
+            raise HTTPException(403, "Accès refusé")
     else:
-        session = creer_session(user_id=current_user.user_id, role=current_user.role)
+        session = creer_session(
+            user_id=current_user.user_id,
+            role=current_user.role,
+            compagnie_id=current_user.compagnie_id,
+        )
         if req.ecran_contexte:
             session.ecran_contexte = req.ecran_contexte
 

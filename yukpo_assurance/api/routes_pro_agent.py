@@ -166,7 +166,8 @@ async def recherche_rag_pro(
             "metier":       metier,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[routes_pro_agent.py] {e}")
+        raise HTTPException(status_code=500, detail="Erreur serveur interne")
 
 
 # ── Factory d'agents par métier ────────────────────────────────────────────────
