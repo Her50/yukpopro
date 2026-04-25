@@ -161,7 +161,21 @@
     "modeles": "Modelos",
     "conversion": "Conversão",
     "infographie": "Infografia",
-    "selectTemplate": "Escolher um modelo"
+    "selectTemplate": "Escolher um modelo",
+    "infogOneVisual": "Gerar 1 design",
+    "infogFourVariants": "4 variantes IA",
+    "infogVariantsLoading": "Gerando…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — para impressão profissional",
+    "infogSvgTitle": "SVG vetorial — editavel em Illustrator/Inkscape",
+    "infogVariantsTitle": "direcoes criativas — escolha sua favorita",
+    "infogRetouchTitle": "Retocar este infografico",
+    "infogRetouchPlaceholder": "Ex: Alterar o titulo, fundo azul, adicionar numero 699...",
+    "infogRetouchApply": "Aplicar",
+    "infogRetouching": "Retocando…"
   },
   "traduction": {
     "title": "Tradução de Documentos",

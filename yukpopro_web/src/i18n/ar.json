@@ -135,7 +135,21 @@
     "modeles": "القوالب",
     "conversion": "التحويل",
     "infographie": "الإنفوغرافيك",
-    "selectTemplate": "اختر قالباً"
+    "selectTemplate": "اختر قالباً",
+    "infogOneVisual": "إنشاء تصميم واحد",
+    "infogFourVariants": "4 متغيرات بالذكاء الاصطناعي",
+    "infogVariantsLoading": "جارٍ الإنشاء…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — للطباعة الاحترافية",
+    "infogSvgTitle": "SVG متجه — قابل للتحرير في Illustrator/Inkscape",
+    "infogVariantsTitle": "اتجاهات إبداعية — اختر المفضلة لديك",
+    "infogRetouchTitle": "تعديل هذا الرسم البياني",
+    "infogRetouchPlaceholder": "مثال: غيّر العنوان، اجعل الخلفية زرقاء، أضف الرقم 699…",
+    "infogRetouchApply": "تطبيق",
+    "infogRetouching": "جاري التعديل…"
   },
   "traduction": {
     "title": "ترجمة المستندات",

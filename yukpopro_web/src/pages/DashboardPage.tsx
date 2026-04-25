@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Bot, FileText, MessageSquare, Languages, TrendingUp, Sparkles,
   Zap, Users, ChevronRight, CreditCard, Calendar, Briefcase, MapPin, Building2,
@@ -70,6 +71,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color }: {
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { profil, setProfil } = useProfilStore();
   const { sessions } = useCopiloteStore();
@@ -132,12 +134,12 @@ export const DashboardPage = () => {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-xl md:text-2xl font-display font-bold text-white">
-            {prenom ? `Bonjour, ${prenom} 👋` : "Tableau de bord"}
+            {prenom ? t('dashboard.welcome', { name: prenom }) : t('dashboard.title')}
           </h1>
           <p className="text-slate-400 text-sm mt-0.5">
             {p
-              ? `${p.metier?.replace(/_/g, " ")} · ${p.pays} · Niveau ${p.niveau_pro || "Starter"}`
-              : "Bienvenue sur Yukpo Pro"}
+              ? `${p.metier?.replace(/_/g, " ")} · ${p.pays} · ${p.niveau_pro || "Starter"}`
+              : "Yukpo Pro"}
           </p>
         </div>
         <button
@@ -145,7 +147,7 @@ export const DashboardPage = () => {
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-corp-600 hover:bg-corp-700 text-white text-sm font-semibold transition-colors shadow-md shadow-corp-600/30"
         >
           <Sparkles className="w-4 h-4" />
-          Ouvrir Yukpo Pro
+          {t('dashboard.openYukpo')}
         </button>
       </div>
 
@@ -154,7 +156,7 @@ export const DashboardPage = () => {
         {p && (
           <Card className="p-5">
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-gold-400" /> Progression
+              <Sparkles className="w-3.5 h-3.5 text-gold-400" /> {t('dashboard.progression')}
             </h3>
             <XPBar xp={p.xp_points || 0} />
           </Card>
@@ -164,13 +166,13 @@ export const DashboardPage = () => {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <CreditCard className="w-3.5 h-3.5" /> Quota mensuel
+                <CreditCard className="w-3.5 h-3.5" /> {t('dashboard.monthlyQuota')}
               </h3>
               <button
                 onClick={() => navigate("/abonnement")}
                 className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
               >
-                Voir mon plan →
+                {t('dashboard.viewPlan')}
               </button>
             </div>
             <div className="space-y-2">
@@ -202,28 +204,26 @@ export const DashboardPage = () => {
       {/* ── Stats d'utilisation ── */}
       <div>
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Votre activité sur la plateforme
+          {t('dashboard.usageActivity')}
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
-            icon={MessageSquare} label="Conversations"
+            icon={MessageSquare} label={t('dashboard.conversations')}
             value={totalConvs}
-            sub={`dont ${p?.nb_requetes_agent || 0} via agents`}
             color="bg-gradient-to-br from-corp-600 to-yukpo-600"
           />
           <StatCard
-            icon={FileText} label="Documents générés"
+            icon={FileText} label={t('dashboard.docsGenerated')}
             value={totalDocs}
-            sub={`${p?.nb_rapports_generes || 0} rapports · ${p?.nb_slides_generes || 0} slides`}
             color="bg-gradient-to-br from-gold-500 to-gold-600"
           />
           <StatCard
-            icon={Languages} label="Traductions"
+            icon={Languages} label={t('dashboard.translations')}
             value={p?.nb_traductions || 0}
             color="bg-gradient-to-br from-green-500 to-green-600"
           />
           <StatCard
-            icon={Bot} label="Agents activés"
+            icon={Bot} label={t('dashboard.agentsActivated')}
             value={p?.nb_requetes_agent || 0}
             color="bg-gradient-to-br from-accent-500 to-accent-600"
           />
@@ -238,20 +238,20 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-bright-400" />
-              Conversations récentes
+              {t('dashboard.recentConversations')}
             </h3>
             <button
               onClick={() => navigate("/chat")}
               className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
             >
-              Voir tout →
+              {t('dashboard.viewAll')}
             </button>
           </div>
           {recentSessions.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-4">
-              Aucune conversation encore.{" "}
+              {t('dashboard.noConversations')}{" "}
               <button onClick={() => navigate("/chat")} className="text-bright-400 hover:underline">
-                Démarrer
+                {t('dashboard.start')}
               </button>
             </p>
           ) : (
@@ -279,7 +279,7 @@ export const DashboardPage = () => {
         {/* Accès rapide */}
         <Card className="p-5">
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-gold-400" /> Accès rapide
+            <Zap className="w-4 h-4 text-gold-400" /> {t('dashboard.quickAccess')}
           </h3>
           <div className="space-y-2">
             {[
@@ -312,23 +312,23 @@ export const DashboardPage = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-amber-400" />
-            Offres d'emploi matchées
+            {t('dashboard.matchedJobs')}
           </h3>
           <button
             onClick={() => navigate("/emploi")}
             className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
           >
-            Voir tout →
+            {t('dashboard.viewAll')}
           </button>
         </div>
         {offresEmploi.length === 0 ? (
           <div className="text-center py-4 space-y-2">
-            <p className="text-slate-500 text-sm">Aucune offre récente.</p>
+            <p className="text-slate-500 text-sm">{t('dashboard.noOffers')}</p>
             <button
               onClick={() => navigate("/emploi")}
               className="text-xs text-bright-400 hover:text-bright-300 transition-colors"
             >
-              Configurer la veille emploi →
+              {t('dashboard.configureWatch')}
             </button>
           </div>
         ) : (
@@ -371,9 +371,9 @@ export const DashboardPage = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <Gavel className="w-4 h-4 text-bright-400" />
-            Marchés publics — Appels d'offres
+            {t('dashboard.tenders')}
           </h3>
-          <span className="text-xs text-slate-500">Mis à jour toutes les 6h</span>
+          <span className="text-xs text-slate-500">{t('dashboard.updatedEvery')}</span>
         </div>
         {marches.length === 0 ? (
           <div className="text-center py-4 space-y-1">

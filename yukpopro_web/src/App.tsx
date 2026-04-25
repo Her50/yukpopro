@@ -17,6 +17,7 @@ import { HistoriqueDocumentsPage } from "@/pages/HistoriqueDocumentsPage";
 import { EmploiPage } from "@/pages/EmploiPage";
 import { MarchesPage } from "@/pages/MarchesPage";
 import { EnquetesPage } from "@/pages/EnquetesPage";
+import { PublicFormPage } from "@/pages/PublicFormPage";
 import { ParametresPage } from "@/pages/ParametresPage";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
@@ -34,6 +35,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/formulaire/:formulaireId" element={<PublicFormPage />} />
 
           {/* Protected */}
           <Route element={<AppLayout />}>

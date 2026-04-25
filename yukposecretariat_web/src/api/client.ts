@@ -75,23 +75,55 @@ export const audioAPI = {
 }
 
 // ─── Infographie ──────────────────────────────────────────────────────────────
+export interface ProfilInfographie {
+  metier?: string;
+  secteur?: string;
+  nom_organisation?: string;
+  audience?: string;
+  ton?: string;
+  couleur_primaire_hex?: string;
+  couleurs_accents_hex?: string[];
+}
+
 export const infographieAPI = {
   gabarits: () => api.get('/infographie/gabarits'),
-  generer: (data: { brief: string; type_gabarit: string; pays?: string }) =>
-    api.post('/infographie/generer', data),
+  generer: (data: {
+    brief: string;
+    type_gabarit: string;
+    pays?: string;
+    profil?: ProfilInfographie;
+    export_cmyk?: boolean;
+    export_svg?: boolean;
+    dpi_preview?: number;
+  }) => api.post('/infographie/generer', data, { timeout: 180_000 }),
+  genererVariantes: (data: {
+    brief: string;
+    type_gabarit: string;
+    pays?: string;
+    profil?: ProfilInfographie;
+    nombre?: number;
+  }) => api.post('/infographie/generer-variantes', data, { timeout: 240_000 }),
   genererManuel: (data: Record<string, unknown>) =>
-    api.post('/infographie/generer-manuel', data),
+    api.post('/infographie/generer-manuel', data, { timeout: 180_000 }),
   genererDepuisModele: (formData: FormData) =>
     api.post('/infographie/generer-depuis-modele', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120_000,
+      timeout: 180_000,
     }),
-  genererCustom: (data: { width_mm: number; height_mm: number; bleed_mm?: number; brief: string; pays?: string }) =>
-    api.post('/infographie/generer-custom', data),
+  genererCustom: (data: {
+    width_mm: number;
+    height_mm: number;
+    bleed_mm?: number;
+    brief: string;
+    pays?: string;
+    profil?: ProfilInfographie;
+    export_cmyk?: boolean;
+    export_svg?: boolean;
+  }) => api.post('/infographie/generer-custom', data, { timeout: 180_000 }),
   telecharger: (fichier_id: string) =>
     api.get(`/infographie/fichier/${fichier_id}`, { responseType: 'blob' }),
   modifier: (data: { fichier_id: string; instructions: string; pays?: string }) =>
-    api.post('/infographie/modifier', data, { timeout: 120_000 }),
+    api.post('/infographie/modifier', data, { timeout: 180_000 }),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────

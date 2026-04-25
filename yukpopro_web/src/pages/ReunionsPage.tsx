@@ -121,6 +121,7 @@ function useAudioRecorder() {
 const FormulaireReunion = ({
   onSave, onClose,
 }: { onSave: (r: Reunion) => void; onClose: () => void }) => {
+  const { t } = useTranslation();
   const form = useReunionFormStore();
   const titre = form.titre;
   const date = form.date;
@@ -273,7 +274,7 @@ const FormulaireReunion = ({
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-400" />
-            <h2 className="text-white font-semibold text-sm">Nouvelle réunion</h2>
+            <h2 className="text-white font-semibold text-sm">{t('reunions.newMeeting')}</h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700">
             <X className="w-4 h-4" />
@@ -284,17 +285,17 @@ const FormulaireReunion = ({
           {/* Titre + Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-slate-400 block mb-1.5 font-medium">Titre *</label>
+              <label className="text-xs text-slate-400 block mb-1.5 font-medium">{t('reunions.titleLabel')} *</label>
               <input
                 type="text"
                 value={titre}
                 onChange={e => setTitre(e.target.value)}
-                placeholder="Réunion mensuelle équipe finance"
+                placeholder={t('reunions.titlePlaceholder')}
                 className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="text-xs text-slate-400 block mb-1.5 font-medium">Date</label>
+              <label className="text-xs text-slate-400 block mb-1.5 font-medium">{t('reunions.dateLabel')}</label>
               <input
                 type="date"
                 value={date}
@@ -307,9 +308,9 @@ const FormulaireReunion = ({
           {/* Participants */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs text-slate-400 font-medium">Participants</label>
+              <label className="text-xs text-slate-400 font-medium">{t('reunions.participants')}</label>
               <button onClick={addParticipant} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
-                <Plus className="w-3 h-3" /> Ajouter
+                <Plus className="w-3 h-3" /> {t('reunions.add')}
               </button>
             </div>
             <div className="space-y-2">
@@ -319,14 +320,14 @@ const FormulaireReunion = ({
                     type="text"
                     value={p.nom}
                     onChange={e => updateParticipant(i, "nom", e.target.value)}
-                    placeholder="Nom"
+                    placeholder={t('reunions.namePlaceholder')}
                     className="flex-1 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-600 px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                   />
                   <input
                     type="text"
                     value={p.role || ""}
                     onChange={e => updateParticipant(i, "role", e.target.value)}
-                    placeholder="Rôle"
+                    placeholder={t('reunions.rolePlaceholder')}
                     className="w-28 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-600 px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                   />
                   {participants.length > 1 && (
@@ -342,7 +343,7 @@ const FormulaireReunion = ({
           {/* Langue de réunion */}
           <div>
             <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1.5">
-              <Languages className="w-3.5 h-3.5" /> Langue de la réunion
+              <Languages className="w-3.5 h-3.5" /> {t('reunions.language')}
             </label>
             <div className="relative">
               <button
@@ -376,11 +377,11 @@ const FormulaireReunion = ({
           {/* Zone enregistrement */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs text-slate-400 font-medium">Enregistrement audio</label>
+              <label className="text-xs text-slate-400 font-medium">{t('reunions.audioRecording')}</label>
               {recorder.isRecording && (
                 <span className="flex items-center gap-1.5 text-xs text-red-400 animate-pulse">
                   <Radio className="w-3 h-3" />
-                  {recorder.isPaused ? "Pause" : "Enregistrement"} — {fmtDuration(recorder.duration)}
+                  {recorder.isPaused ? t('reunions.pause') : t('reunions.recording')} — {fmtDuration(recorder.duration)}
                 </span>
               )}
             </div>
@@ -388,7 +389,7 @@ const FormulaireReunion = ({
             {!recorder.supported ? (
               <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
                 <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <p className="text-amber-300 text-xs">Microphone non disponible sur ce navigateur.</p>
+                <p className="text-amber-300 text-xs">{t('reunions.noMicro')}</p>
               </div>
             ) : (
               <div className="rounded-xl p-3 space-y-3" style={{ background: "var(--ykp-elevated)", border: "1px solid var(--ykp-border)" }}>
@@ -420,12 +421,12 @@ const FormulaireReunion = ({
                       />
                       <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
                         <Languages className="w-3.5 h-3.5 text-purple-400" />
-                        Traduire en direct pendant la réunion
+                        {t('reunions.translateLiveMode')}
                       </span>
                     </label>
                     {traduireLive && (
                       <div className="flex items-center gap-2 pl-6">
-                        <span className="text-[11px] text-slate-300">Langue cible :</span>
+                        <span className="text-[11px] text-slate-300">{t('reunions.targetLangLabel')}</span>
                         <div className="relative">
                           <button
                             type="button"
@@ -463,7 +464,7 @@ const FormulaireReunion = ({
                             )}
                           </AnimatePresence>
                         </div>
-                        <span className="text-[10px] text-slate-400">(même micro, pas de 2e capture)</span>
+                        <span className="text-[10px] text-slate-400">{t('reunions.sameStreamDesc')}</span>
                       </div>
                     )}
                   </div>
@@ -477,7 +478,7 @@ const FormulaireReunion = ({
                       disabled={transcribing}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
                     >
-                      <Mic className="w-4 h-4" /> Démarrer l'enregistrement
+                      <Mic className="w-4 h-4" /> {t('reunions.startRecording')}
                     </button>
                   ) : (
                     <>
@@ -486,7 +487,7 @@ const FormulaireReunion = ({
                         className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors"
                       >
                         {recorder.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                        {recorder.isPaused ? "Reprendre" : "Pause"}
+                        {recorder.isPaused ? t('reunions.resume') : t('reunions.pause')}
                       </button>
                       <button
                         onClick={handleStopRecording}
@@ -494,7 +495,7 @@ const FormulaireReunion = ({
                         className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
                       >
                         <Square className="w-3.5 h-3.5" />
-                        {transcribing ? "Transcription…" : "Arrêter et transcrire"}
+                        {transcribing ? t('reunions.transcribing') : t('reunions.stopAndTranscribe')}
                       </button>
                     </>
                   )}
@@ -503,7 +504,7 @@ const FormulaireReunion = ({
                 {/* Transcription live */}
                 {liveSpeech && (
                   <div className="bg-slate-900/60 rounded-lg p-2 border border-slate-700">
-                    <p className="text-xs text-slate-500 mb-1">Transcription live :</p>
+                    <p className="text-xs text-slate-500 mb-1">{t('reunions.liveTranscription')}</p>
                     <p className="text-slate-300 text-xs leading-relaxed">{liveSpeech}</p>
                   </div>
                 )}
@@ -516,7 +517,7 @@ const FormulaireReunion = ({
                         <Languages className="w-3 h-3" /> Traduction live → {langueCible}
                       </p>
                       {tLignes.length === 0 && !tInterim && (
-                        <p className="text-slate-500 text-xs italic">En attente de parole…</p>
+                        <p className="text-slate-500 text-xs italic">{t('reunions.waitingForSpeech')}</p>
                       )}
                       {tLignes.slice(-6).map((l) => (
                         <div key={l.utteranceId} className="text-xs">
@@ -536,7 +537,7 @@ const FormulaireReunion = ({
                         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
                       >
                         <Square className="w-3.5 h-3.5" />
-                        {transcribing ? "Transcription…" : "Terminer l'enregistrement"}
+                        {transcribing ? t('reunions.transcribing') : t('reunions.stopAndTranscribe')}
                       </button>
                     )}
                   </>
@@ -545,7 +546,7 @@ const FormulaireReunion = ({
                 {transcribing && (
                   <div className="flex items-center gap-2 py-1">
                     <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                    <p className="text-blue-300 text-xs">Yukpo transcrit votre réunion…</p>
+                    <p className="text-blue-300 text-xs">{t('reunions.transcribingMeeting')}</p>
                   </div>
                 )}
               </div>
@@ -558,18 +559,18 @@ const FormulaireReunion = ({
               <div className="flex items-center gap-2 mb-1.5">
                 <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
                 <label className="text-xs text-green-300 font-medium">
-                  Transcription terminée — modifiez si nécessaire avant de sauvegarder
+                  {t('reunions.transcriptionDone')}
                 </label>
               </div>
             ) : (
               <label className="text-xs text-slate-400 font-medium block mb-1.5">
-                Notes textuelles * <span className="text-slate-600 font-normal">(ou ajoutées par transcription)</span>
+                {t('reunions.notesLabel')} <span className="text-slate-600 font-normal">{t('reunions.notesOr')}</span>
               </label>
             )}
             <textarea
               value={notes}
               onChange={e => { setNotes(e.target.value); }}
-              placeholder="Saisissez les points clés, ou utilisez l'enregistrement pour transcrire automatiquement…"
+              placeholder={t('reunions.notesPlaceholder')}
               rows={6}
               className={`w-full bg-slate-800 border rounded-xl text-white placeholder-slate-500 px-3 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${transcriptionDone ? "border-green-500/40" : "border-slate-600"}`}
             />
@@ -578,15 +579,14 @@ const FormulaireReunion = ({
           <div className="flex items-start gap-2 bg-blue-500/10 border border-blue-500/30 rounded-xl p-3">
             <Sparkles className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-blue-300 text-xs">
-              Yukpo Pro génère un rapport structuré avec participants identifiés, décisions, plan d'action et suivi.
-              L'enregistrement est transcrit par Yukpo (15+ langues supportées).
+              {t('reunions.sparklesInfo')}
             </p>
           </div>
         </div>
 
         <div className="px-5 py-4 border-t border-slate-700 flex gap-3 flex-shrink-0">
           <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white text-sm transition-colors">
-            Annuler
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleSave}
@@ -594,7 +594,7 @@ const FormulaireReunion = ({
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
           >
             <FileText className="w-4 h-4" />
-            Enregistrer
+            {t('common.save')}
           </button>
         </div>
       </motion.div>
@@ -613,6 +613,7 @@ const EditionTranscriptionModal = ({
   onConfirm: (notesEditees: string) => void;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState(reunion.notes);
 
   return (
@@ -630,7 +631,7 @@ const EditionTranscriptionModal = ({
           <div className="flex items-center gap-2">
             <Pencil className="w-4 h-4 text-blue-400" />
             <div>
-              <h2 className="text-white font-semibold text-sm">Éditer la transcription</h2>
+              <h2 className="text-white font-semibold text-sm">{t('reunions.editTranscriptionTitle')}</h2>
               <p className="text-slate-400 text-xs mt-0.5">{reunion.titre} · {new Date(reunion.date).toLocaleDateString("fr-FR")}</p>
             </div>
           </div>
@@ -643,28 +644,27 @@ const EditionTranscriptionModal = ({
           <div className="flex items-start gap-2 bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 flex-shrink-0">
             <Sparkles className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-blue-300 text-xs">
-              Corrigez ou complétez la transcription avant de générer le rapport.
-              Yukpo Pro utilisera ce texte pour produire un rapport anonymisé et structuré.
+              {t('reunions.editTranscriptionDesc')}
             </p>
           </div>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
             className="flex-1 w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"
-            placeholder="Transcription de la réunion…"
+            placeholder={t('reunions.transcription')}
           />
         </div>
 
         <div className="px-5 py-4 border-t border-slate-700 flex gap-3 flex-shrink-0">
           <button onClick={onClose} className="px-4 py-2.5 rounded-xl border border-slate-600 text-slate-300 hover:text-white text-sm transition-colors">
-            Annuler
+            {t('common.cancel')}
           </button>
           <button
             onClick={() => onConfirm(notes.trim() || reunion.notes)}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
           >
             <Sparkles className="w-4 h-4" />
-            Générer le rapport avec ce texte
+            {t('reunions.generateWithText')}
           </button>
         </div>
       </motion.div>
@@ -683,12 +683,13 @@ const ReunionCard = ({
   onSelect: () => void;
   onDelete: () => void;
 }) => {
+  const { t } = useTranslation();
   const statusConfig: Record<StatutReunion, { label: string; color: string; icon: any }> = {
-    brouillon:      { label: "Brouillon",        color: "bg-slate-700 text-slate-400",     icon: Clock },
-    enregistrement: { label: "Enreg. en cours",  color: "bg-red-500/20 text-red-400",      icon: Radio },
-    transcription:  { label: "Transcription…",   color: "bg-blue-500/20 text-blue-400",    icon: Sparkles },
-    analyse:        { label: "Yukpo analyse…",   color: "bg-amber-500/20 text-amber-400",  icon: Sparkles },
-    termine:        { label: "Rapport prêt",     color: "bg-green-500/20 text-green-400",  icon: CheckCircle },
+    brouillon:      { label: t('reunions.statusBrouillon'), color: "bg-slate-700 text-slate-400",     icon: Clock },
+    enregistrement: { label: t('reunions.statusEnreg'),     color: "bg-red-500/20 text-red-400",      icon: Radio },
+    transcription:  { label: t('reunions.statusTranscription'), color: "bg-blue-500/20 text-blue-400", icon: Sparkles },
+    analyse:        { label: t('reunions.statusAnalyse'),   color: "bg-amber-500/20 text-amber-400",  icon: Sparkles },
+    termine:        { label: t('reunions.statusTermine'),   color: "bg-green-500/20 text-green-400",  icon: CheckCircle },
   };
   const cfg = statusConfig[reunion.statut];
   const StatusIcon = cfg.icon;
@@ -743,7 +744,7 @@ const ReunionCard = ({
               onClick={onSelect}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/20 transition-colors"
             >
-              <FileText className="w-3.5 h-3.5" /> Voir le rapport
+              <FileText className="w-3.5 h-3.5" /> {t('reunions.viewReport')}
             </button>
             <button
               onClick={onEdit}
@@ -769,7 +770,7 @@ const ReunionCard = ({
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold disabled:opacity-50 disabled:cursor-wait transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              {reunion.statut === "analyse" ? "Analyse en cours…" : "Analyser avec Yukpo Pro"}
+              {reunion.statut === "analyse" ? t('reunions.analyzing') : t('reunions.analyzeWithYukpo')}
             </button>
           </>
         )}
@@ -788,6 +789,7 @@ const RapportModal = ({
   onEditerEtRegenerer: () => void;
   onRapportUpdated: (rapport: string, fichier: string) => void;
 }) => {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing]   = useState(false);
   const [rapportEdit, setRapportEdit] = useState(reunion.rapport || "");
   const [savingDocx, setSavingDocx]  = useState(false);
@@ -859,8 +861,8 @@ const RapportModal = ({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium transition-colors"
                 >
                   {savingDocx
-                    ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Génération…</>
-                    : <><Download className="w-3.5 h-3.5" /> Sauvegarder & DOCX</>}
+                    ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> {t('reunions.generating')}</>
+                    : <><Download className="w-3.5 h-3.5" /> {t('reunions.saveAndDocx')}</>}
                 </button>
               </>
             ) : (
@@ -871,7 +873,7 @@ const RapportModal = ({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 border border-amber-600/40 text-amber-400 hover:bg-amber-600/30 text-xs font-medium transition-colors"
                   title="Éditer le rapport et régénérer le DOCX"
                 >
-                  <Pencil className="w-3.5 h-3.5" /> Éditer le rapport
+                  <Pencil className="w-3.5 h-3.5" /> {t('reunions.editReport')}
                 </button>
                 {/* Régénérer depuis transcription */}
                 <button
@@ -879,7 +881,7 @@ const RapportModal = ({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs transition-colors"
                   title="Modifier la transcription et régénérer"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Retranscription
+                  <RefreshCw className="w-3.5 h-3.5" /> {t('reunions.retranscribe')}
                 </button>
                 {/* Télécharger DOCX */}
                 {nomFichier && (
@@ -909,13 +911,13 @@ const RapportModal = ({
         {nomFichier && !isEditing && (
           <div className="px-6 py-2 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
             <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-            <span className="text-green-300 text-xs">Sauvegardé dans Mes Documents — {nomFichier}</span>
+            <span className="text-green-300 text-xs">{t('reunions.savedInDocs', { file: nomFichier })}</span>
           </div>
         )}
         {isEditing && (
           <div className="px-6 py-2 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2">
             <Pencil className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            <span className="text-amber-300 text-xs">Mode édition — modifiez le rapport, puis cliquez "Sauvegarder & DOCX" pour régénérer le fichier Word</span>
+            <span className="text-amber-300 text-xs">{t('reunions.editModeInfo')}</span>
           </div>
         )}
 
@@ -1050,7 +1052,7 @@ export const ReunionsPage = () => {
               {t('reunions.title')}
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Enregistrez, transcrivez (15+ langues) et générez des rapports percutants avec plan d'action.
+              {t('reunions.pageSubtitle')}
             </p>
           </div>
           <button
@@ -1066,16 +1068,16 @@ export const ReunionsPage = () => {
         {reunions.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { icon: Mic,         title: "1. Enregistrez",    desc: "Cliquez Démarrer — l'audio est capturé et transcrit automatiquement par Yukpo en 15+ langues." },
-              { icon: Sparkles,    title: "2. Rapport Yukpo",  desc: "Yukpo Pro génère un rapport structuré : participants, décisions, plan d'action avec responsables." },
-              { icon: CheckCircle, title: "3. Suivi & Export", desc: "Téléchargez le rapport Markdown et suivez les recommandations et actions assignées." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="p-4 rounded-xl text-center" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
+              { icon: Mic,         titleKey: "reunions.onboardStep1",    descKey: "reunions.onboardStep1Desc" },
+              { icon: Sparkles,    titleKey: "reunions.onboardStep2",    descKey: "reunions.onboardStep2Desc" },
+              { icon: CheckCircle, titleKey: "reunions.onboardStep3",    descKey: "reunions.onboardStep3Desc" },
+            ].map(({ icon: Icon, titleKey, descKey }) => (
+              <div key={titleKey} className="p-4 rounded-xl text-center" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
                   <Icon className="w-4 h-4 text-blue-400" />
                 </div>
-                <p className="text-white text-sm font-semibold mb-1">{title}</p>
-                <p className="text-slate-400 text-xs leading-relaxed">{desc}</p>
+                <p className="text-white text-sm font-semibold mb-1">{t(titleKey)}</p>
+                <p className="text-slate-400 text-xs leading-relaxed">{t(descKey)}</p>
               </div>
             ))}
           </div>
@@ -1085,7 +1087,7 @@ export const ReunionsPage = () => {
         {reunionsEnAttente.length > 0 && (
           <div>
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" /> À analyser ({reunionsEnAttente.length})
+              <Clock className="w-3.5 h-3.5" /> {t('reunions.toAnalyze')} ({reunionsEnAttente.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {reunionsEnAttente.map(r => (
@@ -1106,7 +1108,7 @@ export const ReunionsPage = () => {
         {reunionsTerminees.length > 0 && (
           <div>
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5 text-green-400" /> Rapports générés ({reunionsTerminees.length})
+              <CheckCircle className="w-3.5 h-3.5 text-green-400" /> {t('reunions.reportsGenerated')} ({reunionsTerminees.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {reunionsTerminees.map(r => (
@@ -1134,7 +1136,7 @@ export const ReunionsPage = () => {
               onClick={() => setShowForm(true)}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
             >
-              <Plus className="w-4 h-4" /> Créer ma première réunion
+              <Plus className="w-4 h-4" /> {t('reunions.createFirst')}
             </button>
           </div>
         )}

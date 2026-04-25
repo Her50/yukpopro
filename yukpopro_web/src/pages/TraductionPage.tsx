@@ -1,4 +1,5 @@
 import { useState, useRef, FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Languages, ArrowRight, Copy, Download, CheckCircle,
   Upload, FileText, X, File as FileIcon,
@@ -39,6 +40,7 @@ const FORMATS_LABEL = "PDF, Word, TXT, CSV, Excel, PowerPoint, Image";
 type ModeTraduction = "texte" | "fichier";
 
 export const TraductionPage = () => {
+  const { t } = useTranslation();
   const { profil } = useProfilStore();
 
   const mode = useTraductionStore((s) => s.mode) as ModeTraduction;
@@ -152,10 +154,8 @@ export const TraductionPage = () => {
     <div className="p-6 space-y-6 max-w-6xl mx-auto animate-fade-in">
       <DemoBanner />
       <div>
-        <h1 className="text-2xl font-display font-bold text-white">Traduction Professionnelle</h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Traduction avec terminologie métier africaine — SYSCOHADA, OHADA, COBAC, FCFA, UEMOA, CEMAC préservés.
-        </p>
+        <h1 className="text-2xl font-display font-bold text-white">{t('traduction.title')}</h1>
+        <p className="text-slate-400 text-sm mt-1">{t('traduction.afroSubtitle')}</p>
       </div>
 
       {/* ── Sélecteur mode ──────────────────────────────────────────────────── */}
@@ -166,7 +166,7 @@ export const TraductionPage = () => {
             mode === "texte" ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"
           }`}
         >
-          <Languages className="w-4 h-4" /> Traduire du texte
+          <Languages className="w-4 h-4" /> {t('traduction.translateText')}
         </button>
         <button
           onClick={() => { setMode("fichier"); }}
@@ -174,7 +174,7 @@ export const TraductionPage = () => {
             mode === "fichier" ? "bg-yukpo-500 text-white" : "text-slate-400 hover:text-white"
           }`}
         >
-          <Upload className="w-4 h-4" /> Traduire un fichier
+          <Upload className="w-4 h-4" /> {t('traduction.translateDoc')}
         </button>
       </div>
 
@@ -224,17 +224,17 @@ export const TraductionPage = () => {
         <form onSubmit={handleTraduireTexte}>
           {/* Bouton en haut — toujours visible quelle que soit la hauteur de l'écran */}
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-slate-500">{contenu.split(/\s+/).filter(Boolean).length} mots</span>
+            <span className="text-xs text-slate-500">{t('traduction.wordCount', { count: contenu.split(/\s+/).filter(Boolean).length })}</span>
             <Button type="submit" loading={loading} size="sm" icon={<Languages className="w-4 h-4" />} disabled={!contenu.trim()}>
-              Traduire
+              {t('traduction.translateBtn')}
             </Button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Source */}
             <div className="space-y-3">
-              <label className="text-sm font-medium text-slate-300">Texte source</label>
+              <label className="text-sm font-medium text-slate-300">{t('traduction.sourceLabel')}</label>
               <Textarea
-                placeholder="Collez ici le texte à traduire — rapport, contrat, email, note de synthèse…"
+                placeholder={t('traduction.sourcePlaceholder')}
                 value={contenu}
                 onChange={(e) => setContenu(e.target.value)}
                 rows={14}
@@ -261,7 +261,7 @@ export const TraductionPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-300 block mb-2">
-                  Document à traduire
+                  {t('traduction.docLabel')}
                 </label>
                 {!fichierSelectionne ? (
                   <div
@@ -270,10 +270,10 @@ export const TraductionPage = () => {
                   >
                     <Upload className="w-10 h-10 text-slate-600 group-hover:text-yukpo-400 mx-auto mb-3 transition-colors" />
                     <p className="text-slate-300 font-medium text-sm mb-1">
-                      Cliquez pour sélectionner un fichier
+                      {t('traduction.clickSelectFile')}
                     </p>
                     <p className="text-slate-500 text-xs">{FORMATS_LABEL}</p>
-                    <p className="text-slate-600 text-xs mt-1">Maximum 20 MB</p>
+                    <p className="text-slate-600 text-xs mt-1">{t('traduction.maxSize')}</p>
                   </div>
                 ) : (
                   <div className="border border-slate-600 rounded-xl p-4 flex items-center gap-3 bg-slate-800/50">
@@ -304,7 +304,7 @@ export const TraductionPage = () => {
 
               {/* Info formats */}
               <Card className="p-4">
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-2">Formats supportés</p>
+                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-2">{t('traduction.supportedFormats')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {["PDF", "DOCX", "PPTX", "TXT", "CSV", "XLSX", "PNG", "JPG"].map((fmt) => (
                     <span key={fmt} className="px-2 py-0.5 rounded-md bg-slate-700 text-slate-300 text-xs font-mono">
@@ -313,7 +313,7 @@ export const TraductionPage = () => {
                   ))}
                 </div>
                 <p className="text-slate-500 text-xs mt-2">
-                  Les images sont analysées par reconnaissance intelligente (OCR). Le texte extrait est traduit et retourné.
+                  {t('traduction.ocrDesc')}
                 </p>
               </Card>
 
@@ -326,7 +326,7 @@ export const TraductionPage = () => {
                 disabled={!fichierSelectionne}
                 className="w-full"
               >
-                {loading ? "Traduction en cours…" : "Traduire le fichier"}
+                {loading ? t('traduction.translatingFile') : t('traduction.translateFileBtn')}
               </Button>
             </div>
 
@@ -355,6 +355,7 @@ function CarteTelechargement({
   resultat: ResultatTraduction;
   generateurApi: typeof import("@/api/client")["generateurApi"];
 }) {
+  const { t } = useTranslation();
   const nomFichier = resultat.chemin_docx ?? "";
   if (!nomFichier) return null;
   const ext = nomFichier.split(".").pop()?.toUpperCase() ?? "DOCX";
@@ -368,7 +369,7 @@ function CarteTelechargement({
           {icone}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">Fichier traduit prêt</p>
+          <p className="text-white font-semibold text-sm">{t('traduction.fileReady')}</p>
           <p className="text-slate-400 text-xs truncate mt-0.5">{nomFichier}</p>
           <p className="text-slate-500 text-xs mt-0.5">{resultat.nb_mots_cible} mots • Format {ext}</p>
         </div>
@@ -381,14 +382,14 @@ function CarteTelechargement({
         className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-yukpo-500 hover:bg-yukpo-600 text-white font-medium text-sm transition-colors"
       >
         <Download className="w-4 h-4" />
-        Télécharger le fichier traduit ({ext})
+        {t('traduction.downloadTranslatedFile', { ext })}
       </a>
 
       {/* Badge Mes Documents */}
       {resultat.sauvegarde_mes_documents && (
         <div className="flex items-center gap-1.5 text-xs text-green-400">
           <CheckCircle className="w-3.5 h-3.5" />
-          Sauvegardé dans Mes Documents
+          {t('traduction.savedInDocs')}
         </div>
       )}
     </div>
@@ -407,11 +408,12 @@ interface ZoneResultatProps {
 }
 
 function ZoneResultat({ loading, resultat, copie, onCopier, generateurApi, modeFichier }: ZoneResultatProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-slate-300">Traduction</label>
+          <label className="text-sm font-medium text-slate-300">{t('traduction.translationLabel')}</label>
           {resultat && (
             <Badge variant="green" size="sm">✓ {resultat.nb_mots_cible} mots</Badge>
           )}
@@ -423,7 +425,7 @@ function ZoneResultat({ loading, resultat, copie, onCopier, generateurApi, modeF
             className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
           >
             {copie ? <CheckCircle className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-            {copie ? "Copié !" : "Copier le texte"}
+            {copie ? t('common.copied') : t('traduction.copyText')}
           </button>
         )}
       </div>
@@ -437,8 +439,8 @@ function ZoneResultat({ loading, resultat, copie, onCopier, generateurApi, modeF
         <Card className="flex items-center justify-center h-[300px] border-dashed">
           <div className="text-center space-y-3">
             <Languages className="w-8 h-8 text-yukpo-400 animate-pulse mx-auto" />
-            <p className="text-slate-400 text-sm">Yukpo Pro traduit votre document…</p>
-            <p className="text-slate-600 text-xs">Yukpo applique la terminologie métier africaine</p>
+            <p className="text-slate-400 text-sm">{t('traduction.translatingDoc')}</p>
+            <p className="text-slate-600 text-xs">{t('traduction.afroTerminology')}</p>
           </div>
         </Card>
       ) : resultat ? (
@@ -447,7 +449,7 @@ function ZoneResultat({ loading, resultat, copie, onCopier, generateurApi, modeF
         </div>
       ) : (
         <Card className="flex items-center justify-center h-[300px] border-dashed">
-          <p className="text-slate-600 text-sm">La traduction apparaîtra ici</p>
+          <p className="text-slate-600 text-sm">{t('traduction.resultHere')}</p>
         </Card>
       )}
     </div>

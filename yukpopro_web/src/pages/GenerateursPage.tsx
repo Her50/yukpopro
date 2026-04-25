@@ -8,6 +8,7 @@ import { Card, Button, Textarea, Badge, Select } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi, infographieApi, GabaritInfographie, ResultatInfographieReponse } from "@/api/client";
 import { useGenerateurStore } from "@/store/generateurStore";
+import { formatAmount } from "@/services/paysDevise";
 
 type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
 type InfogMode = "brief" | "manuel" | "modele" | "custom";
@@ -395,7 +396,308 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
       },
     ],
   },
+  {
+    categorie: "Assurance & Réassurance CIMA",
+    emoji: "🛡️",
+    templates: [
+      {
+        label: "Rapport de solvabilité CIMA",
+        description: "Rapport annuel de solvabilité selon le Code CIMA révisé",
+        type: "rapport",
+        typeDoc: "rapport_financier",
+        mode: "complet",
+        sujet: "Rapport de solvabilité CIMA — compagnie d'assurance",
+        contexte: "Calcul de la marge de solvabilité (primes vs sinistres), provisions techniques (PPNA, PSAP, PSAV), actifs admis en représentation, ratios prudentiels CIMA, mesures correctives si seuils non atteints.",
+      },
+      {
+        label: "Note technique tarification",
+        description: "Note actuarielle de tarification d'un produit d'assurance",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Note actuarielle de tarification d'un produit d'assurance",
+        contexte: "Analyse sinistralité historique, méthodes actuarielles (fréquence/coût moyen, Chain Ladder, GLM), hypothèses, calcul de prime pure, chargements (gestion, acquisition, sécurité), tarification finale et sensibilités.",
+      },
+      {
+        label: "Rapport gestion sinistre",
+        description: "Rapport d'expertise et règlement d'un sinistre complexe",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "Rapport de gestion sinistre — expertise et règlement",
+        contexte: "Rappel des garanties souscrites, circonstances du sinistre, pièces reçues, expertise contradictoire, évaluation des dommages, application des franchises/plafonds, proposition de règlement, motivation juridique.",
+      },
+      {
+        label: "Présentation conseil d'administration",
+        description: "Slides de présentation CA compagnie d'assurance",
+        type: "slides",
+        typeDoc: "rapport_direction",
+        mode: "detaille",
+        sujet: "Présentation CA — résultats compagnie d'assurance",
+        contexte: "Synthèse activité (CA, sinistralité S/P, résultat technique), solvabilité CIMA, placements, perspectives et décisions stratégiques à valider.",
+      },
+    ],
+  },
+  {
+    categorie: "Énergie, Mines & Pétrole",
+    emoji: "⛽",
+    templates: [
+      {
+        label: "Étude d'impact environnemental",
+        description: "EIES complète pour projet minier/énergétique (norme BAD/IFC)",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Étude d'impact environnemental et social — projet minier/énergétique",
+        contexte: "Description du projet, état initial (biophysique, social), identification et évaluation des impacts, mesures d'atténuation/compensation, plan de gestion environnementale et sociale (PGES), plan de suivi. Conforme aux standards IFC/BAD.",
+      },
+      {
+        label: "Rapport production mensuelle",
+        description: "Rapport mensuel de production énergie / mines",
+        type: "rapport",
+        typeDoc: "compte_rendu",
+        mode: "standard",
+        sujet: "Rapport de production mensuelle — énergie / mines",
+        contexte: "Production physique (tonnage/MWh), taux de disponibilité des équipements, incidents HSE, performance vs budget, actions correctives, prévisions mois suivant.",
+      },
+      {
+        label: "Note étude rentabilité projet",
+        description: "Analyse financière TRI/VAN pour projet énergie ou mines",
+        type: "rapport",
+        typeDoc: "rapport_financier",
+        mode: "complet",
+        sujet: "Étude de rentabilité — projet énergie / mines",
+        contexte: "CAPEX/OPEX détaillé, hypothèses de prix et production, modèle financier (P&L, cash-flows, bilan), TRI projet/equity, VAN, analyse de sensibilité (prix, production, taux de change), seuil de rentabilité.",
+      },
+    ],
+  },
+  {
+    categorie: "Agriculture & Agro-industrie",
+    emoji: "🌾",
+    templates: [
+      {
+        label: "Plan de développement agricole",
+        description: "Plan d'affaires exploitation agricole / agro-industrielle",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Plan de développement — exploitation agricole / agro-industrie",
+        contexte: "Analyse agronomique (sol, climat, filière), plan cultural, besoins en intrants et équipements, projections de rendement et de chiffre d'affaires, compte d'exploitation prévisionnel, plan de financement, analyse des risques climatiques.",
+      },
+      {
+        label: "Étude de filière agricole",
+        description: "Analyse filière (cacao, café, coton, riz, etc.) pays CEMAC/UEMOA",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Étude de filière agricole — diagnostic et recommandations",
+        contexte: "Cartographie des acteurs (producteurs, coopératives, industriels, exportateurs), volumes et prix, infrastructures, politiques publiques, contraintes et opportunités, recommandations de structuration de la filière.",
+      },
+      {
+        label: "Rapport campagne agricole",
+        description: "Bilan de campagne — rendements, ventes, marges",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "Rapport de campagne agricole",
+        contexte: "Superficies emblavées, rendements par culture, volumes produits, prix de cession, charges opérationnelles, marge brute, comparaison campagne précédente, enseignements et plan campagne suivante.",
+      },
+    ],
+  },
+  {
+    categorie: "Transport & Logistique",
+    emoji: "🚚",
+    templates: [
+      {
+        label: "Étude logistique — chaîne d'approvisionnement",
+        description: "Audit supply chain avec recommandations d'optimisation",
+        type: "rapport",
+        typeDoc: "rapport_audit",
+        mode: "complet",
+        sujet: "Audit logistique et chaîne d'approvisionnement",
+        contexte: "Cartographie flux physiques et d'information, analyse coûts logistiques (transport, stockage, manutention), délais de livraison, ruptures, recommandations d'optimisation (modal, routier, entreposage, SI, KPIs logistiques).",
+      },
+      {
+        label: "Plan de transport urbain",
+        description: "Étude de schéma directeur transport pour collectivité",
+        type: "rapport",
+        typeDoc: "plan_action",
+        mode: "complet",
+        sujet: "Schéma directeur de transport urbain",
+        contexte: "Diagnostic mobilité (enquêtes origine-destination, offre existante), projections de demande, scénarios d'infrastructure (BRT, bus, voirie), plan de financement, calendrier de mise en œuvre, indicateurs de performance.",
+      },
+      {
+        label: "Business plan flotte transport",
+        description: "Dossier de financement création/extension flotte de transport",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Business plan — flotte de transport routier / marchandise",
+        contexte: "Étude de marché fret, CAPEX véhicules, OPEX (carburant, entretien, chauffeurs, assurance), tarification, prévisions de CA, rentabilité, plan de financement (leasing, crédit), analyse de risques (carburant, change).",
+      },
+    ],
+  },
+  {
+    categorie: "Tech, Digital & SI",
+    emoji: "💻",
+    templates: [
+      {
+        label: "Cahier des charges SI",
+        description: "Cahier des charges fonctionnel et technique d'un projet SI",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Cahier des charges — projet système d'information",
+        contexte: "Contexte et enjeux métier, périmètre, exigences fonctionnelles (use cases), exigences non-fonctionnelles (sécurité, performance, conformité RGPD/CAMTEL), architecture cible, livrables, planning, critères de recette.",
+      },
+      {
+        label: "Rapport d'audit cybersécurité",
+        description: "Audit sécurité informatique avec recommandations ISO 27001",
+        type: "rapport",
+        typeDoc: "rapport_audit",
+        mode: "complet",
+        sujet: "Rapport d'audit cybersécurité",
+        contexte: "Périmètre et méthodologie (ISO 27001, NIST), cartographie des actifs, analyse des vulnérabilités techniques et organisationnelles, tests d'intrusion, évaluation des risques, recommandations hiérarchisées avec plan de remédiation.",
+      },
+      {
+        label: "Pitch deck startup tech",
+        description: "Pitch de levée pour startup tech africaine",
+        type: "slides",
+        typeDoc: "pitch_projet",
+        mode: "pitch",
+        sujet: "Pitch deck — startup tech africaine",
+        contexte: "Problème et insight marché, solution tech, traction (MAU, MRR), modèle économique SaaS, concurrence, équipe fondatrice, plan de croissance Pan-Africain, levée de fonds et utilisation.",
+      },
+    ],
+  },
+  {
+    categorie: "Éducation & Formation",
+    emoji: "🎓",
+    templates: [
+      {
+        label: "Plan stratégique établissement",
+        description: "Plan stratégique pluriannuel pour établissement scolaire/universitaire",
+        type: "rapport",
+        typeDoc: "plan_action",
+        mode: "complet",
+        sujet: "Plan stratégique — établissement d'enseignement",
+        contexte: "Diagnostic (effectifs, taux de réussite, ressources, infrastructures), vision et axes stratégiques, objectifs SMART, plan d'action par axe, plan de financement, gouvernance et suivi.",
+      },
+      {
+        label: "Rapport pédagogique annuel",
+        description: "Rapport annuel d'activités pédagogiques",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "Rapport pédagogique annuel",
+        contexte: "Effectifs et mouvements, résultats aux examens officiels, encadrement pédagogique, programmes parcourus, activités péri-éducatives, difficultés rencontrées, perspectives année suivante.",
+      },
+      {
+        label: "Module de formation professionnelle",
+        description: "Support de formation professionnelle certifiante",
+        type: "slides",
+        typeDoc: "formation",
+        mode: "detaille",
+        sujet: "Module de formation professionnelle certifiante",
+        contexte: "Objectifs pédagogiques, prérequis, plan du module, contenus théoriques et exercices pratiques, études de cas, modalités d'évaluation, bibliographie et ressources complémentaires.",
+      },
+    ],
+  },
+  {
+    categorie: "Immobilier & Construction",
+    emoji: "🏢",
+    templates: [
+      {
+        label: "Étude de faisabilité immobilière",
+        description: "Étude technique, juridique et financière d'un projet immobilier",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Étude de faisabilité — projet immobilier",
+        contexte: "Analyse du foncier (titre, servitudes, PLU), étude de marché (offre/demande, prix m²), programme constructible, CAPEX construction, planning, commercialisation, compte d'exploitation, retour sur investissement.",
+      },
+      {
+        label: "Rapport expertise immobilière",
+        description: "Rapport d'expertise et valorisation d'un bien immobilier",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "Rapport d'expertise immobilière",
+        contexte: "Description du bien, titre et régularité juridique, méthodes de valorisation (comparatif, revenu, coût de remplacement), justification de la valeur retenue, conclusion avec marge de précision.",
+      },
+    ],
+  },
+  {
+    categorie: "Tourisme & Hôtellerie",
+    emoji: "🏨",
+    templates: [
+      {
+        label: "Business plan hôtel / resort",
+        description: "Business plan complet pour création hôtel ou resort",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "complet",
+        sujet: "Business plan — hôtel / resort",
+        contexte: "Étude de marché touristique, concept et positionnement, programme (chambres, F&B, SPA), CAPEX, prévisions RevPar/ADR/TO, compte d'exploitation 5 ans, plan de financement, stratégie marketing.",
+      },
+      {
+        label: "Rapport performance hôtelière",
+        description: "Rapport mensuel KPIs hôteliers (TO, ADR, RevPAR, GOP)",
+        type: "rapport",
+        typeDoc: "rapport_financier",
+        mode: "standard",
+        sujet: "Rapport de performance hôtelière mensuelle",
+        contexte: "Taux d'occupation, ADR, RevPAR, F&B ratios, GOP, comparaison N-1 et budget, analyse par segment (corporate/leisure/groupes), canaux de distribution, actions commerciales et marketing.",
+      },
+    ],
+  },
+  {
+    categorie: "Communication & Marketing",
+    emoji: "📣",
+    templates: [
+      {
+        label: "Plan de communication 360°",
+        description: "Stratégie communication multicanale pour marque/produit",
+        type: "rapport",
+        typeDoc: "plan_action",
+        mode: "complet",
+        sujet: "Plan de communication 360° — marque / produit",
+        contexte: "Diagnostic de marque, insights consommateurs, objectifs SMART, cibles et personas, positionnement, message clé, mix médias (TV, radio, digital, OOH, influenceurs), calendrier, budget, KPIs.",
+      },
+      {
+        label: "Brief créatif campagne",
+        description: "Brief créatif pour agence de communication",
+        type: "rapport",
+        typeDoc: "note_de_synthese",
+        mode: "standard",
+        sujet: "Brief créatif — campagne de communication",
+        contexte: "Contexte, objectifs business et de communication, cible prioritaire, insight consommateur, promesse, ton, mandatories, livrables attendus, calendrier, budget.",
+      },
+      {
+        label: "Rapport bilan campagne",
+        description: "Bilan de performance d'une campagne de communication",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "Bilan de performance d'une campagne de communication",
+        contexte: "Rappel des objectifs, KPIs atteints vs cibles (reach, engagement, conversions, ventes), analyse par canal, ROI, enseignements et recommandations pour les prochaines campagnes.",
+      },
+    ],
+  },
 ];
+
+// Templates personnalisés ajoutés par l'utilisateur (persistés en localStorage).
+// Survit aux recharges et permet d'enrichir la bibliothèque sans déploiement.
+const KEY_TEMPLATES_PERSO = "yukpo_pro_templates_perso_v1";
+function chargerTemplatesPerso(): CategorieTemplates[] {
+  try {
+    const raw = localStorage.getItem(KEY_TEMPLATES_PERSO);
+    return raw ? (JSON.parse(raw) as CategorieTemplates[]) : [];
+  } catch { return []; }
+}
+function sauverTemplatesPerso(cats: CategorieTemplates[]) {
+  try { localStorage.setItem(KEY_TEMPLATES_PERSO, JSON.stringify(cats)); } catch {}
+}
 
 const TYPES_RAPPORT = [
   { value: "rapport_analyse",   label: "Rapport d'analyse" },
@@ -627,16 +929,51 @@ export const GenerateursPage = () => {
     });
   };
 
-  const handleTelechargerInfog = (kind: "pdf" | "png") => {
+  const handleTelechargerInfog = (kind: "pdf" | "png" | "pdf_cmyk" | "png_hd" | "svg") => {
     if (!infogResult) return;
-    const b64 = kind === "pdf" ? infogResult.pdf_base64 : infogResult.png_base64;
-    const id  = kind === "pdf" ? infogResult.pdf_id     : infogResult.png_id;
-    if (!b64 || !id) { toast.error("Fichier indisponible"); return; }
-    const mime = kind === "pdf" ? "application/pdf" : "image/png";
+    const map: Record<string, { b64?: string; id?: string; mime: string }> = {
+      pdf:      { b64: infogResult.pdf_base64,         id: infogResult.pdf_id,         mime: "application/pdf" },
+      png:      { b64: infogResult.png_preview_base64 || infogResult.png_base64, id: infogResult.png_preview_id || infogResult.png_id, mime: "image/png" },
+      pdf_cmyk: { b64: infogResult.pdf_cmyk_base64,    id: infogResult.pdf_cmyk_id,    mime: "application/pdf" },
+      png_hd:   { b64: infogResult.png_base64,         id: infogResult.png_id,         mime: "image/png" },
+      svg:      { b64: infogResult.svg_base64,         id: infogResult.svg_id,         mime: "image/svg+xml" },
+    };
+    const item = map[kind];
+    if (!item.b64 || !item.id) { toast.error("Fichier indisponible"); return; }
     const a = document.createElement("a");
-    a.href = `data:${mime};base64,${b64}`;
-    a.download = id;
+    a.href = `data:${item.mime};base64,${item.b64}`;
+    a.download = item.id;
     a.click();
+  };
+
+  // ── Variantes (4 directions créatives en parallèle) ─────────────────────
+  const [infogVariantes, setInfogVariantes] = useState<Array<{ direction: string; resultat: ResultatInfographieReponse }> | null>(null);
+  const [infogRetoucheInstr, setInfogRetoucheInstr] = useState("");
+
+  const handleGenererVariantes = async () => {
+    if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
+    setInfogVariantes(null);
+    await runJob("infographie", async () => {
+      const data = await infographieApi.genererVariantes({
+        brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays, nombre: 4,
+      });
+      setInfogVariantes(data.variantes);
+      // On pose la 1ère variante comme résultat principal pour l'aperçu
+      if (data.variantes?.[0]) return data.variantes[0].resultat;
+      return null;
+    }, { successMsg: "4 variantes générées !" });
+  };
+
+  const handleRetoucher = async () => {
+    if (!infogResult?.pdf_id) { toast.error("Aucune infographie à retoucher"); return; }
+    if (infogRetoucheInstr.trim().length < 5) { toast.error("Précisez la modification souhaitée"); return; }
+    await runJob("infographie", async () => {
+      const r = await infographieApi.modifier({
+        fichier_id: infogResult.pdf_id!, instructions: infogRetoucheInstr, pays: infogPays,
+      });
+      setInfogRetoucheInstr("");
+      return r;
+    }, { successMsg: "Infographie retouchée" });
   };
 
   // ── Conversion de format ──────────────────────────────────────────────────
@@ -760,22 +1097,22 @@ export const GenerateursPage = () => {
       <DemoBanner />
       <div>
         <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">
-          Yukpo Studio
+          {t('generateurs.title')}
           <span className="text-xs font-semibold px-2 py-0.5 bg-corp-600/15 border border-corp-600/30 text-corp-600 rounded-full tracking-wide">PRO</span>
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Rapports d'analyse · Présentations PowerPoint · Analyse de fichiers · Conversion · Bibliothèque de modèles
+          {t('generateurs.subtitle')}
         </p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-xl flex-wrap" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         {([
-          { id: "rapport",    icon: <FileText className="w-4 h-4" />,      label: "Rapports Word" },
-          { id: "slides",     icon: <Presentation className="w-4 h-4" />,  label: "PowerPoint" },
-          { id: "conversion", icon: <RefreshCw className="w-4 h-4" />,     label: "Conversion" },
-          { id: "modeles",    icon: <BookOpen className="w-4 h-4" />,      label: "Bibliothèque" },
-          { id: "infographie", icon: <Palette className="w-4 h-4" />,     label: "Infographie Pro" },
+          { id: "rapport",    icon: <FileText className="w-4 h-4" />,      label: t('generateurs.tabRapport') },
+          { id: "slides",     icon: <Presentation className="w-4 h-4" />,  label: t('generateurs.tabSlides') },
+          { id: "conversion", icon: <RefreshCw className="w-4 h-4" />,     label: t('generateurs.tabConversion') },
+          { id: "modeles",    icon: <BookOpen className="w-4 h-4" />,      label: t('generateurs.tabModeles') },
+          { id: "infographie", icon: <Palette className="w-4 h-4" />,     label: t('generateurs.tabInfog') },
         ] as const).map(({ id, icon, label }) => (
           <button
             key={id}
@@ -904,7 +1241,7 @@ export const GenerateursPage = () => {
                     <FolderOpen className={`w-6 h-6 shrink-0 ${fichiers.length > 0 ? "text-yukpo-400" : "text-slate-500"}`} />
                     <div>
                       <p className="text-sm font-medium text-slate-300">
-                        {fichiers.length > 0 ? `${fichiers.length} fichier(s) chargé(s)` : "Glissez vos fichiers ici"}
+                        {fichiers.length > 0 ? t('generateurs.filesLoaded', { count: fichiers.length }) : t('generateurs.dropFilesHere')}
                       </p>
                       <p className="text-xs text-slate-500 mt-0.5">PDF, DOCX, XLSX, CSV, TXT, PPTX</p>
                     </div>
@@ -954,7 +1291,7 @@ export const GenerateursPage = () => {
             <div className="flex flex-col sm:flex-row items-end gap-3">
               <div className="flex-1">
                 <Select
-                  label="Type de document généré"
+                  label={t('generateurs.docType')}
                   options={TYPES_SORTIE_FICHIERS}
                   value={typeSortieFichiers}
                   onChange={(e) => setTypeSortieFichiers(e.target.value)}
@@ -962,7 +1299,7 @@ export const GenerateursPage = () => {
               </div>
               <div className="w-full sm:w-44">
                 <Select
-                  label="Niveau de détail"
+                  label={t('generateurs.mode')}
                   options={[
                     { value: "flash",    label: "Flash — rapide" },
                     { value: "standard", label: "Standard" },
@@ -982,7 +1319,7 @@ export const GenerateursPage = () => {
                   icon={<Upload className="w-4 h-4" />}
                   className="w-full sm:w-auto whitespace-nowrap"
                 >
-                  Analyser et générer
+                  {t('generateurs.analyser')}
                 </Button>
               </div>
             </div>
@@ -1090,7 +1427,7 @@ export const GenerateursPage = () => {
             {fichierConv && (
               <>
                 <Select
-                  label="Convertir vers"
+                  label={t('generateurs.convertTo')}
                   options={ciblsDispos}
                   value={formatCible}
                   onChange={(e) => setFormatCible(e.target.value)}
@@ -1234,7 +1571,7 @@ export const GenerateursPage = () => {
                   <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Brief créatif *</label>
                   <textarea value={infogBrief} onChange={e => setInfogBrief(e.target.value)} rows={5} required
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                    placeholder="Ex: Flyer pour la formation 'Souscription Risques Industriels' organisée par YukpoAssurance Douala, le 15 mai 2026 à l'hôtel Hilton. Cible : courtiers et souscripteurs CIMA. Contact : +237 690 11 22 33. Style moderne et institutionnel." />
+                    placeholder={t('generateurs.briefPlaceholder')} />
                 </div>
               )}
 
@@ -1248,33 +1585,33 @@ export const GenerateursPage = () => {
                     </div>
                     <input value={infogSousTitre} onChange={e => setInfogSousTitre(e.target.value)} maxLength={80}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Sous-titre" />
+                      placeholder={t('generateurs.infogSubtitlePlaceholder')} />
                     <select value={infogPalette} onChange={e => setInfogPalette(e.target.value)}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
                       {infogPalettes.map(p => <option key={p} value={p}>{p[0].toUpperCase() + p.slice(1)}</option>)}
                     </select>
                     <input value={infogOrg} onChange={e => setInfogOrg(e.target.value)}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Nom de l'organisation" />
+                      placeholder={t('generateurs.infogOrgPlaceholder')} />
                     <input value={infogContact} onChange={e => setInfogContact(e.target.value)}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Tel / email / adresse" />
+                      placeholder={t('generateurs.infogContactPlaceholder')} />
                     <input value={infogDate} onChange={e => setInfogDate(e.target.value)}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Date événement" />
+                      placeholder={t('generateurs.infogDatePlaceholder')} />
                     <input value={infogLieu} onChange={e => setInfogLieu(e.target.value)}
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Lieu" />
+                      placeholder={t('generateurs.infogLieuPlaceholder')} />
                     <input value={infogSlogan} onChange={e => setInfogSlogan(e.target.value)}
                       className="col-span-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500"
-                      placeholder="Slogan / accroche" />
+                      placeholder={t('generateurs.infogSloganPlaceholder')} />
                   </div>
                   <textarea value={infogCorps} onChange={e => setInfogCorps(e.target.value)} rows={2} maxLength={300}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                    placeholder="Corps de texte principal (max 300 caractères)" />
+                    placeholder={t('generateurs.infogCorpsPlaceholder')} />
                   <textarea value={infogDetails} onChange={e => setInfogDetails(e.target.value)} rows={3}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
-                    placeholder="Détails (1 par ligne, max 6 lignes)" />
+                    placeholder={t('generateurs.infogDetailsPlaceholder')} />
                 </>
               )}
 
@@ -1303,18 +1640,58 @@ export const GenerateursPage = () => {
                 </div>
               )}
 
-              {/* Bouton générer */}
-              <button type="submit" disabled={infogLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-corp-600 to-corp-500 hover:from-corp-700 hover:to-corp-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
-                {infogLoading
-                  ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro compose votre infographie…</>
-                  : <><Sparkles className="w-4 h-4" /> Générer l'infographie print-ready</>}
-              </button>
-              <p className="text-[11px] text-slate-500 text-center">PDF 300 DPI, traits de coupe, bleed inclus · PNG preview · sauvegarde automatique dans Mes Documents</p>
+              {/* Boutons générer (1 visuel ou 4 variantes en parallèle) */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button type="submit" disabled={infogLoading}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-corp-600 to-corp-500 hover:from-corp-700 hover:to-corp-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
+                  {infogLoading
+                    ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro compose…</>
+                    : <><Sparkles className="w-4 h-4" /> {t("generateurs.infogOneVisual")}</>}
+                </button>
+                {infogMode === "brief" && (
+                  <button type="button" onClick={handleGenererVariantes} disabled={infogLoading}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-pink-500/20 hover:bg-pink-500/30 disabled:opacity-50 text-pink-200 font-semibold rounded-xl transition-all text-sm border border-pink-500/30"
+                    title={t("generateurs.infogFourVariants")}>
+                    <Wand2 className="w-4 h-4" /> {t("generateurs.infogFourVariants")}
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 text-center">PDF 300 DPI · CMJN press-ready · SVG vectoriel · PNG HD · sauvegarde Mes Documents</p>
             </form>
 
             {/* Aperçu — 2 colonnes */}
             <div className="lg:col-span-2 flex flex-col gap-4">
+              {/* Galerie variantes IA (si générées) */}
+              {infogVariantes && infogVariantes.length > 1 && (
+                <Card className="p-3">
+                  <p className="text-xs font-semibold text-white mb-2 flex items-center gap-1.5">
+                    <Wand2 className="w-3.5 h-3.5 text-pink-400" /> {(infogVariantes?.length ?? 4)} {t("generateurs.infogVariantsTitle")}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {infogVariantes.map((v, idx) => {
+                      const actif = infogResult?.pdf_id === v.resultat?.pdf_id;
+                      return (
+                        <button key={idx} type="button"
+                          onClick={() => setInfogResult(v.resultat)}
+                          className={`relative rounded-lg overflow-hidden border-2 transition-all ${actif ? "border-pink-400 ring-2 ring-pink-400/40" : "border-slate-700/60 hover:border-slate-500"}`}
+                          title={v.direction}>
+                          {v.resultat?.png_base64 ? (
+                            <img src={`data:image/png;base64,${v.resultat.png_base64}`} alt={v.direction}
+                              className="w-full h-32 object-contain bg-white" />
+                          ) : (
+                            <div className="w-full h-32 bg-slate-800 flex items-center justify-center text-xs text-slate-500">
+                              {v.direction}
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 capitalize">
+                            {v.direction}{actif && " ✓"}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
               {infogResult ? (
                 <Card className="p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
@@ -1331,13 +1708,28 @@ export const GenerateursPage = () => {
                       {infogResult.pdf_id && (
                         <button type="button" onClick={() => handleTelechargerInfog("pdf")}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-yukpo-500/20 hover:bg-yukpo-500/30 text-yukpo-300 rounded-lg text-xs font-medium transition-all">
-                          <Download className="w-3.5 h-3.5" /> PDF print-ready
+                          <Download className="w-3.5 h-3.5" /> {t("generateurs.infogPdfRgb")}
+                        </button>
+                      )}
+                      {infogResult.pdf_cmyk_id && (
+                        <button type="button" onClick={() => handleTelechargerInfog("pdf_cmyk")}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded-lg text-xs font-medium transition-all"
+                          title={t("generateurs.infogPdfCmykTitle")}>
+                          <Download className="w-3.5 h-3.5" /> {t("generateurs.infogPdfCmyk")}
+                        </button>
+                      )}
+                      {infogResult.svg_id && (
+                        <button type="button" onClick={() => handleTelechargerInfog("svg")}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 rounded-lg text-xs font-medium transition-all"
+                          title={t("generateurs.infogSvgTitle")}>
+                          <Download className="w-3.5 h-3.5" /> {t("generateurs.infogSvg")}
                         </button>
                       )}
                       {infogResult.png_id && (
-                        <button type="button" onClick={() => handleTelechargerInfog("png")}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-all">
-                          <Download className="w-3.5 h-3.5" /> PNG
+                        <button type="button" onClick={() => handleTelechargerInfog("png_hd")}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-all"
+                          title="PNG 300 dpi">
+                          <Download className="w-3.5 h-3.5" /> {t("generateurs.infogPngHd")}
                         </button>
                       )}
                     </div>
@@ -1358,13 +1750,29 @@ export const GenerateursPage = () => {
                         <p><span className="text-slate-500">Palette :</span> {infogResult.specification.palette}</p>
                       )}
                       {typeof infogResult.prix_fcfa === "number" && infogResult.prix_fcfa > 0 && (
-                        <p><span className="text-slate-500">Tarif imprimé indicatif :</span> {infogResult.prix_fcfa.toLocaleString("fr-FR")} FCFA</p>
+                        <p><span className="text-slate-500">Tarif imprimé indicatif :</span> {formatAmount(infogResult.prix_fcfa, infogPays)}</p>
                       )}
                     </div>
                   )}
                   <span className="flex items-center gap-1.5 text-[11px] text-green-400">
                     <Save className="w-3 h-3" /> Sauvegardé dans Mes Documents
                   </span>
+
+                  {/* Retouche IA — instructions libres pour modifier le visuel */}
+                  <div className="border-t border-slate-700/60 pt-3 mt-1 flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                      <Wand2 className="w-3.5 h-3.5 text-pink-400" /> {t("generateurs.infogRetouchTitle")}
+                    </span>
+                    <Textarea
+                      value={infogRetoucheInstr}
+                      onChange={e => setInfogRetoucheInstr(e.target.value)}
+                      placeholder={t("generateurs.infogRetouchPlaceholder")}
+                      rows={2}
+                    />
+                    <Button type="button" onClick={handleRetoucher} disabled={infogLoading || !infogRetoucheInstr.trim()} variant="secondary" className="self-end text-xs">
+                      {infogLoading ? <><Loader className="w-3.5 h-3.5 animate-spin" /> {t("generateurs.infogRetouching")}</> : <><Sparkles className="w-3.5 h-3.5" /> {t("generateurs.infogRetouchApply")}</>}
+                    </Button>
+                  </div>
                 </Card>
               ) : (
                 <Card className="flex flex-col items-center justify-center gap-4 p-12 border-dashed min-h-[400px]">
@@ -1407,19 +1815,19 @@ export const GenerateursPage = () => {
           {tab === "rapport" ? (
             <form onSubmit={handleGenererRapport} className="space-y-3">
               <Textarea
-                label="Sujet du rapport *"
-                placeholder="Ex: Analyse de la situation financière de l'entreprise XYZ pour l'exercice 2024…"
+                label={t('generateurs.subjectRapport')}
+                placeholder={t('generateurs.subjectRapportPlaceholder')}
                 value={sujetRapport}
                 onChange={(e) => setSujetRapport(e.target.value)}
                 rows={2}
               />
               <div className="grid grid-cols-2 gap-3">
-                <Select label="Type de rapport" options={TYPES_RAPPORT} value={typeRapport} onChange={(e) => setTypeRapport(e.target.value)} />
-                <Select label="Mode" options={MODES_RAPPORT} value={modeRapport} onChange={(e) => setModeRapport(e.target.value)} />
+                <Select label={t('generateurs.typeRapport')} options={TYPES_RAPPORT} value={typeRapport} onChange={(e) => setTypeRapport(e.target.value)} />
+                <Select label={t('generateurs.mode')} options={MODES_RAPPORT} value={modeRapport} onChange={(e) => setModeRapport(e.target.value)} />
               </div>
               <Textarea
-                label="Contexte / Données supplémentaires"
-                placeholder="Données financières, informations spécifiques, instructions particulières…"
+                label={t('generateurs.contextExtra')}
+                placeholder={t('generateurs.contextExtraPlaceholder')}
                 value={contexteRapport}
                 onChange={(e) => setContexteRapport(e.target.value)}
                 rows={3}
@@ -1488,26 +1896,26 @@ export const GenerateursPage = () => {
                   </div>
                 )}
                 <Button type="submit" loading={loading} icon={<FileText className="w-4 h-4" />}>
-                  {fichiersRapport.length > 0 ? `Analyser et générer (${fichiersRapport.length} fichier${fichiersRapport.length > 1 ? "s" : ""})` : "Générer le rapport"}
+                  {fichiersRapport.length > 0 ? t('generateurs.generateWithFiles', { count: fichiersRapport.length, plural: fichiersRapport.length > 1 ? "s" : "" }) : t('generateurs.generateReport')}
                 </Button>
               </div>
             </form>
           ) : (
             <form onSubmit={handleGenererSlides} className="space-y-3">
               <Textarea
-                label="Sujet de la présentation *"
-                placeholder="Ex: Résultats financiers Q3 2024 pour le conseil d'administration…"
+                label={t('generateurs.subjectSlides')}
+                placeholder={t('generateurs.subjectSlidesPlaceholder')}
                 value={sujetSlides}
                 onChange={(e) => setSujetSlides(e.target.value)}
                 rows={2}
               />
               <div className="grid grid-cols-2 gap-3">
-                <Select label="Type de présentation" options={TYPES_SLIDES} value={typeSlides} onChange={(e) => setTypeSlides(e.target.value)} />
-                <Select label="Mode" options={MODES_SLIDES} value={modeSlides} onChange={(e) => setModeSlides(e.target.value)} />
+                <Select label={t('generateurs.typeSlides')} options={TYPES_SLIDES} value={typeSlides} onChange={(e) => setTypeSlides(e.target.value)} />
+                <Select label={t('generateurs.mode')} options={MODES_SLIDES} value={modeSlides} onChange={(e) => setModeSlides(e.target.value)} />
               </div>
               <Textarea
-                label="Contexte / Données"
-                placeholder="Données clés à inclure, KPIs, messages principaux…"
+                label={t('generateurs.contextData')}
+                placeholder={t('generateurs.contextDataPlaceholder')}
                 value={contexteSlides}
                 onChange={(e) => setContexteSlides(e.target.value)}
                 rows={3}
@@ -1576,7 +1984,7 @@ export const GenerateursPage = () => {
                   </div>
                 )}
                 <Button type="submit" loading={loading} icon={<Presentation className="w-4 h-4" />}>
-                  {fichiersSlides.length > 0 ? `Analyser et générer (${fichiersSlides.length} fichier${fichiersSlides.length > 1 ? "s" : ""})` : "Générer les slides"}
+                  {fichiersSlides.length > 0 ? t('generateurs.generateWithFiles', { count: fichiersSlides.length, plural: fichiersSlides.length > 1 ? "s" : "" }) : t('generateurs.generateSlides')}
                 </Button>
               </div>
             </form>

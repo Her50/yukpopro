@@ -3,15 +3,11 @@ import { Mic, Upload, Download, Loader2, Square, Circle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { audioAPI } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
+import { CountryPicker } from '../components/CountryPicker'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
-
-const PAYS = [
-  { code: 'CM', label: '🇨🇲 CM' }, { code: 'SN', label: '🇸🇳 SN' },
-  { code: 'CI', label: '🇨🇮 CI' }, { code: 'TG', label: '🇹🇬 TG' },
-]
 
 type AudioResult = {
   transcription_brute: string; document_formate: string; duree_secondes?: number;
@@ -152,13 +148,7 @@ export default function AudioPage() {
         </div>
 
         {/* Pays */}
-        <div className="flex gap-2">
-          {PAYS.map(p => (
-            <button key={p.code} onClick={() => setPays(p.code)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium ${pays === p.code ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-            >{p.label}</button>
-          ))}
-        </div>
+        <CountryPicker label="Pays" value={pays} onChange={setPays} />
 
         {/* Contexte */}
         <div>

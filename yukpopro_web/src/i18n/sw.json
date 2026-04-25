@@ -116,7 +116,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Inatengeneza…",
-    "download": "Pakua"
+    "download": "Pakua",
+    "infogOneVisual": "Tengeneza muundo 1",
+    "infogFourVariants": "Tofauti 4 za AI",
+    "infogVariantsLoading": "Inatengeneza…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — kwa uchapishaji wa kitaalamu",
+    "infogSvgTitle": "SVG ya vekta — inaweza kuhaririwa katika Illustrator/Inkscape",
+    "infogVariantsTitle": "miongozo ya ubunifu — chagua unayopenda",
+    "infogRetouchTitle": "Hariri hii infografia",
+    "infogRetouchPlaceholder": "Mf: Badilisha kichwa, weka mandharinyuma bluu, ongeza nambari 699…",
+    "infogRetouchApply": "Tumia",
+    "infogRetouching": "Inahaririwa…"
   },
   "traduction": {
     "title": "Tafsiri ya Nyaraka",

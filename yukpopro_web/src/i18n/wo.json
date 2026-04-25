@@ -95,7 +95,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Di def…",
-    "download": "Indi"
+    "download": "Indi",
+    "infogOneVisual": "Defar 1 tëralin",
+    "infogFourVariants": "4 wuute AI",
+    "infogVariantsLoading": "Defal…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — ngir tëralin bu professionnel",
+    "infogSvgTitle": "SVG vector — mën a coppite ci Illustrator/Inkscape",
+    "infogVariantsTitle": "yoonu xalaat — tann sa bii nga genel",
+    "infogRetouchTitle": "Coppite infographie bii",
+    "infogRetouchPlaceholder": "Misaal: Soppi tiitar, def fond bu bula, dolli numero 699…",
+    "infogRetouchApply": "Jefandikoo",
+    "infogRetouching": "Coppite…"
   },
   "traduction": {
     "title": "Tekki nataal",

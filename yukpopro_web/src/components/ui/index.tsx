@@ -254,13 +254,13 @@ export const Spinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
 
 // ── YukpoPro Logo ─────────────────────────────────────────────────────────────
 
-export const YukpoLogo = ({ size = 32, showText = true }: { size?: number; showText?: boolean }) => (
+export const YukpoLogo = ({ size = 48, showText = true }: { size?: number; showText?: boolean }) => (
   <div className="flex items-center gap-3">
     <div style={{
       width: size * 1.6, height: size * 1.6, background: "white",
       borderRadius: size * 0.28, display: "flex", alignItems: "center",
-      justifyContent: "center", padding: size * 0.06, flexShrink: 0,
-      boxShadow: "0 0 0 1px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25)",
+      justifyContent: "center", padding: size * 0.1, flexShrink: 0,
+      boxShadow: "0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35)",
     }}>
       <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
     </div>
@@ -268,13 +268,13 @@ export const YukpoLogo = ({ size = 32, showText = true }: { size?: number; showT
       <div className="flex flex-col leading-tight">
         <span
           className="font-display font-bold tracking-tight"
-          style={{ fontSize: size * 0.56, color: "var(--ykp-sidebar-active-text)" }}
+          style={{ fontSize: size * 0.58, color: "var(--ykp-sidebar-active-text)" }}
         >
           Yukpo<span style={{ color: "#00B0F0" }}>Pro</span>
         </span>
         <span
           className="tracking-wide"
-          style={{ fontSize: size * 0.24, color: "var(--ykp-sidebar-text-muted)" }}
+          style={{ fontSize: size * 0.26, color: "var(--ykp-sidebar-text-muted)" }}
         >
           Intelligence Africaine
         </span>

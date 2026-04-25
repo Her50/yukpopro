@@ -37,12 +37,13 @@ export const AppLayout = () => {
           </button>
           <div className="flex items-center gap-2">
             <div style={{
-              width: 30, height: 30, background: "white", borderRadius: 8,
-              display: "flex", alignItems: "center", justifyContent: "center", padding: 2,
+              width: 44, height: 44, background: "white", borderRadius: 11,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 4,
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.18), 0 4px 10px rgba(0,0,0,0.3)",
             }}>
               <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
-            <span className="text-white font-bold text-sm">YukpoPro</span>
+            <span className="text-white font-bold text-base">Yukpo<span style={{ color: "#00B0F0" }}>Pro</span></span>
           </div>
         </div>
 

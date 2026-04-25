@@ -120,7 +120,21 @@
     "title": "Yukpo Studio",
     "subtitle": "Professionelle Dokumente erstellen",
     "generating": "Generierung…",
-    "download": "Herunterladen"
+    "download": "Herunterladen",
+    "infogOneVisual": "1 Design erstellen",
+    "infogFourVariants": "4 KI-Varianten",
+    "infogVariantsLoading": "Wird erstellt…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — für professionellen Druck",
+    "infogSvgTitle": "Vektor-SVG — bearbeitbar in Illustrator/Inkscape",
+    "infogVariantsTitle": "kreative Richtungen — wahlen Sie Ihren Favoriten",
+    "infogRetouchTitle": "Diese Infografik retuschieren",
+    "infogRetouchPlaceholder": "Bsp: Titel andern, Hintergrund blau, Nummer 699 hinzufugen…",
+    "infogRetouchApply": "Anwenden",
+    "infogRetouching": "Retuschieren…"
   },
   "traduction": {
     "title": "Dokumentenübersetzung",

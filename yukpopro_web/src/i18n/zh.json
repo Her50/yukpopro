@@ -117,7 +117,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "生成中…",
-    "download": "下载"
+    "download": "下载",
+    "infogOneVisual": "生成1个设计",
+    "infogFourVariants": "4个AI变体",
+    "infogVariantsLoading": "生成中…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — 专业印刷",
+    "infogSvgTitle": "矢量SVG — 可在Illustrator/Inkscape中编辑",
+    "infogVariantsTitle": "创意方向 — 选择您的最爱",
+    "infogRetouchTitle": "修改此信息图",
+    "infogRetouchPlaceholder": "示例：更改标题，将背景改为蓝色，添加号码699…",
+    "infogRetouchApply": "应用",
+    "infogRetouching": "修改中…"
   },
   "traduction": {
     "title": "文档翻译",

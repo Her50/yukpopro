@@ -9,6 +9,18 @@ import { profilApi, emploiApi } from "@/api/client";
 import { METIERS, PAYS_MONDE, SECTEURS_ACTIVITE } from "@/types";
 import { detectLanguageFromCountry } from "@/i18n";
 
+function useIsMobile() {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setM(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return m;
+}
+
 const NIVEAUX_EXPERTISE = [
   { value: "debutant",       label: "Débutant (0-2 ans)" },
   { value: "intermediaire",  label: "Intermédiaire (2-5 ans)" },
@@ -51,6 +63,7 @@ const ComboSelect = ({
   const [rect, setRect] = useState<DOMRect | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const isMobile = useIsMobile();
 
   const selectedLabel = options.find((o) => o.value === value)?.label ?? "";
 
@@ -64,23 +77,38 @@ const ComboSelect = ({
     setSearch("");
   };
 
+  const closeDropdown = () => { setOpen(false); setSearch(""); };
+
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
     const handler = (e: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-        setSearch("");
+        closeDropdown();
       }
+    };
+    const onResize = () => {
+      if (btnRef.current) setRect(btnRef.current.getBoundingClientRect());
     };
     document.addEventListener("mousedown", handler);
     document.addEventListener("touchstart", handler);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onResize, true);
     return () => {
       document.removeEventListener("mousedown", handler);
       document.removeEventListener("touchstart", handler);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onResize, true);
     };
-  }, [open]);
+  }, [open, isMobile]);
 
-  // Dropdown uses fixed positioning to avoid overflow clipping from parent scroll containers
+  // Lock body scroll while bottom-sheet open on mobile
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open, isMobile]);
+
   const dropdownStyle: React.CSSProperties = rect
     ? {
         position: "fixed",
@@ -108,7 +136,7 @@ const ComboSelect = ({
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {open && (
+      {open && !isMobile && (
         <div className="rounded-lg bg-white border border-slate-300 shadow-xl overflow-hidden" style={dropdownStyle}>
           <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-200">
             <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -127,8 +155,8 @@ const ComboSelect = ({
             {filtered.map((o) => (
               <li
                 key={o.value}
-                onMouseDown={(e) => { e.preventDefault(); onChange(o.value); setOpen(false); setSearch(""); }}
-                onTouchEnd={(e) => { e.preventDefault(); onChange(o.value); setOpen(false); setSearch(""); }}
+                onMouseDown={(e) => { e.preventDefault(); onChange(o.value); closeDropdown(); }}
+                onTouchEnd={(e) => { e.preventDefault(); onChange(o.value); closeDropdown(); }}
                 className={`px-3 py-2.5 text-sm cursor-pointer transition-colors leading-snug ${
                   o.value === value
                     ? "bg-sky-50 text-sky-700 font-medium"
@@ -140,6 +168,49 @@ const ComboSelect = ({
             ))}
           </ul>
         </div>
+      )}
+
+      {open && isMobile && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-[9998]" onClick={closeDropdown} />
+          <div className="fixed inset-x-0 bottom-0 z-[9999] bg-white rounded-t-2xl shadow-2xl flex flex-col max-h-[85vh] animate-slide-up">
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-200">
+              <span className="text-sm font-semibold text-slate-700">{label}</span>
+              <button type="button" onClick={closeDropdown}
+                      className="text-sm text-sky-600 font-medium px-2 py-1">Fermer</button>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200">
+              <Search className="w-4 h-4 text-slate-400 shrink-0" />
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher…"
+                className="flex-1 bg-transparent text-base text-slate-900 placeholder-slate-400 focus:outline-none py-1.5"
+              />
+            </div>
+            <ul className="overflow-y-auto py-1 flex-1 overscroll-contain">
+              {filtered.length === 0 && (
+                <li className="px-4 py-3 text-sm text-slate-400 italic">Aucun résultat</li>
+              )}
+              {filtered.map((o) => (
+                <li
+                  key={o.value}
+                  onClick={() => { onChange(o.value); closeDropdown(); }}
+                  className={`px-4 py-3 text-base cursor-pointer transition-colors leading-snug ${
+                    o.value === value
+                      ? "bg-sky-50 text-sky-700 font-semibold"
+                      : "text-slate-800 active:bg-slate-200"
+                  }`}
+                >
+                  {o.label}
+                </li>
+              ))}
+            </ul>
+            <div className="h-[env(safe-area-inset-bottom)]" />
+          </div>
+        </>
       )}
     </div>
   );
@@ -295,7 +366,7 @@ export const ProfilPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-5 max-w-4xl mx-auto animate-fade-in">
+    <div className="p-4 sm:p-6 space-y-5 max-w-4xl mx-auto animate-fade-in pb-28 md:pb-6">
 
       {/* En-tête page */}
       <div>
@@ -309,10 +380,10 @@ export const ProfilPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="flex flex-col gap-5 lg:grid lg:grid-cols-3">
 
-        {/* Colonne gauche — identité */}
-        <div className="space-y-4">
+        {/* Identité — toujours en haut */}
+        <div className="order-1 lg:col-span-1">
           <Card className="p-5 text-center space-y-3 bg-slate-800/50 border border-slate-700">
             {/* Avatar cliquable avec photo ou initiale */}
             <div className="relative mx-auto w-20 h-20 group cursor-pointer"
@@ -327,12 +398,18 @@ export const ProfilPage = () => {
                   </span>
                 </div>
               )}
-              {/* Overlay caméra au survol */}
-              <div className="absolute inset-0 rounded-2xl flex items-center justify-center
-                              bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Overlay caméra au survol (desktop) */}
+              <div className="absolute inset-0 rounded-2xl items-center justify-center
+                              bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex">
                 {photoUploading
                   ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   : <Camera className="w-6 h-6 text-white" />}
+              </div>
+              {/* Badge caméra permanent (mobile + visuel discret desktop) */}
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-sky-600 border-2 border-slate-800 flex items-center justify-center shadow-md md:hidden">
+                {photoUploading
+                  ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : <Camera className="w-3.5 h-3.5 text-white" />}
               </div>
             </div>
             <input ref={photoFileRef} type="file" accept="image/*" className="hidden"
@@ -344,7 +421,7 @@ export const ProfilPage = () => {
               </button>
             )}
             {!photoUrl && (
-              <p className="text-xs text-slate-500">Cliquez sur l'avatar pour ajouter une photo</p>
+              <p className="text-xs text-slate-500">Touchez l'avatar pour ajouter une photo</p>
             )}
             <div>
               <p className="text-white font-semibold text-sm">
@@ -366,7 +443,10 @@ export const ProfilPage = () => {
               {(profil?.xp_points || 0).toLocaleString("fr-FR")} XP
             </p>
           </Card>
+        </div>
 
+        {/* Stats — sous le formulaire en mobile, sous l'identité en desktop */}
+        <div className="order-3 lg:order-2 lg:col-span-1 lg:row-start-2">
           <Card className="p-4 space-y-2 bg-slate-800/50 border border-slate-700">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Utilisation</p>
             {[
@@ -388,7 +468,7 @@ export const ProfilPage = () => {
         </div>
 
         {/* Formulaire */}
-        <div className="lg:col-span-2">
+        <div className="order-2 lg:order-3 lg:col-span-2 lg:row-span-2 lg:row-start-1 lg:col-start-2">
           <Card className="p-5 bg-slate-800/50 border border-slate-700">
             <form onSubmit={handleSave} className="space-y-4">
 
@@ -408,7 +488,7 @@ export const ProfilPage = () => {
                 placeholder="— Rechercher votre métier —"
               />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <ComboSelect
                   label="Pays"
                   required
@@ -425,7 +505,7 @@ export const ProfilPage = () => {
                 </FieldSelect>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <ComboSelect
                     label="Secteur d'activité"
@@ -506,29 +586,52 @@ export const ProfilPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div
-                    className="relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center cursor-pointer hover:border-sky-500/60 transition-colors group"
-                    onClick={() => cvFileRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const f = e.dataTransfer.files?.[0];
-                      if (f) handleCvFile(f);
-                    }}
-                  >
-                    {cvUploading ? (
-                      <div className="flex flex-col items-center gap-2 text-slate-400">
-                        <span className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs">{t("common.uploading")}</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1.5">
-                        <Upload size={22} className="text-slate-500 group-hover:text-sky-400 transition-colors" />
-                        <span className="text-sm text-slate-400 group-hover:text-slate-300">{t("profil.dragDropFile")}</span>
-                        <span className="text-xs text-slate-500">{t("profil.cvUploadDesc")}</span>
-                      </div>
-                    )}
-                  </div>
+                  <>
+                    {/* Bouton plein sur mobile */}
+                    <button
+                      type="button"
+                      onClick={() => cvFileRef.current?.click()}
+                      disabled={cvUploading}
+                      className="md:hidden w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-sky-600/90 hover:bg-sky-500 text-white text-sm font-semibold disabled:opacity-60 transition-colors"
+                    >
+                      {cvUploading ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          {t("common.uploading")}
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          {t("profil.cvUploadDesc")}
+                        </>
+                      )}
+                    </button>
+
+                    {/* Zone drag-drop sur desktop */}
+                    <div
+                      className="hidden md:block relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center cursor-pointer hover:border-sky-500/60 transition-colors group"
+                      onClick={() => cvFileRef.current?.click()}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const f = e.dataTransfer.files?.[0];
+                        if (f) handleCvFile(f);
+                      }}
+                    >
+                      {cvUploading ? (
+                        <div className="flex flex-col items-center gap-2 text-slate-400">
+                          <span className="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-xs">{t("common.uploading")}</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1.5">
+                          <Upload size={22} className="text-slate-500 group-hover:text-sky-400 transition-colors" />
+                          <span className="text-sm text-slate-400 group-hover:text-slate-300">{t("profil.dragDropFile")}</span>
+                          <span className="text-xs text-slate-500">{t("profil.cvUploadDesc")}</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
 
                 <input
@@ -540,18 +643,24 @@ export const ProfilPage = () => {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold text-white transition-all bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-              >
-                {loading ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                {loading ? t("common.saving") : isWelcome ? `${t("profil.saveBtn")} →` : t("profil.saveBtn")}
-              </button>
+              <div className="md:static md:p-0 md:bg-transparent md:border-0
+                              fixed inset-x-0 bottom-0 z-40 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]
+                              bg-slate-900/95 backdrop-blur border-t border-slate-700">
+                <div className="max-w-4xl mx-auto md:max-w-none md:mx-0">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold text-white transition-all bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  >
+                    {loading ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    {loading ? t("common.saving") : isWelcome ? `${t("profil.saveBtn")} →` : t("profil.saveBtn")}
+                  </button>
+                </div>
+              </div>
 
             </form>
           </Card>

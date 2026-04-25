@@ -107,7 +107,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Oluşturuluyor…",
-    "download": "İndir"
+    "download": "İndir",
+    "infogOneVisual": "1 tasarım oluştur",
+    "infogFourVariants": "4 YZ varyantı",
+    "infogVariantsLoading": "Oluşturuluyor…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — profesyonel baskı için",
+    "infogSvgTitle": "Vektor SVG — Illustrator/Inkscape ile duzenlenebilir",
+    "infogVariantsTitle": "yaratici yon — favorinizi secin",
+    "infogRetouchTitle": "Bu infografigi duzenle",
+    "infogRetouchPlaceholder": "Orn: Basligi degistir, arka plani mavi yap, 699 numarasini ekle…",
+    "infogRetouchApply": "Uygula",
+    "infogRetouching": "Duzenleniyor…"
   },
   "traduction": {
     "title": "Belge Çevirisi",

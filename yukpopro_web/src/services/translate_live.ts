@@ -99,6 +99,8 @@ export class TranslateLiveClient {
   private stopping = false;
   private _playQueue: ArrayBuffer[] = [];
   private _playing = false;
+  private _reconnectAttempts = 0;
+  private _wsUrl = "";  // mémorisé pour reconnexion
 
   constructor(opts: TranslateLiveOptions) {
     this.opts = opts;
@@ -222,19 +224,25 @@ export class TranslateLiveClient {
     try {
       const ctx = this.playbackCtx;
       if (ctx && ctx.state !== "closed") {
-        const audioBuf = await ctx.decodeAudioData(mp3.slice(0));
-        const src = ctx.createBufferSource();
-        src.buffer = audioBuf;
-        src.connect(ctx.destination);
-        src.onended = () => {
-          this._playing = false;
-          this._drainQueue();
-        };
-        src.start(0);
-        return;
+        // Réveille le contexte si le navigateur l'a suspendu (fréquent après 1-2s d'inactivité)
+        if (ctx.state === "suspended") {
+          try { await ctx.resume(); } catch {/* ignore */}
+        }
+        try {
+          const audioBuf = await ctx.decodeAudioData(mp3.slice(0));
+          const src = ctx.createBufferSource();
+          src.buffer = audioBuf;
+          src.connect(ctx.destination);
+          src.onended = () => {
+            this._playing = false;
+            this._drainQueue();
+          };
+          src.start(0);
+          return;
+        } catch {/* decode failed — fall through to Audio() */}
       }
-    } catch {/* fall through to Audio() */}
-    // Fallback : HTML Audio element
+    } catch {/* ctx access failed */}
+    // Fallback : HTML Audio element (toujours actif car déclenché après geste utilisateur)
     try {
       const blob = new Blob([mp3], { type: "audio/mpeg" });
       const url  = URL.createObjectURL(blob);
@@ -290,7 +298,6 @@ export class TranslateLiveClient {
   }
 
   private async _connectWS(): Promise<void> {
-    // Vercel ne proxi pas les WebSockets — on pointe directement vers le backend
     const apiBase = (import.meta.env.VITE_API_URL as string | undefined) || "";
     const wsBase = apiBase
       ? apiBase.replace(/^http/, "ws")
@@ -299,14 +306,21 @@ export class TranslateLiveClient {
       + `?token=${encodeURIComponent(this.opts.token)}`
       + `&source=${encodeURIComponent(this.opts.source)}`
       + `&target=${encodeURIComponent(this.opts.target)}`;
+    this._wsUrl = url;
+    this._reconnectAttempts = 0;
+    return this._openWS(url, true);
+  }
 
+  private _openWS(url: string, isFirst: boolean): Promise<void> {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(url);
       ws.binaryType = "arraybuffer";
       let opened = false;
+      let resolved = false;
 
       ws.onopen = () => {
         opened = true;
+        this._reconnectAttempts = 0;
         this.heartbeat = window.setInterval(() => {
           try { ws.send("ping"); } catch {/* ignore */}
         }, 30_000);
@@ -317,8 +331,8 @@ export class TranslateLiveClient {
         // Format : 4 octets (big-endian) longueur meta JSON + meta JSON + MP3
         if (ev.data instanceof ArrayBuffer) {
           try {
-            const buf  = new DataView(ev.data);
-            const metaLen = buf.getUint32(0, false);  // big-endian
+            const buf     = new DataView(ev.data);
+            const metaLen = buf.getUint32(0, false);
             const metaBytes = new Uint8Array(ev.data, 4, metaLen);
             const meta = JSON.parse(new TextDecoder().decode(metaBytes)) as {
               type: string; utterance_id: string; gender: "male"|"female"; format: string;
@@ -326,8 +340,10 @@ export class TranslateLiveClient {
             const audioBytes = new Uint8Array(ev.data, 4 + metaLen);
             if (meta.type === "audio") {
               // Lecture directe via WebAudio (contourne autoplay Chrome)
-              void this.playMp3Bytes(audioBytes.buffer.slice(audioBytes.byteOffset, audioBytes.byteOffset + audioBytes.byteLength));
-              // Notifier la page pour l'indicateur genre
+              void this.playMp3Bytes(audioBytes.buffer.slice(
+                audioBytes.byteOffset,
+                audioBytes.byteOffset + audioBytes.byteLength,
+              ));
               const audioBlob = new Blob([audioBytes], { type: "audio/mpeg" });
               this.opts.onEvent({ ...meta, type: "audio", audioBlob } as TranslateEventAudio);
             }
@@ -339,8 +355,8 @@ export class TranslateLiveClient {
         try {
           const obj = JSON.parse(ev.data) as TranslateEvent;
           if (obj.type === "ready") {
-            this.setStatus("ready");
-            resolve();
+            this.setStatus("streaming");
+            if (!resolved) { resolved = true; resolve(); }
           } else {
             this.opts.onEvent(obj);
           }
@@ -348,25 +364,42 @@ export class TranslateLiveClient {
       };
 
       ws.onerror = () => {
-        if (!opened) reject(new Error("Connexion WebSocket impossible"));
+        if (!opened && isFirst) reject(new Error("Connexion WebSocket impossible"));
       };
 
       ws.onclose = (ev) => {
-        if (this.heartbeat) {
-          clearInterval(this.heartbeat);
-          this.heartbeat = null;
+        if (this.heartbeat) { clearInterval(this.heartbeat); this.heartbeat = null; }
+
+        // Codes fatals — pas de reconnexion
+        const FATAL_CODES = [4001, 4002, 4003, 4005];
+        if (this.stopping || FATAL_CODES.includes(ev.code)) {
+          if (!this.stopping) {
+            const codeMsg =
+              ev.code === 4001 ? "Non authentifié" :
+              ev.code === 4002 ? "Crédits épuisés" :
+              ev.code === 4003 ? "Trop de sessions simultanées" :
+              ev.code === 4005 ? "Plafond mensuel atteint" :
+              ev.code === 4100 ? "Service STT indisponible" :
+              `Connexion fermée (${ev.code})`;
+            this.setStatus("error", codeMsg);
+          }
+          if (!opened && isFirst) reject(new Error("WebSocket fermée avant d'être prête"));
+          return;
         }
-        if (!this.stopping) {
-          const codeMsg =
-            ev.code === 4001 ? "Non authentifié" :
-            ev.code === 4002 ? "Crédits épuisés" :
-            ev.code === 4003 ? "Trop de sessions simultanées" :
-            ev.code === 4005 ? "Plafond mensuel atteint" :
-            ev.code === 4100 ? "Service de transcription indisponible" :
-            `Connexion fermée (${ev.code})`;
-          this.setStatus("error", codeMsg);
+
+        // Reconnexion avec backoff exponentiel (max 5 tentatives, 30s)
+        if (!this.stopping && this._reconnectAttempts < 5) {
+          this._reconnectAttempts++;
+          const delay = Math.min(1000 * Math.pow(2, this._reconnectAttempts - 1), 30_000);
+          this.setStatus("connecting", `Reconnexion dans ${Math.round(delay / 1000)}s…`);
+          setTimeout(() => {
+            if (!this.stopping) this._openWS(this._wsUrl, false).catch(() => {});
+          }, delay);
+        } else if (!this.stopping) {
+          this.setStatus("error", "Connexion perdue. Vérifiez votre réseau.");
         }
-        if (!opened) reject(new Error("WebSocket fermée avant d'être prête"));
+
+        if (!opened && isFirst) reject(new Error("WebSocket fermée avant d'être prête"));
       };
 
       this.ws = ws;

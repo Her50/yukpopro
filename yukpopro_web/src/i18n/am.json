@@ -92,7 +92,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "በማዘጋጀት ላይ…",
-    "download": "አውርድ"
+    "download": "አውርድ",
+    "infogOneVisual": "1 ዲዛይን ፍጠር",
+    "infogFourVariants": "4 AI ልዩነቶች",
+    "infogVariantsLoading": "በመፍጠር ላይ…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — ለሙያዊ ህትመት",
+    "infogSvgTitle": "የቬክተር SVG — Illustrator/Inkscape ውስጥ ሊስተካከል የሚችል",
+    "infogVariantsTitle": "የፈጠራ አቅጣጫዎች — የሚወዱትን ይምረጡ",
+    "infogRetouchTitle": "ይህን ኢንፎግራፊክ አስተካክል",
+    "infogRetouchPlaceholder": "ምሳሌ: ርዕሱን ቀይር፣ ጀርባውን ሰማያዊ አድርግ፣ ቁጥር 699 ጨምር…",
+    "infogRetouchApply": "ተግብር",
+    "infogRetouching": "በማስተካከል ላይ…"
   },
   "traduction": {
     "title": "የሰነድ ትርጉም",

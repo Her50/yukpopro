@@ -107,7 +107,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "बन रहा है…",
-    "download": "डाउनलोड करें"
+    "download": "डाउनलोड करें",
+    "infogOneVisual": "1 डिज़ाइन बनाएं",
+    "infogFourVariants": "4 AI विकल्प",
+    "infogVariantsLoading": "बना रहे हैं…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — पेशेवर प्रिंटिंग के लिए",
+    "infogSvgTitle": "वेक्टर SVG — Illustrator/Inkscape में संपादन योग्य",
+    "infogVariantsTitle": "रचनात्मक दिशाएं — अपनी पसंदीदा चुनें",
+    "infogRetouchTitle": "इस इन्फोग्राफिक को संशोधित करें",
+    "infogRetouchPlaceholder": "उदा: शीर्षक बदलें, पृष्ठभूमि नीली करें, नंबर 699 जोड़ें...",
+    "infogRetouchApply": "लागू करें",
+    "infogRetouching": "संशोधन हो रहा…"
   },
   "traduction": {
     "title": "दस्तावेज़ अनुवाद",

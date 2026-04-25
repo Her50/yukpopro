@@ -3,12 +3,14 @@
  * Filtres libres : mot-clé, secteur, source — sans restriction de profil
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Gavel, RefreshCw, ExternalLink, Building2, MapPin,
   Calendar, Bell, CheckCircle, AlertCircle,
   Search, Zap, Globe, Filter, X,
 } from "lucide-react";
 import { marchesApi, type MarchePublic } from "@/api/client";
+import { useMarchesStore } from "@/store/marchesStore";
 import { DemoBanner } from "@/components/DemoBanner";
 
 const formatDate = (iso?: string | null) => {
@@ -26,17 +28,23 @@ const FREQUENCES = [
 ];
 
 export const MarchesPage = () => {
+  const { t } = useTranslation();
   const [marches, setMarches]       = useState<MarchePublic[]>([]);
   const [loading, setLoading]       = useState(true);
   const [searching, setSearching]   = useState(false);
-  const [frequence, setFrequence]   = useState(6);
   const [toast, setToast]           = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-  const [showSources, setShowSources] = useState(false);
 
-  // ── Filtres libres ──────────────────────────────────────────────────────────
-  const [keyword, setKeyword]         = useState("");
-  const [filtreSecteur, setFiltreSecteur] = useState("");
-  const [filtreSource, setFiltreSource]   = useState("");
+  // Store persistant : filtres + fréquence + panneau sources survivent à la nav
+  const frequence       = useMarchesStore(s => s.frequence);
+  const setFrequence    = useMarchesStore(s => s.setFrequence);
+  const showSources     = useMarchesStore(s => s.showSources);
+  const setShowSources  = useMarchesStore(s => s.setShowSources);
+  const keyword         = useMarchesStore(s => s.keyword);
+  const setKeyword      = useMarchesStore(s => s.setKeyword);
+  const filtreSecteur   = useMarchesStore(s => s.filtreSecteur);
+  const setFiltreSecteur = useMarchesStore(s => s.setFiltreSecteur);
+  const filtreSource    = useMarchesStore(s => s.filtreSource);
+  const setFiltreSource = useMarchesStore(s => s.setFiltreSource);
 
   const secteurs = useMemo(
     () => [...new Set(marches.map(m => m.secteur).filter(Boolean) as string[])],
@@ -99,7 +107,7 @@ export const MarchesPage = () => {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400">Chargement des appels d'offres…</p>
+        <p className="text-slate-400">{t('marches.loadingText')}</p>
       </div>
     );
   }
@@ -121,7 +129,7 @@ export const MarchesPage = () => {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Gavel className="text-blue-400" size={24} />
-            Marchés Publics & Appels d'Offres
+            {t('marches.title')}
           </h1>
           <p className="text-slate-400 text-sm mt-1">
             {filtresActifs
@@ -139,7 +147,7 @@ export const MarchesPage = () => {
             ? <RefreshCw size={15} className="animate-spin" />
             : <Search size={15} />
           }
-          {searching ? "Chargement…" : "Actualiser"}
+          {searching ? t('common.searching') : t('marches.searchNow')}
         </button>
       </div>
 
@@ -147,13 +155,13 @@ export const MarchesPage = () => {
       <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
         <div className="flex items-center gap-2 mb-1">
           <Filter size={14} className="text-blue-400" />
-          <span className="text-slate-300 text-sm font-semibold">Filtrer les résultats</span>
+          <span className="text-slate-300 text-sm font-semibold">{t('marches.filterTitle')}</span>
           {filtresActifs && (
             <button
               onClick={() => { setKeyword(""); setFiltreSecteur(""); setFiltreSource(""); }}
               className="ml-auto flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors"
             >
-              <X size={12} /> Réinitialiser
+              <X size={12} /> {t('marches.resetFilters')}
             </button>
           )}
         </div>
@@ -165,7 +173,7 @@ export const MarchesPage = () => {
             type="text"
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
-            placeholder="Rechercher par titre, organisme, lieu…"
+            placeholder={t('marches.searchPlaceholder')}
             className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
           />
           {keyword && (
@@ -178,7 +186,7 @@ export const MarchesPage = () => {
         {/* Secteur chips */}
         {secteurs.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <span className="text-xs text-slate-500 self-center">Secteur :</span>
+            <span className="text-xs text-slate-500 self-center">{t('marches.sectorLabel')}</span>
             {secteurs.map(s => (
               <button
                 key={s}
@@ -198,7 +206,7 @@ export const MarchesPage = () => {
         {/* Source chips */}
         {sources.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <span className="text-xs text-slate-500 self-center">Source :</span>
+            <span className="text-xs text-slate-500 self-center">{t('marches.sourceLabel')}</span>
             {sources.map(s => (
               <button
                 key={s}
@@ -224,9 +232,9 @@ export const MarchesPage = () => {
         >
           <div className="flex items-center gap-2">
             <Globe size={15} className="text-blue-400" />
-            <span className="text-slate-300 text-sm font-semibold">Sources de veille actives</span>
+            <span className="text-slate-300 text-sm font-semibold">{t('marches.sourcesActiveTitle')}</span>
           </div>
-          <span className="text-slate-500 text-xs">{showSources ? "Masquer" : "Voir"}</span>
+          <span className="text-slate-500 text-xs">{showSources ? t('marches.hideLabel') : t('marches.showLabel')}</span>
         </button>
         {showSources && (
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-400">
@@ -253,7 +261,7 @@ export const MarchesPage = () => {
       {/* Fréquence */}
       <div className="flex items-center gap-3 flex-wrap">
         <span className="text-slate-400 text-sm font-semibold flex items-center gap-1">
-          <Bell size={14} className="text-blue-400" /> Mise à jour :
+          <Bell size={14} className="text-blue-400" /> {t('marches.updateFreq')}
         </span>
         {FREQUENCES.map((f) => (
           <button
@@ -276,11 +284,8 @@ export const MarchesPage = () => {
             <Gavel className="text-blue-400" size={28} />
           </div>
           <div>
-            <p className="text-white font-semibold">Aucun appel d'offres chargé</p>
-            <p className="text-slate-400 text-sm mt-1">
-              Yukpo surveille ARMP, dgMarket (Banque Mondiale), UNGM et les plateformes nationales.
-              Lancez une recherche pour charger les dernières offres.
-            </p>
+            <p className="text-white font-semibold">{t('marches.noMarchesLoaded')}</p>
+            <p className="text-slate-400 text-sm mt-1">{t('marches.noMarchesLoadedDesc')}</p>
           </div>
           <button
             onClick={lancerRecherche}
@@ -288,20 +293,18 @@ export const MarchesPage = () => {
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors text-sm"
           >
             {searching ? <RefreshCw size={15} className="animate-spin" /> : <Zap size={15} />}
-            {searching ? "Chargement en cours…" : "Lancer une recherche maintenant"}
+            {searching ? t('common.loading') : t('marches.launchSearchNow')}
           </button>
         </div>
       ) : marchesFiltres.length === 0 ? (
         <div className="rounded-2xl p-8 text-center space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
-          <p className="text-white font-semibold">Aucun résultat pour ces filtres</p>
-          <p className="text-slate-400 text-sm">
-            Essayez d'autres mots-clés ou supprimez les filtres actifs.
-          </p>
+          <p className="text-white font-semibold">{t('marches.noFilterResults')}</p>
+          <p className="text-slate-400 text-sm">{t('marches.noFilterResultsDesc')}</p>
           <button
             onClick={() => { setKeyword(""); setFiltreSecteur(""); setFiltreSource(""); }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-xl transition-colors"
           >
-            <X size={14} /> Supprimer les filtres
+            <X size={14} /> {t('marches.deleteFilters')}
           </button>
         </div>
       ) : (
@@ -317,7 +320,14 @@ export const MarchesPage = () => {
                   <Gavel className="text-blue-400" size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold leading-snug">{m.titre}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white font-semibold leading-snug">{m.titre}</p>
+                    {m.source_type === "simule" && (
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 whitespace-nowrap">
+                        Yukpo IA
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap items-center gap-3 mt-2">
                     {m.organisme && (
                       <span className="flex items-center gap-1 text-xs text-slate-400">
@@ -369,7 +379,7 @@ export const MarchesPage = () => {
                     className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-400 text-xs font-semibold rounded-xl transition-colors mt-0.5"
                   >
                     <ExternalLink size={13} />
-                    Voir
+                    {t('marches.viewLink')}
                   </a>
                 )}
               </div>

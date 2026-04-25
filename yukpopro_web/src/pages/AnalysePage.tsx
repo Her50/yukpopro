@@ -1,30 +1,34 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Upload, BarChart2, FileUp, X, TrendingUp } from "lucide-react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import { Card, Button, Badge, Spinner } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi } from "@/api/client";
+import { useAnalyseStore } from "@/store/analyseStore";
 
 export const AnalysePage = () => {
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
-  const [renduMarkdown, setRenduMarkdown] = useState("");
-  const [fichierNom, setFichierNom] = useState("");
-  const [apercu, setApercu] = useState<Record<string, unknown>[] | null>(null);
+  const loading       = useAnalyseStore(s => s.loading);
+  const stats         = useAnalyseStore(s => s.stats);
+  const renduMarkdown = useAnalyseStore(s => s.renduMarkdown);
+  const fichierNom    = useAnalyseStore(s => s.fichierNom);
+  const apercu        = useAnalyseStore(s => s.apercu);
+  const setLoading    = useAnalyseStore(s => s.setLoading);
+  const setResult     = useAnalyseStore(s => s.setResult);
+  const resetAnalyse  = useAnalyseStore(s => s.reset);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
     setLoading(true);
-    setStats(null);
-    setRenduMarkdown("");
-    setApercu(null);
-    setFichierNom(file.name);
+    setResult({ fichierNom: file.name, stats: null, renduMarkdown: "", apercu: null });
     try {
       const res = await generateurApi.uploadData(file);
-      setStats(res.stats);
-      setRenduMarkdown(res.rendu_markdown || "");
-      setApercu(res.apercu_200 || null);
+      setResult({
+        fichierNom: file.name,
+        stats: res.stats,
+        renduMarkdown: res.rendu_markdown || "",
+        apercu: res.apercu_200 || null,
+      });
       toast.success(`${file.name} analysé — ${res.nb_lignes} lignes, ${res.nb_colonnes} colonnes`);
     } catch {
       toast.error("Erreur analyse fichier");
@@ -110,7 +114,7 @@ export const AnalysePage = () => {
               variant="ghost"
               size="sm"
               icon={<X className="w-4 h-4" />}
-              onClick={() => { setStats(null); setRenduMarkdown(""); setFichierNom(""); }}
+              onClick={() => resetAnalyse()}
             >
               Nouveau fichier
             </Button>

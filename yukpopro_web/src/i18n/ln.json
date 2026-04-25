@@ -92,7 +92,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Ko sala…",
-    "download": "Kokita"
+    "download": "Kokita",
+    "infogOneVisual": "Sala mokanda 1",
+    "infogFourVariants": "Mitindo 4 ya AI",
+    "infogVariantsLoading": "Kosalemi…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — mpo na kobimisa professionnel",
+    "infogSvgTitle": "SVG vector — ekoki kobongisama na Illustrator/Inkscape",
+    "infogVariantsTitle": "ba ndelo ya bikelaseli — pona oyo olingi",
+    "infogRetouchTitle": "Bongisa infographique oyo",
+    "infogRetouchPlaceholder": "Ndakisa: Bongisa titre, tya fond na bleu, bakisa numero 699…",
+    "infogRetouchApply": "Salela",
+    "infogRetouching": "Kobongisa…"
   },
   "traduction": {
     "title": "Kobongola mikanda",

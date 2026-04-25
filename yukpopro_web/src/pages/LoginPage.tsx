@@ -1,5 +1,6 @@
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle2, Globe2, Shield, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button, Input, YukpoLogo } from "@/components/ui";
@@ -17,6 +18,7 @@ const FEATURES = [
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { setAuth } = useAuthStore();
   const { setProfil } = useProfilStore();
 
@@ -145,7 +147,7 @@ export const LoginPage = () => {
 
         {/* Logo */}
         <div className="relative z-10">
-          <YukpoLogo size={36} />
+          <YukpoLogo size={56} />
         </div>
 
         {/* Hero text */}
@@ -213,24 +215,24 @@ export const LoginPage = () => {
         <div className="w-full max-w-md animate-fade-in">
           {/* Logo mobile */}
           <div className="lg:hidden flex justify-center mb-8">
-            <YukpoLogo size={32} />
+            <YukpoLogo size={52} />
           </div>
 
           {/* ── LOGIN ──────────────────────────────────────────────────── */}
           {mode === "login" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-display font-bold text-white">Connexion</h2>
-                <p className="text-sm text-slate-400 mt-1">Accédez à vos agents professionnels IA</p>
+                <h2 className="text-2xl font-display font-bold text-white">{t('auth.login')}</h2>
+                <p className="text-sm text-slate-400 mt-1">{t('auth.loginSubtitle')}</p>
               </div>
 
               <div className="p-8 rounded-xl space-y-5"
                 style={{ background: "rgba(30,38,64,0.8)", border: "1px solid rgba(0,84,166,0.15)", boxShadow: "0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)" }}>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <Input
-                    label="Email"
+                    label={t('auth.email')}
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-4 h-4" />}
@@ -239,7 +241,7 @@ export const LoginPage = () => {
                   />
                   <div className="relative">
                     <Input
-                      label="Mot de passe"
+                      label={t('auth.password')}
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
@@ -252,26 +254,25 @@ export const LoginPage = () => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-8 text-slate-500 hover:text-slate-300 transition-colors"
-                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
                   <Button type="submit" loading={loading} className="w-full mt-2" size="lg">
-                    Se connecter <ArrowRight className="w-4 h-4" />
+                    {t('auth.login')} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
               </div>
 
               <p className="text-center text-sm text-slate-500">
-                Pas encore de compte ?{" "}
+                {t('auth.noAccount')}{" "}
                 <button
                   onClick={() => setMode("register")}
                   className="font-semibold transition-colors"
                   style={{ color: "#00B0F0" }}
                 >
-                  Créer un compte
+                  {t('auth.createAccount')}
                 </button>
               </p>
             </div>
@@ -281,21 +282,21 @@ export const LoginPage = () => {
           {mode === "register" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-display font-bold text-white">Créer un compte</h2>
-                <p className="text-sm text-slate-400 mt-1">Rejoignez les professionnels africains sur YukpoPro</p>
+                <h2 className="text-2xl font-display font-bold text-white">{t('auth.register')}</h2>
+                <p className="text-sm text-slate-400 mt-1">{t('auth.loginTitle')}</p>
               </div>
 
               <div className="p-8 rounded-xl space-y-4"
                 style={{ background: "rgba(30,38,64,0.8)", border: "1px solid rgba(0,84,166,0.15)", boxShadow: "0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)" }}>
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <Input label="Nom *" placeholder="KOME" value={nom} onChange={(e) => setNom(e.target.value)} required />
-                    <Input label="Prénom" placeholder="Anatole" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
+                    <Input label={`${t('auth.lastName')} *`} placeholder="KOME" value={nom} onChange={(e) => setNom(e.target.value)} required />
+                    <Input label={t('auth.firstName')} placeholder="Anatole" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
                   </div>
                   <Input
-                    label="Email *"
+                    label={`${t('auth.email')} *`}
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     icon={<Mail className="w-4 h-4" />}
@@ -303,9 +304,9 @@ export const LoginPage = () => {
                   />
                   <div className="relative">
                     <Input
-                      label="Mot de passe *"
+                      label={`${t('auth.password')} *`}
                       type={showPassword ? "text" : "password"}
-                      placeholder="6 caractères minimum"
+                      placeholder="6 min."
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       icon={<Lock className="w-4 h-4" />}
@@ -319,9 +320,9 @@ export const LoginPage = () => {
 
                   <div className="relative">
                     <Input
-                      label="Confirmer le mot de passe *"
+                      label={`${t('auth.confirmPasswordLabel', 'Confirmer')} *`}
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Répétez votre mot de passe"
+                      placeholder={t('auth.confirmPasswordPlaceholder', '••••••••')}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       icon={<Lock className="w-4 h-4" />}
@@ -333,27 +334,25 @@ export const LoginPage = () => {
                     </button>
                     {confirmPassword && password !== confirmPassword && (
                       <p className="text-xs mt-1" style={{ color: "#f87171" }}>
-                        Les mots de passe ne correspondent pas
+                        {t('auth.passwordMismatch', '≠')}
                       </p>
                     )}
                     {confirmPassword && password === confirmPassword && password.length >= 6 && (
-                      <p className="text-xs mt-1" style={{ color: "#34d399" }}>
-                        ✓ Mots de passe identiques
-                      </p>
+                      <p className="text-xs mt-1" style={{ color: "#34d399" }}>✓</p>
                     )}
                   </div>
 
                   <Button type="submit" loading={loading} className="w-full" size="lg"
                     disabled={!email || !password || !nom || password !== confirmPassword}>
-                    Créer mon compte <ArrowRight className="w-4 h-4" />
+                    {t('auth.createAccount')} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
               </div>
 
               <p className="text-center text-sm text-slate-500">
-                Déjà un compte ?{" "}
+                {t('auth.alreadyHaveAccount')}{" "}
                 <button onClick={() => setMode("login")} className="font-semibold" style={{ color: "#00B0F0" }}>
-                  Se connecter
+                  {t('auth.login')}
                 </button>
               </p>
             </div>
@@ -375,10 +374,8 @@ export const LoginPage = () => {
               </div>
 
               <div>
-                <h2 className="text-2xl font-display font-bold text-white">Votre profil métier</h2>
-                <p className="text-sm text-slate-400 mt-1">
-                  Yukpo adapte automatiquement ses 13 agents à votre contexte professionnel.
-                </p>
+                <h2 className="text-2xl font-display font-bold text-white">{t('auth.onboardingTitle', 'Profil métier')}</h2>
+                <p className="text-sm text-slate-400 mt-1">{t('auth.onboardingSubtitle', '')}</p>
               </div>
 
               <div className="p-8 rounded-xl space-y-4"
@@ -386,7 +383,7 @@ export const LoginPage = () => {
                 <form onSubmit={handleOnboarding} className="space-y-4">
                   <div>
                     <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase block mb-1.5">
-                      Votre métier *
+                      {t('auth.metier', 'Métier')} *
                     </label>
                     <select
                       value={metier}
@@ -402,7 +399,7 @@ export const LoginPage = () => {
 
                   <div>
                     <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase block mb-1.5">
-                      Votre pays *
+                      {t('auth.pays', 'Pays')} *
                     </label>
                     <select
                       value={pays}
@@ -430,7 +427,7 @@ export const LoginPage = () => {
                   />
 
                   <Button type="submit" loading={loading} className="w-full" size="lg" variant="gold">
-                    Accéder à YukpoPro <ArrowRight className="w-4 h-4" />
+                    {t('auth.completeProfile', 'Accéder à YukpoPro')} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </form>
               </div>

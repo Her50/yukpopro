@@ -107,10 +107,11 @@ i18n
       ln: { translation: ln },
       am: { translation: am },
     },
+    lng: "fr",
     fallbackLng: "fr",
     supportedLngs: ["fr", "en", "es", "pt", "ar", "de", "zh", "sw", "ha", "ru", "hi", "tr", "wo", "ln", "am"],
     detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
+      order: ["localStorage"],
       caches: ["localStorage"],
       lookupLocalStorage: "yukpo_lang",
     },

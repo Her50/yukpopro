@@ -54,18 +54,18 @@ export default function DashboardPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 col-span-2 sm:col-span-1">
           <div className="text-xs text-gray-500 mb-1">Caisse du jour</div>
-          <div className="text-lg font-bold text-emerald-600">{formatFCFA(totalJour)}</div>
+          <div className="text-base sm:text-lg font-bold text-emerald-600 truncate">{formatFCFA(totalJour)}</div>
         </div>
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <div className="text-xs text-gray-500 mb-1">En attente</div>
-          <div className="text-lg font-bold text-orange-500">{enAttente}</div>
+          <div className="text-base sm:text-lg font-bold text-orange-500">{enAttente}</div>
         </div>
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <div className="text-xs text-gray-500 mb-1">En cours</div>
-          <div className="text-lg font-bold text-blue-600">{enCours}</div>
+          <div className="text-base sm:text-lg font-bold text-blue-600">{enCours}</div>
         </div>
       </div>
 

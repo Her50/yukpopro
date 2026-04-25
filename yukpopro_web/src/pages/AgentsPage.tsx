@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Card, Button, Textarea, Badge, Spinner } from "@/components/ui";
 import { DemoBanner } from "@/components/DemoBanner";
 import { useProfilStore, useAuthStore } from "@/store";
+import { useAgentsStore } from "@/store/agentsStore";
 import { agentApi, abonnementApi } from "@/api/client";
 import type { AgentChatResponse } from "@/types";
 
@@ -63,17 +64,31 @@ export const AgentsPage = () => {
   const { user } = useAuthStore();
   const isAdmin = ["admin", "super_admin", "yukpo_owner"].includes(user?.role || "");
   const [abonnement, setAbonnement] = useState<Record<string, unknown> | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState(profil?.metier || "comptable");
 
+  // Store persistant : agent sélectionné, drafts, résultats survivent à la nav
+  const selectedAgent    = useAgentsStore(s => s.selectedAgent);
+  const setSelectedAgent = useAgentsStore(s => s.setSelectedAgent);
+  const message          = useAgentsStore(s => s.message);
+  const setMessage       = useAgentsStore(s => s.setMessage);
+  const resultat         = useAgentsStore(s => s.resultat);
+  const setResultat      = useAgentsStore(s => s.setResultat);
+  const showEtapes       = useAgentsStore(s => s.showEtapes);
+  const setShowEtapes    = useAgentsStore(s => s.setShowEtapes);
+  const rechercheQuery   = useAgentsStore(s => s.rechercheQuery);
+  const setRechercheQuery = useAgentsStore(s => s.setRechercheQuery);
+  const rechercheResult  = useAgentsStore(s => s.rechercheResult);
+  const setRechercheResult = useAgentsStore(s => s.setRechercheResult);
+
+  // Initialise l'agent sélectionné à partir du profil au premier mount uniquement
   useEffect(() => {
+    if (!useAgentsStore.getState().selectedAgent || useAgentsStore.getState().selectedAgent === "comptable") {
+      if (profil?.metier) setSelectedAgent(profil.metier);
+    }
     abonnementApi.monAbonnement().then(setAbonnement).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [message, setMessage] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [resultat, setResultat] = useState<AgentChatResponse | null>(null);
-  const [showEtapes, setShowEtapes] = useState(false);
-  const [rechercheQuery, setRechercheQuery] = useState("");
-  const [rechercheResult, setRechercheResult] = useState<string | null>(null);
   const [rechercheLoading, setRechercheLoading] = useState(false);
 
   const handleSend = async (e: FormEvent) => {

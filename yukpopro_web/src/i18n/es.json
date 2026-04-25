@@ -184,7 +184,21 @@
     "modeles": "Plantillas",
     "conversion": "Conversión",
     "infographie": "Infografía",
-    "selectTemplate": "Elegir una plantilla"
+    "selectTemplate": "Elegir una plantilla",
+    "infogOneVisual": "Generar 1 diseño",
+    "infogFourVariants": "4 variantes IA",
+    "infogVariantsLoading": "Generando…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — para impresión profesional",
+    "infogSvgTitle": "SVG vectorial — editable en Illustrator/Inkscape",
+    "infogVariantsTitle": "direcciones creativas — elige tu favorita",
+    "infogRetouchTitle": "Retocar esta infografia",
+    "infogRetouchPlaceholder": "Ej: Cambiar el titulo, fondo azul, agregar numero 699...",
+    "infogRetouchApply": "Aplicar",
+    "infogRetouching": "Retocando…"
   },
   "traduction": {
     "title": "Traducción de Documentos",

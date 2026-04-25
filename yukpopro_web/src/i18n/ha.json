@@ -107,7 +107,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Ana ƙirƙira…",
-    "download": "Sauke"
+    "download": "Sauke",
+    "infogOneVisual": "Ƙirƙira ƙira 1",
+    "infogFourVariants": "Bambance-bambance 4 na AI",
+    "infogVariantsLoading": "Ana ƙirƙira…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — don bugun ƙwararru",
+    "infogSvgTitle": "Vector SVG — ana iya gyara a Illustrator/Inkscape",
+    "infogVariantsTitle": "kwatance masu kirkira — zabi wanda ka fi so",
+    "infogRetouchTitle": "Gyara wannan infographic",
+    "infogRetouchPlaceholder": "Misali: Canza take, sanya bango shudi, kara lamba 699…",
+    "infogRetouchApply": "Aiwatar",
+    "infogRetouching": "Ana gyara…"
   },
   "traduction": {
     "title": "Fassarar Takarduna",

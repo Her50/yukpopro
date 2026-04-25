@@ -101,6 +101,11 @@ export const useTranslateLiveStore = create<TranslateLiveState>((set, get) => ({
           }
         } else if (ev.type === "audio") {
           set({ lastGender: (ev as TranslateEventAudio).gender });
+        } else if ((ev as any).type === "warning") {
+          // STT indisponible ou autre avertissement serveur — afficher dans le statusMsg
+          const w = ev as any;
+          set({ statusMsg: w.message || "Avertissement serveur" });
+          if (onError && w.code === "stt_unavailable") onError(w.message);
         } else if (ev.type === "usage") {
           set({ minutesUsed: ev.minutes, creditsUsed: ev.credits_debited_total });
         } else if (ev.type === "error") {
@@ -118,10 +123,19 @@ export const useTranslateLiveStore = create<TranslateLiveState>((set, get) => ({
   },
 
   stop: async () => {
-    await _client?.stop();
-    _client = null;
+    // Annule l'UI et le TTS immédiatement pour débloquer l'interface,
+    // même si la fermeture WebSocket tarde.
     _tts.cancel();
-    set({ active: false, status: "idle" });
+    set({ active: false, status: "idle", currentInterim: "" });
+    const client = _client;
+    _client = null;
+    if (!client) return;
+    try {
+      await Promise.race([
+        client.stop(),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
+    } catch { /* ignore */ }
   },
 
   setTarget: (t: string) => {

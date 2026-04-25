@@ -2,6 +2,25 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, ProfilPro, CopiloteMessage } from "@/types";
 
+// Clés localStorage à purger entre deux sessions utilisateur sur la même machine.
+// Couvre tous les stores persist() qui contiennent des données liées à un compte.
+const _PER_USER_KEYS = [
+  "yukpopro_chat_v2",
+  "yukpopro_docs_v2",
+  "yukpopro_recorder",
+  "yukpopro_translate_live",
+  "yukpopro_generateur",
+  "yukpopro_traduction",
+  "yukpopro_reunion_form",
+];
+
+const _wipePerUserState = () => {
+  if (typeof window === "undefined") return;
+  for (const k of _PER_USER_KEYS) {
+    try { localStorage.removeItem(k); } catch { /* noop */ }
+  }
+};
+
 // ── Auth Store ────────────────────────────────────────────────────────────────
 
 interface AuthState {
@@ -20,23 +39,32 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (user, token) => {
-        // Si un autre user était connecté, vider son historique de chat
-        const prev = useAuthStore.getState().user;
-        if (prev && prev.user_id !== user.user_id) {
-          localStorage.removeItem("yukpopro_chat_v2");
-          localStorage.removeItem("yukpopro_docs_v2");
+        // Compare au DERNIER user_id vu (persisté séparément), pas juste à l'état mémoire :
+        // après un logout, state.user est null mais le dernier user_id reste connu.
+        const lastUserId = typeof window !== "undefined"
+          ? localStorage.getItem("yukpopro_last_user_id")
+          : null;
+        if (lastUserId && String(user.user_id) !== lastUserId) {
+          _wipePerUserState();
         }
-        localStorage.setItem("yukpopro_token", token);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("yukpopro_last_user_id", String(user.user_id));
+          localStorage.setItem("yukpopro_token", token);
+        }
         set({ user, token, isAuthenticated: true });
       },
 
       logout: () => {
-        localStorage.removeItem("yukpopro_token");
-        localStorage.removeItem("yukpopro_user");
-        // Vider le cache chat/docs pour éviter la fuite entre comptes
-        localStorage.removeItem("yukpopro_chat_v2");
-        localStorage.removeItem("yukpopro_docs_v2");
+        // On ne touche PAS aux clés per-user : l'historique reste accessible
+        // si le même compte se reconnecte. setAuth() wipe uniquement si user_id change.
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("yukpopro_token");
+          localStorage.removeItem("yukpopro_user");
+        }
         set({ user: null, token: null, isAuthenticated: false });
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
       },
     }),
     {

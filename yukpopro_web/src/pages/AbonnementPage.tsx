@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CreditCard, Smartphone, CheckCircle, Clock, AlertCircle,
   Zap, Star, Crown, Rocket, ArrowRight, RefreshCw, Copy, Check, PlusCircle,
@@ -20,6 +21,7 @@ const PLAN_ICONS: Record<PlanAbonnement, typeof Zap> = {
 type EtapePaiement = "plans" | "operateur" | "instructions" | "confirmation" | "succes";
 
 export const AbonnementPage = () => {
+  const { t } = useTranslation();
   const { profil } = useProfilStore();
   const [abonnement, setAbonnement] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -158,17 +160,13 @@ export const AbonnementPage = () => {
       <DemoBanner />
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white">Abonnement & Paiement</h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Tous les 13 agents Yukpo sont accessibles à tous les utilisateurs. Seul le quota de crédits varie selon le plan.
-        </p>
+        <h1 className="text-2xl font-display font-bold text-white">{t('abonnement.pageTitle')}</h1>
+        <p className="text-slate-400 text-sm mt-1">{t('abonnement.pageSubtitle')}</p>
         <div className="mt-3 flex items-start gap-2 rounded-xl px-4 py-3 max-w-2xl" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <span className="text-yukpo-400 text-sm">💡</span>
           <p className="text-slate-400 text-xs leading-relaxed">
-            <strong className="text-white">Qu'est-ce qu'un crédit Yukpo ?</strong>{" "}
-            Chaque échange avec Yukpo consomme des crédits selon la complexité de la demande.
-            Une question simple coûte ~5 crédits, une analyse de document ~20-50 crédits, un rapport complet ~100-300 crédits.
-            Les plans payants se renouvellent chaque mois. Le plan gratuit offre 3 000 crédits uniques sans renouvellement.
+            <strong className="text-white">{t('abonnement.creditInfoTitle')}</strong>{" "}
+            {t('abonnement.creditInfoDesc')}
           </p>
         </div>
       </div>
@@ -195,7 +193,7 @@ export const AbonnementPage = () => {
                       {((abonnement.credits_restants as number) ?? (abonnement.requetes_restantes as number) ?? 0).toLocaleString()}
                     </span>
                     <span className="text-slate-400 text-sm">
-                      / {((abonnement.credits_alloues as number) ?? (abonnement.quota_jour as number) ?? 0).toLocaleString()} crédits Yukpo restants
+                      {t('abonnement.creditsYukpoLeft', { count: ((abonnement.credits_alloues as number) ?? (abonnement.quota_jour as number) ?? 0).toLocaleString() })}
                     </span>
                   </div>
                   {/* Barre de progression */}
@@ -210,27 +208,27 @@ export const AbonnementPage = () => {
                     />
                   </div>
                   <p className="text-xs text-slate-500">
-                    {((abonnement.credits_utilises as number) ?? 0).toLocaleString()} crédits Yukpo utilisés
+                    {t('abonnement.creditsYukpoUsed', { count: ((abonnement.credits_utilises as number) ?? 0).toLocaleString() })}
                     {abonnement.renouvellement_le ? (
-                      <span className="text-slate-600"> · Renouvellement le {abonnement.renouvellement_le as string}</span>
+                      <span className="text-slate-600"> · {t('abonnement.renewalDate', { date: abonnement.renouvellement_le as string })}</span>
                     ) : planActuel === "gratuit" ? (
-                      <span className="text-amber-600"> · Sans renouvellement</span>
+                      <span className="text-amber-600"> · {t('abonnement.noRenewal')}</span>
                     ) : null}
                   </p>
                   {/* Équivalence FCFA */}
                   <p className="text-xs text-slate-600 italic">
-                    ≈ {((abonnement.credits_restants as number) ?? 0)} FCFA d'utilisation Yukpo disponible
+                    {t('abonnement.fcfaAvailable', { count: (abonnement.credits_restants as number) ?? 0 })}
                   </p>
                 </div>
                 {abonnement.date_fin && (
                   <p className="text-xs text-slate-500 mt-1">
-                    Abonnement expire le {new Date(abonnement.date_fin as string).toLocaleDateString("fr-FR")}
+                    {t('abonnement.expiryDate', { date: new Date(abonnement.date_fin as string).toLocaleDateString() })}
                   </p>
                 )}
               </div>
             </div>
             <Button variant="ghost" size="sm" icon={<RefreshCw className="w-3 h-3" />} onClick={charger}>
-              Actualiser
+              {t('abonnement.refresh')}
             </Button>
           </div>
 
@@ -247,36 +245,36 @@ export const AbonnementPage = () => {
       {!modeRecharge ? (
         <div className="flex items-center justify-between rounded-2xl px-5 py-4" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <div>
-            <p className="text-white font-semibold">Recharger des crédits</p>
-            <p className="text-slate-400 text-xs mt-0.5">Achetez des crédits supplémentaires sans changer de plan · 0,6 FCFA / crédit</p>
+            <p className="text-white font-semibold">{t('abonnement.rechargeTitle')}</p>
+            <p className="text-slate-400 text-xs mt-0.5">{t('abonnement.rechargeSubtitle')}</p>
           </div>
           <Button variant="secondary" size="sm" icon={<PlusCircle className="w-4 h-4" />} onClick={() => { setModeRecharge(true); setEtapeR("packs"); }}>
-            Recharger
+            {t('abonnement.rechargeBtn')}
           </Button>
         </div>
       ) : (
         <Card className="p-6 space-y-5 border-yukpo-500/30">
           <div className="flex items-center justify-between">
-            <h2 className="text-white font-bold flex items-center gap-2"><PlusCircle className="w-5 h-5 text-yukpo-400" /> Recharger des crédits</h2>
-            <button onClick={() => { setModeRecharge(false); setEtapeR("packs"); }} className="text-slate-500 hover:text-white text-xs">Annuler</button>
+            <h2 className="text-white font-bold flex items-center gap-2"><PlusCircle className="w-5 h-5 text-yukpo-400" /> {t('abonnement.rechargePackTitle')}</h2>
+            <button onClick={() => { setModeRecharge(false); setEtapeR("packs"); }} className="text-slate-500 hover:text-white text-xs">{t('common.cancel')}</button>
           </div>
 
           {etapeR === "packs" && (
             <>
-              <p className="text-slate-400 text-sm">Choisissez un pack — les crédits s'ajoutent immédiatement à votre solde :</p>
+              <p className="text-slate-400 text-sm">{t('abonnement.choosePack')}</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {PACKS.map((pack) => (
                   <div key={pack.id} onClick={() => setPackChoisi(pack.id)}
                     className={`relative rounded-xl border p-4 cursor-pointer transition-all text-center ${packChoisi === pack.id ? "border-yukpo-500 bg-yukpo-500/10" : "border-slate-700 hover:border-slate-500"}`}>
                     {pack.badge && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yukpo-500 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap">{pack.badge}</span>}
                     <p className="text-white font-bold text-lg">{pack.credits.toLocaleString()}</p>
-                    <p className="text-slate-400 text-xs">crédits</p>
+                    <p className="text-slate-400 text-xs">{t('abonnement.creditsUnit')}</p>
                     <p className="text-yukpo-300 font-semibold mt-2">{pack.prix.toLocaleString()} FCFA</p>
                   </div>
                 ))}
               </div>
               <Button variant="primary" disabled={!packChoisi} onClick={() => setEtapeR("operateur")}>
-                Continuer <ArrowRight className="w-4 h-4" />
+                {t('common.next')} <ArrowRight className="w-4 h-4" />
               </Button>
             </>
           )}
@@ -299,9 +297,9 @@ export const AbonnementPage = () => {
                   className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-yukpo-500" />
               </div>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setEtapeR("packs")}>Retour</Button>
+                <Button variant="ghost" onClick={() => setEtapeR("packs")}>{t('common.back')}</Button>
                 <Button variant="primary" className="flex-1" loading={loadingR} disabled={!operateurR || telephoneR.length < 8} onClick={handleInitierRecharge}>
-                  <Smartphone className="w-4 h-4" /> Recevoir les instructions
+                  <Smartphone className="w-4 h-4" /> {t('abonnement.getInstructions')}
                 </Button>
               </div>
             </>
@@ -310,18 +308,18 @@ export const AbonnementPage = () => {
           {etapeR === "instructions" && instrR && (
             <>
               <div className="bg-slate-900 rounded-xl p-4 border border-yukpo-500/30">
-                <p className="text-slate-400 text-xs mb-1">Référence de recharge</p>
+                <p className="text-slate-400 text-xs mb-1">{t('abonnement.rechargeRefLabel')}</p>
                 <div className="flex items-center gap-3">
                   <code className="text-yukpo-300 text-xl font-bold tracking-widest flex-1">{refR}</code>
                   <button onClick={() => { navigator.clipboard.writeText(refR); toast.success("Copié !"); }} className="text-slate-400 hover:text-white"><Copy className="w-4 h-4" /></button>
                 </div>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Montant</span>
+                <span className="text-slate-400">{t('abonnement.amountLabel')}</span>
                 <span className="text-white font-bold">{(instrR.montant_fcfa as number)?.toLocaleString()} FCFA</span>
               </div>
               <Button variant="primary" className="w-full" onClick={() => setEtapeR("confirmation")}>
-                <CheckCircle className="w-4 h-4" /> J'ai effectué le paiement
+                <CheckCircle className="w-4 h-4" /> {t('abonnement.paymentMadeBtn')}
               </Button>
             </>
           )}
@@ -330,15 +328,15 @@ export const AbonnementPage = () => {
             <>
               <input type="text" placeholder="YYMMDD-NNN-XXXX" value={refR} onChange={(e) => setRefR(e.target.value.toUpperCase())}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono tracking-widest placeholder-slate-600 focus:outline-none focus:border-green-500" />
-              <input type="tel" placeholder="Numéro MoMo expéditeur (obligatoire)" value={telephoneR} onChange={(e) => setTelephoneR(e.target.value.replace(/\D/g, ""))}
+              <input type="tel" placeholder={t('abonnement.momoSenderRechargeLabel')} value={telephoneR} onChange={(e) => setTelephoneR(e.target.value.replace(/\D/g, ""))}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500" />
-              <input type="text" placeholder="ID Transaction Mobile Money (optionnel)" value={txIdR} onChange={(e) => setTxIdR(e.target.value)}
+              <input type="text" placeholder={t('abonnement.txIdLabel')} value={txIdR} onChange={(e) => setTxIdR(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500" />
-              <p className="text-xs text-amber-300">⚠️ Activation provisoire — vérifiée sous 3h. Annulation auto si non reçu.</p>
+              <p className="text-xs text-amber-300">{t('abonnement.provisionalWarning')}</p>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setEtapeR("instructions")}>Retour</Button>
+                <Button variant="ghost" onClick={() => setEtapeR("instructions")}>{t('common.back')}</Button>
                 <Button variant="primary" className="flex-1" loading={loadingR} disabled={!refR} onClick={handleConfirmerRecharge}>
-                  <CheckCircle className="w-4 h-4" /> Confirmer la recharge
+                  <CheckCircle className="w-4 h-4" /> {t('abonnement.confirmRechargeBtn')}
                 </Button>
               </div>
             </>
@@ -349,10 +347,10 @@ export const AbonnementPage = () => {
               <div className="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto">
                 <CheckCircle className="w-7 h-7 text-green-400" />
               </div>
-              <p className="text-white font-bold text-xl">Crédits ajoutés !</p>
-              <p className="text-slate-400 text-sm">Vos crédits sont immédiatement disponibles.</p>
+              <p className="text-white font-bold text-xl">{t('abonnement.rechargeSuccessTitle')}</p>
+              <p className="text-slate-400 text-sm">{t('abonnement.rechargeSuccessDesc')}</p>
               <Button variant="secondary" onClick={() => { setModeRecharge(false); setEtapeR("packs"); setPackChoisi(""); setOperateurR(""); setTelephoneR(""); }}>
-                Fermer
+                {t('abonnement.closeBtn')}
               </Button>
             </div>
           )}
@@ -380,7 +378,7 @@ export const AbonnementPage = () => {
                 )}
                 {estActuel && (
                   <div className="absolute -top-3 right-3">
-                    <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">Actuel</span>
+                    <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{t('abonnement.currentBadge')}</span>
                   </div>
                 )}
 
@@ -392,7 +390,7 @@ export const AbonnementPage = () => {
                   <h3 className="text-white font-bold text-lg">{plan.nom}</h3>
                   <div className="flex items-baseline gap-1 mt-1">
                     {plan.prix_fcfa === 0 ? (
-                      <span className="text-2xl font-bold text-white">Gratuit</span>
+                      <span className="text-2xl font-bold text-white">{t('abonnement.freeLabel')}</span>
                     ) : (
                       <>
                         <span className="text-2xl font-bold text-white">{plan.prix_fcfa.toLocaleString()}</span>
@@ -414,7 +412,7 @@ export const AbonnementPage = () => {
 
                 {!estActuel && plan.prix_fcfa > 0 && (
                   <Button variant={plan.badge ? "primary" : "secondary"} size="sm" className="w-full">
-                    Choisir <ArrowRight className="w-3 h-3" />
+                    {t('abonnement.chooseBtn')} <ArrowRight className="w-3 h-3" />
                   </Button>
                 )}
               </div>
@@ -429,13 +427,13 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-yukpo-500 text-white flex items-center justify-center text-sm font-bold">2</div>
             <div>
-              <h2 className="text-white font-bold">Mode de paiement</h2>
-              <p className="text-slate-400 text-sm">Plan {PLANS.find(p=>p.id===planChoisi)?.nom} — {PLANS.find(p=>p.id===planChoisi)?.prix_fcfa.toLocaleString()} FCFA</p>
+              <h2 className="text-white font-bold">{t('abonnement.step2Title')}</h2>
+              <p className="text-slate-400 text-sm">{t('abonnement.step2Subtitle', { name: PLANS.find(p=>p.id===planChoisi)?.nom, price: PLANS.find(p=>p.id===planChoisi)?.prix_fcfa.toLocaleString() })}</p>
             </div>
           </div>
 
           <div>
-            <p className="text-slate-400 text-sm mb-3">Choisir votre opérateur Mobile Money :</p>
+            <p className="text-slate-400 text-sm mb-3">{t('abonnement.selectOperator')}</p>
             <div className="grid grid-cols-2 gap-2">
               {operateursFiltres.map((op) => (
                 <button
@@ -455,7 +453,7 @@ export const AbonnementPage = () => {
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">Numéro de téléphone Mobile Money</label>
+            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.phoneMoMoLabel')}</label>
             <div className="flex gap-2">
               <span className="flex items-center px-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 text-sm">+237</span>
               <input
@@ -469,7 +467,7 @@ export const AbonnementPage = () => {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setEtape("plans")}>Retour</Button>
+            <Button variant="ghost" onClick={() => setEtape("plans")}>{t('common.back')}</Button>
             <Button
               variant="primary"
               className="flex-1"
@@ -477,7 +475,7 @@ export const AbonnementPage = () => {
               onClick={handleInitierPaiement}
               disabled={!operateurChoisi || telephone.length < 8}
             >
-              <Smartphone className="w-4 h-4" /> Recevoir les instructions
+              <Smartphone className="w-4 h-4" /> {t('abonnement.getInstructions')}
             </Button>
           </div>
         </Card>
@@ -489,14 +487,14 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-yukpo-500 text-white flex items-center justify-center text-sm font-bold">3</div>
             <div>
-              <h2 className="text-white font-bold">Instructions de paiement</h2>
-              <p className="text-slate-400 text-sm">Effectuez le paiement depuis votre téléphone</p>
+              <h2 className="text-white font-bold">{t('abonnement.step3Title')}</h2>
+              <p className="text-slate-400 text-sm">{t('abonnement.step3Subtitle')}</p>
             </div>
           </div>
 
           {/* Référence */}
           <div className="bg-slate-900 rounded-xl p-4 border border-yukpo-500/30">
-            <p className="text-slate-400 text-xs mb-1">Votre référence de paiement</p>
+            <p className="text-slate-400 text-xs mb-1">{t('abonnement.paymentRefLabel')}</p>
             <div className="flex items-center gap-3">
               <code className="text-yukpo-300 text-xl font-bold tracking-widest flex-1">{reference}</code>
               <button onClick={copierReference} className="text-slate-400 hover:text-white">
@@ -507,14 +505,14 @@ export const AbonnementPage = () => {
 
           {/* Montant */}
           <div className="flex justify-between text-sm">
-            <span className="text-slate-400">Montant à payer</span>
+            <span className="text-slate-400">{t('abonnement.amountToPay')}</span>
             <span className="text-white font-bold text-lg">{(instructionsPaiement.montant_fcfa as number)?.toLocaleString()} FCFA</span>
           </div>
 
           {/* Étapes opérateur */}
           {instructionsPaiement.instructions && (
             <div className="space-y-2">
-              <p className="text-slate-300 text-sm font-semibold">Comment payer :</p>
+              <p className="text-slate-300 text-sm font-semibold">{t('abonnement.howToPay')}</p>
               {Object.entries((instructionsPaiement.instructions as any).etapes || {}).map(([key, val]) => (
                 <div key={key} className="flex gap-3 text-sm">
                   <span className="text-yukpo-400 font-medium w-16 flex-shrink-0 capitalize">{key}</span>
@@ -526,14 +524,11 @@ export const AbonnementPage = () => {
 
           <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-amber-300 text-xs">
-              Conservez votre référence <strong>{reference}</strong>. Vous en aurez besoin pour confirmer votre abonnement.
-              La demande expire dans 30 minutes.
-            </p>
+            <p className="text-amber-300 text-xs">{t('abonnement.refExpiry')}</p>
           </div>
 
           <Button variant="primary" className="w-full" onClick={() => setEtape("confirmation")}>
-            <CheckCircle className="w-4 h-4" /> J'ai effectué le paiement
+            <CheckCircle className="w-4 h-4" /> {t('abonnement.paymentDoneBtn')}
           </Button>
         </Card>
       )}
@@ -544,13 +539,13 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">4</div>
             <div>
-              <h2 className="text-white font-bold">Confirmer le paiement</h2>
-              <p className="text-slate-400 text-sm">Entrez votre référence pour activer l'abonnement</p>
+              <h2 className="text-white font-bold">{t('abonnement.step4Title')}</h2>
+              <p className="text-slate-400 text-sm">{t('abonnement.step4Subtitle')}</p>
             </div>
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">Référence de paiement *</label>
+            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.payRefLabel')}</label>
             <input
               type="text"
               placeholder="YYMMDD-NNN-XXXX"
@@ -562,23 +557,23 @@ export const AbonnementPage = () => {
 
           <div>
             <label className="text-slate-400 text-sm block mb-2">
-              Numéro MoMo utilisé pour le paiement <span className="text-red-400">*</span>
+              {t('abonnement.momoSenderLabel')} <span className="text-red-400">*</span>
             </label>
             <input
               type="tel"
-              placeholder="6XXXXXXXX (numéro depuis lequel vous avez payé)"
+              placeholder={t('abonnement.momoSenderLabel')}
               value={numeroExpediteur}
               onChange={(e) => setNumeroExpediteur(e.target.value.replace(/\D/g, ""))}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500"
             />
-            <p className="text-xs text-slate-500 mt-1">Obligatoire — sert à vérifier la réception de votre paiement.</p>
+            <p className="text-xs text-slate-500 mt-1">{t('abonnement.momoRequired')}</p>
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">ID Transaction Mobile Money (optionnel)</label>
+            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.txIdLabel')}</label>
             <input
               type="text"
-              placeholder="Numéro de transaction reçu par SMS"
+              placeholder={t('abonnement.txIdPlaceholder')}
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500"
@@ -586,13 +581,11 @@ export const AbonnementPage = () => {
           </div>
 
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-300 leading-relaxed">
-            ⚠️ <strong>Activation provisoire.</strong> Votre abonnement sera activé immédiatement mais vérifié sous 3h.
-            Si le paiement n'est pas reçu sur notre compte MoMo, l'abonnement sera automatiquement annulé.
-            Le paiement direct intégré arrive bientôt.
+            {t('abonnement.provisionalWarning')}
           </div>
 
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setEtape("instructions")}>Retour</Button>
+            <Button variant="ghost" onClick={() => setEtape("instructions")}>{t('common.back')}</Button>
             <Button
               variant="primary"
               className="flex-1"
@@ -600,7 +593,7 @@ export const AbonnementPage = () => {
               onClick={handleConfirmerPaiement}
               disabled={!reference}
             >
-              <CheckCircle className="w-4 h-4" /> Activer mon abonnement
+              <CheckCircle className="w-4 h-4" /> {t('abonnement.activateBtn')}
             </Button>
           </div>
         </Card>
@@ -613,14 +606,13 @@ export const AbonnementPage = () => {
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-2xl">Abonnement activé !</h2>
+            <h2 className="text-white font-bold text-2xl">{t('abonnement.successTitle')}</h2>
             <p className="text-slate-400 mt-2">
-              Votre plan {PLANS.find(p => p.id === planChoisi)?.nom} est maintenant actif.
-              Accédez à tous les agents et fonctionnalités YukpoPro.
+              {t('abonnement.successDesc', { name: PLANS.find(p => p.id === planChoisi)?.nom })}
             </p>
           </div>
           <Button variant="primary" className="w-full" onClick={() => setEtape("plans")}>
-            <Zap className="w-4 h-4" /> Commencer à utiliser YukpoPro
+            <Zap className="w-4 h-4" /> {t('abonnement.startUsingBtn')}
           </Button>
         </Card>
       )}
@@ -634,6 +626,7 @@ export const AbonnementPage = () => {
 };
 
 const HistoriquePaiements = () => {
+  const { t } = useTranslation();
   const [historique, setHistorique] = useState<unknown[]>([]);
   useEffect(() => {
     abonnementApi.historique().then((r) => setHistorique(r.historique || [])).catch(() => {});
@@ -644,7 +637,7 @@ const HistoriquePaiements = () => {
   return (
     <Card className="p-5">
       <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-        <Clock className="w-4 h-4 text-slate-400" /> Historique des paiements
+        <Clock className="w-4 h-4 text-slate-400" /> {t('abonnement.payHistoryTitle')}
       </h3>
       <div className="space-y-2">
         {historique.map((h: any, i) => (

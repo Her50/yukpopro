@@ -73,22 +73,22 @@ export default function CaissePage() {
       </div>
 
       {/* Solde du jour */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 text-green-600 text-xs font-medium mb-1">
             <TrendingUp size={14} /> Entrées
           </div>
-          <div className="text-lg font-bold text-green-700">{formatFCFA(rapport.total_entrees ?? 0)}</div>
+          <div className="text-base sm:text-lg font-bold text-green-700 truncate">{formatFCFA(rapport.total_entrees ?? 0)}</div>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 text-red-500 text-xs font-medium mb-1">
             <TrendingDown size={14} /> Sorties
           </div>
-          <div className="text-lg font-bold text-red-600">{formatFCFA(rapport.total_sorties ?? 0)}</div>
+          <div className="text-base sm:text-lg font-bold text-red-600 truncate">{formatFCFA(rapport.total_sorties ?? 0)}</div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-2xl p-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 col-span-2 sm:col-span-1">
           <div className="text-xs font-medium text-gray-500 mb-1">Solde</div>
-          <div className={`text-lg font-bold ${(rapport.solde ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+          <div className={`text-base sm:text-lg font-bold truncate ${(rapport.solde ?? 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
             {formatFCFA(rapport.solde ?? 0)}
           </div>
         </div>

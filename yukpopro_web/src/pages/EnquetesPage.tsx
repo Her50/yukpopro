@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { enquetesApi } from "@/api/client";
+import { useEnqueteStore } from "@/store/enqueteStore";
 import { DemoBanner } from "@/components/DemoBanner";
+import { FormBuilder, type BuilderFormulaire } from "@/components/enquetes/FormBuilder";
+import { FormPreview } from "@/components/enquetes/FormPreview";
+import { SurveyAnalytics } from "@/components/enquetes/SurveyAnalytics";
+import { DictionnaireEditor } from "@/components/enquetes/DictionnaireEditor";
+import { PlanAnalyseEditor } from "@/components/enquetes/PlanAnalyseEditor";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -77,12 +83,39 @@ const sentimentColor = (s: string) => ({
 
 export const EnquetesPage = () => {
   const { t } = useTranslation();
+  // Store persistant (survit aux navigations) : navigation, brouillons, résultats coûteux
+  const expandedId      = useEnqueteStore(s => s.expandedId);
+  const setExpanded     = useEnqueteStore(s => s.setExpandedId);
+  const activeTab       = useEnqueteStore(s => s.activeTab);
+  const setActiveTab    = useEnqueteStore(s => s.setActiveTab);
+  const formView        = useEnqueteStore(s => s.formView);
+  const setFormView     = useEnqueteStore(s => s.setFormView);
+  const genIAMode       = useEnqueteStore(s => s.genIAMode);
+  const setGenIAMode    = useEnqueteStore(s => s.setGenIAMode);
+  const form            = useEnqueteStore(s => s.createForm);
+  const setForm         = useEnqueteStore(s => s.setCreateForm);
+  const patchForm       = useEnqueteStore(s => s.patchCreateForm);
+  const genIAForm       = useEnqueteStore(s => s.genIAForm);
+  const setGenIAForm    = useEnqueteStore(s => s.setGenIAForm);
+  const patchGenIAForm  = useEnqueteStore(s => s.patchGenIAForm);
+  const protocoleParams = useEnqueteStore(s => s.protocoleParams);
+  const setProtocoleParams = useEnqueteStore(s => s.setProtocoleParams);
+  const patchProtocoleParams = useEnqueteStore(s => s.patchProtocoleParams);
+  const formulaire      = useEnqueteStore(s => s.formulaire);
+  const setFormulaire   = useEnqueteStore(s => s.setFormulaire);
+  const analyseResult   = useEnqueteStore(s => s.analyseResult);
+  const setAnalyseResult= useEnqueteStore(s => s.setAnalyseResult);
+  const analyseType     = useEnqueteStore(s => s.analyseType);
+  const setAnalyseType  = useEnqueteStore(s => s.setAnalyseType);
+  const rapport         = useEnqueteStore(s => s.rapport);
+  const setRapport      = useEnqueteStore(s => s.setRapport);
+  const resetEtudeContext = useEnqueteStore(s => s.resetEtudeContext);
+
+  // État éphémère (rechargé depuis backend ou non persistant entre nav)
   const [etudes,     setEtudes]     = useState<Etude[]>([]);
   const [loaded,     setLoaded]     = useState(false);
   const [loading,    setLoading]    = useState(false);
-  const [expandedId, setExpanded]   = useState<string | null>(null);
   const [detail,     setDetail]     = useState<EtudeDetail | null>(null);
-  const [activeTab,  setActiveTab]  = useState<DetailTab>("audio");
   const [showCreate, setShowCreate] = useState(false);
 
   // État onglet Audio
@@ -91,32 +124,22 @@ export const EnquetesPage = () => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   // État onglet Formulaire
-  const [formulaire,       setFormulaire]       = useState<any | null>(null);
-  const [genIAMode,        setGenIAMode]         = useState(false);
-  const [genIAForm,        setGenIAForm]         = useState({ description: "", titre: "", objectif: "", population: "", n_questions: 15 });
   const [generatingForm,   setGeneratingForm]    = useState(false);
   const [formDonnees,      setFormDonnees]       = useState<any | null>(null);
   const [copied,           setCopied]            = useState(false);
+  const [builderForm,      setBuilderForm]       = useState<BuilderFormulaire | null>(null);
+  const [loadingBuilder,   setLoadingBuilder]    = useState(false);
   // Upload protocole
   const [protocoleFile,    setProtocoleFile]    = useState<File | null>(null);
-  const [protocoleParams,  setProtocoleParams]  = useState({ titre: "", objectif: "", population: "", n_questions: 20 });
   const [uploadingProt,    setUploadingProt]    = useState(false);
   const protocoleRef = useRef<HTMLInputElement>(null);
 
   // État onglet Analyse
   const [analysing,        setAnalysing]         = useState<string | null>(null); // type en cours
-  const [analyseResult,    setAnalyseResult]     = useState<any | null>(null);
-  const [analyseType,      setAnalyseType]       = useState<string | null>(null);
 
   // État onglet Rapport
-  const [rapport,          setRapport]           = useState<any | null>(null);
   const [generating,       setGenerating]        = useState(false);
 
-  // Formulaire création étude
-  const [form, setForm] = useState({
-    titre: "", contexte: "", methodologie: "exploratoire", mode: "qualitatif",
-    population_cible: "", terrain: "", questions_recherche: "",
-  });
   const [creating, setCreating] = useState(false);
 
   // ── Chargement ───────────────────────────────────────────────────────────────
@@ -133,12 +156,28 @@ export const EnquetesPage = () => {
 
   useEffect(() => { chargerEtudes(); }, [chargerEtudes]);
 
+  // Réhydratation : si expandedId est restauré du store, recharger detail/transcriptions
+  useEffect(() => {
+    if (expandedId && !detail) {
+      (async () => {
+        try {
+          const [d, tr] = await Promise.all([
+            enquetesApi.getEtude(expandedId),
+            enquetesApi.listerTranscriptions(expandedId).catch(() => ({ transcriptions: [] })),
+          ]);
+          setDetail(d);
+          setTranscriptions(tr.transcriptions || []);
+        } catch { /* étude supprimée — laisse expandedId, l'utilisateur peut nettoyer */ }
+      })();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const ouvrirEtude = async (etude: Etude) => {
     if (expandedId === etude.etude_id) { setExpanded(null); setDetail(null); return; }
     setExpanded(etude.etude_id);
-    setActiveTab("audio");
-    setTranscriptions([]); setFormulaire(null); setFormDonnees(null);
-    setAnalyseResult(null); setRapport(null); setGenIAMode(false);
+    resetEtudeContext();
+    setTranscriptions([]); setFormDonnees(null);
     try {
       const [d, tr] = await Promise.all([
         enquetesApi.getEtude(etude.etude_id),
@@ -229,6 +268,58 @@ export const EnquetesPage = () => {
       const d = await enquetesApi.donneesFormulaire(expandedId);
       setFormDonnees(d);
     } catch { toast.error("Aucune donnée ou formulaire non créé"); }
+  };
+
+  const extraireFormulaireId = (f: any): string | null => {
+    if (!f) return null;
+    if (f.formulaire_id) return f.formulaire_id;
+    if (f.lien_collecte) {
+      const m = String(f.lien_collecte).match(/\/formulaire\/([a-f0-9-]+)/i);
+      if (m) return m[1];
+    }
+    return null;
+  };
+
+  const ouvrirBuilder = async (view: "builder" | "preview" | "analytics" | "dictionnaire" | "plan") => {
+    if (view === "dictionnaire" || view === "plan") {
+      setFormView(view);
+      return;
+    }
+    const fid = extraireFormulaireId(formulaire);
+    if (!fid) { toast.error("Formulaire non disponible"); return; }
+    setLoadingBuilder(true);
+    try {
+      const full = await enquetesApi.getFormulairePublic(fid);
+      setBuilderForm({
+        formulaire_id: full.formulaire_id,
+        titre: full.titre,
+        description: full.description || "",
+        questions: full.questions || [],
+      });
+      if (view === "analytics") {
+        await chargerDonnees();
+      }
+      setFormView(view);
+    } catch {
+      toast.error("Impossible de charger le formulaire");
+    } finally {
+      setLoadingBuilder(false);
+    }
+  };
+
+  const telechargerQuestionnaireDocx = async () => {
+    if (!expandedId) return;
+    const url = enquetesApi.questionnaireDocxUrl(expandedId);
+    const token = localStorage.getItem("yukpopro_token");
+    try {
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "questionnaire.docx";
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch { toast.error("Téléchargement impossible"); }
   };
 
   const uploaderProtocole = async () => {
@@ -374,15 +465,15 @@ export const EnquetesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className={labelCls}>{t("enquetes.form.title")} *</label>
-                <input className={inputCls} placeholder="Perceptions des services de santé au Cameroun" value={form.titre} onChange={e => setForm(f => ({ ...f, titre: e.target.value }))} />
+                <input className={inputCls} placeholder="Perceptions des services de santé au Cameroun" value={form.titre} onChange={e => patchForm({ titre: e.target.value })} />
               </div>
               <div>
                 <label className={labelCls}>{t("enquetes.form.terrain")}</label>
-                <input className={inputCls} placeholder="Yaoundé — quartiers périphériques" value={form.terrain} onChange={e => setForm(f => ({ ...f, terrain: e.target.value }))} />
+                <input className={inputCls} placeholder="Yaoundé — quartiers périphériques" value={form.terrain} onChange={e => patchForm({ terrain: e.target.value })} />
               </div>
               <div>
                 <label className={labelCls}>{t("enquetes.form.methodologie")}</label>
-                <select className={inputCls} value={form.methodologie} onChange={e => setForm(f => ({ ...f, methodologie: e.target.value }))}>
+                <select className={inputCls} value={form.methodologie} onChange={e => patchForm({ methodologie: e.target.value })}>
                   {METHODOLOGIES.map(m => <option key={m.value} value={m.value} style={{ background: "var(--ykp-elevated)", color: "var(--ykp-text-primary)" }}>{m.label}</option>)}
                 </select>
               </div>
@@ -390,7 +481,7 @@ export const EnquetesPage = () => {
                 <label className={labelCls}>{t("enquetes.form.modeEtude")}</label>
                 <div className="flex gap-2">
                   {MODES.map(m => (
-                    <button key={m.value} onClick={() => setForm(f => ({ ...f, mode: m.value }))}
+                    <button key={m.value} onClick={() => patchForm({ mode: m.value })}
                       className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all border ${form.mode === m.value ? "text-yukpo-200 border-yukpo-500/40 bg-yukpo-500/10" : "text-gray-500 border-white/[0.06] hover:border-white/[0.12]"}`}>
                       {m.label}
                     </button>
@@ -399,15 +490,15 @@ export const EnquetesPage = () => {
               </div>
               <div className="md:col-span-2">
                 <label className={labelCls}>{t("enquetes.form.population")}</label>
-                <input className={inputCls} placeholder="Femmes rurales 25–45 ans, ménages à faible revenu" value={form.population_cible} onChange={e => setForm(f => ({ ...f, population_cible: e.target.value }))} />
+                <input className={inputCls} placeholder="Femmes rurales 25–45 ans, ménages à faible revenu" value={form.population_cible} onChange={e => patchForm({ population_cible: e.target.value })} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelCls}>{t("enquetes.form.contexte")}</label>
-                <textarea rows={2} className={inputCls + " resize-none"} placeholder="Décrivez la problématique, le contexte et les objectifs de votre étude…" value={form.contexte} onChange={e => setForm(f => ({ ...f, contexte: e.target.value }))} />
+                <textarea rows={2} className={inputCls + " resize-none"} placeholder="Décrivez la problématique, le contexte et les objectifs de votre étude…" value={form.contexte} onChange={e => patchForm({ contexte: e.target.value })} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelCls}>{t("enquetes.form.questions")} <span className="text-gray-600 font-normal">{t("enquetes.form.questionsHint")}</span></label>
-                <textarea rows={3} className={inputCls + " resize-none"} placeholder={"Quels sont les obstacles à l'accès aux soins ?\nComment les ménages gèrent-ils les dépenses de santé ?"} value={form.questions_recherche} onChange={e => setForm(f => ({ ...f, questions_recherche: e.target.value }))} />
+                <textarea rows={3} className={inputCls + " resize-none"} placeholder={"Quels sont les obstacles à l'accès aux soins ?\nComment les ménages gèrent-ils les dépenses de santé ?"} value={form.questions_recherche} onChange={e => patchForm({ questions_recherche: e.target.value })} />
               </div>
             </div>
             <div className="flex gap-2">
@@ -582,19 +673,19 @@ export const EnquetesPage = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                     <div>
                                       <label className={labelCls}>Titre du formulaire *</label>
-                                      <input className={inputCls} placeholder="Enquête ménages 2026" value={protocoleParams.titre} onChange={e => setProtocoleParams(p => ({ ...p, titre: e.target.value }))} />
+                                      <input className={inputCls} placeholder="Enquête ménages 2026" value={protocoleParams.titre} onChange={e => patchProtocoleParams({ titre: e.target.value })} />
                                     </div>
                                     <div>
                                       <label className={labelCls}>Population cible</label>
-                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.population} onChange={e => setProtocoleParams(p => ({ ...p, population: e.target.value }))} />
+                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.population} onChange={e => patchProtocoleParams({ population: e.target.value })} />
                                     </div>
                                     <div className="md:col-span-2">
                                       <label className={labelCls}>Objectif de l'étude</label>
-                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.objectif} onChange={e => setProtocoleParams(p => ({ ...p, objectif: e.target.value }))} />
+                                      <input className={inputCls} placeholder="Auto-détecté depuis le protocole" value={protocoleParams.objectif} onChange={e => patchProtocoleParams({ objectif: e.target.value })} />
                                     </div>
                                     <div>
                                       <label className={labelCls}>Nombre de questions</label>
-                                      <input type="number" min={5} max={60} className={inputCls} value={protocoleParams.n_questions} onChange={e => setProtocoleParams(p => ({ ...p, n_questions: +e.target.value }))} />
+                                      <input type="number" min={5} max={60} className={inputCls} value={protocoleParams.n_questions} onChange={e => patchProtocoleParams({ n_questions: +e.target.value })} />
                                     </div>
                                   </div>
 
@@ -655,23 +746,23 @@ export const EnquetesPage = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                   <div>
                                     <label className={labelCls}>Titre du formulaire *</label>
-                                    <input className={inputCls} placeholder="Enquête satisfaction soins primaires" value={genIAForm.titre} onChange={e => setGenIAForm(f => ({ ...f, titre: e.target.value }))} />
+                                    <input className={inputCls} placeholder="Enquête satisfaction soins primaires" value={genIAForm.titre} onChange={e => patchGenIAForm({ titre: e.target.value })} />
                                   </div>
                                   <div>
                                     <label className={labelCls}>Population cible *</label>
-                                    <input className={inputCls} placeholder="Patients, ménages, bénéficiaires" value={genIAForm.population} onChange={e => setGenIAForm(f => ({ ...f, population: e.target.value }))} />
+                                    <input className={inputCls} placeholder="Patients, ménages, bénéficiaires" value={genIAForm.population} onChange={e => patchGenIAForm({ population: e.target.value })} />
                                   </div>
                                   <div className="md:col-span-2">
                                     <label className={labelCls}>Description du sujet *</label>
-                                    <textarea rows={2} className={inputCls + " resize-none"} placeholder="Contexte, thèmes à couvrir, enjeux spécifiques…" value={genIAForm.description} onChange={e => setGenIAForm(f => ({ ...f, description: e.target.value }))} />
+                                    <textarea rows={2} className={inputCls + " resize-none"} placeholder="Contexte, thèmes à couvrir, enjeux spécifiques…" value={genIAForm.description} onChange={e => patchGenIAForm({ description: e.target.value })} />
                                   </div>
                                   <div className="md:col-span-2">
                                     <label className={labelCls}>Objectif principal</label>
-                                    <input className={inputCls} placeholder="Mesurer la satisfaction, identifier les barrières d'accès…" value={genIAForm.objectif} onChange={e => setGenIAForm(f => ({ ...f, objectif: e.target.value }))} />
+                                    <input className={inputCls} placeholder="Mesurer la satisfaction, identifier les barrières d'accès…" value={genIAForm.objectif} onChange={e => patchGenIAForm({ objectif: e.target.value })} />
                                   </div>
                                   <div>
                                     <label className={labelCls}>Nombre de questions</label>
-                                    <input type="number" min={5} max={40} className={inputCls} value={genIAForm.n_questions} onChange={e => setGenIAForm(f => ({ ...f, n_questions: +e.target.value }))} />
+                                    <input type="number" min={5} max={40} className={inputCls} value={genIAForm.n_questions} onChange={e => patchGenIAForm({ n_questions: +e.target.value })} />
                                   </div>
                                 </div>
                                 <div className="flex gap-2 pt-1">
@@ -718,7 +809,67 @@ export const EnquetesPage = () => {
                                       <RefreshCw className="w-3.5 h-3.5" />
                                       Voir les réponses
                                     </button>
+                                    <button disabled={loadingBuilder} onClick={() => ouvrirBuilder("builder")} className={`${btnBase} text-yukpo-400 border border-yukpo-400/20 hover:bg-yukpo-400/[0.08]`}>
+                                      <ClipboardList className="w-3.5 h-3.5" />
+                                      Éditer les questions
+                                    </button>
+                                    <button disabled={loadingBuilder} onClick={() => ouvrirBuilder("preview")} className={`${btnBase} text-gray-300 border border-white/[0.08] hover:bg-white/[0.05]`}>
+                                      <Eye className="w-3.5 h-3.5" />
+                                      Aperçu répondant
+                                    </button>
+                                    <button disabled={loadingBuilder} onClick={() => ouvrirBuilder("analytics")} className={`${btnBase} text-blue-300 border border-blue-400/20 hover:bg-blue-400/[0.08]`}>
+                                      <BarChart2 className="w-3.5 h-3.5" />
+                                      Analytics
+                                    </button>
+                                    <button onClick={() => ouvrirBuilder("dictionnaire")} className={`${btnBase} text-purple-300 border border-purple-400/20 hover:bg-purple-400/[0.08]`}>
+                                      <BookOpen className="w-3.5 h-3.5" />
+                                      Dictionnaire
+                                    </button>
+                                    <button onClick={() => ouvrirBuilder("plan")} className={`${btnBase} text-amber-300 border border-amber-400/20 hover:bg-amber-400/[0.08]`}>
+                                      <FileText className="w-3.5 h-3.5" />
+                                      Plan d'analyse
+                                    </button>
+                                    <button onClick={telechargerQuestionnaireDocx} className={`${btnBase} text-gray-300 border border-white/[0.08] hover:bg-white/[0.05]`}>
+                                      <Download className="w-3.5 h-3.5" />
+                                      Questionnaire Word
+                                    </button>
                                   </div>
+
+                                  {formView !== "none" && (
+                                    <div className="mt-4 pt-4 border-t border-white/[0.08] space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+                                          {formView === "builder" ? "Éditeur" : formView === "preview" ? "Aperçu" : formView === "analytics" ? "Analyse des réponses" : formView === "dictionnaire" ? "Dictionnaire variables" : "Plan d'analyse"}
+                                        </span>
+                                        <button onClick={() => setFormView("none")} className="text-xs text-gray-400 hover:text-white">Fermer ✕</button>
+                                      </div>
+                                      {formView === "builder" && builderForm && (
+                                        <FormBuilder
+                                          formulaire={builderForm}
+                                          onPreview={() => setFormView("preview")}
+                                          onSaved={upd => setBuilderForm(upd)}
+                                        />
+                                      )}
+                                      {formView === "preview" && builderForm && <FormPreview formulaire={builderForm} />}
+                                      {formView === "dictionnaire" && expandedId && <DictionnaireEditor etude_id={expandedId} />}
+                                      {formView === "plan" && expandedId && <PlanAnalyseEditor etude_id={expandedId} />}
+                                      {formView === "analytics" && builderForm && (
+                                        <SurveyAnalytics
+                                          etude_id={expandedId || ""}
+                                          formulaireTitre={builderForm.titre}
+                                          questions={builderForm.questions.map((q, i) => ({
+                                            question_id: q.question_id || `q_${i}`,
+                                            libelle: q.libelle,
+                                            type_question: q.type_question,
+                                            options: q.options,
+                                            name_xlsform: q.name_xlsform,
+                                            ordre: q.ordre ?? i,
+                                          }))}
+                                          reponses={formDonnees?.reponses || []}
+                                        />
+                                      )}
+                                    </div>
+                                  )}
                                   <p className="text-[10px] text-gray-500 mt-2 flex items-center gap-1">
                                     <CheckCircle2 className="w-3 h-3 text-green-500/70" />
                                     Le XLSForm est automatiquement sauvegardé dans <strong className="text-gray-400">Mes Documents</strong> dès le téléchargement.

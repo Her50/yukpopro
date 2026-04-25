@@ -117,7 +117,21 @@
   "generateurs": {
     "title": "Yukpo Studio",
     "generating": "Генерация…",
-    "download": "Скачать"
+    "download": "Скачать",
+    "infogOneVisual": "Создать 1 дизайн",
+    "infogFourVariants": "4 ИИ-варианта",
+    "infogVariantsLoading": "Создание…",
+    "infogPdfRgb": "PDF RGB",
+    "infogPdfCmyk": "PDF CMYK",
+    "infogSvg": "SVG",
+    "infogPngHd": "PNG HD",
+    "infogPdfCmykTitle": "PDF CMYK — для профессиональной печати",
+    "infogSvgTitle": "Векторный SVG — редактируется в Illustrator/Inkscape",
+    "infogVariantsTitle": "креативных направлений — выберите любимое",
+    "infogRetouchTitle": "Изменить эту инфографику",
+    "infogRetouchPlaceholder": "Прим.: Изменить заголовок, синий фон, добавить номер 699…",
+    "infogRetouchApply": "Применить",
+    "infogRetouching": "Обработка…"
   },
   "traduction": {
     "title": "Перевод документов",

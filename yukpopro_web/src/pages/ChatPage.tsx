@@ -3,7 +3,7 @@
  * Remplace CopilotePage, AgentsPage, GenerateursPage, AnalysePage, TraductionPage
  * Un seul chat intelligent qui orchestre tous les agents et outils.
  */
-import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
+import React, { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, type UploadedFile } from "@/api/client";
 import { cn } from "@/components/ui";
 import type { CopiloteMessage, NavigationSuggestion } from "@/types";
 import { METIERS, PAYS_AFRIQUE } from "@/types";
@@ -726,15 +726,24 @@ export const ChatPage = () => {
 
 // ── Construit le message de bienvenue contextuel ─────────────────────────────
 
+const PAYS_LABELS: Record<string, string> = {
+  CM: "Cameroun", CI: "Côte d'Ivoire", SN: "Sénégal", BF: "Burkina Faso",
+  TG: "Togo", BJ: "Bénin", ML: "Mali", NE: "Niger", GA: "Gabon",
+  CG: "Congo", CD: "RD Congo", TD: "Tchad", CF: "Centrafrique",
+  GN: "Guinée", DZ: "Algérie", MA: "Maroc", TN: "Tunisie",
+  MG: "Madagascar", MR: "Mauritanie", GQ: "Guinée équatoriale",
+  RW: "Rwanda", BI: "Burundi", DJ: "Djibouti", FR: "France",
+};
+
 function buildWelcomeText(profil: any, metierCtx: typeof METIERS_CONFIG[string]): string {
   if (!profil?.metier) {
     return "Je suis Yukpo Pro, votre assistant professionnel intelligent. Posez-moi une question, envoyez un document à analyser ou traduire, ou demandez-moi de générer un rapport — je comprends le langage naturel et m'adapte à votre demande.";
   }
-  const agents = metierCtx.agents.slice(0, 2).join(" et ");
-  const cap = metierCtx.capabilities[0]?.toLowerCase() || "vous accompagner dans votre activité";
-  const pays = profil.pays ? ` au ${profil.pays}` : " en Afrique";
-  const niv = profil.niveau_expertise === "expert" || profil.niveau_expertise === "senior" ? "expérimenté" : "professionnel";
-  return `Je suis Yukpo Pro, votre assistant dédié aux ${niv}s en ${metierCtx.label}${pays}. Je peux vous aider à ${cap}, activer ${agents} pour des analyses pointues, générer des rapports et documents, traduire vos fichiers et gérer vos réunions. Posez-moi votre première question ou envoyez un document.`;
+  const paysNom = profil.pays ? (PAYS_LABELS[profil.pays] || profil.pays) : "";
+  const surPays = paysNom ? ` au ${paysNom}` : " en Afrique";
+  const metierLabel = metierCtx.label || "professionnels";
+  const agents = metierCtx.agents.slice(0, 2).map((a) => `l'${a}`).join(" et ");
+  return `Je suis Yukpo Pro, votre assistant IA dédié aux ${metierLabel.toLowerCase()}${surPays}. Je peux analyser vos documents, générer des rapports, traduire vos fichiers et mobiliser ${agents || "des agents spécialisés"} pour des analyses pointues. Posez-moi votre première question ou envoyez un document.`;
 }
 
 const WelcomeScreen = ({
@@ -745,7 +754,21 @@ const WelcomeScreen = ({
 }) => {
   const { t } = useTranslation();
   const prenom = user?.prenom || user?.nom?.split(" ")[0] || "";
-  const welcomeText = buildWelcomeText(profil, metierCtx);
+  const fallbackText = React.useMemo(() => buildWelcomeText(profil, metierCtx), [profil, metierCtx]);
+  const [welcomeText, setWelcomeText] = React.useState<string>(fallbackText);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    copiloteApi
+      .welcome()
+      .then((res) => {
+        if (!cancelled && res?.message) setWelcomeText(res.message);
+      })
+      .catch(() => {
+        // garde le fallback grammaticalement correct
+      });
+    return () => { cancelled = true; };
+  }, [profil?.metier, profil?.pays, profil?.niveau_expertise]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-xl mx-auto w-full text-center">
@@ -901,18 +924,11 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
           <NavSuggestionButtons suggestions={message.navigation_suggestions} />
         )}
 
-        {/* Coût LLM (transparent, discret) */}
+        {/* Tokens consommés (transparent, discret — pas de montant) */}
         {message.cout_llm && !message.loading && (
           <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
-            <span title={`Modèle : ${message.cout_llm.modele} · ${message.cout_llm.tokens_input}+${message.cout_llm.tokens_output} tokens`}>
+            <span title={`Modèle : ${message.cout_llm.modele} · ${message.cout_llm.tokens_input} in + ${message.cout_llm.tokens_output} out`}>
               💡 {message.cout_llm.tokens_input + message.cout_llm.tokens_output} tokens
-            </span>
-            <span>·</span>
-            <span title={`Coût réel : $${message.cout_llm.cout_reel_usd.toFixed(5)} · Marge ×${message.cout_llm.marge}`}>
-              {message.cout_llm.cout_app_xaf != null && message.cout_llm.devise_cout
-                ? `${(message.cout_llm.cout_app_xaf as number).toFixed(0)} ${message.cout_llm.devise_cout}`
-                : `$${message.cout_llm.cout_app_usd.toFixed(4)}`
-              }
             </span>
           </div>
         )}

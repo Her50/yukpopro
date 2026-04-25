@@ -12,12 +12,14 @@
  *  - Ouverture des offres en nouvel onglet
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Briefcase, Bell, BellOff, Search, Settings, RefreshCw,
   ExternalLink, FileText, Upload, Trash2, Clock, CheckCircle,
   AlertCircle, ChevronDown, ChevronUp, Zap, X,
 } from "lucide-react";
 import { emploiApi, type OffreEmploi, type ConfigEmploi } from "@/api/client";
+import { useEmploiStore } from "@/store/emploiStore";
 import { DemoBanner } from "@/components/DemoBanner";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -61,19 +63,30 @@ const FREQUENCES = [
 // ── Composant principal ───────────────────────────────────────────────────────
 
 export const EmploiPage = () => {
+  const { t } = useTranslation();
+  // Store persistant (drafts + filtres survivent à la navigation)
+  const showConfig    = useEmploiStore(s => s.showConfig);
+  const setShowConfig = useEmploiStore(s => s.setShowConfig);
+  const profilTexte   = useEmploiStore(s => s.profilTexte);
+  const setProfilTexte = useEmploiStore(s => s.setProfilTexte);
+  const frequence     = useEmploiStore(s => s.frequence);
+  const setFrequence  = useEmploiStore(s => s.setFrequence);
+  const cvTexte       = useEmploiStore(s => s.cvTexte);
+  const setCvTexte    = useEmploiStore(s => s.setCvTexte);
+  const cvMode        = useEmploiStore(s => s.cvMode);
+  const setCvMode     = useEmploiStore(s => s.setCvMode);
+  const keyword       = useEmploiStore(s => s.keyword);
+  const setKeyword    = useEmploiStore(s => s.setKeyword);
+  const expandedIdx   = useEmploiStore(s => s.expandedIdx);
+  const setExpandedIdx = useEmploiStore(s => s.setExpandedIdx);
+
+  // État éphémère
   const [config, setConfig]           = useState<ConfigEmploi | null>(null);
   const [loading, setLoading]         = useState(true);
   const [searching, setSearching]     = useState(false);
   const [saving, setSaving]           = useState(false);
-  const [showConfig, setShowConfig]   = useState(false);
-  const [profilTexte, setProfilTexte] = useState("");
-  const [frequence, setFrequence]     = useState(24);
-  const [cvTexte, setCvTexte]         = useState("");
-  const [cvMode, setCvMode]           = useState<"texte" | "fichier">("texte");
   const [uploadingCV, setUploadingCV] = useState(false);
   const [toast, setToast]             = useState<{ msg: string; type: "ok" | "err" } | null>(null);
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  const [keyword, setKeyword]         = useState("");
 
   const offres = useMemo(() => config?.offres_emploi_recentes || [], [config]);
   const offresFiltrees = useMemo(() => {
@@ -100,8 +113,14 @@ export const EmploiPage = () => {
     try {
       const data = await emploiApi.getConfig();
       setConfig(data);
-      setProfilTexte(data.profil_recherche_emploi || "");
-      setFrequence(data.frequence_recherche_heures || 24);
+      // Hydratation initiale uniquement : préserve les éventuels drafts non sauvegardés
+      // si l'utilisateur revient sur la page après navigation.
+      const st = useEmploiStore.getState();
+      if (!st.hydratedFromBackend) {
+        setProfilTexte(data.profil_recherche_emploi || "");
+        setFrequence(data.frequence_recherche_heures || 24);
+        st.markHydrated();
+      }
     } catch {
       setConfig({
         recherche_emploi_active: false,
@@ -217,7 +236,7 @@ export const EmploiPage = () => {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400">Chargement des offres…</p>
+        <p className="text-slate-400">{t('emploi.loading')}</p>
       </div>
     );
   }
@@ -239,7 +258,7 @@ export const EmploiPage = () => {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Briefcase className="text-violet-400" size={24} />
-            Veille Emploi
+            {t('emploi.watchTitle')}
           </h1>
           <p className="text-slate-400 text-sm mt-1">
             {keyword
@@ -258,7 +277,7 @@ export const EmploiPage = () => {
               ? <RefreshCw size={15} className="animate-spin" />
               : <Search size={15} />
             }
-            {searching ? "Recherche…" : "Chercher maintenant"}
+            {searching ? t('emploi.searching') : t('emploi.searchNow')}
           </button>
           <button
             onClick={() => setShowConfig(!showConfig)}
@@ -278,7 +297,7 @@ export const EmploiPage = () => {
         <div className="rounded-2xl p-6 space-y-5" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
           <h2 className="text-white font-bold text-base flex items-center gap-2">
             <Settings size={16} className="text-violet-400" />
-            Configuration de la recherche
+            {t('emploi.configTitle')}
           </h2>
 
           {/* Veille on/off */}
@@ -289,11 +308,11 @@ export const EmploiPage = () => {
                 : <BellOff size={18} className="text-slate-400" />
               }
               <div>
-                <p className="text-white font-semibold text-sm">Veille automatique</p>
+                <p className="text-white font-semibold text-sm">{t('emploi.watchAuto')}</p>
                 <p className="text-slate-400 text-xs">
                   {config?.recherche_emploi_active
-                    ? `Active — toutes les ${config.frequence_recherche_heures}h`
-                    : "Désactivée"}
+                    ? t('emploi.watchActiveFreq', { hours: config.frequence_recherche_heures })
+                    : t('marches.watchDesc', 'Inactive')}
                 </p>
               </div>
             </div>
@@ -310,7 +329,7 @@ export const EmploiPage = () => {
           {/* Fréquence */}
           <div>
             <label className="text-slate-300 text-sm font-semibold block mb-2">
-              Fréquence de recherche automatique
+              {t('emploi.searchFreq')}
             </label>
             <div className="flex flex-wrap gap-2">
               {FREQUENCES.map((f) => (
@@ -331,11 +350,9 @@ export const EmploiPage = () => {
           {/* Profil de recherche */}
           <div>
             <label className="text-slate-300 text-sm font-semibold block mb-1">
-              Profil de recherche
+              {t('emploi.profilSearch')}
             </label>
-            <p className="text-slate-500 text-xs mb-2">
-              Décrivez le poste idéal, vos compétences clés, secteur et localisation préférés.
-            </p>
+            <p className="text-slate-500 text-xs mb-2">{t('emploi.profileDesc')}</p>
             <textarea
               value={profilTexte}
               onChange={(e) => setProfilTexte(e.target.value)}
@@ -350,7 +367,7 @@ export const EmploiPage = () => {
             disabled={saving}
             className="w-full py-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors"
           >
-            {saving ? "Sauvegarde…" : "Sauvegarder la configuration"}
+            {saving ? t('common.saving') : t('emploi.saveConfig')}
           </button>
 
           {/* ── Section CV ──────────────────────────────────────────────── */}
@@ -381,7 +398,7 @@ export const EmploiPage = () => {
                   className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors
                     ${cvMode === m ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"}`}
                 >
-                  {m === "texte" ? "Coller le texte" : "Uploader un fichier"}
+                  {m === "texte" ? t('emploi.pasteText') : t('emploi.uploadFile')}
                 </button>
               ))}
             </div>
@@ -393,7 +410,7 @@ export const EmploiPage = () => {
                   onChange={(e) => setCvTexte(e.target.value)}
                   rows={5}
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 resize-none"
-                  placeholder="Collez ici le contenu de votre CV (texte brut ou Markdown)…"
+                  placeholder={t('emploi.cvPastePlaceholder')}
                 />
                 <button
                   onClick={uploadCVTexte}
@@ -401,7 +418,7 @@ export const EmploiPage = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white text-sm rounded-xl transition-colors"
                 >
                   {uploadingCV ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
-                  Enregistrer le CV
+                  {t('emploi.saveCV')}
                 </button>
               </div>
             ) : (
@@ -410,9 +427,9 @@ export const EmploiPage = () => {
                 ${uploadingCV ? "border-violet-500/50 bg-violet-500/10" : "border-slate-600 hover:border-slate-500 bg-slate-900/50"}`}>
                 <Upload size={22} className="text-slate-400" />
                 <span className="text-slate-300 text-sm font-medium">
-                  {uploadingCV ? "Upload en cours…" : "Cliquez ou glissez votre CV"}
+                  {uploadingCV ? t('emploi.uploading') : t('emploi.clickOrDrop')}
                 </span>
-                <span className="text-slate-500 text-xs">PDF, DOCX, TXT — max 5 Mo</span>
+                <span className="text-slate-500 text-xs">{t('emploi.cvFormats')}</span>
                 <input
                   type="file"
                   accept=".pdf,.docx,.doc,.txt,.md"
@@ -430,25 +447,25 @@ export const EmploiPage = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           icon={config?.recherche_emploi_active ? <Bell size={16} className="text-violet-400" /> : <BellOff size={16} className="text-slate-500" />}
-          label="Veille"
-          value={config?.recherche_emploi_active ? "Active" : "Inactive"}
+          label={t('emploi.veille')}
+          value={config?.recherche_emploi_active ? t('emploi.activeLabel') : t('emploi.inactiveLabel')}
           color={config?.recherche_emploi_active ? "text-violet-400" : "text-slate-400"}
         />
         <StatCard
           icon={<Briefcase size={16} className="text-amber-400" />}
-          label="Offres trouvées"
+          label={t('emploi.offresFound')}
           value={String(offres.length)}
           color="text-amber-400"
         />
         <StatCard
           icon={<Clock size={16} className="text-slate-400" />}
-          label="Dernière recherche"
+          label={t('emploi.lastSearch')}
           value={formatDate(config?.derniere_recherche_emploi)}
           color="text-slate-300"
         />
         <StatCard
           icon={<Zap size={16} className="text-emerald-400" />}
-          label="Fréquence"
+          label={t('emploi.frequencyLabel')}
           value={`${config?.frequence_recherche_heures || 24}h`}
           color="text-emerald-400"
         />
@@ -459,16 +476,14 @@ export const EmploiPage = () => {
         <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl">
           <AlertCircle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-amber-800 dark:text-amber-300 text-sm font-semibold">Profil de recherche non configuré</p>
-            <p className="text-amber-700 dark:text-amber-400/70 text-xs mt-0.5">
-              Renseignez votre profil dans la configuration pour recevoir des offres pertinentes.
-            </p>
+            <p className="text-amber-800 dark:text-amber-300 text-sm font-semibold">{t('emploi.profileMissing')}</p>
+            <p className="text-amber-700 dark:text-amber-400/70 text-xs mt-0.5">{t('emploi.profileMissingDesc')}</p>
           </div>
           <button
             onClick={() => setShowConfig(true)}
             className="ml-auto text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 text-xs font-semibold whitespace-nowrap"
           >
-            Configurer →
+            {t('emploi.configure')}
           </button>
         </div>
       )}
@@ -477,7 +492,7 @@ export const EmploiPage = () => {
       {config?.cv_disponible && (
         <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
           <FileText size={15} className="text-emerald-400" />
-          <span className="text-emerald-300 text-sm font-medium">CV enregistré — utilisé pour le matching des offres</span>
+          <span className="text-emerald-300 text-sm font-medium">{t('emploi.cvUsed')}</span>
         </div>
       )}
 
@@ -489,7 +504,7 @@ export const EmploiPage = () => {
             type="text"
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
-            placeholder="Rechercher dans les offres — titre, entreprise, lieu…"
+            placeholder={t('marches.searchPlaceholder')}
             className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
           />
           {keyword && (
@@ -505,19 +520,19 @@ export const EmploiPage = () => {
         <EmptyState onSearch={lancerRecherche} searching={searching} />
       ) : offresFiltrees.length === 0 ? (
         <div className="rounded-2xl p-8 text-center space-y-3" style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}>
-          <p className="text-white font-semibold">Aucune offre pour "{keyword}"</p>
-          <p className="text-slate-400 text-sm">Essayez un autre mot-clé ou lancez une nouvelle recherche.</p>
+          <p className="text-white font-semibold">{t('emploi.noKeyword', { keyword })}</p>
+          <p className="text-slate-400 text-sm">{t('emploi.emptyDesc')}</p>
           <button
             onClick={() => setKeyword("")}
             className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-xl transition-colors"
           >
-            <X size={14} /> Effacer la recherche
+            <X size={14} /> {t('emploi.clearSearch')}
           </button>
         </div>
       ) : (
         <div className="space-y-3">
           <h2 className="text-white font-bold text-base">
-            {keyword ? `Résultats pour "${keyword}"` : "Offres récentes"}
+            {keyword ? t('emploi.resultsFor', { keyword }) : t('emploi.recentOffers')}
           </h2>
           {offresFiltrees.map((offre, idx) => (
             <OffreCard

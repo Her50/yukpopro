@@ -18,9 +18,9 @@ const NAV_KEYS = [
   { path: "/mes-documents",  icon: FolderOpen,      key: "documents",      badge: null,  adminOnly: false },
   { path: "/traduction",     icon: Languages,       key: "traduction",     badge: null,  adminOnly: false },
   { path: "/translate-live", icon: Radio,           key: "translateLive",  badge: "NEW", adminOnly: false },
+  { path: "/enquetes",       icon: ClipboardList,   key: "enquetes",       badge: null,  adminOnly: false },
   { path: "/emploi",         icon: Briefcase,       key: "emploi",         badge: null,  adminOnly: false },
   { path: "/marches",        icon: Gavel,           key: "marches",        badge: null,  adminOnly: false },
-  { path: "/enquetes",       icon: ClipboardList,   key: "enquetes",       badge: null,  adminOnly: false },
   { path: "/dashboard",      icon: LayoutDashboard, key: "dashboard",      badge: null,  adminOnly: false },
   { path: "/profil",         icon: User,            key: "profil",         badge: null,  adminOnly: false },
   { path: "/parametres",     icon: Settings,        key: "parametres",     badge: null,  adminOnly: false },
@@ -98,14 +98,14 @@ export const Sidebar = () => {
       >
         {collapsed ? (
           <div style={{
-            width: 40, height: 40, background: "white", borderRadius: 10,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 2,
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25)",
+            width: 52, height: 52, background: "white", borderRadius: 13,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 5,
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35)",
           }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
         ) : (
-          <YukpoLogo size={30} />
+          <YukpoLogo size={40} />
         )}
       </div>
 

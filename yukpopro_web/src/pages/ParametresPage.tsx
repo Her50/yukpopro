@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Lock, Bell, Palette, AlertTriangle, Eye, EyeOff, CheckCircle, Sun, Moon } from "lucide-react";
+import { Lock, Bell, Palette, AlertTriangle, Eye, EyeOff, CheckCircle, Sun, Moon, UserCog, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui";
 import { authApi } from "@/api/client";
 import { useUIStore } from "@/store";
@@ -73,6 +74,21 @@ export const ParametresPage = () => {
         <h1 className="text-xl font-bold text-white">{t("parametres.title")}</h1>
         <p className="text-slate-400 text-sm mt-0.5">{t("parametres.subtitle")}</p>
       </div>
+
+      {/* Compte / Profil */}
+      <Section icon={UserCog} title={t("parametres.account")}>
+        <Link
+          to="/profil"
+          className="flex items-center justify-between gap-4 rounded-lg border border-slate-700 bg-slate-700/30
+                     px-4 py-3 hover:bg-slate-700/60 hover:border-sky-500/40 transition-colors group"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-200">{t("parametres.editProfile")}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t("parametres.editProfileDesc")}</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-sky-400 shrink-0" />
+        </Link>
+      </Section>
 
       {/* Sécurité */}
       <Section icon={Lock} title={t("parametres.security")}>

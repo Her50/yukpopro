@@ -5,15 +5,8 @@ import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { DemoBanner } from '../components/DemoBanner'
+import { CountryPicker } from '../components/CountryPicker'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
-
-const PAYS = [
-  { code: 'CM', label: '🇨🇲 Cameroun' },
-  { code: 'SN', label: '🇸🇳 Sénégal' },
-  { code: 'CI', label: '🇨🇮 Côte d\'Ivoire' },
-  { code: 'TG', label: '🇹🇬 Togo' },
-  { code: 'BJ', label: '🇧🇯 Bénin' },
-]
 
 interface TypeDoc { cle: string; label: string; categorie: string; prix_base_fcfa: number; description: string }
 
@@ -125,22 +118,7 @@ export default function RedactionPage() {
         </div>
 
         {/* Pays */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Contexte pays</label>
-          <div className="flex flex-wrap gap-2">
-            {PAYS.map(p => (
-              <button
-                key={p.code}
-                onClick={() => setPays(p.code)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  pays === p.code
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >{p.label}</button>
-            ))}
-          </div>
-        </div>
+        <CountryPicker label="Contexte pays" value={pays} onChange={setPays} />
 
         {/* Informations */}
         <div>

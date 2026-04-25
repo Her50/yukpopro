@@ -148,15 +148,16 @@ export const chatApi = {
    */
   send: async (req: ChatSendRequest): Promise<ChatResponse> => {
     try {
-      const { data } = await http.post("/pro/copilote/chat", req);
+      // 300 s : le backend peut prendre jusqu'à 240 s pour générer un document
+      // (slides, rapport, CV) ou traduire un gros fichier. Laisse une marge.
+      const { data } = await http.post("/pro/copilote/chat", req, { timeout: 300_000 });
       return data;
     } catch (err: any) {
       if (err.response?.status === 404 || err.response?.status === 422) {
-        // Fallback vers le copilote assurance (champ question, pas message)
         const { data } = await http.post("/copilote/chat", {
           question: req.message,
           compagnie_id: 1,
-        });
+        }, { timeout: 300_000 });
         return { reponse: data.reponse || data.message || JSON.stringify(data) };
       }
       throw err;
@@ -181,7 +182,7 @@ export const chatApi = {
 
 export const copiloteApi = {
   chat: async (message: string, pays?: string): Promise<CopiloteResponse> => {
-    const { data } = await http.post("/pro/copilote/chat", { message, pays });
+    const { data } = await http.post("/pro/copilote/chat", { message, pays }, { timeout: 300_000 });
     return data;
   },
 
@@ -196,6 +197,11 @@ export const copiloteApi = {
 
   suggestions: async () => {
     const { data } = await http.get("/pro/copilote/suggestions");
+    return data;
+  },
+
+  welcome: async (): Promise<{ message: string; from_llm: boolean; cached: boolean }> => {
+    const { data } = await http.get("/pro/copilote/welcome");
     return data;
   },
 };
@@ -218,7 +224,7 @@ export const agentApi = {
 
 export const generateurApi = {
   rapport: async (req: GenererRapportRequest): Promise<GenerateurResult> => {
-    const { data } = await http.post("/pro/rapports/generer", req, { timeout: 270_000 });
+    const { data } = await http.post("/pro/rapports/generer", req, { timeout: 360_000 });
     return data;
   },
 
@@ -228,7 +234,7 @@ export const generateurApi = {
   },
 
   slides: async (req: GenererSlidesRequest): Promise<GenerateurResult> => {
-    const { data } = await http.post("/pro/slides/generer", req, { timeout: 270_000 });
+    const { data } = await http.post("/pro/slides/generer", req, { timeout: 360_000 });
     return data;
   },
 
@@ -257,20 +263,20 @@ export const generateurApi = {
     params.fichiers.forEach((f) => form.append("fichiers", f));
     const { data } = await http.post("/pro/analyser-et-generer", form, {
       headers: { "Content-Type": "multipart/form-data" },
-      timeout: 270_000,
+      timeout: 360_000,
     });
     return data;
   },
 
   traduire: async (req: TraductionRequest): Promise<TraductionResponse> => {
-    const { data } = await http.post("/pro/traduire", req, { timeout: 270_000 });
+    const { data } = await http.post("/pro/traduire", req, { timeout: 360_000 });
     return data;
   },
 
   traduireFichier: async (formData: FormData): Promise<TraductionResponse & { fichier_source?: string }> => {
     const { data } = await http.post("/pro/traduire-fichier", formData, {
       headers: { "Content-Type": "multipart/form-data" },
-      timeout: 270_000,
+      timeout: 360_000,
     });
     return data;
   },
@@ -525,14 +531,15 @@ export const emploiApi = {
 // ── Marchés Publics ───────────────────────────────────────────────────────────
 
 export interface MarchePublic {
-  titre:      string;
-  organisme?: string;
-  lieu?:      string;
-  resume?:    string;
-  url?:       string;
-  source?:    string;
-  date_pub?:  string;
-  secteur?:   string;
+  titre:        string;
+  organisme?:   string;
+  lieu?:        string;
+  resume?:      string;
+  url?:         string;
+  source?:      string;
+  source_type?: "reel" | "simule";
+  date_pub?:    string;
+  secteur?:     string;
 }
 
 export const marchesApi = {
@@ -611,6 +618,16 @@ export interface SpecificationInfographieData {
   lieu?: string | null;
 }
 
+export interface ProfilInfographie {
+  metier?: string;
+  secteur?: string;
+  nom_organisation?: string;
+  audience?: string;
+  ton?: "formel" | "chaleureux" | "jeune" | "premium" | "sobre" | string;
+  couleur_primaire_hex?: string;
+  couleurs_accents_hex?: string[];
+}
+
 export interface ResultatInfographieReponse {
   gabarit: string;
   titre?: string;
@@ -620,10 +637,28 @@ export interface ResultatInfographieReponse {
   png_id: string | null;
   pdf_base64: string | null;
   png_base64: string | null;
+  pdf_cmyk_id?: string | null;
+  pdf_cmyk_base64?: string | null;
+  png_preview_id?: string | null;
+  png_preview_base64?: string | null;
+  svg_id?: string | null;
+  svg_base64?: string | null;
   prix_fcfa: number;
   meta?: Record<string, any>;
   analyse_modele?: string;
   dimensions_mm?: { width: number; height: number; bleed: number };
+}
+
+export interface VarianteInfographie extends ResultatInfographieReponse {
+  index: number;
+  variante: string;
+}
+
+export interface ResultatVariantesReponse {
+  gabarit: string;
+  nombre_variantes: number;
+  variantes: VarianteInfographie[];
+  note?: string;
 }
 
 export const infographieApi = {
@@ -636,8 +671,23 @@ export const infographieApi = {
     brief: string;
     type_gabarit: string;
     pays?: string;
+    profil?: ProfilInfographie;
+    export_cmyk?: boolean;
+    export_svg?: boolean;
+    dpi_preview?: number;
   }): Promise<ResultatInfographieReponse> => {
-    const { data } = await http.post("/bureau/infographie/generer", payload, { timeout: 90_000 });
+    const { data } = await http.post("/bureau/infographie/generer", payload, { timeout: 120_000 });
+    return data;
+  },
+
+  genererVariantes: async (payload: {
+    brief: string;
+    type_gabarit: string;
+    pays?: string;
+    profil?: ProfilInfographie;
+    nombre?: number;
+  }): Promise<ResultatVariantesReponse> => {
+    const { data } = await http.post("/bureau/infographie/generer-variantes", payload, { timeout: 180_000 });
     return data;
   },
 
@@ -653,8 +703,12 @@ export const infographieApi = {
     slogan?: string;
     date_evenement?: string;
     lieu?: string;
+    couleur_primaire_hex?: string;
+    couleurs_accents_hex?: string[];
+    export_cmyk?: boolean;
+    export_svg?: boolean;
   }): Promise<ResultatInfographieReponse> => {
-    const { data } = await http.post("/bureau/infographie/generer-manuel", payload, { timeout: 60_000 });
+    const { data } = await http.post("/bureau/infographie/generer-manuel", payload, { timeout: 90_000 });
     return data;
   },
 
@@ -670,7 +724,7 @@ export const infographieApi = {
     fd.append("type_gabarit", payload.type_gabarit);
     fd.append("pays", payload.pays || "CM");
     const { data } = await http.post("/bureau/infographie/generer-depuis-modele", fd, {
-      timeout: 120_000,
+      timeout: 180_000,
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data;
@@ -682,8 +736,20 @@ export const infographieApi = {
     bleed_mm?: number;
     brief: string;
     pays?: string;
+    profil?: ProfilInfographie;
+    export_cmyk?: boolean;
+    export_svg?: boolean;
   }): Promise<ResultatInfographieReponse> => {
-    const { data } = await http.post("/bureau/infographie/generer-custom", payload, { timeout: 90_000 });
+    const { data } = await http.post("/bureau/infographie/generer-custom", payload, { timeout: 120_000 });
+    return data;
+  },
+
+  modifier: async (payload: {
+    fichier_id: string;
+    instructions: string;
+    pays?: string;
+  }): Promise<ResultatInfographieReponse> => {
+    const { data } = await http.post("/bureau/infographie/modifier", payload, { timeout: 120_000 });
     return data;
   },
 
@@ -786,6 +852,59 @@ export const enquetesApi = {
 
   xlsformUrl: (etude_id: string): string =>
     `/api/v1/enquetes/${etude_id}/formulaire/xlsform`,
+
+  csvDonneesUrl: (etude_id: string): string =>
+    `/api/v1/enquetes/${etude_id}/formulaire/donnees.csv`,
+
+  majFormulaire: async (formulaire_id: string, payload: {
+    titre?: string; description?: string; actif?: boolean; questions: any[];
+  }): Promise<any> => {
+    const { data } = await http.put(`/enquetes/formulaire/${formulaire_id}/structure`, payload);
+    return data;
+  },
+
+  getFormulairePublic: async (formulaire_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/formulaire/${formulaire_id}`);
+    return data;
+  },
+
+  soumettreFormulaire: async (formulaire_id: string, reponses: Record<string, any>): Promise<any> => {
+    const { data } = await http.post(`/enquetes/formulaire/${formulaire_id}/soumettre`, reponses);
+    return data;
+  },
+
+  // Dictionnaire des variables
+  getDictionnaire: async (etude_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${etude_id}/dictionnaire`);
+    return data;
+  },
+  setDictionnaire: async (etude_id: string, variables: Record<string, any>): Promise<any> => {
+    const { data } = await http.put(`/enquetes/${etude_id}/dictionnaire`, { variables });
+    return data;
+  },
+  genererDictionnaireIa: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/dictionnaire/generer-ia`, {}, { timeout: 120_000 });
+    return data;
+  },
+
+  // Plan d'analyse
+  getPlanAnalyse: async (etude_id: string): Promise<any> => {
+    const { data } = await http.get(`/enquetes/${etude_id}/plan-analyse`);
+    return data;
+  },
+  setPlanAnalyse: async (etude_id: string, plan_analyse: string): Promise<any> => {
+    const { data } = await http.put(`/enquetes/${etude_id}/plan-analyse`, { plan_analyse });
+    return data;
+  },
+  genererPlanAnalyseIa: async (etude_id: string): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/plan-analyse/generer-ia`, {}, { timeout: 180_000 });
+    return data;
+  },
+
+  questionnaireDocxUrl: (etude_id: string): string =>
+    `/api/v1/enquetes/${etude_id}/questionnaire.docx`,
+  planAnalyseDocxUrl: (etude_id: string): string =>
+    `/api/v1/enquetes/${etude_id}/plan-analyse.docx`,
 
   uploadProtocole: async (
     etude_id: string,
