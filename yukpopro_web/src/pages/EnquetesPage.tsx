@@ -48,12 +48,33 @@ interface AnalyseIntelligente {
 }
 
 const METHODOLOGIES = [
-  { value: "exploratoire",     label: "Exploratoire",               desc: "Découvrir un sujet peu documenté" },
-  { value: "descriptive",      label: "Descriptive",                desc: "Décrire et mesurer une situation" },
-  { value: "phenomenologique", label: "Phénoménologique",           desc: "Analyser les expériences vécues" },
-  { value: "theorie_ancree",   label: "Théorie ancrée",             desc: "Construire une théorie depuis les données" },
-  { value: "ethnographique",   label: "Ethnographique",             desc: "Observer un groupe en immersion" },
-  { value: "action",           label: "Recherche-action",           desc: "Produire un changement tout en étudiant" },
+  // ── Générales ────────────────────────────────────────────────────────────────
+  { value: "exploratoire",          label: "Exploratoire",                  desc: "Découvrir un sujet peu documenté" },
+  { value: "descriptive",           label: "Descriptive",                   desc: "Décrire et mesurer une situation" },
+  { value: "mixte_combinee",        label: "Mixte (quali + quanti)",        desc: "Combiner entretiens et données chiffrées" },
+  // ── Épidémiologie & Santé publique ────────────────────────────────────────────
+  { value: "transversale",          label: "Transversale (Cross-sectional)", desc: "Mesurer prévalence ou distribution à un instant T" },
+  { value: "cas_temoins",           label: "Cas-témoins",                   desc: "Comparer un groupe exposé à un groupe non exposé" },
+  { value: "cohorte",               label: "Cohorte (longitudinale)",       desc: "Suivre une population dans le temps" },
+  { value: "prevalence",            label: "Prévalence / Incidence",        desc: "Estimer la fréquence d'un phénomène dans une population" },
+  { value: "ecr",                   label: "Essai contrôlé randomisé (ECR)", desc: "Évaluer l'efficacité d'une intervention par randomisation" },
+  // ── Marketing & Études commerciales ──────────────────────────────────────────
+  { value: "etude_marche",          label: "Étude de marché",               desc: "Analyser un marché, la concurrence, la demande" },
+  { value: "satisfaction_nps",      label: "Satisfaction / NPS",            desc: "Mesurer la satisfaction client ou le Net Promoter Score" },
+  { value: "test_concept_produit",  label: "Test concept / produit",        desc: "Évaluer l'acceptabilité d'un produit ou d'un concept" },
+  { value: "comportement_conso",    label: "Comportement consommateur",     desc: "Comprendre les motivations et décisions d'achat" },
+  { value: "focus_group",           label: "Focus group",                   desc: "Recueillir opinions et perceptions en groupe" },
+  // ── Gestion de projets & Évaluation ──────────────────────────────────────────
+  { value: "evaluation_besoins",    label: "Évaluation des besoins",        desc: "Identifier les besoins d'une population ou d'une organisation" },
+  { value: "faisabilite",           label: "Étude de faisabilité",          desc: "Analyser la viabilité technique, financière, opérationnelle" },
+  { value: "evaluation_impact",     label: "Évaluation d'impact",           desc: "Mesurer les effets d'un programme ou d'une intervention" },
+  { value: "baseline_endline",      label: "Baseline / Endline",            desc: "Capturer l'état initial et final d'un indicateur" },
+  { value: "audit",                 label: "Audit organisationnel",         desc: "Évaluer les pratiques, processus et conformité" },
+  // ── Sciences sociales & Qualitatives ─────────────────────────────────────────
+  { value: "phenomenologique",      label: "Phénoménologique",              desc: "Analyser les expériences vécues en profondeur" },
+  { value: "theorie_ancree",        label: "Théorie ancrée (Grounded)",     desc: "Construire une théorie émergente depuis les données" },
+  { value: "ethnographique",        label: "Ethnographique",                desc: "Observer et documenter un groupe en immersion" },
+  { value: "action",                label: "Recherche-action",              desc: "Produire un changement tout en étudiant" },
 ];
 const MODES = [
   { value: "qualitatif",  label: "Qualitatif",  desc: "Entretiens, focus groups, observations" },

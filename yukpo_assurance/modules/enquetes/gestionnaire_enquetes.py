@@ -79,6 +79,10 @@ class Formulaire:
     actif: bool = True
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     reponses: list[dict] = field(default_factory=list)
+    # Dictionnaire des variables : {name_xlsform: {description, unite, categorie, notes_metier, modalites_detaillees}}
+    dictionnaire_variables: dict = field(default_factory=dict)
+    # Plan d'analyse éditable (texte markdown)
+    plan_analyse: str = ""
 
 
 @dataclass
@@ -174,7 +178,7 @@ async def analyser_qualitatif(etude_id: str) -> dict:
     if not etude.transcriptions:
         raise ValueError("Aucune transcription disponible — uploadez d'abord les audios")
 
-    from core.ia_client import ModeIA, ia_client
+    from core.ia_client import ModeIA, ModelePrioritaire, ia_client
 
     # Corpus agrégé
     corpus = "\n\n".join(
@@ -184,7 +188,7 @@ async def analyser_qualitatif(etude_id: str) -> dict:
     n_transcriptions = len(etude.transcriptions)
     questions_str = "\n".join(f"- {q}" for q in etude.questions_recherche) or "Non spécifiées"
 
-    prompt = f"""Tu es un expert en analyse qualitative francophone (méthode {etude.methodologie}).
+    prompt = f"""Tu es un expert senior en analyse qualitative francophone, spécialisé en méthode {etude.methodologie} et adaptable à tout domaine (santé publique, marketing, évaluation de programmes, sciences sociales, gestion de projets).
 
 CONTEXTE DE L'ÉTUDE :
 Titre : {etude.titre}
@@ -219,14 +223,18 @@ TÂCHE — Effectue une analyse qualitative rigoureuse et retourne un JSON struc
 
 Extrait des citations TEXTUELLES du corpus. Sois rigoureux, précis, analytique."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
+    reponse = await ia_client.appeler(
+        prompt=prompt, mode=ModeIA.ANALYSE,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+    )
+    raw = getattr(reponse, "contenu", "") or ""
 
     try:
-        debut = reponse.find("{")
-        fin = reponse.rfind("}") + 1
-        analyse = json.loads(reponse[debut:fin])
+        debut = raw.find("{")
+        fin = raw.rfind("}") + 1
+        analyse = json.loads(raw[debut:fin])
     except Exception:
-        analyse = {"synthese_analytique": reponse, "themes_principaux": []}
+        analyse = {"synthese_analytique": raw, "themes_principaux": []}
 
     # Reconstruire les objets ThemeQualitatif
     etude.themes = [
@@ -572,7 +580,7 @@ async def generer_rapport(etude_id: str, format_rapport: str = "json") -> dict:
         if etude.formulaire and etude.formulaire.reponses:
             await analyser_quantitatif(etude_id)
 
-    from core.ia_client import ModeIA, ia_client
+    from core.ia_client import ModeIA, ModelePrioritaire, ia_client
 
     analyse_q = etude.analyse_qualitative or {}
     analyse_qn = etude.analyse_quantitative or {}
@@ -583,35 +591,87 @@ async def generer_rapport(etude_id: str, format_rapport: str = "json") -> dict:
         ensure_ascii=False, indent=2
     )
 
-    prompt = f"""Tu es un chercheur senior spécialisé en méthodes qualitatives africaines.
-Rédige un rapport d'étude académique rigoureux et complet en français.
+    dico_str = ""
+    if etude.formulaire and etude.formulaire.dictionnaire_variables:
+        dico_rows = []
+        for name, meta in etude.formulaire.dictionnaire_variables.items():
+            desc = meta.get("description", "")
+            unite = meta.get("unite", "")
+            cat = meta.get("categorie", "")
+            notes = meta.get("notes_metier", "")
+            dico_rows.append(f"- {name} ({cat or 'n/a'}) : {desc}" + (f" | unité : {unite}" if unite else "") + (f" | note : {notes}" if notes else ""))
+        dico_str = "\n".join(dico_rows)
+
+    plan_str = etude.formulaire.plan_analyse if etude.formulaire and etude.formulaire.plan_analyse else ""
+
+    croisements = analyse_qn.get("croisements_cibles", []) or analyse_qn.get("tableaux_croises", [])
+    descriptives = analyse_qn.get("analyses_descriptives", []) or analyse_qn.get("descriptives", [])
+    cr_str = json.dumps(croisements[:8], ensure_ascii=False, indent=2) if croisements else ""
+    desc_str = json.dumps(descriptives[:12], ensure_ascii=False, indent=2) if descriptives else ""
+    n_reponses = len(etude.formulaire.reponses) if etude.formulaire else 0
+
+    prompt = f"""Tu es un chercheur senior spécialisé en méthodes mixtes (qualitatives et quantitatives).
+Rédige un rapport d'étude académique rigoureux, dense et exhaustif en français.
+IMPORTANT : ne limite pas la longueur — le rapport doit être complet et détaillé, avec une analyse
+approfondie pour chaque thème, chaque tableau, chaque graphique, adaptée au contexte de l'étude.
 
 ÉTUDE :
 Titre : {etude.titre}
+Contexte : {etude.contexte}
 Méthodologie : {etude.methodologie}
+Mode : {etude.mode}
 Terrain : {etude.terrain} | Population : {etude.population_cible}
-Entretiens analysés : {len(etude.transcriptions)}
-Questions de recherche : {chr(10).join(etude.questions_recherche)}
+Entretiens qualitatifs analysés : {len(etude.transcriptions)}
+Réponses quantitatives collectées : {n_reponses}
+Questions de recherche :
+{chr(10).join("- " + q for q in etude.questions_recherche)}
 
-THÈMES IDENTIFIÉS :
+{"PLAN D'ANALYSE (valide, à suivre fidèlement) :" + chr(10) + plan_str if plan_str else ""}
+
+{"DICTIONNAIRE DES VARIABLES (utilise-le pour commenter les résultats avec précision métier) :" + chr(10) + dico_str if dico_str else ""}
+
+THÈMES QUALITATIFS IDENTIFIÉS :
 {themes_str}
 
-SYNTHÈSE DE L'ANALYSE :
+SYNTHÈSE QUALITATIVE :
 {analyse_q.get("synthese_analytique", "")}
 
-Rédige le rapport avec ces sections :
-1. RÉSUMÉ EXÉCUTIF (150 mots)
-2. INTRODUCTION ET PROBLÉMATIQUE
-3. CADRE MÉTHODOLOGIQUE (approche, terrain, collecte, traitement)
-4. PRÉSENTATION DES RÉSULTATS PAR THÈME (chaque thème avec citations verbatim, interprétation)
-5. DISCUSSION (convergences, divergences, mise en perspective)
-6. CONCLUSIONS ET RECOMMANDATIONS
-7. LIMITES DE L'ÉTUDE
+{"ANALYSES QUANTITATIVES DESCRIPTIVES :" + chr(10) + desc_str if desc_str else ""}
 
-Utilise un style académique rigoureux, ancre tes analyses dans le contexte africain francophone.
-Intègre les citations verbatim pour illustrer chaque thème."""
+{"TABLEAUX CROISÉS / TESTS STATISTIQUES :" + chr(10) + cr_str if cr_str else ""}
 
-    rapport_texte = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
+GRAPHIQUES DISPONIBLES (référence-les dans le texte par leur nom) :
+{", ".join(etude.graphiques.keys()) or "aucun"}
+
+Structure attendue du rapport (détaillé, aucune section à raccourcir) :
+1. RÉSUMÉ EXÉCUTIF (300-400 mots, résultats clés chiffrés + qualitatifs)
+2. INTRODUCTION ET PROBLÉMATIQUE (avec ancrage contextuel et revue littérature si pertinent)
+3. CADRE MÉTHODOLOGIQUE (approche, terrain, échantillonnage, collecte, traitement, limites méthodologiques)
+4. RÉSULTATS QUANTITATIFS
+   4.1 Description de l'échantillon (avec tableau commenté)
+   4.2 Analyses descriptives variable par variable (commente chaque graphique/tableau)
+   4.3 Analyses croisées / tests statistiques (chi², V de Cramér, p-value interprétée)
+   4.4 Synthèse des patterns quantitatifs
+5. RÉSULTATS QUALITATIFS PAR THÈME
+   Pour chaque thème : fréquence, citations verbatim complètes (3+), interprétation, sentiment, sous-thèmes
+6. DISCUSSION INTÉGRÉE (triangulation qualitatif × quantitatif, convergences, divergences, mise en perspective avec la littérature)
+7. RECOMMANDATIONS OPÉRATIONNELLES (actionnables, prioritisées)
+8. CONCLUSION
+9. LIMITES DE L'ÉTUDE ET PISTES FUTURES
+
+EXIGENCES RÉDACTIONNELLES :
+- Style académique rigoureux, phrases denses, vocabulaire précis
+- Commente CHAQUE graphique et CHAQUE tableau cités (pourcentages, comparaisons, significativité)
+- Intègre systématiquement les citations verbatim pour illustrer les thèmes qualitatifs
+- Ancre l'interprétation dans le contexte (terrain, population, spécificités locales)
+- N'invente aucune donnée : ne cite que ce qui figure dans l'analyse fournie
+- Utilise des titres markdown (# section, ## sous-section)"""
+
+    _rep_rapport = await ia_client.appeler(
+        prompt=prompt, mode=ModeIA.REDACTION,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+    )
+    rapport_texte = (getattr(_rep_rapport, "contenu", "") or "").strip()
 
     rapport = {
         "etude_id": etude_id,
@@ -672,16 +732,40 @@ def _generer_docx(etude: "Etude", rapport_texte: str) -> str:
                 p = doc.add_paragraph(ligne)
                 p.paragraph_format.space_after = Pt(4)
 
+        # Graphiques embarqués
+        if etude.graphiques:
+            doc.add_heading("Graphiques et tableaux", 1)
+            for nom, b64 in etude.graphiques.items():
+                try:
+                    img_bytes = base64.b64decode(b64)
+                    img_buf = io.BytesIO(img_bytes)
+                    doc.add_paragraph(nom.replace("_", " ").capitalize(), style="Intense Quote")
+                    doc.add_picture(img_buf, width=Inches(6.0))
+                except Exception:
+                    continue
+
         # Citations en bloc
         if etude.themes:
             doc.add_heading("Verbatims clés", 1)
             for theme in etude.themes:
                 doc.add_heading(theme.libelle, 2)
-                for citation in theme.citations[:3]:
+                for citation in theme.citations[:5]:
                     p = doc.add_paragraph(f'« {citation} »')
                     p.paragraph_format.left_indent = Inches(0.5)
                     run = p.runs[0] if p.runs else p.add_run()
                     run.italic = True
+
+        # Dictionnaire variables
+        if etude.formulaire and etude.formulaire.dictionnaire_variables:
+            doc.add_heading("Annexe — Dictionnaire des variables", 1)
+            for name, meta in etude.formulaire.dictionnaire_variables.items():
+                p = doc.add_paragraph()
+                p.add_run(f"{name} ").bold = True
+                p.add_run(meta.get("description", ""))
+                if meta.get("unite"):
+                    p.add_run(f" (unité : {meta['unite']})")
+                if meta.get("categorie"):
+                    p.add_run(f" — {meta['categorie']}")
 
         buf = io.BytesIO()
         doc.save(buf)
@@ -805,6 +889,59 @@ def creer_formulaire(
     _formulaires_publics[form.formulaire_id] = etude_id
     if etude.mode == "qualitatif":
         etude.mode = "mixte"
+    return form
+
+
+def mettre_a_jour_formulaire(
+    formulaire_id: str,
+    titre: Optional[str] = None,
+    description: Optional[str] = None,
+    actif: Optional[bool] = None,
+    questions: Optional[list[dict]] = None,
+) -> Optional[Formulaire]:
+    """Met à jour un formulaire existant (métadonnées et/ou structure des questions)."""
+    etude_id = _formulaires_publics.get(formulaire_id)
+    if not etude_id:
+        return None
+    etude = _etudes.get(etude_id)
+    if not etude or not etude.formulaire:
+        return None
+
+    form = etude.formulaire
+    if titre is not None:
+        form.titre = titre
+    if description is not None:
+        form.description = description
+    if actif is not None:
+        form.actif = actif
+
+    if questions is not None:
+        questions_obj = []
+        for i, q in enumerate(questions):
+            section_id = q.get("section_id", "")
+            if not section_id:
+                raw = q.get("section", "") or q.get("section_label", "")
+                if raw:
+                    section_id = re.sub(r"[^a-z0-9_]", "_", raw.lower().strip())[:30].strip("_") or f"s{i}"
+            questions_obj.append(QuestionFormulaire(
+                libelle=q.get("libelle", ""),
+                type_question=q.get("type_question", "text"),
+                options=q.get("options", []),
+                obligatoire=q.get("obligatoire", True),
+                ordre=q.get("ordre", i),
+                hint=q.get("hint", ""),
+                section_id=section_id,
+                section_label=q.get("section_label", q.get("section", "")),
+                relevant=q.get("relevant", ""),
+                constraint=q.get("constraint", ""),
+                constraint_message=q.get("constraint_message", ""),
+                appearance=q.get("appearance", ""),
+                parameters=q.get("parameters", ""),
+                name_xlsform=q.get("name_xlsform", "") or q.get("name", ""),
+            ))
+        form.questions = questions_obj
+
+    etude.updated_at = datetime.now(timezone.utc).isoformat()
     return form
 
 
@@ -1131,17 +1268,19 @@ async def generer_formulaire_ia(
     - Noms de variables courts pour références ${...}
     Retourne questions plates + sections_metadata pour creer_formulaire.
     """
-    from core.ia_client import ModeIA, ia_client
+    from core.ia_client import ModeIA, ModelePrioritaire, ia_client
 
-    prompt = f"""Tu es un expert en ingénierie de formulaires ODK/KoBoCollect pour la recherche en Afrique francophone.
+    prompt = f"""Tu es un expert en ingénierie de formulaires de collecte de données pour tout type d'étude (épidémiologie, marketing, sciences sociales, gestion de projets, évaluation d'impact, satisfaction client, etc.).
 
-MISSION : Génère un formulaire de collecte professionnel avec sections, logique de saut et contraintes.
+MISSION : Génère un formulaire de collecte professionnel adapté au domaine de l'étude, avec sections, logique de saut et contraintes pertinentes pour ce contexte spécifique.
 
 Titre : {titre}
 Objectif : {objectif}
 Population : {population}
-Contexte : {description}
+Contexte / Domaine : {description}
 Nombre de questions : {n_questions}
+
+ADAPTATION DOMAINE : Analyse le contexte et adapte entièrement le vocabulaire, les questions, les catégories de réponses et les sections au domaine réel de l'étude (ex: pour une étude marketing → questions satisfaction/NPS/comportement ; pour épidémiologie → facteurs de risque/exposition ; pour RH/projet → indicateurs performance/satisfaction ; pour étude sociale → conditions de vie/perceptions).
 
 Génère un JSON avec EXACTEMENT ce format (respecte chaque champ) :
 {{
@@ -1201,60 +1340,27 @@ Génère un JSON avec EXACTEMENT ce format (respecte chaque champ) :
       "appearance": "field-list",
       "questions": [
         {{
-          "name": "acces_service",
-          "libelle": "Avez-vous accès à [service principal] ?",
-          "type_question": "oui_non",
-          "options": [],
+          "name": "satisfaction_globale",
+          "libelle": "Comment évaluez-vous [l'objet principal de l'étude] ?",
+          "type_question": "likert",
+          "options": ["Très insatisfait", "Insatisfait", "Neutre", "Satisfait", "Très satisfait"],
           "obligatoire": true,
           "hint": "",
-          "appearance": "horizontal",
+          "appearance": "likert",
           "relevant": "",
           "constraint": "",
           "constraint_message": ""
         }},
         {{
-          "name": "raison_non_acces",
-          "libelle": "Quelle est la principale raison du non-accès ?",
+          "name": "raison_insatisfaction",
+          "libelle": "Quelle est la principale raison de votre insatisfaction ?",
           "type_question": "select_one",
-          "options": ["Coût trop élevé", "Distance trop grande", "Manque d'information", "Autre"],
+          "options": ["Qualité insuffisante", "Coût trop élevé", "Délais non respectés", "Manque d'information", "Autre"],
           "obligatoire": false,
           "hint": "",
           "appearance": "minimal",
-          "relevant": "${{acces_service}} = 'non'",
+          "relevant": "${{satisfaction_globale}} = 'Très insatisfait' or ${{satisfaction_globale}} = 'Insatisfait'",
           "constraint": "",
-          "constraint_message": ""
-        }}
-      ]
-    }},
-    {{
-      "section_id": "membres_menage",
-      "label": "Détail des membres du ménage",
-      "is_repeat": true,
-      "repeat_count": "${{nb_membres}}",
-      "appearance": "",
-      "questions": [
-        {{
-          "name": "prenom_membre",
-          "libelle": "Prénom du membre",
-          "type_question": "text",
-          "options": [],
-          "obligatoire": true,
-          "hint": "",
-          "appearance": "",
-          "relevant": "",
-          "constraint": "",
-          "constraint_message": ""
-        }},
-        {{
-          "name": "age_membre",
-          "libelle": "Âge de ce membre",
-          "type_question": "number",
-          "options": [],
-          "obligatoire": true,
-          "hint": "",
-          "appearance": "",
-          "relevant": "",
-          "constraint": ". >= 0 and . <= 120",
           "constraint_message": ""
         }}
       ]
@@ -1281,16 +1387,20 @@ RÈGLES OBLIGATOIRES :
    - Sections ≤6 questions → appearance "field-list" (1 écran)
 6. Contraintes numériques obligatoires pour âge, quantités, scores
 7. Terminer par une section "Commentaires" avec 1 question ouverte (text)
-8. Vocabulaire africain francophone : "localité", "quartier", "chef de ménage", "groupement", etc.
+8. Vocabulaire adapté au domaine et au contexte géographique fourni (ne pas imposer de vocabulaire spécifique ; utilise les termes métier du secteur : ex. "client/prospect" en marketing, "patient/enquêté" en santé, "bénéficiaire/ménage" en développement, "collaborateur/salarié" en RH).
 
 Retourne UNIQUEMENT le JSON, sans aucun texte autour."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
+    reponse = await ia_client.appeler(
+        prompt=prompt, mode=ModeIA.ANALYSE,
+        forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+    )
+    raw = getattr(reponse, "contenu", "") or ""
 
     try:
-        debut = reponse.find("{")
-        fin = reponse.rfind("}") + 1
-        data = json.loads(reponse[debut:fin])
+        debut = raw.find("{")
+        fin = raw.rfind("}") + 1
+        data = json.loads(raw[debut:fin])
     except Exception:
         raise ValueError("Impossible de parser la réponse IA — réessayez")
 
@@ -1344,7 +1454,7 @@ async def analyser_commentaires(etude_id: str) -> dict:
     if not etude.formulaire or not etude.formulaire.reponses:
         raise ValueError("Aucune donnée collectée")
 
-    from core.ia_client import ModeIA, ia_client
+    from core.ia_client import ModeIA, ModelePrioritaire, ia_client
 
     try:
         import pandas as pd
@@ -1390,13 +1500,17 @@ Retourne un JSON structuré :
 
 Sois analytique, identifie les patterns réels dans les données."""
 
-        reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.ANALYSE)
+        reponse = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+        )
+        raw = getattr(reponse, "contenu", "") or ""
         try:
-            debut = reponse.find("{")
-            fin = reponse.rfind("}") + 1
-            analyse_q = json.loads(reponse[debut:fin])
+            debut = raw.find("{")
+            fin = raw.rfind("}") + 1
+            analyse_q = json.loads(raw[debut:fin])
         except Exception:
-            analyse_q = {"synthese": reponse}
+            analyse_q = {"synthese": raw}
 
         # Graphique : thèmes émergents
         graphique_themes = None
@@ -1554,9 +1668,9 @@ async def analyser_quantitatif_intelligent(etude_id: str) -> dict:
                     info["min"], info["max"] = float(vals.min()), float(vals.max())
         q_summary.append(info)
 
-    from core.ia_client import ModeIA, ia_client
+    from core.ia_client import ModeIA, ModelePrioritaire, ia_client
 
-    prompt = f"""Tu es un statisticien expert en analyses d'enquêtes sociales en Afrique francophone.
+    prompt = f"""Tu es un statisticien expert en analyses d'enquêtes quantitatives pour tout type de domaine (épidémiologie, marketing, évaluation, sciences sociales, RH, etc.).
 
 CONTEXTE DE L'ÉTUDE :
 Titre : {etude.titre}
@@ -1590,12 +1704,16 @@ Retourne un JSON :
 
 Limite : maximum 6 croisements ciblés. Retourne UNIQUEMENT le JSON."""
 
-    reponse = await ia_client.appeler(prompt=prompt, mode=ModeIA.REDACTION)
+    reponse = await ia_client.appeler(
+        prompt=prompt, mode=ModeIA.REDACTION,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+    )
+    raw = getattr(reponse, "contenu", "") or ""
 
     try:
-        debut = reponse.find("{")
-        fin   = reponse.rfind("}") + 1
-        plan  = json.loads(reponse[debut:fin])
+        debut = raw.find("{")
+        fin   = raw.rfind("}") + 1
+        plan  = json.loads(raw[debut:fin])
     except Exception:
         raise ValueError("Plan d'analyse IA non parseable — réessayez")
 
