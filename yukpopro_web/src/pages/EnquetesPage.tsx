@@ -25,7 +25,7 @@ import { PlanAnalyseEditor } from "@/components/enquetes/PlanAnalyseEditor";
 
 type EtudeStatut = "brouillon" | "transcription" | "analyse" | "rapport_pret";
 type EtudeMode   = "qualitatif" | "quantitatif" | "mixte";
-type DetailTab   = "audio" | "formulaire" | "analyse" | "rapport";
+type DetailTab   = "formulaire" | "audio" | "collecte" | "analyse" | "rapport";
 
 interface Etude {
   etude_id: string; titre: string; mode: EtudeMode; methodologie: string;
@@ -241,22 +241,24 @@ export const EnquetesPage = () => {
   // ── Audio ─────────────────────────────────────────────────────────────────────
 
   const uploaderAudio = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !expandedId) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length || !expandedId) return;
     setUploading(true);
-    toast("Transcription Yukpo en cours…", { icon: "🎙️", duration: 10000 });
-    try {
-      const res = await enquetesApi.uploaderAudio(expandedId, file);
-      toast.dismiss();
-      toast.success(`Transcription terminée — ${res.duree_estimee_min} min enregistrées`);
-      await refreshDetail(expandedId);
-    } catch (err: any) {
-      toast.dismiss();
-      toast.error(err?.response?.data?.detail || "Erreur transcription");
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
+    toast(`Transcription de ${files.length} fichier(s) en cours…`, { icon: "🎙️", duration: 30000 });
+    let success = 0;
+    for (const file of files) {
+      try {
+        await enquetesApi.uploaderAudio(expandedId, file);
+        success++;
+      } catch (err: any) {
+        toast.error(`${file.name} — ${err?.response?.data?.detail || "Erreur transcription"}`);
+      }
     }
+    toast.dismiss();
+    if (success > 0) toast.success(`${success} transcription(s) terminée(s)`);
+    await refreshDetail(expandedId);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   // ── Formulaire ────────────────────────────────────────────────────────────────
@@ -654,11 +656,11 @@ export const EnquetesPage = () => {
           const isOpen = expandedId === etude.etude_id;
           const idx = statutIdx(etude.statut);
           const statutColors = [
-            { text: "#94a3b8", bg: "rgba(148,163,184,0.08)", border: "rgba(148,163,184,0.2)" },
-            { text: "#fbbf24", bg: "rgba(251,191,36,0.08)",  border: "rgba(251,191,36,0.2)" },
-            { text: "#60a5fa", bg: "rgba(96,165,250,0.08)",  border: "rgba(96,165,250,0.2)" },
-            { text: "#4ade80", bg: "rgba(74,222,128,0.08)",  border: "rgba(74,222,128,0.2)" },
-          ][idx] ?? { text: "#94a3b8", bg: "rgba(148,163,184,0.08)", border: "rgba(148,163,184,0.2)" };
+            { text: "#475569", bg: "rgba(71,85,105,0.10)",   border: "rgba(71,85,105,0.30)"  },  // brouillon — slate foncé
+            { text: "#b45309", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.40)" },  // audio traité — amber
+            { text: "#1d4ed8", bg: "rgba(37,99,235,0.10)",   border: "rgba(37,99,235,0.35)"  },  // analysé — blue
+            { text: "#15803d", bg: "rgba(22,163,74,0.10)",   border: "rgba(22,163,74,0.35)"  },  // rapport prêt — green
+          ][idx] ?? { text: "#475569", bg: "rgba(71,85,105,0.10)", border: "rgba(71,85,105,0.30)" };
 
           return (
             <div
@@ -684,8 +686,12 @@ export const EnquetesPage = () => {
                       {PIPELINE[idx]?.label}
                     </span>
                     <span
-                      className="text-xs px-2 py-0.5 rounded-full border"
-                      style={{ color: "var(--ykp-text-muted)", background: "var(--ykp-canvas)", borderColor: "var(--ykp-border)" }}
+                      className="text-xs px-2 py-0.5 rounded-full border font-medium"
+                      style={{
+                        color: etude.mode === "qualitatif" ? "#6d28d9" : etude.mode === "quantitatif" ? "#0369a1" : "#7c3aed",
+                        background: etude.mode === "qualitatif" ? "rgba(109,40,217,0.08)" : etude.mode === "quantitatif" ? "rgba(3,105,161,0.08)" : "rgba(124,58,237,0.08)",
+                        borderColor: etude.mode === "qualitatif" ? "rgba(109,40,217,0.30)" : etude.mode === "quantitatif" ? "rgba(3,105,161,0.30)" : "rgba(124,58,237,0.30)",
+                      }}
                     >
                       {etude.mode}
                     </span>
@@ -706,17 +712,25 @@ export const EnquetesPage = () => {
                         )}
                       </div>
                     ))}
-                    <span className="text-xs ml-2" style={{ color: "var(--ykp-text-faint)" }}>
-                      {etude.n_transcriptions > 0 && `${etude.n_transcriptions} audio · `}
-                      {etude.n_reponses > 0 && `${etude.n_reponses} réponses`}
-                      {etude.terrain && ` · ${etude.terrain}`}
+                    <span className="text-xs ml-2 flex items-center gap-1" style={{ color: "var(--ykp-text-secondary)" }}>
+                      {etude.n_transcriptions > 0 && <><Mic className="w-3 h-3 inline opacity-60" />{etude.n_transcriptions} audio · </>}
+                      {etude.n_reponses > 0 && <><Users className="w-3 h-3 inline opacity-60" />{etude.n_reponses} réponses · </>}
+                      {etude.terrain && <><MapPin className="w-3 h-3 inline opacity-60" />{etude.terrain}</>}
                     </span>
                   </div>
                 </div>
-                {isOpen
-                  ? <ChevronUp className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#0054A6" }} />
-                  : <ChevronDown className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "var(--ykp-text-faint)" }} />
-                }
+                <div
+                  className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                  style={{
+                    background: isOpen ? "rgba(0,84,166,0.12)" : "rgba(0,84,166,0.06)",
+                    border: `1px solid ${isOpen ? "rgba(0,84,166,0.3)" : "rgba(0,84,166,0.15)"}`,
+                  }}
+                >
+                  {isOpen
+                    ? <ChevronUp className="w-4 h-4" style={{ color: "#0054A6" }} />
+                    : <ChevronDown className="w-4 h-4" style={{ color: "#0054A6" }} />
+                  }
+                </div>
               </button>
 
               {/* Panneau détail */}
@@ -728,17 +742,19 @@ export const EnquetesPage = () => {
                     className="flex border-b overflow-x-auto"
                     style={{ borderColor: "var(--ykp-border)", background: "var(--ykp-canvas)" }}
                   >
-                    {(["audio", "formulaire", "analyse", "rapport"] as DetailTab[]).map(tab => {
+                    {(["formulaire", "audio", "collecte", "analyse", "rapport"] as DetailTab[]).map(tab => {
                       const labels: Record<DetailTab, string> = {
-                        audio:      `🎙 ${t("enquetes.tabs.audio")}`,
                         formulaire: `📋 ${t("enquetes.tabs.formulaire")}`,
+                        audio:      `🎙 ${t("enquetes.tabs.audio")}`,
+                        collecte:   `🔗 Collecte`,
                         analyse:    `🔍 ${t("enquetes.tabs.analyse")}`,
                         rapport:    `📄 ${t("enquetes.tabs.rapport")}`,
                       };
                       const alerts: Record<DetailTab, boolean> = {
-                        audio:      detail.n_transcriptions === 0,
-                        formulaire: detail.mode !== "qualitatif" && detail.n_reponses === 0,
-                        analyse:    !detail.has_analyse && detail.n_transcriptions > 0,
+                        formulaire: detail.mode !== "qualitatif" && !formulaire,
+                        audio:      detail.mode !== "quantitatif" && detail.n_transcriptions === 0,
+                        collecte:   detail.mode !== "qualitatif" && detail.n_reponses === 0 && !!formulaire,
+                        analyse:    !detail.has_analyse && (detail.n_transcriptions > 0 || detail.n_reponses > 0),
                         rapport:    detail.has_analyse && !detail.has_rapport,
                       };
                       const isActive = activeTab === tab;
@@ -793,7 +809,7 @@ export const EnquetesPage = () => {
                           style={{ borderColor: uploading ? "#0054A6" : "var(--ykp-border)" }}
                           onClick={() => !uploading && fileRef.current?.click()}
                         >
-                          <input ref={fileRef} type="file" accept="audio/*,.m4a,.wav,.mp3,.ogg,.webm" className="hidden" onChange={uploaderAudio} />
+                          <input ref={fileRef} type="file" accept="audio/*,.m4a,.wav,.mp3,.ogg,.webm" multiple className="hidden" onChange={uploaderAudio} />
                           {uploading ? (
                             <div className="flex flex-col items-center gap-2">
                               <Loader2 className="w-8 h-8 text-[#0054A6] animate-spin" />
@@ -810,7 +826,7 @@ export const EnquetesPage = () => {
                                 {t("enquetes.audio.uploadAudio")}
                               </p>
                               <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>
-                                {t("enquetes.audio.uploadDesc")}
+                                MP3, M4A, WAV, OGG, WebM · Sélection multiple possible · Yukpo transcrit automatiquement
                               </p>
                             </div>
                           )}
@@ -857,6 +873,125 @@ export const EnquetesPage = () => {
                           >
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                             {t("enquetes.audio.noAudio")}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── Onglet Collecte ── */}
+                    {activeTab === "collecte" && (
+                      <div className="space-y-4">
+                        {detail.mode === "qualitatif" ? (
+                          <div
+                            className="rounded-xl border p-4 text-center"
+                            style={{ background: "var(--ykp-canvas)", borderColor: "var(--ykp-border)" }}
+                          >
+                            <p className="text-xs" style={{ color: "var(--ykp-text-secondary)" }}>
+                              En mode <strong>qualitatif pur</strong>, la collecte se fait via entretiens audio (onglet Audio).
+                            </p>
+                          </div>
+                        ) : !formulaire ? (
+                          <div
+                            className="flex items-center gap-2 text-xs rounded-xl p-3 border"
+                            style={{ color: "var(--ykp-text-muted)", background: "var(--ykp-canvas)", borderColor: "var(--ykp-border)" }}
+                          >
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            Créez d'abord un formulaire dans l'onglet <strong>Formulaire</strong> pour générer un lien de collecte.
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {/* Stats réponses */}
+                            <div
+                              className="grid grid-cols-2 gap-3"
+                            >
+                              <div className="rounded-xl border p-4 flex items-center gap-3"
+                                style={{ background: "var(--ykp-canvas)", borderColor: "var(--ykp-border)" }}
+                              >
+                                <Users className="w-5 h-5 text-[#0054A6]" />
+                                <div>
+                                  <p className="text-xl font-bold" style={{ color: "var(--ykp-text-primary)" }}>{detail.n_reponses}</p>
+                                  <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>réponse(s) collectée(s)</p>
+                                </div>
+                              </div>
+                              <div className="rounded-xl border p-4 flex items-center gap-3"
+                                style={{ background: "var(--ykp-canvas)", borderColor: "var(--ykp-border)" }}
+                              >
+                                <ClipboardList className="w-5 h-5 text-purple-500" />
+                                <div>
+                                  <p className="text-xl font-bold" style={{ color: "var(--ykp-text-primary)" }}>{formulaire.questions?.length || 0}</p>
+                                  <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>question(s) dans le formulaire</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Lien de collecte */}
+                            {formulaire.lien_collecte && (
+                              <div
+                                className="rounded-xl border p-4 space-y-3"
+                                style={{ background: "rgba(0,84,166,0.04)", borderColor: "rgba(0,84,166,0.2)" }}
+                              >
+                                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--ykp-text-muted)" }}>
+                                  Lien de collecte (à partager avec vos répondants)
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <code
+                                    className="flex-1 text-xs rounded-lg px-3 py-2 truncate"
+                                    style={{ background: "var(--ykp-canvas)", border: "1px solid var(--ykp-border)", color: "#0054A6" }}
+                                  >
+                                    {window.location.origin}{formulaire.lien_collecte}
+                                  </code>
+                                  <button
+                                    onClick={() => copierLien(formulaire.lien_collecte)}
+                                    className={`${btnBase} text-[#0054A6] border border-[#0054A6]/25 hover:bg-[#0054A6]/[0.08] flex-shrink-0`}
+                                    style={{ background: "var(--ykp-input-bg)" }}
+                                  >
+                                    {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                    {copied ? "Copié !" : "Copier"}
+                                  </button>
+                                </div>
+                                <p className="text-[11px]" style={{ color: "var(--ykp-text-muted)" }}>
+                                  Partagez ce lien avec vos enquêteurs de terrain. Compatible KoBoCollect via l'import XLSForm.
+                                </p>
+                              </div>
+                            )}
+
+                            {/* XLSForm download */}
+                            <div className="flex flex-wrap gap-2">
+                              {formulaire.lien_xlsform && (
+                                <a
+                                  href={formulaire.lien_xlsform}
+                                  download
+                                  className={`${btnBase} text-green-700 dark:text-green-400 border border-green-500/25 hover:bg-green-500/[0.08]`}
+                                  style={{ background: "var(--ykp-input-bg)" }}
+                                >
+                                  <FileSpreadsheet className="w-3.5 h-3.5" /> Télécharger XLSForm (ODK / KoBoCollect)
+                                </a>
+                              )}
+                              <button
+                                onClick={chargerDonnees}
+                                className={`${btnBase} border`}
+                                style={{ color: "var(--ykp-text-secondary)", borderColor: "var(--ykp-border)", background: "var(--ykp-input-bg)" }}
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" /> Actualiser les réponses
+                              </button>
+                              <button
+                                onClick={telechargerQuestionnaireDocx}
+                                className={`${btnBase} border`}
+                                style={{ color: "var(--ykp-text-secondary)", borderColor: "var(--ykp-border)", background: "var(--ykp-input-bg)" }}
+                              >
+                                <Download className="w-3.5 h-3.5" /> Questionnaire Word
+                              </button>
+                            </div>
+
+                            {detail.n_reponses === 0 && (
+                              <div
+                                className="flex items-center gap-2 text-xs rounded-xl p-3 border"
+                                style={{ color: "#b45309", background: "rgba(245,158,11,0.06)", borderColor: "rgba(245,158,11,0.25)" }}
+                              >
+                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                Aucune réponse reçue. Partagez le lien ci-dessus avec vos répondants ou importez les données KoBoCollect.
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1181,11 +1316,47 @@ export const EnquetesPage = () => {
 
                     {/* ── Onglet Analyse ── */}
                     {activeTab === "analyse" && (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
+
+                        {/* Étape 0 — Plan d'analyse (prérequis) */}
+                        <div
+                          className="rounded-xl border p-4"
+                          style={{ background: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.30)" }}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
+                                <FileText className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold" style={{ color: "var(--ykp-text-primary)" }}>
+                                  Étape 0 — Plan d'analyse
+                                </p>
+                                <p className="text-xs mt-0.5" style={{ color: "var(--ykp-text-muted)" }}>
+                                  Définissez vos hypothèses et axes analytiques avant de lancer les analyses. Yukpo les utilisera pour orienter les résultats.
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => { setActiveTab("formulaire"); setTimeout(() => ouvrirBuilder("plan"), 100); }}
+                              className={`${btnBase} text-amber-700 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/[0.08] flex-shrink-0`}
+                              style={{ background: "var(--ykp-input-bg)" }}
+                            >
+                              <FileText className="w-3.5 h-3.5" /> Ouvrir le plan
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Avertissement données manquantes */}
                         {detail.n_transcriptions === 0 && detail.n_reponses === 0 && (
                           <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-yellow-400 bg-amber-50 dark:bg-yellow-400/[0.06] rounded-xl p-3 border border-amber-200 dark:border-yellow-400/20">
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            {t("enquetes.analyse.noDataWarning")}
+                            {detail.mode === "qualitatif"
+                              ? "Aucun entretien audio transcrit — uploadez des audios dans l'onglet Audio pour débloquer les analyses."
+                              : detail.mode === "quantitatif"
+                              ? "Aucune réponse collectée — partagez votre formulaire via l'onglet Collecte pour débloquer les analyses."
+                              : "Aucune donnée (ni audio ni réponses) — alimentez les onglets Audio et Collecte pour débloquer les analyses."
+                            }
                           </div>
                         )}
 
