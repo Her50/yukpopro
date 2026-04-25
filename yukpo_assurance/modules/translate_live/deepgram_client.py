@@ -93,7 +93,7 @@ class DeepgramStreamingClient:
             conn = dg.listen.websocket.v("1")
 
         options_kwargs = dict(
-            model="nova-3",
+            model="nova-2",
             smart_format=True,
             interim_results=True,
             encoding="linear16",
@@ -102,8 +102,11 @@ class DeepgramStreamingClient:
             punctuate=True,
             vad_events=True,
         )
-        # Nova-3 supporte language=multi pour auto-detect
-        options_kwargs["language"] = "multi" if self._source_lang == "auto" else self._source_lang
+        # nova-2 : detect_language=True pour auto ; sinon langue fixée
+        if self._source_lang == "auto":
+            options_kwargs["detect_language"] = True
+        else:
+            options_kwargs["language"] = self._source_lang
 
         async def _on_message(_self, result, **kwargs):  # pragma: no cover — dépend SDK
             try:
@@ -132,9 +135,14 @@ class DeepgramStreamingClient:
         conn.on(LiveTranscriptionEvents.Close, _on_close)
 
         try:
-            ok = await conn.start(LiveOptions(**options_kwargs))
+            ok = await asyncio.wait_for(
+                conn.start(LiveOptions(**options_kwargs)),
+                timeout=15.0,
+            )
             if not ok:
                 raise RuntimeError("conn.start() a retourné False")
+        except asyncio.TimeoutError:
+            raise RuntimeError("Deepgram n'a pas répondu dans les 15s — vérifiez DEEPGRAM_API_KEY")
         except TypeError:
             # API plus ancienne (sync start)
             ok = conn.start(LiveOptions(**options_kwargs))  # type: ignore
@@ -150,8 +158,9 @@ class DeepgramStreamingClient:
         if not self._started or not self._dg_connection:
             return
         try:
-            send = self._dg_connection.send
-            res = send(pcm16)
+            # Préférer send_raw (binary direct) si disponible, sinon send
+            method = getattr(self._dg_connection, "send_raw", None) or self._dg_connection.send
+            res = method(pcm16)
             if asyncio.iscoroutine(res):
                 await res
         except Exception as e:

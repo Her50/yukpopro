@@ -21,6 +21,7 @@ export interface Ligne {
 interface TranslateLiveState {
   status: TranslateStatus;
   statusMsg: string;
+  sttAvailable: boolean;
   lignes: Ligne[];
   currentInterim: string;
   minutesUsed: number;
@@ -48,6 +49,7 @@ const _tts = getTTSSpeaker();
 export const useTranslateLiveStore = create<TranslateLiveState>((set, get) => ({
   status: "idle",
   statusMsg: "",
+  sttAvailable: true,
   lignes: [],
   currentInterim: "",
   minutesUsed: 0,
@@ -57,7 +59,7 @@ export const useTranslateLiveStore = create<TranslateLiveState>((set, get) => ({
 
   start: async ({ token, source, target, sourceMode, ttsAvailable, externalStream, onError }) => {
     if (get().active) return;
-    set({ lignes: [], currentInterim: "", minutesUsed: 0, creditsUsed: 0, active: true });
+    set({ lignes: [], currentInterim: "", minutesUsed: 0, creditsUsed: 0, active: true, sttAvailable: true });
 
     const client = new TranslateLiveClient({
       token,
@@ -70,6 +72,10 @@ export const useTranslateLiveStore = create<TranslateLiveState>((set, get) => ({
         if (s === "error" && details && onError) onError(details);
       },
       onEvent: (ev: TranslateEvent) => {
+        if (ev.type === "ready") {
+          set({ sttAvailable: (ev as any).stt_available !== false });
+          return;
+        }
         if (ev.type === "transcript") {
           if (!ev.is_final) {
             set({ currentInterim: ev.text });

@@ -355,6 +355,7 @@ export class TranslateLiveClient {
         try {
           const obj = JSON.parse(ev.data) as TranslateEvent;
           if (obj.type === "ready") {
+            this.opts.onEvent(obj);  // forward stt_available to store
             this.setStatus("streaming");
             if (!resolved) { resolved = true; resolve(); }
           } else {
@@ -371,7 +372,7 @@ export class TranslateLiveClient {
         if (this.heartbeat) { clearInterval(this.heartbeat); this.heartbeat = null; }
 
         // Codes fatals — pas de reconnexion
-        const FATAL_CODES = [4001, 4002, 4003, 4005];
+        const FATAL_CODES = [4001, 4002, 4003, 4005, 4100];
         if (this.stopping || FATAL_CODES.includes(ev.code)) {
           if (!this.stopping) {
             const codeMsg =

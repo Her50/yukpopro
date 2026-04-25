@@ -40,6 +40,7 @@ export const TranslateLivePage = () => {
 
   const status = useTranslateLiveStore((s) => s.status);
   const statusMsg = useTranslateLiveStore((s) => s.statusMsg);
+  const sttAvailable = useTranslateLiveStore((s) => s.sttAvailable);
   const lignes = useTranslateLiveStore((s) => s.lignes);
   const currentInterim = useTranslateLiveStore((s) => s.currentInterim);
   const minutesUsed = useTranslateLiveStore((s) => s.minutesUsed);
@@ -410,10 +411,17 @@ export const TranslateLivePage = () => {
 
         <div ref={lignesRef} className="max-h-[55vh] overflow-y-auto p-4 space-y-3">
           {lignes.length === 0 && !currentInterim && (
-            <div className="text-sm text-gray-500 text-center py-10">
-              {isStreaming
-                ? "En attente de parole…"
-                : "Aucune transcription. Démarrez une session pour commencer."}
+            <div className="text-sm text-center py-10">
+              {isStreaming && !sttAvailable ? (
+                <span className="text-red-400 flex items-center justify-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  STT indisponible — vérifiez la clé DEEPGRAM_API_KEY côté serveur.
+                </span>
+              ) : isStreaming ? (
+                <span className="text-gray-500">En attente de parole…</span>
+              ) : (
+                <span className="text-gray-500">Aucune transcription. Démarrez une session pour commencer.</span>
+              )}
             </div>
           )}
           {lignes.map((l) => (

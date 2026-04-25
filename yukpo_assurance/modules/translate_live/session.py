@@ -119,7 +119,8 @@ class TranslateLiveSession:
         _sessions_actives[user_id] = count + 1
 
         try:
-            await self._demarrer_deepgram()
+            if not await self._demarrer_deepgram():
+                return  # WS already closed with 4100
             await self._send_ready()
             self._tache_facturation = asyncio.create_task(self._boucle_facturation())
             await self._boucle_messages()
@@ -145,20 +146,40 @@ class TranslateLiveSession:
 
     # ── Démarrage STT ─────────────────────────────────────────────────────────
 
-    async def _demarrer_deepgram(self) -> None:
+    async def _demarrer_deepgram(self) -> bool:
+        """Lance Deepgram. Retourne True si prêt, False si STT indisponible (WS déjà fermé)."""
         if not deepgram_disponible():
-            logger.warning("[TranslateLive] Deepgram indisponible — mode dégradé (pas de transcript)")
-            self._dg = None
-            return
+            logger.warning("[TranslateLive] Deepgram indisponible — clé absente ou SDK manquant")
+            await self._send_json({
+                "type": "error",
+                "code": "stt_unavailable",
+                "message": "Transcription audio indisponible (clé DEEPGRAM_API_KEY manquante ou SDK absent). Contactez l'administrateur.",
+            })
+            try:
+                await self.ws.close(code=4100)
+            except Exception:
+                pass
+            return False
         self._dg = DeepgramStreamingClient(
             on_transcript=self._on_transcript,
             source_lang=self.etat.source_lang,
         )
         try:
             await self._dg.start()
+            return True
         except Exception as e:
             logger.warning(f"[TranslateLive] échec start Deepgram : {e}")
             self._dg = None
+            await self._send_json({
+                "type": "error",
+                "code": "stt_unavailable",
+                "message": f"Transcription indisponible ({str(e)[:120]}). Vérifiez la clé DEEPGRAM_API_KEY.",
+            })
+            try:
+                await self.ws.close(code=4100)
+            except Exception:
+                pass
+            return False
 
     # ── Messages serveur ──────────────────────────────────────────────────────
 
@@ -251,6 +272,8 @@ class TranslateLiveSession:
                 gender=self._current_gender,
                 api_key=self._el_key,
             )
+            if not audio_mp3:
+                logger.warning(f"[TranslateLive] TTS échoué pour utterance {utter_id} (ElevenLabs retourné None)")
             if audio_mp3:
                 # Envoie l'audio MP3 en binaire avec métadonnées en préambule JSON
                 meta = json.dumps({
