@@ -65,7 +65,6 @@ TARIFS_INPUT = {
     "claude-opus-4-6":             15.0 / 1_000_000,
     "claude-sonnet-4-6":            3.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   0.25 / 1_000_000,
-    "gpt-5.5":                      7.5 / 1_000_000,  # Prudent — à confirmer sur openai.com/api/pricing
     "gpt-4o":                       2.5 / 1_000_000,
     "gpt-4o-mini":                 0.15 / 1_000_000,
 }
@@ -73,7 +72,6 @@ TARIFS_OUTPUT = {
     "claude-opus-4-6":             75.0 / 1_000_000,
     "claude-sonnet-4-6":           15.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   1.25 / 1_000_000,
-    "gpt-5.5":                     30.0 / 1_000_000,  # Prudent — à confirmer sur openai.com/api/pricing
     "gpt-4o":                      10.0 / 1_000_000,
     "gpt-4o-mini":                  0.60 / 1_000_000,
 }
@@ -91,16 +89,14 @@ class ModelePrioritaire(str, Enum):
     CLAUDE_OPUS    = "claude-opus-4-6"
     CLAUDE_SONNET  = "claude-sonnet-4-6"       # Optimal pour CIMA/sinistres/rédaction
     CLAUDE_HAIKU   = "claude-haiku-4-5-20251001"
-    GPT5_5         = "gpt-5.5"                 # Nouveau primaire GPT — analyse/rédaction complexe, moins de tokens
-    GPT4O          = "gpt-4o"                  # Vision/OCR — conservé jusqu'à confirmation vision gpt-5.5
+    GPT4O          = "gpt-4o"                  # Primaire GPT — analyse/rédaction/vision
     GPT4O_MINI     = "gpt-4o-mini"             # Léger/économique — équivalent GPT de Haiku
 
 # Mapping Claude → GPT équivalent (utilisé quand Claude est indisponible)
-# GPT-5.5 remplace GPT-4o pour Sonnet/Opus : plus intelligent, moins de tokens par tâche
 _CLAUDE_TO_GPT: dict[str, str] = {
     ModelePrioritaire.CLAUDE_HAIKU.value:  ModelePrioritaire.GPT4O_MINI.value,
-    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT5_5.value,
-    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT5_5.value,
+    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT4O.value,
+    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4O.value,
 }
 
 
@@ -546,7 +542,6 @@ class IAClient:
 
         # Limites tokens par modèle GPT
         _MAX_BY_MODEL = {
-            "gpt-5.5":      32000,  # GPT-5.5 — contexte étendu
             "gpt-4o":       16000,
             "gpt-4o-mini":  16000,
         }
@@ -584,8 +579,7 @@ class IAClient:
             raise ValueError(f"{_modele} a retourné une réponse sans choix")
         texte = response.choices[0].message.content or ""
 
-        # Auto-fallback : si le modèle primaire (gpt-5.5) renvoie vide,
-        # on retente une fois avec gpt-4o (modèle stable et éprouvé).
+        # Auto-fallback : si le modèle renvoie vide, on retente une fois avec gpt-4o.
         if not texte.strip() and not modele_force and _modele != "gpt-4o":
             logger.warning(f"[IAClient] {_modele} a retourné un texte vide → retry avec gpt-4o")
             kwargs_retry = {
@@ -783,7 +777,7 @@ class IAClient:
         # GPT primaire (ou Claude indisponible)
         if mode in (ModeIA.COPILOTE, ModeIA.COMMERCIAL):
             return ModelePrioritaire.GPT4O_MINI
-        return ModelePrioritaire.GPT5_5
+        return ModelePrioritaire.GPT4O
 
     def _temperature_par_mode(self, mode: ModeIA) -> float:
         mapping = {
