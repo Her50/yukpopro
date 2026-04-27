@@ -1,6 +1,6 @@
 /**
  * YukpoAssurance — Composant génération de rapports
- * Utilisé dans Yukpo IA (mode général) et dans chaque module (templates spécialisés)
+ * Utilisé dans YukpoPro (mode général) et dans chaque module (templates spécialisés)
  * Génération IA : PDF · Word · PowerPoint · Excel
  */
 import { useState, useRef, useEffect } from 'react'
@@ -512,7 +512,7 @@ export function RapportsModule({ module, contexteInitial }: RapportsModuleProps)
                   )}
                   <div className="flex items-center justify-center gap-2 mt-4">
                     <ArrowPathIcon className="w-5 h-5 animate-spin text-primary-500" />
-                    <span className="text-sm text-gray-500">Yukpo IA génère votre document…</span>
+                    <span className="text-sm text-gray-500">YukpoPro génère votre document…</span>
                   </div>
                 </div>
               </div>

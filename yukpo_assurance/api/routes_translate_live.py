@@ -27,6 +27,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 
+from config.settings import settings as _settings
 from core.auth import TokenData, _decoder_token, get_current_user
 from modules.translate_live import (
     CREDITS_PAR_MINUTE,
@@ -50,7 +51,7 @@ async def status(current_user: TokenData = Depends(get_current_user)) -> dict:
     return {
         "stt_available": deepgram_disponible(),
         "translator_available": True,  # GPT-4o-mini via ia_client — toujours dispo si clé OpenAI OK
-        "tts_available": bool(getattr(__import__("config.settings", fromlist=["settings"]).settings, "ELEVENLABS_API_KEY", "")),
+        "tts_available": bool(getattr(_settings, "ELEVENLABS_API_KEY", "")),
         "price_per_minute_fcfa": COUT_FCFA_PAR_MINUTE,
         "price_per_minute_credits": CREDITS_PAR_MINUTE,
     }

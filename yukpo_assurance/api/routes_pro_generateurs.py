@@ -910,7 +910,7 @@ async def _get_profil_optionnel(user_id: int, db):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class TraduireDocumentRequest(BaseModel):
-    contenu:        str  = Field(..., min_length=10, max_length=50_000,
+    contenu:        str  = Field(..., min_length=1, max_length=50_000,
                                   description="Texte ou contenu du document à traduire")
     langue_source:  str  = Field("fr", description="Langue source (fr, en, es, pt...)")
     langue_cible:   str  = Field("en", description="Langue cible (en, fr, es, pt...)")
@@ -962,11 +962,16 @@ async def traduire_document(
     )
 
     try:
+        # max_tokens proportionnel à la taille du texte source : un mot ≈ 1.5 token,
+        # la cible fait ~1.3× la source selon les langues. On garde une marge confortable
+        # mais on évite de demander 8192 pour 5 mots (latence × 5).
+        _nb_mots_src = len(req.contenu.split())
+        _max_out = max(256, min(8192, int(_nb_mots_src * 4) + 256))
         reponse_ia = await ia_client.appeler(
             prompt=prompt_user,
             mode=ModeIA.REDACTION,
             systeme=prompt_sys,
-            max_tokens_override=8192,
+            max_tokens_override=_max_out,
             utiliser_cache=False,
         )
         texte_traduit = reponse_ia.contenu if hasattr(reponse_ia, "contenu") else str(reponse_ia)
@@ -982,23 +987,25 @@ async def traduire_document(
             role=current_user.role,
         )
 
-        # Générer DOCX si demandé
+        # Générer DOCX si demandé — écriture directe (pas de relance LLM).
+        # ReportWriterPro restructure le texte via IA, ce qui dénature une traduction
+        # et multiplie la latence par 3-5×. On veut juste un DOCX brut du texte traduit.
         chemin_docx = None
         if req.format_sortie == "docx":
             try:
-                from modules.pro.report_writer_pro import ReportWriterPro
-                writer = ReportWriterPro(profil=profil)
-                resultat_doc = await asyncio.wait_for(
-                    writer.generer(
-                        sujet=req.sujet or f"Traduction {src} → {dst}",
-                        type_rapport="note_de_synthese",
-                        mode="standard",
-                        contexte=texte_traduit,
-                        format_sortie="docx",
-                    ),
-                    timeout=120,
-                )
-                chemin_docx = resultat_doc.get("chemin_fichier")
+                from docx import Document
+                from pathlib import Path
+                _doc = Document()
+                _doc.add_heading(req.sujet or f"Traduction {src} → {dst}", level=1)
+                for _para in (texte_traduit or "").split("\n"):
+                    _doc.add_paragraph(_para)
+                _data_dir = Path(__file__).resolve().parent.parent / "data" / "generated" / "traductions"
+                _data_dir.mkdir(parents=True, exist_ok=True)
+                _ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                _slug = "".join(c if c.isalnum() or c in "-_" else "_" for c in (req.sujet or "traduction"))[:40]
+                _path = _data_dir / f"trad_{_slug}_{_ts}.docx"
+                _doc.save(str(_path))
+                chemin_docx = str(_path)
             except Exception as e_doc:
                 logger.warning(f"[Traduction] Impossible de générer DOCX : {e_doc}")
 

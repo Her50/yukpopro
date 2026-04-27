@@ -59,7 +59,7 @@ export function Header({ onMenuClick, title }: HeaderProps) {
         onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(0,176,240,0.12)')}
       >
         <CpuChipIcon className="h-4 w-4 text-blue-300" />
-        <span className="text-blue-100 text-xs font-semibold">Yukpo Agents IA</span>
+        <span className="text-blue-100 text-xs font-semibold">Yukpo Agents Yukpo</span>
         <span
           className="text-xs px-1.5 py-0.5 rounded-full font-bold"
           style={{ background: 'rgba(0,176,240,0.3)', color: '#7dd3fc' }}

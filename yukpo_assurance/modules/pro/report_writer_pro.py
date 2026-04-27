@@ -285,12 +285,26 @@ _STRUCTURES = {
     },
 }
 
-# Limites de tokens selon le mode
+# Limites de tokens selon le mode (par appel IA — Claude Sonnet 4.6 cap pratique ~64k)
+# Bumpés : un rapport "standard" 6 sections × ~3000 mots ≈ 24k tokens compressés ;
+# avec chunking 3 sections/lot, chaque lot peut prendre 16k tokens confortablement.
 _TOKENS_PAR_MODE = {
-    "flash":    5000,
-    "standard": 24000,
-    "complet":  64000,
-    "expert":   100000,
+    "flash":    6000,
+    "standard": 16000,   # par LOT (avec chunking actif) — total possible >40k
+    "complet":  32000,   # par lot
+    "expert":   48000,   # par lot
+}
+
+# Taille des lots pour la génération par chunks (modes longs).
+# Chaque lot = un appel IA dédié → contourne le plafond de tokens par appel
+# et permet vraiment d'atteindre le niveau de détail demandé.
+# AVANT : standard=99 (1 seul appel pour 6 sections → compression forte, perte de détail).
+# APRÈS : standard chunké aussi (3 sections/lot) pour pousser jusqu'au détail demandé.
+_SECTIONS_PAR_LOT = {
+    "flash":    99,    # pas de chunking — synthèse courte
+    "standard": 3,     # ~2 lots pour 6 sections — chaque section dispose de tokens
+    "complet":  3,     # ~4 lots pour 11 sections
+    "expert":   2,     # lots très serrés → sections très denses
 }
 
 
@@ -430,6 +444,22 @@ def _analyser_excel_pandas(contexte: str) -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Erreurs métier
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SourcesInsuffisantesError(Exception):
+    """
+    Levée quand aucune source vérifiable (pièces jointes, RAG, recherche web)
+    ne permet de rédiger un rapport factuel. L'API doit la convertir en message
+    clair pour l'utilisateur lui demandant de fournir la documentation.
+    """
+    def __init__(self, raison: str, sources_essayees: Optional[list[str]] = None):
+        super().__init__(raison)
+        self.raison = raison
+        self.sources_essayees = sources_essayees or []
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Classe principale
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -441,13 +471,15 @@ class ReportWriterPro:
 
     async def generer(
         self,
-        sujet:           str,
-        type_rapport:    str = "rapport_analyse",
-        mode:            str = "standard",
-        contexte:        Optional[str] = None,
-        donnees:         Optional[dict] = None,
-        langue:          str = "fr",
-        format_sortie:   str = "docx",   # "docx" | "markdown"
+        sujet:                 str,
+        type_rapport:          str = "rapport_analyse",
+        mode:                  str = "standard",
+        contexte:              Optional[str] = None,
+        donnees:               Optional[dict] = None,
+        langue:                str = "fr",
+        format_sortie:         str = "docx",   # "docx" | "markdown"
+        instruction_utilisateur: Optional[str] = None,
+        forcer_recherche_web:  bool = False,
     ) -> dict:
         """
         Génère un rapport professionnel.
@@ -472,17 +504,29 @@ class ReportWriterPro:
 
         # Le mode expert utilise la structure "complet" étendue
         structure_mode = "complet" if mode == "expert" else mode
-        structure = _STRUCTURES[type_rapport][structure_mode]
+        structure_brute = _STRUCTURES[type_rapport][structure_mode]
+
+        # Sections meta non-LLM : "Page de garde" est dessinée nativement par
+        # _construire_docx ; "Sommaire" devrait être un champ TOC Word, pas
+        # une section narrative. On les retire AVANT l'appel LLM pour éviter
+        # qu'elles n'apparaissent comme "1. Page de garde" / "2. Sommaire"
+        # dans le corps du document.
+        _SECTIONS_META = {"page de garde", "sommaire", "table des matières", "table des matieres"}
+        structure = [s for s in structure_brute if s.strip().lower() not in _SECTIONS_META]
+        if not structure:  # garde-fou
+            structure = structure_brute
 
         # 1. Générer le contenu via IA
         contenu_sections = await self._generer_contenu_ia(
             sujet=sujet,
             type_rapport=type_rapport,
             mode=mode,
-            structure=structure,  # structure déjà résolue ci-dessus
+            structure=structure,
             contexte=contexte,
             donnees=donnees,
             langue=langue,
+            instruction_utilisateur=instruction_utilisateur,
+            forcer_recherche_web=forcer_recherche_web,
         )
 
         # 2. Construire le document
@@ -535,12 +579,15 @@ class ReportWriterPro:
         contexte:     Optional[str],
         donnees:      Optional[dict],
         langue:       str,
+        instruction_utilisateur: Optional[str] = None,
+        forcer_recherche_web:    bool = False,
     ) -> list[dict]:
         """
         Appelle l'IA pour générer le contenu de chaque section.
         Retourne une liste de dicts : {"titre": ..., "contenu": ...}
         """
         from core.ia_client import ModeIA, ia_client
+        from core.pays_devise import vocabulaire_devise
 
         # Construire le système prompt
         metier_info = ""
@@ -548,6 +595,7 @@ class ReportWriterPro:
         if self._profil:
             metier_info = f"Métier du demandeur : {self._profil.metier}"
             pays_info   = f"Pays : {self._profil.pays}"
+        devise_locale = vocabulaire_devise(self._profil.pays if self._profil else None)
 
         system = (
             "Tu es un expert senior polyvalent en Afrique francophone : rédacteur de rapports professionnels, "
@@ -558,28 +606,158 @@ class ReportWriterPro:
             "comptabilité SYSCOHADA révisé 2017, finance d'entreprise, analyse de données avancée, "
             "management RH, gestion de projet, marchés africains. "
             f"{metier_info} {pays_info}\n\n"
-            "RÈGLES ABSOLUES DE RÉDACTION :\n"
-            "1. EXPLOITATION TOTALE DES DONNÉES FOURNIES : si des fichiers Excel/tableaux sont dans le contexte, "
-            "les analyser ligne par ligne, extraire TOUS les chiffres réels, calculer des ratios, "
-            "identifier des tendances, des anomalies, des corrélations. Ne JAMAIS inventer de chiffres.\n"
-            "2. Contenu DENSE, LONG et PROFESSIONNEL — chaque section doit être exhaustive, "
-            "avec des sous-sections, des tableaux récapitulatifs, des analyses croisées.\n"
-            "3. TABLEAUX OBLIGATOIRES : inclure des tableaux de données dans chaque section pertinente "
-            "(format markdown : | col | col | col |). Les tableaux doivent reprendre les données réelles des fichiers.\n"
-            "4. Cite les textes réglementaires exacts (Art. précis du CGI, SYSCOHADA révisé 2017, "
-            "Acte uniforme OHADA, Code du travail national, Règlement CIMA…).\n"
-            "5. Chiffres et ratios CONCRETS : calcule taux de croissance, marges, ratios financiers "
-            "(ROE, ROA, ratio d'endettement, BFR…) à partir des données fournies.\n"
-            "6. Recommandations ACTIONNABLES avec responsables, délais, KPIs de suivi.\n"
-            "7. Vocabulaire africain : FCFA, BEAC/BCEAO, CEMAC/UEMOA, CNSS/CNPS/CNAMGS, SYSCOHADA.\n"
-            "8. Style cabinet McKinsey/Deloitte : synthèse exécutive percutante, structure pyramidale, "
-            "insights non-évidents, regard critique sur les données."
+            "🚫 RÈGLE NUMÉRO 1 — INTERDICTION ABSOLUE D'INVENTER OU DE MOBILISER TA MÉMOIRE :\n"
+            "• Tu n'as PAS le droit d'utiliser tes connaissances d'entraînement comme source de chiffres.\n"
+            "• Toute donnée chiffrée, tout taux, tout montant, toute citation réglementaire DOIT venir "
+            "explicitement des SOURCES FOURNIES dans le contexte du prompt utilisateur "
+            "(pièces jointes, RAG corpus, sources web vérifiées avec URL).\n"
+            "• Si une donnée nécessaire n'est PAS dans les sources fournies, tu écris textuellement : "
+            "« Donnée non disponible dans les sources fournies — à collecter auprès de [organisme précis] » "
+            "et tu poursuis. Tu ne combles JAMAIS un trou par estimation, extrapolation ou souvenir.\n"
+            "• Aucun placeholder type X%, Y FCFA, A1, B1, [chiffre], [montant], [date] n'est toléré.\n"
+            "• Chaque chiffre cité doit être suivi de sa source entre parenthèses : "
+            "(Source : nom_institution / URL / nom_du_fichier_joint).\n\n"
+            "RÈGLES DE RÉDACTION :\n"
+            "1. EXPLOITATION TOTALE DES SOURCES : analyser ligne par ligne tableaux/extraits fournis, "
+            "extraire TOUS les chiffres réels, calculer ratios, tendances, anomalies, corrélations.\n"
+            "2. Contenu DENSE, LONG et PROFESSIONNEL — chaque section exhaustive, sous-sections, "
+            "tableaux récapitulatifs, analyses croisées. Pousse jusqu'au niveau de détail demandé "
+            "par l'utilisateur, ne synthétise PAS prématurément.\n"
+            "3. TABLEAUX OBLIGATOIRES : inclure dans chaque section pertinente (format markdown). "
+            "Chaque cellule chiffrée doit être traçable à une source du contexte.\n"
+            "4. Cite les textes réglementaires EXACTS (article précis, alinéa, année de révision) "
+            "uniquement s'ils figurent dans les sources fournies.\n"
+            "5. Calculs financiers (ROE, ROA, BFR, marges…) UNIQUEMENT sur données réelles fournies, "
+            "avec formule explicite et chiffres source.\n"
+            "6. Recommandations ACTIONNABLES avec responsables, délais, KPIs.\n"
+            f"7. Devise locale obligatoire pour les montants : {devise_locale}.\n"
+            "   Vocabulaire africain : BEAC/BCEAO, CEMAC/UEMOA, CNSS/CNPS/CNAMGS, SYSCOHADA.\n"
+            "8. Style cabinet Big4/McKinsey/Deloitte : synthèse percutante, pyramidale, insights "
+            "non-évidents, regard critique étayé par les sources."
         )
 
         # Enrichir le contexte Excel avec une analyse statistique approfondie
         contexte_enrichi = contexte
         if contexte and ("===" in contexte or " | " in contexte or "Feuille :" in contexte):
             contexte_enrichi = _analyser_excel_pandas(contexte)
+
+        # ── Enrichissement RAG automatique pour rapports techniques ──────────
+        # Sans pièce jointe, le LLM n'a aucune donnée à exploiter et produit des
+        # placeholders (X%, A1, B1...). On injecte le corpus réglementaire/stats.
+        _TYPES_RAG = {
+            "rapport_financier", "rapport_audit", "rapport_rh",
+            "note_juridique", "note_de_synthese", "rapport_analyse",
+        }
+        if type_rapport in _TYPES_RAG:
+            try:
+                from modules.rag.rag_retriever import (
+                    rechercher_pour_metier, rechercher_corpus_reglementaire,
+                )
+                pays_profil = self._profil.pays if self._profil else None
+                metier_profil = self._profil.metier if self._profil else None
+                requete_rag = (instruction_utilisateur or sujet or "").strip()
+                contexte_rag = ""
+                if requete_rag:
+                    if metier_profil:
+                        contexte_rag = rechercher_pour_metier(
+                            question=requete_rag,
+                            metier=metier_profil,
+                            pays=pays_profil,
+                            top_k=10,
+                        )
+                    else:
+                        contexte_rag = rechercher_corpus_reglementaire(
+                            question=requete_rag,
+                            pays=pays_profil,
+                            top_k=10,
+                        )
+                if contexte_rag:
+                    bloc_rag = (
+                        f"\n\n{'═'*60}\n"
+                        f"DONNÉES RÉGLEMENTAIRES & STATISTIQUES OFFICIELLES "
+                        f"(corpus indexé — citer textuellement) :\n"
+                        f"{'═'*60}\n{contexte_rag}"
+                    )
+                    contexte_enrichi = (contexte_enrichi or "") + bloc_rag
+                    logger.info(
+                        f"[ReportWriter] RAG injecté ({len(contexte_rag)} chars) "
+                        f"pour {type_rapport} pays={pays_profil}"
+                    )
+                else:
+                    logger.warning(
+                        f"[ReportWriter] RAG vide pour {type_rapport} "
+                        f"(question={requete_rag[:80]!r}, pays={pays_profil})"
+                    )
+            except Exception as e:
+                logger.warning(f"[ReportWriter] Enrichissement RAG échoué: {e}")
+
+        # ── Recherche web réelle (sources fiables) ───────────────────────────
+        # Déclenchée si :
+        #   - forcer_recherche_web=True (régénération suite à plainte utilisateur), OU
+        #   - rapport technique sans pièce jointe ni RAG exploitable.
+        # Si AUCUNE source fiable n'est trouvée → on refuse de générer (lève
+        # SourcesInsuffisantesError) plutôt que de laisser le LLM inventer.
+        sources_urls_web: list[str] = []
+        _besoin_web = type_rapport in _TYPES_RAG and (
+            forcer_recherche_web
+            or not (contexte_enrichi and len(contexte_enrichi) > 500)
+        )
+        if _besoin_web:
+            try:
+                from modules.pro.recherche_web_pro import rechercher_sources_pour_rapport
+                pays_profil = self._profil.pays if self._profil else None
+                requete_web = (instruction_utilisateur or sujet or "").strip()
+                resultat_web = await rechercher_sources_pour_rapport(
+                    sujet=requete_web,
+                    type_rapport=type_rapport,
+                    pays_iso2=pays_profil,
+                    nb_sources_min=3,
+                    timeout_total=50.0,
+                )
+                if resultat_web.contexte_formate:
+                    bloc_web = (
+                        f"\n\n{'═'*60}\n"
+                        f"SOURCES WEB VÉRIFIÉES "
+                        f"({resultat_web.nb_sources} sources institutionnelles/IFI/régulateurs — "
+                        f"À CITER explicitement avec leur URL) :\n"
+                        f"{'═'*60}\n{resultat_web.contexte_formate}"
+                    )
+                    contexte_enrichi = (contexte_enrichi or "") + bloc_web
+                    sources_urls_web = resultat_web.sources_urls
+                    logger.info(
+                        f"[ReportWriter] Web injecté: {resultat_web.nb_sources} sources, "
+                        f"{len(resultat_web.contexte_formate)} chars"
+                    )
+                elif forcer_recherche_web or not contexte_enrichi:
+                    # Aucune source trouvée et pas de fallback → REFUS
+                    raise SourcesInsuffisantesError(
+                        raison=(
+                            resultat_web.raison_echec
+                            or "Aucune source fiable trouvée pour ce sujet."
+                        ),
+                        sources_essayees=resultat_web.sources_urls,
+                    )
+            except SourcesInsuffisantesError:
+                raise
+            except Exception as e:
+                logger.warning(f"[ReportWriter] Recherche web échouée: {e}")
+                if forcer_recherche_web and not contexte_enrichi:
+                    raise SourcesInsuffisantesError(
+                        raison=f"Recherche web indisponible : {e}",
+                    )
+
+        # ── Garde-fou final : pas de données du tout ⇒ refus ─────────────────
+        # Pour un rapport technique, refuser d'inventer si rien n'est exploitable.
+        if type_rapport in _TYPES_RAG and not contexte_enrichi:
+            raise SourcesInsuffisantesError(
+                raison=(
+                    "Aucune source vérifiable disponible pour ce rapport "
+                    "(pas de pièces jointes, pas de correspondance dans le corpus "
+                    "réglementaire local, pas de résultat sur les sites web fiables). "
+                    "Veuillez fournir un document source (rapport annuel, données "
+                    "comptables, état CIMA, etc.) pour permettre une rédaction factuelle."
+                ),
+            )
 
         # Construire le prompt utilisateur
         sections_str = "\n".join(f"{i+1}. **{s}**" for i, s in enumerate(structure))
@@ -606,41 +784,97 @@ class ReportWriterPro:
             "• Si plusieurs feuilles Excel : analyser et croiser les données inter-feuilles\n"
         ) if a_des_donnees else ""
 
-        prompt = (
-            f"Génère un rapport professionnel de type '{type_rapport}' "
-            f"en mode '{mode}' sur le sujet suivant.\n\n"
-            f"{'═'*60}\n"
-            f"INSTRUCTION DE L'UTILISATEUR : {sujet}\n"
-            f"{'═'*60}\n\n"
-            f"STRUCTURE REQUISE ({len(structure)} sections) :\n{sections_str}"
-            f"{contexte_str}{donnees_str}"
-            f"{instructions_donnees}\n\n"
-            f"EXIGENCES DE CONTENU :\n"
-            f"• Chaque section : {nbre_mots}\n"
-            f"• Langue : {langue}\n"
-            f"• Niveau : document de référence signable par un directeur ou DG\n"
-            f"• Inclure dans chaque section : analyse, tableaux, chiffres, références réglementaires\n"
-            f"• Terminer par des recommandations hiérarchisées (priorité 1/2/3) avec KPIs\n"
-            f"• Format professionnel : titres clairs, listes à puces, tableaux markdown\n\n"
-            f"FORMAT DE RÉPONSE — JSON strict :\n"
-            f'{{"sections": [{{"titre": "Nom exact de section", "contenu": "Contenu complet et détaillé..."}}]}}\n'
-            f"OBLIGATOIRE : inclure LES {len(structure)} sections dans l'ordre exact. "
-            f"Chaque section doit être COMPLÈTE et AUTONOME."
-        )
-
+        # ── Génération par lots pour modes longs (contournement plafond tokens) ──
+        import asyncio
         import json
 
-        reponse_ia = await ia_client.appeler(
-            prompt=prompt,
-            systeme=system,
-            mode=ModeIA.REDACTION,
-            max_tokens_override=_TOKENS_PAR_MODE[mode],
-            json_attendu=True,
-            utiliser_cache=False,
-        )
-        texte = reponse_ia.contenu
+        taille_lot = _SECTIONS_PAR_LOT.get(mode, 99)
+        lots: list[list[str]] = [
+            structure[i:i + taille_lot] for i in range(0, len(structure), taille_lot)
+        ] if taille_lot < len(structure) else [structure]
 
-        sections = self._parser_sections_json(texte, structure)
+        instruction_brute = (instruction_utilisateur or sujet).strip()
+        a_du_rag_ou_donnees = bool(contexte_enrichi)
+        regle_anti_placeholder = (
+            "\n\n🚫 INTERDICTION ABSOLUE D'UTILISER DES PLACEHOLDERS :\n"
+            "• Ne JAMAIS écrire X%, Y FCFA, A1, B1, G1, H1, [chiffre], [montant], [à compléter], etc.\n"
+            "• Tous les chiffres DOIVENT venir soit du contexte fourni (pièces jointes/RAG), "
+            "soit de connaissances réglementaires officielles vérifiables (ex: SMIG CIMA, taux IS, plafonds CNPS).\n"
+            "• Si une donnée précise n'est PAS disponible dans le contexte ni dans tes connaissances "
+            "officielles : écris explicitement 'Donnée non disponible dans les sources fournies — "
+            "à collecter auprès de [source recommandée]' au lieu d'inventer un placeholder.\n"
+            "• Préfère un rapport plus court avec des données réelles à un rapport long avec des trous."
+        ) if a_du_rag_ou_donnees else (
+            "\n\n⚠️ AUCUNE DONNÉE SOURCE FOURNIE — RÈGLE STRICTE :\n"
+            "• Tu n'as ni pièces jointes ni RAG ciblé. Base-toi UNIQUEMENT sur tes connaissances "
+            "officielles vérifiables (textes CIMA, OHADA, SYSCOHADA, codes nationaux, statistiques "
+            "publiques notoires) et CITE les sources précises (article, année, organisme).\n"
+            "• Pour tout chiffre que tu ne peux pas sourcer avec certitude, écris : "
+            "'Donnée à collecter — non publique au moment de la rédaction'. "
+            "JAMAIS de X, Y, A1, B1 ou autres placeholders.\n"
+            "• Le rapport peut être plus court mais doit rester FACTUEL."
+        )
+
+        def _construire_prompt_lot(sous_structure: list[str], idx_lot: int, total_lots: int) -> str:
+            sections_lot_str = "\n".join(
+                f"{i+1}. **{s}**" for i, s in enumerate(sous_structure)
+            )
+            entete_lot = (
+                f"⚙️ LOT {idx_lot + 1}/{total_lots} du rapport — "
+                f"Génère UNIQUEMENT les {len(sous_structure)} sections ci-dessous. "
+                f"Les autres lots seront concaténés.\n\n"
+            ) if total_lots > 1 else ""
+            return (
+                f"{entete_lot}"
+                f"Génère un rapport professionnel de type '{type_rapport}' "
+                f"en mode '{mode}'.\n\n"
+                f"{'═'*60}\n"
+                f"TITRE DU DOCUMENT : {sujet}\n"
+                f"DEMANDE EXACTE DE L'UTILISATEUR : {instruction_brute}\n"
+                f"{'═'*60}\n\n"
+                f"SECTIONS DE CE LOT ({len(sous_structure)} sections) :\n{sections_lot_str}"
+                f"{contexte_str}{donnees_str}"
+                f"{instructions_donnees}{regle_anti_placeholder}\n\n"
+                f"EXIGENCES DE CONTENU :\n"
+                f"• Chaque section : {nbre_mots}\n"
+                f"• Langue : {langue}\n"
+                f"• Niveau : document de référence signable par un directeur ou DG\n"
+                f"• Inclure dans chaque section : analyse, tableaux, chiffres, références réglementaires\n"
+                f"• Terminer la dernière section par des recommandations hiérarchisées (priorité 1/2/3) avec KPIs\n"
+                f"• Format professionnel : titres clairs, listes à puces, tableaux markdown\n\n"
+                f"FORMAT DE RÉPONSE — JSON strict :\n"
+                f'{{"sections": [{{"titre": "Nom exact de section", "contenu": "Contenu complet et détaillé..."}}]}}\n'
+                f"OBLIGATOIRE : inclure LES {len(sous_structure)} sections de CE LOT dans l'ordre exact. "
+                f"Chaque section doit être COMPLÈTE et AUTONOME."
+            )
+
+        async def _generer_un_lot(sous_structure: list[str], idx: int, total: int) -> list[dict]:
+            reponse = await ia_client.appeler(
+                prompt=_construire_prompt_lot(sous_structure, idx, total),
+                systeme=system,
+                mode=ModeIA.REDACTION,  # Claude Sonnet 4.6 primaire, GPT-4o fallback
+                max_tokens_override=_TOKENS_PAR_MODE[mode],
+                json_attendu=True,
+                utiliser_cache=False,
+            )
+            return self._parser_sections_json(reponse.contenu, sous_structure)
+
+        if len(lots) == 1:
+            return await _generer_un_lot(lots[0], 0, 1)
+
+        # Parallélisation des lots : gain de latence net, chaque lot ~15-30s
+        resultats = await asyncio.gather(
+            *[_generer_un_lot(lot, i, len(lots)) for i, lot in enumerate(lots)],
+            return_exceptions=True,
+        )
+
+        sections: list[dict] = []
+        for i, res in enumerate(resultats):
+            if isinstance(res, Exception):
+                logger.warning(f"[ReportWriter] Lot {i+1} échoué : {res} → sections placeholder")
+                sections.extend({"titre": t, "contenu": f"[Lot {i+1} indisponible]"} for t in lots[i])
+            else:
+                sections.extend(res)
         return sections
 
     def _parser_sections_json(self, texte: str, structure: list[str]) -> list[dict]:

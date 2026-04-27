@@ -1,0 +1,73 @@
+# Données RAG volumineuses (257MB) — chargées dynamiquement si besoin
+data/rag_knowledge/
+
+# Données générées runtime
+data/generated/
+data/attestations/
+data/contrats_generes/
+data/ml_models/
+data/orass_csv/
+data/pki/
+
+# Logs & artefacts
+logs/
+test-results/
+*.log
+
+# Tests locaux
+tests/
+test_*.py
+
+# Git / CI
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Venv
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs & markdown
+*.md
+docs/
+
+# Scripts de développement local (non nécessaires en prod)
+scripts/
+notebooks/
+*.ipynb
+
+# Fichiers fournisseurs lourds
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.zip
+*.tar.gz
+
+# Node.js (si présent)
+node_modules/
+
+# Requirements non-cloud
+requirements.txt
+requirements-dev.txt

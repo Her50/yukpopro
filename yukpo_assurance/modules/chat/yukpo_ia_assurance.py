@@ -74,6 +74,7 @@ class SessionChat:
     """
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     user_id: int = 0
+    compagnie_id: int = 0
     role_utilisateur: str = "agent"
     titre: Optional[str] = None
     ecran_contexte: Optional[str] = None    # ex: "sinistre_detail", "reporting_cima"
@@ -103,9 +104,9 @@ def _evict_sessions_si_necessaire() -> None:
         logger.debug(f"[Chat/LRU] Session évincée du cache RAM: {oldest_id[:8]}")
 
 
-def creer_session(user_id: int, role: str = "agent", titre: Optional[str] = None) -> SessionChat:
+def creer_session(user_id: int, role: str = "agent", titre: Optional[str] = None, compagnie_id: int = 0) -> SessionChat:
     _evict_sessions_si_necessaire()
-    s = SessionChat(user_id=user_id, role_utilisateur=role, titre=titre)
+    s = SessionChat(user_id=user_id, compagnie_id=compagnie_id, role_utilisateur=role, titre=titre)
     _sessions[s.session_id] = s
     _sessions.move_to_end(s.session_id)  # La plus récente à la fin
     # Persister immédiatement en DB (fire-and-forget)

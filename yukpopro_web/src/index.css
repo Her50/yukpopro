@@ -435,9 +435,16 @@
   .ykp-page .bg-gradient-to-br .text-white,
   .ykp-page .bg-gradient-to-l .text-white,
   .ykp-page .bg-gradient-to-tr .text-white,
-  .ykp-page .bg-gradient-to-tl .text-white,
-  .ykp-page button.text-white,
-  .ykp-page a.text-white {
+  .ykp-page .bg-gradient-to-tl .text-white {
+    color: #ffffff !important;
+  }
+
+  /* Buttons et liens portant directement .text-white :
+     règle séparée pour éviter que le minifier ne fusionne avec les variants
+     prose-* de Tailwind, ce qui produirait des sélecteurs invalides
+     (`.prose-headings\:text-white :is(...))button` sans espace). */
+  .ykp-page button[class~="text-white"],
+  .ykp-page a[class~="text-white"] {
     color: #ffffff !important;
   }
 

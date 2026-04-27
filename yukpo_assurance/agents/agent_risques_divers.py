@@ -904,7 +904,8 @@ Structure la note en 12 sections numérotées selon la nomenclature NTIS CIMA.
 Adopte un style technique, factuel et professionnel.
 La note doit justifier la recommandation et le montant proposé."""
 
-                ntis_texte = await ia_client.generer(prompt=prompt_ntis, mode=ModeIA.AVANCE)
+                _rep_ntis = await ia_client.appeler(prompt=prompt_ntis, mode=ModeIA.REDACTION)
+                ntis_texte = _rep_ntis.contenu
                 note_id = f"NTIS-{ref}-{date.today().strftime('%Y%m%d')}-{str(uuid.uuid4())[:4].upper()}"
 
                 # Enregistrement en base

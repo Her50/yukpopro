@@ -126,6 +126,35 @@ export const infographieAPI = {
     api.post('/infographie/modifier', data, { timeout: 180_000 }),
 }
 
+// ─── Infographie Pro (multi-page IA + médiathèque) ────────────────────────────
+export const infographieProAPI = {
+  projets: () => api.get('/bureau/infographie-pro/projets'),
+  uploadMedia: (formData: FormData) =>
+    api.post('/bureau/infographie-pro/medias', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120_000,
+    }),
+  listerMedias: (params: { portee: 'session' | 'compte'; categorie?: string; session_id?: string }) =>
+    api.get('/bureau/infographie-pro/medias', { params }),
+  supprimerMedia: (media_id: string, portee: 'session' | 'compte', session_id?: string) =>
+    api.delete(`/bureau/infographie-pro/medias/${media_id}`, { params: { portee, session_id } }),
+  generer: (data: {
+    cle_projet: string; brief: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie; medias_refs?: string[]; export_cmyk?: boolean;
+    directives_visuelles?: Record<string, number>;
+  }) => api.post('/bureau/infographie-pro/generer', data, { timeout: 360_000 }),
+  genererAuto: (data: {
+    brief: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie; medias_refs?: string[];
+    cle_projet_hint?: string; export_cmyk?: boolean;
+    directives_visuelles?: Record<string, number>;
+  }) => api.post('/bureau/infographie-pro/generer-auto', data, { timeout: 360_000 }),
+  modifier: (data: {
+    projet_id: string; instructions: string;
+    medias_refs_supplementaires?: string[]; pays?: string;
+    directives_visuelles?: Record<string, number>;
+  }) => api.post('/bureau/infographie-pro/modifier', data, { timeout: 360_000 }),
+}
+
 // ─── Traduction ───────────────────────────────────────────────────────────────
 export const traductionAPI = {
   traduireTexte: (data: { contenu: string; langue_source: string; langue_cible: string; contexte_metier?: string; format_sortie?: string }) =>

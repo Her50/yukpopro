@@ -485,16 +485,57 @@ export const adminPaiementsApi = {
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
 export const adminApi = {
-  utilisateurs: async (page = 1, parPage = 50) => {
-    const { data } = await http.get(`/pro/admin/utilisateurs?page=${page}&par_page=${parPage}`);
+  utilisateurs: async (params: { page?: number; par_page?: number; search?: string; plan?: string; statut?: string } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set("page", String(params.page ?? 1));
+    qs.set("par_page", String(params.par_page ?? 50));
+    if (params.search) qs.set("search", params.search);
+    if (params.plan) qs.set("plan", params.plan);
+    if (params.statut) qs.set("statut", params.statut);
+    const { data } = await http.get(`/pro/admin/utilisateurs?${qs.toString()}`);
+    return data;
+  },
+  detailsUtilisateur: async (userId: number) => {
+    const { data } = await http.get(`/pro/admin/utilisateurs/${userId}`);
     return data;
   },
   stats: async () => {
     const { data } = await http.get("/pro/admin/stats");
     return data;
   },
+  statsAvancees: async () => {
+    const { data } = await http.get("/pro/admin/stats/avancees");
+    return data;
+  },
+  statsRevenus: async () => {
+    const { data } = await http.get("/pro/admin/stats/revenus");
+    return data;
+  },
   changerMetier: async (userId: number, metier: string, pays?: string) => {
     const { data } = await http.put(`/pro/admin/utilisateurs/${userId}/metier`, { metier, pays });
+    return data;
+  },
+  forcerAbonnement: async (userId: number, plan: string, creditsBonus = 0, dureeJours = 30) => {
+    const { data } = await http.put(`/pro/admin/utilisateurs/${userId}/abonnement`,
+      { plan, credits_bonus: creditsBonus, duree_jours: dureeJours });
+    return data;
+  },
+  bloquer: async (userId: number, motif?: string, dureeHeures?: number) => {
+    const { data } = await http.post(`/pro/admin/utilisateurs/${userId}/bloquer`,
+      { motif, duree_heures: dureeHeures });
+    return data;
+  },
+  debloquer: async (userId: number) => {
+    const { data } = await http.post(`/pro/admin/utilisateurs/${userId}/debloquer`);
+    return data;
+  },
+  creditsBonus: async (userId: number, montant: number, motif?: string) => {
+    const { data } = await http.post(`/pro/admin/utilisateurs/${userId}/credits-bonus`,
+      { montant, motif });
+    return data;
+  },
+  promotion: async (montant: number, cible: "tous" | "plan" | "ids", opts: { plan?: string; user_ids?: number[]; motif?: string } = {}) => {
+    const { data } = await http.post(`/pro/admin/promotions`, { montant, cible, ...opts });
     return data;
   },
   agents: async () => {
@@ -607,9 +648,9 @@ export const marchesApi = {
     return (data.marches_publics_recents || []) as MarchePublic[];
   },
 
-  lancerRecherche: async (): Promise<{ nb_marches: number }> => {
+  lancerRecherche: async (): Promise<{ nb_marches: number; marches: MarchePublic[] }> => {
     const { data } = await http.post("/pro/profil/marches/rechercher");
-    return { nb_marches: data.nb_marches || 0 };
+    return { nb_marches: data.nb_marches || 0, marches: (data.marches || []) as MarchePublic[] };
   },
 };
 
@@ -816,6 +857,36 @@ export const infographieApi = {
     const base = (http.defaults.baseURL || "").replace(/\/$/, "");
     return `${base}/bureau/infographie/fichier/${encodeURIComponent(fichier_id)}`;
   },
+};
+
+// ── Designer Pro (Infographie multi-page IA) ─────────────────────────────────
+
+export const infographieProApi = {
+  projets: async () => (await http.get("/bureau/infographie-pro/projets")).data,
+  uploadMedia: async (formData: FormData) =>
+    (await http.post("/bureau/infographie-pro/medias", formData, {
+      headers: { "Content-Type": "multipart/form-data" }, timeout: 120_000,
+    })).data,
+  listerMedias: async (params: { portee: "session" | "compte"; categorie?: string; session_id?: string }) =>
+    (await http.get("/bureau/infographie-pro/medias", { params })).data,
+  supprimerMedia: async (media_id: string, portee: "session" | "compte", session_id?: string) =>
+    (await http.delete(`/bureau/infographie-pro/medias/${media_id}`, { params: { portee, session_id } })).data,
+  generer: async (payload: {
+    cle_projet: string; brief: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie; medias_refs?: string[]; export_cmyk?: boolean;
+    directives_visuelles?: Record<string, number>;
+  }) => (await http.post("/bureau/infographie-pro/generer", payload, { timeout: 360_000 })).data,
+  genererAuto: async (payload: {
+    brief: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie; medias_refs?: string[];
+    cle_projet_hint?: string; export_cmyk?: boolean;
+    directives_visuelles?: Record<string, number>;
+  }) => (await http.post("/bureau/infographie-pro/generer-auto", payload, { timeout: 360_000 })).data,
+  modifier: async (payload: {
+    projet_id: string; instructions: string;
+    medias_refs_supplementaires?: string[]; pays?: string;
+    directives_visuelles?: Record<string, number>;
+  }) => (await http.post("/bureau/infographie-pro/modifier", payload, { timeout: 360_000 })).data,
 };
 
 // ── Enquêtes & Études ────────────────────────────────────────────────────────

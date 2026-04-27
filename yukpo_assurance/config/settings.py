@@ -100,11 +100,16 @@ class Settings(BaseSettings):
             if cle_env.startswith("sk-ant-") and len(cle_env) > 40 and "votre-cle" not in cle_env:
                 object.__setattr__(self, "CLAUDE_API_KEY", cle_env)
 
-    # Modèles par défaut — Claude primaire, GPT en fallback
+    # Sélection du fournisseur primaire — "gpt" ou "claude"
+    # Permet de basculer instantanément l'ordre primaire/fallback sans refactor.
+    # Tous les flux IA (chat, tool-use, vision, fallback) respectent ce paramètre.
+    LLM_PRIMAIRE: str = "gpt"                          # gpt | claude (override via env LLM_PRIMAIRE)
+
+    # Modèles par défaut
     CLAUDE_MODEL_PRIMAIRE: str = "claude-sonnet-4-6"    # Chat — bon équilibre vitesse/qualité
     CLAUDE_MODEL_RAPIDE: str = "claude-haiku-4-5-20251001"  # Tâches simples, classification
-    GPT_MODEL_PRIMAIRE: str = "gpt-5.5"                  # Fallback principal — plus intelligent, moins de tokens
-    GPT_MODEL_VISION:   str = "gpt-4o"                  # Vision/OCR uniquement (gpt-5.5 vision à confirmer)
+    GPT_MODEL_PRIMAIRE: str = "gpt-4o"                  # GPT principal — analyse/rédaction (128k contexte, dense)
+    GPT_MODEL_VISION:   str = "gpt-4o"                  # Vision/OCR
     GPT_MODEL_FALLBACK: str = "gpt-4o-mini"             # Fallback léger pour tâches simples / COPILOTE
 
     # Paramètres d'orchestration (inspiré de yukpomnang2/orchestration_ia.rs)

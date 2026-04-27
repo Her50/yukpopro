@@ -53,7 +53,7 @@ class ProfilProfessionnelDB(Base):
     metier = Column(String(80), nullable=False, default="professionnel")
     # Sous-spécialité libre : "expert-comptable SYSCOHADA", "DRH grands comptes", …
     specialite = Column(String(150), nullable=True)
-    pays = Column(String(5), nullable=False, default="CM")
+    pays = Column(String(64), nullable=False, default="CM")
     zone = Column(String(30), nullable=True)          # "OHADA" | "UEMOA" | "CEMAC"
     secteur = Column(String(40), nullable=False, default="prive")
     niveau = Column(String(30), nullable=False, default="senior")

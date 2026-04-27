@@ -4,19 +4,19 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://yukpopro-backend.fly.dev/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "https://yukpopro-backend.fly.dev/api/$1"
     },
     {
-      "source": "/auth/:path*",
-      "destination": "https://yukpopro-backend.fly.dev/auth/:path*"
+      "source": "/auth/(.*)",
+      "destination": "https://yukpopro-backend.fly.dev/auth/$1"
     },
     {
       "source": "/health",
       "destination": "https://yukpopro-backend.fly.dev/health"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|auth/|health).*)",
       "destination": "/index.html"
     }
   ],

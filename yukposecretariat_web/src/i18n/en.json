@@ -4,7 +4,7 @@
     "redaction": "AI Writing",
     "ocr": "Scan → Text",
     "audio": "Audio → Doc",
-    "infographie": "Infographics",
+    "infographie": "Designer Pro",
     "traduction": "AI Translation",
     "documents": "My Documents",
     "kanban": "Work Queue",
@@ -161,5 +161,18 @@
     "permissionRequired": "Permission required",
     "permissionPhotos": "Please allow access to your photos",
     "permissionCamera": "Please allow access to the camera"
+  },
+  "designerPro": {
+    "heading": "Designer Pro — multi-page visuals",
+    "subheading": "Announcements, brochures, menus, photo books, programs… AI picks the layout, embeds your media and applies your changes in natural language.",
+    "mediaLibrary": "Media library",
+    "generate": "Generate visual",
+    "generating": "Multi-page generation (1–2 min)…",
+    "creativity": "Creativity",
+    "density": "Text density",
+    "imageImportance": "Image emphasis",
+    "elegance": "Elegance",
+    "modify": "Modify in natural language",
+    "apply": "Apply"
   }
 }

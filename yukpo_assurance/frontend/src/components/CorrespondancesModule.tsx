@@ -570,7 +570,7 @@ export function CorrespondancesModule({ module, references = [], titre }: Props)
               <button onClick={genererLettre} disabled={loading}
                 className="flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-700 disabled:opacity-60 transition-colors">
                 <SparklesIcon className="h-4 w-4" />
-                {loading ? <><ArrowPathIcon className="h-4 w-4 animate-spin" /> Rédaction…</> : 'Générer avec Yukpo IA'}
+                {loading ? <><ArrowPathIcon className="h-4 w-4 animate-spin" /> Rédaction…</> : 'Générer avec YukpoPro'}
               </button>
 
               {lettre && (

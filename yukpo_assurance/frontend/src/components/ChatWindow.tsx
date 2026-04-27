@@ -156,8 +156,8 @@ export function ChatWindow({
             </div>
           )}
           <div>
-            <h2 className="font-semibold text-gray-800">Yukpo IA — {branding.nom}</h2>
-            <p className="text-xs text-gray-400">Intelligence Artificielle • Expert CIMA Vie & Non-Vie</p>
+            <h2 className="font-semibold text-gray-800">YukpoPro — {branding.nom}</h2>
+            <p className="text-xs text-gray-400">Assurance CIMA • Expert Vie & Non-Vie</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -189,9 +189,9 @@ export function ChatWindow({
               )}
             </div>
 
-            <h3 className="text-xl font-bold text-gray-800 mb-1">Bonjour, je suis YukpoIA</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-1">Bonjour, je suis Yukpo</h3>
             <p className="text-sm text-gray-500 mb-1">
-              Assistant IA spécialisé assurance — {branding.nom}
+              Votre assistant spécialisé assurance — {branding.nom}
             </p>
             <p className="text-xs text-gray-400 mb-6 text-center max-w-sm">
               Je maîtrise l'ensemble du Code CIMA, toutes les garanties vie et non-vie,

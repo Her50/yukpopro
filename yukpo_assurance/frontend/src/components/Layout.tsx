@@ -5,9 +5,9 @@ import { Header } from './Header'
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard':    'Tableau de bord',
-  '/agents':       'Yukpo Agents IA',
+  '/agents':       'Yukpo Agents',
   '/validations':  'Validations humaines',
-  '/chat':         'Yukpo IA Copilote',
+  '/chat':         'Yukpo Copilote',
   '/sinistres':    'Sinistres',
   '/souscription': 'Polices & Souscription',
   '/comptabilite': 'Comptabilité PCSA',

@@ -74,6 +74,48 @@ def _generate_reference(user_id: int, phone: str) -> str:
     return f"{datetime.utcnow().strftime('%y%m%d')}-{user_id:05d}-{suffix}"
 
 
+_CREDITS_BY_PACK = {"pack_500": 500, "pack_2000": 2000, "pack_5000": 5000, "pack_15000": 15000}
+
+
+async def _apply_payment_success(tx: PaymentTransactionV2DB, db: AsyncSession) -> None:
+    """Crédite l'utilisateur après confirmation d'un paiement V2 (idempotent)."""
+    meta = dict(tx.metadata_json or {})
+    if meta.get("applied_at"):
+        return
+    if not tx.user_id:
+        logger.warning("[Paiement V2] tx %s sans user_id, skip apply", tx.reference)
+        return
+    try:
+        from modules.pro.service_profil import get_or_create
+        from modules.pro.service_credits import get_ou_creer_credits, synchroniser_plan
+        from datetime import timedelta
+
+        if tx.type == "recharge":
+            credits_ajout = _CREDITS_BY_PACK.get(tx.plan_ou_pack or "", 0)
+            if credits_ajout > 0:
+                credit = await get_ou_creer_credits(tx.user_id, db)
+                credit.credits_alloues += credits_ajout
+                credit.mise_a_jour = datetime.utcnow()
+        elif tx.type == "abonnement" and tx.plan_ou_pack:
+            profil, _ = await get_or_create(tx.user_id, db)
+            prefs = dict(profil.preferences or {})
+            debut = datetime.utcnow()
+            prefs["plan"] = tx.plan_ou_pack
+            prefs["abonnement_debut"] = debut.isoformat()
+            prefs["abonnement_fin"] = (debut + timedelta(days=30)).isoformat()
+            prefs["derniere_reference"] = tx.reference
+            prefs["abonnement_statut"] = "actif"
+            profil.preferences = prefs
+            try:
+                await synchroniser_plan(tx.user_id, tx.plan_ou_pack, db)
+            except Exception as e:
+                logger.warning("[Paiement V2] sync plan KO: %s", e)
+        meta["applied_at"] = datetime.utcnow().isoformat()
+        tx.metadata_json = meta
+    except Exception as e:
+        logger.exception("[Paiement V2] apply KO pour %s: %s", tx.reference, e)
+
+
 # ─── Routes ────────────────────────────────────────────────────────────────
 
 @router.post("/initier", response_model=InitiateResponseSchema)
@@ -181,6 +223,8 @@ async def get_transaction(
                 tx.updated_at = datetime.utcnow()
                 if new_status.value in ("success", "failed", "cancelled", "refunded"):
                     tx.completed_at = datetime.utcnow()
+                if new_status.value == "success":
+                    await _apply_payment_success(tx, db)
                 await db.commit()
         except Exception as exc:
             logger.warning("Refresh statut KO pour %s: %s", reference, exc)
@@ -242,6 +286,8 @@ async def webhook_v2(
             tx.updated_at = datetime.utcnow()
             if event.status.value in ("success", "failed", "cancelled", "refunded"):
                 tx.completed_at = datetime.utcnow()
+            if event.status.value == "success":
+                await _apply_payment_success(tx, db)
 
     await db.commit()
     return {"received": True, "valid": True, "status": event.status.value}

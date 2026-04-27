@@ -111,7 +111,10 @@ i18n
     fallbackLng: "fr",
     supportedLngs: ["fr", "en", "es", "pt", "ar", "de", "zh", "sw", "ha", "ru", "hi", "tr", "wo", "ln", "am"],
     detection: {
-      order: ["localStorage"],
+      // 1. localStorage (choix explicite) → 2. langue OS/navigateur → 3. fallback FR
+      // L'IP/pays est consulté plus tard (ProfilPage) seulement si rien n'est défini :
+      // navigator.language est plus fiable pour les pays bilingues (CM, CA, CH, BE, MA…)
+      order: ["localStorage", "navigator", "htmlTag"],
       caches: ["localStorage"],
       lookupLocalStorage: "yukpo_lang",
     },

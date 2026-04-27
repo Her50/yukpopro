@@ -61,8 +61,18 @@ export const useTraductionStore = create<TraductionState>((set, get) => ({
       return res;
     } catch (err: any) {
       set((st) => ({ loading: { ...st.loading, [mode]: false } }));
-      const detail = err?.response?.data?.detail || opts?.errorMsg || "Erreur lors de la traduction";
-      toast.error(String(detail).slice(0, 120));
+      const raw = err?.response?.data?.detail ?? err?.response?.data?.message ?? err?.message;
+      let msg: string;
+      if (typeof raw === "string") {
+        msg = raw;
+      } else if (Array.isArray(raw)) {
+        msg = raw.map((e: any) => e?.msg || e?.message || JSON.stringify(e)).join(" ; ");
+      } else if (raw && typeof raw === "object") {
+        msg = raw.msg || raw.message || JSON.stringify(raw);
+      } else {
+        msg = opts?.errorMsg || "Erreur lors de la traduction";
+      }
+      toast.error(msg.slice(0, 200));
       return null;
     }
   },

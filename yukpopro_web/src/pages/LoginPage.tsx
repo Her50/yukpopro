@@ -10,11 +10,11 @@ import { METIERS, PAYS_AFRIQUE } from "@/types";
 
 type Mode = "login" | "register" | "onboarding";
 
-const FEATURES = [
-  { icon: Zap,          label: "13 agents IA spécialisés",     desc: "Comptable, DRH, Juriste, Banquier, DAF, ONG…" },
-  { icon: Globe2,       label: "Corpus réglementaire africain", desc: "SYSCOHADA, OHADA, COBAC, CIMA, Codes fiscaux" },
-  { icon: Shield,       label: "Sécurité niveau entreprise",    desc: "Données hébergées en Afrique, RGPD compatible" },
-];
+const FEATURE_KEYS = [
+  { icon: Zap,    key: "agents" },
+  { icon: Globe2, key: "corpus" },
+  { icon: Shield, key: "security" },
+] as const;
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -155,31 +155,30 @@ export const LoginPage = () => {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{ background: "rgba(0,84,166,0.2)", border: "1px solid rgba(0,176,240,0.3)", color: "#00B0F0" }}>
-              ✦ Intelligence Professionnelle Africaine
+              ✦ {t('login.heroBadge')}
             </div>
             <h1 className="text-4xl xl:text-5xl font-display font-bold text-white leading-[1.15] tracking-tight">
-              Vos agents IA<br />
+              {t('login.heroTitle1')}<br />
               <span style={{ background: "linear-gradient(90deg, #0054A6, #00B0F0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                pensent africain
+                {t('login.heroTitle2')}
               </span>
             </h1>
             <p className="text-base text-slate-400 leading-relaxed max-w-sm">
-              Corpus juridique OHADA, SYSCOHADA, COBAC, CIMA — vos agents connaissent
-              le droit et la comptabilité de vos marchés.
+              {t('login.heroSubtitle')}
             </p>
           </div>
 
           {/* Feature list */}
           <div className="space-y-4">
-            {FEATURES.map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="flex items-start gap-4">
+            {FEATURE_KEYS.map(({ icon: Icon, key }) => (
+              <div key={key} className="flex items-start gap-4">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: "rgba(0,84,166,0.2)", border: "1px solid rgba(0,84,166,0.35)" }}>
                   <Icon className="w-4 h-4" style={{ color: "#00B0F0" }} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-100">{label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                  <p className="text-sm font-semibold text-slate-100">{t(`login.features.${key}.label`)}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t(`login.features.${key}.desc`)}</p>
                 </div>
               </div>
             ))}
@@ -188,9 +187,9 @@ export const LoginPage = () => {
           {/* Stat badges */}
           <div className="flex items-center gap-3 flex-wrap">
             {[
-              { val: "13",   lbl: "agents IA" },
-              { val: "6+",   lbl: "pays couverts" },
-              { val: "99,9%",lbl: "disponibilité" },
+              { val: "13",     lbl: t('login.stats.agents') },
+              { val: "100+",   lbl: t('login.stats.countries') },
+              { val: "99,9%",  lbl: t('login.stats.uptime') },
             ].map(({ val, lbl }) => (
               <div key={lbl} className="px-4 py-2 rounded-lg text-center"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>

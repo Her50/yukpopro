@@ -1,5 +1,5 @@
 /**
- * Store Zustand pour les agents IA autonomes.
+ * Store Zustand pour les agents Yukpo autonomes.
  * Gère : exécutions en cours, historique, connexion SSE.
  */
 import { create } from 'zustand'

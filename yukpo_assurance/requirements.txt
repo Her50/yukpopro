@@ -5,7 +5,7 @@
 anthropic>=0.40.0
 openai>=1.50.0
 # YukpoTranslate Live — STT streaming (optionnel, fallback mode dégradé si absent)
-deepgram-sdk>=3.7.0
+deepgram-sdk>=3.7.0,<4.0.0
 
 # ─── API & Web ─────────────────────────────────────────────────────────────────
 fastapi>=0.115.0
@@ -85,8 +85,14 @@ python-dateutil>=2.9.0
 aiosmtplib>=3.0.0              # Envoi email async (notifications, rapports)
 sendgrid>=6.11.0               # SendGrid API
 
-# ─── PDF ────────────────────────────────────────────────────────────────────────
+# ─── PDF & Infographie Pro ──────────────────────────────────────────────────────
 reportlab>=4.1.0               # Génération PDF avancé (rapports, certificats)
+svgwrite>=1.4.3                # Export SVG vectoriel infographies
+pikepdf>=9.0.0                 # Manipulation PDF avancée (assemblage multi-page livrets, métadata PDF/X)
+fonttools>=4.50.0              # Subsetting Google Fonts pour embed dans PDF
+staticmap>=0.5.7               # Plans localisation (cérémonie deuil/mariage)
+# WeasyPrint requis Phase 2 (HTML/CSS → PDF). Désactivé Phase 1 (deps Cairo lourdes Windows)
+# weasyprint>=62.0
 
 # ─── WhatsApp / Notifications ──────────────────────────────────────────────────
 twilio>=9.0.0

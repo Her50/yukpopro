@@ -3,7 +3,7 @@
  * - Liste des réunions avec statut
  * - Création de réunion
  * - Enregistrement audio (Expo AV)
- * - Transcription & Analyse IA
+ * - Transcription & Analyse YukpoPro
  * - PV automatisé, agenda suivant, suivi actions
  */
 import { useState, useRef } from 'react'
@@ -473,7 +473,7 @@ function ModalDetailReunion({ visible, reunion, onClose, onUpdated }: {
         <View style={styles.tabBar}>
           {[
             { id: 'notes', label: 'Notes & Enreg.', icon: 'mic-outline' as const },
-            { id: 'analyse', label: 'Analyse IA', icon: 'sparkles-outline' as const },
+            { id: 'analyse', label: 'Analyse YukpoPro', icon: 'sparkles-outline' as const },
             { id: 'agenda', label: 'Prochain agenda', icon: 'calendar-outline' as const },
           ].map(o => (
             <TouchableOpacity key={o.id} style={[styles.tab, onglet === o.id && styles.tabActive]}
@@ -502,7 +502,7 @@ function ModalDetailReunion({ visible, reunion, onClose, onUpdated }: {
               <View style={styles.recordCard}>
                 <Text style={styles.sectionTitle}>Enregistrement audio</Text>
                 <Text style={{ fontSize: 12, color: '#6b7280', marginBottom: 12 }}>
-                  Enregistrez la réunion — transcription automatique Whisper disponible via le backend
+                  Enregistrez la réunion — transcription audio automatique disponible via le backend
                 </Text>
                 <TouchableOpacity style={styles.recordBtn}
                   onPress={() => Alert.alert('Enregistrement', 'Activez expo-av dans le projet pour l\'enregistrement audio en temps réel. Utilisez les notes textuelles en attendant.')}>
@@ -514,7 +514,7 @@ function ModalDetailReunion({ visible, reunion, onClose, onUpdated }: {
               <View>
                 <Text style={styles.fieldLabel}>Notes manuelles</Text>
                 <TextInput value={notes} onChangeText={setNotes} multiline numberOfLines={8}
-                  placeholder="Saisir ici les points discutés, décisions, intervenants… L'IA analysera ce texte."
+                  placeholder="Saisir ici les points discutés, décisions, intervenants… YukpoPro analysera ce texte."
                   style={[styles.textInput, { height: 160, textAlignVertical: 'top' }]} />
               </View>
 
@@ -532,7 +532,7 @@ function ModalDetailReunion({ visible, reunion, onClose, onUpdated }: {
             </>
           )}
 
-          {/* Analyse IA */}
+          {/* Analyse YukpoPro */}
           {onglet === 'analyse' && (
             analyse ? (
               <>
@@ -630,7 +630,7 @@ function ModalDetailReunion({ visible, reunion, onClose, onUpdated }: {
             ) : (
               <View style={styles.empty}>
                 <Ionicons name="calendar-outline" size={40} color="#d1d5db" />
-                <Text style={styles.emptyText}>Générez l'agenda depuis l'onglet Analyse IA</Text>
+                <Text style={styles.emptyText}>Générez l'agenda depuis l'onglet Analyse YukpoPro</Text>
               </View>
             )
           )}

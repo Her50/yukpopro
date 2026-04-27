@@ -4,7 +4,7 @@
     "redaction": "Rédaction IA",
     "ocr": "Scan → Texte",
     "audio": "Audio → Doc",
-    "infographie": "Infographie",
+    "infographie": "Designer Pro",
     "traduction": "Traduction IA",
     "documents": "Mes Documents",
     "kanban": "File de travaux",
@@ -151,5 +151,18 @@
     "permissionRequired": "Permission requise",
     "permissionPhotos": "Autorisez l'accès à vos photos",
     "permissionCamera": "Autorisez l'accès à la caméra"
+  },
+  "designerPro": {
+    "heading": "Designer Pro — visuels multi-page",
+    "subheading": "Faire-part, brochures, menus, livres photo, programmes… L'IA choisit la mise en page, intègre tes médias et applique tes modifications en langage naturel.",
+    "mediaLibrary": "Médiathèque",
+    "generate": "Générer le visuel",
+    "generating": "Génération multi-page (peut prendre 1–2 min)…",
+    "creativity": "Créativité",
+    "density": "Densité texte",
+    "imageImportance": "Place des images",
+    "elegance": "Élégance",
+    "modify": "Modifier en langage naturel",
+    "apply": "Appliquer"
   }
 }

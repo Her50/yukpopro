@@ -259,7 +259,7 @@ function OngletAssistant({ dossiers }: { dossiers: DossierLitige[] }) {
     setTimeout(() => {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Réponse IA (mode démo) sur : "${texte}"\n\n**Éléments Code CIMA :**\n• Art. 12 : Délai règlement 30 jours après production pièces\n• Art. 13 : Prescription biennale\n• Art. 18 : Rejet motivé obligatoirement\n• Art. 308 : Arbitrage CIMA avant juridiction\n\nConnectez le backend Yukpo IA pour une réponse complète.`,
+        content: `Réponse IA (mode démo) sur : "${texte}"\n\n**Éléments Code CIMA :**\n• Art. 12 : Délai règlement 30 jours après production pièces\n• Art. 13 : Prescription biennale\n• Art. 18 : Rejet motivé obligatoirement\n• Art. 308 : Arbitrage CIMA avant juridiction\n\nConnectez le backend YukpoPro pour une réponse complète.`,
       }])
       setLoading(false)
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100)
@@ -425,7 +425,7 @@ function OngletCorrespondances({ dossiers }: { dossiers: DossierLitige[] }) {
           >
             <Ionicons name="sparkles-outline" size={16} color="#fff" />
             <Text style={styles.btnPrimaryText}>
-              {loading ? 'Rédaction en cours…' : 'Générer avec Yukpo IA'}
+              {loading ? 'Rédaction en cours…' : 'Générer avec YukpoPro'}
             </Text>
           </TouchableOpacity>
         </View>

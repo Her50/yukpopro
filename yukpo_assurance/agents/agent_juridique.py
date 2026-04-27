@@ -440,7 +440,7 @@ Ton : professionnel, factuel, référence aux articles de la police et du Code C
                     prompt = f"""Rédige une proposition de médiation amiable pour résoudre un litige client.
 Objet : {objet} — Montant : {montant:,} FCFA
 Proposer : cadre de la médiation, délai, compromis envisageable, avantages pour les deux parties."""
-                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.REDACTION)
                     return rep.contenu
 
                 if action == "escalader_contentieux":

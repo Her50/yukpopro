@@ -1,4 +1,5 @@
 import { type ReactNode, type ButtonHTMLAttributes, type InputHTMLAttributes, forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -221,13 +222,13 @@ interface BadgeProps {
 
 export const Badge = ({ children, variant = "corp", size = "md" }: BadgeProps) => {
   const colors = {
-    corp:   "bg-corp-600/15 text-corp-700 border-corp-600/25 dark:bg-corp-600/20 dark:text-bright-400 dark:border-corp-600/30",
-    purple: "bg-yukpo-500/15 text-yukpo-700 border-yukpo-500/25 dark:bg-yukpo-500/20 dark:text-yukpo-300 dark:border-yukpo-500/30",
-    cyan:   "bg-accent-500/15 text-accent-700 border-accent-500/25 dark:bg-accent-500/20 dark:text-accent-400 dark:border-accent-500/30",
-    gold:   "bg-gold-500/15 text-gold-700 border-gold-500/25 dark:bg-gold-500/20 dark:text-gold-400 dark:border-gold-500/30",
-    green:  "bg-success-500/15 text-success-700 border-success-500/25 dark:bg-success-500/20 dark:text-success-400 dark:border-success-500/30",
-    red:    "bg-danger-500/15 text-danger-700 border-danger-500/25 dark:bg-danger-500/20 dark:text-danger-400 dark:border-danger-500/30",
-    slate:  "bg-slate-100 text-slate-700 border-slate-200 dark:bg-white/[0.07] dark:text-slate-300 dark:border-white/[0.10]",
+    corp:   "bg-blue-100 text-blue-800 border-blue-300 dark:bg-corp-600/20 dark:text-bright-400 dark:border-corp-600/30",
+    purple: "bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-yukpo-500/20 dark:text-yukpo-300 dark:border-yukpo-500/30",
+    cyan:   "bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-accent-500/20 dark:text-accent-400 dark:border-accent-500/30",
+    gold:   "bg-amber-100 text-amber-800 border-amber-300 dark:bg-gold-500/20 dark:text-gold-400 dark:border-gold-500/30",
+    green:  "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-success-500/20 dark:text-success-400 dark:border-success-500/30",
+    red:    "bg-rose-100 text-rose-800 border-rose-300 dark:bg-danger-500/20 dark:text-danger-400 dark:border-danger-500/30",
+    slate:  "bg-slate-100 text-slate-800 border-slate-300 dark:bg-white/[0.07] dark:text-slate-300 dark:border-white/[0.10]",
   };
   const sizes = { sm: "text-[10px] px-2 py-0.5", md: "text-xs px-2.5 py-1" };
   return (
@@ -254,13 +255,16 @@ export const Spinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
 
 // ── YukpoPro Logo ─────────────────────────────────────────────────────────────
 
-export const YukpoLogo = ({ size = 48, showText = true }: { size?: number; showText?: boolean }) => (
+export const YukpoLogo = ({ size = 48, showText = true }: { size?: number; showText?: boolean }) => {
+  const { t } = useTranslation();
+  return (
   <div className="flex items-center gap-3">
     <div style={{
-      width: size * 1.6, height: size * 1.6, background: "white",
-      borderRadius: size * 0.28, display: "flex", alignItems: "center",
-      justifyContent: "center", padding: size * 0.1, flexShrink: 0,
+      width: size * 1.15, height: size * 1.15, background: "white",
+      borderRadius: size * 0.22, display: "flex", alignItems: "center",
+      justifyContent: "center", padding: size * 0.14, flexShrink: 0,
       boxShadow: "0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35)",
+      overflow: "hidden",
     }}>
       <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
     </div>
@@ -276,12 +280,13 @@ export const YukpoLogo = ({ size = 48, showText = true }: { size?: number; showT
           className="tracking-wide"
           style={{ fontSize: size * 0.26, color: "var(--ykp-sidebar-text-muted)" }}
         >
-          Intelligence Africaine
+          {t('common.tagline')}
         </span>
       </div>
     )}
   </div>
-);
+  );
+};
 
 // ── Section header (helper pour titres de page) ───────────────────────────────
 

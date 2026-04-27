@@ -81,8 +81,15 @@ export interface AlerteCIMA {
 }
 
 // Sinistres
-export type StatutSinistre = 'ouvert' | 'en_cours' | 'clos' | 'rejet'
+export type StatutSinistre = 'ouvert' | 'en_cours' | 'expertise_en_cours' | 'relance' | 'contentieux' | 'accord' | 'clos' | 'rejet'
 export type BrancheAssurance = 'auto' | 'vie' | 'mrh' | 'sante' | 'transport' | 'rc'
+
+export interface EtapeWorkflow {
+  id: string
+  label: string
+  date?: string
+  statut: 'fait' | 'en_cours' | 'en_attente' | 'na'
+}
 
 export interface Sinistre {
   id: string
@@ -98,6 +105,7 @@ export interface Sinistre {
   description: string
   score_fraude?: number
   police_numero?: string
+  etapes_workflow?: EtapeWorkflow[]
 }
 
 export interface DeclarerSinistreRequest {

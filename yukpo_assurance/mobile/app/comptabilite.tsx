@@ -142,7 +142,7 @@ export default function ComptabiliteScreen() {
           <TouchableOpacity style={styles.btn} onPress={traiterUpload} disabled={loadingUpload}>
             {loadingUpload
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.btnText}>Traiter avec l'IA</Text>}
+              : <Text style={styles.btnText}>Traiter avec Yukpo</Text>}
           </TouchableOpacity>
 
           {resultatUpload && <ResultatBlock data={resultatUpload} />}
@@ -255,7 +255,7 @@ function OngletCorrespondancesCompta() {
           />
 
           <TouchableOpacity style={[styles.btn, loading && { opacity: 0.6 }]} onPress={generer} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Générer avec Yukpo IA</Text>}
+            {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.btnText}>Générer avec YukpoPro</Text>}
           </TouchableOpacity>
         </>
       )}

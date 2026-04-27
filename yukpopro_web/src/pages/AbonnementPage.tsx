@@ -196,7 +196,7 @@ export const AbonnementPage = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-bold text-lg">{planActuelInfo?.nom || "Gratuit"}</span>
-                  <Badge variant={planActuel === "gratuit" ? "secondary" : "purple"}>
+                  <Badge variant="green">
                     {(abonnement.statut as string) || "actif"}
                   </Badge>
                 </div>
@@ -269,8 +269,8 @@ export const AbonnementPage = () => {
       ) : (
         <Card className="p-6 space-y-5 border-yukpo-500/30">
           <div className="flex items-center justify-between">
-            <h2 className="text-white font-bold flex items-center gap-2"><PlusCircle className="w-5 h-5 text-yukpo-400" /> {t('abonnement.rechargePackTitle')}</h2>
-            <button onClick={() => { setModeRecharge(false); setEtapeR("packs"); }} className="text-slate-500 hover:text-white text-xs">{t('common.cancel')}</button>
+            <h2 className="text-gray-900 dark:text-white font-bold flex items-center gap-2"><PlusCircle className="w-5 h-5 text-yukpo-400" /> {t('abonnement.rechargePackTitle')}</h2>
+            <button onClick={() => { setModeRecharge(false); setEtapeR("packs"); }} className="text-slate-500 hover:text-gray-900 dark:hover:text-white text-xs">{t('common.cancel')}</button>
           </div>
 
           {etapeR === "packs" && (
@@ -316,10 +316,10 @@ export const AbonnementPage = () => {
                 ))}
               </div>
               <div className="flex gap-2">
-                <span className="flex items-center px-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 text-sm">+237</span>
+                <span className="flex items-center px-3 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-gray-600 dark:text-slate-400 text-sm">+237</span>
                 <input type="tel" placeholder="6XX XXX XXX" value={telephoneR}
                   onChange={(e) => setTelephoneR(e.target.value.replace(/\D/g, ""))}
-                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-yukpo-500" />
+                  className="flex-1 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-yukpo-500" />
               </div>
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setEtapeR("packs")}>{t('common.back')}</Button>
@@ -341,7 +341,7 @@ export const AbonnementPage = () => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">{t('abonnement.amountLabel')}</span>
-                <span className="text-white font-bold">{(instrR.montant_fcfa as number)?.toLocaleString()} FCFA</span>
+                <span className="text-gray-900 dark:text-white font-bold">{(instrR.montant_fcfa as number)?.toLocaleString()} FCFA</span>
               </div>
               <Button variant="primary" className="w-full" onClick={() => setEtapeR("confirmation")}>
                 <CheckCircle className="w-4 h-4" /> {t('abonnement.paymentMadeBtn')}
@@ -352,11 +352,11 @@ export const AbonnementPage = () => {
           {etapeR === "confirmation" && (
             <>
               <input type="text" placeholder="YYMMDD-NNN-XXXX" value={refR} onChange={(e) => setRefR(e.target.value.toUpperCase())}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono tracking-widest placeholder-slate-600 focus:outline-none focus:border-green-500" />
+                className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white font-mono tracking-widest placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-green-500" />
               <input type="tel" placeholder={t('abonnement.momoSenderRechargeLabel')} value={telephoneR} onChange={(e) => setTelephoneR(e.target.value.replace(/\D/g, ""))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500" />
+                className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-green-500" />
               <input type="text" placeholder={t('abonnement.txIdLabel')} value={txIdR} onChange={(e) => setTxIdR(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500" />
+                className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-yukpo-500" />
               <p className="text-xs text-amber-300">{t('abonnement.provisionalWarning')}</p>
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setEtapeR("instructions")}>{t('common.back')}</Button>
@@ -452,7 +452,7 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 rounded-full bg-yukpo-500 text-white flex items-center justify-center text-sm font-bold">2</div>
             <div>
-              <h2 className="text-white font-bold">{t('abonnement.step2Title')}</h2>
+              <h2 className="text-gray-900 dark:text-white font-bold">{t('abonnement.step2Title')}</h2>
               <p className="text-slate-400 text-sm">{t('abonnement.step2Subtitle', { name: PLANS.find(p=>p.id===planChoisi)?.nom, price: PLANS.find(p=>p.id===planChoisi)?.prix_fcfa.toLocaleString() })}</p>
             </div>
           </div>
@@ -478,15 +478,15 @@ export const AbonnementPage = () => {
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.phoneMoMoLabel')}</label>
+            <label className="text-gray-600 dark:text-slate-400 text-sm block mb-2">{t('abonnement.phoneMoMoLabel')}</label>
             <div className="flex gap-2">
-              <span className="flex items-center px-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 text-sm">+237</span>
+              <span className="flex items-center px-3 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-gray-600 dark:text-slate-400 text-sm">+237</span>
               <input
                 type="tel"
                 placeholder="6XX XXX XXX"
                 value={telephone}
                 onChange={(e) => setTelephone(e.target.value.replace(/\D/g, ""))}
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-yukpo-500"
+                className="flex-1 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-yukpo-500"
               />
             </div>
           </div>
@@ -512,7 +512,7 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-yukpo-500 text-white flex items-center justify-center text-sm font-bold">3</div>
             <div>
-              <h2 className="text-white font-bold">{t('abonnement.step3Title')}</h2>
+              <h2 className="text-gray-900 dark:text-white font-bold">{t('abonnement.step3Title')}</h2>
               <p className="text-slate-400 text-sm">{t('abonnement.step3Subtitle')}</p>
             </div>
           </div>
@@ -564,24 +564,24 @@ export const AbonnementPage = () => {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">4</div>
             <div>
-              <h2 className="text-white font-bold">{t('abonnement.step4Title')}</h2>
+              <h2 className="text-gray-900 dark:text-white font-bold">{t('abonnement.step4Title')}</h2>
               <p className="text-slate-400 text-sm">{t('abonnement.step4Subtitle')}</p>
             </div>
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.payRefLabel')}</label>
+            <label className="text-gray-600 dark:text-slate-400 text-sm block mb-2">{t('abonnement.payRefLabel')}</label>
             <input
               type="text"
               placeholder="YYMMDD-NNN-XXXX"
               value={reference}
               onChange={(e) => setReference(e.target.value.toUpperCase())}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono tracking-widest placeholder-slate-600 focus:outline-none focus:border-green-500"
+              className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white font-mono tracking-widest placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-green-500"
             />
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">
+            <label className="text-gray-600 dark:text-slate-400 text-sm block mb-2">
               {t('abonnement.momoSenderLabel')} <span className="text-red-400">*</span>
             </label>
             <input
@@ -589,19 +589,19 @@ export const AbonnementPage = () => {
               placeholder={t('abonnement.momoSenderLabel')}
               value={numeroExpediteur}
               onChange={(e) => setNumeroExpediteur(e.target.value.replace(/\D/g, ""))}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-green-500"
+              className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-green-500"
             />
             <p className="text-xs text-slate-500 mt-1">{t('abonnement.momoRequired')}</p>
           </div>
 
           <div>
-            <label className="text-slate-400 text-sm block mb-2">{t('abonnement.txIdLabel')}</label>
+            <label className="text-gray-600 dark:text-slate-400 text-sm block mb-2">{t('abonnement.txIdLabel')}</label>
             <input
               type="text"
               placeholder={t('abonnement.txIdPlaceholder')}
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-yukpo-500"
+              className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:outline-none focus:border-yukpo-500"
             />
           </div>
 
@@ -631,8 +631,8 @@ export const AbonnementPage = () => {
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-2xl">{t('abonnement.successTitle')}</h2>
-            <p className="text-slate-400 mt-2">
+            <h2 className="text-gray-900 dark:text-white font-bold text-2xl">{t('abonnement.successTitle')}</h2>
+            <p className="text-gray-600 dark:text-slate-400 mt-2">
               {t('abonnement.successDesc', { name: PLANS.find(p => p.id === planChoisi)?.nom })}
             </p>
           </div>

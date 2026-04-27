@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #111827;
+    color: #F9FAFB;
+    min-height: 100vh;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+  }
+
+  *::-webkit-scrollbar { width: 5px; height: 5px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background-color: #374151; border-radius: 999px; }
+  *::-webkit-scrollbar-thumb:hover { background-color: #4B5563; }
+}
+
+@layer components {
+  .prose-assurance {
+    --tw-prose-headings:      #F9FAFB;
+    --tw-prose-body:          #D1D5DB;
+    --tw-prose-bold:          #F9FAFB;
+    --tw-prose-links:         #33ccff;
+    --tw-prose-code:          #33ccff;
+    --tw-prose-counters:      #9CA3AF;
+    --tw-prose-bullets:       #6B7280;
+    --tw-prose-hr:            #374151;
+    --tw-prose-quotes:        #9CA3AF;
+    --tw-prose-quote-borders: #4B5563;
+    --tw-prose-captions:      #6B7280;
+    --tw-prose-pre-code:      #D1D5DB;
+    --tw-prose-pre-bg:        #0D1117;
+    --tw-prose-th-borders:    #374151;
+    --tw-prose-td-borders:    #1F2937;
+  }
+
+  .prose-invert {
+    --tw-prose-headings:      #F9FAFB;
+    --tw-prose-body:          #D1D5DB;
+    --tw-prose-bold:          #F9FAFB;
+    --tw-prose-links:         #33ccff;
+    --tw-prose-code:          #33ccff;
+    --tw-prose-counters:      #9CA3AF;
+    --tw-prose-bullets:       #6B7280;
+    --tw-prose-hr:            #374151;
+    --tw-prose-quotes:        #9CA3AF;
+    --tw-prose-quote-borders: #4B5563;
+    --tw-prose-captions:      #6B7280;
+    --tw-prose-pre-code:      #D1D5DB;
+    --tw-prose-pre-bg:        #0D1117;
+    --tw-prose-th-borders:    #374151;
+    --tw-prose-td-borders:    #1F2937;
+  }
+}

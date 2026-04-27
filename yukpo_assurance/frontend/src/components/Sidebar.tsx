@@ -2,7 +2,7 @@
  * Sidebar Yukpo — Navigation agent-first.
  *
  * Architecture :
- *  - Agents IA = point d'entrée principal pour toutes les actions
+ *  - Agents Yukpo = point d'entrée principal pour toutes les actions
  *  - Modules = vues lecture/historique uniquement (non redondantes avec les agents)
  *  - Administration = paramètres
  */
@@ -32,9 +32,9 @@ import { useState } from 'react'
 // ─── Navigation primaire (actions → agents) ───────────────────────────────────
 const NAV_PRIMAIRE = [
   { path: '/dashboard',   label: 'Tableau de bord',  icon: HomeIcon },
-  { path: '/agents',      label: 'Agents IA',         icon: CpuChipIcon,            badge: 'NOUVEAU' },
+  { path: '/agents',      label: 'Yukpo Agents',      icon: CpuChipIcon,            badge: 'NOUVEAU' },
   { path: '/validations', label: 'Validations',       icon: ShieldCheckIcon },
-  { path: '/chat',        label: 'Yukpo IA Copilote', icon: ChatBubbleLeftRightIcon },
+  { path: '/chat',        label: 'Yukpo Copilote',    icon: ChatBubbleLeftRightIcon },
 ]
 
 // ─── Modules consultation (lecture / historique) ──────────────────────────────

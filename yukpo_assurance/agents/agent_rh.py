@@ -515,7 +515,7 @@ Poste : {params.get('poste')}
 Profil requis : {params.get('profil_requis', 'À définir')}
 Description mission : {params.get('description', '')}
 Format : titre percutant, missions, profil, avantages, modalités candidature."""
-                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.REDACTION)
                     from core.approval_queue import approval_queue
                     await approval_queue.ajouter({
                         "type": "offre_emploi",
@@ -554,7 +554,7 @@ Profil requis : {params.get('profil_requis', '')}
 Poste : {params.get('poste')}
 Date d'entrée : {params.get('date_entretien', 'À définir')}
 Inclure : J1-J7, J8-J30, J31-J90 — activités, formations, rencontres clés, objectifs premier mois."""
-                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                    rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.REDACTION)
                     return rep.contenu
 
                 # lister_candidats / planifier_entretien / evaluer_candidat

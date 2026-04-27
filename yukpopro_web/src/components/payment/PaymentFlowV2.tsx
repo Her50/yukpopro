@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Smartphone, Copy, Check, ArrowRight, Loader2,
-  CheckCircle, XCircle, ExternalLink, AlertCircle,
+  CheckCircle, XCircle, ExternalLink, AlertCircle, CreditCard,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui";
@@ -36,7 +36,8 @@ type Props = {
   onCancel?: () => void;
 };
 
-type Step = "phone" | "provider" | "confirm" | "processing" | "done";
+type Step = "method" | "phone" | "provider" | "confirm" | "processing" | "done";
+type MethodChoice = "mobile_money" | "card";
 
 const TERMINAL_STATUSES = new Set(["success", "failed", "cancelled", "refunded", "expired"]);
 
@@ -46,7 +47,8 @@ export const PaymentFlowV2 = ({
   onSuccess, onCancel,
 }: Props) => {
   const { t } = useTranslation();
-  const [step, setStep] = useState<Step>("phone");
+  const [step, setStep] = useState<Step>("method");
+  const [methodChoice, setMethodChoice] = useState<MethodChoice | undefined>();
   const [phone, setPhone] = useState(defaultPhone);
   const [provider, setProvider] = useState<ProviderName | undefined>();
   const [response, setResponse] = useState<PaymentInitiateResponse | null>(null);
@@ -125,6 +127,75 @@ export const PaymentFlowV2 = ({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // ─── Step 0 : Méthode (Mobile Money vs Carte Bancaire) ───
+  if (step === "method") {
+    const choose = (m: MethodChoice) => {
+      setMethodChoice(m);
+      setProvider(undefined);
+      if (m === "card") setStep("provider");
+      else setStep("phone");
+    };
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">
+          {t("payment.chooseMethodTitle", "Comment souhaitez-vous payer ?")}
+        </h3>
+        <p className="text-sm text-gray-600">
+          {t("payment.chooseMethodDesc", "Sélectionnez votre mode de paiement.")}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => choose("mobile_money")}
+            className={[
+              "flex items-center gap-3 p-4 rounded-xl border-2 transition text-left",
+              "hover:shadow-md hover:border-indigo-400",
+              methodChoice === "mobile_money" ? "border-indigo-600 ring-2 ring-indigo-200" : "border-gray-200",
+            ].join(" ")}
+          >
+            <span className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500 text-white shrink-0">
+              <Smartphone className="w-6 h-6" />
+            </span>
+            <span>
+              <span className="block font-semibold">
+                {t("payment.methodMobileMoney", "Mobile Money")}
+              </span>
+              <span className="block text-xs text-gray-500">
+                {t("payment.methodMobileMoneyDesc", "MTN MoMo, Orange Money, Wave…")}
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => choose("card")}
+            className={[
+              "flex items-center gap-3 p-4 rounded-xl border-2 transition text-left",
+              "hover:shadow-md hover:border-indigo-400",
+              methodChoice === "card" ? "border-indigo-600 ring-2 ring-indigo-200" : "border-gray-200",
+            ].join(" ")}
+          >
+            <span className="w-12 h-12 rounded-full flex items-center justify-center bg-violet-600 text-white shrink-0">
+              <CreditCard className="w-6 h-6" />
+            </span>
+            <span>
+              <span className="block font-semibold">
+                {t("payment.methodCard", "Carte bancaire")}
+              </span>
+              <span className="block text-xs text-gray-500">
+                {t("payment.methodCardDesc", "Visa, Mastercard, PayPal")}
+              </span>
+            </span>
+          </button>
+        </div>
+        {onCancel && (
+          <div className="flex justify-end pt-2">
+            <Button variant="ghost" onClick={onCancel}>{t("common.cancel", "Annuler")}</Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ─── Step 1 : Téléphone ───
   if (step === "phone") {
     return (
@@ -144,9 +215,9 @@ export const PaymentFlowV2 = ({
           />
         </div>
         <div className="flex gap-2 justify-end pt-2">
-          {onCancel && (
-            <Button variant="ghost" onClick={onCancel}>{t("common.cancel", "Annuler")}</Button>
-          )}
+          <Button variant="ghost" onClick={() => setStep("method")}>
+            {t("common.back", "Retour")}
+          </Button>
           <Button
             disabled={!phone || phone.length < 8}
             onClick={() => setStep("provider")}
@@ -160,20 +231,30 @@ export const PaymentFlowV2 = ({
 
   // ─── Step 2 : Provider ───
   if (step === "provider") {
+    const title = methodChoice === "card"
+      ? t("payment.chooseCardTitle", "Choisissez votre processeur")
+      : t("payment.choosePaymentTitle", "Choisissez votre opérateur");
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">{t("payment.choosePaymentTitle", "Choisissez votre opérateur")}</h3>
+        <h3 className="text-lg font-semibold">{title}</h3>
         <PaymentMethodSelector
           customerPhone={phone}
           countryCode={countryCode}
           selected={provider}
           onSelect={setProvider}
+          methodFilter={methodChoice}
         />
         <div className="flex gap-2 justify-end pt-2">
-          <Button variant="ghost" onClick={() => setStep("phone")}>
+          <Button
+            variant="ghost"
+            onClick={() => setStep(methodChoice === "card" ? "method" : "phone")}
+          >
             {t("common.back", "Retour")}
           </Button>
-          <Button disabled={!provider} onClick={() => setStep("confirm")}>
+          <Button
+            disabled={!provider}
+            onClick={() => setStep(methodChoice === "card" ? "confirm" : "confirm")}
+          >
             {t("common.next", "Suivant")} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
@@ -188,7 +269,9 @@ export const PaymentFlowV2 = ({
         <h3 className="text-lg font-semibold">{t("payment.confirmTitle", "Confirmer le paiement")}</h3>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl space-y-2 text-sm">
           <div className="flex justify-between"><span>{t("payment.amount", "Montant")}</span><strong>{amount.toLocaleString()} {currency}</strong></div>
-          <div className="flex justify-between"><span>{t("payment.phone", "Téléphone")}</span><strong>{phone}</strong></div>
+          {methodChoice !== "card" && (
+            <div className="flex justify-between"><span>{t("payment.phone", "Téléphone")}</span><strong>{phone}</strong></div>
+          )}
           <div className="flex justify-between"><span>{t("payment.method", "Méthode")}</span><strong>{provider}</strong></div>
         </div>
         <div className="flex gap-2 justify-end">
@@ -257,7 +340,7 @@ export const PaymentFlowV2 = ({
       )}
       <div className="flex gap-2 justify-center pt-2">
         {!success && (
-          <Button onClick={() => { setStep("phone"); setResponse(null); setPollStatus(""); }}>
+          <Button onClick={() => { setStep("method"); setResponse(null); setPollStatus(""); }}>
             {t("payment.tryAgain", "Réessayer")}
           </Button>
         )}

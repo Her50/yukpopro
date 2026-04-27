@@ -22,6 +22,7 @@ import logging
 from typing import Optional
 
 from core.agent_orchestrateur import TypeAgent
+from core.pays_devise import format_amount, vocabulaire_devise
 from agents.base_agent import BaseAgent
 
 logger = logging.getLogger("yukpo_assurance.pro.agent_pro_base")
@@ -55,6 +56,14 @@ class AgentProBase(BaseAgent):
         self._metier    = profil.metier if profil else None
         self._pays      = profil.pays   if profil else None
 
+    def _format_montant(self, montant) -> str:
+        """Formate un montant dans la devise du pays de l'utilisateur."""
+        return format_amount(montant, self._pays)
+
+    def _vocabulaire_devise(self) -> str:
+        """Mention 'devise locale (CODE)' pour les prompts LLM."""
+        return vocabulaire_devise(self._pays)
+
     # ══════════════════════════════════════════════════════════════════════════
     # Méthodes abstraites requises par BaseAgent
     # ══════════════════════════════════════════════════════════════════════════
@@ -64,10 +73,16 @@ class AgentProBase(BaseAgent):
         System prompt enrichi du profil professionnel.
         Surchargé par chaque agent métier avec ses règles de domaine.
         """
+        devise_locale = self._vocabulaire_devise()
         lignes = [
             "Tu es un assistant IA expert pour les professionnels en Afrique francophone.",
             "Tu maîtrises le droit OHADA, la fiscalité africaine (CIMA zone, UEMOA, CEMAC),",
             "et les pratiques professionnelles locales.",
+            "",
+            f"DEVISE LOCALE : Les montants doivent être exprimés en {devise_locale}",
+            f"  (devise du pays de l'utilisateur). Si un outil retourne un montant en FCFA",
+            f"  alors que la devise locale n'est pas FCFA, mentionne la conversion approximative",
+            f"  et utilise systématiquement {devise_locale} dans ta narration et tes recommandations.",
             "",
             "PRINCIPES FONDAMENTAUX :",
             "- Réponds toujours en tenant compte du contexte africain francophone.",
@@ -398,8 +413,7 @@ class AgentProBase(BaseAgent):
                 "N'inventez pas de contenu juridique."
             )
 
-    @staticmethod
-    def _outil_calculer(params: dict) -> str:
+    def _outil_calculer(self, params: dict) -> str:
         """Évalue une expression mathématique via AST (sans eval() non contrôlé)."""
         import ast
         import operator as op
@@ -437,9 +451,9 @@ class AgentProBase(BaseAgent):
                 if result == int(result):
                     result = int(result)
             label = f" ({description})" if description else ""
-            # Format FCFA avec espaces comme séparateur de milliers
+            # Format selon la devise du pays utilisateur
             if isinstance(result, (int, float)) and abs(result) >= 1000:
-                fmt = f"{result:,.0f}".replace(",", " ")
+                fmt = self._format_montant(result)
             else:
                 fmt = str(result)
             return f"Calcul{label} : `{expression}` = **{fmt}**"

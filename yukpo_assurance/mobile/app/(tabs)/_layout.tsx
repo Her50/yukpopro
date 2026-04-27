@@ -6,7 +6,7 @@
  *   2. Agents       — Interface agent IA (instruction → exécution autonome)
  *   3. Validations  — File d'approbation humaine (swipe to approve)
  *   4. Alertes      — Notifications agents + conformité
- *   5. Yukpo IA     — Chat classique copilote CIMA
+ *   5. YukpoPro     — Chat classique copilote CIMA
  */
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -88,13 +88,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ─── 2. Agents IA ─────────────────────────────────── */}
+      {/* ─── 2. Agents Yukpo ─────────────────────────────────── */}
       <Tabs.Screen
         name="agent"
         options={{
           title: 'Agents',
           tabBarIcon: ({ color, size }) => <TabIcon name="flash-outline" color={color} size={size} />,
-          headerTitle: 'Agents IA Autonomes',
+          headerTitle: 'Agents Yukpo Autonomes',
           tabBarBadge: undefined,
         }}
       />
@@ -127,13 +127,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ─── 5. Yukpo IA (chat classique) ─────────────────── */}
+      {/* ─── 5. YukpoPro (chat classique) ─────────────────── */}
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Yukpo IA',
+          title: 'YukpoPro',
           tabBarIcon: ({ color, size }) => <TabIcon name="chatbubble-outline" color={color} size={size} />,
-          headerTitle: 'Yukpo IA — Copilote CIMA',
+          headerTitle: 'YukpoPro — Copilote CIMA',
         }}
       />
 

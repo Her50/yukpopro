@@ -782,11 +782,17 @@ class BaseAgent(ABC):
 
         # ── Appel GPT-4o ─────────────────────────────────────────────────────
         client_gpt = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+        _modele_gpt = settings.GPT_MODEL_FALLBACK
+        _ml = _modele_gpt.lower()
+        _est_reasoning = _ml.startswith(("gpt-5", "o1", "o3", "o4"))
         kwargs: dict = {
-            "model": settings.GPT_MODEL_FALLBACK,
-            "max_tokens": settings.IA_MAX_TOKENS,
+            "model": _modele_gpt,
             "messages": oai_messages,
         }
+        if _est_reasoning:
+            kwargs["max_completion_tokens"] = settings.IA_MAX_TOKENS
+        else:
+            kwargs["max_tokens"] = settings.IA_MAX_TOKENS
         if outils_gpt:
             kwargs["tools"] = outils_gpt
             kwargs["tool_choice"] = "auto"

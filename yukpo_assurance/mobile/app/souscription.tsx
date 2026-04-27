@@ -108,7 +108,7 @@ function OngletCourtiersSouscription() {
     { id: 'c3', courtier: 'YK Courtage', ref: 'POL-2026-0389', type: 'CNI assuré', statut: 'valide', score: 88 },
   ]
   const statColor = (s: string) => s === 'valide' ? '#16a34a' : s === 'rejete' ? '#dc2626' : s === 'en_analyse' ? '#1d4ed8' : '#f59e0b'
-  const statLabel = (s: string) => s === 'valide' ? 'Validé' : s === 'rejete' ? 'Rejeté' : s === 'en_analyse' ? 'Analyse IA' : 'En attente'
+  const statLabel = (s: string) => s === 'valide' ? 'Validé' : s === 'rejete' ? 'Rejeté' : s === 'en_analyse' ? 'Analyse YukpoPro' : 'En attente'
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f1f5f9' }} contentContainerStyle={{ padding: 12, gap: 10 }}>
@@ -128,7 +128,7 @@ function OngletCourtiersSouscription() {
             </View>
           </View>
           {d.score != null && (
-            <Text style={{ fontSize: 11, color: d.score > 70 ? '#166534' : '#dc2626', marginTop: 6, fontWeight: '600' }}>Score IA : {d.score}%</Text>
+            <Text style={{ fontSize: 11, color: d.score > 70 ? '#166534' : '#dc2626', marginTop: 6, fontWeight: '600' }}>Score YukpoPro : {d.score}%</Text>
           )}
           {d.statut === 'en_attente' && (
             <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#1d4ed8', paddingVertical: 8, borderRadius: 8, marginTop: 10 }}>
@@ -357,7 +357,7 @@ export default function SouscriptionScreen() {
         {etape === 'scan_cni' && (
           <View style={{ alignItems: 'center' }}>
             <Text style={styles.stepTitle}>Scanner la CNI du client</Text>
-            <Text style={styles.stepHint}>Yukpo IA extraira automatiquement les informations du client</Text>
+            <Text style={styles.stepHint}>YukpoPro extraira automatiquement les informations du client</Text>
 
             {imageUri ? (
               <Image source={{ uri: imageUri }} style={styles.previewImg} resizeMode="contain" />
@@ -371,7 +371,7 @@ export default function SouscriptionScreen() {
             {scanLoading ? (
               <View style={{ alignItems: 'center', paddingVertical: 16 }}>
                 <ActivityIndicator size="large" color="#1d4ed8" />
-                <Text style={{ color: '#1d4ed8', marginTop: 8 }}>Yukpo IA analyse la CNI…</Text>
+                <Text style={{ color: '#1d4ed8', marginTop: 8 }}>YukpoPro analyse la CNI…</Text>
               </View>
             ) : (
               <View style={{ width: '100%', gap: 10 }}>

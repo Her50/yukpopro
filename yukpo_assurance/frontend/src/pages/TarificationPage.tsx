@@ -657,7 +657,7 @@ export default function TarificationPage() {
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <h2 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <SparklesIcon className="w-5 h-5 text-purple-600" />
-                Analyse IA — Score de risque ML
+                Analyse YukpoPro — Score de risque ML
                 <span className="ml-auto text-xs text-gray-400">Confiance {Math.round(resultatML.confiance * 100)}%</span>
               </h2>
 

@@ -14,15 +14,15 @@
       "assureur"
     ],
     "fiabilite": "semi_officiel",
-    "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-    "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-    "indexe_le": "2026-04-17T02:49:15.951250"
+    "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+    "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+    "indexe_le": "2026-04-22T17:24:46.385072"
   },
-  "nb_chars": 7632,
-  "nb_chunks": 10,
+  "nb_chars": 41579,
+  "nb_chunks": 81,
   "chunks": [
     {
-      "texte": "ISO 45001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article ne s'appuie pas, ou pas assez, sur des sources\n\nsecondaires ou tertiaires\n\n(\n\nfévrier 2023\n\n).\n\nL'article peut contenir des analyses et interprétations inexactes ou inédites de sources primaires. Pour améliorer la\n\nvérifiabilité\n\nde l'article ainsi que\n\nson intérêt encyclopédique\n\n, il est nécessaire, quand des\n\nsources primaires\n\nsont citées, de les associer à des analyses faites par des sources secondaires.\n\nLogo de la norme\n\nISO 45001\n\n.\n\nISO 45001\n\n« Systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation » (en\n\nanglais\n\n:\n\nOccupational health and safety management systems -- Requirements with guidance for use\n\n) est une\n\nnorme",
+      "texte": "Sécurité au travail — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\n(Redirigé depuis\nSanté et sécurité au travail\n)\nHarley Bruce adolescent, membre d'un binôme de jeunes hommes poussant des wagonnets sur le site de l'Indian Mountain Line de la compagnie Proctor Coal Co., près de Jellico, dans le\nTennessee\n, photographié par Lewis Wickes, vers 1910. C'est pour protéger les enfants, les adolescents et les femmes des travaux pénibles que la\nréglementation\nsur la\nsécurité\net la\nsanté\nau travail a émergé lors de la\nrévolution industrielle\n.\nDans certains cas (crise de 1929, guerre mondiale), même des pays à législation plus avancée ont dérogé aux règles, loi ou conventions en faisant travailler des enfants et des femmes à des\ntâches pénibles\n(récolte des\nbetteraves\ndurant la Seconde Guerre mondiale ; Hall County,\nNebraska\n, oct.",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -37,17 +37,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
         "chunk_index": 0,
-        "chunk_total": 10,
-        "nb_chars": 886
+        "chunk_total": 81,
+        "nb_chars": 863
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nISO 45001 — Wikipédia\n\nAller au contenu\n\nUn article de Wikipédia, l'encyclopédie libre.\n\nSi ce bandeau n'est plus pertinent, retirez-le. Cliquez ici pour en savoir plus.\n\nCet article ne s'appuie pas, ou pas assez, sur des sources\n\nsecondaires ou tertiaires\n\n(\n\nfévrier 2023\n\n).\n\nL'article peut contenir des analyses et interprétations inexactes ou inédites de sources primaires. Pour améliorer la\n\nvérifiabilité\n\nde l'article ainsi que\n\nson intérêt encyclopédique\n\n, il est nécessaire, quand des\n\nsources primaires\n\nsont citées, de les associer à des analyses faites par des sources secondaires.\n\nLogo de la norme\n\nISO 45001\n\n.\n\nISO 45001\n\n« Systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation » (en\n\nanglais\n\n:\n\nOccupational health and safety management systems -- Requirements with guidance for use\n\n) est une\n\nnorme"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSécurité au travail — Wikipédia\nAller au contenu\nUn article de Wikipédia, l'encyclopédie libre.\n(Redirigé depuis\nSanté et sécurité au travail\n)\nHarley Bruce adolescent, membre d'un binôme de jeunes hommes poussant des wagonnets sur le site de l'Indian Mountain Line de la compagnie Proctor Coal Co., près de Jellico, dans le\nTennessee\n, photographié par Lewis Wickes, vers 1910. C'est pour protéger les enfants, les adolescents et les femmes des travaux pénibles que la\nréglementation\nsur la\nsécurité\net la\nsanté\nau travail a émergé lors de la\nrévolution industrielle\n.\nDans certains cas (crise de 1929, guerre mondiale), même des pays à législation plus avancée ont dérogé aux règles, loi ou conventions en faisant travailler des enfants et des femmes à des\ntâches pénibles\n(récolte des\nbetteraves\ndurant la Seconde Guerre mondiale ; Hall County,\nNebraska\n, oct."
     },
     {
-      "texte": "internationale qui spécifie les exigences pour un système de management de la\n\nsanté et sécurité au travail\n\n(SST,\n\nanglais\n\n:\n\nOHS\n\n), publiée en\n\nmars 2018\n\npar l'\n\nOrganisation internationale de normalisation\n\n.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme a été développée par le comité ISO/TC 283\n\n[\n\n]\n, après un long processus de rédaction, comprenant plusieurs projets rejetés et retravaillés entre 2015 et 2017, la norme a finalement été publiée officiellement le\n12 mars 2018\n.\nLa perspective d’une norme ISO sur les Systèmes de Management de la Sécurité et Santé au Travail a été envisagée dès les années 2000 sous l’impulsion du\nBSI\n(les Britanniques ont publié une première norme de SMSST en 1996 : BS 8800, devenue OHSAS 18001\n[",
+      "texte": ").\nLa\nsécurité au travail\n, dénommée également\nsanté et sécurité au travail\n(\nSST\n), désigne diverses disciplines visant à gérer les risques professionnels pesant sur la\nsanté\n.\nCes notions, apparues au\nXIX\ne\nsiècle\ndans le champ du\ndroit du travail\n, en lien avec le\ndéveloppement industriel\nautour duquel s'est progressivement construit ce champ du droit, ont été mises en œuvre avec des premières mesures de protection au bénéfice des travailleurs les plus vulnérables : les\nfemmes\net les\nenfants\n. L’appellation « santé et sécurité au travail » désigne ce qu'on appelait autrefois « hygiène, sécurité et\nconditions de travail\n».\nAujourd'hui, la SST englobe la prévention des risques physiques, chimiques, des risques psychosociaux (RPS), des troubles musculosquelettiques (TMS) et la promotion du bien-être au travail ou qualité de vie au travail (QVT\n[",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -62,17 +62,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
         "chunk_index": 1,
-        "chunk_total": 10,
-        "nb_chars": 756
+        "chunk_total": 81,
+        "nb_chars": 857
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\ninternationale qui spécifie les exigences pour un système de management de la\n\nsanté et sécurité au travail\n\n(SST,\n\nanglais\n\n:\n\nOHS\n\n), publiée en\n\nmars 2018\n\npar l'\n\nOrganisation internationale de normalisation\n\n.\n\nHistorique\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLa norme a été développée par le comité ISO/TC 283\n\n[\n\n]\n, après un long processus de rédaction, comprenant plusieurs projets rejetés et retravaillés entre 2015 et 2017, la norme a finalement été publiée officiellement le\n12 mars 2018\n.\nLa perspective d’une norme ISO sur les Systèmes de Management de la Sécurité et Santé au Travail a été envisagée dès les années 2000 sous l’impulsion du\nBSI\n(les Britanniques ont publié une première norme de SMSST en 1996 : BS 8800, devenue OHSAS 18001\n["
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n).\nLa\nsécurité au travail\n, dénommée également\nsanté et sécurité au travail\n(\nSST\n), désigne diverses disciplines visant à gérer les risques professionnels pesant sur la\nsanté\n.\nCes notions, apparues au\nXIX\ne\nsiècle\ndans le champ du\ndroit du travail\n, en lien avec le\ndéveloppement industriel\nautour duquel s'est progressivement construit ce champ du droit, ont été mises en œuvre avec des premières mesures de protection au bénéfice des travailleurs les plus vulnérables : les\nfemmes\net les\nenfants\n. L’appellation « santé et sécurité au travail » désigne ce qu'on appelait autrefois « hygiène, sécurité et\nconditions de travail\n».\nAujourd'hui, la SST englobe la prévention des risques physiques, chimiques, des risques psychosociaux (RPS), des troubles musculosquelettiques (TMS) et la promotion du bien-être au travail ou qualité de vie au travail (QVT\n["
     },
     {
-      "texte": "]\n). Mais plusieurs votes au sein de l’ISO ont d’abord été négatifs (une des raisons était la disponibilité et la légitimité du référentiel international ILO-OSH\n[\n\n]\n\npublié par l’\n\nOrganisation internationale du travail\n\nen 2001).\n\nEn 2013 un nouveau vote est enfin positif et l’ISO s’engage dans l’élaboration de son propre référentiel de SMSST. Le projet fait même l’objet d’un accord de coopération entre l’\n\nOIT\n\net l’ISO (accord qui se terminera par une tension entre ces deux organismes, la norme ISO ne s'étant pas totalement alignée sur toutes les exigences minimum de l'ILO-OSH). La naissance de l’ISO 45001 est laborieuse mais arrive à terme début 2018.\n\nDe nombreux organismes nationaux de normalisation membres de l'ISO l'adoptent comme norme nationale (par exemple BSI qui en fait d'emblée sa norme ISO 45001 en annulant ses propres normes de SMSST, dont celle mondialement connue",
+      "texte": "]\n).\nDéfinition\n[\nmodifier\n|\nmodifier le code\n]\nSelon l’\nOMS\n, la santé et sécurité au travail est un «axe de travail pluridisciplinaire visant la promotion et le maintien du plus haut degré de bien-être physique, mental et social des travailleurs dans toutes les professions »\n[\n\n]\n. Elle implique la prévention des atteintes à la santé liés aux conditions de travail, la protection contre les risques pour la santé physique et mentale, et l'aménagement de l'environnement professionnel en fonction des capacités physiologiques et psychologiques des travailleurs\n[\n\n]\n,\n.\nL’\nUnion européenne\ndéfinit la SST comme un ensemble de mesures visant à améliorer la sécurité et la santé des travailleurs, fondées sur les principes de prévention inscrits dans la directive-cadre 89/391/CEE\n[",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -87,17 +87,342 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
         "chunk_index": 2,
-        "chunk_total": 10,
+        "chunk_total": 81,
+        "nb_chars": 783
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n).\nDéfinition\n[\nmodifier\n|\nmodifier le code\n]\nSelon l’\nOMS\n, la santé et sécurité au travail est un «axe de travail pluridisciplinaire visant la promotion et le maintien du plus haut degré de bien-être physique, mental et social des travailleurs dans toutes les professions »\n[\n\n]\n. Elle implique la prévention des atteintes à la santé liés aux conditions de travail, la protection contre les risques pour la santé physique et mentale, et l'aménagement de l'environnement professionnel en fonction des capacités physiologiques et psychologiques des travailleurs\n[\n\n]\n,\n.\nL’\nUnion européenne\ndéfinit la SST comme un ensemble de mesures visant à améliorer la sécurité et la santé des travailleurs, fondées sur les principes de prévention inscrits dans la directive-cadre 89/391/CEE\n["
+    },
+    {
+      "texte": "]\n.\nEn outre, «La santé au travail traite de tous les aspects de la santé et de la sécurité sur le lieu de travail et met fortement l'accent sur la prévention primaire des risques»\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 3,
+        "chunk_total": 81,
+        "nb_chars": 182
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nEn outre, «La santé au travail traite de tous les aspects de la santé et de la sécurité sur le lieu de travail et met fortement l'accent sur la prévention primaire des risques»\n["
+    },
+    {
+      "texte": "]\n.\nEnjeux contemporains\n[\nmodifier\n|\nmodifier le code\n]\nLa\npénibilité du travail\nvarie grandement selon les métiers et leurs conditions d'exercice (\nhauts-fourneaux\nde\nClabecq\n, Belgique).\nLa\nsignalétique\net les\nétiquettes de danger\nsont un des nombreux outils de prévention rendus obligatoires au\nXX\ne\nsiècle pour certains produits et certaines activités.\nToute situation de travail engendre des risques, plus ou moins prononcés, pour l'employé.\nLa protection de la\nsanté au travail\ndes salariés de\ndroit privé\n(\nentreprises\n,\nassociations\n, etc.) et des\nfonctionnaires\n(\nfonction publique\nd'État ou des\ncollectivités territoriales\n,\nhôpitaux\n), est devenue avec la prise de conscience du public face aux\nrisques\n, une notion incontournable. Au-delà de la prévention des accidents du travail et des maladies professionnelles, la SST intègre désormais la qualité de vie au travail (QVT)\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 4,
+        "chunk_total": 81,
+        "nb_chars": 889
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nEnjeux contemporains\n[\nmodifier\n|\nmodifier le code\n]\nLa\npénibilité du travail\nvarie grandement selon les métiers et leurs conditions d'exercice (\nhauts-fourneaux\nde\nClabecq\n, Belgique).\nLa\nsignalétique\net les\nétiquettes de danger\nsont un des nombreux outils de prévention rendus obligatoires au\nXX\ne\nsiècle pour certains produits et certaines activités.\nToute situation de travail engendre des risques, plus ou moins prononcés, pour l'employé.\nLa protection de la\nsanté au travail\ndes salariés de\ndroit privé\n(\nentreprises\n,\nassociations\n, etc.) et des\nfonctionnaires\n(\nfonction publique\nd'État ou des\ncollectivités territoriales\n,\nhôpitaux\n), est devenue avec la prise de conscience du public face aux\nrisques\n, une notion incontournable. Au-delà de la prévention des accidents du travail et des maladies professionnelles, la SST intègre désormais la qualité de vie au travail (QVT)\n["
+    },
+    {
+      "texte": "]\n.\nLa Santé Sécurité au Travail répond a cinq enjeux : humains, économiques, sociaux, juridiques, et d’image de marque\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 5,
+        "chunk_total": 81,
+        "nb_chars": 121
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nLa Santé Sécurité au Travail répond a cinq enjeux : humains, économiques, sociaux, juridiques, et d’image de marque\n["
+    },
+    {
+      "texte": "]\n.\nEnjeu humain et éthique\n[\nmodifier\n|\nmodifier le code\n]\nLa protection de la santé physique et mentale des travailleurs est l'objectif principale de la SST et vise à garantir un environnement de travail sûr, sain et respectueux de l’intégrité des personnes. Cette dimension recouvre notamment :\nla prévention des risques classiques (chutes, manutentions, exposition aux agents chimiques ou biologiques) ;\nla lutte contre les troubles musculosquelettiques (TMS) ;\nla lutte contre les risques psychosociaux (stress, harcèlement, surcharge mentale) ;\nl’adaptation des conditions de travail aux capacités des travailleurs.\nLa SST est également considérée comme un levier du développement durable, en lien avec les Objectifs de Développement Durable (ODD), notamment l’ODD 8 relatif à un travail décent pour tous\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 6,
+        "chunk_total": 81,
+        "nb_chars": 812
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nEnjeu humain et éthique\n[\nmodifier\n|\nmodifier le code\n]\nLa protection de la santé physique et mentale des travailleurs est l'objectif principale de la SST et vise à garantir un environnement de travail sûr, sain et respectueux de l’intégrité des personnes. Cette dimension recouvre notamment :\nla prévention des risques classiques (chutes, manutentions, exposition aux agents chimiques ou biologiques) ;\nla lutte contre les troubles musculosquelettiques (TMS) ;\nla lutte contre les risques psychosociaux (stress, harcèlement, surcharge mentale) ;\nl’adaptation des conditions de travail aux capacités des travailleurs.\nLa SST est également considérée comme un levier du développement durable, en lien avec les Objectifs de Développement Durable (ODD), notamment l’ODD 8 relatif à un travail décent pour tous\n["
+    },
+    {
+      "texte": "]\n.\nEnjeu économique\n[\nmodifier\n|\nmodifier le code\n]\nLes accidents du travail, maladies professionnelles  génèrent des coûts importants\n[\n\n]\npour les entreprises, les travailleurs et la collectivité. Ces coûts sont liés à l’absentéisme, à la perte de productivité, à la désorganisation des services, à l’indemnisation des victimes et, dans certains cas, à des contentieux.\nLes investissements en matière de prévention peuvent générer un retour sur investissement significatif pour les employeurs\n[\n\n]\n, en particulier lorsqu’ils sont intégrés dans une politique de management des risques\n[\n\n]\n\n.\n\nTendance\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 7,
+        "chunk_total": 81,
+        "nb_chars": 642
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nEnjeu économique\n[\nmodifier\n|\nmodifier le code\n]\nLes accidents du travail, maladies professionnelles  génèrent des coûts importants\n[\n\n]\npour les entreprises, les travailleurs et la collectivité. Ces coûts sont liés à l’absentéisme, à la perte de productivité, à la désorganisation des services, à l’indemnisation des victimes et, dans certains cas, à des contentieux.\nLes investissements en matière de prévention peuvent générer un retour sur investissement significatif pour les employeurs\n[\n\n]\n, en particulier lorsqu’ils sont intégrés dans une politique de management des risques\n[\n\n]\n\n.\n\nTendance\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "Les enquêtes menées  soulignent une évolution préoccupante dans la perception des risques professionnels. En particulier, dans les petites entreprises, la prévention est encore trop souvent perçue comme une contrainte administrative. Parallèlement, les attentes des travailleurs en matière de bien-être, d’équilibre vie professionnelle-vie personnelle et de reconnaissance sont en forte augmentation.\n\nLes enquêtes disponibles notent une tendance globale à la dégradation de l'attention portée aux risques professionnels par les travailleurs, comme par leurs employeurs. En France, selon une enquête\n\nIpsos\n\n, produite en 2010 (publié le\n\n22 novembre 2010\n\n), un tiers des Français négligent leur bien-être au profit de leur travail. La proportion passe même à 50 % pour la tranche d'âge entre 30 et 50 ans.\n\nDe plus, dans un contexte socio-économique poussant à toujours plus de productivité,",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 8,
+        "chunk_total": 81,
+        "nb_chars": 893
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLes enquêtes menées  soulignent une évolution préoccupante dans la perception des risques professionnels. En particulier, dans les petites entreprises, la prévention est encore trop souvent perçue comme une contrainte administrative. Parallèlement, les attentes des travailleurs en matière de bien-être, d’équilibre vie professionnelle-vie personnelle et de reconnaissance sont en forte augmentation.\n\nLes enquêtes disponibles notent une tendance globale à la dégradation de l'attention portée aux risques professionnels par les travailleurs, comme par leurs employeurs. En France, selon une enquête\n\nIpsos\n\n, produite en 2010 (publié le\n\n22 novembre 2010\n\n), un tiers des Français négligent leur bien-être au profit de leur travail. La proportion passe même à 50 % pour la tranche d'âge entre 30 et 50 ans.\n\nDe plus, dans un contexte socio-économique poussant à toujours plus de productivité,"
+    },
+    {
+      "texte": "« 70 % des actifs estiment que leur situation s’est dégradée au travail »\n\n, notamment en ce qui concerne le niveau de\n\nstress\n\n(52 %), et la charge de travail (49 %)\n\n[\n\n]\n. Une suite d'études commandées par l'\nINRS\ninrs.fr\n[\n\n]\nen 2007, 2010 et 2014 a montré que les\nchefs\nde\npetites ou moyennes entreprises\n(PME) et de\ntrès petites entreprises\n(TPE) se préoccupent de moins en moins des questions de santé et de sécurité au travail. Le taux de chefs d'entreprise se préoccupant de cette question passant de 25 à 16 % dans les TPE (microentreprises de 1 à 9 personnes) et de 18 à 14 % dans les PE (petites entreprises ayant 10 à 49 salariés)\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 9,
+        "chunk_total": 81,
+        "nb_chars": 645
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n« 70 % des actifs estiment que leur situation s’est dégradée au travail »\n\n, notamment en ce qui concerne le niveau de\n\nstress\n\n(52 %), et la charge de travail (49 %)\n\n[\n\n]\n. Une suite d'études commandées par l'\nINRS\ninrs.fr\n[\n\n]\nen 2007, 2010 et 2014 a montré que les\nchefs\nde\npetites ou moyennes entreprises\n(PME) et de\ntrès petites entreprises\n(TPE) se préoccupent de moins en moins des questions de santé et de sécurité au travail. Le taux de chefs d'entreprise se préoccupant de cette question passant de 25 à 16 % dans les TPE (microentreprises de 1 à 9 personnes) et de 18 à 14 % dans les PE (petites entreprises ayant 10 à 49 salariés)\n["
+    },
+    {
+      "texte": "]\n.\nPour l'étude conduite fin 2014, les risques jugés les plus préoccupants par ces employeurs étaient le risque routier, le risque lié à l'activité physique et le risque de chute de plain-pied. Plus d'un tiers de ces chefs d'entreprise estimaient que leur activité ne présente pas de risque du tout pour leurs employés, et ne voyaient aucun intérêt au\nDocument unique d'évaluation des risques professionnels\n[\n\n]\n. Cependant, ce même sondage relève que de 2010 et 2014, le nombre de dirigeants affirmant avoir mis en œuvre des mesures de prévention (protections individuelles ou collectives, interventions sur l'aménagement ou l'organisation, actions de formation, information aux salariés) a augmenté\n[\n\n]\n. Ils apprécient les fiches techniques et notices éditées par les fabricants qu'ils consultent de plus en plus en\nformat numérique\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 10,
+        "chunk_total": 81,
+        "nb_chars": 840
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nPour l'étude conduite fin 2014, les risques jugés les plus préoccupants par ces employeurs étaient le risque routier, le risque lié à l'activité physique et le risque de chute de plain-pied. Plus d'un tiers de ces chefs d'entreprise estimaient que leur activité ne présente pas de risque du tout pour leurs employés, et ne voyaient aucun intérêt au\nDocument unique d'évaluation des risques professionnels\n[\n\n]\n. Cependant, ce même sondage relève que de 2010 et 2014, le nombre de dirigeants affirmant avoir mis en œuvre des mesures de prévention (protections individuelles ou collectives, interventions sur l'aménagement ou l'organisation, actions de formation, information aux salariés) a augmenté\n[\n\n]\n. Ils apprécient les fiches techniques et notices éditées par les fabricants qu'ils consultent de plus en plus en\nformat numérique\n["
+    },
+    {
+      "texte": "]\n. Ils disent consulter les services de santé au travail quand ils ont des questions à ce sujet (pour 49 % d'entre eux dans les PE, et 34 % des TPE) ; environ 60 % d'entre eux leur font confiance,\n« devant les organismes de prévention (CARSAT, CRAM, ARACT… : environ 40 %) et les organisations professionnelles (environ 30 %) »\n[\n\n]\n.\nL'INRS conclut de ce sondage que\n« la prévention est principalement perçue par les chefs d'entreprise comme une contrainte. (Ils) ne vont pas, ou peu, chercher l'information qui, pensent-ils, leur parviendra d'une manière ou d'une autre si elle est importante »\n[\n\n]\n.\nPourtant, les Français considèrent à 60 % que s'occuper de leur bien-être serait « important », 24 % considérant même cela comme « primordial »\n[\n\n]\n.\nEn\n\n, la France est le pays avec les moins bons résultats de l'Union européenne en matière de sécurité au travail\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 11,
+        "chunk_total": 81,
+        "nb_chars": 871
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n. Ils disent consulter les services de santé au travail quand ils ont des questions à ce sujet (pour 49 % d'entre eux dans les PE, et 34 % des TPE) ; environ 60 % d'entre eux leur font confiance,\n« devant les organismes de prévention (CARSAT, CRAM, ARACT… : environ 40 %) et les organisations professionnelles (environ 30 %) »\n[\n\n]\n.\nL'INRS conclut de ce sondage que\n« la prévention est principalement perçue par les chefs d'entreprise comme une contrainte. (Ils) ne vont pas, ou peu, chercher l'information qui, pensent-ils, leur parviendra d'une manière ou d'une autre si elle est importante »\n[\n\n]\n.\nPourtant, les Français considèrent à 60 % que s'occuper de leur bien-être serait « important », 24 % considérant même cela comme « primordial »\n[\n\n]\n.\nEn\n\n, la France est le pays avec les moins bons résultats de l'Union européenne en matière de sécurité au travail\n["
+    },
+    {
+      "texte": "]\n.\nOrganisation (en France)\n[\nmodifier\n|\nmodifier le code\n]\nLe premier traité d’hygiène industrielle est rédigé en 1860 par le médecin hygiéniste\nMaxime Vernois\n[\n\n]\n.\nEn France, le nouveau\ncode du travail\n, maintenant plus que centenaire, a structuré une partie dédiée à la prévention des risques professionnels qui constitue un véritable « système de management de la sécurité et de la santé au travail »\n[\n\n]\n\n.\n\nActeurs dans l'entreprise\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUn ouvrier marocain repeint un mur sur une échelle sans aucune sécurité à\n\nCasablanca\n\nLes acteurs dans l'entreprise de la santé et de la sécurité au travail sont :\n\nEn premier lieu l'\n\nemployeur\n\n(porteur du\n\nmandat social",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 12,
+        "chunk_total": 81,
+        "nb_chars": 704
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nOrganisation (en France)\n[\nmodifier\n|\nmodifier le code\n]\nLe premier traité d’hygiène industrielle est rédigé en 1860 par le médecin hygiéniste\nMaxime Vernois\n[\n\n]\n.\nEn France, le nouveau\ncode du travail\n, maintenant plus que centenaire, a structuré une partie dédiée à la prévention des risques professionnels qui constitue un véritable « système de management de la sécurité et de la santé au travail »\n[\n\n]\n\n.\n\nActeurs dans l'entreprise\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nUn ouvrier marocain repeint un mur sur une échelle sans aucune sécurité à\n\nCasablanca\n\nLes acteurs dans l'entreprise de la santé et de la sécurité au travail sont :\n\nEn premier lieu l'\n\nemployeur\n\n(porteur du\n\nmandat social"
+    },
+    {
+      "texte": "de l'entreprise, ou son délégataire avéré au niveau d'un établissement le cas échéant) qui doit assurer la sécurité et protéger la santé physique et mentale de son personnel. Pour cela, il met en place une organisation et une\n\nplanification\n\nde la\n\nprévention\n\ndes risques professionnels et de la\n\npénibilité au travail\n\ndans toutes les activités de son entreprise à tous les niveaux de la hiérarchie (voir les principes généraux de prévention dans les art L4121-1 et quelques suivants du code du travail). En cas d'\n\naccident du travail\n\nou de maladie professionnelle, la responsabilité civile de l'employeur envers son salarié est automatique mais forfaitaire. Toutefois, une réparation complémentaire peut être recherchée selon la procédure dite de la faute inexcusable de l'employeur. La\n\nresponsabilité pénale",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 13,
+        "chunk_total": 81,
+        "nb_chars": 814
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nde l'entreprise, ou son délégataire avéré au niveau d'un établissement le cas échéant) qui doit assurer la sécurité et protéger la santé physique et mentale de son personnel. Pour cela, il met en place une organisation et une\n\nplanification\n\nde la\n\nprévention\n\ndes risques professionnels et de la\n\npénibilité au travail\n\ndans toutes les activités de son entreprise à tous les niveaux de la hiérarchie (voir les principes généraux de prévention dans les art L4121-1 et quelques suivants du code du travail). En cas d'\n\naccident du travail\n\nou de maladie professionnelle, la responsabilité civile de l'employeur envers son salarié est automatique mais forfaitaire. Toutefois, une réparation complémentaire peut être recherchée selon la procédure dite de la faute inexcusable de l'employeur. La\n\nresponsabilité pénale"
+    },
+    {
+      "texte": "de l'employeur peut être aussi recherchée, par exemple, en cas de non-respect des textes réglementaires en santé et sécurité au travail du\n\nCode du travail\n\n, ou bien en cas d'accident grave ou mortel, mais aussi celle des membres de l'encadrement ou même celle de simple salariés impliqués dans la\n\ngenèse\n\nde l'évènement.\n\nLe\n\npréventeur\n\n(salarié compétent en Protection et Prévention des Risques Professionnels désigné par l'Employeur conformément au Code du travail - transposition timide et tardive des dispositions de l'art 7 de la directive européenne 89/391/CEE) n'est pas le délégataire de l'obligation générale de l'employeur en matière de sécurité et de la santé au travail du personnel, mais un fonctionnel de la prévention sécurité et santé au travail dans l'entreprise",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 14,
+        "chunk_total": 81,
+        "nb_chars": 783
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nde l'employeur peut être aussi recherchée, par exemple, en cas de non-respect des textes réglementaires en santé et sécurité au travail du\n\nCode du travail\n\n, ou bien en cas d'accident grave ou mortel, mais aussi celle des membres de l'encadrement ou même celle de simple salariés impliqués dans la\n\ngenèse\n\nde l'évènement.\n\nLe\n\npréventeur\n\n(salarié compétent en Protection et Prévention des Risques Professionnels désigné par l'Employeur conformément au Code du travail - transposition timide et tardive des dispositions de l'art 7 de la directive européenne 89/391/CEE) n'est pas le délégataire de l'obligation générale de l'employeur en matière de sécurité et de la santé au travail du personnel, mais un fonctionnel de la prévention sécurité et santé au travail dans l'entreprise"
+    },
+    {
+      "texte": "Son rôle est globalement de conseiller son employeur, l'encadrement et les salariés et de conduire les activités de protection et de prévention des risques professionnels dans son entreprise (cf directive européenne de 1989)\n\nDe nombreuses appellations existent : ingénieur sécurité, responsable sécurité, animateur sécurité… Il agit en lien avec les divers acteurs internes et externes concernés\n\nDans les entreprises d'une certaine taille (alors généralement le préventeur a un niveau de formation bac + 2 à 5 ans) il porte et gère le\n\nsystème de management\n\nde la sécurité & santé au travail\n\nde son entreprise (cf modèle internationale ILO-OSH) à commencer par la définition de la politique sécurité & santé au travail et la conduite d'un programme de prévention annuel, en passant notamment par le processus d'évaluation des risques professionnels et celui de la conformité aux exigences du",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 15,
+        "chunk_total": 81,
         "nb_chars": 895
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n). Mais plusieurs votes au sein de l’ISO ont d’abord été négatifs (une des raisons était la disponibilité et la légitimité du référentiel international ILO-OSH\n[\n\n]\n\npublié par l’\n\nOrganisation internationale du travail\n\nen 2001).\n\nEn 2013 un nouveau vote est enfin positif et l’ISO s’engage dans l’élaboration de son propre référentiel de SMSST. Le projet fait même l’objet d’un accord de coopération entre l’\n\nOIT\n\net l’ISO (accord qui se terminera par une tension entre ces deux organismes, la norme ISO ne s'étant pas totalement alignée sur toutes les exigences minimum de l'ILO-OSH). La naissance de l’ISO 45001 est laborieuse mais arrive à terme début 2018.\n\nDe nombreux organismes nationaux de normalisation membres de l'ISO l'adoptent comme norme nationale (par exemple BSI qui en fait d'emblée sa norme ISO 45001 en annulant ses propres normes de SMSST, dont celle mondialement connue"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSon rôle est globalement de conseiller son employeur, l'encadrement et les salariés et de conduire les activités de protection et de prévention des risques professionnels dans son entreprise (cf directive européenne de 1989)\n\nDe nombreuses appellations existent : ingénieur sécurité, responsable sécurité, animateur sécurité… Il agit en lien avec les divers acteurs internes et externes concernés\n\nDans les entreprises d'une certaine taille (alors généralement le préventeur a un niveau de formation bac + 2 à 5 ans) il porte et gère le\n\nsystème de management\n\nde la sécurité & santé au travail\n\nde son entreprise (cf modèle internationale ILO-OSH) à commencer par la définition de la politique sécurité & santé au travail et la conduite d'un programme de prévention annuel, en passant notamment par le processus d'évaluation des risques professionnels et celui de la conformité aux exigences du"
     },
     {
-      "texte": "OHSAS 18001\n\n) tandis que quelques pays ont décidé de ne pas en faire leur norme nationale (dont la France). Suite à sa parution, un délai de trois ans a été accordé pour la migration des entreprises certifiées selon OHSAS 18001 vers ISO 45001\n\n[\n\n]\n.\nL'ISO 45001 est diffusée en trois langues (anglais, espagnol et français) par l'ISO\n[\n\n]\nou via ses membres (les organismes nationaux de normalisation).\nEn France, l’AFNOR a annoncé en\nnovembre 2024\nle lancement d’une révision de la norme pour intégrer des évolutions telles que la prise en compte des enjeux climatiques\n[\n\n]\n,\n[\n\n]\nAnnée\nVersion / Étape\n\nOHSAS 18001:1999\n\nOHSAS 18001:2007\n\nCréation du comité ISO/TC 283\n2015-2017\nProjets de norme ISO 45001\n\nISO 45001:2018\n\nFin de la transition OHSAS 18001 → ISO 45001",
+      "texte": "droit du travail\n\n, jusqu'au bouclage du système avec la\n\nrevue de direction\n\nHors système de management structuré c'est lui néanmoins qui va analyser les situations de travail, proposer des dispositions ou plans d'actions de prévention, établir des consignes de sécurité, déterminer des actions d'information-formation, assurer une veille technique et réglementaire, analyser les accidents et maladies professionnels, animer le CHSCT, etc.)\n\nSuivant la taille et l'organisation de l'entreprise, cette mission de prévention des risques professionnel se combine souvent avec d'autres missions telles la protection de l'environnement, la qualité, la sûreté, et/ou les services généraux-maintenance",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -112,17 +437,217 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 3,
-        "chunk_total": 10,
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 16,
+        "chunk_total": 81,
+        "nb_chars": 695
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\ndroit du travail\n\n, jusqu'au bouclage du système avec la\n\nrevue de direction\n\nHors système de management structuré c'est lui néanmoins qui va analyser les situations de travail, proposer des dispositions ou plans d'actions de prévention, établir des consignes de sécurité, déterminer des actions d'information-formation, assurer une veille technique et réglementaire, analyser les accidents et maladies professionnels, animer le CHSCT, etc.)\n\nSuivant la taille et l'organisation de l'entreprise, cette mission de prévention des risques professionnel se combine souvent avec d'autres missions telles la protection de l'environnement, la qualité, la sûreté, et/ou les services généraux-maintenance"
+    },
+    {
+      "texte": "En fait le préventeur qui existe officieusement dans nombre d'entreprises d'une certaine taille correspond typiquement au fonctionnel ou service de « protection et prévention des risques professionnels » demandé par la directive EU de 1989 qui n'a toujours pas été véritablement transposée sur ce point dans notre droit français.\n\nCe préventeur en sécurité et santé au travail est généralement issu d'une formation universitaire technologique de deux à cinq ans. Ces missions peuvent inclure la gestion du risque incendie, l'amélioration des conditions d'exécution des tâches (\n\nergonomie\n\n), les conseils en matière de santé, sécurité et conditions de travail, l'analyse des accidents du travail et des maladies professionnelles et le choix des\n\néquipements de protection individuelle\n\n(EPI).\n\nL'\n\nencadrement",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 17,
+        "chunk_total": 81,
+        "nb_chars": 810
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nEn fait le préventeur qui existe officieusement dans nombre d'entreprises d'une certaine taille correspond typiquement au fonctionnel ou service de « protection et prévention des risques professionnels » demandé par la directive EU de 1989 qui n'a toujours pas été véritablement transposée sur ce point dans notre droit français.\n\nCe préventeur en sécurité et santé au travail est généralement issu d'une formation universitaire technologique de deux à cinq ans. Ces missions peuvent inclure la gestion du risque incendie, l'amélioration des conditions d'exécution des tâches (\n\nergonomie\n\n), les conseils en matière de santé, sécurité et conditions de travail, l'analyse des accidents du travail et des maladies professionnelles et le choix des\n\néquipements de protection individuelle\n\n(EPI).\n\nL'\n\nencadrement"
+    },
+    {
+      "texte": "est souvent le premier responsable en matière de santé et de sécurité au travail. Il veille à l'application des\n\nconsignes de sécurité\n\nsur le terrain.\n\nLes\n\nsalariés\n\nsont responsables de leur propre sécurité ainsi que celle de leurs collègues pouvant être affectés par leurs actions, dans la mesure de leurs connaissances (formations, informations) et des moyens mis à leur disposition. Ils sont responsables de l'application des consignes de sécurité édictées par l'employeur qui s'appliquent à eux. Le Code du travail précise que cette responsabilité ne diminue pas celle de l'employeur. Ils participent à la politique de prévention de l'entreprise.\n\nLes\n\nreprésentants du personnel\n\nau\n\nCHSCT\n\n(comité d'hygiène, de sécurité et des conditions de travail) qui est l'\n\ninstitution",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 18,
+        "chunk_total": 81,
+        "nb_chars": 783
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nest souvent le premier responsable en matière de santé et de sécurité au travail. Il veille à l'application des\n\nconsignes de sécurité\n\nsur le terrain.\n\nLes\n\nsalariés\n\nsont responsables de leur propre sécurité ainsi que celle de leurs collègues pouvant être affectés par leurs actions, dans la mesure de leurs connaissances (formations, informations) et des moyens mis à leur disposition. Ils sont responsables de l'application des consignes de sécurité édictées par l'employeur qui s'appliquent à eux. Le Code du travail précise que cette responsabilité ne diminue pas celle de l'employeur. Ils participent à la politique de prévention de l'entreprise.\n\nLes\n\nreprésentants du personnel\n\nau\n\nCHSCT\n\n(comité d'hygiène, de sécurité et des conditions de travail) qui est l'\n\ninstitution"
+    },
+    {
+      "texte": "représentative du personnel chargée de la sécurité et de la santé au travail obligatoire dans les entreprises de 50 salariés et plus. Le CHSCT peut être vu comme le\n\ncontrepoids\n\ndes pouvoirs de la direction en ce qui concerne la mise en place de mesures liées à la sécurité et aux conditions de travail. Il est présidé par l'employeur ou son représentant, comporte une délégation du personnel proportionnelle à l'effectif, et est assisté du\n\nmédecin du travail\n\net du préventeur. Il a pour missions :\n\nde contribuer à la protection de la santé physique et mentale (y compris la pénibilité au travail) et de la sécurité des travailleurs de l'établissement, et de ceux mis à sa disposition par une entreprise extérieure ;\n\nde contribuer à l'amélioration des conditions de travail, notamment en vue de faciliter l'accès des femmes à tous les emplois et de répondre aux problèmes liés à la maternité ;",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 19,
+        "chunk_total": 81,
+        "nb_chars": 898
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nreprésentative du personnel chargée de la sécurité et de la santé au travail obligatoire dans les entreprises de 50 salariés et plus. Le CHSCT peut être vu comme le\n\ncontrepoids\n\ndes pouvoirs de la direction en ce qui concerne la mise en place de mesures liées à la sécurité et aux conditions de travail. Il est présidé par l'employeur ou son représentant, comporte une délégation du personnel proportionnelle à l'effectif, et est assisté du\n\nmédecin du travail\n\net du préventeur. Il a pour missions :\n\nde contribuer à la protection de la santé physique et mentale (y compris la pénibilité au travail) et de la sécurité des travailleurs de l'établissement, et de ceux mis à sa disposition par une entreprise extérieure ;\n\nde contribuer à l'amélioration des conditions de travail, notamment en vue de faciliter l'accès des femmes à tous les emplois et de répondre aux problèmes liés à la maternité ;"
+    },
+    {
+      "texte": "de veiller à l'observation des prescriptions légales prises en ces matières\n\n[\n\n]\n\n.\n\nLe\n\nmédecin du travail\n\nconseille l'employeur, les salariés et leurs représentants, en matière de prévention des risques professionnels. Il est employé par les entreprises le plus importantes (Sce de Santé de Santé au Travail dits autonomes), mais pour la majorité des entreprises il travaille dans un Sce de Santé au Travail interentreprises. Sa mission principale est la\n\nsurveillance\n\nmédicale du personnel en vue de la détermination de l'aptitude médicale au poste de travail. Il doit consacrer un tiers de son temps à des actions en milieu de travail.\n\nL'\n\ninfirmière\n\nen santé au travail assiste le médecin du travail dans ses missions. Elle est directement présente dans l'entreprise (une première infirmière dans tout établissement industriel dont l'effectif dépasse 200 salariés).\n\nL'\n\nassistante sociale",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 20,
+        "chunk_total": 81,
+        "nb_chars": 899
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nde veiller à l'observation des prescriptions légales prises en ces matières\n\n[\n\n]\n\n.\n\nLe\n\nmédecin du travail\n\nconseille l'employeur, les salariés et leurs représentants, en matière de prévention des risques professionnels. Il est employé par les entreprises le plus importantes (Sce de Santé de Santé au Travail dits autonomes), mais pour la majorité des entreprises il travaille dans un Sce de Santé au Travail interentreprises. Sa mission principale est la\n\nsurveillance\n\nmédicale du personnel en vue de la détermination de l'aptitude médicale au poste de travail. Il doit consacrer un tiers de son temps à des actions en milieu de travail.\n\nL'\n\ninfirmière\n\nen santé au travail assiste le médecin du travail dans ses missions. Elle est directement présente dans l'entreprise (une première infirmière dans tout établissement industriel dont l'effectif dépasse 200 salariés).\n\nL'\n\nassistante sociale"
+    },
+    {
+      "texte": "joue un rôle d'écoute et de conseil notamment dans la prévention des\n\nrisques psychosociaux\n\n(RPS) et le traitement des troubles psychosocieux.\n\nActeurs hors des entreprises\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes\n\nintervenants en prévention des risques professionnels\n\n(IPRP) complètent les compétences des équipes pluridisciplinaires des Services de Santé au Travail interentreprises. Les IPRP sont également d'office les institutions spécialisées\n\nINRS\n\n,\n\nCARSAT\n\n,\n\nOPPBTP\n\net agences régionales du réseau de l'ANACT. Ce sont également des \"personnes morales\" spécialisées ou des \"personnes physiques\" dûment enregistrées sur dossier par la DIRRECTE. La notion d'IPRP a été mis en place dans le cadre de la législation sur la\n\npluridisciplinarité\n\ndes services de santé au travail (comprendre en fait pluridisciplinarité de la démarche de\n\nprévention",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 21,
+        "chunk_total": 81,
+        "nb_chars": 857
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\njoue un rôle d'écoute et de conseil notamment dans la prévention des\n\nrisques psychosociaux\n\n(RPS) et le traitement des troubles psychosocieux.\n\nActeurs hors des entreprises\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nLes\n\nintervenants en prévention des risques professionnels\n\n(IPRP) complètent les compétences des équipes pluridisciplinaires des Services de Santé au Travail interentreprises. Les IPRP sont également d'office les institutions spécialisées\n\nINRS\n\n,\n\nCARSAT\n\n,\n\nOPPBTP\n\net agences régionales du réseau de l'ANACT. Ce sont également des \"personnes morales\" spécialisées ou des \"personnes physiques\" dûment enregistrées sur dossier par la DIRRECTE. La notion d'IPRP a été mis en place dans le cadre de la législation sur la\n\npluridisciplinarité\n\ndes services de santé au travail (comprendre en fait pluridisciplinarité de la démarche de\n\nprévention"
+    },
+    {
+      "texte": "de l'employeur) pour poursuivre la laborieuse transposition française de la\n\ndirective européenne\n\nde 1989 (au début des années 2000 la France risquait en effet des\n\npénalités\n\n). Dans la pratique, leur profil est varié, il s'agira en effet soit d'un ergonome, soit d'un psychologue du travail, ou encore de juristes... En entreprise, l'IPRP pourra notamment être invité par le\n\nComité d'hygiène, de sécurité et des conditions de travail\n\n(CHSCT) en tant que membre consultatif à l'une de ses réunions.\n\nL'\n\ninspecteur\n\nou le\n\ncontrôleur du travail\n\nde l'\n\ninspection du travail",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 22,
+        "chunk_total": 81,
+        "nb_chars": 578
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nde l'employeur) pour poursuivre la laborieuse transposition française de la\n\ndirective européenne\n\nde 1989 (au début des années 2000 la France risquait en effet des\n\npénalités\n\n). Dans la pratique, leur profil est varié, il s'agira en effet soit d'un ergonome, soit d'un psychologue du travail, ou encore de juristes... En entreprise, l'IPRP pourra notamment être invité par le\n\nComité d'hygiène, de sécurité et des conditions de travail\n\n(CHSCT) en tant que membre consultatif à l'une de ses réunions.\n\nL'\n\ninspecteur\n\nou le\n\ncontrôleur du travail\n\nde l'\n\ninspection du travail"
+    },
+    {
+      "texte": ", ou l'inspecteur santé sécurité au travail (dans la fonction publique). Leur mission est de veiller à l'application de la réglementation du travail, notamment en matière de santé et de sécurité au travail. Ils sont, depuis 2010, répartis en unités territoriales des DIRECCTE de chaque région. Ils sont assistés d'ingénieurs en prévention et de médecins inspecteurs régionaux du travail (MIRT).\n\nL'\n\ningénieur conseil\n\nou le\n\ncontrôleur de sécurité\n\ndes services prévention des organismes de Sécurité Sociale (\n\nCaisse d'assurance retraite et de la santé au travail\n\n) ou CARSAT, ex-CRAM jusqu'en\n\njuillet 2010\n\nou encore CRAM (Île-de-France et Alsace-Moselle) ou\n\nCGSS",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 23,
+        "chunk_total": 81,
+        "nb_chars": 669
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n, ou l'inspecteur santé sécurité au travail (dans la fonction publique). Leur mission est de veiller à l'application de la réglementation du travail, notamment en matière de santé et de sécurité au travail. Ils sont, depuis 2010, répartis en unités territoriales des DIRECCTE de chaque région. Ils sont assistés d'ingénieurs en prévention et de médecins inspecteurs régionaux du travail (MIRT).\n\nL'\n\ningénieur conseil\n\nou le\n\ncontrôleur de sécurité\n\ndes services prévention des organismes de Sécurité Sociale (\n\nCaisse d'assurance retraite et de la santé au travail\n\n) ou CARSAT, ex-CRAM jusqu'en\n\njuillet 2010\n\nou encore CRAM (Île-de-France et Alsace-Moselle) ou\n\nCGSS"
+    },
+    {
+      "texte": "(DOM-TOM). Leur mission est de prévenir les risques d'accidents du travail et de maladies professionnelles des salariés du régime général. Pour remplir cette mission, ils ont à leur disposition une palette d'outils de conseil et de contrôle : enquête en cas d'accident du travail ou de maladie professionnelle, réalisation de mesures physiques ou chimiques, préconisations techniques ou organisationnelles, incitations financières (aides financières simplifiées, contrats de prévention, ristournes, majoration du taux de cotisation accidents du travail après procédure d'injonction, organisation de conférences, salons et formations). Ils doivent posséder un agrément délivré par la\n\nCNAMTS\n\nà l'issue d'une formation de plus d'un an suivie auprès de l'\n\nINRS\n\net l'\n\nEN3S",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 24,
+        "chunk_total": 81,
         "nb_chars": 772
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nOHSAS 18001\n\n) tandis que quelques pays ont décidé de ne pas en faire leur norme nationale (dont la France). Suite à sa parution, un délai de trois ans a été accordé pour la migration des entreprises certifiées selon OHSAS 18001 vers ISO 45001\n\n[\n\n]\n.\nL'ISO 45001 est diffusée en trois langues (anglais, espagnol et français) par l'ISO\n[\n\n]\nou via ses membres (les organismes nationaux de normalisation).\nEn France, l’AFNOR a annoncé en\nnovembre 2024\nle lancement d’une révision de la norme pour intégrer des évolutions telles que la prise en compte des enjeux climatiques\n[\n\n]\n,\n[\n\n]\nAnnée\nVersion / Étape\n\nOHSAS 18001:1999\n\nOHSAS 18001:2007\n\nCréation du comité ISO/TC 283\n2015-2017\nProjets de norme ISO 45001\n\nISO 45001:2018\n\nFin de la transition OHSAS 18001 → ISO 45001"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n(DOM-TOM). Leur mission est de prévenir les risques d'accidents du travail et de maladies professionnelles des salariés du régime général. Pour remplir cette mission, ils ont à leur disposition une palette d'outils de conseil et de contrôle : enquête en cas d'accident du travail ou de maladie professionnelle, réalisation de mesures physiques ou chimiques, préconisations techniques ou organisationnelles, incitations financières (aides financières simplifiées, contrats de prévention, ristournes, majoration du taux de cotisation accidents du travail après procédure d'injonction, organisation de conférences, salons et formations). Ils doivent posséder un agrément délivré par la\n\nCNAMTS\n\nà l'issue d'une formation de plus d'un an suivie auprès de l'\n\nINRS\n\net l'\n\nEN3S"
     },
     {
-      "texte": "Lancement de la révision ISO 45001\nStructure de la norme\n[\nmodifier\n|\nmodifier le code\n]\nComme d'autres normes ISO (notamment\nISO 9001\net\nISO 14001\n), l'ISO 45001 adopte le schéma «\nHigh Level Structure\n» (HSL) en dix chapitres\n[\n\n]\ncommun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n[\n\n]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 45001:2018 spécifie les exigences relatives à un système de management de la santé et de la sécurité au travail (SMSST). Elle s’applique à tout organisme, quelle que soit sa taille, son secteur d’activité ou sa forme juridique\n[",
+      "texte": "(pour les ingénieurs conseils) et prêtent serment auprès des tribunaux d'instance pour ne rien révéler des secrets de fabrication et d'exploitation des entreprises qu'ils visitent. Ils ont ainsi un droit d'accès aux lieux de travail identique aux inspecteurs et contrôleurs du travail et peuvent demander toute mesure justifiée de prévention aux entreprises qu'ils accompagnent (code la Sécurité sociale). Certains d'entre eux sont spécialisés : ergonomie, psychologie du travail, mesures physiques (centres de mesures physiques) ou chimiques (laboratoires de chimie), formation de chefs d'entreprises ou de personnes ressources en prévention dans les entreprises. Ils contribuent avec l'INRS et la CNAMTS à l'élaboration de guides de bonnes pratiques édités par l'INRS et à la préparation de recommandations adoptées par les instances paritaires des branches professionnelles (CTN, CATMP et CTR).",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -137,17 +662,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 4,
-        "chunk_total": 10,
-        "nb_chars": 654
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 25,
+        "chunk_total": 81,
+        "nb_chars": 897
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLancement de la révision ISO 45001\nStructure de la norme\n[\nmodifier\n|\nmodifier le code\n]\nComme d'autres normes ISO (notamment\nISO 9001\net\nISO 14001\n), l'ISO 45001 adopte le schéma «\nHigh Level Structure\n» (HSL) en dix chapitres\n[\n\n]\ncommun à toutes les normes de managements. Cette structure facilite l'intégration avec d'autre systèmes de managements\n[\n\n]\n.\nDomaine d'application\n[\nmodifier\n|\nmodifier le code\n]\nLa norme ISO 45001:2018 spécifie les exigences relatives à un système de management de la santé et de la sécurité au travail (SMSST). Elle s’applique à tout organisme, quelle que soit sa taille, son secteur d’activité ou sa forme juridique\n["
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n(pour les ingénieurs conseils) et prêtent serment auprès des tribunaux d'instance pour ne rien révéler des secrets de fabrication et d'exploitation des entreprises qu'ils visitent. Ils ont ainsi un droit d'accès aux lieux de travail identique aux inspecteurs et contrôleurs du travail et peuvent demander toute mesure justifiée de prévention aux entreprises qu'ils accompagnent (code la Sécurité sociale). Certains d'entre eux sont spécialisés : ergonomie, psychologie du travail, mesures physiques (centres de mesures physiques) ou chimiques (laboratoires de chimie), formation de chefs d'entreprises ou de personnes ressources en prévention dans les entreprises. Ils contribuent avec l'INRS et la CNAMTS à l'élaboration de guides de bonnes pratiques édités par l'INRS et à la préparation de recommandations adoptées par les instances paritaires des branches professionnelles (CTN, CATMP et CTR)."
     },
     {
-      "texte": "]\n, souhaitant établir, mettre en œuvre et améliorer un cadre structuré pour gérer les risques professionnels.\nElle permet à l’organisme :\nde prendre en compte les exigences légales, réglementaires et autres exigences auxquelles il a choisi de se conformer ;\nde fournir un environnement de travail sûr et sain pour ses travailleurs ;\nde mettre en place l'amélioration continue de ses performances en matière de\nsécurité au travail\n[",
+      "texte": "Le fonctionnement des services prévention, les aides financières aux entreprises, par les Caisses primaires d'assurance maladie (CPAM), ou le fonctionnement de l'INRS, l'indemnisation des victimes d'accidents du travail ou de maladies professionnelles sont financés par les cotisations AT/MP des employeurs du régime général de sécurité sociale. Les contrôleurs de sécurité et ingénieurs conseils sont environ 1 000 répartis sur 22 organismes.\n\nLeurs interlocuteurs habituels sont les salariés à leur poste de travail, l'employeur, les représentants des salariés (\n\nCHSCT\n\n), le médecin du travail, l'inspecteur ou le contrôleur du travail, les syndicats professionnels, les concepteurs d'équipements et tous les acteurs de la prévention cités ci-dessous. Ils travaillent en lien avec l'\n\nInstitut national de recherche et de sécurité",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -162,17 +687,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 5,
-        "chunk_total": 10,
-        "nb_chars": 432
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 26,
+        "chunk_total": 81,
+        "nb_chars": 834
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n, souhaitant établir, mettre en œuvre et améliorer un cadre structuré pour gérer les risques professionnels.\nElle permet à l’organisme :\nde prendre en compte les exigences légales, réglementaires et autres exigences auxquelles il a choisi de se conformer ;\nde fournir un environnement de travail sûr et sain pour ses travailleurs ;\nde mettre en place l'amélioration continue de ses performances en matière de\nsécurité au travail\n["
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLe fonctionnement des services prévention, les aides financières aux entreprises, par les Caisses primaires d'assurance maladie (CPAM), ou le fonctionnement de l'INRS, l'indemnisation des victimes d'accidents du travail ou de maladies professionnelles sont financés par les cotisations AT/MP des employeurs du régime général de sécurité sociale. Les contrôleurs de sécurité et ingénieurs conseils sont environ 1 000 répartis sur 22 organismes.\n\nLeurs interlocuteurs habituels sont les salariés à leur poste de travail, l'employeur, les représentants des salariés (\n\nCHSCT\n\n), le médecin du travail, l'inspecteur ou le contrôleur du travail, les syndicats professionnels, les concepteurs d'équipements et tous les acteurs de la prévention cités ci-dessous. Ils travaillent en lien avec l'\n\nInstitut national de recherche et de sécurité"
     },
     {
-      "texte": "]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nISO/TC 283 - Management de la santé et de la sécurité au travail\n», sur\nOrganisation internationale de normalisation\n(consulté le\n17 juillet 2025\n)\n↑\n«\nNorme OHSAS 18001 / ISO 45001 et certification\n», sur\nohsas-18001.fr\n(consulté le\n17 juillet 2025\n)\n↑\nILO-OSH\n,\nOrganisation internationale du travail\n.\n↑\nChristelle\nMambueni\n, «\nSanté et sécurité au travail : adieu OHSAS 18001, place à l’ISO 45001\n», sur\nGroupe Afnor\n,\n\ner\n\noctobre 2021\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n»,\n\nOrganisation internationale de normalisation\n\n.\n\n↑\n\n«\n\nISO 45001:2018/Amd 1:2024\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nLe climat, game changer des normes de management\n\n», sur\n\nGroupe Afnor\n\n,\n\n4 mars 2024\n\n(consulté le",
+      "texte": "sur la diffusion de la documentation et des supports de sensibilisation (affiches, vidéo, dépliants, brochures), la recherche et la formation en prévention.\n\nLes techniciens en prévention des caisses de mutualité sociale agricole (MSA) : ils sont le pendant des contrôleurs de sécurité et ingénieurs conseil des CARSAT pour le régime agricole (salariés d'exploitants agricoles et de sociétés coopératives agricoles).\n\nLes organismes de contrôle technique qui vérifient la conformité réglementaire et l'état de conservation des équipements de travail.\n\nLes organismes de conseil et de formation spécialisés en matière de santé et de sécurité au travail.\n\nL'\n\nINRS\n\n(Institut National de Recherche et de Sécurité pour la prévention des maladies professionnelles et des accidents du travail)est un organisme créé en 1947 sous l'égide de la CNAMTS, sous forme d'\n\nassociation loi de 1901",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -187,17 +712,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 6,
-        "chunk_total": 10,
-        "nb_chars": 888
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 27,
+        "chunk_total": 81,
+        "nb_chars": 883
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nISO/TC 283 - Management de la santé et de la sécurité au travail\n», sur\nOrganisation internationale de normalisation\n(consulté le\n17 juillet 2025\n)\n↑\n«\nNorme OHSAS 18001 / ISO 45001 et certification\n», sur\nohsas-18001.fr\n(consulté le\n17 juillet 2025\n)\n↑\nILO-OSH\n,\nOrganisation internationale du travail\n.\n↑\nChristelle\nMambueni\n, «\nSanté et sécurité au travail : adieu OHSAS 18001, place à l’ISO 45001\n», sur\nGroupe Afnor\n,\n\ner\n\noctobre 2021\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n»,\n\nOrganisation internationale de normalisation\n\n.\n\n↑\n\n«\n\nISO 45001:2018/Amd 1:2024\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n17 juillet 2025\n\n)\n\n↑\n\nSébastien\n\nBaudet\n\n, «\n\nLe climat, game changer des normes de management\n\n», sur\n\nGroupe Afnor\n\n,\n\n4 mars 2024\n\n(consulté le"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nsur la diffusion de la documentation et des supports de sensibilisation (affiches, vidéo, dépliants, brochures), la recherche et la formation en prévention.\n\nLes techniciens en prévention des caisses de mutualité sociale agricole (MSA) : ils sont le pendant des contrôleurs de sécurité et ingénieurs conseil des CARSAT pour le régime agricole (salariés d'exploitants agricoles et de sociétés coopératives agricoles).\n\nLes organismes de contrôle technique qui vérifient la conformité réglementaire et l'état de conservation des équipements de travail.\n\nLes organismes de conseil et de formation spécialisés en matière de santé et de sécurité au travail.\n\nL'\n\nINRS\n\n(Institut National de Recherche et de Sécurité pour la prévention des maladies professionnelles et des accidents du travail)est un organisme créé en 1947 sous l'égide de la CNAMTS, sous forme d'\n\nassociation loi de 1901"
     },
     {
-      "texte": "17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018 - analyse de la nouvelle norme pour la santé et la sécurité\n\n», sur\n\nnbn.be\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n,\n\n8 janvier 2019\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nRetour sur la norme Iso 45001 : 2018 « Management de la santé et de la sécurité au travail » - Article de revue\n\n», sur\n\nInstitut national de recherche et de sécurité\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nISO 9001\n\nNormes de sécurité du lieu de travail\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nCertification AFAQ ISO 45001\n\n», sur\n\ncertification.afnor.org\n\n(consulté le\n\n10 novembre 2025\n\n)\n\n.\n\n«",
+      "texte": ", sans but lucratif. Il est administré par les partenaires sociaux. Il est financé par le Fonds National de Prévention des Accidents du Travail et des maladies professionnelles. C'est un organisme généraliste sur la prévention des risques professionnels. Sa mission est la prévention des risques professionnels, à travers quatre modes d'actions : Études et Recherches, Formation, Assistance et Information. Dans son action d'information, l'INRS publie des brochures, revues, affiches sur ce sujet et son site web (\n\nwww.inrs.fr\n\n) a pour objet la diffusion d'informations sur la prévention.\n\nL'\n\nOPPBTP",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -212,17 +737,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 7,
-        "chunk_total": 10,
-        "nb_chars": 866
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 28,
+        "chunk_total": 81,
+        "nb_chars": 602
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n17 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018 - analyse de la nouvelle norme pour la santé et la sécurité\n\n», sur\n\nnbn.be\n\n↑\n\n«\n\nISO 45001 - Santé et sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n,\n\n8 janvier 2019\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nRetour sur la norme Iso 45001 : 2018 « Management de la santé et de la sécurité au travail » - Article de revue\n\n», sur\n\nInstitut national de recherche et de sécurité\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\n↑\n\n«\n\nISO 45001:2018\n\n», sur\n\nOrganisation internationale de normalisation\n\n(consulté le\n\n16 juillet 2025\n\n)\n\n.\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nISO 9001\n\nNormes de sécurité du lieu de travail\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\n«\n\nCertification AFAQ ISO 45001\n\n», sur\n\ncertification.afnor.org\n\n(consulté le\n\n10 novembre 2025\n\n)\n\n.\n\n«"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n, sans but lucratif. Il est administré par les partenaires sociaux. Il est financé par le Fonds National de Prévention des Accidents du Travail et des maladies professionnelles. C'est un organisme généraliste sur la prévention des risques professionnels. Sa mission est la prévention des risques professionnels, à travers quatre modes d'actions : Études et Recherches, Formation, Assistance et Information. Dans son action d'information, l'INRS publie des brochures, revues, affiches sur ce sujet et son site web (\n\nwww.inrs.fr\n\n) a pour objet la diffusion d'informations sur la prévention.\n\nL'\n\nOPPBTP"
     },
     {
-      "texte": "Santé, sécurité et qualité de vie au travail\n\n», sur\n\nGroupe Afnor\n\n«\n\nISO 45001:2018 Systèmes de management de la santé et de la sécurité au travail — Exigences et lignes directrices pour leur utilisation\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO/TC 283 — Systèmes de management de la santé et de la sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO 45001 en 6 points majeurs\n\n», sur\n\nEcholine.fr\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485",
+      "texte": "(Organisme Professionnel de Prévention du Bâtiment et des Travaux Publics) : cet organisme paritaire conseille et forme les salariés et employeurs du secteur de la construction. il est financé par une cotisation patronale. Ses conseillers et ingénieurs en prévention accompagnent les entreprises et les syndicats professionnels dans leurs actions d'évaluation des risques et de prévention. L'OPPBTP publie des documentations.\n\nLe\n\ncoordonnateur de sécurité et de protection de la santé",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -237,17 +762,17 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 8,
-        "chunk_total": 10,
-        "nb_chars": 886
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 29,
+        "chunk_total": 81,
+        "nb_chars": 485
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSanté, sécurité et qualité de vie au travail\n\n», sur\n\nGroupe Afnor\n\n«\n\nISO 45001:2018 Systèmes de management de la santé et de la sécurité au travail — Exigences et lignes directrices pour leur utilisation\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO/TC 283 — Systèmes de management de la santé et de la sécurité au travail\n\n», sur\n\nOrganisation internationale de normalisation\n\n«\n\nISO 45001 en 6 points majeurs\n\n», sur\n\nEcholine.fr\n\nv\n\n·\n\nm\n\nNormes\n\nISO\n\n3166-1\n3166-2\n3166-3\n\n10118-3\n\n10303-11\n10303-238\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n(de)\n\n13211-1\n\n19775-1\n\nListe de normes ISO\n\nListe des normes de romanisation ISO\n\nv\n\n·\n\nm\n\nCertifications\n\nde systèmes de management\n\nMulti-sectorielles\n\nQualité\n\nISO 9001\n\nSûreté et sécurité\n\nISO 45001\n\nEnvironnement\n\nISO 14001\n\nEMAS\n\nResponsabilité sociétale\n\nSA 8000\n\nSectorielles\n\nAutomobile\n\nIATF 16949\n\nSanté et médecine\n\nISO 13485"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n(Organisme Professionnel de Prévention du Bâtiment et des Travaux Publics) : cet organisme paritaire conseille et forme les salariés et employeurs du secteur de la construction. il est financé par une cotisation patronale. Ses conseillers et ingénieurs en prévention accompagnent les entreprises et les syndicats professionnels dans leurs actions d'évaluation des risques et de prévention. L'OPPBTP publie des documentations.\n\nLe\n\ncoordonnateur de sécurité et de protection de la santé"
     },
     {
-      "texte": "Agroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail du management\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_45001&oldid=235144948\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nArticle manquant de références depuis février 2023\n\nArticle manquant de références/Liste complète\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 45001\n\n15 langues\n\nAjouter un sujet",
+      "texte": "sur les chantiers de génie civil et du bâtiment : désigné et rémunéré par le maître d'ouvrage d'une opération au stade de l'avant projet sommaire (APS), il a un rôle de prévention en phase de conception des ouvrages, en vue de leur entretien ultérieur en sécurité (dossier d'intervention ultérieur sur l'ouvrage ou DIUO) et un rôle de préparation des travaux, d'accompagnement des entreprises dans la continuité des mesures de prévention et dans la réduction des risques liés à la coactivité entre entreprises (tenue du Registre journal de l'opération, rédaction du\n\nPlan général de coordination de sécurité et de protection de la santé\n\nou PGCSPS puis analyse des\n\nPlans particulier de sécurité et de protection de la santé\n\n(PPSPS) des entreprises).\n\nDans les cursus de formation des\n\nécoles de management\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
       "metadata": {
         "doc_id": "normes_iso_45001_sst",
         "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
@@ -262,14 +787,1264 @@
           "assureur"
         ],
         "fiabilite": "semi_officiel",
-        "url_source": "https://fr.wikipedia.org/wiki/ISO_45001",
-        "hash": "182bb54703845c6e7267ed7247c47c60522e15feb03ed3b3b71b633678cd7b9c",
-        "indexe_le": "2026-04-17T02:49:15.951250",
-        "chunk_index": 9,
-        "chunk_total": 10,
-        "nb_chars": 791
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 30,
+        "chunk_total": 81,
+        "nb_chars": 844
       },
-      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAgroalimentaire\n\nISO 22000\n\nAéronautique et spatial\n\nEN 9100\n\nTechnologies de l'information\n\nISO/IEC 20000\n\nISO/IEC 27001\n\nChaînes d'approvisionnement\n\nISO 28001\n\nÉnergie\n\nISO 50001\n\nEN 16001\n\nTélécommunications\n\nTL 9000\n\nPortail du management\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=ISO_45001&oldid=235144948\n\n».\n\nCatégories\n\n:\n\nNorme ISO\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nArticle manquant de références depuis février 2023\n\nArticle manquant de références/Liste complète\n\nArticle contenant un appel à traduction en allemand\n\nPortail:Management/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Sciences humaines et sociales/Articles liés\n\nPortail:Société/Articles liés\n\nRechercher\n\nRechercher\n\nISO 45001\n\n15 langues\n\nAjouter un sujet"
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nsur les chantiers de génie civil et du bâtiment : désigné et rémunéré par le maître d'ouvrage d'une opération au stade de l'avant projet sommaire (APS), il a un rôle de prévention en phase de conception des ouvrages, en vue de leur entretien ultérieur en sécurité (dossier d'intervention ultérieur sur l'ouvrage ou DIUO) et un rôle de préparation des travaux, d'accompagnement des entreprises dans la continuité des mesures de prévention et dans la réduction des risques liés à la coactivité entre entreprises (tenue du Registre journal de l'opération, rédaction du\n\nPlan général de coordination de sécurité et de protection de la santé\n\nou PGCSPS puis analyse des\n\nPlans particulier de sécurité et de protection de la santé\n\n(PPSPS) des entreprises).\n\nDans les cursus de formation des\n\nécoles de management\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "Plusieurs acteurs et divers rapports publics ont suggéré qu'il était important que le thème de la sécurité et santé au travail soit intégré dans ces cursus afin que les futurs cadres puissent mieux participer à la prévention et gérer leur propre stress.\n\nEn France, l'\n\nINRS\n\net l'institut LH2 ont en 2011 publié un état des lieux à ce sujet, sur la base d'une enquête effectuée auprès de nombreuses écoles de management. En 2010-2011, 65 % des établissements incluaient le sujet de la santé et sécurité au travail. 32 % ne l'abordaient pas et n'avaient pas en projet à court terme pour le faire, tout en reconnaissant un intérêt au sujet ; selon l'INRS,\n\n« 60 % de ces établissements n’ayant pas de santé et sécurité au travail dans leur cursus seraient prêts à participer à des expérimentations de développement de ces enseignements »",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 31,
+        "chunk_total": 81,
+        "nb_chars": 836
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nPlusieurs acteurs et divers rapports publics ont suggéré qu'il était important que le thème de la sécurité et santé au travail soit intégré dans ces cursus afin que les futurs cadres puissent mieux participer à la prévention et gérer leur propre stress.\n\nEn France, l'\n\nINRS\n\net l'institut LH2 ont en 2011 publié un état des lieux à ce sujet, sur la base d'une enquête effectuée auprès de nombreuses écoles de management. En 2010-2011, 65 % des établissements incluaient le sujet de la santé et sécurité au travail. 32 % ne l'abordaient pas et n'avaient pas en projet à court terme pour le faire, tout en reconnaissant un intérêt au sujet ; selon l'INRS,\n\n« 60 % de ces établissements n’ayant pas de santé et sécurité au travail dans leur cursus seraient prêts à participer à des expérimentations de développement de ces enseignements »"
+    },
+    {
+      "texte": ". Enfin, dans les écoles qui abordent ce sujet, plutôt que sa prévention, c'est principalement la gestion du stress qui est abordée, souvent en lien avec le management des ressources humaines (fonction RH « identifiée » comme le référent naturel pour la santé et sécurité au travail en entreprise). La pédagogie passe essentiellement par des cours magistraux et des conférences d'intervenants extérieurs\n\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 32,
+        "chunk_total": 81,
+        "nb_chars": 406
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n. Enfin, dans les écoles qui abordent ce sujet, plutôt que sa prévention, c'est principalement la gestion du stress qui est abordée, souvent en lien avec le management des ressources humaines (fonction RH « identifiée » comme le référent naturel pour la santé et sécurité au travail en entreprise). La pédagogie passe essentiellement par des cours magistraux et des conférences d'intervenants extérieurs\n\n["
+    },
+    {
+      "texte": "]\n.\nAu Québec\n[\nmodifier\n|\nmodifier le code\n]\nL’\nInstitut de recherche Robert-Sauvé en santé et en sécurité du travail\n(IRSST) est un organisme de recherche scientifique implanté au Québec depuis 1980. Financé principalement par la\nCNESST\n, il est administré par des représentants d’employeurs et de travailleurs et reconnu comme organisme de bienfaisance depuis 1982. Sa mission est de promouvoir la santé et la sécurité au travail par la recherche, l’expertise de ses laboratoires et le transfert des connaissances, dans une optique de prévention et de retour durable à l'emploi\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 33,
+        "chunk_total": 81,
+        "nb_chars": 582
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nAu Québec\n[\nmodifier\n|\nmodifier le code\n]\nL’\nInstitut de recherche Robert-Sauvé en santé et en sécurité du travail\n(IRSST) est un organisme de recherche scientifique implanté au Québec depuis 1980. Financé principalement par la\nCNESST\n, il est administré par des représentants d’employeurs et de travailleurs et reconnu comme organisme de bienfaisance depuis 1982. Sa mission est de promouvoir la santé et la sécurité au travail par la recherche, l’expertise de ses laboratoires et le transfert des connaissances, dans une optique de prévention et de retour durable à l'emploi\n["
+    },
+    {
+      "texte": "]\n.\nCadre réglementaire et normatif\n[\nmodifier\n|\nmodifier le code\n]\nNiveau international\n[\nmodifier\n|\nmodifier le code\n]\nL’\nOrganisation internationale du travail - OIT\nadopte des conventions et recommandations relatives à la protection des travailleurs, à la prévention des accidents du travail et obligations des États membres\n[\n\n]\n. Ces textes n’ont d’effet juridique qu’après ratification par les pays concernés.\nLa réglementation européenne est à l'origine de la majorité de la réglementation française actuelle en matière de sécurité et de santé au travail\n[\n\n]\n. La directive-cadre 89/391/CEE\n[\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 34,
+        "chunk_total": 81,
+        "nb_chars": 604
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nCadre réglementaire et normatif\n[\nmodifier\n|\nmodifier le code\n]\nNiveau international\n[\nmodifier\n|\nmodifier le code\n]\nL’\nOrganisation internationale du travail - OIT\nadopte des conventions et recommandations relatives à la protection des travailleurs, à la prévention des accidents du travail et obligations des États membres\n[\n\n]\n. Ces textes n’ont d’effet juridique qu’après ratification par les pays concernés.\nLa réglementation européenne est à l'origine de la majorité de la réglementation française actuelle en matière de sécurité et de santé au travail\n[\n\n]\n. La directive-cadre 89/391/CEE\n[\n\n]"
+    },
+    {
+      "texte": ", adoptée en 1989, constitue le fondement de la politique européenne en matière de sécurité et de santé au travail. Elle établit les principes généraux de prévention que doivent appliquer les États membres ainsi que la participation de ces derniers aux démarches de prévention. La directive sert de base à une série de directives « filles » couvrant des risques ou des situations spécifiques, et elle impose aux employeurs une obligation générale de garantir la sécurité et la santé des travailleurs dans tous les aspects liés au travail. Ces directives  sont de deux types :\n\nDirectives de mise sur le marché dites « économiques »",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 35,
+        "chunk_total": 81,
+        "nb_chars": 631
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n, adoptée en 1989, constitue le fondement de la politique européenne en matière de sécurité et de santé au travail. Elle établit les principes généraux de prévention que doivent appliquer les États membres ainsi que la participation de ces derniers aux démarches de prévention. La directive sert de base à une série de directives « filles » couvrant des risques ou des situations spécifiques, et elle impose aux employeurs une obligation générale de garantir la sécurité et la santé des travailleurs dans tous les aspects liés au travail. Ces directives  sont de deux types :\n\nDirectives de mise sur le marché dites « économiques »"
+    },
+    {
+      "texte": ": elles concernent la mise sur le marché et la conception des produits (machines, équipements de travail, dispositifs de protection…), pas exemples la directive 2006/42/CE dite « Machines ». Leur objectif est de garantir un niveau de sécurité homogène et de faciliter la libre circulation des biens dans l’Union européenne.\n\nDirectives\n\nréglementant les conditions de travail\n\ndites « sociales »\n\n: elles définissent les exigences générales relatives à l’utilisation des équipements, à l’organisation du travail et à la protection des travailleurs, par exemple la directive-cadre 89/391/CEE sur la santé et la sécurité des travailleurs, qui constitue le socle de la réglementation européenne en matière de prévention.\n\nLégislation en France\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 36,
+        "chunk_total": 81,
+        "nb_chars": 777
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n: elles concernent la mise sur le marché et la conception des produits (machines, équipements de travail, dispositifs de protection…), pas exemples la directive 2006/42/CE dite « Machines ». Leur objectif est de garantir un niveau de sécurité homogène et de faciliter la libre circulation des biens dans l’Union européenne.\n\nDirectives\n\nréglementant les conditions de travail\n\ndites « sociales »\n\n: elles définissent les exigences générales relatives à l’utilisation des équipements, à l’organisation du travail et à la protection des travailleurs, par exemple la directive-cadre 89/391/CEE sur la santé et la sécurité des travailleurs, qui constitue le socle de la réglementation européenne en matière de prévention.\n\nLégislation en France\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]"
+    },
+    {
+      "texte": "La principale source de droit français en matière de santé et de sécurité au travail est la quatrième partie du code du travail intitulée\n\nSanté et sécurité au travail\n\n[\n\n]\n.\nDans le livre\nI\ner\nsont présentés les principes généraux de prévention qui découlent directement de la directive-cadre européenne 89/391/CEE relative à l'amélioration de la sécurité et de la santé des travailleurs\n[\n\n]\n. L'employeur met en œuvre les mesures de prévention sur le fondement des principes généraux de prévention.\nLe titre\nI\ner\ndu livre VI mentionné ci-dessus regroupe les articles relatifs à l'organisation et aux missions du CHSCT\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 37,
+        "chunk_total": 81,
+        "nb_chars": 623
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLa principale source de droit français en matière de santé et de sécurité au travail est la quatrième partie du code du travail intitulée\n\nSanté et sécurité au travail\n\n[\n\n]\n.\nDans le livre\nI\ner\nsont présentés les principes généraux de prévention qui découlent directement de la directive-cadre européenne 89/391/CEE relative à l'amélioration de la sécurité et de la santé des travailleurs\n[\n\n]\n. L'employeur met en œuvre les mesures de prévention sur le fondement des principes généraux de prévention.\nLe titre\nI\ner\ndu livre VI mentionné ci-dessus regroupe les articles relatifs à l'organisation et aux missions du CHSCT\n["
+    },
+    {
+      "texte": "]\n.\nObligation de résultat - Faute inexcusable\n[\nmodifier\n|\nmodifier le code\n]\nDepuis 2002 à la suite de l’\naffaire de l’amiante\n, l’employeur a en France une obligation de résultat en matière de Santé et Sécurité au travail, à distinguer d’une obligation de moyen. Cela signifie que l’employeur peut être condamné à des dommages et intérêts si cette obligation n’est pas respectée\n[\n\n]\n,\n[\n\n]\n.\nDès lors que l’employeur avait ou aurait dû avoir conscience d’un danger en lien avec l’activité de travail et qu’il n’a pas pris les mesures permettant d’en préserver son salarié, sa faute inexcusable peut être reconnue par le juge. Dès que c’est le cas, à la suite d'un arrêt du Conseil constitutionnel le\n18 juin 2010\n, les victimes peuvent obtenir une réparation quasi intégrale de leur préjudice\n[\n\n]\n\n. C'est au salarié d'apporter la preuve de la faute inexcusable.",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 38,
+        "chunk_total": 81,
+        "nb_chars": 867
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nObligation de résultat - Faute inexcusable\n[\nmodifier\n|\nmodifier le code\n]\nDepuis 2002 à la suite de l’\naffaire de l’amiante\n, l’employeur a en France une obligation de résultat en matière de Santé et Sécurité au travail, à distinguer d’une obligation de moyen. Cela signifie que l’employeur peut être condamné à des dommages et intérêts si cette obligation n’est pas respectée\n[\n\n]\n,\n[\n\n]\n.\nDès lors que l’employeur avait ou aurait dû avoir conscience d’un danger en lien avec l’activité de travail et qu’il n’a pas pris les mesures permettant d’en préserver son salarié, sa faute inexcusable peut être reconnue par le juge. Dès que c’est le cas, à la suite d'un arrêt du Conseil constitutionnel le\n18 juin 2010\n, les victimes peuvent obtenir une réparation quasi intégrale de leur préjudice\n[\n\n]\n\n. C'est au salarié d'apporter la preuve de la faute inexcusable."
+    },
+    {
+      "texte": "Référentiels international, européens ou nationaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nNormes de sécurité du lieu de travail\n\n.\n\nLe référentiel utilisé dans un système de management de la santé et de la sécurité au travail est un guide au service d’une politique. Ce document est fait pour aider l'entreprise à prendre les dispositions d’organisation et de gestion nécessaires au respect de la santé et de la sécurité au travail et à la recherche d’une amélioration permanente des performances dans ce domaine.",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 39,
+        "chunk_total": 81,
+        "nb_chars": 532
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nRéférentiels international, européens ou nationaux\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nArticle détaillé :\n\nNormes de sécurité du lieu de travail\n\n.\n\nLe référentiel utilisé dans un système de management de la santé et de la sécurité au travail est un guide au service d’une politique. Ce document est fait pour aider l'entreprise à prendre les dispositions d’organisation et de gestion nécessaires au respect de la santé et de la sécurité au travail et à la recherche d’une amélioration permanente des performances dans ce domaine."
+    },
+    {
+      "texte": "L’entreprise créé son propre référentiel (incluant les indicateurs à surveiller : absentéisme, accidents, incidents…) en fonction de ses objectifs en santé et sécurité au travail et en adaptant les référentiels existants. Ce choix est fonction de critères propres à l’entreprise comme sa taille, son domaine d’activité, sa culture sécurité, ou encore l’existence de systèmes semblables\n\n[\n\n]\n.\nISO 45001\nde\nmars 2018\n, systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation.\nILO-OSH 2001 : Principes directeurs concernant les systèmes de gestion de la sécurité et de la santé au travail - Référentiel international de l'\nOIT\nqui a été validé par les États et les partenaires sociaux (employeurs et salariés) au niveau international\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 40,
+        "chunk_total": 81,
+        "nb_chars": 798
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nL’entreprise créé son propre référentiel (incluant les indicateurs à surveiller : absentéisme, accidents, incidents…) en fonction de ses objectifs en santé et sécurité au travail et en adaptant les référentiels existants. Ce choix est fonction de critères propres à l’entreprise comme sa taille, son domaine d’activité, sa culture sécurité, ou encore l’existence de systèmes semblables\n\n[\n\n]\n.\nISO 45001\nde\nmars 2018\n, systèmes de management de la santé et de la sécurité au travail - Exigences et lignes directrices pour leur utilisation.\nILO-OSH 2001 : Principes directeurs concernant les systèmes de gestion de la sécurité et de la santé au travail - Référentiel international de l'\nOIT\nqui a été validé par les États et les partenaires sociaux (employeurs et salariés) au niveau international\n["
+    },
+    {
+      "texte": "]\nHB 211 en 2002 en Australie, Z10 en 2005 aux États-Unis, Z1000 au Canada... Ces deux dernières normes nationales font référence à l'ILO-OSH.\nBS 8800:1996 Guide des systèmes de management de la santé et de la sécurité au travail - Norme britannique très complète - 90 pages (version 2004), payant.\nOHSAS 18001:2007 Systèmes de management de la santé et de la sécurité au travail - Norme internationale très inspirée de l'BS 8800. Cette norme est a été annulée en 2018 car Occupational Health and Safety Assessment Series Project Group va adopter la norme internationale\nISO 45001\n.\nMASE 2004 : Référentiel français initié dans les années 1990 par Shell - Étang de Berre - Manuel d'Amélioration de la Sécurité des Entreprises. Ce système est plutôt orienté vers la politique de prévention des entreprises extérieures\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 41,
+        "chunk_total": 81,
+        "nb_chars": 818
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\nHB 211 en 2002 en Australie, Z10 en 2005 aux États-Unis, Z1000 au Canada... Ces deux dernières normes nationales font référence à l'ILO-OSH.\nBS 8800:1996 Guide des systèmes de management de la santé et de la sécurité au travail - Norme britannique très complète - 90 pages (version 2004), payant.\nOHSAS 18001:2007 Systèmes de management de la santé et de la sécurité au travail - Norme internationale très inspirée de l'BS 8800. Cette norme est a été annulée en 2018 car Occupational Health and Safety Assessment Series Project Group va adopter la norme internationale\nISO 45001\n.\nMASE 2004 : Référentiel français initié dans les années 1990 par Shell - Étang de Berre - Manuel d'Amélioration de la Sécurité des Entreprises. Ce système est plutôt orienté vers la politique de prévention des entreprises extérieures\n["
+    },
+    {
+      "texte": "]\n.\nEnquête Santé et itinéraire professionnel\n[\nmodifier\n|\nmodifier le code\n]\nAprès un\nBilan des sources quantitatives dans le champ de la santé et des itinéraires professionnels\n[\n\n]\n, une\nenquête Santé et itinéraire professionnel\n(SIP) a été lancée par la DREES et la DARES (2006-2007), visant à étudier les liens éventuels entre santé, parcours professionnels et conditions de travail\n[",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 42,
+        "chunk_total": 81,
+        "nb_chars": 389
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nEnquête Santé et itinéraire professionnel\n[\nmodifier\n|\nmodifier le code\n]\nAprès un\nBilan des sources quantitatives dans le champ de la santé et des itinéraires professionnels\n[\n\n]\n, une\nenquête Santé et itinéraire professionnel\n(SIP) a été lancée par la DREES et la DARES (2006-2007), visant à étudier les liens éventuels entre santé, parcours professionnels et conditions de travail\n["
+    },
+    {
+      "texte": "]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nRisques psychosociaux (RPS). Réglementation - Risques - INRS\n», sur\nwww.inrs.fr\n(consulté le\n15 juillet 2025\n)\n↑\nOrganisation mondiale de la Santé et Organisation internationale du travail,\nPrendre soin des soignants : guide d’élaboration et de mise en oeurvre de programmes de santé et de sécurité au travail pour les agents de santé [Caring for those who care: guide for the development and implementation of occupational health and safety programmes for health workers]\n,\n\n, 107\n\np.\n\n(\n\nISBN\n\n978-92-4-006159-0\n\n)\n\n↑\n\nComités mixtes de santé et de sécurité au travail. Genève : Organisation internationale du Travail ; 2015 (https://www.ilo.org/legacy/english/osh/en/story_content/external_files/fs_bs_2-workplace_4_en.pdf.\n\n↑",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 43,
+        "chunk_total": 81,
+        "nb_chars": 789
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n]\n.\nNotes et références\n[\nmodifier\n|\nmodifier le code\n]\n↑\n«\nRisques psychosociaux (RPS). Réglementation - Risques - INRS\n», sur\nwww.inrs.fr\n(consulté le\n15 juillet 2025\n)\n↑\nOrganisation mondiale de la Santé et Organisation internationale du travail,\nPrendre soin des soignants : guide d’élaboration et de mise en oeurvre de programmes de santé et de sécurité au travail pour les agents de santé [Caring for those who care: guide for the development and implementation of occupational health and safety programmes for health workers]\n,\n\n, 107\n\np.\n\n(\n\nISBN\n\n978-92-4-006159-0\n\n)\n\n↑\n\nComités mixtes de santé et de sécurité au travail. Genève : Organisation internationale du Travail ; 2015 (https://www.ilo.org/legacy/english/osh/en/story_content/external_files/fs_bs_2-workplace_4_en.pdf.\n\n↑"
+    },
+    {
+      "texte": "Directive 89/391/CEE du Conseil, du 12 juin 1989, concernant la mise en oeuvre de mesures visant à promouvoir l'amélioration de la sécurité et de la santé des travailleurs au travail\n\n,\n\nvol.\n\n183,\n\n12 juin 1989\n\n(\n\nlire en ligne\n\n)\n\n↑\n\n(en)\n\n«\n\nOccupational health\n\n», sur\n\nwho.int\n\n(consulté le\n\n21 septembre 2023\n\n)\n\n↑\n\n«\n\nFondamentaux de la prévention. Fondamentaux en prévention - Démarches de prévention - INRS\n\n», sur\n\nwww.inrs.fr\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nSanté et Sécurité au travail : Automatisez vos Démarches SST\n\n», sur\n\nSirhéos & Sirhéos\n\n(consulté le\n\n17 avril 2019\n\n)\n\n↑\n\n«\n\nPromouvoir une croissance économique durable\n\n», sur\n\nDéveloppement durable\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nWayback Machine\n\n»\n\n[\n\narchive du\n\n9 mai 2024\n\n]\n\n, sur\n\nwww.carsat-sudest.fr\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nPrévention et performance : un duo gagnant-gagnant\n\n», sur",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 44,
+        "chunk_total": 81,
+        "nb_chars": 900
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nDirective 89/391/CEE du Conseil, du 12 juin 1989, concernant la mise en oeuvre de mesures visant à promouvoir l'amélioration de la sécurité et de la santé des travailleurs au travail\n\n,\n\nvol.\n\n183,\n\n12 juin 1989\n\n(\n\nlire en ligne\n\n)\n\n↑\n\n(en)\n\n«\n\nOccupational health\n\n», sur\n\nwho.int\n\n(consulté le\n\n21 septembre 2023\n\n)\n\n↑\n\n«\n\nFondamentaux de la prévention. Fondamentaux en prévention - Démarches de prévention - INRS\n\n», sur\n\nwww.inrs.fr\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nSanté et Sécurité au travail : Automatisez vos Démarches SST\n\n», sur\n\nSirhéos & Sirhéos\n\n(consulté le\n\n17 avril 2019\n\n)\n\n↑\n\n«\n\nPromouvoir une croissance économique durable\n\n», sur\n\nDéveloppement durable\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nWayback Machine\n\n»\n\n[\n\narchive du\n\n9 mai 2024\n\n]\n\n, sur\n\nwww.carsat-sudest.fr\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\n«\n\nPrévention et performance : un duo gagnant-gagnant\n\n», sur"
+    },
+    {
+      "texte": "Prévention BTP\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\nBRAUNIG\n\nD\n\net KOHSTALL\n\nT\n\n,\n\nRendement de la prévention : calcul du ratio coût-bénéfices de l’investissement dans la sécurité et la santé en entreprise. Résumé des résultats.\n\n, Association internationale de la sécurité sociale (AISS). Genève (Suisse),\n\n(\n\nlire en ligne\n\n)\n\n↑\n\na\n\net\n\nb\n\nIpsos ;\n\n« Plus d’un Français sur trois n’arrive pas à dégager suffisamment de temps pour s’occuper de son bien-être »\n\net\n\nDiaporama présentant les résultats\n\n↑\n\n1.000 chefs d'entreprises de 1 et 49 salariés interrogés par téléphone (en 2014 : du 24 novembre 2014 au 2 janvier 2015), par l’institut LH2\n\n↑\n\na\n\nb\n\nc\n\nd\n\ne\n\net\n\nf\n\nSondage 2014 INRS :\n\nSanté et sécurité au travail dans les petites entreprises Quelle prévention ?\n\n, consulté 2015-03-26\n\n↑\n\nLise Roos-Weil, «",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 45,
+        "chunk_total": 81,
+        "nb_chars": 816
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nPrévention BTP\n\n(consulté le\n\n31 juillet 2025\n\n)\n\n↑\n\nBRAUNIG\n\nD\n\net KOHSTALL\n\nT\n\n,\n\nRendement de la prévention : calcul du ratio coût-bénéfices de l’investissement dans la sécurité et la santé en entreprise. Résumé des résultats.\n\n, Association internationale de la sécurité sociale (AISS). Genève (Suisse),\n\n(\n\nlire en ligne\n\n)\n\n↑\n\na\n\net\n\nb\n\nIpsos ;\n\n« Plus d’un Français sur trois n’arrive pas à dégager suffisamment de temps pour s’occuper de son bien-être »\n\net\n\nDiaporama présentant les résultats\n\n↑\n\n1.000 chefs d'entreprises de 1 et 49 salariés interrogés par téléphone (en 2014 : du 24 novembre 2014 au 2 janvier 2015), par l’institut LH2\n\n↑\n\na\n\nb\n\nc\n\nd\n\ne\n\net\n\nf\n\nSondage 2014 INRS :\n\nSanté et sécurité au travail dans les petites entreprises Quelle prévention ?\n\n, consulté 2015-03-26\n\n↑\n\nLise Roos-Weil, «"
+    },
+    {
+      "texte": "La France est-elle le pays qui compte le plus d'accidents du travail mortels en Europe ?\n\n», sur\n\nfrancetvinfo.fr\n\n,\n\n26 avril 2024\n\n(consulté le\n\n14 août 2024\n\n)\n\n:\n\n« La France 4e en Europe concernant les accidents mortels au travail »\n\n↑\n\nMaxime Vernois,\n\nTraité pratique d’hygiène industrielle et administrative, comprenant l’étude des établissements insalubres, dangereux et incommodes\n\n, Baillière et fils, 1860.\n\n↑\n\nCode du travail\n\n, Quatrième partie : Santé et sécurité au travail.\n\n↑\n\n(\n\nart. L. 4612-1 et suivant du code du travail\n\n)\n\n↑\n\nINRS, Santé et sécurité au travail dans les écoles de management ;\n\nSynthèse\n\ndes résultats et\n\nétude complète\n\n, 2011\n\n↑\n\n«\n\nDéployer notre expertise (rapport d'activité de l'IRSST)\n\n»\n\n↑\n\nwww.ilo.org\n\n↑\n\nListe\n\ndes principaux textes de l'Union européenne en matière de santé, d'hygiène et de sécurité au travail.\n\n↑\n\n«",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 46,
+        "chunk_total": 81,
+        "nb_chars": 870
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLa France est-elle le pays qui compte le plus d'accidents du travail mortels en Europe ?\n\n», sur\n\nfrancetvinfo.fr\n\n,\n\n26 avril 2024\n\n(consulté le\n\n14 août 2024\n\n)\n\n:\n\n« La France 4e en Europe concernant les accidents mortels au travail »\n\n↑\n\nMaxime Vernois,\n\nTraité pratique d’hygiène industrielle et administrative, comprenant l’étude des établissements insalubres, dangereux et incommodes\n\n, Baillière et fils, 1860.\n\n↑\n\nCode du travail\n\n, Quatrième partie : Santé et sécurité au travail.\n\n↑\n\n(\n\nart. L. 4612-1 et suivant du code du travail\n\n)\n\n↑\n\nINRS, Santé et sécurité au travail dans les écoles de management ;\n\nSynthèse\n\ndes résultats et\n\nétude complète\n\n, 2011\n\n↑\n\n«\n\nDéployer notre expertise (rapport d'activité de l'IRSST)\n\n»\n\n↑\n\nwww.ilo.org\n\n↑\n\nListe\n\ndes principaux textes de l'Union européenne en matière de santé, d'hygiène et de sécurité au travail.\n\n↑\n\n«"
+    },
+    {
+      "texte": "La directive-cadre sur la SST | Safety and health at work EU-OSHA\n\n», sur\n\nosha.europa.eu\n\n(consulté le\n\n20 novembre 2025\n\n)\n\n↑\n\nlegifrance.gouv.fr\n\n↑\n\nSur le site\n\nlegifrance.gouv.fr\n\n.\n\n↑\n\nSur le site\n\nlegifrance.gouv.fr\n\n.\n\n↑\n\n«\n\nAccident du travail : indemnisation en cas d'incapacité permanente\n\n», sur\n\nservice-public.fr\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\n«\n\nLa faute inexcusable - Preuves et procédure\n\n», sur\n\ndroit-travail-france.fr\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\n«\n\nDécision n° 2010-8 QPC du 18 juin 2010\n\n», sur\n\nConseil constitutionnel\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\nSite de l'INRS, Système de management de la santé et de la sécurité\n\n↑\n\nIl est gratuit, 26 pages\n\nwww.ilo.org\n\n[PDF]\n\n↑\n\nwww.mase.com.fr\n\n↑\n\nBilan des sources quantitatives\n\ndans le champ de la santé et des itinéraires professionnels (France)\n\n↑\n\nArticle du ministère de la Santé\n\nVoir aussi\n\n[\n\nmodifier\n\n|",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 47,
+        "chunk_total": 81,
+        "nb_chars": 891
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nLa directive-cadre sur la SST | Safety and health at work EU-OSHA\n\n», sur\n\nosha.europa.eu\n\n(consulté le\n\n20 novembre 2025\n\n)\n\n↑\n\nlegifrance.gouv.fr\n\n↑\n\nSur le site\n\nlegifrance.gouv.fr\n\n.\n\n↑\n\nSur le site\n\nlegifrance.gouv.fr\n\n.\n\n↑\n\n«\n\nAccident du travail : indemnisation en cas d'incapacité permanente\n\n», sur\n\nservice-public.fr\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\n«\n\nLa faute inexcusable - Preuves et procédure\n\n», sur\n\ndroit-travail-france.fr\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\n«\n\nDécision n° 2010-8 QPC du 18 juin 2010\n\n», sur\n\nConseil constitutionnel\n\n(consulté le\n\n9 mars 2020\n\n)\n\n↑\n\nSite de l'INRS, Système de management de la santé et de la sécurité\n\n↑\n\nIl est gratuit, 26 pages\n\nwww.ilo.org\n\n[PDF]\n\n↑\n\nwww.mase.com.fr\n\n↑\n\nBilan des sources quantitatives\n\ndans le champ de la santé et des itinéraires professionnels (France)\n\n↑\n\nArticle du ministère de la Santé\n\nVoir aussi\n\n[\n\nmodifier\n\n|"
+    },
+    {
+      "texte": "modifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nZamprotta, I. (1977),\n\nUne initiative à l’avant-garde dans la Communauté européenne : la réalisation du CIDI. Comparaison avec l’EDV d’Allemagne fédérale\n\n, thèse de\n\nmaîtrise\n\n, École supérieure de sciences et lettres, L’Avenir,\n\nBruxelles\n\nZamprotta, I. (1979),\n\nLa prevenzione dei rischi da lavoro nella realtà sociale ed economica italiana in rapporto alle esperienze comunitarie: linee ed indirizzi di prevenzione\n\n, in\n\nProposte sociali\n\n,\n\n(\n\nISSN\n\n0303-5174\n\n)\n\n, IPAS,\n\nRome\n\nZamprotta, I., (1981),\n\nRécents résultats de la prévention des accidents du travail dans le domaine de la Communauté européenne\n\n, L’Avenir,\n\nBruxelles\n\nStéphane Buzzi, Jean-Claude Devinck, Paul-André Rosental (2006),\n\nLa Santé au travail : 1880-2006\n\n, La Découverte",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 48,
+        "chunk_total": 81,
+        "nb_chars": 825
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nmodifier le code\n\n]\n\nBibliographie\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nZamprotta, I. (1977),\n\nUne initiative à l’avant-garde dans la Communauté européenne : la réalisation du CIDI. Comparaison avec l’EDV d’Allemagne fédérale\n\n, thèse de\n\nmaîtrise\n\n, École supérieure de sciences et lettres, L’Avenir,\n\nBruxelles\n\nZamprotta, I. (1979),\n\nLa prevenzione dei rischi da lavoro nella realtà sociale ed economica italiana in rapporto alle esperienze comunitarie: linee ed indirizzi di prevenzione\n\n, in\n\nProposte sociali\n\n,\n\n(\n\nISSN\n\n0303-5174\n\n)\n\n, IPAS,\n\nRome\n\nZamprotta, I., (1981),\n\nRécents résultats de la prévention des accidents du travail dans le domaine de la Communauté européenne\n\n, L’Avenir,\n\nBruxelles\n\nStéphane Buzzi, Jean-Claude Devinck, Paul-André Rosental (2006),\n\nLa Santé au travail : 1880-2006\n\n, La Découverte"
+    },
+    {
+      "texte": "Report de l'ouverture du Passeport de prévention à 2025 pour les employeurs\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nQualité de vie au travail\n\nVentilation industrielle\n\nAccident du travail\n\nMaladie professionnelle\n\nMédecin du travail\n\nPrévention\n\nPrévention de la désinsertion professionnelle\n\nComité d'hygiène, de sécurité et des conditions de travail\n\n(CHSCT)\n\nAuto évaluation de l'engagement santé et sécurité au travail\n\nSécurité en laboratoire\n\nCoordonnateur SPS (France)\n\nPsychologie de la santé au travail\n\nÉquipement de protection individuelle\n\nSauveteur-secouriste du travail\n\nSanté environnementale\n\nSanté au travail\n\nInstitut national de recherche et de sécurité (INRS)\n\nDirty, dangerous and demeaning\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRessource relative à la santé\n\n:\n\nNCI Thesaurus\n\nNotice dans un dictionnaire ou une encyclopédie généraliste\n\n:",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 49,
+        "chunk_total": 81,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nReport de l'ouverture du Passeport de prévention à 2025 pour les employeurs\n\nArticles connexes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nQualité de vie au travail\n\nVentilation industrielle\n\nAccident du travail\n\nMaladie professionnelle\n\nMédecin du travail\n\nPrévention\n\nPrévention de la désinsertion professionnelle\n\nComité d'hygiène, de sécurité et des conditions de travail\n\n(CHSCT)\n\nAuto évaluation de l'engagement santé et sécurité au travail\n\nSécurité en laboratoire\n\nCoordonnateur SPS (France)\n\nPsychologie de la santé au travail\n\nÉquipement de protection individuelle\n\nSauveteur-secouriste du travail\n\nSanté environnementale\n\nSanté au travail\n\nInstitut national de recherche et de sécurité (INRS)\n\nDirty, dangerous and demeaning\n\nLiens externes\n\n[\n\nmodifier\n\n|\n\nmodifier le code\n\n]\n\nRessource relative à la santé\n\n:\n\nNCI Thesaurus\n\nNotice dans un dictionnaire ou une encyclopédie généraliste\n\n:"
+    },
+    {
+      "texte": "Store norske leksikon\n\nNotices d'autorité\n\n:\n\nGND\n\nTchéquie\n\nAgence européenne pour la santé et la sécurité au travail\n\nPortail Santé de l'Union européenne - Santé et sécurité sur le lieu de travail\n\nv\n\n·\n\nm\n\nSanté au travail\n\nHistoire\n\nMédecine du travail\n\nGrève dans les manufactures d’allumettes\n\nRadium Girls\n\nPathologie professionnelle\n\nSyndrome d'épuisement professionnel\n\nPerte d'audition due au bruit\n\nTrouble musculosquelettique\n\nIrradiation professionnelle\n\nSyndrome d'irradiation aiguë\n\nAccident de décompression\n\nCancer professionnel\n\nAsthme professionnel\n\nDermatite de contact\n\nPathologie neurologique professionnelle\n\nPathologie ORL professionnelle\n\nMaladie professionnelle\n\nTableaux de maladies professionnelles\n\nHygiène du travail\n\nRisque professionnel\n\nDanger biologique\n\nRisque chimique\n\nRisque physique\n\n(en)\n\nRisques psychosociaux\n\nNormes internationales\n\nDirective cadre CEE",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 50,
+        "chunk_total": 81,
+        "nb_chars": 895
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nStore norske leksikon\n\nNotices d'autorité\n\n:\n\nGND\n\nTchéquie\n\nAgence européenne pour la santé et la sécurité au travail\n\nPortail Santé de l'Union européenne - Santé et sécurité sur le lieu de travail\n\nv\n\n·\n\nm\n\nSanté au travail\n\nHistoire\n\nMédecine du travail\n\nGrève dans les manufactures d’allumettes\n\nRadium Girls\n\nPathologie professionnelle\n\nSyndrome d'épuisement professionnel\n\nPerte d'audition due au bruit\n\nTrouble musculosquelettique\n\nIrradiation professionnelle\n\nSyndrome d'irradiation aiguë\n\nAccident de décompression\n\nCancer professionnel\n\nAsthme professionnel\n\nDermatite de contact\n\nPathologie neurologique professionnelle\n\nPathologie ORL professionnelle\n\nMaladie professionnelle\n\nTableaux de maladies professionnelles\n\nHygiène du travail\n\nRisque professionnel\n\nDanger biologique\n\nRisque chimique\n\nRisque physique\n\n(en)\n\nRisques psychosociaux\n\nNormes internationales\n\nDirective cadre CEE"
+    },
+    {
+      "texte": "Voir aussi :\n\nErgonomie\n\nRadioprotection\n\nConditions de travail\n\nAccident du travail\n\nEPI\n\nv\n\n·\n\nm\n\nSanté publique\n\nGénéral\n\nAssurance maladie\n\nClinique\n\nCrise sanitaire\n\nDanger biologique\n\nHôpital\n\nListe OMS des médicaments essentiels\n\nPsychologie sociale\n\nRisque\n\npandémique\n\nphytosanitaire\n\nsanitaire\n\nSyndémie\n\nSanté\n\nAnthropologie\n\nCode\n\nÉconomie\n\nÉducation\n\nEnvironnement\n\nGlobale\n\nNumérique\n\nPolitique\n\nProfessionnel\n\nPromotion\n\nSanté planétaire\n\nSoins\n\nSystème\n\nSécurité sanitaire\n\nSécurité sociale\n\nSurveillance syndromique\n\nUrgence de santé publique de portée internationale\n\nVigilance sanitaire\n\nProphylaxie\n\n,\n\nPrévention\n\nAssainissement\n\ndéfécation en plein air\n\nréseau séparatif\n\nmaladie hydrique\n\nHygiène\n\nbucco-dentaire\n\ndes aliments\n\ndu corps\n\ndes mains\n\nde vie\n\nMédecine\n\nPharmacovigilance\n\nPlanification familiale\n\nPrévention quaternaire\n\nPropreté\n\nDératisation",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 51,
+        "chunk_total": 81,
+        "nb_chars": 880
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nVoir aussi :\n\nErgonomie\n\nRadioprotection\n\nConditions de travail\n\nAccident du travail\n\nEPI\n\nv\n\n·\n\nm\n\nSanté publique\n\nGénéral\n\nAssurance maladie\n\nClinique\n\nCrise sanitaire\n\nDanger biologique\n\nHôpital\n\nListe OMS des médicaments essentiels\n\nPsychologie sociale\n\nRisque\n\npandémique\n\nphytosanitaire\n\nsanitaire\n\nSyndémie\n\nSanté\n\nAnthropologie\n\nCode\n\nÉconomie\n\nÉducation\n\nEnvironnement\n\nGlobale\n\nNumérique\n\nPolitique\n\nProfessionnel\n\nPromotion\n\nSanté planétaire\n\nSoins\n\nSystème\n\nSécurité sanitaire\n\nSécurité sociale\n\nSurveillance syndromique\n\nUrgence de santé publique de portée internationale\n\nVigilance sanitaire\n\nProphylaxie\n\n,\n\nPrévention\n\nAssainissement\n\ndéfécation en plein air\n\nréseau séparatif\n\nmaladie hydrique\n\nHygiène\n\nbucco-dentaire\n\ndes aliments\n\ndu corps\n\ndes mains\n\nde vie\n\nMédecine\n\nPharmacovigilance\n\nPlanification familiale\n\nPrévention quaternaire\n\nPropreté\n\nDératisation"
+    },
+    {
+      "texte": "Santé et sécurité au travail EPI Ergonomie Hygiène Médecine Prévention des blessures Sécurité du patient Sécurisexe Tabagisme législation sevrage Vaccin Vaccination Infections et épidémies Contagion Endémie Immunité grégaire Maladie à déclaration obligatoire infectieuse émergente sexuellement transmissible tropicale Pandémie Porteur sain Prévention Comportements-barrière Confinement Contrôle des infections Désinfection Distanciation physique Solution hydroalcoolique Paradoxe de la prévention Protection Cordon sanitaire EPI médical Masques chirurgical FFP en tissu Préservatif Quarantaine Recherche des contacts Veille sanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 52,
+        "chunk_total": 81,
+        "nb_chars": 840
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSanté et sécurité au travail EPI Ergonomie Hygiène Médecine Prévention des blessures Sécurité du patient Sécurisexe Tabagisme législation sevrage Vaccin Vaccination Infections et épidémies Contagion Endémie Immunité grégaire Maladie à déclaration obligatoire infectieuse émergente sexuellement transmissible tropicale Pandémie Porteur sain Prévention Comportements-barrière Confinement Contrôle des infections Désinfection Distanciation physique Solution hydroalcoolique Paradoxe de la prévention Protection Cordon sanitaire EPI médical Masques chirurgical FFP en tissu Préservatif Quarantaine Recherche des contacts Veille sanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Veille sanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 53,
+        "chunk_total": 81,
+        "nb_chars": 223
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nVeille sanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "sanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 54,
+        "chunk_total": 81,
+        "nb_chars": 216
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nsanitaire Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Alimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 55,
+        "chunk_total": 81,
+        "nb_chars": 206
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAlimentation Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Additifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 56,
+        "chunk_total": 81,
+        "nb_chars": 193
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAdditifs Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Alimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 57,
+        "chunk_total": 81,
+        "nb_chars": 184
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAlimentation humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "humaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 58,
+        "chunk_total": 81,
+        "nb_chars": 171
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nhumaine saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "saine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 59,
+        "chunk_total": 81,
+        "nb_chars": 163
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nsaine génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "génétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 60,
+        "chunk_total": 81,
+        "nb_chars": 157
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\ngénétiquement modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "modifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 61,
+        "chunk_total": 81,
+        "nb_chars": 143
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nmodifiée Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Chimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 62,
+        "chunk_total": 81,
+        "nb_chars": 134
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nChimie Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Eau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 63,
+        "chunk_total": 81,
+        "nb_chars": 127
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nEau potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "potable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 64,
+        "chunk_total": 81,
+        "nb_chars": 123
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\npotable Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Microbiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 65,
+        "chunk_total": 81,
+        "nb_chars": 115
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nMicrobiologie Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Procédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 66,
+        "chunk_total": 81,
+        "nb_chars": 101
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nProcédé agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "agroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 67,
+        "chunk_total": 81,
+        "nb_chars": 93
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nagroalimentaire Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Sécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 68,
+        "chunk_total": 81,
+        "nb_chars": 77
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nSécurité Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "Bonnes pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 69,
+        "chunk_total": 81,
+        "nb_chars": 68
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nBonnes pratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "pratiques agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 70,
+        "chunk_total": 81,
+        "nb_chars": 61
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\npratiques agricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "agricole de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 71,
+        "chunk_total": 81,
+        "nb_chars": 51
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nagricole de fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "de fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 72,
+        "chunk_total": 81,
+        "nb_chars": 42
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nde fabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "fabrication HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 73,
+        "chunk_total": 81,
+        "nb_chars": 39
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nfabrication HACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "HACCP ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 74,
+        "chunk_total": 81,
+        "nb_chars": 27
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nHACCP ISO 22000 Populations"
+    },
+    {
+      "texte": "ISO 22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 75,
+        "chunk_total": 81,
+        "nb_chars": 21
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nISO 22000 Populations"
+    },
+    {
+      "texte": "22000 Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 76,
+        "chunk_total": 81,
+        "nb_chars": 17
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\n22000 Populations"
+    },
+    {
+      "texte": "Populations",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 77,
+        "chunk_total": 81,
+        "nb_chars": 11
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nPopulations"
+    },
+    {
+      "texte": "Accès aux soins\n\nDéterminant de santé\n\nsocial\n\ncommercial\n\nDépistage\n\nDonnées de santé\n\nMouvements des malades\n\nMédecine sociale\n\nMortalité\n\ninfantile\n\ninfanto-juvénile\n\nSanté\n\ncommunautaire\n\nmentale\n\nsexuelle\n\nÉquité\n\nSciences\n\nCommunication\n\nComportementales\n\nDéviance\n\nDéviance positive\n\nChangement de comportement\n\nModèle\n\nde croyance en santé\n\ncompartimental en épidémiologie\n\ntransthéorique de changement\n\nPsychologie de la santé\n\nThéorie\n\nsociale cognitive\n\ndu comportement planifié\n\nmicrobienne\n\nDémographie\n\nEspérance de vie\n\nTaux\n\nde natalité\n\n,\n\nde mortalité\n\nÉpidémiologie\n\nÉvolutive\n\nIncidence\n\nPrévalence\n\nTaux\n\nde létalité\n\n,\n\nde morbidité\n\nÉtudes de Whitehall\n\nHygiénisme\n\nLogiciels médicaux libres\n\nSociologie\n\nde la médecine\n\nde la santé\n\nStatistiques\n\nBiostatistique\n\nÉtude cas-témoins\n\nEssai randomisé contrôlé\n\nRisque relatif\n\nOrganisations\n\nAlgérie (\n\nINSP\n\n)\n\nCanada",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 78,
+        "chunk_total": 81,
+        "nb_chars": 889
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAccès aux soins\n\nDéterminant de santé\n\nsocial\n\ncommercial\n\nDépistage\n\nDonnées de santé\n\nMouvements des malades\n\nMédecine sociale\n\nMortalité\n\ninfantile\n\ninfanto-juvénile\n\nSanté\n\ncommunautaire\n\nmentale\n\nsexuelle\n\nÉquité\n\nSciences\n\nCommunication\n\nComportementales\n\nDéviance\n\nDéviance positive\n\nChangement de comportement\n\nModèle\n\nde croyance en santé\n\ncompartimental en épidémiologie\n\ntransthéorique de changement\n\nPsychologie de la santé\n\nThéorie\n\nsociale cognitive\n\ndu comportement planifié\n\nmicrobienne\n\nDémographie\n\nEspérance de vie\n\nTaux\n\nde natalité\n\n,\n\nde mortalité\n\nÉpidémiologie\n\nÉvolutive\n\nIncidence\n\nPrévalence\n\nTaux\n\nde létalité\n\n,\n\nde morbidité\n\nÉtudes de Whitehall\n\nHygiénisme\n\nLogiciels médicaux libres\n\nSociologie\n\nde la médecine\n\nde la santé\n\nStatistiques\n\nBiostatistique\n\nÉtude cas-témoins\n\nEssai randomisé contrôlé\n\nRisque relatif\n\nOrganisations\n\nAlgérie (\n\nINSP\n\n)\n\nCanada"
+    },
+    {
+      "texte": "Agence de la santé publique\n\nINSPQ\n\nChine\n\nCentre de contrôle et de prévention des maladies\n\nUnion européenne\n\nBanque de données\n\nCEPCM\n\ncnDAspe\n\nENVI\n\nEHESP\n\nESP\n\nHCSP\n\nInstitut Pasteur\n\nOclaesp\n\nPortail Santé\n\nSanté publique France\n\nSciensano\n\nWIV-ISP\n\nÉtats-Unis\n\nCDC\n\nService de santé publique\n\nOrganisation mondiale\n\nOMS\n\ndes toilettes\n\nSuisse (\n\nOFSP\n\n)\n\nPar pays\n\nBelgique\n\nCanada\n\nChine\n\nFrance\n\nLuxembourg\n\nSuisse\n\nHistoire\n\nCharte d'Ottawa\n\nConférences sanitaires internationales\n\nListe d'épidémies\n\nMouvement d'hygiène sociale\n\nOffice international d'hygiène publique\n\nRèglement sanitaire international\n\nPersonnalités\n\nElena Arnedo Soriano\n\nSara Josephine Baker\n\nAgostino Bassi\n\nGirolamo Fracastoro\n\nJoseph Lister\n\nLouis Pasteur\n\nMargaret Sanger\n\nIgnace Philippe Semmelweis\n\nJohn Snow\n\nCharles-Edward Amory Winslow\n\nPortail du droit\n\nPortail des entreprises\n\nPortail de la médecine",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 79,
+        "chunk_total": 81,
+        "nb_chars": 892
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nAgence de la santé publique\n\nINSPQ\n\nChine\n\nCentre de contrôle et de prévention des maladies\n\nUnion européenne\n\nBanque de données\n\nCEPCM\n\ncnDAspe\n\nENVI\n\nEHESP\n\nESP\n\nHCSP\n\nInstitut Pasteur\n\nOclaesp\n\nPortail Santé\n\nSanté publique France\n\nSciensano\n\nWIV-ISP\n\nÉtats-Unis\n\nCDC\n\nService de santé publique\n\nOrganisation mondiale\n\nOMS\n\ndes toilettes\n\nSuisse (\n\nOFSP\n\n)\n\nPar pays\n\nBelgique\n\nCanada\n\nChine\n\nFrance\n\nLuxembourg\n\nSuisse\n\nHistoire\n\nCharte d'Ottawa\n\nConférences sanitaires internationales\n\nListe d'épidémies\n\nMouvement d'hygiène sociale\n\nOffice international d'hygiène publique\n\nRèglement sanitaire international\n\nPersonnalités\n\nElena Arnedo Soriano\n\nSara Josephine Baker\n\nAgostino Bassi\n\nGirolamo Fracastoro\n\nJoseph Lister\n\nLouis Pasteur\n\nMargaret Sanger\n\nIgnace Philippe Semmelweis\n\nJohn Snow\n\nCharles-Edward Amory Winslow\n\nPortail du droit\n\nPortail des entreprises\n\nPortail de la médecine"
+    },
+    {
+      "texte": "Portail du travail et des métiers\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Sécurité_au_travail&oldid=233975446\n\n».\n\nCatégorie\n\n:\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nPage utilisant P1748\n\nPage pointant vers des bases externes\n\nPage pointant vers des bases relatives à la santé\n\nPage utilisant P4342\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nArticle contenant un appel à traduction en anglais\n\nPortail:Droit/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Entreprises/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Médecine/Articles liés\n\nPortail:Biologie/Articles liés\n\nPortail:Sciences/Articles liés\n\nPortail:Travail et métiers/Articles liés\n\nRechercher\n\nRechercher\n\nSécurité au travail\n\n36 langues\n\nAjouter un sujet",
+      "metadata": {
+        "doc_id": "normes_iso_45001_sst",
+        "nom_doc": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "nom": "ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)",
+        "pays": "TRANSNATIONAL",
+        "zone": "OHADA",
+        "domaine": "normes",
+        "metier_tags": [
+          "auditeur",
+          "risk_manager",
+          "DRH",
+          "assureur"
+        ],
+        "fiabilite": "semi_officiel",
+        "url_source": "https://fr.wikipedia.org/wiki/Sant%C3%A9_et_s%C3%A9curit%C3%A9_au_travail",
+        "hash": "5e0620088e228b434c9c58a2a9af2b59b78258c84f81812636410d683da4df49",
+        "indexe_le": "2026-04-22T17:24:46.385072",
+        "chunk_index": 80,
+        "chunk_total": 81,
+        "nb_chars": 851
+      },
+      "texte_embed": "normes — ISO 45001:2018 — Santé et sécurité au travail (Wikipedia FR)\nPortail du travail et des métiers\n\nCe document provient de «\n\nhttps://fr.wikipedia.org/w/index.php?title=Sécurité_au_travail&oldid=233975446\n\n».\n\nCatégorie\n\n:\n\nHygiène et sécurité du travail\n\nCatégories cachées :\n\nPage utilisant P1748\n\nPage pointant vers des bases externes\n\nPage pointant vers des bases relatives à la santé\n\nPage utilisant P4342\n\nPage pointant vers des dictionnaires ou encyclopédies généralistes\n\nArticle de Wikipédia avec notice d'autorité\n\nArticle contenant un appel à traduction en anglais\n\nPortail:Droit/Articles liés\n\nPortail:Société/Articles liés\n\nPortail:Entreprises/Articles liés\n\nPortail:Économie/Articles liés\n\nPortail:Médecine/Articles liés\n\nPortail:Biologie/Articles liés\n\nPortail:Sciences/Articles liés\n\nPortail:Travail et métiers/Articles liés\n\nRechercher\n\nRechercher\n\nSécurité au travail\n\n36 langues\n\nAjouter un sujet"
     }
   ]
 }

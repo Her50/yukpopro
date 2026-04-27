@@ -292,7 +292,7 @@ Score BANT calculé : {score}/100 — {niveau}
 Concurrent actuel : {params.get('concurrent', 'inconnu')}
 
 Recommande : produit(s) le plus adapté, angle commercial à utiliser, prochain contact."""
-                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.COMMERCIAL)
                 return json.dumps({
                     "prospect_id": params["prospect_id"],
                     "score_bant": score,
@@ -347,7 +347,7 @@ Prime actuelle : {prime:,.0f} FCFA
 Historique : {json.dumps(params.get('historique', {}), ensure_ascii=False)}
 
 Rédige : accroche personnalisée, bénéfices mis en avant, offre commerciale (remise max 8% si score > 50), appel à l'action WhatsApp."""
-                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.COMMERCIAL)
                 return rep.contenu
 
             if nom == "generer_devis_commercial":
@@ -383,7 +383,7 @@ Canal : {params['canal']}
 Numéro de relance : {nb}/3
 
 Message court (max 160 caractères si SMS), percutant, personnalisé."""
-                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.CREATION)
+                rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.COMMERCIAL)
                 contact = prospect.get("telephone", "") if params["canal"] in ("whatsapp", "sms") else prospect.get("email", "")
                 if contact:
                     await notifications.envoyer(canal=params["canal"], destinataire=contact, message=rep.contenu)

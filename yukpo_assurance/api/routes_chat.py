@@ -247,8 +247,8 @@ def _openai_key_valide() -> bool:
 async def _stream_response(session, message: str, current_user: TokenData) -> StreamingResponse:
     """
     Streaming SSE multi-moteur :
-    1. Claude (Anthropic) — si clé valide
-    2. OpenAI GPT-4o — si clé valide
+    1. OpenAI GPT — si clé valide (primaire dense)
+    2. Claude (Anthropic) — fallback si OpenAI échoue
     3. Mode démo CIMA — réponse locale si aucune clé disponible
     """
 
@@ -261,12 +261,44 @@ async def _stream_response(session, message: str, current_user: TokenData) -> St
         texte_complet: list[str] = []
         modele_utilise = "demo"
 
-        # ── 1. Essai Claude ──────────────────────────────────────────────────
-        if _claude_key_valide():
+        # ── 1. Essai OpenAI (primaire) ───────────────────────────────────────
+        if _openai_key_valide():
+            try:
+                import openai as _openai
+                oai = _openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+                messages_oai = []
+                if systeme:
+                    messages_oai.append({"role": "system", "content": systeme})
+                messages_oai.append({"role": "user", "content": prompt_complet})
+                _modele_oai = settings.GPT_MODEL_PRIMAIRE
+                _ml_oai = _modele_oai.lower()
+                _est_reasoning_oai = _ml_oai.startswith(("gpt-5", "o1", "o3", "o4"))
+                _budget_tokens = min(settings.IA_MAX_TOKENS_DOCUMENT, 8192)
+                _kwargs_oai: dict = {
+                    "model": _modele_oai,
+                    "messages": messages_oai,
+                    "stream": True,
+                }
+                if _est_reasoning_oai:
+                    _kwargs_oai["max_completion_tokens"] = _budget_tokens
+                else:
+                    _kwargs_oai["max_tokens"] = _budget_tokens
+                async with await oai.chat.completions.create(**_kwargs_oai) as stream:
+                    async for chunk in stream:
+                        delta = chunk.choices[0].delta.content if chunk.choices else None
+                        if delta:
+                            texte_complet.append(delta)
+                            yield f"data: {json.dumps({'chunk': delta, 'done': False}, ensure_ascii=False)}\n\n"
+                modele_utilise = _modele_oai
+                logger.info(f"[Chat/Stream] OpenAI OK ({_modele_oai}) — session {session.session_id}")
+            except Exception as e_oai:
+                logger.warning(f"[Chat/Stream] OpenAI échoué ({e_oai}) → fallback Claude")
+                texte_complet.clear()
+
+        # ── 2. Fallback Claude ───────────────────────────────────────────────
+        if not texte_complet and _claude_key_valide():
             try:
                 claude_client = anthropic.AsyncAnthropic(api_key=settings.CLAUDE_API_KEY)
-                # Prompt caching : le system prompt (~2000 tokens) est mis en cache
-                # côté Anthropic pendant 5 min → réduit TTFT de ~60% sur les appels suivants
                 system_avec_cache = [
                     {
                         "type": "text",
@@ -286,33 +318,7 @@ async def _stream_response(session, message: str, current_user: TokenData) -> St
                 modele_utilise = settings.CLAUDE_MODEL_PRIMAIRE
                 logger.info(f"[Chat/Stream] Claude OK — session {session.session_id}")
             except Exception as e_claude:
-                logger.warning(f"[Chat/Stream] Claude échoué ({e_claude}) → fallback OpenAI")
-                texte_complet.clear()
-
-        # ── 2. Fallback OpenAI ───────────────────────────────────────────────
-        if not texte_complet and _openai_key_valide():
-            try:
-                import openai as _openai
-                oai = _openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-                messages_oai = []
-                if systeme:
-                    messages_oai.append({"role": "system", "content": systeme})
-                messages_oai.append({"role": "user", "content": prompt_complet})
-                async with await oai.chat.completions.create(
-                    model=settings.GPT_MODEL_FALLBACK,
-                    max_tokens=min(settings.IA_MAX_TOKENS, 4096),
-                    messages=messages_oai,
-                    stream=True,
-                ) as stream:
-                    async for chunk in stream:
-                        delta = chunk.choices[0].delta.content if chunk.choices else None
-                        if delta:
-                            texte_complet.append(delta)
-                            yield f"data: {json.dumps({'chunk': delta, 'done': False}, ensure_ascii=False)}\n\n"
-                modele_utilise = settings.GPT_MODEL_FALLBACK
-                logger.info(f"[Chat/Stream] OpenAI OK — session {session.session_id}")
-            except Exception as e_oai:
-                logger.warning(f"[Chat/Stream] OpenAI échoué ({e_oai}) → mode démo")
+                logger.warning(f"[Chat/Stream] Claude échoué ({e_claude}) → mode démo")
                 texte_complet.clear()
 
         # ── 3. Mode démo CIMA ────────────────────────────────────────────────

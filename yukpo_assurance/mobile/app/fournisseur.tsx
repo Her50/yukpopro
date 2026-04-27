@@ -422,13 +422,13 @@ function FileAttente({ pieces, onUpdate }: { pieces: PieceFournisseur[]; onUpdat
                 ))}
               </View>
 
-              {/* Analyse IA */}
+              {/* Analyse YukpoPro */}
               {selected.score_ia !== null && (
                 <View style={[fa.detailCard, {
                   borderLeftWidth: 4,
                   borderLeftColor: selected.score_ia >= 70 ? '#10b981' : selected.score_ia >= 45 ? '#f59e0b' : '#ef4444',
                 }]}>
-                  <Text style={fa.detailSection}>Analyse Yukpo IA</Text>
+                  <Text style={fa.detailSection}>Analyse YukpoPro</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                     <Text style={{ fontSize: 32, fontWeight: '800', color: selected.score_ia >= 70 ? '#10b981' : selected.score_ia >= 45 ? '#d97706' : '#dc2626' }}>
                       {selected.score_ia}
@@ -452,7 +452,7 @@ function FileAttente({ pieces, onUpdate }: { pieces: PieceFournisseur[]; onUpdat
                     : <Ionicons name="sparkles-outline" size={18} color="#fff" />
                   }
                   <Text style={fa.modalActionText}>
-                    {analysing === selected.id ? 'Analyse en cours…' : 'Lancer l\'analyse Yukpo IA'}
+                    {analysing === selected.id ? 'Analyse en cours…' : 'Lancer l\'analyse YukpoPro'}
                   </Text>
                 </TouchableOpacity>
               )}

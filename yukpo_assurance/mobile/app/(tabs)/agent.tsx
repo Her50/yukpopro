@@ -1,5 +1,5 @@
 /**
- * Écran Yukpo Agents — Interface mobile agents IA autonomes.
+ * Écran Yukpo Agents — Interface mobile agents Yukpo autonomes.
  * Branding Yukpo : #0054A6 / #00B0F0 / #1e2640
  */
 import React, { useState, useRef, useCallback } from 'react'
@@ -319,7 +319,7 @@ export default function AgentScreen() {
             <View style={styles.headerTitleRow}>
               <Text style={styles.headerBrand}>Yukpo</Text>
               <View style={styles.badgeIA}>
-                <Text style={styles.badgeIAText}>Agents IA</Text>
+                <Text style={styles.badgeIAText}>Agents Yukpo</Text>
               </View>
             </View>
             <Text style={styles.headerSub}>L'intelligence CIMA au service de votre compagnie</Text>

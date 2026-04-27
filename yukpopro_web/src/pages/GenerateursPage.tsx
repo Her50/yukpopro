@@ -9,6 +9,7 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { generateurApi, infographieApi, GabaritInfographie, ResultatInfographieReponse } from "@/api/client";
 import { useGenerateurStore } from "@/store/generateurStore";
 import { formatAmount } from "@/services/paysDevise";
+import DesignerProPanel from "@/components/DesignerProPanel";
 
 type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
 type InfogMode = "brief" | "manuel" | "modele" | "custom";
@@ -699,52 +700,24 @@ function sauverTemplatesPerso(cats: CategorieTemplates[]) {
   try { localStorage.setItem(KEY_TEMPLATES_PERSO, JSON.stringify(cats)); } catch {}
 }
 
-const TYPES_RAPPORT = [
-  { value: "rapport_analyse",   label: "Rapport d'analyse" },
-  { value: "note_de_synthese",  label: "Note de synthèse" },
-  { value: "note_juridique",    label: "Note juridique" },
-  { value: "rapport_financier", label: "Rapport financier" },
-  { value: "rapport_rh",        label: "Rapport RH" },
-  { value: "plan_action",       label: "Plan d'action" },
-  { value: "compte_rendu",      label: "Compte-rendu" },
-  { value: "rapport_audit",     label: "Rapport d'audit" },
+const TYPES_RAPPORT_VALUES = [
+  "rapport_analyse","note_de_synthese","note_juridique","rapport_financier",
+  "rapport_rh","plan_action","compte_rendu","rapport_audit",
 ];
 
-const MODES_RAPPORT = [
-  { value: "flash",    label: "Flash — 1 page (rapide)" },
-  { value: "standard", label: "Standard — 3-5 pages" },
-  { value: "complet",  label: "Complet — 10-30 pages" },
-  { value: "expert",   label: "Expert — 40-80 pages (exhaustif)" },
+const MODES_RAPPORT_VALUES = ["flash","standard","complet","expert"];
+
+const TYPES_SLIDES_VALUES = [
+  "bilan_activite","proposition_client","rapport_direction","formation",
+  "pitch_projet","analyse_marche","rapport_financier",
 ];
 
-const TYPES_SLIDES = [
-  { value: "bilan_activite",      label: "Bilan d'activité" },
-  { value: "proposition_client",  label: "Proposition client" },
-  { value: "rapport_direction",   label: "Rapport direction / CA" },
-  { value: "formation",           label: "Support de formation" },
-  { value: "pitch_projet",        label: "Pitch projet / Startup" },
-  { value: "analyse_marche",      label: "Analyse de marché" },
-  { value: "rapport_financier",   label: "Présentation financière" },
-];
+const MODES_SLIDES_VALUES = ["executive","detaille","pitch","expert"];
 
-const MODES_SLIDES = [
-  { value: "executive", label: "Exécutif — 5-8 slides" },
-  { value: "detaille",  label: "Détaillé — 10-15 slides" },
-  { value: "pitch",     label: "Pitch — 8-12 slides impactants" },
-  { value: "expert",    label: "Expert — 25-40 slides (exhaustif)" },
-];
-
-const TYPES_SORTIE_FICHIERS = [
-  { value: "rapport_analyse",        label: "Rapport d'analyse (DOCX)" },
-  { value: "rapport_financier",      label: "Rapport financier (DOCX)" },
-  { value: "rapport_audit",          label: "Rapport d'audit (DOCX)" },
-  { value: "note_de_synthese",       label: "Note de synthèse (DOCX)" },
-  { value: "note_juridique",         label: "Note juridique (DOCX)" },
-  { value: "plan_action",            label: "Plan d'action (DOCX)" },
-  { value: "rapport_direction",      label: "Présentation direction (PPTX)" },
-  { value: "bilan_activite",         label: "Bilan d'activité (PPTX)" },
-  { value: "proposition_client",     label: "Proposition client (PPTX)" },
-  { value: "pitch_projet",           label: "Pitch projet (PPTX)" },
+const TYPES_SORTIE_FICHIERS_VALUES = [
+  "rapport_analyse","rapport_financier","rapport_audit","note_de_synthese",
+  "note_juridique","plan_action","rapport_direction","bilan_activite",
+  "proposition_client","pitch_projet",
 ];
 
 const EXTENSIONS_ACCEPTEES = ".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.pptx";
@@ -801,6 +774,7 @@ export const GenerateursPage = () => {
   const fileSlidesRef  = useRef<HTMLInputElement>(null);
 
   // ── Infographie Pro (print-ready PDF + PNG preview) ──────────────────────
+  const [infogDesignerMode, setInfogDesignerMode] = useState<"monopages" | "multipages">("multipages");
   const [infogMode, setInfogMode]               = useState<InfogMode>("brief");
   const [infogGabarits, setInfogGabarits]       = useState<GabaritInfographie[]>([]);
   const [infogPalettes, setInfogPalettes]       = useState<string[]>([]);
@@ -839,7 +813,7 @@ export const GenerateursPage = () => {
         setInfogPalettes(d.palettes);
         if (d.palettes?.length) setInfogPalette(d.palettes[0]);
       })
-      .catch(() => toast.error("Impossible de charger les gabarits"));
+      .catch(() => toast.error(t("generateurs.loadGabaritFailed")));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
@@ -853,16 +827,16 @@ export const GenerateursPage = () => {
     e.preventDefault();
     // Validations synchrones (avant de lancer le job)
     if (infogMode === "brief" && infogBrief.trim().length < 10) {
-      toast.error("Décrivez votre besoin (min 10 caractères)"); return;
+      toast.error(t("generateurs.briefMin10")); return;
     }
-    if (infogMode === "manuel" && !infogTitre.trim()) { toast.error("Titre requis"); return; }
+    if (infogMode === "manuel" && !infogTitre.trim()) { toast.error(t("generateurs.titleRequired")); return; }
     if (infogMode === "modele") {
-      if (!infogModele) { toast.error("Choisissez une image modèle"); return; }
-      if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
+      if (!infogModele) { toast.error(t("generateurs.chooseModelImage")); return; }
+      if (infogBrief.trim().length < 10) { toast.error(t("generateurs.briefMin10")); return; }
     }
     if (infogMode === "custom") {
-      if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
-      if (infogW <= 0 || infogH <= 0) { toast.error("Dimensions invalides"); return; }
+      if (infogBrief.trim().length < 10) { toast.error(t("generateurs.briefMin10")); return; }
+      if (infogW <= 0 || infogH <= 0) { toast.error(t("generateurs.invalidDimensions")); return; }
     }
 
     await runJob("infographie", async () => {
@@ -892,38 +866,38 @@ export const GenerateursPage = () => {
         });
       }
     }, {
-      successMsg: "Infographie générée et sauvegardée dans Mes Documents !",
+      successMsg: t("generateurs.infogSavedDocs"),
       onError: (err) => {
         const status = err?.response?.status;
         const detail: string = err?.response?.data?.detail || "";
         if (status === 402 && detail.startsWith("CREDITS_EPUISES")) {
           const restants = /restants=(\d+)/.exec(detail)?.[1] ?? "0";
           const plan     = /plan=([^|]+)/.exec(detail)?.[1] ?? "—";
-          toast((t) => (
+          toast((to) => (
             <span className="text-sm">
-              Crédits insuffisants ({restants} restants, plan {plan}).
+              {t("generateurs.creditsInsufficient", { restants, plan })}
               <button
-                onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+                onClick={() => { toast.dismiss(to.id); navigate("/abonnement"); }}
                 className="ml-2 px-2 py-1 bg-yukpo-500 text-white rounded text-xs font-semibold"
               >
-                Recharger / Upgrader
+                {t("generateurs.rechargeUpgrade")}
               </button>
             </span>
           ), { duration: 8000, icon: "💳" });
         } else if (status === 403 && detail.startsWith("MODULE_NON_AUTORISE")) {
-          toast((t) => (
+          toast((to) => (
             <span className="text-sm">
-              Module Infographie non inclus dans votre plan.
+              {t("generateurs.moduleInfogNotIncluded")}
               <button
-                onClick={() => { toast.dismiss(t.id); navigate("/abonnement"); }}
+                onClick={() => { toast.dismiss(to.id); navigate("/abonnement"); }}
                 className="ml-2 px-2 py-1 bg-purple-500 text-white rounded text-xs font-semibold"
               >
-                Upgrader
+                {t("generateurs.upgrade")}
               </button>
             </span>
           ), { duration: 8000, icon: "🔒" });
         } else {
-          toast.error(detail || "Erreur lors de la génération");
+          toast.error(detail || t("generateurs.generationError"));
         }
       },
     });
@@ -939,7 +913,7 @@ export const GenerateursPage = () => {
       svg:      { b64: infogResult.svg_base64,         id: infogResult.svg_id,         mime: "image/svg+xml" },
     };
     const item = map[kind];
-    if (!item.b64 || !item.id) { toast.error("Fichier indisponible"); return; }
+    if (!item.b64 || !item.id) { toast.error(t("generateurs.fileUnavailable")); return; }
     const a = document.createElement("a");
     a.href = `data:${item.mime};base64,${item.b64}`;
     a.download = item.id;
@@ -951,7 +925,7 @@ export const GenerateursPage = () => {
   const [infogRetoucheInstr, setInfogRetoucheInstr] = useState("");
 
   const handleGenererVariantes = async () => {
-    if (infogBrief.trim().length < 10) { toast.error("Décrivez votre besoin (min 10 caractères)"); return; }
+    if (infogBrief.trim().length < 10) { toast.error(t("generateurs.briefMin10")); return; }
     setInfogVariantes(null);
     await runJob("infographie", async () => {
       const data = await infographieApi.genererVariantes({
@@ -961,19 +935,19 @@ export const GenerateursPage = () => {
       // On pose la 1ère variante comme résultat principal pour l'aperçu
       if (data.variantes?.[0]) return data.variantes[0].resultat;
       return null;
-    }, { successMsg: "4 variantes générées !" });
+    }, { successMsg: t("generateurs.fourVariantsGenerated") });
   };
 
   const handleRetoucher = async () => {
-    if (!infogResult?.pdf_id) { toast.error("Aucune infographie à retoucher"); return; }
-    if (infogRetoucheInstr.trim().length < 5) { toast.error("Précisez la modification souhaitée"); return; }
+    if (!infogResult?.pdf_id) { toast.error(t("generateurs.noInfogToRetouch")); return; }
+    if (infogRetoucheInstr.trim().length < 5) { toast.error(t("generateurs.specifyChange")); return; }
     await runJob("infographie", async () => {
       const r = await infographieApi.modifier({
         fichier_id: infogResult.pdf_id!, instructions: infogRetoucheInstr, pays: infogPays,
       });
       setInfogRetoucheInstr("");
       return r;
-    }, { successMsg: "Infographie retouchée" });
+    }, { successMsg: t("generateurs.infogRetouched") });
   };
 
   // ── Conversion de format ──────────────────────────────────────────────────
@@ -1007,7 +981,7 @@ export const GenerateursPage = () => {
     await runJob(
       "conversion",
       () => generateurApi.convertirFichier(fichierConv, formatCible),
-      { successMsg: "Conversion réussie !", errorMsg: "Erreur lors de la conversion" },
+      { successMsg: t("generateurs.conversionSuccess"), errorMsg: t("generateurs.conversionError") },
     );
   };
 
@@ -1031,8 +1005,8 @@ export const GenerateursPage = () => {
 
   const handleAnalyserEtGenerer = async (e: FormEvent) => {
     e.preventDefault();
-    if (!instructionFichiers.trim()) return toast.error("Décrivez ce que vous souhaitez générer");
-    if (fichiers.length === 0) return toast.error("Ajoutez au moins un fichier source");
+    if (!instructionFichiers.trim()) return toast.error(t("generateurs.describeWhatToGenerate"));
+    if (fichiers.length === 0) return toast.error(t("generateurs.addAtLeastOneFile"));
     const estSlides = FORMATS_SLIDES.has(typeSortieFichiers);
     await runJob("fichiers", () => generateurApi.analyserEtGenerer({
       instruction: instructionFichiers,
@@ -1041,7 +1015,7 @@ export const GenerateursPage = () => {
       mode: modeFichiers,
       format_sortie: estSlides ? "pptx" : "docx",
       fichiers,
-    }), { successMsg: `Document généré depuis ${fichiers.length} fichier(s) !` });
+    }), { successMsg: t("generateurs.documentFromFiles", { count: fichiers.length }) });
   };
 
   const handleGenererRapport = async (e: FormEvent) => {
@@ -1056,7 +1030,7 @@ export const GenerateursPage = () => {
         mode: modeRapport,
         format_sortie: "docx",
         fichiers: fichiersRapport,
-      }), { successMsg: `Rapport généré depuis ${fichiersRapport.length} fichier(s) !` });
+      }), { successMsg: t("generateurs.reportFromFiles", { count: fichiersRapport.length }) });
     } else {
       await runJob("rapport", () => generateurApi.rapport({
         sujet: sujetRapport,
@@ -1064,7 +1038,7 @@ export const GenerateursPage = () => {
         mode: modeRapport,
         contexte: contexteRapport || undefined,
         format_sortie: formatRapport as "docx" | "markdown",
-      }), { successMsg: "Rapport généré avec succès !" });
+      }), { successMsg: t("generateurs.reportSuccess") });
     }
   };
 
@@ -1080,7 +1054,7 @@ export const GenerateursPage = () => {
         mode: modeSlides,
         format_sortie: "pptx",
         fichiers: fichiersSlides,
-      }), { successMsg: `Présentation générée depuis ${fichiersSlides.length} fichier(s) !` });
+      }), { successMsg: t("generateurs.presentationFromFiles", { count: fichiersSlides.length }) });
     } else {
       await runJob("slides", () => generateurApi.slides({
         sujet: sujetSlides,
@@ -1088,7 +1062,7 @@ export const GenerateursPage = () => {
         mode: modeSlides,
         contexte: contexteSlides || undefined,
         format_sortie: formatSlides as "pptx" | "markdown",
-      }), { successMsg: "Présentation générée !" });
+      }), { successMsg: t("generateurs.presentationSuccess") });
     }
   };
 
@@ -1112,7 +1086,7 @@ export const GenerateursPage = () => {
           { id: "slides",     icon: <Presentation className="w-4 h-4" />,  label: t('generateurs.tabSlides') },
           { id: "conversion", icon: <RefreshCw className="w-4 h-4" />,     label: t('generateurs.tabConversion') },
           { id: "modeles",    icon: <BookOpen className="w-4 h-4" />,      label: t('generateurs.tabModeles') },
-          { id: "infographie", icon: <Palette className="w-4 h-4" />,     label: t('generateurs.tabInfog') },
+          { id: "infographie", icon: <Sparkles className="w-4 h-4" />,   label: t('generateurs.tabDesignerPro', 'Designer Pro') },
         ] as const).map(({ id, icon, label }) => (
           <button
             key={id}
@@ -1122,7 +1096,6 @@ export const GenerateursPage = () => {
             }`}
           >
             {icon} {label}
-            {id === "infographie" && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-400 font-semibold">PRO</span>}
           </button>
         ))}
       </div>
@@ -1131,7 +1104,7 @@ export const GenerateursPage = () => {
       {tab === "modeles" && (
         <div className="space-y-2">
           <p className="text-xs text-slate-500 mb-3">
-            {TEMPLATES_PAR_METIER.reduce((s, c) => s + c.templates.length, 0)} modèles — cliquez sur une rubrique pour voir les modèles disponibles
+            {t("generateurs.modelsHint", { total: TEMPLATES_PAR_METIER.reduce((s, c) => s + c.templates.length, 0) })}
           </p>
           {TEMPLATES_PAR_METIER.map((cat) => {
             const isOpen = openCat === cat.categorie;
@@ -1147,7 +1120,7 @@ export const GenerateursPage = () => {
                     <div className="text-left">
                       <p className="text-sm font-semibold text-white">{cat.categorie}</p>
                       <p className="text-xs text-slate-500">
-                        {cat.templates.length} modèle{cat.templates.length > 1 ? "s" : ""}
+                        {t("generateurs.modelsCount", { count: cat.templates.length, plural: cat.templates.length > 1 ? "s" : "" })}
                         {" · "}
                         {cat.templates.filter(t => t.type === "rapport").length > 0 && (
                           <span className="text-blue-400">{cat.templates.filter(t => t.type === "rapport").length} DOCX</span>
@@ -1183,7 +1156,7 @@ export const GenerateursPage = () => {
                           }
                           setTab(tpl.type as Tab);
                           setResultat(null);
-                          toast.success(`Modèle "${tpl.label}" chargé`);
+                          toast.success(t("generateurs.modelLoaded", { label: tpl.label }));
                         }}
                         className="group text-left p-3 rounded-xl hover:border-yukpo-500/60 hover:bg-yukpo-500/5 transition-all"
                         style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}
@@ -1222,7 +1195,7 @@ export const GenerateursPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-stretch">
               {/* Zone de dépôt compacte */}
               <div className="flex flex-col">
-                <p className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Fichiers sources *</p>
+                <p className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">{t("generateurs.filesSources")}</p>
                 <div
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
@@ -1276,10 +1249,10 @@ export const GenerateursPage = () => {
               {/* Instruction */}
               <div className="flex flex-col">
                 <label className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">
-                  Instruction de génération *
+                  {t("generateurs.instructionLabel")}
                 </label>
                 <textarea
-                  placeholder="Ex: Génère un rapport d'analyse financière basé sur ces données Excel, avec tendances, ratios clés et recommandations. Analyse les évolutions année par année et mets en évidence les anomalies."
+                  placeholder={t("generateurs.filesInstructionPlaceholder")}
                   value={instructionFichiers}
                   onChange={(e) => setInstructionFichiers(e.target.value)}
                   className="flex-1 min-h-[160px] w-full rounded-xl border border-slate-600 bg-slate-800/60 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-yukpo-500 focus:ring-1 focus:ring-yukpo-500/40 resize-none transition-colors"
@@ -1292,7 +1265,7 @@ export const GenerateursPage = () => {
               <div className="flex-1">
                 <Select
                   label={t('generateurs.docType')}
-                  options={TYPES_SORTIE_FICHIERS}
+                  options={TYPES_SORTIE_FICHIERS_VALUES.map(v => ({ value: v, label: t(`generateurs.lists.sortie.${v}`) }))}
                   value={typeSortieFichiers}
                   onChange={(e) => setTypeSortieFichiers(e.target.value)}
                 />
@@ -1301,10 +1274,10 @@ export const GenerateursPage = () => {
                 <Select
                   label={t('generateurs.mode')}
                   options={[
-                    { value: "flash",    label: "Flash — rapide" },
-                    { value: "standard", label: "Standard" },
-                    { value: "complet",  label: "Complet" },
-                    { value: "executive", label: "Exécutif" },
+                    { value: "flash",    label: t("generateurs.modeFlash") },
+                    { value: "standard", label: t("generateurs.modeStandard") },
+                    { value: "complet",  label: t("generateurs.modeComplet") },
+                    { value: "executive", label: t("generateurs.modeExecutive") },
                   ]}
                   value={modeFichiers}
                   onChange={(e) => setModeFichiers(e.target.value)}
@@ -1330,8 +1303,8 @@ export const GenerateursPage = () => {
             <Card className="p-6 flex items-center gap-4">
               <Loader className="w-6 h-6 text-yukpo-400 animate-spin shrink-0" />
               <div>
-                <p className="text-white font-medium text-sm">Yukpo Pro analyse et génère votre document…</p>
-                <p className="text-slate-400 text-xs mt-0.5">Yukpo lit vos fichiers et rédige le document professionnel</p>
+                <p className="text-white font-medium text-sm">{t("generateurs.analyzing")}</p>
+                <p className="text-slate-400 text-xs mt-0.5">{t("generateurs.analyzingHelper")}</p>
               </div>
             </Card>
           )}
@@ -1340,14 +1313,14 @@ export const GenerateursPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span className="text-sm font-semibold text-white">Document généré !</span>
+                  <span className="text-sm font-semibold text-white">{t("generateurs.documentReady")}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => { setResultat(null); setFichiers([]); setInstructionFichiers(""); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-600 text-slate-400 text-xs font-medium hover:border-yukpo-500 hover:text-yukpo-300 transition-all"
                 >
-                  <Upload className="w-3 h-3" /> Générer un autre
+                  <Upload className="w-3 h-3" /> {t("generateurs.generateAnother")}
                 </button>
               </div>
               {resultat.fichier && (
@@ -1359,14 +1332,14 @@ export const GenerateursPage = () => {
                   <Download className="w-5 h-5 shrink-0 text-blue-600 dark:text-yukpo-400" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{resultat.fichier}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cliquer pour télécharger</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t("generateurs.clickToDownload")}</p>
                   </div>
                   <Download className="w-4 h-4 shrink-0 ml-auto text-blue-400 dark:text-yukpo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               )}
               {resultat.markdown && (
                 <div className="max-h-64 overflow-y-auto">
-                  <p className="text-xs text-slate-500 mb-2">Aperçu :</p>
+                  <p className="text-xs text-slate-500 mb-2">{t("generateurs.preview")}</p>
                   <div className="p-3 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                     <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                       {resultat.markdown.slice(0, 2000)}
@@ -1383,7 +1356,7 @@ export const GenerateursPage = () => {
       {tab === "conversion" && (
         <div className="max-w-xl mx-auto space-y-5">
           <div className="text-center">
-            <p className="text-sm text-slate-400">Convertissez un fichier vers un autre format en un clic.<br />PDF → Word, Excel → CSV, Image → Word (OCR), et bien d'autres.</p>
+            <p className="text-sm text-slate-400">{t("generateurs.convertSubtitle")}<br />{t("generateurs.convertSubtitle2")}</p>
           </div>
           <form onSubmit={handleConvertir} className="space-y-4">
             {/* Zone dépôt */}
@@ -1402,7 +1375,7 @@ export const GenerateursPage = () => {
                 </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm font-medium text-slate-300">Déposez votre fichier ici</p>
+                  <p className="text-sm font-medium text-slate-300">{t("generateurs.dropFileHere")}</p>
                   <p className="text-xs text-slate-500 mt-1">PDF, DOCX, PPTX, XLSX, CSV, TXT, JPG, PNG</p>
                 </div>
               )}
@@ -1433,7 +1406,7 @@ export const GenerateursPage = () => {
                   onChange={(e) => setFormatCible(e.target.value)}
                 />
                 <Button type="submit" loading={loadingConv} icon={<RefreshCw className="w-4 h-4" />} className="w-full">
-                  Convertir
+                  {t("generateurs.convertCta")}
                 </Button>
               </>
             )}
@@ -1442,7 +1415,7 @@ export const GenerateursPage = () => {
           {loadingConv && (
             <Card className="p-5 flex items-center gap-4">
               <Loader className="w-5 h-5 text-yukpo-400 animate-spin" />
-              <p className="text-sm text-white">Conversion en cours…</p>
+              <p className="text-sm text-white">{t("generateurs.converting")}</p>
             </Card>
           )}
 
@@ -1451,7 +1424,7 @@ export const GenerateursPage = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-400" />
                 <span className="text-sm font-semibold text-white">
-                  {resultatConv.format_source.toUpperCase()} → {resultatConv.format_cible.replace(".", "").toUpperCase()} — Conversion réussie !
+                  {resultatConv.format_source.toUpperCase()} → {resultatConv.format_cible.replace(".", "").toUpperCase()} — {t("generateurs.conversionSuccess")}
                 </span>
               </div>
               <a
@@ -1470,23 +1443,45 @@ export const GenerateursPage = () => {
                 onClick={() => { setFichierConv(null); setResultatConv(null); }}
                 className="text-xs text-slate-400 hover:text-white underline"
               >
-                Convertir un autre fichier
+                {t("generateurs.convertAnother")}
               </button>
             </Card>
           )}
         </div>
       )}
 
-      {/* ── Tab Infographie Pro (print-ready PDF + PNG preview) ───────────── */}
+      {/* ── Tab Designer Pro ────────────────────────────────────────────────── */}
       {tab === "infographie" && (
         <div className="space-y-4">
+          {/* Sélecteur mono-page / multi-page */}
+          <div className="flex gap-1 bg-gray-100 border border-gray-200 p-1 rounded-xl w-fit">
+            {([
+              { id: "multipages", label: `✨ ${t("generateurs.designerMultiPage")}`, desc: t("generateurs.designerMultiPageDesc") },
+              { id: "monopages",  label: `🖨️ ${t("generateurs.designerMonoPage")}`,    desc: t("generateurs.designerMonoPageDesc") },
+            ] as const).map(m => (
+              <button key={m.id} onClick={() => setInfogDesignerMode(m.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  infogDesignerMode === m.id
+                    ? "bg-white shadow-sm border border-gray-200 text-amber-700"
+                    : "text-gray-800 hover:text-gray-900"
+                }`}
+                title={m.desc}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          {infogDesignerMode === "multipages" ? (
+            <DesignerProPanel />
+          ) : (
+          <div className="space-y-4">
           {/* Étape 1 : choix du sous-mode */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {([
-              { id: "brief",  icon: <Wand2 className="w-4 h-4" />,      label: "Brief libre IA",       desc: "Décris, l'IA compose" },
-              { id: "manuel", icon: <Settings2 className="w-4 h-4" />,  label: "Spec manuelle",        desc: "Sans IA, contrôle total" },
-              { id: "modele", icon: <FileImage className="w-4 h-4" />,  label: "Depuis un modèle",     desc: "Upload + brief inspiré" },
-              { id: "custom", icon: <Maximize2 className="w-4 h-4" />,  label: "Format sur mesure",    desc: "Dimensions libres mm" },
+              { id: "brief",  icon: <Wand2 className="w-4 h-4" />,      label: t("generateurs.subModeBrief"),  desc: t("generateurs.subModeBriefDesc") },
+              { id: "manuel", icon: <Settings2 className="w-4 h-4" />,  label: t("generateurs.subModeManuel"), desc: t("generateurs.subModeManuelDesc") },
+              { id: "modele", icon: <FileImage className="w-4 h-4" />,  label: t("generateurs.subModeModele"), desc: t("generateurs.subModeModeleDesc") },
+              { id: "custom", icon: <Maximize2 className="w-4 h-4" />,  label: t("generateurs.subModeCustom"), desc: t("generateurs.subModeCustomDesc") },
             ] as const).map(({ id, icon, label, desc }) => (
               <button key={id} type="button" onClick={() => { setInfogMode(id); setInfogResult(null); }}
                 className={`flex flex-col items-start gap-1 p-3 rounded-xl border transition-all text-left ${
@@ -1510,7 +1505,7 @@ export const GenerateursPage = () => {
               {infogMode !== "custom" && (
                 <div>
                   <label className="text-xs font-semibold text-slate-400 mb-1.5 block">
-                    Gabarit ({infogGabarits.length} disponibles)
+                    {t("generateurs.gabaritLabel", { count: infogGabarits.length })}
                   </label>
                   <select value={infogGabarit} onChange={e => setInfogGabarit(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
@@ -1518,14 +1513,14 @@ export const GenerateursPage = () => {
                       <optgroup key={cat} label={cat.toUpperCase()}>
                         {items.map(g => (
                           <option key={g.cle} value={g.cle}>
-                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} crédits
+                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} {t("generateurs.credits")}
                           </option>
                         ))}
                       </optgroup>
                     ))}
                   </select>
                   {gabaritCourant && (
-                    <p className="text-[11px] text-slate-500 mt-1">{gabaritCourant.description} · bleed {gabaritCourant.bleed_mm}mm</p>
+                    <p className="text-[11px] text-slate-500 mt-1">{gabaritCourant.description} · {t("generateurs.gabaritBleed", { mm: gabaritCourant.bleed_mm })}</p>
                   )}
                 </div>
               )}
@@ -1534,17 +1529,17 @@ export const GenerateursPage = () => {
               {infogMode === "custom" && (
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Largeur (mm)</label>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">{t("generateurs.widthMm")}</label>
                     <input type="number" min={10} max={3000} value={infogW} onChange={e => setInfogW(Number(e.target.value))}
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Hauteur (mm)</label>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">{t("generateurs.heightMm")}</label>
                     <input type="number" min={10} max={3000} value={infogH} onChange={e => setInfogH(Number(e.target.value))}
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Bleed (mm)</label>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">{t("generateurs.bleedMm")}</label>
                     <input type="number" min={0} max={20} value={infogBleed} onChange={e => setInfogBleed(Number(e.target.value))}
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
                   </div>
@@ -1554,13 +1549,13 @@ export const GenerateursPage = () => {
               {/* Mode MODÈLE : upload */}
               {infogMode === "modele" && (
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Image modèle (PNG/JPG/WEBP, max 10 Mo)</label>
+                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">{t("generateurs.modelImageLabel")}</label>
                   <input ref={infogModeleRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp"
                     onChange={e => setInfogModele(e.target.files?.[0] || null)} className="hidden" />
                   <button type="button" onClick={() => infogModeleRef.current?.click()}
                     className="w-full flex items-center gap-2 px-3 py-2 border border-dashed border-slate-700 hover:border-yukpo-500 rounded-lg text-sm text-slate-400 hover:text-white transition-all">
                     <Upload className="w-4 h-4" />
-                    {infogModele ? `${infogModele.name} (${(infogModele.size / 1024).toFixed(0)} Ko)` : "Uploader un visuel modèle (style, couleurs, layout)"}
+                    {infogModele ? `${infogModele.name} (${(infogModele.size / 1024).toFixed(0)} Ko)` : t("generateurs.uploadModelVisual")}
                   </button>
                 </div>
               )}
@@ -1568,7 +1563,7 @@ export const GenerateursPage = () => {
               {/* Étape 3 : champs spécifiques au mode */}
               {(infogMode === "brief" || infogMode === "modele" || infogMode === "custom") && (
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">Brief créatif *</label>
+                  <label className="text-xs font-semibold text-slate-400 mb-1.5 block">{t("generateurs.creativeBrief")}</label>
                   <textarea value={infogBrief} onChange={e => setInfogBrief(e.target.value)} rows={5} required
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500 resize-none"
                     placeholder={t('generateurs.briefPlaceholder')} />
@@ -1579,7 +1574,7 @@ export const GenerateursPage = () => {
                 <>
                   <div className="grid grid-cols-2 gap-2.5">
                     <div className="col-span-2">
-                      <label className="text-xs font-semibold text-slate-400 mb-1 block">Titre principal *</label>
+                      <label className="text-xs font-semibold text-slate-400 mb-1 block">{t("generateurs.mainTitle")}</label>
                       <input value={infogTitre} onChange={e => setInfogTitre(e.target.value)} required maxLength={60}
                         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500" />
                     </div>
@@ -1619,7 +1614,7 @@ export const GenerateursPage = () => {
               {infogMode !== "manuel" && (
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 mb-1 block">Pays cible</label>
+                    <label className="text-xs font-semibold text-slate-400 mb-1 block">{t("generateurs.targetCountry")}</label>
                     <select value={infogPays} onChange={e => setInfogPays(e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-yukpo-500">
                       <option value="CM">Cameroun</option>
@@ -1645,7 +1640,7 @@ export const GenerateursPage = () => {
                 <button type="submit" disabled={infogLoading}
                   className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-corp-600 to-corp-500 hover:from-corp-700 hover:to-corp-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-all text-sm">
                   {infogLoading
-                    ? <><Loader className="w-4 h-4 animate-spin" /> Yukpo Pro compose…</>
+                    ? <><Loader className="w-4 h-4 animate-spin" /> {t("generateurs.infogComposing")}</>
                     : <><Sparkles className="w-4 h-4" /> {t("generateurs.infogOneVisual")}</>}
                 </button>
                 {infogMode === "brief" && (
@@ -1656,7 +1651,7 @@ export const GenerateursPage = () => {
                   </button>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 text-center">PDF 300 DPI · CMJN press-ready · SVG vectoriel · PNG HD · sauvegarde Mes Documents</p>
+              <p className="text-[11px] text-slate-500 text-center">{t("generateurs.infogFooter")}</p>
             </form>
 
             {/* Aperçu — 2 colonnes */}
@@ -1696,13 +1691,13 @@ export const GenerateursPage = () => {
                 <Card className="p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-white flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-pink-400" /> Aperçu
+                      <ImageIcon className="w-4 h-4 text-pink-400" /> {t("generateurs.preview").replace(/[ :]+$/, "")}
                     </span>
                     <div className="flex gap-2 flex-wrap justify-end">
                       {infogResult.png_id && (
                         <button type="button" onClick={() => setInfogZoom(true)}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-all">
-                          <Maximize2 className="w-3.5 h-3.5" /> Zoom
+                          <Maximize2 className="w-3.5 h-3.5" /> {t("generateurs.zoom")}
                         </button>
                       )}
                       {infogResult.pdf_id && (
@@ -1740,22 +1735,22 @@ export const GenerateursPage = () => {
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-2 p-8 rounded-xl text-slate-400 text-sm" style={{ background: "var(--ykp-elevated)" }}>
                       <FileText className="w-8 h-8" />
-                      Preview PNG indisponible — téléchargez le PDF
+                      {t("generateurs.previewPngUnavailable")}
                     </div>
                   )}
                   {infogResult.specification && (
                     <div className="text-xs text-slate-400 space-y-1 border-t border-slate-700/60 pt-2">
-                      <p><span className="text-slate-500">Titre :</span> {infogResult.specification.titre}</p>
+                      <p><span className="text-slate-500">{t("generateurs.specTitle")}</span> {infogResult.specification.titre}</p>
                       {infogResult.specification.palette && (
-                        <p><span className="text-slate-500">Palette :</span> {infogResult.specification.palette}</p>
+                        <p><span className="text-slate-500">{t("generateurs.specPalette")}</span> {infogResult.specification.palette}</p>
                       )}
                       {typeof infogResult.prix_fcfa === "number" && infogResult.prix_fcfa > 0 && (
-                        <p><span className="text-slate-500">Tarif imprimé indicatif :</span> {formatAmount(infogResult.prix_fcfa, infogPays)}</p>
+                        <p><span className="text-slate-500">{t("generateurs.indicativePrintPrice")}</span> {formatAmount(infogResult.prix_fcfa, infogPays)}</p>
                       )}
                     </div>
                   )}
                   <span className="flex items-center gap-1.5 text-[11px] text-green-400">
-                    <Save className="w-3 h-3" /> Sauvegardé dans Mes Documents
+                    <Save className="w-3 h-3" /> {t("generateurs.savedToDocs")}
                   </span>
 
                   {/* Retouche IA — instructions libres pour modifier le visuel */}
@@ -1780,8 +1775,8 @@ export const GenerateursPage = () => {
                     <Palette className="w-8 h-8 text-purple-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-white font-semibold mb-1">Infographie Pro — Print-Ready</p>
-                    <p className="text-slate-500 text-sm">Cartes de visite · Flyers · Affiches · Diplômes<br />Faire-part · Roll-ups · Posts sociaux · Bâches</p>
+                    <p className="text-white font-semibold mb-1">{t("generateurs.infogProTitle")}</p>
+                    <p className="text-slate-500 text-sm">{t("generateurs.infogProDesc")}<br />{t("generateurs.infogProDesc2")}</p>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center max-w-sm">
                     {["Flyer A5", "Carte visite", "Diplôme", "Roll-up", "Insta Post", "Affiche A2"].map(t => (
@@ -1807,6 +1802,8 @@ export const GenerateursPage = () => {
             </div>
           )}
         </div>
+          )}
+        </div>
       )}
 
       <div className={`grid grid-cols-1 lg:grid-cols-5 gap-6 items-start ${tab === "modeles" || tab === "conversion" || tab === "infographie" ? "hidden" : ""}`}>
@@ -1822,8 +1819,8 @@ export const GenerateursPage = () => {
                 rows={2}
               />
               <div className="grid grid-cols-2 gap-3">
-                <Select label={t('generateurs.typeRapport')} options={TYPES_RAPPORT} value={typeRapport} onChange={(e) => setTypeRapport(e.target.value)} />
-                <Select label={t('generateurs.mode')} options={MODES_RAPPORT} value={modeRapport} onChange={(e) => setModeRapport(e.target.value)} />
+                <Select label={t('generateurs.typeRapport')} options={TYPES_RAPPORT_VALUES.map(v => ({ value: v, label: t(`generateurs.lists.typeRapport.${v}`) }))} value={typeRapport} onChange={(e) => setTypeRapport(e.target.value)} />
+                <Select label={t('generateurs.mode')} options={MODES_RAPPORT_VALUES.map(v => ({ value: v, label: t(`generateurs.lists.modeRapport.${v}`) }))} value={modeRapport} onChange={(e) => setModeRapport(e.target.value)} />
               </div>
               <Textarea
                 label={t('generateurs.contextExtra')}
@@ -1836,14 +1833,14 @@ export const GenerateursPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-slate-400">
-                    Fichiers d'analyse <span className="text-slate-600 font-normal">(optionnel — Excel, PDF, CSV, DOCX…)</span>
+                    {t("generateurs.filesAnalysis")} <span className="text-slate-600 font-normal">{t("generateurs.filesAnalysisHint")}</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => fileRapportRef.current?.click()}
                     className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
                   >
-                    <Upload className="w-3.5 h-3.5" /> Ajouter fichiers
+                    <Upload className="w-3.5 h-3.5" /> {t("generateurs.addFiles")}
                   </button>
                   <input
                     ref={fileRapportRef}
@@ -1878,7 +1875,7 @@ export const GenerateursPage = () => {
                 {fichiersRapport.length > 0 && (
                   <p className="text-xs text-yukpo-400 mt-1.5 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    Yukpo analysera automatiquement ces fichiers pour enrichir le rapport
+                    {t("generateurs.filesEnrichReport")}
                   </p>
                 )}
               </div>
@@ -1910,8 +1907,8 @@ export const GenerateursPage = () => {
                 rows={2}
               />
               <div className="grid grid-cols-2 gap-3">
-                <Select label={t('generateurs.typeSlides')} options={TYPES_SLIDES} value={typeSlides} onChange={(e) => setTypeSlides(e.target.value)} />
-                <Select label={t('generateurs.mode')} options={MODES_SLIDES} value={modeSlides} onChange={(e) => setModeSlides(e.target.value)} />
+                <Select label={t('generateurs.typeSlides')} options={TYPES_SLIDES_VALUES.map(v => ({ value: v, label: t(`generateurs.lists.typeSlides.${v}`) }))} value={typeSlides} onChange={(e) => setTypeSlides(e.target.value)} />
+                <Select label={t('generateurs.mode')} options={MODES_SLIDES_VALUES.map(v => ({ value: v, label: t(`generateurs.lists.modeSlides.${v}`) }))} value={modeSlides} onChange={(e) => setModeSlides(e.target.value)} />
               </div>
               <Textarea
                 label={t('generateurs.contextData')}
@@ -1924,14 +1921,14 @@ export const GenerateursPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-slate-400">
-                    Fichiers d'analyse <span className="text-slate-600 font-normal">(optionnel — Excel, PDF, CSV…)</span>
+                    {t("generateurs.filesAnalysis")} <span className="text-slate-600 font-normal">{t("generateurs.filesAnalysisHintSlides")}</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => fileSlidesRef.current?.click()}
                     className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
                   >
-                    <Upload className="w-3.5 h-3.5" /> Ajouter fichiers
+                    <Upload className="w-3.5 h-3.5" /> {t("generateurs.addFiles")}
                   </button>
                   <input
                     ref={fileSlidesRef}
@@ -1966,7 +1963,7 @@ export const GenerateursPage = () => {
                 {fichiersSlides.length > 0 && (
                   <p className="text-xs text-yukpo-400 mt-1.5 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    Yukpo analysera ces fichiers pour construire les slides
+                    {t("generateurs.filesEnrichSlides")}
                   </p>
                 )}
               </div>
@@ -1997,15 +1994,15 @@ export const GenerateursPage = () => {
             <Card className="p-8 flex flex-col items-center justify-center gap-4 h-full min-h-48">
               <Loader className="w-8 h-8 text-yukpo-400 animate-spin" />
               <div className="text-center">
-                <p className="text-white font-medium text-sm">Yukpo Pro rédige votre document…</p>
-                <p className="text-slate-400 text-xs mt-1">Yukpo construit un document professionnel de haute qualité</p>
+                <p className="text-white font-medium text-sm">{t("generateurs.writingDocument")}</p>
+                <p className="text-slate-400 text-xs mt-1">{t("generateurs.writingDocumentHelper")}</p>
               </div>
             </Card>
           ) : resultat ? (
             <Card className="p-5 space-y-4 animate-fade-in">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-400" />
-                <span className="text-sm font-semibold text-white">Document généré !</span>
+                <span className="text-sm font-semibold text-white">{t("generateurs.documentReady")}</span>
               </div>
 
               {/* Téléchargement */}
@@ -2018,7 +2015,7 @@ export const GenerateursPage = () => {
                   <Download className="w-5 h-5 shrink-0 text-blue-600 dark:text-yukpo-400" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{resultat.fichier}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cliquer pour télécharger</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t("generateurs.clickToDownload")}</p>
                   </div>
                 </a>
               )}
@@ -2026,13 +2023,13 @@ export const GenerateursPage = () => {
               {/* Aperçu Markdown */}
               {resultat.markdown && (
                 <div className="max-h-80 overflow-y-auto">
-                  <p className="text-xs text-slate-500 mb-2">Aperçu :</p>
+                  <p className="text-xs text-slate-500 mb-2">{t("generateurs.preview")}</p>
                   <div className="p-3 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                     <ReactMarkdown className="prose prose-sm prose-invert max-w-none">
                       {resultat.markdown.slice(0, 2000)}
                     </ReactMarkdown>
                     {(resultat.markdown.length || 0) > 2000 && (
-                      <p className="text-slate-500 mt-2">… (aperçu tronqué)</p>
+                      <p className="text-slate-500 mt-2">{t("generateurs.previewTruncated")}</p>
                     )}
                   </div>
                 </div>
@@ -2043,8 +2040,8 @@ export const GenerateursPage = () => {
               {tab === "rapport" ? <FileText className="w-12 h-12 text-slate-600" /> : <Presentation className="w-12 h-12 text-slate-600" />}
               <p className="text-slate-500 text-sm text-center">
                 {tab === "rapport"
-                  ? "Votre rapport DOCX apparaîtra ici"
-                  : "Votre présentation PPTX apparaîtra ici"}
+                  ? t("generateurs.rapportPlaceholder")
+                  : t("generateurs.slidesPlaceholder")}
               </p>
             </Card>
           )}

@@ -387,7 +387,7 @@ Produis le document complet et professionnel."""
 
     reponse = await ia_client.appeler(
         prompt=prompt,
-        mode=ModeIA.GENERATION,
+        mode=ModeIA.REDACTION,
         systeme=systeme,
         max_tokens_override=getattr(settings, "IA_MAX_TOKENS_DOCUMENT", 8192),
     )
@@ -443,7 +443,7 @@ Retourne uniquement le texte reformulé, sans commentaire."""
 
     reponse = await ia_client.appeler(
         prompt=f"Texte à reformuler :\n\n{texte}",
-        mode=ModeIA.GENERATION,
+        mode=ModeIA.REDACTION,
         systeme=systeme,
     )
     meta = {

@@ -2,8 +2,8 @@
 SchedulerMarches — Veille marchés publics par secteur d'activité.
 
 Sources actives (ordre de priorité) :
-  1. SerpAPI Google Search  — "appel d'offres {secteur} {pays}" + plateformes ARMP locales
-     → Variable : SERPAPI_KEY (déjà dans .env)
+  1. Serper.dev Google Search — "appel d'offres {secteur} {pays}" + plateformes ARMP locales
+     → Variable : SERPER_API_KEY (header X-API-KEY, POST google.serper.dev/search)
   2. dgMarket RSS           — World Bank / UN procurement, couvre Afrique + international
      → Gratuit, aucune clé
   3. UNGM                   — UN Global Marketplace, secteurs ONU/ONG
@@ -191,14 +191,14 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
         logger.debug(f"[SchedulerMarches] Débit crédits ignoré: {e}")
 
     resultats = await asyncio.gather(
-        _fetch_serpapi_marches(termes, pays, info),
+        _fetch_serper_marches(termes, pays, info),
         _fetch_dgmarket(pays),
         _fetch_ungm(termes),
         return_exceptions=True,
     )
 
     marches_bruts: list[dict] = []
-    noms = ["SerpAPI", "dgMarket", "UNGM"]
+    noms = ["Serper", "dgMarket", "UNGM"]
     for nom, res in zip(noms, resultats):
         if isinstance(res, list):
             logger.info(f"[SchedulerMarches] {nom}: {len(res)} avis")
@@ -226,10 +226,10 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
     return len(uniques)
 
 
-# ── Source 1 : SerpAPI ────────────────────────────────────────────────────────
+# ── Source 1 : Serper.dev ─────────────────────────────────────────────────────
 
-async def _fetch_serpapi_marches(termes: list[str], pays: str, info: dict) -> list[dict]:
-    api_key = os.getenv("SERPAPI_KEY", "")
+async def _fetch_serper_marches(termes: list[str], pays: str, info: dict) -> list[dict]:
+    api_key = os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
     if not api_key or api_key.startswith("VOTRE"):
         return []
 
@@ -238,9 +238,7 @@ async def _fetch_serpapi_marches(termes: list[str], pays: str, info: dict) -> li
         marches: list[dict] = []
         plateformes = _PLATEFORMES_PAYS.get(pays, [])
 
-        # Requête 1 : appels d'offres généraux du secteur dans le pays
         q1 = f"appel d'offres {' '.join(termes[:1])} {info['nom']}"
-        # Requête 2 : ciblée sur les plateformes officielles
         if plateformes:
             site_q = " OR ".join(f"site:{s}" for s in plateformes[:4])
             q2 = f"appel d'offres {termes[0]} ({site_q})"
@@ -248,45 +246,47 @@ async def _fetch_serpapi_marches(termes: list[str], pays: str, info: dict) -> li
             q2 = None
 
         queries = [q for q in [q1, q2] if q]
+        headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
 
         async with httpx.AsyncClient(timeout=20) as client:
             for q in queries:
-                resp = await client.get("https://serpapi.com/search", params={
-                    "engine": "google",
-                    "q":      q,
-                    "gl":     info["gl"],
-                    "hl":     info["hl"],
-                    "num":    10,
-                    "tbs":    "qdr:m",   # résultats du dernier mois
-                    "api_key": api_key,
-                })
+                resp = await client.post(
+                    "https://google.serper.dev/search",
+                    json={
+                        "q":   q,
+                        "gl":  info["gl"],
+                        "hl":  info["hl"],
+                        "num": 10,
+                        "tbs": "qdr:m",   # résultats du dernier mois
+                    },
+                    headers=headers,
+                )
                 if resp.status_code != 200:
                     continue
                 data = resp.json()
-                for r in data.get("organic_results", []):
+                for r in data.get("organic", []):
                     url = r.get("link", "")
-                    titre = r.get("title", "").strip()
+                    titre = (r.get("title") or "").strip()
                     if not titre or len(titre) < 8:
                         continue
-                    # Identifier la plateforme officielle
                     source = next(
                         (p for p in plateformes if p in url),
                         "Appel d'offres"
                     )
                     marches.append({
-                        "titre":       titre[:200],
-                        "organisme":   _extraire_organisme(r.get("displayed_link", ""), r.get("snippet", "")),
-                        "lieu":        info["nom"],
-                        "resume":      (r.get("snippet", "") or "")[:500],
-                        "url":         url,
-                        "source":      source,
-                        "date_pub":    r.get("date", "Récent"),
-                        "secteur":     termes[0] if termes else "",
+                        "titre":     titre[:200],
+                        "organisme": _extraire_organisme(r.get("displayedLink") or r.get("displayed_link", ""), r.get("snippet", "")),
+                        "lieu":      info["nom"],
+                        "resume":    (r.get("snippet") or "")[:500],
+                        "url":       url,
+                        "source":    source,
+                        "date_pub":  r.get("date", "Récent"),
+                        "secteur":   termes[0] if termes else "",
                     })
         return marches
 
     except Exception as e:
-        logger.debug(f"[SchedulerMarches] SerpAPI erreur: {e}")
+        logger.debug(f"[SchedulerMarches] Serper erreur: {e}")
         return []
 
 
@@ -388,34 +388,33 @@ async def _fetch_ungm(termes: list[str]) -> list[dict]:
 # ── Sauvegarde DB ─────────────────────────────────────────────────────────────
 
 async def _sauvegarder_marches(user_id: int, marches: list[dict]):
-    try:
-        from core.database import async_session_maker
-        from modules.pro.profil_pro import ProfilProfessionnelDB
-        from sqlalchemy import update
+    from core.database import async_session_maker
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+    from sqlalchemy import update
 
-        async with async_session_maker() as db:
-            await db.execute(
-                update(ProfilProfessionnelDB)
-                .where(ProfilProfessionnelDB.user_id == user_id)
-                .values(
-                    marches_publics_recents=marches,
-                    derniere_recherche_marches=datetime.utcnow(),
-                )
+    async with async_session_maker() as db:
+        result = await db.execute(
+            update(ProfilProfessionnelDB)
+            .where(ProfilProfessionnelDB.user_id == user_id)
+            .values(
+                marches_publics_recents=marches,
+                derniere_recherche_marches=datetime.utcnow(),
             )
-            await db.commit()
-        logger.info(f"[SchedulerMarches] {len(marches)} avis sauvegardés pour user {user_id}")
-    except Exception as e:
-        logger.error(f"[SchedulerMarches] Erreur sauvegarde: {e}")
+        )
+        await db.commit()
+        if result.rowcount == 0:
+            logger.error(f"[SchedulerMarches] user {user_id}: aucun profil mis à jour (introuvable ?)")
+            raise RuntimeError(f"Profil user {user_id} introuvable lors de la sauvegarde des marchés")
+    logger.info(f"[SchedulerMarches] {len(marches)} avis sauvegardés pour user {user_id}")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _extraire_organisme(displayed_link: str, snippet: str) -> str:
     """Tente d'extraire le nom de l'organisme depuis les résultats Google."""
-    # Souvent dans le snippet : "Le ministère de X lance un appel..."
     m = re.search(r"(minist[eè]re|direction|agence|office|commune|région|mairie)\s+[^\.,]{3,40}", snippet, re.IGNORECASE)
     if m:
         return m.group(0).strip()[:80]
-    # Fallback : domaine
     m2 = re.search(r"([a-z0-9\-]+\.[a-z]{2,4})", displayed_link)
     return m2.group(1) if m2 else "Organisme public"
+

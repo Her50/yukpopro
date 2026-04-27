@@ -21,7 +21,13 @@ type Props = {
   onSelect: (provider: ProviderName) => void;
   selected?: ProviderName;
   disabled?: boolean;
+  methodFilter?: "mobile_money" | "card";
 };
+
+const MOBILE_MONEY_PROVIDERS: ProviderName[] = [
+  "mtn_momo", "orange_money", "campay", "wave", "cinetpay", "flutterwave", "notchpay",
+];
+const CARD_PROVIDERS: ProviderName[] = ["stripe", "paypal"];
 
 const PROVIDER_META: Record<ProviderName, {
   icon: typeof Smartphone;
@@ -46,6 +52,7 @@ export const PaymentMethodSelector = ({
   onSelect,
   selected,
   disabled,
+  methodFilter,
 }: Props) => {
   const { t } = useTranslation();
   const [providers, setProviders] = useState<ProviderName[]>([]);
@@ -53,6 +60,10 @@ export const PaymentMethodSelector = ({
   const [showManual, setShowManual] = useState(false);
 
   useEffect(() => {
+    if (methodFilter === "card") {
+      setProviders(CARD_PROVIDERS);
+      return;
+    }
     if (!customerPhone || customerPhone.length < 6) {
       setProviders([]);
       return;
@@ -71,11 +82,17 @@ export const PaymentMethodSelector = ({
       })
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
-  }, [customerPhone, countryCode]);
+  }, [customerPhone, countryCode, methodFilter]);
+
+  const filtered = useMemo(() => {
+    if (methodFilter === "card") return providers.filter((p) => CARD_PROVIDERS.includes(p));
+    if (methodFilter === "mobile_money") return providers.filter((p) => MOBILE_MONEY_PROVIDERS.includes(p));
+    return providers;
+  }, [providers, methodFilter]);
 
   const visible = useMemo(
-    () => (showManual ? [...providers, "legacy_manual" as ProviderName] : providers),
-    [providers, showManual],
+    () => (showManual && methodFilter !== "card" ? [...filtered, "legacy_manual" as ProviderName] : filtered),
+    [filtered, showManual, methodFilter],
   );
 
   if (loading) {

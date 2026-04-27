@@ -14,6 +14,7 @@ import {
   ChevronLeft, ChevronRight, Bot, Sparkles, Download,
   FileText, Image, Table, Globe, BarChart2,
   Pencil, Save, User as UserIcon, Mic, MicOff,
+  Copy, Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
@@ -159,11 +160,11 @@ export const ChatPage = () => {
           `⚠️ **${detail.message}** ${detail.action}\n\n[→ Recharger mes crédits / Changer de plan](/abonnement)`,
           null,
         );
-        toast.error("Crédits épuisés");
+        toast.error(t("chat.creditsExpired"));
       } else {
-        const msg = typeof detail === "string" ? detail : "Erreur de connexion. Réessayez.";
+        const msg = typeof detail === "string" ? detail : t("chat.connectionError");
         updateLastAssistantMessage(`⚠️ ${msg}`, null);
-        toast.error("Erreur YukpoPro");
+        toast.error(t("chat.yukpoError"));
       }
     } finally {
       setLoading(false);
@@ -244,7 +245,7 @@ export const ChatPage = () => {
         setInput(finalTranscript + interim);
       };
       recognition.onerror = (e: any) => {
-        if (e.error !== "aborted") toast.error("Erreur micro : " + e.error);
+        if (e.error !== "aborted") toast.error(t("chat.micError", { err: e.error }));
         stopRecording(false);
       };
       recognition.onend = () => {
@@ -282,7 +283,7 @@ export const ChatPage = () => {
       setAudioSeconds(0);
       timerRef.current = setInterval(() => setAudioSeconds(s => s + 1), 1000);
     } catch (err) {
-      toast.error("Impossible d'accéder au microphone. Vérifiez les permissions.");
+      toast.error(t("chat.micPermissionError"));
     }
   };
 
@@ -518,13 +519,13 @@ export const ChatPage = () => {
             {activeDocument() && (
               <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-yukpo-500/10 border border-yukpo-500/30 text-xs">
                 <Pencil className="w-3.5 h-3.5 text-yukpo-400 flex-shrink-0" />
-                <span className="text-slate-300">Édition du document :</span>
+                <span className="text-slate-300">{t("chat.editingDocument")}</span>
                 <span className="text-yukpo-300 font-medium truncate max-w-md">{activeDocument()?.titre}</span>
                 <button
                   type="button"
                   onClick={() => setActiveDocument(null)}
                   className="ml-auto text-slate-400 hover:text-red-400"
-                  title="Quitter le mode édition"
+                  title={t("chat.exitEditMode")}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -558,7 +559,7 @@ export const ChatPage = () => {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading || uploadingFile}
                   className="flex-shrink-0 p-3 text-slate-400 hover:text-yukpo-400 transition-colors disabled:opacity-40"
-                  title="Joindre un fichier (Word, Excel, PDF, image...)"
+                  title={t("chat.attachFileTitle")}
                 >
                   {uploadingFile
                     ? <div className="w-5 h-5 border-2 border-slate-500 border-t-yukpo-400 rounded-full animate-spin" />
@@ -577,7 +578,7 @@ export const ChatPage = () => {
                       ? "text-red-400 animate-pulse"
                       : "text-slate-400 hover:text-yukpo-400"
                   )}
-                  title={isRecording ? "Arrêter la dictée" : "Dictée vocale"}
+                  title={isRecording ? t("chat.stopDictation") : t("chat.voiceDictation")}
                 >
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
@@ -696,8 +697,8 @@ export const ChatPage = () => {
 
               <p className="text-slate-600 text-xs mt-3">
                 {recognitionRef.current
-                  ? "Chrome / Edge — transcription automatique"
-                  : "Firefox / Safari — message audio"}
+                  ? t("chat.transcriptionAuto")
+                  : t("chat.audioMessage")}
               </p>
             </motion.div>
           </motion.div>
@@ -713,7 +714,7 @@ export const ChatPage = () => {
             onSaved={(updated) => {
               useProfilStore.getState().setProfil(updated);
               setProfilModalOpen(false);
-              toast.success("Profil mis à jour ! Yukpo s'adapte à votre nouveau profil.");
+              toast.success(t("chat.profileUpdated"));
             }}
           />
         )}
@@ -830,6 +831,39 @@ const NavSuggestionButtons = ({ suggestions }: { suggestions: NavigationSuggesti
 
 const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
   const isUser = message.role === "user";
+  const proseRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
+
+  const handleCopy = async () => {
+    const raw = (message.content as string) || "";
+    if (!raw) return;
+    const html = proseRef.current?.innerHTML || "";
+    try {
+      if (html && typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([raw], { type: "text/plain" }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(raw);
+      }
+      setCopied(true);
+      toast.success(t("chat.messageCopied"));
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      try {
+        await navigator.clipboard.writeText(raw);
+        setCopied(true);
+        toast.success(t("chat.messageCopied"));
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error(t("chat.copyFailed"));
+      }
+    }
+  };
 
   if (isUser) {
     return (
@@ -889,13 +923,26 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
             ))}
           </div>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none text-slate-200
-            prose-headings:text-white prose-headings:font-semibold
-            prose-strong:text-white prose-code:text-yukpo-300
-            prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700
-            prose-blockquote:border-yukpo-500 prose-blockquote:text-slate-300
-            prose-a:text-yukpo-400 prose-li:text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content as string}</ReactMarkdown>
+          <div>
+            <div ref={proseRef} className="prose prose-invert prose-sm max-w-none text-slate-200
+              prose-headings:text-white prose-headings:font-semibold
+              prose-strong:text-white prose-code:text-yukpo-300
+              prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700
+              prose-blockquote:border-yukpo-500 prose-blockquote:text-slate-300
+              prose-a:text-yukpo-400 prose-li:text-slate-300">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content as string}</ReactMarkdown>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleCopy}
+                aria-label={t("chat.copyMessage")}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-300 shadow-sm"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? t("common.copied") : t("common.copy")}
+              </button>
+            </div>
           </div>
         )}
 
@@ -939,12 +986,12 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
 
 // ── Modale édition profil ──────────────────────────────────────────────────────
 
-const NIVEAUX_EXPERTISE = [
-  { value: "debutant",      label: "Débutant (0-2 ans)" },
-  { value: "intermediaire", label: "Intermédiaire (2-5 ans)" },
-  { value: "senior",        label: "Senior (5-10 ans)" },
-  { value: "expert",        label: "Expert (10+ ans)" },
-];
+const NIVEAUX_EXPERTISE_KEYS = [
+  { value: "debutant",      key: "expertiseDebutant" },
+  { value: "intermediaire", key: "expertiseIntermediaire" },
+  { value: "senior",        key: "expertiseSenior" },
+  { value: "expert",        key: "expertiseExpert" },
+] as const;
 
 const ProfilModal = ({
   profil, onClose, onSaved,
@@ -975,7 +1022,7 @@ const ProfilModal = ({
       });
       onSaved(updated);
     } catch {
-      toast.error("Erreur lors de la mise à jour du profil");
+      toast.error(t("chat.profileUpdateError"));
     } finally {
       setSaving(false);
     }
@@ -1029,7 +1076,7 @@ const ProfilModal = ({
                 onChange={(e) => setMetier(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
               >
-                <option value="">— Sélectionner votre métier —</option>
+                <option value="">{t("chat.selectProfession")}</option>
                 {METIERS.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
                 ))}
@@ -1057,8 +1104,8 @@ const ProfilModal = ({
                   onChange={(e) => setNiveau(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
                 >
-                  {NIVEAUX_EXPERTISE.map((n) => (
-                    <option key={n.value} value={n.value}>{n.label}</option>
+                  {NIVEAUX_EXPERTISE_KEYS.map((n) => (
+                    <option key={n.value} value={n.value}>{t(`chat.${n.key}`)}</option>
                   ))}
                 </select>
               </div>
@@ -1072,7 +1119,7 @@ const ProfilModal = ({
                   type="text"
                   value={secteur}
                   onChange={(e) => setSecteur(e.target.value)}
-                  placeholder="Finance, BTP…"
+                  placeholder={t("chat.secteurPlaceholder")}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
                 />
               </div>
@@ -1082,7 +1129,7 @@ const ProfilModal = ({
                   type="text"
                   value={entreprise}
                   onChange={(e) => setEntreprise(e.target.value)}
-                  placeholder="Votre organisation"
+                  placeholder={t("chat.entreprisePlaceholder")}
                   className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
                 />
               </div>
@@ -1097,7 +1144,7 @@ const ProfilModal = ({
                 max="50"
                 value={annees}
                 onChange={(e) => setAnnees(e.target.value)}
-                placeholder="Ex: 8"
+                placeholder={t("chat.anneesPlaceholder")}
                 className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yukpo-500"
               />
             </div>
@@ -1108,7 +1155,7 @@ const ProfilModal = ({
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Vos spécialités, votre contexte de travail…"
+                placeholder={t("chat.bioPlaceholder")}
                 rows={3}
                 className="w-full bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 px-3 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-yukpo-500"
               />

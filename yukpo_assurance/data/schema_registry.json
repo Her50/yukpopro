@@ -599,7 +599,7 @@
         ]
       }
     },
-    "derniere_introspection": "2026-04-22T11:29:43.985121",
+    "derniere_introspection": "2026-04-23T05:58:59.336995",
     "version_schema": "72e169ea",
     "mappings_metier": {
       "police.numero": "POL_CONTRATS.NUM_POLICE",

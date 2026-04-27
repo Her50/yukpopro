@@ -97,6 +97,10 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # via multiplicateur=prix_fcfa_du_gabarit. Ex : carte visite 2000 FCFA, flyer A5 3000 FCFA.
     "infographie_creation":  1.0,   # base 1 FCFA, multiplié par le prix_fcfa du gabarit
     "infographie_vision":   10.0,   # 200 crédits (analyse image modèle uploadé)
+    # Designer Pro (multi-page) — facturé au prix_fcfa du projet (livret, brochure…)
+    "designerpro_creation":      1.0,   # multiplicateur = prix_fcfa du projet
+    "designerpro_modification":  1.0,   # multiplicateur = prix_fcfa / 4 (modif moins chère)
+    "designerpro_media_upload":  0.5,   # 10 crédits (stockage + normalisation Pillow)
     # OCR / traitement image
     "ocr_scan":              3.0,   #  60 crédits
     "ocr_manuscrit":         5.0,   # 100 crédits (vision avancée)

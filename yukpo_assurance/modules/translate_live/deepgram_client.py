@@ -92,8 +92,17 @@ class DeepgramStreamingClient:
             # Très vieux SDK — fallback sync
             conn = dg.listen.websocket.v("1")
 
+        # `detect_language` n'existe pas sur LiveOptions (SDK 3.x).
+        # Pour l'auto-détection live, on utilise `language="multi"` (nova-3 multilingual).
+        if self._source_lang == "auto":
+            _modele = "nova-3"
+            _langue = "multi"
+        else:
+            _modele = "nova-2"
+            _langue = self._source_lang
         options_kwargs = dict(
-            model="nova-2",
+            model=_modele,
+            language=_langue,
             smart_format=True,
             interim_results=True,
             encoding="linear16",
@@ -102,11 +111,6 @@ class DeepgramStreamingClient:
             punctuate=True,
             vad_events=True,
         )
-        # nova-2 : detect_language=True pour auto ; sinon langue fixée
-        if self._source_lang == "auto":
-            options_kwargs["detect_language"] = True
-        else:
-            options_kwargs["language"] = self._source_lang
 
         async def _on_message(_self, result, **kwargs):  # pragma: no cover — dépend SDK
             try:

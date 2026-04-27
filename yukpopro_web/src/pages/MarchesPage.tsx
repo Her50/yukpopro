@@ -94,6 +94,7 @@ export const MarchesPage = () => {
     setSearching(true);
     try {
       const result = await marchesApi.lancerRecherche();
+      setMarches(result.marches);
       await charger();
       showToast(`${result.nb_marches} appel(s) d'offres chargé(s)`);
     } catch {

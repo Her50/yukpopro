@@ -105,6 +105,7 @@ from api.routes_bureau_redaction import router as bureau_redaction_router
 from api.routes_bureau_ocr import router as bureau_ocr_router
 from api.routes_bureau_audio import router as bureau_audio_router
 from api.routes_bureau_infographie import router as bureau_infographie_router
+from api.routes_bureau_infographie_pro import router as bureau_infographie_pro_router
 from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
@@ -294,6 +295,21 @@ async def lifespan(app: FastAPI):
         logger.warning("  [CIMA] Index RAG chargé en arrière-plan (non bloquant)")
     except Exception as e:
         logger.warning(f"  [CIMA] Index non chargé : {e}")
+
+    # ── Polices Google Fonts (Designer Pro) — pré-téléchargement non-bloquant ──
+    try:
+        import asyncio as _aio_fonts
+        async def _prechauffer_fonts():
+            try:
+                from modules.bureau.font_loader import prechauffer
+                rapport = await _aio_fonts.to_thread(prechauffer)
+                ok = sum(1 for v in rapport.values() if v)
+                logger.info(f"  [Fonts] Google Fonts préchargées : {ok}/{len(rapport)} familles")
+            except Exception as _e:
+                logger.info(f"  [Fonts] Pré-chargement non-critique : {_e}")
+        _aio_fonts.create_task(_prechauffer_fonts())
+    except Exception:
+        pass
 
     # ── RAG Multi-documents — chargement au démarrage (non bloquant avec timeout) ─
     try:
@@ -719,6 +735,7 @@ app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction", 
 app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
 app.include_router(bureau_audio_router,      prefix="/api/v1/bureau/audio",       tags=["Secrétariat — Audio → Document"])
 app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie", tags=["Secrétariat — Infographie Print"])
+app.include_router(bureau_infographie_pro_router, prefix="/api/v1/bureau/infographie-pro", tags=["Secrétariat — Infographie Pro (multi-page IA)"])
 app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])

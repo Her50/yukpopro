@@ -74,7 +74,7 @@ async def scanner_image(
     """
     Pipeline complet : image → texte → Markdown structuré → (optionnel) .docx.
     """
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
     # 1. Prétraitement image
     image_bytes = _pretraiter_image(image_bytes, mime)
@@ -97,6 +97,7 @@ Retourne uniquement le texte transcrit, en Markdown."""
     reponse_ocr = await ia_client.appeler(
         prompt=prompt_ocr,
         mode=ModeIA.ANALYSE,
+        forcer_modele=ModelePrioritaire.GPT4O,   # GPT-4o vision = meilleur pour OCR images
         images_b64=[f"data:{mime};base64,{image_b64}"],
     )
     texte_brut = reponse_ocr.contenu
@@ -117,7 +118,8 @@ Reformate ce texte en Markdown propre et structuré :
 
     reponse_struct = await ia_client.appeler(
         prompt=prompt_structure,
-        mode=ModeIA.GENERATION,
+        mode=ModeIA.REDACTION,
+        forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,   # légère structuration texte → Haiku
     )
     texte_structure = reponse_struct.contenu
 
@@ -161,7 +163,7 @@ async def scanner_notes_manuscrites(
     Spécialisé notes manuscrites → document formaté.
     Pipeline : lecture cursive → nettoyage → mise en forme finale.
     """
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
     image_bytes = _pretraiter_image(image_bytes, mime)
     image_b64 = base64.standard_b64encode(image_bytes).decode()
@@ -178,7 +180,8 @@ Produis directement le document final, prêt à être utilisé."""
 
     reponse = await ia_client.appeler(
         prompt=prompt,
-        mode=ModeIA.GENERATION,
+        mode=ModeIA.REDACTION,
+        forcer_modele=ModelePrioritaire.GPT4O,   # GPT-4o vision — lecture cursive africaine
         images_b64=[f"data:{mime};base64,{image_b64}"],
     )
 

@@ -706,29 +706,29 @@ def _extraire_mots_cles(profil, extra: str = "") -> str:
 # ── Sauvegarde DB ─────────────────────────────────────────────────────────────
 
 async def _sauvegarder_offres(user_id: int, offres: list[dict]):
-    try:
-        from core.database import async_session_maker
-        from modules.pro.profil_pro import ProfilProfessionnelDB
-        from sqlalchemy import update
+    from core.database import async_session_maker
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+    from sqlalchemy import update
 
-        now = datetime.now(timezone.utc)
-        async with async_session_maker() as db:
-            await db.execute(
-                update(ProfilProfessionnelDB)
-                .where(ProfilProfessionnelDB.user_id == user_id)
-                .values(
-                    offres_emploi_recentes=offres,
-                    derniere_recherche_emploi=now,
-                )
+    now = datetime.utcnow()
+    async with async_session_maker() as db:
+        result = await db.execute(
+            update(ProfilProfessionnelDB)
+            .where(ProfilProfessionnelDB.user_id == user_id)
+            .values(
+                offres_emploi_recentes=offres,
+                derniere_recherche_emploi=now,
             )
-            await db.commit()
-        simules = sum(1 for o in offres if o.get("source_type") == "simule")
-        reelles = len(offres) - simules
-        logger.info(
-            f"[SchedulerEmploi] user {user_id}: {reelles} offres réelles + {simules} suggestions IA sauvegardées"
         )
-    except Exception as e:
-        logger.error(f"[SchedulerEmploi] Erreur sauvegarde: {e}")
+        await db.commit()
+        if result.rowcount == 0:
+            logger.error(f"[SchedulerEmploi] user {user_id}: aucun profil mis à jour (introuvable ?)")
+            raise RuntimeError(f"Profil user {user_id} introuvable lors de la sauvegarde des offres")
+    simules = sum(1 for o in offres if o.get("source_type") == "simule")
+    reelles = len(offres) - simules
+    logger.info(
+        f"[SchedulerEmploi] user {user_id}: {reelles} offres réelles + {simules} suggestions IA sauvegardées"
+    )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

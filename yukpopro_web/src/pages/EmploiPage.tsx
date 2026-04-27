@@ -157,6 +157,7 @@ export const EmploiPage = () => {
     setSearching(true);
     try {
       const result = await emploiApi.lancerRecherche();
+      setConfig((prev) => prev ? { ...prev, offres_emploi_recentes: result.offres, derniere_recherche_emploi: new Date().toISOString() } : prev);
       await charger();
       showToast(`${result.nb_offres} offre(s) trouvée(s) pour votre profil`);
     } catch {

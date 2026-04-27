@@ -320,6 +320,10 @@ _STRUCTURES: dict[str, dict[str, list]] = {
 
 _TOKENS_PAR_MODE = {"executive": 6000, "detaille": 16000, "pitch": 10000, "expert": 24000}
 
+# Taille des lots (nb slides par appel IA) pour contourner le plafond par appel
+# et maximiser la densité des slides sans troncature silencieuse.
+_SLIDES_PAR_LOT = {"executive": 99, "pitch": 99, "detaille": 10, "expert": 8}
+
 
 # ── Helpers PPTX ──────────────────────────────────────────────────────────────
 
@@ -448,9 +452,11 @@ class SlideBuilderPro:
         structure: list[dict], contexte: Optional[str], donnees: Optional[dict],
     ) -> list[dict]:
         from core.ia_client import ModeIA, ia_client
+        from core.pays_devise import vocabulaire_devise
 
-        metier_info = f"Métier : {self._profil.metier}" if self._profil else ""
-        pays_info   = f"Pays : {self._profil.pays}"     if self._profil else ""
+        metier_info  = f"Métier : {self._profil.metier}" if self._profil else ""
+        pays_info    = f"Pays : {self._profil.pays}"     if self._profil else ""
+        devise_locale = vocabulaire_devise(self._profil.pays if self._profil else None)
 
         titres_str = "\n".join(
             f'{i+1}. "{s["titre"]}" (type: {s["type"]})'
@@ -487,35 +493,72 @@ class SlideBuilderPro:
             f"• Slides type 'two_columns' : 'points' = [{{'gauche': [...], 'droite': [...]}}] — liste des items gauche et droite\n"
             f"• Messages clés tirés des données réelles fournies\n"
             f"• Langage professionnel niveau direction générale / investisseurs\n"
-            f"• Contexte africain : FCFA, BEAC/BCEAO, OHADA, SYSCOHADA si pertinent\n"
+            f"• Devise locale OBLIGATOIRE pour tous les montants : {devise_locale}\n"
+            f"• Contexte africain : OHADA, SYSCOHADA, BEAC/BCEAO, CEMAC/UEMOA si pertinent\n"
             f"• Chaque slide doit avoir un titre percutant et un message accrocheur\n\n"
             f"RÉPONDS UNIQUEMENT EN JSON (sans balise markdown) :\n"
             f'{{"slides": ['
             f'{{"titre": "...", "type": "...", '
             f'"points": ["point1 factuel", "point2..."], '
-            f'"kpis": [{{"label": "Libellé", "valeur": "1 234 FCFA", "tendance": "hausse|baisse|stable"}}], '
+            f'"kpis": [{{"label": "Libellé", "valeur": "1 234 (devise locale {devise_locale})", "tendance": "hausse|baisse|stable"}}], '
             f'"message_cle": "Message fort de la slide en 1 phrase percutante", '
             f'"note": "Note présentateur optionnelle"'
             f'}}]}}'
         )
 
-        reponse_ia = await ia_client.appeler(
-            prompt=prompt,
-            systeme=(
-                "Tu es un expert en communication stratégique et présentation d'excellence "
-                "pour dirigeants et investisseurs. Tu produis des présentations niveau McKinsey/BCG : "
-                "messages percutants, données concrètes, KPIs réels, recommandations actionnables. "
-                "Si des données ou contexte sont fournis, tu les exploites INTÉGRALEMENT. "
-                "Tu ne génères JAMAIS de données fictives si des données réelles sont disponibles. "
-                "Réponds uniquement en JSON valide."
-            ),
-            mode=ModeIA.REDACTION,
-            max_tokens_override=_TOKENS_PAR_MODE[mode],
-            json_attendu=True,
-            utiliser_cache=False,
+        systeme_prompt = (
+            "Tu es un expert en communication stratégique et présentation d'excellence "
+            "pour dirigeants et investisseurs. Tu produis des présentations niveau McKinsey/BCG : "
+            "messages percutants, données concrètes, KPIs réels, recommandations actionnables. "
+            "Si des données ou contexte sont fournis, tu les exploites INTÉGRALEMENT. "
+            "Tu ne génères JAMAIS de données fictives si des données réelles sont disponibles. "
+            "Réponds uniquement en JSON valide."
         )
 
-        return self._parser_slides_json(reponse_ia.contenu, structure)
+        taille_lot = _SLIDES_PAR_LOT.get(mode, 99)
+        if taille_lot >= len(structure):
+            reponse_ia = await ia_client.appeler(
+                prompt=prompt, systeme=systeme_prompt, mode=ModeIA.REDACTION,
+                max_tokens_override=_TOKENS_PAR_MODE[mode],
+                json_attendu=True, utiliser_cache=False,
+            )
+            return self._parser_slides_json(reponse_ia.contenu, structure)
+
+        # Chunking : parallélise la génération pour modes longs (detaille/expert)
+        import asyncio as _asyncio
+        lots = [structure[i:i + taille_lot] for i in range(0, len(structure), taille_lot)]
+
+        async def _gen_lot(sous_struct: list[dict], idx: int, total: int) -> list[dict]:
+            titres_lot = "\n".join(
+                f'{i+1}. "{s["titre"]}" (type: {s["type"]})'
+                for i, s in enumerate(sous_struct)
+            )
+            prompt_lot = prompt.replace(
+                f"SLIDES À GÉNÉRER ({nb_slides} slides) :\n{titres_str}",
+                f"⚙️ LOT {idx+1}/{total} — génère UNIQUEMENT ces {len(sous_struct)} slides :\n{titres_lot}",
+            )
+            rep = await ia_client.appeler(
+                prompt=prompt_lot, systeme=systeme_prompt, mode=ModeIA.REDACTION,
+                max_tokens_override=_TOKENS_PAR_MODE[mode],
+                json_attendu=True, utiliser_cache=False,
+            )
+            return self._parser_slides_json(rep.contenu, sous_struct)
+
+        resultats = await _asyncio.gather(
+            *[_gen_lot(lot, i, len(lots)) for i, lot in enumerate(lots)],
+            return_exceptions=True,
+        )
+        slides_out: list[dict] = []
+        for i, r in enumerate(resultats):
+            if isinstance(r, Exception):
+                slides_out.extend(
+                    {"titre": s["titre"], "type": s["type"], "points": [],
+                     "kpis": [], "message_cle": "", "note": ""}
+                    for s in lots[i]
+                )
+            else:
+                slides_out.extend(r)
+        return slides_out
 
     def _parser_slides_json(self, texte: str, structure: list[dict]) -> list[dict]:
         import json, re

@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from typing import Optional
 import base64
 
-from modules.copilote.assistant_quotidien import AssistantQuotidien, SessionCopilote, assistant, get_or_create_session
+from modules.copilote.assistant_quotidien import AssistantQuotidien, SessionCopilote, assistant, get_or_create_session_async
+from modules.copilote.persistence import sauvegarder_session
 from core.auth import TokenData, get_current_user, require_permission
 
 router = APIRouter(dependencies=[Depends(require_permission("copilote"))])
@@ -34,10 +35,12 @@ async def chat(
     current_user: TokenData = Depends(get_current_user),
 ):
     """Point d'entrée principal du copilote — conversation libre"""
-    session = get_or_create_session(current_user.user_id, current_user.role)
+    session = await get_or_create_session_async(current_user.user_id, current_user.role)
     if req.contexte_actif:
         session.contexte_actif = req.contexte_actif
-    return await assistant.repondre(question=req.question, session=session)
+    result = await assistant.repondre(question=req.question, session=session)
+    await sauvegarder_session(session)
+    return result
 
 
 @router.post("/rediger-courrier")

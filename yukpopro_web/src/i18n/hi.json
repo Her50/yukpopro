@@ -49,7 +49,8 @@
     "noResults": "कोई परिणाम नहीं",
     "noData": "कोई डेटा नहीं",
     "credits": "क्रेडिट",
-    "or": "या"
+    "or": "या",
+    "tagline": "Intelligence Professionnelle"
   },
   "auth": {
     "login": "लॉगिन करें",
@@ -80,7 +81,31 @@
     "disclaimer": "Yukpo Pro गलतियाँ कर सकता है। महत्वपूर्ण जानकारी की जाँच करें।",
     "thinking": "Yukpo सोच रहा है…",
     "updateSuccess": "प्रोफ़ाइल अपडेट हो गई!",
-    "updateError": "प्रोफ़ाइल अपडेट में त्रुटि"
+    "updateError": "प्रोफ़ाइल अपडेट में त्रुटि",
+    "copyFailed": "कॉपी नहीं हो सका",
+    "creditsExpired": "Crédits épuisés",
+    "connectionError": "Erreur de connexion. Réessayez.",
+    "yukpoError": "Erreur YukpoPro",
+    "micError": "Erreur micro : {{err}}",
+    "micPermissionError": "Impossible d'accéder au microphone. Vérifiez les permissions.",
+    "editingDocument": "Édition du document :",
+    "exitEditMode": "Quitter le mode édition",
+    "attachFileTitle": "Joindre un fichier (Word, Excel, PDF, image...)",
+    "stopDictation": "Arrêter la dictée",
+    "voiceDictation": "Dictée vocale",
+    "transcriptionAuto": "Chrome / Edge — transcription automatique",
+    "audioMessage": "Firefox / Safari — message audio",
+    "profileUpdated": "Profil mis à jour ! Yukpo s'adapte à votre nouveau profil.",
+    "profileUpdateError": "Erreur lors de la mise à jour du profil",
+    "selectProfession": "— Sélectionner votre métier —",
+    "secteurPlaceholder": "Finance, BTP…",
+    "entreprisePlaceholder": "Votre organisation",
+    "anneesPlaceholder": "Ex: 8",
+    "bioPlaceholder": "Vos spécialités, votre contexte de travail…",
+    "expertiseDebutant": "Débutant (0-2 ans)",
+    "expertiseIntermediaire": "Intermédiaire (2-5 ans)",
+    "expertiseSenior": "Senior (5-10 ans)",
+    "expertiseExpert": "Expert (10+ ans)"
   },
   "emploi": {
     "title": "नौकरी के अवसर",
@@ -121,7 +146,145 @@
     "infogRetouchTitle": "इस इन्फोग्राफिक को संशोधित करें",
     "infogRetouchPlaceholder": "उदा: शीर्षक बदलें, पृष्ठभूमि नीली करें, नंबर 699 जोड़ें...",
     "infogRetouchApply": "लागू करें",
-    "infogRetouching": "संशोधन हो रहा…"
+    "infogRetouching": "संशोधन हो रहा…",
+    "lists": {
+      "typeRapport": {
+        "rapport_analyse": "Rapport d'analyse",
+        "note_de_synthese": "Note de synthese",
+        "note_juridique": "Note juridique",
+        "rapport_financier": "Rapport financier",
+        "rapport_rh": "Rapport RH",
+        "plan_action": "Plan d'action",
+        "compte_rendu": "Compte-rendu",
+        "rapport_audit": "Rapport d'audit"
+      },
+      "modeRapport": {
+        "flash": "Flash - 1 page (rapide)",
+        "standard": "Standard - 3-5 pages",
+        "complet": "Complet - 10-30 pages",
+        "expert": "Expert - 40-80 pages (exhaustif)"
+      },
+      "typeSlides": {
+        "bilan_activite": "Bilan d'activite",
+        "proposition_client": "Proposition client",
+        "rapport_direction": "Rapport direction / CA",
+        "formation": "Support de formation",
+        "pitch_projet": "Pitch projet / Startup",
+        "analyse_marche": "Analyse de marche",
+        "rapport_financier": "Presentation financiere"
+      },
+      "modeSlides": {
+        "executive": "Executif - 5-8 slides",
+        "detaille": "Detaille - 10-15 slides",
+        "pitch": "Pitch - 8-12 slides impactants",
+        "expert": "Expert - 25-40 slides (exhaustif)"
+      },
+      "sortie": {
+        "rapport_analyse": "Rapport d'analyse (DOCX)",
+        "rapport_financier": "Rapport financier (DOCX)",
+        "rapport_audit": "Rapport d'audit (DOCX)",
+        "note_de_synthese": "Note de synthese (DOCX)",
+        "note_juridique": "Note juridique (DOCX)",
+        "plan_action": "Plan d'action (DOCX)",
+        "rapport_direction": "Presentation direction (PPTX)",
+        "bilan_activite": "Bilan d'activite (PPTX)",
+        "proposition_client": "Proposition client (PPTX)",
+        "pitch_projet": "Pitch projet (PPTX)"
+      }
+    },
+    "loadGabaritFailed": "Impossible de charger les gabarits",
+    "briefMin10": "Décrivez votre besoin (min 10 caractères)",
+    "titleRequired": "Titre requis",
+    "chooseModelImage": "Choisissez une image modèle",
+    "invalidDimensions": "Dimensions invalides",
+    "infogSavedDocs": "Infographie générée et sauvegardée dans Mes Documents !",
+    "creditsInsufficient": "Crédits insuffisants ({{restants}} restants, plan {{plan}}).",
+    "rechargeUpgrade": "Recharger / Upgrader",
+    "moduleInfogNotIncluded": "Module Infographie non inclus dans votre plan.",
+    "upgrade": "Upgrader",
+    "generationError": "Erreur lors de la génération",
+    "fileUnavailable": "Fichier indisponible",
+    "fourVariantsGenerated": "4 variantes générées !",
+    "noInfogToRetouch": "Aucune infographie à retoucher",
+    "specifyChange": "Précisez la modification souhaitée",
+    "infogRetouched": "Infographie retouchée",
+    "conversionSuccess": "Conversion réussie !",
+    "conversionError": "Erreur lors de la conversion",
+    "describeWhatToGenerate": "Décrivez ce que vous souhaitez générer",
+    "addAtLeastOneFile": "Ajoutez au moins un fichier source",
+    "documentFromFiles": "Document généré depuis {{count}} fichier(s) !",
+    "reportFromFiles": "Rapport généré depuis {{count}} fichier(s) !",
+    "reportSuccess": "Rapport généré avec succès !",
+    "presentationFromFiles": "Présentation générée depuis {{count}} fichier(s) !",
+    "presentationSuccess": "Présentation générée !",
+    "modelsHint": "{{total}} modèles — cliquez sur une rubrique pour voir les modèles disponibles",
+    "modelsCount": "{{count}} modèle{{plural}}",
+    "modelLoaded": "Modèle « {{label}} » chargé",
+    "use": "Utiliser",
+    "filesSources": "Fichiers sources *",
+    "instructionLabel": "Instruction de génération *",
+    "filesInstructionPlaceholder": "Ex: Génère un rapport d'analyse financière basé sur ces données Excel, avec tendances, ratios clés et recommandations. Analyse les évolutions année par année et mets en évidence les anomalies.",
+    "modeFlash": "Flash — rapide",
+    "modeStandard": "Standard",
+    "modeComplet": "Complet",
+    "modeExecutive": "Exécutif",
+    "analyzing": "Yukpo Pro analyse et génère votre document…",
+    "analyzingHelper": "Yukpo lit vos fichiers et rédige le document professionnel",
+    "documentReady": "Document généré !",
+    "generateAnother": "Générer un autre",
+    "clickToDownload": "Cliquer pour télécharger",
+    "preview": "Aperçu :",
+    "convertSubtitle": "Convertissez un fichier vers un autre format en un clic.",
+    "convertSubtitle2": "PDF → Word, Excel → CSV, Image → Word (OCR), et bien d'autres.",
+    "dropFileHere": "Déposez votre fichier ici",
+    "convertCta": "Convertir",
+    "converting": "Conversion en cours…",
+    "convertAnother": "Convertir un autre fichier",
+    "designerMultiPage": "Multi-page IA",
+    "designerMultiPageDesc": "Livrets, brochures, menus…",
+    "designerMonoPage": "Mono-page",
+    "designerMonoPageDesc": "Flyer, affiche, carte…",
+    "subModeBrief": "Brief libre IA",
+    "subModeBriefDesc": "Décris, l'IA compose",
+    "subModeManuel": "Spec manuelle",
+    "subModeManuelDesc": "Sans IA, contrôle total",
+    "subModeModele": "Depuis un modèle",
+    "subModeModeleDesc": "Upload + brief inspiré",
+    "subModeCustom": "Format sur mesure",
+    "subModeCustomDesc": "Dimensions libres mm",
+    "gabaritLabel": "Gabarit ({{count}} disponibles)",
+    "gabaritBleed": "bleed {{mm}}mm",
+    "credits": "crédits",
+    "widthMm": "Largeur (mm)",
+    "heightMm": "Hauteur (mm)",
+    "bleedMm": "Bleed (mm)",
+    "modelImageLabel": "Image modèle (PNG/JPG/WEBP, max 10 Mo)",
+    "uploadModelVisual": "Uploader un visuel modèle (style, couleurs, layout)",
+    "creativeBrief": "Brief créatif *",
+    "mainTitle": "Titre principal *",
+    "targetCountry": "Pays cible",
+    "infogComposing": "Yukpo Pro compose…",
+    "infogFooter": "PDF 300 DPI · CMJN press-ready · SVG vectoriel · PNG HD · sauvegarde Mes Documents",
+    "zoom": "Zoom",
+    "previewPngUnavailable": "Preview PNG indisponible — téléchargez le PDF",
+    "specTitle": "Titre :",
+    "specPalette": "Palette :",
+    "indicativePrintPrice": "Tarif imprimé indicatif :",
+    "savedToDocs": "Sauvegardé dans Mes Documents",
+    "infogProTitle": "Infographie Pro — Print-Ready",
+    "infogProDesc": "Cartes de visite · Flyers · Affiches · Diplômes",
+    "infogProDesc2": "Faire-part · Roll-ups · Posts sociaux · Bâches",
+    "filesAnalysis": "Fichiers d'analyse",
+    "filesAnalysisHint": "(optionnel — Excel, PDF, CSV, DOCX…)",
+    "filesAnalysisHintSlides": "(optionnel — Excel, PDF, CSV…)",
+    "addFiles": "Ajouter fichiers",
+    "filesEnrichReport": "Yukpo analysera automatiquement ces fichiers pour enrichir le rapport",
+    "filesEnrichSlides": "Yukpo analysera ces fichiers pour construire les slides",
+    "writingDocument": "Yukpo Pro rédige votre document…",
+    "writingDocumentHelper": "Yukpo construit un document professionnel de haute qualité",
+    "previewTruncated": "… (aperçu tronqué)",
+    "rapportPlaceholder": "Votre rapport DOCX apparaîtra ici",
+    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici"
   },
   "traduction": {
     "title": "दस्तावेज़ अनुवाद",
@@ -186,6 +349,70 @@
       "stripe": "Credit card (Stripe)",
       "paypal": "PayPal",
       "legacy_manual": "Manual validation"
+    }
+  },
+  "documents": {
+    "title": "मेरे दस्तावेज़",
+    "subtitle": "{{count}} दस्तावेज़",
+    "newDocument": "नया दस्तावेज़",
+    "searchPlaceholder": "खोजें...",
+    "filters": {
+      "all": "सभी",
+      "reports": "रिपोर्ट",
+      "slides": "स्लाइड",
+      "translations": "अनुवाद"
+    },
+    "empty": {
+      "noMatch": "कोई मेल नहीं",
+      "noDocuments": "कोई दस्तावेज़ नहीं",
+      "cta": "Yukpo Studio से बनाएं"
+    },
+    "actions": {
+      "improve": "सुधारें",
+      "improveTitle": "चैट से सुधारें"
+    },
+    "toast": {
+      "deleted": "हटाया गया"
+    },
+    "errors": {
+      "loadFailed": "लोड विफल",
+      "deleteFailed": "हटाने में त्रुटि"
+    },
+    "chat": {
+      "documentLoaded": "दस्तावेज़ लोड: **{{titre}}**",
+      "previewIntro": "पूर्वावलोकन:",
+      "improvePrompt": "कैसे सुधारें?"
+    },
+    "types": {
+      "default": "दस्तावेज़",
+      "slides": "प्रस्तुति",
+      "cv": "CV",
+      "traduction": "अनुवाद"
+    }
+  },
+  "login": {
+    "heroBadge": "Intelligence Professionnelle Internationale",
+    "heroTitle1": "Vos agents IA",
+    "heroTitle2": "comprennent votre métier",
+    "heroSubtitle": "Plateforme multi-métiers et multi-juridictions — vos agents maîtrisent les normes IFRS, OHADA, GAAP et les cadres réglementaires de vos marchés.",
+    "features": {
+      "agents": {
+        "label": "13 agents IA spécialisés",
+        "desc": "Comptable, DRH, Juriste, Banquier, DAF, ONG…"
+      },
+      "corpus": {
+        "label": "Corpus réglementaire international",
+        "desc": "IFRS, OHADA, SYSCOHADA, GAAP, codes fiscaux multi-pays"
+      },
+      "security": {
+        "label": "Sécurité niveau entreprise",
+        "desc": "Données chiffrées, conformité RGPD"
+      }
+    },
+    "stats": {
+      "agents": "agents IA",
+      "countries": "pays couverts",
+      "uptime": "disponibilité"
     }
   }
 }

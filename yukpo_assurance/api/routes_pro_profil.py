@@ -502,11 +502,15 @@ async def lancer_recherche_emploi(
     from modules.pro.scheduler_emploi import rechercher_offres_pour_user
     from modules.pro.service_profil import get_or_create
     profil, _ = await get_or_create(current_user.user_id, db)
-    nb = await rechercher_offres_pour_user(user_id=current_user.user_id, profil=profil)
-    # Recharger le profil pour les offres fraîches
+    try:
+        await rechercher_offres_pour_user(user_id=current_user.user_id, profil=profil)
+    except Exception as e:
+        logger.error(f"[routes_pro_profil] Recherche emploi user {current_user.user_id}: {e}")
+        raise HTTPException(status_code=500, detail="Échec de la recherche d'offres. Réessayez plus tard.")
+    db.expire(profil)
     await db.refresh(profil)
     offres = profil.offres_emploi_recentes or []
-    return {"nb_offres": nb, "offres": offres}
+    return {"nb_offres": len(offres), "offres": offres}
 
 
 @router.post("/marches/rechercher", summary="Lancer une recherche d'appels d'offres immédiate")
@@ -517,10 +521,15 @@ async def lancer_recherche_marches(
     from modules.pro.scheduler_marches import rechercher_marches_pour_user
     from modules.pro.service_profil import get_or_create
     profil, _ = await get_or_create(current_user.user_id, db)
-    nb = await rechercher_marches_pour_user(user_id=current_user.user_id, profil=profil)
+    try:
+        await rechercher_marches_pour_user(user_id=current_user.user_id, profil=profil)
+    except Exception as e:
+        logger.error(f"[routes_pro_profil] Recherche marchés user {current_user.user_id}: {e}")
+        raise HTTPException(status_code=500, detail="Échec de la recherche de marchés. Réessayez plus tard.")
+    db.expire(profil)
     await db.refresh(profil)
     marches = profil.marches_publics_recents or []
-    return {"nb_marches": nb, "marches": marches}
+    return {"nb_marches": len(marches), "marches": marches}
 
 
 @router.get("/badges", summary="Mes badges et progression XP")

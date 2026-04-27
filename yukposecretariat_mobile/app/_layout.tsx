@@ -3,6 +3,7 @@ import { Stack, useRouter, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { AuthProvider, useAuth } from '../src/context/AuthContext'
 import * as SplashScreen from 'expo-splash-screen'
+import '../src/i18n'
 
 SplashScreen.preventAutoHideAsync()
 

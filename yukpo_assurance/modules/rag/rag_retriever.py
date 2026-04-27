@@ -114,7 +114,7 @@ def rechercher_corpus_reglementaire(
     resultats_finaux.sort(key=lambda x: x["score"], reverse=True)
 
     # ── Formatage contexte ────────────────────────────────────────────────
-    return _formater_contexte(resultats_finaux[:top_k + 4], question)
+    return _formater_contexte(resultats_finaux[:top_k + 4], question, pays_demande=pays or "")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -155,13 +155,15 @@ def _resoudre_filtres(
 # Formatage contexte → prompt IA
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _formater_contexte(resultats: list[dict], question: str) -> str:
+def _formater_contexte(resultats: list[dict], question: str, pays_demande: str = "") -> str:
     """
     Formate les chunks récupérés en bloc de contexte injecté dans le prompt.
     Même structure que le contexte CIMA pour cohérence.
     """
     parties = []
     total_chars = 0
+    noms_corpus: list[str] = []
+    pays_presents: set[str] = set()
 
     # Dédupliquer par texte (éviter les doublons inter-sources)
     vus = set()
@@ -186,6 +188,11 @@ def _formater_contexte(resultats: list[dict], question: str) -> str:
         pays     = meta.get("pays", "")
         domaine  = meta.get("domaine", "")
 
+        if nom_doc and nom_doc not in noms_corpus:
+            noms_corpus.append(nom_doc)
+        if pays:
+            pays_presents.add(pays)
+
         # En-tête du chunk
         en_tete_parts = [f"**{nom_doc}**"]
         if pays and pays != "TRANSNATIONAL":
@@ -202,11 +209,26 @@ def _formater_contexte(resultats: list[dict], question: str) -> str:
     if not parties:
         return ""
 
+    # Corpus list dérivé dynamiquement des chunks réellement retournés
+    corpus_resume = " · ".join(noms_corpus[:9]) if noms_corpus else "(aucune source nommée)"
+    local_uniquement_transnational = (
+        bool(pays_demande)
+        and pays_presents
+        and pays_presents.issubset({"TRANSNATIONAL"})
+    )
+    signal_couverture = ""
+    if local_uniquement_transnational:
+        signal_couverture = (
+            f"[Corpus local non indexé pour « {pays_demande} » — "
+            "s'appuyer sur la mémoire LLM pour le droit national, "
+            "utiliser les passages ci-dessous uniquement pour les normes internationales]\n"
+        )
     header = (
         "=== CORPUS RÉGLEMENTAIRE — PASSAGES PERTINENTS ===\n"
         f"Question : {question[:100]}\n"
-        f"Sources : {len(parties)} passage(s) | Corpus : OHADA · SYSCOHADA · CGI · Code Travail · COBAC · Code Civil · Code Pénal · UEMOA · CEMAC\n"
-        "=" * 50 + "\n"
+        f"Sources : {len(parties)} passage(s) | Corpus : {corpus_resume}\n"
+        f"{signal_couverture}"
+        + "=" * 50 + "\n"
     )
     footer = (
         "\n" + "=" * 50 + "\n"
@@ -336,7 +358,7 @@ def rechercher_pour_metier(
         ]
 
     candidats.sort(key=lambda x: x["score"], reverse=True)
-    return _formater_contexte(candidats[:top_k], question)
+    return _formater_contexte(candidats[:top_k], question, pays_demande=pays or "")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

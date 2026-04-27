@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FileText, Presentation, Download, Trash2, RefreshCw,
   MessageSquare, Clock, Search, Plus,
@@ -37,34 +38,25 @@ const resolveIcon = (type: string): React.ReactNode => {
 };
 
 const resolveColor = (type: string): string => {
-  if (!type) return "secondary";
+  if (!type) return "slate";
   if (type.startsWith("slides")) return "purple";
-  if (type.startsWith("contrat") || type.startsWith("convention")) return "orange";
+  if (type.startsWith("contrat") || type.startsWith("convention")) return "gold";
   if (type.startsWith("lettre") || type.startsWith("courrier")) return "green";
-  if (type === "cv" || type === "lettre_emploi") return "pink";
+  if (type === "cv" || type === "lettre_emploi") return "red";
   if (type === "traduction") return "green";
-  if (type.startsWith("rapport") || type.startsWith("note") || type.startsWith("plan")) return "blue";
-  return "secondary";
+  if (type.startsWith("rapport") || type.startsWith("note") || type.startsWith("plan")) return "cyan";
+  return "slate";
 };
 
-const resolveLabel = (type: string): string => {
-  const labels: Record<string, string> = {
-    rapport_analyse: "Rapport", rapport_financier: "Rapport financier",
-    rapport_rh: "Rapport RH", rapport_audit: "Rapport audit",
-    note_juridique: "Note juridique", note_de_synthese: "Note de synthèse",
-    plan_action: "Plan d'action", compte_rendu: "Compte-rendu",
-    contrat_bail: "Contrat de bail", contrat_travail: "Contrat de travail",
-    contrat_prestation: "Contrat prestation", contrat_vente: "Contrat vente",
-    contrat_generique: "Contrat", convention: "Convention",
-    statuts: "Statuts", reglement_interieur: "Règlement intérieur",
-    lettre_officielle: "Lettre officielle", lettre_commerciale: "Lettre commerciale",
-    lettre_mise_en_demeure: "Mise en demeure", lettre_resiliation: "Résiliation",
-    lettre_emploi: "Lettre emploi", attestation: "Attestation", certificat: "Certificat",
-    cv: "CV", traduction: "Traduction",
-  };
-  if (labels[type]) return labels[type];
-  if (type.startsWith("slides")) return "Présentation";
-  return type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+const resolveLabel = (type: string, t: (k: string, opts?: any) => string): string => {
+  if (!type || !type.trim()) return t("documents.types.default");
+  // i18n key d'abord, fallback sur la clé brute
+  const key = `documents.types.${type}`;
+  const tr = t(key);
+  if (tr && tr !== key) return tr;
+  if (type.startsWith("slides")) return t("documents.types.slides");
+  const cleaned = type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()).trim();
+  return cleaned || t("documents.types.default");
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {};   // legacy, non utilisé
@@ -73,6 +65,7 @@ const TYPE_LABELS: Record<string, string> = {};
 
 export const HistoriqueDocumentsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { newSession, addMessage, setActiveDocument } = useCopiloteStore();
   const { supprimerVersBackend } = useDocsStore();
 
@@ -88,7 +81,7 @@ export const HistoriqueDocumentsPage = () => {
       const res = await generateurApi.historiqueDocuments();
       setDocuments(res.documents);
     } catch {
-      toast.error("Impossible de charger l'historique");
+      toast.error(t("documents.errors.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -105,18 +98,14 @@ export const HistoriqueDocumentsPage = () => {
       type_doc: doc.type_doc,
       contenu_genere: doc.contenu_genere,
     });
-    const prompt = doc.contenu_source
-      ? `Je souhaite améliorer ce document (ID #${doc.id}) : "${doc.titre}".\n\nDemande initiale : ${doc.contenu_source}\n\nQue souhaitez-vous modifier ou améliorer ?`
-      : `Je souhaite améliorer le document "${doc.titre}". Que voulez-vous modifier ?`;
-
     addMessage({
       id: crypto.randomUUID(),
       role: "assistant",
-      content: `📄 Document chargé : **${doc.titre}**\n\n${
+      content: `📄 ${t("documents.chat.documentLoaded", { titre: doc.titre })}\n\n${
         doc.contenu_genere
-          ? `Voici un aperçu du contenu actuel :\n\n${doc.contenu_genere.slice(0, 800)}${doc.contenu_genere.length > 800 ? "…" : ""}\n\n`
+          ? `${t("documents.chat.previewIntro")}\n\n${doc.contenu_genere.slice(0, 800)}${doc.contenu_genere.length > 800 ? "…" : ""}\n\n`
           : ""
-      }Comment souhaitez-vous améliorer ou modifier ce document ? Décrivez vos changements.`,
+      }${t("documents.chat.improvePrompt")}`,
       timestamp: new Date().toISOString(),
       document_ref: { id: doc.id, titre: doc.titre, type: doc.type_doc },
     });
@@ -129,9 +118,9 @@ export const HistoriqueDocumentsPage = () => {
     try {
       await generateurApi.supprimerDocument(doc.id);
       setDocuments(prev => prev.filter(d => d.id !== doc.id));
-      toast.success("Document supprimé");
+      toast.success(t("documents.toast.deleted"));
     } catch {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("documents.errors.deleteFailed"));
     } finally {
       setSuppression(null);
     }
@@ -147,7 +136,7 @@ export const HistoriqueDocumentsPage = () => {
 
   const formatDate = (iso: string) => {
     try {
-      return new Date(iso).toLocaleDateString("fr-FR", {
+      return new Date(iso).toLocaleDateString(undefined, {
         day: "2-digit", month: "short", year: "numeric",
         hour: "2-digit", minute: "2-digit",
       });
@@ -162,14 +151,14 @@ export const HistoriqueDocumentsPage = () => {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white">Mes Documents</h1>
+          <h1 className="text-2xl font-display font-bold text-white">{t("documents.title")}</h1>
           <p className="text-slate-400 text-sm mt-1">
-            {documents.length} document{documents.length !== 1 ? "s" : ""} générés · Retrouvez, retéléchargez ou améliorez via le chat
+            {t("documents.subtitle", { count: documents.length })}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={charger}>
-            Actualiser
+            {t("common.refresh")}
           </Button>
           <Button
             variant="primary"
@@ -177,7 +166,7 @@ export const HistoriqueDocumentsPage = () => {
             icon={<Plus className="w-3.5 h-3.5" />}
             onClick={() => navigate("/generateurs")}
           >
-            Nouveau document
+            {t("documents.newDocument")}
           </Button>
         </div>
       </div>
@@ -189,7 +178,7 @@ export const HistoriqueDocumentsPage = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Rechercher un document…"
+            placeholder={t("documents.searchPlaceholder")}
             value={recherche}
             onChange={e => setRecherche(e.target.value)}
             className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-yukpo-500"
@@ -198,10 +187,10 @@ export const HistoriqueDocumentsPage = () => {
         {/* Filtre type */}
         <div className="flex gap-1.5">
           {[
-            { value: "all", label: "Tous" },
-            { value: "rapport", label: "Rapports" },
-            { value: "slides", label: "Slides" },
-            { value: "traduction", label: "Traductions" },
+            { value: "all", label: t("documents.filters.all") },
+            { value: "rapport", label: t("documents.filters.reports") },
+            { value: "slides", label: t("documents.filters.slides") },
+            { value: "traduction", label: t("documents.filters.translations") },
           ].map(({ value, label }) => (
             <button
               key={value}
@@ -229,12 +218,12 @@ export const HistoriqueDocumentsPage = () => {
           <FileText className="w-12 h-12 text-slate-700 mx-auto mb-4" />
           <p className="text-slate-400 font-medium">
             {recherche || filtreType !== "all"
-              ? "Aucun document ne correspond à votre recherche"
-              : "Aucun document généré pour l'instant"}
+              ? t("documents.empty.noMatch")
+              : t("documents.empty.noDocuments")}
           </p>
           {!recherche && filtreType === "all" && (
             <p className="text-slate-600 text-sm mt-2">
-              Créez votre premier rapport ou présentation via les Générateurs IA
+              {t("documents.empty.cta")}
             </p>
           )}
         </Card>
@@ -250,7 +239,7 @@ export const HistoriqueDocumentsPage = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={resolveColor(doc.type_doc) as any} size="sm">
-                      {resolveLabel(doc.type_doc)}
+                      {resolveLabel(doc.type_doc, t)}
                     </Badge>
                   </div>
                   <h3 className="text-white font-medium text-sm mt-1 line-clamp-2 leading-tight">
@@ -278,10 +267,10 @@ export const HistoriqueDocumentsPage = () => {
                 <button
                   onClick={() => ameliorerViaChat(doc)}
                   className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-yukpo-500/10 text-yukpo-400 hover:bg-yukpo-500/20 transition-colors border border-yukpo-500/20"
-                  title="Améliorer via le chat"
+                  title={t("documents.actions.improveTitle")}
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
-                  Améliorer
+                  {t("documents.actions.improve")}
                 </button>
 
                 {/* Télécharger */}
@@ -290,7 +279,7 @@ export const HistoriqueDocumentsPage = () => {
                     href={generateurApi.telecharger(doc.fichier)}
                     download={doc.fichier}
                     className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
-                    title="Télécharger"
+                    title={t("common.download")}
                   >
                     <Download className="w-3.5 h-3.5" />
                   </a>
@@ -301,7 +290,7 @@ export const HistoriqueDocumentsPage = () => {
                   onClick={() => handleSupprimer(doc)}
                   disabled={suppression === doc.id}
                   className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
-                  title="Supprimer"
+                  title={t("common.delete")}
                 >
                   {suppression === doc.id
                     ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />

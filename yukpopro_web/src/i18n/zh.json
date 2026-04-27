@@ -49,7 +49,8 @@
     "noResults": "无结果",
     "noData": "暂无数据",
     "credits": "积分",
-    "or": "或"
+    "or": "或",
+    "tagline": "专业智能"
   },
   "auth": {
     "login": "登录",
@@ -83,7 +84,31 @@
     "editProfile": "编辑我的资料",
     "modalTitle": "我的职业资料",
     "updateSuccess": "资料已更新！",
-    "updateError": "更新资料时出错"
+    "updateError": "更新资料时出错",
+    "copyFailed": "无法复制",
+    "creditsExpired": "Crédits épuisés",
+    "connectionError": "Erreur de connexion. Réessayez.",
+    "yukpoError": "Erreur YukpoPro",
+    "micError": "Erreur micro : {{err}}",
+    "micPermissionError": "Impossible d'accéder au microphone. Vérifiez les permissions.",
+    "editingDocument": "Édition du document :",
+    "exitEditMode": "Quitter le mode édition",
+    "attachFileTitle": "Joindre un fichier (Word, Excel, PDF, image...)",
+    "stopDictation": "Arrêter la dictée",
+    "voiceDictation": "Dictée vocale",
+    "transcriptionAuto": "Chrome / Edge — transcription automatique",
+    "audioMessage": "Firefox / Safari — message audio",
+    "profileUpdated": "Profil mis à jour ! Yukpo s'adapte à votre nouveau profil.",
+    "profileUpdateError": "Erreur lors de la mise à jour du profil",
+    "selectProfession": "— Sélectionner votre métier —",
+    "secteurPlaceholder": "Finance, BTP…",
+    "entreprisePlaceholder": "Votre organisation",
+    "anneesPlaceholder": "Ex: 8",
+    "bioPlaceholder": "Vos spécialités, votre contexte de travail…",
+    "expertiseDebutant": "Débutant (0-2 ans)",
+    "expertiseIntermediaire": "Intermédiaire (2-5 ans)",
+    "expertiseSenior": "Senior (5-10 ans)",
+    "expertiseExpert": "Expert (10+ ans)"
   },
   "emploi": {
     "title": "职位招聘",
@@ -131,7 +156,145 @@
     "infogRetouchTitle": "修改此信息图",
     "infogRetouchPlaceholder": "示例：更改标题，将背景改为蓝色，添加号码699…",
     "infogRetouchApply": "应用",
-    "infogRetouching": "修改中…"
+    "infogRetouching": "修改中…",
+    "lists": {
+      "typeRapport": {
+        "rapport_analyse": "分析报告",
+        "note_de_synthese": "综合摘要",
+        "note_juridique": "法律备忘录",
+        "rapport_financier": "财务报告",
+        "rapport_rh": "人力资源报告",
+        "plan_action": "行动计划",
+        "compte_rendu": "会议记录",
+        "rapport_audit": "审计报告"
+      },
+      "modeRapport": {
+        "flash": "快速 - 1页",
+        "standard": "标准 - 3-5页",
+        "complet": "完整 - 10-30页",
+        "expert": "专家 - 40-80页"
+      },
+      "typeSlides": {
+        "bilan_activite": "业务回顾",
+        "proposition_client": "客户提案",
+        "rapport_direction": "董事会报告",
+        "formation": "培训材料",
+        "pitch_projet": "项目演讲",
+        "analyse_marche": "市场分析",
+        "rapport_financier": "财务演示"
+      },
+      "modeSlides": {
+        "executive": "高管 - 5-8页",
+        "detaille": "详细 - 10-15",
+        "pitch": "演讲 - 8-12",
+        "expert": "专家 - 25-40"
+      },
+      "sortie": {
+        "rapport_analyse": "分析报告 (DOCX)",
+        "rapport_financier": "财务报告 (DOCX)",
+        "rapport_audit": "审计 (DOCX)",
+        "note_de_synthese": "摘要 (DOCX)",
+        "note_juridique": "法律 (DOCX)",
+        "plan_action": "计划 (DOCX)",
+        "rapport_direction": "董事会 (PPTX)",
+        "bilan_activite": "业务 (PPTX)",
+        "proposition_client": "客户 (PPTX)",
+        "pitch_projet": "项目 (PPTX)"
+      }
+    },
+    "loadGabaritFailed": "Impossible de charger les gabarits",
+    "briefMin10": "Décrivez votre besoin (min 10 caractères)",
+    "titleRequired": "Titre requis",
+    "chooseModelImage": "Choisissez une image modèle",
+    "invalidDimensions": "Dimensions invalides",
+    "infogSavedDocs": "Infographie générée et sauvegardée dans Mes Documents !",
+    "creditsInsufficient": "Crédits insuffisants ({{restants}} restants, plan {{plan}}).",
+    "rechargeUpgrade": "Recharger / Upgrader",
+    "moduleInfogNotIncluded": "Module Infographie non inclus dans votre plan.",
+    "upgrade": "Upgrader",
+    "generationError": "Erreur lors de la génération",
+    "fileUnavailable": "Fichier indisponible",
+    "fourVariantsGenerated": "4 variantes générées !",
+    "noInfogToRetouch": "Aucune infographie à retoucher",
+    "specifyChange": "Précisez la modification souhaitée",
+    "infogRetouched": "Infographie retouchée",
+    "conversionSuccess": "Conversion réussie !",
+    "conversionError": "Erreur lors de la conversion",
+    "describeWhatToGenerate": "Décrivez ce que vous souhaitez générer",
+    "addAtLeastOneFile": "Ajoutez au moins un fichier source",
+    "documentFromFiles": "Document généré depuis {{count}} fichier(s) !",
+    "reportFromFiles": "Rapport généré depuis {{count}} fichier(s) !",
+    "reportSuccess": "Rapport généré avec succès !",
+    "presentationFromFiles": "Présentation générée depuis {{count}} fichier(s) !",
+    "presentationSuccess": "Présentation générée !",
+    "modelsHint": "{{total}} modèles — cliquez sur une rubrique pour voir les modèles disponibles",
+    "modelsCount": "{{count}} modèle{{plural}}",
+    "modelLoaded": "Modèle « {{label}} » chargé",
+    "use": "Utiliser",
+    "filesSources": "Fichiers sources *",
+    "instructionLabel": "Instruction de génération *",
+    "filesInstructionPlaceholder": "Ex: Génère un rapport d'analyse financière basé sur ces données Excel, avec tendances, ratios clés et recommandations. Analyse les évolutions année par année et mets en évidence les anomalies.",
+    "modeFlash": "Flash — rapide",
+    "modeStandard": "Standard",
+    "modeComplet": "Complet",
+    "modeExecutive": "Exécutif",
+    "analyzing": "Yukpo Pro analyse et génère votre document…",
+    "analyzingHelper": "Yukpo lit vos fichiers et rédige le document professionnel",
+    "documentReady": "Document généré !",
+    "generateAnother": "Générer un autre",
+    "clickToDownload": "Cliquer pour télécharger",
+    "preview": "Aperçu :",
+    "convertSubtitle": "Convertissez un fichier vers un autre format en un clic.",
+    "convertSubtitle2": "PDF → Word, Excel → CSV, Image → Word (OCR), et bien d'autres.",
+    "dropFileHere": "Déposez votre fichier ici",
+    "convertCta": "Convertir",
+    "converting": "Conversion en cours…",
+    "convertAnother": "Convertir un autre fichier",
+    "designerMultiPage": "Multi-page IA",
+    "designerMultiPageDesc": "Livrets, brochures, menus…",
+    "designerMonoPage": "Mono-page",
+    "designerMonoPageDesc": "Flyer, affiche, carte…",
+    "subModeBrief": "Brief libre IA",
+    "subModeBriefDesc": "Décris, l'IA compose",
+    "subModeManuel": "Spec manuelle",
+    "subModeManuelDesc": "Sans IA, contrôle total",
+    "subModeModele": "Depuis un modèle",
+    "subModeModeleDesc": "Upload + brief inspiré",
+    "subModeCustom": "Format sur mesure",
+    "subModeCustomDesc": "Dimensions libres mm",
+    "gabaritLabel": "Gabarit ({{count}} disponibles)",
+    "gabaritBleed": "bleed {{mm}}mm",
+    "credits": "crédits",
+    "widthMm": "Largeur (mm)",
+    "heightMm": "Hauteur (mm)",
+    "bleedMm": "Bleed (mm)",
+    "modelImageLabel": "Image modèle (PNG/JPG/WEBP, max 10 Mo)",
+    "uploadModelVisual": "Uploader un visuel modèle (style, couleurs, layout)",
+    "creativeBrief": "Brief créatif *",
+    "mainTitle": "Titre principal *",
+    "targetCountry": "Pays cible",
+    "infogComposing": "Yukpo Pro compose…",
+    "infogFooter": "PDF 300 DPI · CMJN press-ready · SVG vectoriel · PNG HD · sauvegarde Mes Documents",
+    "zoom": "Zoom",
+    "previewPngUnavailable": "Preview PNG indisponible — téléchargez le PDF",
+    "specTitle": "Titre :",
+    "specPalette": "Palette :",
+    "indicativePrintPrice": "Tarif imprimé indicatif :",
+    "savedToDocs": "Sauvegardé dans Mes Documents",
+    "infogProTitle": "Infographie Pro — Print-Ready",
+    "infogProDesc": "Cartes de visite · Flyers · Affiches · Diplômes",
+    "infogProDesc2": "Faire-part · Roll-ups · Posts sociaux · Bâches",
+    "filesAnalysis": "Fichiers d'analyse",
+    "filesAnalysisHint": "(optionnel — Excel, PDF, CSV, DOCX…)",
+    "filesAnalysisHintSlides": "(optionnel — Excel, PDF, CSV…)",
+    "addFiles": "Ajouter fichiers",
+    "filesEnrichReport": "Yukpo analysera automatiquement ces fichiers pour enrichir le rapport",
+    "filesEnrichSlides": "Yukpo analysera ces fichiers pour construire les slides",
+    "writingDocument": "Yukpo Pro rédige votre document…",
+    "writingDocumentHelper": "Yukpo construit un document professionnel de haute qualité",
+    "previewTruncated": "… (aperçu tronqué)",
+    "rapportPlaceholder": "Votre rapport DOCX apparaîtra ici",
+    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici"
   },
   "traduction": {
     "title": "文档翻译",
@@ -196,6 +359,70 @@
       "stripe": "Credit card (Stripe)",
       "paypal": "PayPal",
       "legacy_manual": "Manual validation"
+    }
+  },
+  "documents": {
+    "title": "我的文档",
+    "subtitle": "已生成 {{count}} 份文档",
+    "newDocument": "新建文档",
+    "searchPlaceholder": "搜索...",
+    "filters": {
+      "all": "全部",
+      "reports": "报告",
+      "slides": "幻灯片",
+      "translations": "翻译"
+    },
+    "empty": {
+      "noMatch": "没有匹配",
+      "noDocuments": "暂无文档",
+      "cta": "通过 Yukpo Studio 创建"
+    },
+    "actions": {
+      "improve": "改进",
+      "improveTitle": "通过聊天改进"
+    },
+    "toast": {
+      "deleted": "已删除"
+    },
+    "errors": {
+      "loadFailed": "加载失败",
+      "deleteFailed": "删除错误"
+    },
+    "chat": {
+      "documentLoaded": "文档已加载: **{{titre}}**",
+      "previewIntro": "预览:",
+      "improvePrompt": "如何改进?"
+    },
+    "types": {
+      "default": "文档",
+      "slides": "演示",
+      "cv": "简历",
+      "traduction": "翻译"
+    }
+  },
+  "login": {
+    "heroBadge": "国际专业智能",
+    "heroTitle1": "您的AI代理",
+    "heroTitle2": "理解您的业务",
+    "heroSubtitle": "多领域、多司法管辖平台——您的代理精通 IFRS、OHADA、GAAP 标准及您所在市场的监管框架。",
+    "features": {
+      "agents": {
+        "label": "13个专业AI代理",
+        "desc": "会计、HR、法务、银行家、CFO、NGO…"
+      },
+      "corpus": {
+        "label": "国际监管语料库",
+        "desc": "IFRS、OHADA、SYSCOHADA、GAAP,多国税法"
+      },
+      "security": {
+        "label": "企业级安全",
+        "desc": "加密数据,符合 GDPR"
+      }
+    },
+    "stats": {
+      "agents": "AI代理",
+      "countries": "覆盖国家",
+      "uptime": "可用性"
     }
   }
 }

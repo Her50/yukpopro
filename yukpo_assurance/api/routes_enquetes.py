@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from core.auth import TokenData, get_current_user, require_permission
+from core.auth import TokenData, get_current_user
 from modules.enquetes import gestionnaire_enquetes as ge
 from modules.enquetes import helpers_dictionnaire_plan as hdp
 from modules.enquetes import facturation as fact
@@ -23,7 +23,9 @@ from modules.enquetes.persistence import (
 )
 from api._routes_enquetes_extra import extra_router
 
-router = APIRouter(dependencies=[Depends(require_permission("enquetes"))])
+# Note : pas de gate par permission — module YukpoPro accessible à tout user
+# authentifié, l'accès est régulé par les crédits/forfaits, pas par le rôle.
+router = APIRouter()
 router.include_router(extra_router)
 
 AUDIO_MIMES = {"audio/mpeg", "audio/mp4", "audio/wav", "audio/ogg",

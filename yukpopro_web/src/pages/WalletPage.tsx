@@ -44,7 +44,8 @@ const PLAN_COLORS: Record<string, string> = {
 };
 
 const MODULE_LABELS: Record<string, string> = {
-  chat: "Chat IA",
+  chat: "Chat Yukpo",
+  copilote: "Chat Yukpo",
   traduction: "Traduction",
   translate_live: "Live",
   reunion: "Réunions",
@@ -100,7 +101,7 @@ export const WalletPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
             <Wallet className="w-7 h-7 text-yukpo-500" />
             {t("wallet.title")}
           </h1>
@@ -145,7 +146,7 @@ export const WalletPage = () => {
           <div>
             <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.activePlan")}</p>
             <div className="mt-2 flex items-center gap-2">
-              <Badge variant={solde.plan === "gratuit" ? "outline" : "default"} className="uppercase">{solde.plan}</Badge>
+              <Badge variant={solde.plan === "gratuit" ? "slate" : "corp"} size="md">{solde.plan.toUpperCase()}</Badge>
             </div>
             <p className="text-sm mt-2" style={{ color: "var(--ykp-text-secondary)" }}>{solde.label_plan}</p>
             {solde.renouvellement_le && (
@@ -175,7 +176,7 @@ export const WalletPage = () => {
             </Button>
           </Link>
           <Link to="/abonnement">
-            <Button size="sm" variant="outline" className="gap-1">
+            <Button size="sm" variant="secondary" className="gap-1">
               <PlusCircle className="w-4 h-4" /> {t("wallet.recharge")}
             </Button>
           </Link>
@@ -185,34 +186,34 @@ export const WalletPage = () => {
       {/* KPIs période */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase" style={{ color: "var(--ykp-text-muted)" }}>
             <Activity className="w-3 h-3" /> {t("wallet.consumed")}
           </div>
-          <p className="text-2xl font-bold mt-2">{data.totaux.credits_consommes.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.creditsPerPeriod", { days: jours })}</p>
+          <p className="text-2xl font-bold mt-2" style={{ color: "var(--ykp-text-primary)" }}>{data.totaux.credits_consommes.toLocaleString()}</p>
+          <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.creditsPerPeriod", { days: jours })}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase" style={{ color: "var(--ykp-text-muted)" }}>
             <Zap className="w-3 h-3" /> {t("wallet.aiCalls")}
           </div>
-          <p className="text-2xl font-bold mt-2">{data.totaux.appels.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.requests")}</p>
+          <p className="text-2xl font-bold mt-2" style={{ color: "var(--ykp-text-primary)" }}>{data.totaux.appels.toLocaleString()}</p>
+          <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.requests")}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase" style={{ color: "var(--ykp-text-muted)" }}>
             <TrendingDown className="w-3 h-3" /> {t("wallet.valueLabel")}
           </div>
-          <p className="text-2xl font-bold mt-2">{data.totaux.valeur_fcfa_payee.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.fcfaEquiv")}</p>
+          <p className="text-2xl font-bold mt-2" style={{ color: "var(--ykp-text-primary)" }}>{data.totaux.valeur_fcfa_payee.toLocaleString()}</p>
+          <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.fcfaEquiv")}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase" style={{ color: "var(--ykp-text-muted)" }}>
             <TrendingUp className="w-3 h-3" /> {t("wallet.avgPerDay")}
           </div>
-          <p className="text-2xl font-bold mt-2">
+          <p className="text-2xl font-bold mt-2" style={{ color: "var(--ykp-text-primary)" }}>
             {Math.round(data.totaux.credits_consommes / Math.max(1, jours)).toLocaleString()}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("wallet.creditsPerDay")}</p>
+          <p className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.creditsPerDay")}</p>
         </Card>
       </div>
 
@@ -220,23 +221,23 @@ export const WalletPage = () => {
         {/* Graphique temporel */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold flex items-center gap-2">
+            <h2 className="font-bold flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
               <BarChart3 className="w-5 h-5" /> {t("wallet.dailyConsumption")}
             </h2>
-            <span className="text-xs text-slate-500 dark:text-slate-400">{data.serie_jour.length} {t("wallet.activeDays")}</span>
+            <span className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{data.serie_jour.length} {t("wallet.activeDays")}</span>
           </div>
           {data.serie_jour.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">{t("wallet.noConsumption")}</p>
+            <p className="text-sm text-center py-12" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.noConsumption")}</p>
           ) : (
             <div className="flex items-end gap-1 h-48">
               {data.serie_jour.slice(-30).map((s) => {
-                const h = (s.credits / maxDay) * 100;
+                const px = Math.max(Math.round((s.credits / maxDay) * 192), 4);
                 return (
-                  <div key={s.jour} className="flex-1 flex flex-col items-center group relative">
+                  <div key={s.jour} className="flex-1 h-full flex flex-col justify-end items-center group relative">
                     <div
                       className="w-full rounded-t transition-all group-hover:opacity-80"
                       style={{
-                        height: `${Math.max(h, 2)}%`,
+                        height: `${px}px`,
                         background: `linear-gradient(180deg, #00B0F0, #0054A6)`,
                       }}
                     />
@@ -252,18 +253,18 @@ export const WalletPage = () => {
 
         {/* Top modules consommateurs */}
         <Card className="p-6">
-          <h2 className="font-bold flex items-center gap-2 mb-4">
+          <h2 className="font-bold flex items-center gap-2 mb-4" style={{ color: "var(--ykp-text-primary)" }}>
             <PieChart className="w-5 h-5" /> {t("wallet.topConsumers")}
           </h2>
           {data.top_modules.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-12">{t("wallet.noData")}</p>
+            <p className="text-sm text-center py-12" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.noData")}</p>
           ) : (
             <div className="space-y-3">
               {data.top_modules.slice(0, 8).map((m) => (
                 <div key={m.module}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium">{MODULE_LABELS[m.module] || m.module}</span>
-                    <span className="text-slate-500 dark:text-slate-400">
+                    <span className="font-medium" style={{ color: "var(--ykp-text-primary)" }}>{MODULE_LABELS[m.module] || m.module}</span>
+                    <span style={{ color: "var(--ykp-text-muted)" }}>
                       {m.credits.toLocaleString()} cr · {m.appels} appel(s)
                     </span>
                   </div>
@@ -286,21 +287,20 @@ export const WalletPage = () => {
       {/* Historique détaillé */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold flex items-center gap-2">
+          <h2 className="font-bold flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
             <Activity className="w-5 h-5" /> {t("wallet.history")}
           </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400">{data.historique.length} {t("wallet.historyCount")}</span>
+          <span className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{data.historique.length} {t("wallet.historyCount")}</span>
         </div>
         {data.historique.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">{t("wallet.noHistory")}</p>
+          <p className="text-sm text-center py-8" style={{ color: "var(--ykp-text-muted)" }}>{t("wallet.noHistory")}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-500 dark:text-slate-400 uppercase border-b">
+                <tr className="text-left text-xs uppercase border-b" style={{ color: "var(--ykp-text-muted)", borderColor: "var(--ykp-border)" }}>
                   <th className="py-2 pr-2">{t("wallet.colDate")}</th>
                   <th className="py-2 pr-2">{t("wallet.colModule")}</th>
-                  <th className="py-2 pr-2">{t("wallet.colModel")}</th>
                   <th className="py-2 pr-2 text-right">{t("wallet.colTokens")}</th>
                   <th className="py-2 pr-2 text-right">{t("wallet.colCost")}</th>
                   <th className="py-2 text-right">{t("wallet.colCredits")}</th>
@@ -308,17 +308,20 @@ export const WalletPage = () => {
               </thead>
               <tbody>
                 {data.historique.map((h) => (
-                  <tr key={h.id} className="border-b border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5">
+                  <tr
+                    key={h.id}
+                    className="border-b hover:bg-slate-100 dark:hover:bg-white/5"
+                    style={{ borderColor: "var(--ykp-border)", color: "var(--ykp-text-secondary)" }}
+                  >
                     <td className="py-2 pr-2 text-xs">{new Date(h.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td>
                     <td className="py-2 pr-2">
                       <Badge variant="outline" className="text-xs">{MODULE_LABELS[h.module] || h.module}</Badge>
                     </td>
-                    <td className="py-2 pr-2 text-xs font-mono text-slate-500 dark:text-slate-400">{h.modele}</td>
-                    <td className="py-2 pr-2 text-right text-xs text-slate-500 dark:text-slate-400">
+                    <td className="py-2 pr-2 text-right text-xs" style={{ color: "var(--ykp-text-muted)" }}>
                       {(h.tokens_input + h.tokens_output).toLocaleString()}
                     </td>
                     <td className="py-2 pr-2 text-right text-xs">{h.cout_fcfa.toFixed(2)} F</td>
-                    <td className="py-2 text-right font-semibold">{h.credits_debites.toFixed(1)}</td>
+                    <td className="py-2 text-right font-semibold" style={{ color: "var(--ykp-text-primary)" }}>{h.credits_debites.toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>

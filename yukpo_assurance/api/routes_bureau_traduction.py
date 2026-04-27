@@ -53,7 +53,7 @@ async def traduire_texte(
     demande: DemandeTraduction,
     current_user: TokenData = Depends(get_current_user),
 ):
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
     from modules.bureau.service_credits_bureau import (
         verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
     )
@@ -80,7 +80,8 @@ async def traduire_texte(
     try:
         reponse_ia = await ia_client.appeler(
             prompt=f"Traduis ce texte :\n\n{demande.contenu}",
-            mode=ModeIA.CLAUDE_RAPIDE,
+            mode=ModeIA.COPILOTE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
             systeme=prompt_sys,
         )
         texte_traduit = reponse_ia.contenu
@@ -203,7 +204,7 @@ async def traduire_fichier(
     lc = LANGUES.get(langue_cible, langue_cible)
     ctx = CONTEXTES.get(contexte_metier, "général")
 
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
     prompt_sys = (
         f"Tu es un traducteur expert {ls} → {lc}, spécialisé terminologie africaine. "
         f"Contexte : {ctx}. Préserve sigles, noms propres, FCFA, OHADA, SYSCOHADA. "
@@ -212,7 +213,8 @@ async def traduire_fichier(
     try:
         reponse_ia = await ia_client.appeler(
             prompt=f"Traduis ce texte :\n\n{texte_source[:6000]}",
-            mode=ModeIA.CLAUDE_RAPIDE,
+            mode=ModeIA.COPILOTE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
             systeme=prompt_sys,
         )
         texte_traduit = reponse_ia.contenu

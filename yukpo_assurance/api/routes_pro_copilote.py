@@ -49,6 +49,120 @@ _SESSIONS: dict[int, dict] = {}
 _MAX_MESSAGES_SESSION = 40  # messages conservés en mémoire
 
 
+async def _generer_titre_document(
+    message: str,
+    type_doc: str,
+    contexte: str = "",
+    ia_client=None,
+) -> str:
+    """
+    Produit un titre court, contextuel et professionnel pour un document
+    généré depuis le chat. Fallback intelligent si le LLM échoue.
+
+    Le titre ne doit JAMAIS être une recopie brute de la question : le LLM
+    reformule en libellé adapté au type de document.
+    """
+    # Fallback sans LLM : nettoyer la question (retirer impératifs/politesse)
+    def _fallback(msg: str, td: str) -> str:
+        import re as _re
+        base = (msg or "").strip().replace("\n", " ")
+        # Retire récursivement les amorces verbales/interrogatives jusqu'à stabilité
+        amorces = (
+            "est-ce que tu peux me ", "est ce que tu peux me ",
+            "est-ce que tu peux ", "est ce que tu peux ",
+            "est-ce que tu pourrais ", "est ce que tu pourrais ",
+            "est-ce que vous pouvez ", "est ce que vous pouvez ",
+            "j'aimerais que tu ", "jaimerais que tu ", "j aimerais que tu ",
+            "j'aurais besoin de ", "jaurais besoin de ", "j ai besoin de ",
+            "il me faut ", "il faut ",
+            "génère-moi ", "génère moi ", "génère ", "genere-moi ", "genere moi ", "genere ",
+            "gerer-moi ", "gerer moi ", "gerer ", "gérer-moi ", "gérer moi ", "gérer ",
+            "rédige-moi ", "rédige moi ", "rédige ", "redige-moi ", "redige moi ", "redige ",
+            "fais-moi ", "fais moi ", "fais ",
+            "peux-tu me ", "peux tu me ", "peux-tu ", "peux tu ",
+            "pourrais-tu me ", "pourrais tu me ", "pourrais-tu ", "pourrais tu ",
+            "pouvez-vous ", "pouvez vous ",
+            "merci de ", "s'il te plaît ", "s il te plait ", "stp ", "svp ",
+            "crée-moi ", "crée moi ", "crée ", "cree-moi ", "cree moi ", "cree ",
+            "prépare-moi ", "prépare moi ", "prépare ", "prepare-moi ", "prepare moi ", "prepare ",
+            "donne-moi ", "donne moi ", "donner ",
+            "écris-moi ", "écris moi ", "écris ", "ecris-moi ", "ecris moi ", "ecris ",
+            "produis-moi ", "produis moi ", "produis ",
+            "élabore ", "elabore ", "monte-moi ", "monte moi ", "monte ",
+        )
+        prev = None
+        while prev != base:
+            prev = base
+            low = base.lower()
+            for amorce in amorces:
+                if low.startswith(amorce):
+                    base = base[len(amorce):].lstrip()
+                    break
+        # Mots-outils résiduels en tête (un, une, le, la, les, des…)
+        base = _re.sub(r"^(?:un |une |le |la |les |des |de |du |d'|d )", "", base, flags=_re.IGNORECASE).strip()
+        base = base.strip(" .?!,:;").capitalize()
+        if len(base) > 80:
+            base = base[:80].rstrip() + "…"
+        if not base or len(base) < 4:
+            libelle_type = (td or "document").replace("_", " ").title()
+            base = libelle_type
+        return base
+
+    if ia_client is None:
+        return _fallback(message, type_doc)
+
+    from core.ia_client import ModeIA
+
+    ctx_extrait = (contexte or "")[:1500]
+    libelle_type = (type_doc or "document").replace("_", " ")
+
+    prompt = (
+        "Tu génères un TITRE court et professionnel pour un document.\n\n"
+        f"Type de document : {libelle_type}\n"
+        f"Demande de l'utilisateur : {message[:500]}\n"
+        + (f"\nContexte (extrait) :\n{ctx_extrait}\n" if ctx_extrait else "")
+        + "\nContraintes IMPÉRATIVES :\n"
+        "- Entre 4 et 10 mots\n"
+        "- Français, casse normale (pas de MAJUSCULES)\n"
+        "- Ne JAMAIS recopier la phrase de l'utilisateur : la REFORMULER en libellé de document\n"
+        "- Pas d'amorce verbale (« Génère », « Rédige »…), pas de guillemets, pas de ponctuation finale\n"
+        "- Doit refléter le SUJET, pas l'action demandée\n"
+        "- Si un sujet précis ressort (client, projet, période), l'inclure\n\n"
+        "Exemples :\n"
+        "  \"Rédige-moi un rapport d'analyse crédit pour la PME ABC\" → Rapport d'analyse crédit PME ABC\n"
+        "  \"génère un bilan d'activité 2024 pour ma direction commerciale\" → Bilan d'activité 2024 — direction commerciale\n"
+        "  \"prépare-moi une note juridique sur la rupture conventionnelle\" → Note juridique sur la rupture conventionnelle\n\n"
+        "Réponds UNIQUEMENT par le titre, rien d'autre."
+    )
+
+    # Tente jusqu'à 2 fois : un titre LLM est CRITIQUE (sinon la question brute
+    # finit dans la page de garde, l'en-tête de page et le slug du fichier).
+    _BAD_PREFIXES = ("génère", "genere", "rédige", "redige", "fais", "crée", "cree",
+                     "est-ce", "est ce", "peux-tu", "peux tu", "pourrais",
+                     "j'aimerais", "jaimerais", "il me faut", "il faut")
+    for tentative in (1, 2):
+        try:
+            reponse = await asyncio.wait_for(
+                ia_client.appeler(
+                    prompt=prompt,
+                    mode=ModeIA.PRECISION,
+                    utiliser_cache=(tentative == 1),
+                    max_tokens_override=40,
+                ),
+                timeout=8.0 if tentative == 1 else 12.0,
+            )
+            titre = (reponse.contenu or "").strip().strip('"').strip("'").strip()
+            titre = titre.split("\n")[0].strip(" .?!").strip()
+            low = titre.lower()
+            if 4 <= len(titre) <= 120 and not low.startswith(_BAD_PREFIXES):
+                return titre
+            logger.debug(f"[Copilote titre] tentative {tentative} rejetée: {titre!r}")
+        except Exception as e:
+            logger.debug(f"[Copilote titre] tentative {tentative} LLM échec ({e})")
+
+    return _fallback(message, type_doc)
+
+
 async def _sauvegarder_doc_db(
     db: AsyncSession,
     user_id: str,
@@ -358,6 +472,52 @@ def _normaliser_msg(msg: str) -> str:
     import unicodedata
     nfc = unicodedata.normalize("NFD", msg.lower())
     return "".join(c for c in nfc if unicodedata.category(c) != "Mn")
+
+
+def _detecter_intention_designer(message: str) -> str | None:
+    """
+    Détecte si le message demande la création d'un visuel design (livret, flyer,
+    brochure, faire-part, programme, menu, livre photo, carte d'invitation, etc.)
+    nécessitant le moteur Designer Pro multi-page.
+    Retourne 'designer' si pertinent, sinon None.
+    """
+    msg = _normaliser_msg(message)
+
+    types_visuels = [
+        "livret", "faire-part", "faire part", "fairepart",
+        "carte d invitation", "carte d'invitation", "carte de visite",
+        "carte de remerciement", "carte mariage", "invitation mariage",
+        "invitation deces", "invitation décès", "invitation deuil",
+        "annonce deces", "annonce décès", "programme funerailles",
+        "programme funérailles", "programme de funerailles",
+        "programme culte", "programme messe", "programme religieux",
+        "brochure", "depliant", "dépliant", "flyer", "tract",
+        "menu restaurant", "menu de restaurant", "menu de mariage",
+        "livre photo", "livre-photo", "album photo",
+        "affiche", "poster", "banniere", "bannière",
+        "carton invitation", "carton d invitation",
+        "infographie pro", "designer pro", "design multi page",
+        "design multi-page", "design plusieurs pages",
+        "livret deces", "livret décès", "livret deuil",
+        "livret mariage", "livret de mariage",
+        "livret programme", "livret de programme",
+    ]
+    if any(t in msg for t in types_visuels):
+        return "designer"
+
+    # Combinaisons verbe + visuel implicite (ex: "fais moi un faire-part")
+    verbes = ["genere", "generer", "cree", "creer", "fais", "faire",
+              "prepare", "preparer", "concevoir", "design", "designer",
+              "monte moi", "donne moi", "je veux", "je voudrais",
+              "il me faut", "j ai besoin", "imprimer", "imprime"]
+    cibles = ["faire part", "fairepart", "livret", "brochure", "flyer",
+              "depliant", "dépliant", "menu", "livre photo", "album",
+              "affiche", "poster", "carte"]
+    a_verbe = any(v in msg[:200] for v in verbes)
+    a_cible = any(c in msg for c in cibles)
+    if a_verbe and a_cible:
+        return "designer"
+    return None
 
 
 def _detecter_intention_generateur(message: str) -> str | None:
@@ -873,6 +1033,12 @@ RÈGLES DE CLASSIFICATION:
 - "agent_metier" → question technique MÉTIER nécessitant un expert (calcul de paie, analyse de bilan, recherche juridique, scoring crédit, droits de douane...). AUSSI quand des fichiers sont joints et l'utilisateur demande une ANALYSE du fichier ("analyse ce fichier", "fais une analyse de ce devis", "examine ce document", "que contient ce fichier", "analyse mes données", "lis ce fichier"). NE PAS utiliser pour des questions sur les capacités de Yukpo.
 - "traduction" → traduire un texte ou document vers une autre langue
 - "conversion" → CONVERTIR/TRANSFORMER un fichier d'un FORMAT à un autre (ex: "convertis ce PDF en Word", "transforme en Excel", "change en DOCX", "PDF vers Word", "Word en PDF", "XLSX en CSV", "image en Word"). UNIQUEMENT quand un fichier est joint ET l'utilisateur demande une conversion de format. Placer "format_cible" dans la réponse (docx, pdf, pptx, xlsx, csv, txt, jpg).
+- "designer" → l'utilisateur veut CRÉER UN VISUEL/IMPRIMÉ DESIGN, mono ou multi-page, avec mise en page graphique (typographie soignée, palette, ornements, photos, plans). Cas typiques (non exhaustifs — analyse l'INTENTION, pas seulement les mots) :
+   • Cérémonies & événements : faire-part de décès/mariage/baptême, livret obsèques/messe/culte, programme de cérémonie, carte d'invitation, carte de remerciement, carton, livret hommage, livret souvenir
+   • Marketing & corporate : brochure, dépliant, flyer, tract, plaquette, affiche, poster, bannière, kakemono, carte de visite, plan d'accès stylisé
+   • Restauration & retail : menu restaurant, carte des vins, étiquette produit
+   • Albums & souvenirs : livre photo, album, fanzine, livret de fin d'année
+   Indices : références à pages multiples ("livret"), mises en page artistiques, photos/témoignages/citations à intégrer, cérémonies religieuses ou familiales, demandes "imprimable / pour l'imprimerie / quadrichromie / CMJN", besoin de plan/QR/famille/programme dans un même document. CHOISIS "designer" même si le mot exact n'apparaît pas tant que l'intention est de produire un imprimé graphique (≠ rapport texte). NE PAS utiliser pour : un simple Word/PDF texte (rapport, contrat, lettre) → "generateur".
 - "conversation" → question générale, explication, conseil, salutation (bonjour, merci...), discussion sans demande de document ni de calcul technique
 
 RÈGLE CRITIQUE FICHIERS JOINTS: Si des fichiers sont joints ET l'utilisateur demande une analyse directe (pas une génération de document Word/PDF), classer en "agent_metier" avec agent="daa".
@@ -906,6 +1072,7 @@ MODULES DISPONIBLES (pour modules_suggeres) :
 - "emploi"         : offres d'emploi, CV, lettres de motivation, recrutement
 - "marches"        : marchés publics, appels d'offres, DAO
 - "enquetes"       : enquêtes, sondages, questionnaires
+- "designer"       : faire-part, livrets, brochures, flyers, menus, cartes d'invitation, livres photo, dépliants — visuels multi-page imprimables
 - "mes_documents"  : retrouver, consulter ou télécharger des documents générés
 - "dashboard"      : statistiques d'utilisation, tableau de bord
 
@@ -932,7 +1099,7 @@ JSON REQUIS (tous les champs, null si non applicable):
         result = json.loads(raw)
 
         # Valider et normaliser
-        if result.get("intention") not in {"generateur", "agent_metier", "traduction", "conversion", "conversation"}:
+        if result.get("intention") not in {"generateur", "agent_metier", "traduction", "conversion", "conversation", "designer"}:
             result["intention"] = "conversation"
 
         logger.info(
@@ -1022,6 +1189,19 @@ def _orchestrer_fallback_keywords(message: str, profil, a_fichiers: bool) -> dic
             "format": intention_cv.get("format_sortie", "docx"),
             "langue_cible": None,
             "confiance": 0.75,
+        }
+
+    # Designer Pro (visuels multi-page : faire-part, livrets, brochures, flyers…)
+    intention_design = _detecter_intention_designer(message)
+    if intention_design:
+        return {
+            "intention": "designer",
+            "sous_type": "designer",
+            "type_doc": "designerpro",
+            "agent": None,
+            "format": "pdf",
+            "langue_cible": None,
+            "confiance": 0.85,
         }
 
     # Générateur document
@@ -1880,25 +2060,33 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
     Injecte le cadre juridique précis du pays + profil métier pour
     éliminer les hallucinations et garantir des réponses précises et localisées.
     """
-    metier = getattr(profil, "metier", "") or "professionnel"
+    metier = getattr(profil, "metier", "") or ""
     nom = getattr(profil, "nom", "") or ""
-    pays_code = (getattr(profil, "pays", "") or pays or "CM").upper()
+    pays_code = (getattr(profil, "pays", "") or pays or "").upper()
     # secteur_activite = secteur économique réel ("finance_banque", etc.)
     secteur = getattr(profil, "secteur_activite", "") or getattr(profil, "secteur", "") or ""
     niveau = getattr(profil, "niveau", "") or "senior"
     prefs = getattr(profil, "preferences", None) or {}
     experience = prefs.get("annees_experience")
+    pays_connu = bool(pays_code)
+    metier_connu = bool(metier)
 
-    # Récupérer le cadre juridique du pays
+    # Récupérer le cadre juridique du pays (fallback _DEFAULT si pays inconnu ou non renseigné)
     cadre = _CADRE_JURIDIQUE_PAYS.get(pays_code, _CADRE_JURIDIQUE_PAYS["_DEFAULT"])
-    pays_nom = cadre["nom_complet"]
-    zone_eco = cadre["zone_eco"]
-    devise = cadre["devise"]
-    banque_centrale = cadre["banque_centrale"]
-    specificites = cadre.get("specificites", "")
+    pays_nom = cadre["nom_complet"] if pays_connu else "(pays non renseigné dans le profil)"
+    zone_eco = cadre["zone_eco"] if pays_connu else "—"
+    devise = cadre["devise"] if pays_connu else "—"
+    banque_centrale = cadre["banque_centrale"] if pays_connu else "—"
+    specificites = cadre.get("specificites", "") if pays_connu else ""
 
-    # Corpus prioritaire selon le métier
-    corpus_metier = _METIER_CORPUS_PRIORITAIRE.get(metier, _METIER_CORPUS_PRIORITAIRE["autre"])
+    # Corpus prioritaire selon le métier (si connu)
+    if metier_connu and metier in _METIER_CORPUS_PRIORITAIRE:
+        corpus_metier = _METIER_CORPUS_PRIORITAIRE[metier]
+    else:
+        corpus_metier = _METIER_CORPUS_PRIORITAIRE.get("autre", [
+            "Adapter le corpus au métier réel de l'utilisateur",
+            "Fiscal, social, commercial, sectoriel — selon la question posée",
+        ])
     corpus_str = "\n   - ".join(corpus_metier)
 
     # Niveau d'expertise → ajuster le ton
@@ -1912,19 +2100,30 @@ def _prompt_systeme_copilote(profil, pays: str, langue: str) -> str:
     }.get(niveau, "Réponds avec précision technique adaptée au profil.")
 
     exp_str = f", {experience} ans d'expérience" if experience else ""
+    annee_courante = datetime.utcnow().year
 
-    return f"""Tu es **Yukpo Copilote**, l'assistant personnel de {nom or 'ce professionnel'} — {metier.replace('_', ' ')}{f' dans le secteur {secteur}' if secteur else ''}{exp_str}.
+    metier_label = metier.replace('_', ' ') if metier_connu else "professionnel (métier non précisé)"
+    return f"""Tu es **Yukpo Pro**, la plateforme IA des professionnels — **disponible à l'international**, tous pays et tous métiers confondus. Tu assistes {nom or 'ce professionnel'}{(' — ' + metier_label) if metier_connu else ''}{f' dans le secteur {secteur}' if secteur else ''}{exp_str}.
 
 ═══════════════════════════════════════════════════
-  CONTEXTE UTILISATEUR — LOCALISATION PRÉCISE
+  IDENTITÉ YUKPO PRO (à utiliser quand on te demande « c'est quoi Yukpo Pro ? »)
 ═══════════════════════════════════════════════════
-▸ Pays         : {pays_nom} ({pays_code})
+Yukpo Pro est une plateforme IA professionnelle **internationale** qui accompagne les professionnels dans leur travail quotidien : analyse de documents, génération de rapports/contrats/slides/CV, traduction, gestion de réunions, agents spécialisés métier, études et enquêtes.
+▸ Elle **n'est pas limitée** à une zone géographique ni à une liste fixe de métiers.
+▸ Elle s'adapte dynamiquement au pays ET au métier renseignés dans le profil utilisateur.
+▸ Quand l'utilisateur demande une présentation, **personnalise la réponse avec son profil** (ci-dessous) : cite son métier, son pays, son secteur. Si le profil est vide, reste générique et invite l'utilisateur à le compléter.
+
+═══════════════════════════════════════════════════
+  CONTEXTE UTILISATEUR — LOCALISATION
+═══════════════════════════════════════════════════
+▸ Pays         : {pays_nom}{f' ({pays_code})' if pays_connu else ''}
 ▸ Zone économique : {zone_eco}
 ▸ Devise       : {devise}
 ▸ Banque centrale : {banque_centrale}
-▸ Métier       : {metier.replace('_', ' ').title()}
+▸ Métier       : {metier_label.title() if metier_connu else 'Non renseigné'}
 ▸ Secteur      : {secteur or 'Non spécifié'}
 ▸ Niveau       : {niveau}
+▸ Année de référence : {annee_courante} (utilise les taux et textes applicables à cette année ; marque `[À vérifier — version officielle en vigueur]` en cas de doute sur la mise à jour)
 {f'▸ Spécificités  : {specificites}' if specificites else ''}
 
 ═══════════════════════════════════════════════════
@@ -1946,12 +2145,12 @@ DOMAINES JURIDIQUES PRIORITAIRES POUR CE PROFIL ({metier.upper()}) :
 ═══════════════════════════════════════════════════
 
 **RÈGLE 1 — SOURCE UNIQUE = TA MÉMOIRE DE FORMATION :**
-→ Tu réponds TOUJOURS depuis ta connaissance des textes juridiques, fiscaux, comptables officiels.
-→ Tu as été formé sur les codes officiels : OHADA, CGI des pays francophones africains, codes du travail, codes civils et pénaux, SYSCOHADA, Code CIMA, normes ISO/OIT.
+→ Tu réponds EXCLUSIVEMENT depuis ta connaissance des textes juridiques, fiscaux, comptables, normatifs officiels. Pas de RAG, pas de web : uniquement ta mémoire — qui est étendue et mondiale.
+→ Tu maîtrises les cadres internationaux (IFRS, ISO, OIT, OCDE, GDPR, Bâle, conventions internationales) ainsi que les cadres régionaux et nationaux — OHADA, SYSCOHADA, CIMA, CEMAC/UEMOA pour l'Afrique francophone ; common law pour l'Afrique anglophone ; droit continental pour l'Europe ; US GAAP / IRC pour l'Amérique du Nord ; droit chinois, japonais, indien, brésilien, russe, etc. **Adapte-toi systématiquement au pays réel de l'utilisateur**.
 → NE PAS inventer d'article, de taux, de barème que tu ne connais pas — dis-le clairement si tu n'es pas sûr.
-→ Marque TOUJOURS : `[À vérifier — version officielle en vigueur]` pour tout article/taux dont tu n'es pas certain.
+→ Marque `[À vérifier — version officielle en vigueur]` pour tout article/taux dont tu n'es pas certain à 100 %.
 → Cite l'article précis et son texte tel que tu le connais — même avec la réserve, c'est utile.
-→ Précise TOUJOURS : "selon le [Code] {pays_nom} (base formation, vérifier la version à jour)"
+→ Précise toujours le texte de référence : "selon le [Code/Loi] {pays_nom} (à confirmer sur la version en vigueur)".
 → JAMAIS de réponse vague type "selon la loi" sans citer l'article précis ou au minimum le chapitre.
 
 **RÈGLE 2 — PRÉCISION CONTEXTUELLE ABSOLUE :**
@@ -1968,7 +2167,7 @@ DOMAINES JURIDIQUES PRIORITAIRES POUR CE PROFIL ({metier.upper()}) :
 
 **RÈGLE 4 — FISCALITÉ (CGI / TVA / IS) :**
 → Toute réponse fiscale doit préciser : le taux exact en vigueur à {pays_nom}, la base imposable, les exonérations éventuelles.
-→ Cite l'article du CGI {pays_nom} concerné si tu le connais, avec `[Mémoire IA]` si non indexé.
+→ Cite l'article du CGI {pays_nom} concerné si tu le connais, avec `[À vérifier — version officielle en vigueur]` si tu n'es pas certain de la version à jour.
 → Les taux et seuils : utilise ceux de {pays_nom} tels que définis dans {cadre['fiscal']}.
 → JAMAIS mélanger des taux d'un autre pays.
 
@@ -1978,20 +2177,20 @@ DOMAINES JURIDIQUES PRIORITAIRES POUR CE PROFIL ({metier.upper()}) :
 → Si la convention collective sectorielle s'applique, la mentionner.
 
 **RÈGLE 6 — MONTANTS ET DEVISES :**
-→ Tous les montants sont en {devise} sauf demande explicite de conversion.
-→ Exemples concrets avec des montants réels en {devise.split('—')[0].strip()}.
+→ Si la devise du pays utilisateur est connue ({devise}), exprime les montants dans cette devise sauf demande explicite de conversion.
+→ Si la devise n'est pas renseignée, demande à l'utilisateur dans quelle devise il souhaite des exemples, ou utilise une devise neutre (USD/EUR) en le signalant.
 
-**RÈGLE 7 — PAYS HORS CORPUS RAG INDEXÉ :**
-→ Le corpus RAG Yukpo couvre principalement les pays OHADA, CEMAC, UEMOA francophones.
-→ Pour tout autre pays : réponds avec ta connaissance de formation — tu es compétent sur tous les systèmes juridiques mondiaux.
-→ Marque `[Réponse mémoire IA — sans RAG local]` pour indiquer l'absence de documents indexés pour ce pays.
-→ Ne dis JAMAIS "je ne connais pas ce pays" — utilise ta formation sur le droit local de ce pays.
+**RÈGLE 7 — COUVERTURE MONDIALE HOMOGÈNE :**
+→ Yukpo Pro sert des professionnels partout dans le monde — Afrique, Europe, Amériques, Asie, Moyen-Orient, Océanie. Tu dois répondre avec la même rigueur technique pour **tout** pays.
+→ Ne dis JAMAIS « je ne connais pas ce pays » ni « je ne suis pas spécialiste de cette juridiction ». Tu as une connaissance étendue des systèmes juridiques et fiscaux mondiaux — utilise-la.
+→ Si le pays n'est pas renseigné dans le profil : demande-le avant de donner des taux ou articles précis, sauf si la question porte sur des normes internationales (IFRS, ISO, OIT, OCDE, GDPR, Bâle…).
+→ Ancre systématiquement chaque réponse dans le contexte de l'utilisateur : son pays ({pays_nom}), sa zone économique ({zone_eco}), sa devise ({devise}), son métier ({metier_label}), son secteur ({secteur or 'non spécifié'}). Les exemples, montants, cas pratiques doivent être tirés de ce contexte — pas d'un autre pays.
 
 ═══════════════════════════════════════════════════
   COMPORTEMENT ET STYLE
 ═══════════════════════════════════════════════════
 ▸ Ton niveau d'expertise : {ton_niveau}
-▸ Langue principale      : {"anglais" if langue == "en" else "français"} professionnel
+▸ Langue de réponse      : RÉPONDS TOUJOURS dans la même langue que la question de l'utilisateur (français, anglais, espagnol, portugais, arabe, allemand, etc.). Détecte la langue du message courant et adapte ta réponse — même si les messages précédents étaient dans une autre langue. Langue par défaut si ambiguë : {"anglais" if langue == "en" else "français"} professionnel.
 ▸ Exemples               : toujours tirés du contexte réel de {pays_nom}
 ▸ Style                  : direct et factuel — pas de préambule vide ("Bien sûr !", "Je serais ravi de...")
 
@@ -2013,8 +2212,8 @@ Si un lien `/api/v1/...` est dans le résultat : le citer tel quel comme lien de
 Le contenu des fichiers (Excel, CSV, Word, PDF) est extrait et fourni dans [Données des fichiers joints].
 Analyser directement ce contenu — JAMAIS prétendre ne pas avoir accès au fichier.
 
-**AGENTS SPÉCIALISÉS (activés automatiquement) :**
-DRH · Comptable · DAF · Banquier · Juriste · Commercial · DAA · Ingénieur · Microfinance · ONG · Douanier · CV/Emploi
+**AGENTS SPÉCIALISÉS (activés automatiquement selon la demande) :**
+Yukpo Pro embarque un catalogue évolutif d'agents experts — RH, comptable, fiscal, financier, juridique, commercial, ingénierie, microfinance, ONG/bailleurs, douane, CV/emploi, etc. — et **n'est PAS limité** à cette liste : si la question relève d'un autre métier (santé, éducation, logistique, data, etc.), tu réponds directement avec l'expertise appropriée. Ne JAMAIS dire « Yukpo Pro ne couvre pas mon métier ».
 
 ═══════════════════════════════════════════════════
   MODULES DE L'APPLICATION — GUIDE D'ORIENTATION
@@ -2054,7 +2253,10 @@ async def copilote_chat(
 
     profil, _ = await get_or_create(current_user.user_id, db)
     session = _get_session(current_user.user_id)
-    pays = req.pays or getattr(profil, "pays", "") or "CM"
+    # ⚠️ Pas de fallback "CM" ici : Yukpo Pro est international. Si le profil
+    # n'a pas encore de pays, on laisse vide pour que le LLM ne suppose PAS
+    # un pays par défaut (évite les réponses contextualisées à tort au Cameroun).
+    pays = req.pays or getattr(profil, "pays", "") or ""
 
     agent_utilise = None
     resultat_agent = None
@@ -2085,6 +2287,45 @@ async def copilote_chat(
     _lc_orch        = orchestration.get("langue_cible") or "en"
     _fc_orch        = orchestration.get("format_cible") or _format_orch
     _modules_llm    = orchestration.get("modules_suggeres") or []  # suggestions sémantiques LLM
+
+    # ── Étape 0b-ter : Détection plainte "données simulées" ─────────────────
+    # Si l'utilisateur conteste un document précédent ("tu as inventé",
+    # "données simulées", "vraies données"...), on relance la génération du
+    # MÊME type de document avec recherche web forcée, plutôt que de tomber
+    # dans une réponse Q/R générique.
+    _PLAINTE_DONNEES_PATTERNS = (
+        "tu as simul", "vous avez simul", "tu as invent", "vous avez invent",
+        "données simul", "donnees simul", "données réelles", "donnees reelles",
+        "vraies données", "vraies donnees", "données fictives", "donnees fictives",
+        "placeholders", "place holder", "tu fais semblant",
+        "n'a pas utilisé les données", "n a pas utilise les donnees",
+        "rapport vide", "document vide", "contenu vide", "rempli de x",
+        "rempli de placeholders", "tu n'as pas cherché", "tu n as pas cherche",
+        "données réelles", "regenere", "régénère", "recommence",
+        "refais avec", "refais le",
+    )
+    _msg_low_plainte = (req.message or "").lower()
+    _est_plainte_donnees = any(p in _msg_low_plainte for p in _PLAINTE_DONNEES_PATTERNS)
+    _force_web_search = False
+    if _est_plainte_donnees:
+        # Retrouver le dernier document généré dans la session (≤ 8 messages)
+        _last_doc_meta = None
+        for _m in reversed(session.get("messages", [])[-8:]):
+            if (_m.get("role") == "assistant"
+                    and (_m.get("meta") or {}).get("agent_utilise") == "generateur"):
+                _last_doc_meta = _m.get("meta") or {}
+                break
+        if _last_doc_meta:
+            _intention = "generateur"
+            _force_web_search = True
+            # On garde _type_doc_o si déjà connu, sinon on essaie de le déduire
+            if not _type_doc_o:
+                _type_doc_o = _last_doc_meta.get("type_doc") or "rapport_analyse"
+            _sous_type = _sous_type or "rapport"
+            logger.info(
+                f"[Copilote] Plainte 'données simulées' détectée → "
+                f"régénération forcée avec web search (type={_type_doc_o})"
+            )
 
     # ── Étape 0b-bis : Mode édition document existant ──────────────────────
     # Si l'utilisateur a ouvert un document depuis "Mes Documents" et demande
@@ -2342,6 +2583,132 @@ async def copilote_chat(
             logger.warning(f"[Copilote-Conv] Conversion échouée: {e_conv}")
             # Fallback : répondre en texte
 
+    # ── Étape 0c-bis : Designer Pro (visuels multi-page) ─────────────────────
+    if _intention == "designer":
+        try:
+            from api.routes_bureau_infographie_pro import (
+                generer_auto as _designer_generer_auto,
+                modifier_projet as _designer_modifier,
+                DemandeAutoPro, DemandeModifierProjet, ProfilDesigner,
+            )
+            from modules.pro.service_profil import get_or_create, incrementer_stat
+
+            # Mode édition : si un document_ref pointe vers un projet designer
+            ref_projet_id = None
+            if req.document_ref is not None:
+                meta_ref = getattr(req.document_ref, "meta", None) or {}
+                if isinstance(meta_ref, dict) and meta_ref.get("projet_id"):
+                    ref_projet_id = meta_ref["projet_id"]
+                elif (req.document_ref.type_doc or "").startswith("designerpro"):
+                    ref_projet_id = meta_ref.get("projet_id") if isinstance(meta_ref, dict) else None
+
+            metier_p = getattr(profil, "metier", None)
+            secteur_p = getattr(profil, "secteur", None) or getattr(profil, "domaine", None)
+            pays_p = (getattr(profil, "pays", None) or "CM")[:2].upper()
+            profil_designer = ProfilDesigner(
+                metier=metier_p,
+                secteur=secteur_p,
+                nom_organisation=getattr(profil, "organisation", None) or getattr(profil, "entreprise", None),
+            )
+
+            if ref_projet_id:
+                dem = DemandeModifierProjet(
+                    projet_id=ref_projet_id,
+                    instructions=req.message,
+                    pays=pays_p,
+                )
+                resultat = await asyncio.wait_for(
+                    _designer_modifier(dem, current_user), timeout=320.0
+                )
+            else:
+                dem = DemandeAutoPro(
+                    brief=req.message,
+                    pays=pays_p,
+                    langue=(_lc_orch or "fr"),
+                    profil=profil_designer,
+                )
+                resultat = await asyncio.wait_for(
+                    _designer_generer_auto(dem, current_user), timeout=320.0
+                )
+
+            res_d = resultat if isinstance(resultat, dict) else {}
+            projet_info = res_d.get("projet") or {}
+            cle_detectee = res_d.get("cle_projet_detectee") or projet_info.get("cle_projet") or "designer"
+            pdf_id = res_d.get("pdf_id") or res_d.get("pdf_cmyk_id")
+            from api.routes_bureau_infographie_pro import _DATA_DIR as _DESIGN_DATA_DIR
+            chemin_pdf = str(_DESIGN_DATA_DIR / pdf_id) if pdf_id else None
+            projet_id = res_d.get("projet_json_id")
+            n_pages = projet_info.get("nombre_pages") or len(res_d.get("pages_png_ids", []) or [])
+
+            reponse_design = (
+                f"🎨 **Visuel généré — {cle_detectee} ({n_pages} page{'s' if n_pages > 1 else ''}).**\n\n"
+                f"Le PDF prêt à imprimer est disponible dans **Mes Documents**. "
+                f"Pour modifier (changer un texte, remplacer une photo, ajuster les couleurs…), "
+                f"décrivez-moi simplement les changements souhaités."
+            )
+
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", reponse_design,
+                             {"agent_utilise": "designer", "projet_id": projet_id, "cle_projet": cle_detectee})
+            await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=4)
+
+            await _sauvegarder_doc_db(
+                db=db, user_id=current_user.user_id,
+                titre=f"Visuel {cle_detectee}"[:100],
+                type_doc=f"designerpro_{cle_detectee}",
+                fichier=chemin_pdf,
+                contenu_genere="",
+                session_id=session["session_id"],
+                meta={"source": "chat", "format": "pdf", "projet_id": projet_id,
+                      "cle_projet": cle_detectee, "nb_pages": n_pages},
+            )
+
+            return {
+                "session_id":           session["session_id"],
+                "reponse":              reponse_design,
+                "agent_utilise":        "designer",
+                "resultat_agent":       {"projet_id": projet_id, "cle_projet": cle_detectee, "nb_pages": n_pages},
+                "nb_messages_session":  len(session["messages"]),
+                "profil_metier":        getattr(profil, "metier", None),
+                "fichiers_generes":     [chemin_pdf] if chemin_pdf else None,
+                "navigation_suggestions": [
+                    {"label": "Designer Pro", "route": "/secretariat/infographie",
+                     "icon": "image", "description": "Affiner le visuel ou changer le format"},
+                ],
+            }
+        except asyncio.TimeoutError:
+            logger.warning("[Copilote-Designer] Timeout génération visuel")
+            _msg_d = ("⚠️ La génération du visuel a pris trop de temps. "
+                      "Reprenez avec un brief plus court ou utilisez **Designer Pro** directement.")
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", _msg_d, {"agent_utilise": "designer"})
+            return {
+                "session_id": session["session_id"], "reponse": _msg_d,
+                "agent_utilise": "designer", "resultat_agent": None,
+                "nb_messages_session": len(session["messages"]),
+                "profil_metier": getattr(profil, "metier", None),
+                "fichiers_generes": None,
+                "navigation_suggestions": [{"label": "Designer Pro", "route": "/secretariat/infographie",
+                                            "icon": "image", "description": "Ouvrir le module"}],
+            }
+        except HTTPException as he:
+            logger.warning(f"[Copilote-Designer] {he.status_code}: {he.detail}")
+            _msg_d = f"⚠️ {he.detail}"
+            _ajouter_message(session, "user", req.message)
+            _ajouter_message(session, "assistant", _msg_d, {"agent_utilise": "designer"})
+            return {
+                "session_id": session["session_id"], "reponse": _msg_d,
+                "agent_utilise": "designer", "resultat_agent": None,
+                "nb_messages_session": len(session["messages"]),
+                "profil_metier": getattr(profil, "metier", None),
+                "fichiers_generes": None, "navigation_suggestions": [],
+            }
+        except Exception as e_d:
+            logger.warning(f"[Copilote-Designer] Génération échouée: {e_d}")
+            # Fallback : tomber sur generateur classique (rapport/contrat)
+            _intention = "generateur"
+            _sous_type = "rapport"
+
     # ── Étape 0d : Génération de document depuis le chat ─────────────────────
     # Déclenché par l'orchestrateur (LLM) — y compris quand des fichiers sont
     # joints et servent de contexte pour le document généré.
@@ -2377,7 +2744,15 @@ async def copilote_chat(
                 # éviter que le prompt d'édition ne se retrouve dans le slug du fichier.
                 sujet_gen = dref.titre
             else:
-                sujet_gen = req.message
+                # Le sujet sert aussi d'en-tête dans le document généré : on
+                # génère un vrai titre via LLM plutôt que de recopier la question.
+                type_doc_pour_titre = _type_doc_o or _detecter_type_document(req.message)
+                sujet_gen = await _generer_titre_document(
+                    message=req.message,
+                    type_doc=type_doc_pour_titre,
+                    contexte="\n\n".join(contexte_gen_parts),
+                    ia_client=ia_client,
+                )
 
             contexte_gen = "\n\n".join(contexte_gen_parts) or None
 
@@ -2422,8 +2797,10 @@ async def copilote_chat(
                         mode="standard",
                         contexte=contexte_gen,
                         format_sortie="docx",
+                        instruction_utilisateur=req.message,
+                        forcer_recherche_web=_force_web_search,
                     ),
-                    timeout=240.0,
+                    timeout=420.0 if _force_web_search else 360.0,
                 )
                 ext = "DOCX"
 
@@ -2438,7 +2815,9 @@ async def copilote_chat(
             _ajouter_message(session, "user", req.message)
             _ajouter_message(session, "assistant", reponse_gen, {"agent_utilise": "generateur"})
             await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=3)
-            titre_sauv = (req.document_ref.titre if _is_edit else req.message)[:100]
+            # Réutilise le titre déjà généré par LLM côté sujet_gen (évite
+            # un second appel LLM). En mode édition on garde le titre d'origine.
+            titre_sauv = (req.document_ref.titre if _is_edit else sujet_gen)[:100]
             meta_sauv = {
                 "source": "chat",
                 "format": ext.lower(),
@@ -2486,6 +2865,38 @@ async def copilote_chat(
                 "navigation_suggestions": [{"label": "Yukpo Studio", "route": "/generateurs", "icon": "file-text", "description": "Générer des documents avec plus de contrôle"}],
             }
         except Exception as e:
+            # Refus volontaire : sources insuffisantes pour rédiger factuellement
+            from modules.pro.report_writer_pro import SourcesInsuffisantesError
+            if isinstance(e, SourcesInsuffisantesError):
+                logger.info(f"[Copilote-Gen] Refus sources insuffisantes: {e.raison}")
+                _sources_txt = ""
+                if e.sources_essayees:
+                    _sources_txt = "\n\n**Sources consultées sans succès :**\n" + "\n".join(
+                        f"- {u}" for u in e.sources_essayees[:5]
+                    )
+                _msg_refus = (
+                    f"📚 **Je préfère ne pas générer ce document avec des données inventées.**\n\n"
+                    f"{e.raison}\n\n"
+                    f"**Pour produire un rapport fiable, merci de me fournir :**\n"
+                    f"- les états financiers / comptes audités concernés (PDF, Excel)\n"
+                    f"- ou tout document source officiel (rapport annuel, état CIMA, "
+                    f"délibération conseil d'administration…)\n"
+                    f"- ou des données chiffrées brutes que je puisse exploiter\n\n"
+                    f"Sans source vérifiable, je ne peux pas rédiger un rapport "
+                    f"professionnel sans risque d'erreur factuelle.{_sources_txt}"
+                )
+                _ajouter_message(session, "user", req.message)
+                _ajouter_message(session, "assistant", _msg_refus, {"agent_utilise": "generateur", "refus_sources": True})
+                return {
+                    "session_id":           session["session_id"],
+                    "reponse":              _msg_refus,
+                    "agent_utilise":        "generateur",
+                    "resultat_agent":       None,
+                    "nb_messages_session":  len(session["messages"]),
+                    "profil_metier":        getattr(profil, "metier", None),
+                    "fichiers_generes":     None,
+                    "navigation_suggestions": [],
+                }
             logger.warning(f"[Copilote-Gen] Génération échouée: {e}")
             _msg_err2 = (
                 f"⚠️ **Erreur lors de la génération du document.** "
@@ -2576,9 +2987,15 @@ async def copilote_chat(
             _ajouter_message(session, "assistant", reponse_cv, {"agent_utilise": "cv_emploi"})
             await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=3)
             # Sauvegarder dans l'historique documents
+            titre_cv = (await _generer_titre_document(
+                message=req.message,
+                type_doc="lettre_motivation" if type_doc == "lettre" else "cv",
+                contexte=contenu_doc[:1500] if isinstance(contenu_doc, str) else "",
+                ia_client=ia_cv,
+            ))[:100]
             await _sauvegarder_doc_db(
                 db=db, user_id=current_user.user_id,
-                titre=req.message[:100],
+                titre=titre_cv,
                 type_doc="lettre_emploi" if type_doc == "lettre" else "cv",
                 fichier=chemin_cv,
                 contenu_genere=contenu_doc[:2000],
@@ -3023,6 +3440,151 @@ async def historique_copilote(
         "nb_appels_agent": session.get("nb_appels_agent", 0),
         "messages":        messages,
     }
+
+
+# ── Message d'accueil personnalisé (LLM + cache) ──────────────────────────────
+
+_PAYS_NOMS: dict[str, str] = {
+    "CM": "Cameroun", "CI": "Côte d'Ivoire", "SN": "Sénégal", "BF": "Burkina Faso",
+    "TG": "Togo", "BJ": "Bénin", "ML": "Mali", "NE": "Niger", "GA": "Gabon",
+    "CG": "Congo", "CD": "RD Congo", "TD": "Tchad", "CF": "Centrafrique",
+    "GN": "Guinée", "DZ": "Algérie", "MA": "Maroc", "TN": "Tunisie",
+    "MG": "Madagascar", "MR": "Mauritanie", "GQ": "Guinée équatoriale",
+    "RW": "Rwanda", "BI": "Burundi", "DJ": "Djibouti", "KM": "Comores",
+    "SC": "Seychelles", "MU": "Maurice", "ZA": "Afrique du Sud", "NG": "Nigeria",
+    "GH": "Ghana", "KE": "Kenya", "ET": "Éthiopie", "EG": "Égypte", "LY": "Libye",
+    "AO": "Angola", "MZ": "Mozambique", "ZW": "Zimbabwe", "ZM": "Zambie",
+    "UG": "Ouganda", "TZ": "Tanzanie", "SD": "Soudan", "SS": "Soudan du Sud",
+    "LR": "Liberia", "SL": "Sierra Leone", "GM": "Gambie", "CV": "Cabo Verde",
+    "ST": "Sao Tomé", "GW": "Guinée-Bissau", "ER": "Érythrée", "SO": "Somalie",
+    "BW": "Botswana", "NA": "Namibie", "LS": "Lesotho", "SZ": "Eswatini",
+    "MW": "Malawi", "FR": "France", "BE": "Belgique", "CA": "Canada", "CH": "Suisse",
+}
+
+_METIER_LABELS_PLURIEL: dict[str, str] = {
+    "comptable": "comptables",
+    "drh": "responsables RH",
+    "daf": "directeurs financiers",
+    "juriste": "juristes",
+    "banquier": "banquiers et analystes crédit",
+    "analyste_credit": "analystes crédit",
+    "trader": "gestionnaires d'actifs",
+    "commercial": "commerciaux",
+    "ingenieur": "ingénieurs",
+    "transitaire": "transitaires",
+    "charge_projets_ong": "chargés de projets ONG",
+    "responsable_microfinance": "responsables microfinance",
+    "notaire": "notaires",
+    "huissier": "huissiers",
+    "avocat": "avocats",
+    "medecin": "médecins",
+    "pharmacien": "pharmaciens",
+    "daa": "directeurs administratifs",
+    "douanier": "douaniers",
+    "cv_emploi": "candidats",
+    "recherche_emploi": "candidats",
+    "generique": "professionnels",
+}
+
+_WELCOME_CACHE: dict[tuple, str] = {}
+
+
+def _welcome_fallback(metier_pluriel: str, pays_nom: str, prenom: str) -> str:
+    salutation = f"Bonjour {prenom}" if prenom else "Bonjour"
+    if metier_pluriel and metier_pluriel != "professionnels":
+        contexte = f"Je suis Yukpo Pro, votre assistant IA dédié aux {metier_pluriel} au {pays_nom}."
+    else:
+        contexte = f"Je suis Yukpo Pro, votre assistant IA pour les professionnels au {pays_nom}."
+    return (
+        f"{salutation} ! {contexte} "
+        "Je peux analyser vos documents, générer des rapports, traduire vos fichiers "
+        "et mobiliser des agents spécialisés pour des analyses pointues. "
+        "Posez-moi votre première question ou envoyez un document."
+    )
+
+
+@router.get("/welcome", summary="Message d'accueil personnalisé (LLM + cache)")
+async def welcome_copilote(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Retourne un message d'accueil grammaticalement correct et contextualisé
+    pour l'écran d'entrée du chat Copilote. Généré par LLM avec fallback
+    template, caché par signature de profil (métier, pays, niveau, prénom).
+    """
+    from modules.pro.service_profil import get_or_create
+    from core.ia_client import ModeIA, ia_client
+    from core.database import UtilisateurDB
+    from sqlalchemy import select
+
+    profil, _ = await get_or_create(current_user.user_id, db)
+    metier_key = (getattr(profil, "metier", "") or "generique").lower()
+    pays_code = (getattr(profil, "pays", "") or "CM").upper()
+    niveau = (getattr(profil, "niveau", "") or "").lower()
+
+    prenom = ""
+    try:
+        res = await db.execute(select(UtilisateurDB).where(UtilisateurDB.id == current_user.user_id))
+        u = res.scalar_one_or_none()
+        if u:
+            prenom = (getattr(u, "prenoms", "") or "").split(" ")[0].strip()
+            if not prenom:
+                prenom = (getattr(u, "nom", "") or "").split(" ")[0].strip()
+    except Exception as e:
+        logger.debug(f"[Copilote welcome] lecture utilisateur échouée ({e})")
+
+    metier_pluriel = _METIER_LABELS_PLURIEL.get(
+        metier_key, metier_key.replace("_", " ") + "s" if metier_key else "professionnels"
+    )
+    pays_nom = _PAYS_NOMS.get(pays_code, pays_code)
+
+    cache_key = (metier_key, pays_code, niveau, prenom)
+    if cache_key in _WELCOME_CACHE:
+        return {"message": _WELCOME_CACHE[cache_key], "from_llm": True, "cached": True}
+
+    fallback = _welcome_fallback(metier_pluriel, pays_nom, prenom)
+
+    prompt = (
+        "Rédige UN SEUL message d'accueil en français, chaleureux et naturel, "
+        "pour un utilisateur qui se connecte à Yukpo Pro "
+        "(assistant IA pour professionnels africains).\n\n"
+        f"Profil utilisateur :\n"
+        f"- Prénom : {prenom or '(inconnu)'}\n"
+        f"- Métier (pluriel, à utiliser tel quel) : {metier_pluriel}\n"
+        f"- Pays (nom complet, à utiliser tel quel) : {pays_nom}\n"
+        f"- Niveau : {niveau or 'professionnel'}\n\n"
+        "Contraintes IMPÉRATIVES :\n"
+        "- 2 à 3 phrases, grammaire française irréprochable\n"
+        "- Commencer par « Bonjour » + prénom si connu\n"
+        "- Mentionner que Yukpo Pro peut : analyser des documents, générer des rapports, "
+        "traduire, activer des agents spécialisés\n"
+        "- Terminer par une invitation à poser une question ou envoyer un document\n"
+        "- Ton professionnel mais accessible, PAS de listes, PAS de markdown\n"
+        "- Ne JAMAIS utiliser un code pays brut (CM, TG…), toujours le nom complet\n"
+        "- Formuler « dédié aux {métier pluriel} » — jamais « aux professionnels en X »\n\n"
+        "Réponds uniquement par le message, sans préambule ni guillemets."
+    )
+
+    try:
+        reponse = await asyncio.wait_for(
+            ia_client.appeler(
+                prompt=prompt,
+                mode=ModeIA.REDACTION,
+                utiliser_cache=True,
+                max_tokens_override=250,
+            ),
+            timeout=6.0,
+        )
+        texte = (reponse.contenu or "").strip().strip('"').strip("'").strip()
+        if 40 <= len(texte) <= 800 and "\n\n" not in texte:
+            _WELCOME_CACHE[cache_key] = texte
+            return {"message": texte, "from_llm": True, "cached": False}
+        logger.debug(f"[Copilote welcome] réponse LLM rejetée (len={len(texte)})")
+    except Exception as e:
+        logger.debug(f"[Copilote welcome] LLM indispo ({e}) → fallback template")
+
+    return {"message": fallback, "from_llm": False, "cached": False}
 
 
 @router.get("/suggestions", summary="Suggestions de questions personnalisées")

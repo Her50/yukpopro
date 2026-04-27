@@ -716,13 +716,24 @@ Adapte le vocabulaire et la profondeur technique au niveau du public cible.
         return DomaineMétier.COPILOTE
 
 
-# Sessions en mémoire (en production : Redis ou DB)
+# Sessions en mémoire — warm-up depuis DB au démarrage via persistence.py
 _sessions: dict[int, SessionCopilote] = {}
 
 
 def get_or_create_session(user_id: int, role: str = "agent") -> SessionCopilote:
+    """Retourne la session RAM (doit être pré-chargée via get_or_create_session_async)."""
     if user_id not in _sessions:
         _sessions[user_id] = SessionCopilote(user_id=user_id, role=role)
+    return _sessions[user_id]
+
+
+async def get_or_create_session_async(user_id: int, role: str = "agent") -> SessionCopilote:
+    """Charge depuis la DB si absent en RAM, sinon retourne le cache."""
+    if user_id not in _sessions:
+        from modules.copilote.persistence import charger_session
+        session = await charger_session(user_id)
+        if session is None:
+            _sessions[user_id] = SessionCopilote(user_id=user_id, role=role)
     return _sessions[user_id]
 
 

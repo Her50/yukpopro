@@ -1,5 +1,5 @@
 /**
- * AgentPage — Interface principale Yukpo Agents IA.
+ * AgentPage — Interface principale Yukpo Agents Yukpo.
  *
  * Layout :
  *   Gauche  : Zone conversation branded Yukpo
@@ -594,7 +594,7 @@ export default function AgentPage() {
                   className="text-xs font-bold px-2 py-0.5 rounded-full"
                   style={{ background: 'rgba(0,176,240,0.25)', color: '#7dd3fc', border: '1px solid rgba(0,176,240,0.3)' }}
                 >
-                  Agents IA
+                  Agents Yukpo
                 </span>
               </div>
               <p className="text-blue-200 text-xs font-medium">
@@ -887,7 +887,7 @@ export default function AgentPage() {
           {/* Barre d'actions rapides */}
           <div className="flex items-center justify-between mt-2">
             <p className="text-xs text-gray-400 flex items-center gap-1">
-              <span className="font-semibold" style={{ color: '#0054A6' }}>Yukpo IA</span>
+              <span className="font-semibold" style={{ color: '#0054A6' }}>YukpoPro</span>
               <span>· Entrée pour envoyer · Shift+Entrée pour saut de ligne</span>
             </p>
             {convMessages.length > 0 && (

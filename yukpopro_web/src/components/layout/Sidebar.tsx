@@ -98,8 +98,8 @@ export const Sidebar = () => {
       >
         {collapsed ? (
           <div style={{
-            width: 52, height: 52, background: "white", borderRadius: 13,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 5,
+            width: 42, height: 42, background: "white", borderRadius: 10,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 2,
             boxShadow: "0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35)",
           }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />

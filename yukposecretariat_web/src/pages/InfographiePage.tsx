@@ -6,6 +6,7 @@ import { infographieAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { DemoBanner } from '../components/DemoBanner'
 import { CountryPicker } from '../components/CountryPicker'
+import DesignerProPanel from '../components/DesignerProPanel'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
 const CAT_LABELS: Record<string, string> = {
@@ -24,7 +25,7 @@ interface Gabarit {
   categorie: string; prix_fcfa: number; description: string
 }
 
-type Mode = 'brief' | 'modele' | 'custom'
+type Mode = 'brief' | 'modele' | 'custom' | 'pro'
 
 function formatCredits(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n) + ' crédits'
@@ -199,19 +200,24 @@ export default function InfographiePage() {
       </div>
 
       {/* Mode tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit text-sm">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit text-sm flex-wrap">
         {([
           { key: 'brief', label: t('infographie.modeBrief') },
           { key: 'modele', label: t('infographie.modeModele') },
           { key: 'custom', label: t('infographie.modeCustom') },
+          { key: 'pro', label: '✨ Multi-page IA' },
         ] as { key: Mode; label: string }[]).map(m => (
           <button key={m.key} onClick={() => { setMode(m.key); setResultat(null) }}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === m.key ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === m.key ? 'bg-white shadow text-orange-600' : 'text-gray-800 hover:text-gray-900'}`}>
             {m.label}
           </button>
         ))}
       </div>
 
+      {mode === 'pro' && <DesignerProPanel />}
+
+      {mode !== 'pro' && (
+      <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
         {/* Gabarit (modes brief et modele) */}
         {mode !== 'custom' && (
@@ -424,6 +430,8 @@ export default function InfographiePage() {
             </div>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   )

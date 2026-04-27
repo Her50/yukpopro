@@ -264,7 +264,7 @@ function ZoneUpload({ onAdd }: { onAdd: (d: DocArchive) => void }) {
               <Text style={s.scanMainText}>{uploading ? 'Upload OCR…' : 'Scanner avec la caméra'}</Text>
             </TouchableOpacity>
             <Text style={{ fontSize: 11, color: '#94a3b8', textAlign: 'center' }}>
-              Le document sera automatiquement analysé par Yukpo IA et indexé dans l'archive.
+              Le document sera automatiquement analysé par YukpoPro et indexé dans l'archive.
             </Text>
           </View>
         </ScrollView>

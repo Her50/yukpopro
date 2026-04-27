@@ -24,13 +24,15 @@ _TYPE_LABELS = {
     "trad": "Traduction",
     "audio": "Audio → Doc",
     "pdf": "Infographie PDF",
+    "designerpro": "Designer Pro (multi-page)",
     "devis": "Devis",
     "facture": "Facture",
 }
 
 _ICONS = {
     "doc": "📄", "ocr": "🔍", "trad": "🌐",
-    "audio": "🎙️", "pdf": "🎨", "devis": "📋", "facture": "🧾",
+    "audio": "🎙️", "pdf": "🎨", "designerpro": "🎨",
+    "devis": "📋", "facture": "🧾",
 }
 
 

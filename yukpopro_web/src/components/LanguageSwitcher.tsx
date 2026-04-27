@@ -64,29 +64,32 @@ export const LanguageSwitcher = ({ collapsed = false }: Props) => {
       {open && (
         <div
           className={`absolute z-50 bottom-full mb-2 ${collapsed ? "left-full ml-2" : "left-0 right-0"}
-            bg-slate-800 border border-slate-600 rounded-xl shadow-xl overflow-hidden min-w-[160px]`}
+            bg-slate-800 border border-slate-600 rounded-xl shadow-xl min-w-[160px]
+            flex flex-col max-h-[min(60vh,420px)]`}
         >
-          <div className="px-3 py-2 border-b border-slate-700">
+          <div className="px-3 py-2 border-b border-slate-700 sticky top-0 bg-slate-800 rounded-t-xl">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               {t("language.select")}
             </p>
           </div>
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => changeLanguage(lang.code)}
-              className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors text-left
-                ${current.code === lang.code
-                  ? "bg-sky-700/40 text-sky-200 font-medium"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
-            >
-              <span className="text-base">{lang.flag}</span>
-              <span className="flex-1">{lang.label}</span>
-              {current.code === lang.code && (
-                <span className="text-[10px] text-sky-300 font-semibold">✓</span>
-              )}
-            </button>
-          ))}
+          <div className="overflow-y-auto overscroll-contain flex-1">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => changeLanguage(lang.code)}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors text-left
+                  ${current.code === lang.code
+                    ? "bg-sky-700/40 text-sky-200 font-medium"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+              >
+                <span className="text-base">{lang.flag}</span>
+                <span className="flex-1">{lang.label}</span>
+                {current.code === lang.code && (
+                  <span className="text-[10px] text-sky-300 font-semibold">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

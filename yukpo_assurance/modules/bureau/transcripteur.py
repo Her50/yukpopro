@@ -115,7 +115,7 @@ Produis le document complet en Markdown."""
 
     reponse = await ia_client.appeler(
         prompt=prompt,
-        mode=ModeIA.GENERATION,
+        mode=ModeIA.REDACTION,
         systeme=systeme,
     )
     document_formate = reponse.contenu

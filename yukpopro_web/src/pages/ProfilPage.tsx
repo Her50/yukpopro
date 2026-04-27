@@ -263,9 +263,12 @@ export const ProfilPage = () => {
       .then((d) => {
         if (d?.country_code && d.country_code !== pays) {
           setPays(d.country_code);
-          // Auto-switch langue interface si pas encore changée par l'utilisateur
+          // Auto-switch langue UI uniquement si NI choix explicite NI langue OS détectée.
+          // navigator.language reflète mieux la préférence réelle dans les pays bilingues.
           const stored = localStorage.getItem("yukpo_lang");
-          if (!stored) {
+          const navLang = (navigator.language || "").slice(0, 2).toLowerCase();
+          const supported = ["fr","en","es","pt","ar","de","zh","sw","ha","ru","hi","tr","wo","ln","am"];
+          if (!stored && !supported.includes(navLang)) {
             const lang = detectLanguageFromCountry(d.country_code);
             i18n.changeLanguage(lang);
           }

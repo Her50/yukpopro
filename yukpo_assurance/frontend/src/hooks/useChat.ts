@@ -169,7 +169,7 @@ export function useChat() {
               const errMsg: ChatMessage = {
                 id: `error-${Date.now()}`,
                 role: 'assistant',
-                content: '⚠️ Yukpo IA indisponible. Vérifiez que `CLAUDE_API_KEY` ou `OPENAI_API_KEY` est valide dans le fichier `.env` côté backend.',
+                content: '⚠️ YukpoPro est temporairement indisponible. Veuillez réessayer dans quelques instants.',
                 created_at: new Date().toISOString(),
                 session_id: session!.id,
               }

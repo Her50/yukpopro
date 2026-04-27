@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { AuthProvider } from '../src/context/AuthContext'
+import { CreditsProvider } from '../src/context/CreditsContext'
 import { PaperProvider, MD3LightTheme } from 'react-native-paper'
 
 const theme = {
@@ -18,8 +19,10 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <PaperProvider theme={theme}>
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <CreditsProvider>
+          <StatusBar style="light" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </CreditsProvider>
       </PaperProvider>
     </AuthProvider>
   )

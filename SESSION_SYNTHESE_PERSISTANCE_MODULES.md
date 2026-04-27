@@ -86,17 +86,37 @@ Vercel redéploie automatiquement à chaque push.
 
 ---
 
-## 7. Reste à faire
+## 7. Rapporteur-traducteur mobile — IMPLÉMENTÉ (option 2)
 
-- **Rapporteur-traducteur mobile** : expo-av ne streame pas le PCM brut. Trois options :
-  1. Migrer vers `expo-audio` (SDK 50+) → potentiellement breaking.
-  2. Ajouter `react-native-audio-record` via dev client (build natif custom).
-  3. Double enregistrement concurrent → fragile, écarté.
-  → **Décision utilisateur attendue.**
+**Décision** : `react-native-audio-record` (PCM 16 kHz mono natif). Raison : seule option permettant un vrai streaming PCM temps réel avec un micro unique partagé. `expo-audio` n'expose pas de flux PCM brut ; double recording concurrent bloqué par l'exclusivité session audio iOS.
+
+**Fichiers créés** :
+- `yukpopro_mobile/src/services/pcm_recorder.ts` — singleton avec refcount + subscribe, partage les chunks entre recorder (WAV) et translate_live (WS).
+- `yukpopro_mobile/src/services/translate_live.ts` — client WebSocket port mobile (transcript/translation/usage events).
+- `yukpopro_mobile/src/store/translateLiveStore.ts` — store Zustand module-level (session survit à la navigation).
+
+**Fichiers modifiés** :
+- `yukpopro_mobile/src/store/recorderStore.ts` — option `pcmMode` : bascule sur pcm_recorder quand le mode rapporteur-traducteur est actif ; conserve expo-av par défaut (compat Expo Go).
+- `yukpopro_mobile/src/screens/ReunionsScreen.tsx` — checkbox violette + sélecteur langue cible + panneau live 6 dernières lignes.
+- `yukpopro_mobile/src/api/client.ts` — expose `getApiBaseUrl()` et `getAuthToken()`.
+- `yukpopro_mobile/package.json` — ajout `react-native-audio-record` et `buffer`.
+
+**Contrainte** : module natif → **Expo Go ne suffit plus**. Build requis :
+```bash
+cd yukpopro_mobile
+npm install
+npx expo prebuild
+eas build --profile development --platform android   # ou ios
+```
+Comportement dégradé si Expo Go : `pcmRecorderAvailable` est `false`, la checkbox affiche "⚠ Dev client requis" et l'enregistrement normal (expo-av) reste fonctionnel.
+
+## 8. Reste à faire
 
 - **TranslateLivePage** : `source` / `sourceMode` / `consentOk` restent en useState local. Pas de bug persistance (session continue), mais le panneau de config se "reset" visuellement à la navigation pendant une session active. UX mineure.
 
 - **Optimisation bundle** : warning Vite (chunk principal 744 kB). Split recommandé si performance chargement devient un enjeu.
+
+- **TTS audio mobile** : le client mobile ignore les frames binaires ElevenLabs. À ajouter si la voix de synthèse est demandée (nécessite décodeur MP3 en RN — `expo-av` Playback).
 
 ---
 
