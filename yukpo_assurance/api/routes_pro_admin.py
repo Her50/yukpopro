@@ -697,7 +697,8 @@ async def stats_revenus(
             # Aucun utilisateur dans ce pays → tout vide
             return {
                 "ca_total_par_devise": [], "ca_aujourdhui": [], "ca_7j": [], "ca_30j": [],
-                "ca_periode": [], "evolution_12mois": [], "par_plan": [], "top_plan_ca": None,
+                "ca_periode": [], "ca_aujourdhui_precedent": [], "ca_7j_precedent": [], "ca_30j_precedent": [],
+                "ca_periode_precedente": [], "evolution_12mois": [], "par_plan": [], "top_plan_ca": None,
                 "par_provider": [], "par_statut": {}, "dernieres_transactions": [],
                 "filtres": {"pays": pays, "continent": continent, "date_debut": date_debut, "date_fin": date_fin},
             }
@@ -748,9 +749,25 @@ async def stats_revenus(
     ca_jour = await _sum_between(today)
     ca_7j = await _sum_between(j7)
     ca_30j = await _sum_between(j30)
+
+    # Comparaisons période précédente (mêmes durées, fenêtres antérieures)
+    hier_debut = today - timedelta(days=1)
+    ca_jour_prec = await _sum_between(hier_debut, today - timedelta(seconds=1))
+    ca_7j_prec = await _sum_between(j7 - timedelta(days=7), j7 - timedelta(seconds=1))
+    ca_30j_prec = await _sum_between(j30 - timedelta(days=30), j30 - timedelta(seconds=1))
+
     ca_periode: List[dict] = []
+    ca_periode_prec: List[dict] = []
     if custom_debut is not None or custom_fin is not None:
-        ca_periode = await _sum_between(custom_debut or datetime(1970, 1, 1), custom_fin)
+        d = custom_debut or datetime(1970, 1, 1)
+        f = custom_fin or now
+        ca_periode = await _sum_between(d, f)
+        # Fenêtre précédente de même durée
+        duree = f - d
+        d_prec = d - duree - timedelta(seconds=1)
+        f_prec = d - timedelta(seconds=1)
+        if d_prec.year >= 1970:
+            ca_periode_prec = await _sum_between(d_prec, f_prec)
 
     # Évolution mensuelle (12 mois) — agrégé en XAF/XOF additionné car valeurs proches
     monthly_stmt = select(
@@ -831,6 +848,10 @@ async def stats_revenus(
         "ca_7j": ca_7j,
         "ca_30j": ca_30j,
         "ca_periode": ca_periode,
+        "ca_aujourdhui_precedent": ca_jour_prec,
+        "ca_7j_precedent": ca_7j_prec,
+        "ca_30j_precedent": ca_30j_prec,
+        "ca_periode_precedente": ca_periode_prec,
         "evolution_12mois": evolution,
         "par_plan": par_plan,
         "top_plan_ca": top_plan_ca,

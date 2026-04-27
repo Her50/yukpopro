@@ -370,14 +370,24 @@ const OverviewTab = () => {
   );
 };
 
-const KPI = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) => (
+const KPI = ({ icon: Icon, label, value, color, variation }: { icon: any; label: string; value: string; color: string; variation?: { pct: number | null; libelle: string } }) => (
   <Card className="p-4">
     <div className="flex items-center gap-2 text-xs font-semibold uppercase" style={{ color: "var(--ykp-text-muted)" }}>
       <Icon className={`w-3.5 h-3.5 ${color}`} /> {label}
     </div>
     <p className="text-2xl font-bold mt-2" style={{ color: "var(--ykp-text-primary)" }}>{value}</p>
+    {variation && (
+      <p className={`text-xs mt-1 font-medium ${variation.pct === null ? "text-slate-500" : variation.pct >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+        {variation.pct === null ? "—" : `${variation.pct >= 0 ? "↗ +" : "↘ "}${variation.pct.toFixed(1)}%`} {variation.libelle}
+      </p>
+    )}
   </Card>
 );
+
+const calcVariation = (actuel: number, precedent: number): number | null => {
+  if (precedent === 0) return actuel > 0 ? null : 0;
+  return ((actuel - precedent) / precedent) * 100;
+};
 
 // ─────────────────────── Onglet Utilisateurs ───────────────────────
 
@@ -757,6 +767,10 @@ interface RevenusData {
   ca_7j: { devise: string; montant: number; transactions: number }[];
   ca_30j: { devise: string; montant: number; transactions: number }[];
   ca_periode?: { devise: string; montant: number; transactions: number }[];
+  ca_aujourdhui_precedent?: { devise: string; montant: number; transactions: number }[];
+  ca_7j_precedent?: { devise: string; montant: number; transactions: number }[];
+  ca_30j_precedent?: { devise: string; montant: number; transactions: number }[];
+  ca_periode_precedente?: { devise: string; montant: number; transactions: number }[];
   evolution_12mois: { mois: string; devise: string; montant: number; transactions: number }[];
   par_plan: { plan: string; devise: string; montant: number; transactions: number }[];
   top_plan_ca?: { plan: string; devise: string; montant: number; transactions: number } | null;
@@ -879,29 +893,50 @@ const RevenusTab = () => {
         </div>
       </Card>
 
-      {/* CA totaux */}
+      {/* CA totaux + variation vs période précédente */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KPI icon={Wallet} label="CA total" value={`${fmt(sumAmount(data.ca_total_par_devise))} F`} color="text-emerald-600" />
-        <KPI icon={TrendingUp} label="CA 30j" value={`${fmt(sumAmount(data.ca_30j))} F`} color="text-corp-600" />
-        <KPI icon={TrendingUp} label="CA 7j" value={`${fmt(sumAmount(data.ca_7j))} F`} color="text-amber-600" />
-        <KPI icon={DollarSign} label="CA aujourd'hui" value={`${fmt(sumAmount(data.ca_aujourdhui))} F`} color="text-purple-600" />
+        <KPI icon={TrendingUp} label="CA 30j" value={`${fmt(sumAmount(data.ca_30j))} F`} color="text-corp-600"
+          variation={{ pct: calcVariation(sumAmount(data.ca_30j), sumAmount(data.ca_30j_precedent || [])), libelle: "vs 30j précédents" }} />
+        <KPI icon={TrendingUp} label="CA 7j" value={`${fmt(sumAmount(data.ca_7j))} F`} color="text-amber-600"
+          variation={{ pct: calcVariation(sumAmount(data.ca_7j), sumAmount(data.ca_7j_precedent || [])), libelle: "vs 7j précédents" }} />
+        <KPI icon={DollarSign} label="CA aujourd'hui" value={`${fmt(sumAmount(data.ca_aujourdhui))} F`} color="text-purple-600"
+          variation={{ pct: calcVariation(sumAmount(data.ca_aujourdhui), sumAmount(data.ca_aujourdhui_precedent || [])), libelle: "vs hier" }} />
       </div>
 
-      {aPeriode && (
-        <Card className="p-4 border-corp-200 bg-corp-50/30">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-corp-600" />
-              <span className="text-sm font-medium" style={{ color: "var(--ykp-text-primary)" }}>
-                Période personnalisée : {dateDebut || "—"} → {dateFin || "—"}
-              </span>
+      {aPeriode && (() => {
+        const caAct = sumAmount(caPeriode);
+        const txAct = sumTx(caPeriode);
+        const prec = data.ca_periode_precedente || [];
+        const caPrec = sumAmount(prec);
+        const txPrec = sumTx(prec);
+        const varCA = calcVariation(caAct, caPrec);
+        const varTx = calcVariation(txAct, txPrec);
+        return (
+          <Card className="p-4 border-corp-200 bg-corp-50/30">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-corp-600" />
+                <span className="text-sm font-medium" style={{ color: "var(--ykp-text-primary)" }}>
+                  Période personnalisée : {dateDebut || "—"} → {dateFin || "—"}
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold text-corp-700">{fmt(caAct)} F · {txAct} tx</div>
+                <div className="text-xs mt-1 flex items-center justify-end gap-3">
+                  <span className={varCA === null ? "text-slate-500" : varCA >= 0 ? "text-emerald-600" : "text-red-600"}>
+                    {varCA === null ? "—" : `${varCA >= 0 ? "↗ +" : "↘ "}${varCA.toFixed(1)}%`} CA
+                  </span>
+                  <span className={varTx === null ? "text-slate-500" : varTx >= 0 ? "text-emerald-600" : "text-red-600"}>
+                    {varTx === null ? "—" : `${varTx >= 0 ? "↗ +" : "↘ "}${varTx.toFixed(1)}%`} tx
+                  </span>
+                  <span className="text-slate-500">vs période précédente ({fmt(caPrec)} F)</span>
+                </div>
+              </div>
             </div>
-            <div className="text-lg font-bold text-corp-700">
-              {fmt(sumAmount(caPeriode))} F · {sumTx(caPeriode)} tx
-            </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        );
+      })()}
 
       {data.top_plan_ca && (
         <Card className="p-4 flex items-center gap-3">
