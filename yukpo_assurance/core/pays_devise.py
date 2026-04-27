@@ -114,3 +114,35 @@ def vocabulaire_devise(pays: str | None) -> str:
     if symbole == "FCFA":
         return f"FCFA ({code})"
     return f"{symbole} ({code})"
+
+
+# ISO 3166-1 alpha-2 → continent (AF/EU/AM/AS)
+PAYS_CONTINENT: dict[str, str] = {
+    "CM": "AF", "GA": "AF", "CG": "AF", "TD": "AF", "CF": "AF", "GQ": "AF",
+    "SN": "AF", "CI": "AF", "BF": "AF", "ML": "AF", "NE": "AF", "TG": "AF",
+    "BJ": "AF", "GW": "AF", "NG": "AF", "GH": "AF", "KE": "AF", "TZ": "AF",
+    "UG": "AF", "RW": "AF", "ET": "AF", "ZA": "AF", "EG": "AF", "MA": "AF",
+    "DZ": "AF", "TN": "AF", "LY": "AF", "SD": "AF", "AO": "AF", "MZ": "AF",
+    "CD": "AF", "MG": "AF", "MU": "AF", "ZW": "AF", "ZM": "AF",
+    "FR": "EU", "BE": "EU", "DE": "EU", "ES": "EU", "IT": "EU", "PT": "EU",
+    "GB": "EU", "CH": "EU", "RU": "EU",
+    "US": "AM", "CA": "AM", "BR": "AM",
+    "CN": "AS", "IN": "AS", "JP": "AS", "AE": "AS", "SA": "AS", "TR": "AS",
+}
+
+CONTINENT_LABELS: dict[str, str] = {
+    "AF": "Afrique", "EU": "Europe", "AM": "Amériques", "AS": "Asie", "OC": "Océanie",
+}
+
+
+def get_continent(pays: str | None) -> str | None:
+    """Retourne le code continent (AF/EU/AM/AS) pour un pays ISO."""
+    if not pays:
+        return None
+    return PAYS_CONTINENT.get(pays.strip().upper())
+
+
+def pays_du_continent(continent: str) -> list[str]:
+    """Liste des codes pays appartenant à un continent donné."""
+    c = continent.strip().upper()
+    return [p for p, cont in PAYS_CONTINENT.items() if cont == c]

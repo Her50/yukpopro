@@ -8,7 +8,6 @@ import { cn, Button, Spinner } from "@/components/ui";
 import { useCopiloteStore, useProfilStore } from "@/store";
 import { copiloteApi } from "@/api/client";
 import type { CopiloteMessage } from "@/types";
-import { v4 as uuidv4 } from "crypto";
 
 // UUID fallback si crypto.randomUUID non dispo
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -88,7 +87,8 @@ const MessageBubble = ({ msg }: { msg: CopiloteMessage }) => {
 };
 
 export const CopiloteWidget = () => {
-  const { isOpen, isFullscreen, isLoading, messages, setOpen, setFullscreen, addMessage, updateLastAssistantMessage, setLoading, clearSession, setSessionId, setNbMessages } = useCopiloteStore();
+  const { isOpen, isFullscreen, isLoading, activeMessages, setOpen, setFullscreen, addMessage, updateLastAssistantMessage, setLoading, clearSession, setSessionId, setNbMessages } = useCopiloteStore();
+  const messages = activeMessages();
   const { profil } = useProfilStore();
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -267,7 +267,7 @@ export const CopiloteWidget = () => {
           </div>
         )}
 
-        {messages.map((msg) => (
+        {messages.map((msg: CopiloteMessage) => (
           <MessageBubble key={msg.id} msg={msg} />
         ))}
         <div ref={messagesEndRef} />

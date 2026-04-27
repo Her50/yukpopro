@@ -67,7 +67,7 @@ export const AbonnementPage = () => {
     // via le mode "manuel" (LegacyManualProvider) au sein du selector.
     const planInfo = PLANS.find((p) => p.id === plan);
     if (planInfo) {
-      setV2Modal({ type: "abonnement", plan_ou_pack: plan, amount: planInfo.prix });
+      setV2Modal({ type: "abonnement", plan_ou_pack: plan, amount: planInfo.prix_fcfa });
     } else {
       setEtape("operateur");
     }
@@ -234,7 +234,7 @@ export const AbonnementPage = () => {
                     {t('abonnement.fcfaAvailable', { count: (abonnement.credits_restants as number) ?? 0 })}
                   </p>
                 </div>
-                {abonnement.date_fin && (
+                {Boolean(abonnement.date_fin) && (
                   <p className="text-xs text-slate-500 mt-1">
                     {t('abonnement.expiryDate', { date: new Date(abonnement.date_fin as string).toLocaleDateString() })}
                   </p>
@@ -247,7 +247,7 @@ export const AbonnementPage = () => {
           </div>
 
           {/* Explication crédits */}
-          {abonnement.explication_credits && (
+          {Boolean(abonnement.explication_credits) && (
             <p className="text-xs text-slate-600 mt-3 pt-3 border-t border-slate-700/50">
               {abonnement.explication_credits as string}
             </p>
@@ -535,7 +535,7 @@ export const AbonnementPage = () => {
           </div>
 
           {/* Étapes opérateur */}
-          {instructionsPaiement.instructions && (
+          {Boolean(instructionsPaiement.instructions) && (
             <div className="space-y-2">
               <p className="text-slate-300 text-sm font-semibold">{t('abonnement.howToPay')}</p>
               {Object.entries((instructionsPaiement.instructions as any).etapes || {}).map(([key, val]) => (

@@ -5,11 +5,13 @@ import toast from "react-hot-toast";
 import { Card, Spinner, Button } from "@/components/ui";
 import { useCopiloteStore, useProfilStore } from "@/store";
 import { copiloteApi } from "@/api/client";
+import type { CopiloteMessage } from "@/types";
 
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export const CopilotePage = () => {
-  const { messages, isLoading, addMessage, updateLastAssistantMessage, setLoading, clearSession, setSessionId, setNbMessages } = useCopiloteStore();
+  const { activeMessages, isLoading, addMessage, updateLastAssistantMessage, setLoading, clearSession, setSessionId, setNbMessages } = useCopiloteStore();
+  const messages = activeMessages();
   const { profil } = useProfilStore();
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -127,7 +129,7 @@ export const CopilotePage = () => {
           </div>
         ) : (
           <>
-            {messages.map((msg) => (
+            {messages.map((msg: CopiloteMessage) => (
               <div
                 key={msg.id}
                 className={`flex gap-3 max-w-4xl ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""}`}

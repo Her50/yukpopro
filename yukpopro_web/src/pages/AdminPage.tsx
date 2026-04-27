@@ -40,11 +40,64 @@ interface StatsAvancees {
   actifs: number;
   bloques: number;
   repartition_plans: { plan: string; count: number }[];
+  top_plan_users?: { plan: string; count: number } | null;
   signups_30j: { jour: string; count: number }[];
   mrr_estime_fcfa: number;
   top_consommateurs: { user_id: number; username: string; email?: string; credits: number; appels: number }[];
+  upgrades_30j?: { user_id: number; username?: string; email?: string; depuis: string; vers: string; nb_paiements: number }[];
+  abonnes_reguliers?: { user_id: number; username?: string; email?: string; nb_paiements: number; total: number }[];
   credits_par_plan: Record<string, number>;
 }
+
+interface GeoOptions {
+  continents: { code: string; label: string }[];
+  pays: { code: string; continent: string }[];
+}
+
+const useGeoOptions = () => {
+  const [geo, setGeo] = useState<GeoOptions | null>(null);
+  useEffect(() => {
+    adminApi.geoOptions().then(setGeo).catch(() => setGeo(null));
+  }, []);
+  return geo;
+};
+
+const GeoFilter = ({
+  pays, continent, onChange, geo,
+}: {
+  pays: string;
+  continent: string;
+  onChange: (next: { pays: string; continent: string }) => void;
+  geo: GeoOptions | null;
+}) => {
+  const paysOptions = (geo?.pays || []).filter((p) => !continent || p.continent === continent);
+  return (
+    <div className="flex flex-wrap gap-2">
+      <select
+        value={continent}
+        onChange={(e) => onChange({ continent: e.target.value, pays: "" })}
+        className="rounded border px-3 py-1.5 text-sm"
+        style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }}
+      >
+        <option value="">Tous continents</option>
+        {(geo?.continents || []).map((c) => (
+          <option key={c.code} value={c.code}>{c.label}</option>
+        ))}
+      </select>
+      <select
+        value={pays}
+        onChange={(e) => onChange({ continent, pays: e.target.value })}
+        className="rounded border px-3 py-1.5 text-sm"
+        style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }}
+      >
+        <option value="">Tous pays</option>
+        {paysOptions.map((p) => (
+          <option key={p.code} value={p.code}>{p.code}</option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
 const PLAN_BADGE: Record<string, "slate" | "corp" | "purple" | "gold" | "green"> = {
   gratuit: "slate", starter: "corp", pro: "purple", business: "gold",
@@ -120,11 +173,16 @@ export const AdminPage = () => {
 const OverviewTab = () => {
   const [stats, setStats] = useState<StatsAvancees | null>(null);
   const [loading, setLoading] = useState(true);
+  const [geoFilter, setGeoFilter] = useState<{ pays: string; continent: string }>({ pays: "", continent: "" });
+  const geo = useGeoOptions();
 
   const charger = async () => {
     setLoading(true);
     try {
-      const d = await adminApi.statsAvancees();
+      const d = await adminApi.statsAvancees({
+        pays: geoFilter.pays || undefined,
+        continent: geoFilter.continent || undefined,
+      });
       setStats(d);
     } catch {
       toast.error("Erreur de chargement");
@@ -132,16 +190,19 @@ const OverviewTab = () => {
       setLoading(false);
     }
   };
-  useEffect(() => { charger(); }, []);
+  useEffect(() => { charger(); }, [geoFilter.pays, geoFilter.continent]);
 
   if (loading || !stats) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>;
 
   const maxSignup = Math.max(1, ...stats.signups_30j.map(s => s.count));
   const totalPlanUsers = stats.repartition_plans.reduce((acc, r) => acc + r.count, 0) || 1;
+  const upgrades = stats.upgrades_30j || [];
+  const reguliers = stats.abonnes_reguliers || [];
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center flex-wrap gap-3">
+        <GeoFilter pays={geoFilter.pays} continent={geoFilter.continent} onChange={setGeoFilter} geo={geo} />
         <Button variant="ghost" size="sm" icon={<RefreshCw className="w-4 h-4" />} onClick={charger}>Actualiser</Button>
       </div>
 
@@ -152,6 +213,19 @@ const OverviewTab = () => {
         <KPI icon={Ban} label="Bloqués" value={fmt(stats.bloques)} color="text-rose-600" />
         <KPI icon={DollarSign} label="MRR estimé" value={`${fmt(stats.mrr_estime_fcfa)} F`} color="text-amber-600" />
       </div>
+
+      {stats.top_plan_users && (
+        <Card className="p-4 flex items-center gap-3">
+          <Gift className="w-5 h-5 text-purple-600" />
+          <div className="flex-1">
+            <div className="text-xs uppercase font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Plan dominant (utilisateurs)</div>
+            <div className="font-bold text-lg flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
+              <Badge variant={PLAN_BADGE[stats.top_plan_users.plan] || "slate"} size="sm">{stats.top_plan_users.plan}</Badge>
+              <span>{fmt(stats.top_plan_users.count)} utilisateurs</span>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Répartition plans */}
@@ -200,6 +274,61 @@ const OverviewTab = () => {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Upgrades 30j */}
+        <Card className="p-5">
+          <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
+            <TrendingUp className="w-4 h-4 text-emerald-600" /> Upgrades de plan (30j)
+            <Badge variant="green" size="sm">{upgrades.length}</Badge>
+          </h3>
+          {upgrades.length === 0 ? (
+            <p className="text-sm py-6 text-center" style={{ color: "var(--ykp-text-muted)" }}>Aucun upgrade détecté</p>
+          ) : (
+            <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+              {upgrades.map((u) => (
+                <div key={u.user_id} className="flex justify-between border-b pb-1.5" style={{ borderColor: "var(--ykp-border)" }}>
+                  <div>
+                    <div className="font-medium" style={{ color: "var(--ykp-text-primary)" }}>{u.username || `#${u.user_id}`}</div>
+                    <div className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{u.email || "—"}</div>
+                  </div>
+                  <div className="text-xs flex items-center gap-1" style={{ color: "var(--ykp-text-secondary)" }}>
+                    <Badge variant={PLAN_BADGE[u.depuis] || "slate"} size="sm">{u.depuis}</Badge>
+                    <ChevronRight className="w-3 h-3" />
+                    <Badge variant={PLAN_BADGE[u.vers] || "slate"} size="sm">{u.vers}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {/* Abonnés réguliers */}
+        <Card className="p-5">
+          <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
+            <CreditCard className="w-4 h-4 text-corp-600" /> Abonnés réguliers (≥3 paiements / 90j)
+            <Badge variant="corp" size="sm">{reguliers.length}</Badge>
+          </h3>
+          {reguliers.length === 0 ? (
+            <p className="text-sm py-6 text-center" style={{ color: "var(--ykp-text-muted)" }}>Aucun abonné régulier</p>
+          ) : (
+            <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+              {reguliers.map((r) => (
+                <div key={r.user_id} className="flex justify-between border-b pb-1.5" style={{ borderColor: "var(--ykp-border)" }}>
+                  <div>
+                    <div className="font-medium" style={{ color: "var(--ykp-text-primary)" }}>{r.username || `#${r.user_id}`}</div>
+                    <div className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{r.email || "—"}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-corp-600">{r.nb_paiements} paiements</div>
+                    <div className="text-xs" style={{ color: "var(--ykp-text-muted)" }}>{fmt(r.total)} F</div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </Card>
@@ -627,8 +756,10 @@ interface RevenusData {
   ca_aujourdhui: { devise: string; montant: number; transactions: number }[];
   ca_7j: { devise: string; montant: number; transactions: number }[];
   ca_30j: { devise: string; montant: number; transactions: number }[];
+  ca_periode?: { devise: string; montant: number; transactions: number }[];
   evolution_12mois: { mois: string; devise: string; montant: number; transactions: number }[];
   par_plan: { plan: string; devise: string; montant: number; transactions: number }[];
+  top_plan_ca?: { plan: string; devise: string; montant: number; transactions: number } | null;
   par_provider: { provider: string; devise: string; montant: number; transactions: number }[];
   par_statut: Record<string, number>;
   dernieres_transactions: any[];
@@ -640,14 +771,27 @@ const sumTx = (arr: { transactions: number }[]) => arr.reduce((a, b) => a + b.tr
 const RevenusTab = () => {
   const [data, setData] = useState<RevenusData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dateDebut, setDateDebut] = useState<string>("");
+  const [dateFin, setDateFin] = useState<string>("");
+  const [geoFilter, setGeoFilter] = useState<{ pays: string; continent: string }>({ pays: "", continent: "" });
+  const geo = useGeoOptions();
 
   const charger = async () => {
     setLoading(true);
-    try { setData(await adminApi.statsRevenus()); }
+    try {
+      setData(await adminApi.statsRevenus({
+        date_debut: dateDebut || undefined,
+        date_fin: dateFin || undefined,
+        pays: geoFilter.pays || undefined,
+        continent: geoFilter.continent || undefined,
+      }));
+    }
     catch { toast.error("Erreur de chargement"); }
     finally { setLoading(false); }
   };
-  useEffect(() => { charger(); }, []);
+  useEffect(() => { charger(); }, [geoFilter.pays, geoFilter.continent]);
+
+  const resetPeriode = () => { setDateDebut(""); setDateFin(""); };
 
   if (loading || !data) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>;
 
@@ -663,11 +807,36 @@ const RevenusTab = () => {
   const moisOrd = Object.keys(evolutionAgg).sort();
   const maxMois = Math.max(1, ...Object.values(evolutionAgg));
 
+  const caPeriode = data.ca_periode || [];
+  const aPeriode = Boolean(dateDebut || dateFin);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button variant="ghost" size="sm" icon={<RefreshCw className="w-4 h-4" />} onClick={charger}>Actualiser</Button>
-      </div>
+      {/* Filtres */}
+      <Card className="p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="text-xs uppercase font-semibold block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Du</label>
+            <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)}
+              className="rounded border px-3 py-1.5 text-sm"
+              style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+          </div>
+          <div>
+            <label className="text-xs uppercase font-semibold block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Au</label>
+            <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)}
+              className="rounded border px-3 py-1.5 text-sm"
+              style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+          </div>
+          <div>
+            <label className="text-xs uppercase font-semibold block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Géographie</label>
+            <GeoFilter pays={geoFilter.pays} continent={geoFilter.continent} onChange={setGeoFilter} geo={geo} />
+          </div>
+          <div className="flex gap-2 ml-auto">
+            {aPeriode && <Button size="sm" variant="ghost" onClick={() => { resetPeriode(); charger(); }}>Réinitialiser période</Button>}
+            <Button size="sm" icon={<RefreshCw className="w-4 h-4" />} onClick={charger}>Appliquer</Button>
+          </div>
+        </div>
+      </Card>
 
       {/* CA totaux */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -676,6 +845,36 @@ const RevenusTab = () => {
         <KPI icon={TrendingUp} label="CA 7j" value={`${fmt(sumAmount(data.ca_7j))} F`} color="text-amber-600" />
         <KPI icon={DollarSign} label="CA aujourd'hui" value={`${fmt(sumAmount(data.ca_aujourdhui))} F`} color="text-purple-600" />
       </div>
+
+      {aPeriode && (
+        <Card className="p-4 border-corp-200 bg-corp-50/30">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-corp-600" />
+              <span className="text-sm font-medium" style={{ color: "var(--ykp-text-primary)" }}>
+                Période personnalisée : {dateDebut || "—"} → {dateFin || "—"}
+              </span>
+            </div>
+            <div className="text-lg font-bold text-corp-700">
+              {fmt(sumAmount(caPeriode))} F · {sumTx(caPeriode)} tx
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {data.top_plan_ca && (
+        <Card className="p-4 flex items-center gap-3">
+          <Gift className="w-5 h-5 text-amber-600" />
+          <div className="flex-1">
+            <div className="text-xs uppercase font-semibold" style={{ color: "var(--ykp-text-muted)" }}>Plan dominant (CA)</div>
+            <div className="font-bold text-lg flex items-center gap-2" style={{ color: "var(--ykp-text-primary)" }}>
+              <Badge variant={PLAN_BADGE[data.top_plan_ca.plan] || "slate"} size="sm">{data.top_plan_ca.plan}</Badge>
+              <span>{fmt(data.top_plan_ca.montant)} {data.top_plan_ca.devise}</span>
+              <span className="text-xs font-normal" style={{ color: "var(--ykp-text-muted)" }}>· {data.top_plan_ca.transactions} tx</span>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* CA par devise */}
       <Card className="p-5">
@@ -832,11 +1031,17 @@ const RevenusTab = () => {
 
 const PromotionsTab = () => {
   const [montant, setMontant] = useState(1000);
-  const [cible, setCible] = useState<"tous" | "plan" | "ids">("tous");
+  const [cible, setCible] = useState<"tous" | "plan" | "ids" | "consommation">("tous");
   const [plan, setPlan] = useState("gratuit");
   const [userIdsRaw, setUserIdsRaw] = useState("");
   const [motif, setMotif] = useState("");
   const [busy, setBusy] = useState(false);
+  const [seuilCreditsMin, setSeuilCreditsMin] = useState<string>("");
+  const [seuilCreditsMax, setSeuilCreditsMax] = useState<string>("");
+  const [seuilAppelsMin, setSeuilAppelsMin] = useState<string>("");
+  const [periodeJours, setPeriodeJours] = useState<number>(30);
+  const [geoFilter, setGeoFilter] = useState<{ pays: string; continent: string }>({ pays: "", continent: "" });
+  const geo = useGeoOptions();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -846,17 +1051,31 @@ const PromotionsTab = () => {
       user_ids = userIdsRaw.split(/[\s,]+/).map(s => parseInt(s.trim())).filter(Boolean);
       if (!user_ids.length) return toast.error("Liste d'IDs invalide");
     }
+    if (cible === "consommation" && !seuilCreditsMin && !seuilCreditsMax && !seuilAppelsMin) {
+      return toast.error("Au moins un seuil requis pour cible 'consommation'");
+    }
     if (!confirm(`Distribuer ${montant} crédits à la cible "${cible}" ?`)) return;
     setBusy(true);
     try {
-      const r = await adminApi.promotion(montant, cible, { plan: cible === "plan" ? plan : undefined, user_ids, motif });
+      const r = await adminApi.promotion(montant, cible, {
+        plan: cible === "plan" ? plan : undefined,
+        user_ids,
+        motif,
+        seuil_credits_min: cible === "consommation" && seuilCreditsMin ? parseFloat(seuilCreditsMin) : undefined,
+        seuil_credits_max: cible === "consommation" && seuilCreditsMax ? parseFloat(seuilCreditsMax) : undefined,
+        seuil_appels_min: cible === "consommation" && seuilAppelsMin ? parseInt(seuilAppelsMin) : undefined,
+        periode_jours: cible === "consommation" ? periodeJours : undefined,
+        pays: geoFilter.pays || undefined,
+        continent: geoFilter.continent || undefined,
+      });
       toast.success(`Promotion appliquée à ${r.beneficiaires} utilisateur(s)`);
       setMontant(1000); setUserIdsRaw(""); setMotif("");
+      setSeuilCreditsMin(""); setSeuilCreditsMax(""); setSeuilAppelsMin("");
     } catch { toast.error("Erreur"); } finally { setBusy(false); }
   };
 
   return (
-    <Card className="p-4 sm:p-6 max-w-2xl">
+    <Card className="p-4 sm:p-6 max-w-3xl">
       <div className="flex items-center gap-2 mb-2">
         <Megaphone className="w-5 h-5 text-amber-600" />
         <h3 className="text-lg font-bold" style={{ color: "var(--ykp-text-primary)" }}>Lancer une promotion</h3>
@@ -875,11 +1094,12 @@ const PromotionsTab = () => {
 
         <div>
           <label className="text-sm font-medium block mb-1" style={{ color: "var(--ykp-text-primary)" }}>Cible</label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { v: "tous", lbl: "Tous", d: "Tous les utilisateurs" },
               { v: "plan", lbl: "Par plan", d: "Un plan spécifique" },
               { v: "ids", lbl: "Liste IDs", d: "Utilisateurs précis" },
+              { v: "consommation", lbl: "Consommation", d: "Selon seuils d'usage" },
             ].map((c) => (
               <button key={c.v} type="button" onClick={() => setCible(c.v as any)}
                 className={`text-left px-3 py-2 rounded border text-sm ${cible === c.v ? "border-corp-600 bg-corp-50" : ""}`}
@@ -914,6 +1134,48 @@ const PromotionsTab = () => {
               style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
           </div>
         )}
+
+        {cible === "consommation" && (
+          <div className="rounded-lg border p-3 space-y-3" style={{ borderColor: "var(--ykp-border)", background: "var(--ykp-surface)" }}>
+            <div className="text-sm font-medium" style={{ color: "var(--ykp-text-primary)" }}>
+              Seuils de consommation (au moins un requis)
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Crédits consommés ≥</label>
+                <input type="number" min={0} value={seuilCreditsMin} onChange={(e) => setSeuilCreditsMin(e.target.value)}
+                  placeholder="ex: 1000"
+                  className="w-full rounded border px-3 py-2 text-sm"
+                  style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+              </div>
+              <div>
+                <label className="text-xs block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Crédits consommés ≤</label>
+                <input type="number" min={0} value={seuilCreditsMax} onChange={(e) => setSeuilCreditsMax(e.target.value)}
+                  placeholder="ex: 5000"
+                  className="w-full rounded border px-3 py-2 text-sm"
+                  style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+              </div>
+              <div>
+                <label className="text-xs block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Nombre d'appels ≥</label>
+                <input type="number" min={0} value={seuilAppelsMin} onChange={(e) => setSeuilAppelsMin(e.target.value)}
+                  placeholder="ex: 50"
+                  className="w-full rounded border px-3 py-2 text-sm"
+                  style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+              </div>
+              <div>
+                <label className="text-xs block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Période d'analyse (jours)</label>
+                <input type="number" min={1} max={365} value={periodeJours} onChange={(e) => setPeriodeJours(parseInt(e.target.value) || 30)}
+                  className="w-full rounded border px-3 py-2 text-sm"
+                  style={{ background: "var(--ykp-surface)", borderColor: "var(--ykp-border)", color: "var(--ykp-text-primary)" }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="text-sm font-medium block mb-1" style={{ color: "var(--ykp-text-primary)" }}>Filtre géographique (optionnel)</label>
+          <GeoFilter pays={geoFilter.pays} continent={geoFilter.continent} onChange={setGeoFilter} geo={geo} />
+        </div>
 
         <div>
           <label className="text-sm font-medium block mb-1" style={{ color: "var(--ykp-text-primary)" }}>Motif (audit)</label>

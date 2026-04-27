@@ -11,10 +11,11 @@ import { useGenerateurStore } from "@/store/generateurStore";
 import { formatAmount } from "@/services/paysDevise";
 import DesignerProPanel from "@/components/DesignerProPanel";
 
-type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie";
+type Tab = "rapport" | "slides" | "modeles" | "conversion" | "infographie" | "fichiers";
 type InfogMode = "brief" | "manuel" | "modele" | "custom";
 
 interface Template {
+  key: string;
   label: string;
   description: string;
   type: "rapport" | "slides";
@@ -25,6 +26,7 @@ interface Template {
 }
 
 interface CategorieTemplates {
+  key: string;
   categorie: string;
   emoji: string;
   templates: Template[];
@@ -32,10 +34,12 @@ interface CategorieTemplates {
 
 const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
   {
+    key: "comptabilite_finance",
     categorie: "Comptabilité & Finance",
     emoji: "🧮",
     templates: [
       {
+        key: "bilan_syscohada",
         label: "Bilan SYSCOHADA commenté",
         description: "Bilan annuel avec analyse des ratios clés (liquidité, solvabilité, rentabilité)",
         type: "rapport",
@@ -45,6 +49,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Préparer un bilan SYSCOHADA révisé avec ratios clés : liquidité générale, solvabilité, rentabilité des capitaux propres. Inclure tableau de flux de trésorerie et notes explicatives.",
       },
       {
+        key: "note_is_tva",
         label: "Note de calcul IS + TVA",
         description: "Calcul détaillé de l'Impôt sur les Sociétés et de la TVA collectée/déductible",
         type: "rapport",
@@ -54,6 +59,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Calcul de l'IS selon le régime applicable (taux normal, minimum de perception) et réconciliation TVA (collectée, déductible, solde à décaisser). Référencer le CGI applicable.",
       },
       {
+        key: "audit_interne",
         label: "Rapport d'audit interne",
         description: "Rapport d'audit des procédures comptables et points de contrôle interne",
         type: "rapport",
@@ -63,6 +69,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Évaluation du contrôle interne, identification des risques (fraude, erreurs, non-conformités), recommandations correctives avec plan d'action priorisé.",
       },
       {
+        key: "presentation_resultats",
         label: "Présentation résultats financiers",
         description: "Slides de présentation des résultats au comité de direction",
         type: "slides",
@@ -74,10 +81,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "juridique_conformite",
     categorie: "Juridique & Conformité",
     emoji: "⚖️",
     templates: [
       {
+        key: "note_juridique_ohada",
         label: "Note juridique OHADA",
         description: "Analyse d'une problématique juridique selon le droit OHADA",
         type: "rapport",
@@ -87,6 +96,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Analyse des actes uniformes OHADA applicables, jurisprudence CCJA, risques juridiques identifiés et recommandations pratiques.",
       },
       {
+        key: "due_diligence",
         label: "Rapport de due diligence",
         description: "Due diligence juridique et financière pour acquisition ou partenariat",
         type: "rapport",
@@ -96,6 +106,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Audit juridique (statuts, contrats, litiges), fiscal (arriérés, redressements), social (CNPS, contrats de travail), immobilier. Synthèse risques et recommandations.",
       },
       {
+        key: "conformite_cima",
         label: "Note de conformité CIMA",
         description: "Vérification de conformité au Code CIMA pour compagnies d'assurance",
         type: "rapport",
@@ -107,10 +118,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "rh_management",
     categorie: "RH & Management",
     emoji: "👥",
     templates: [
       {
+        key: "bilan_social",
         label: "Rapport bilan social",
         description: "Bilan social annuel — effectifs, rémunérations, formation, absentéisme",
         type: "rapport",
@@ -120,6 +133,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Effectifs (pyramide des âges, turn-over), rémunérations (masse salariale, SMIG comparé), formation (plan, coûts, taux de réalisation), absentéisme, conformité Code du travail.",
       },
       {
+        key: "restructuration_rh",
         label: "Plan de restructuration RH",
         description: "Note de restructuration des effectifs avec plan social",
         type: "rapport",
@@ -129,6 +143,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Justification économique, critères de sélection, mesures d'accompagnement (indemnités légales selon Code du travail, outplacement), calendrier de mise en œuvre.",
       },
       {
+        key: "formation_management",
         label: "Slides séminaire formation",
         description: "Support de formation professionnelle (leadership, gestion d'équipe, etc.)",
         type: "slides",
@@ -140,10 +155,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "banque_microfinance",
     categorie: "Banque & Microfinance",
     emoji: "🏦",
     templates: [
       {
+        key: "analyse_credit_pme",
         label: "Rapport analyse crédit PME",
         description: "Analyse de risque crédit pour une PME — scoring et décision",
         type: "rapport",
@@ -153,6 +170,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Analyse des états financiers SYSCOHADA, scoring crédit, ratios COBAC (endettement, couverture), garanties proposées, recommandation d'octroi avec conditions.",
       },
       {
+        key: "ratios_cobac",
         label: "Note ratios prudentiels COBAC",
         description: "Calcul et commentaire des ratios prudentiels COBAC",
         type: "rapport",
@@ -162,6 +180,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Calcul des ratios COBAC : solvabilité (8%), liquidité (≥100%), transformation, division des risques. Comparaison vs normes réglementaires et plan d'action correctif si nécessaire.",
       },
       {
+        key: "comite_credit",
         label: "Présentation comité de crédit",
         description: "Slides de présentation d'un dossier au comité de crédit",
         type: "slides",
@@ -173,10 +192,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "commerce_business",
     categorie: "Commerce & Business",
     emoji: "📈",
     templates: [
       {
+        key: "business_plan",
         label: "Business plan complet",
         description: "Business plan structuré pour création ou développement d'activité",
         type: "rapport",
@@ -186,6 +207,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Executive summary, étude de marché (PESTEL, Porter), modèle économique (BMC), plan marketing, plan opérationnel, projections financières sur 3 ans (P&L, BFR, TRI).",
       },
       {
+        key: "analyse_marche",
         label: "Rapport analyse de marché",
         description: "Étude de marché sectorielle pour un pays d'Afrique subsaharienne",
         type: "rapport",
@@ -195,6 +217,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Taille du marché, acteurs clés, parts de marché, tendances, barrières à l'entrée, opportunités, menaces concurrentielles, recommandations de positionnement.",
       },
       {
+        key: "pitch_deck",
         label: "Pitch deck investisseurs",
         description: "Présentation de levée de fonds pour investisseurs africains / internationaux",
         type: "slides",
@@ -204,6 +227,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Problème / Solution, taille du marché, traction (métriques clés), modèle économique, roadmap, équipe, besoins de financement, utilisation des fonds, exit potentiel.",
       },
       {
+        key: "prospection",
         label: "Rapport prospection commerciale",
         description: "Analyse prospects et stratégie de développement commercial",
         type: "rapport",
@@ -215,10 +239,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "ong_projets",
     categorie: "ONG & Projets",
     emoji: "🌍",
     templates: [
       {
+        key: "rapport_activites_ong",
         label: "Rapport d'activités ONG",
         description: "Rapport annuel d'activités pour bailleurs et partenaires",
         type: "rapport",
@@ -228,6 +254,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Résumé exécutif, réalisations par axe stratégique, indicateurs d'impact atteints vs cibles, utilisation des ressources financières, leçons apprises, perspectives.",
       },
       {
+        key: "note_conceptuelle",
         label: "Note conceptuelle projet",
         description: "Note conceptuelle pour soumission à un appel à projets / bailleur",
         type: "rapport",
@@ -237,6 +264,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Contexte et justification, objectifs (général et spécifiques), bénéficiaires, approche et méthodologie, résultats attendus, cadre logique simplifié, budget indicatif.",
       },
       {
+        key: "presentation_bailleur",
         label: "Présentation bailleur de fonds",
         description: "Slides de présentation d'un projet à un bailleur ou comité de pilotage",
         type: "slides",
@@ -248,10 +276,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "ingenierie_btp",
     categorie: "Ingénierie & BTP",
     emoji: "🏗️",
     templates: [
       {
+        key: "avancement_travaux",
         label: "Rapport d'avancement travaux",
         description: "Rapport mensuel d'avancement d'un chantier",
         type: "rapport",
@@ -261,6 +291,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Avancement physique par lot, planning prévisionnel vs réel, décompte financier, ressources mobilisées, réserves / non-conformités, plan d'actions, photos commentées.",
       },
       {
+        key: "note_technique_etude",
         label: "Note technique étude",
         description: "Note technique pour une étude d'ingénierie ou d'avant-projet",
         type: "rapport",
@@ -272,10 +303,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "sante_publique",
     categorie: "Santé Publique & Épidémiologie",
     emoji: "🏥",
     templates: [
       {
+        key: "situation_epidemio",
         label: "Rapport de situation épidémiologique",
         description: "Rapport de situation épidémio hebdomadaire ou mensuel",
         type: "rapport",
@@ -285,6 +318,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Description de la situation (cas confirmés, incidence, létalité), analyse par zone géographique et groupe démographique, courbe épidémique, facteurs de risque, mesures en cours, recommandations de riposte.",
       },
       {
+        key: "protocole_enquete_epidemio",
         label: "Protocole d'enquête épidémiologique",
         description: "Protocole complet pour enquête de terrain en santé publique",
         type: "rapport",
@@ -294,6 +328,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Justification et objectifs, hypothèses, type d'étude (transversale/cas-témoins/cohorte), population cible et échantillonnage, variables et outils de collecte, procédures de terrain, plan d'analyse, considérations éthiques, calendrier et budget.",
       },
       {
+        key: "evaluation_programme_sante",
         label: "Rapport d'évaluation programme santé",
         description: "Évaluation mi-parcours ou finale d'un programme de santé",
         type: "rapport",
@@ -303,6 +338,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Contexte et description du programme, méthodologie d'évaluation, analyse de la pertinence, efficacité, efficience, impact et durabilité (critères OCDE/CAD), indicateurs atteints vs cibles, leçons apprises, recommandations.",
       },
       {
+        key: "formation_sante_publique",
         label: "Formation — Outils de santé publique",
         description: "Support de formation sur les outils et méthodes en santé publique",
         type: "slides",
@@ -312,6 +348,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Objectifs pédagogiques, modules : épidémiologie descriptive, surveillance épidémiologique, enquêtes de terrain, analyse des données de santé, outils OMS/CDC/ECOWAS, exercices pratiques avec études de cas africains.",
       },
       {
+        key: "presentation_programme_sante",
         label: "Présentation programme santé",
         description: "Slides de présentation d'un programme ou rapport de santé publique",
         type: "slides",
@@ -323,10 +360,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "recherche_protocoles",
     categorie: "Recherche & Protocoles d'étude",
     emoji: "🔬",
     templates: [
       {
+        key: "protocole_etude",
         label: "Protocole d'étude / recherche",
         description: "Protocole scientifique complet pour étude ou recherche",
         type: "rapport",
@@ -336,6 +375,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Titre et résumé, introduction et revue de littérature, problématique et justification, objectifs (général et spécifiques), hypothèses, méthodologie (type d'étude, population, échantillonnage, variables, outils), plan d'analyse statistique, aspects éthiques, calendrier, budget prévisionnel, bibliographie.",
       },
       {
+        key: "rapport_enquete",
         label: "Rapport d'enquête / sondage",
         description: "Rapport de résultats d'une enquête quantitative ou qualitative",
         type: "rapport",
@@ -345,6 +385,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Contexte et objectifs de l'enquête, méthodologie (type, échantillon, outils), résultats descriptifs (fréquences, moyennes, tableaux croisés), analyse inférentielle (tests statistiques), interprétation, conclusions et recommandations, annexes (questionnaire, tableaux détaillés).",
       },
       {
+        key: "presentation_protocole",
         label: "Présentation protocole / résultats",
         description: "Slides de présentation d'un protocole ou des résultats d'étude",
         type: "slides",
@@ -356,10 +397,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "suivi_evaluation",
     categorie: "Suivi & Évaluation de projets",
     emoji: "📊",
     templates: [
       {
+        key: "rapport_se",
         label: "Rapport de suivi S&E",
         description: "Rapport trimestriel ou semestriel de suivi-évaluation d'un projet",
         type: "rapport",
@@ -369,6 +412,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Rappel des objectifs et indicateurs du cadre logique, avancement physique et financier par composante, analyse des indicateurs (atteints vs cibles, tendances), analyse des écarts, facteurs d'influence (risques, hypothèses), leçons apprises, recommandations et plan d'action correctif, perspectives.",
       },
       {
+        key: "cadre_mesure_performance",
         label: "Cadre de mesure de la performance",
         description: "Document CMP / tableau de bord indicateurs d'un projet",
         type: "rapport",
@@ -378,6 +422,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Cadre logique ou théorie du changement, sélection et définition des indicateurs SMART (intrants, extrants, effets, impact), sources de vérification, fréquence de collecte, responsabilités, valeurs de référence (baseline) et cibles.",
       },
       {
+        key: "presentation_se_bailleur",
         label: "Présentation S&E bailleur",
         description: "Slides de rapport de suivi à destination du bailleur ou comité",
         type: "slides",
@@ -387,6 +432,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Rappel des objectifs, tableau de bord des indicateurs clés, avancement physique et financier, points saillants (succès et défis), risques en cours, actions correctives, prochaines étapes.",
       },
       {
+        key: "evaluation_finale",
         label: "Évaluation finale de projet",
         description: "Rapport d'évaluation finale selon critères OCDE/CAD",
         type: "rapport",
@@ -398,10 +444,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "assurance_cima",
     categorie: "Assurance & Réassurance CIMA",
     emoji: "🛡️",
     templates: [
       {
+        key: "solvabilite_cima",
         label: "Rapport de solvabilité CIMA",
         description: "Rapport annuel de solvabilité selon le Code CIMA révisé",
         type: "rapport",
@@ -411,6 +459,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Calcul de la marge de solvabilité (primes vs sinistres), provisions techniques (PPNA, PSAP, PSAV), actifs admis en représentation, ratios prudentiels CIMA, mesures correctives si seuils non atteints.",
       },
       {
+        key: "tarification_actuarielle",
         label: "Note technique tarification",
         description: "Note actuarielle de tarification d'un produit d'assurance",
         type: "rapport",
@@ -420,6 +469,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Analyse sinistralité historique, méthodes actuarielles (fréquence/coût moyen, Chain Ladder, GLM), hypothèses, calcul de prime pure, chargements (gestion, acquisition, sécurité), tarification finale et sensibilités.",
       },
       {
+        key: "gestion_sinistre",
         label: "Rapport gestion sinistre",
         description: "Rapport d'expertise et règlement d'un sinistre complexe",
         type: "rapport",
@@ -429,6 +479,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Rappel des garanties souscrites, circonstances du sinistre, pièces reçues, expertise contradictoire, évaluation des dommages, application des franchises/plafonds, proposition de règlement, motivation juridique.",
       },
       {
+        key: "ca_assurance",
         label: "Présentation conseil d'administration",
         description: "Slides de présentation CA compagnie d'assurance",
         type: "slides",
@@ -440,10 +491,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "energie_mines",
     categorie: "Énergie, Mines & Pétrole",
     emoji: "⛽",
     templates: [
       {
+        key: "eies_minier",
         label: "Étude d'impact environnemental",
         description: "EIES complète pour projet minier/énergétique (norme BAD/IFC)",
         type: "rapport",
@@ -453,6 +506,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Description du projet, état initial (biophysique, social), identification et évaluation des impacts, mesures d'atténuation/compensation, plan de gestion environnementale et sociale (PGES), plan de suivi. Conforme aux standards IFC/BAD.",
       },
       {
+        key: "production_mensuelle",
         label: "Rapport production mensuelle",
         description: "Rapport mensuel de production énergie / mines",
         type: "rapport",
@@ -462,6 +516,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Production physique (tonnage/MWh), taux de disponibilité des équipements, incidents HSE, performance vs budget, actions correctives, prévisions mois suivant.",
       },
       {
+        key: "rentabilite_mines",
         label: "Note étude rentabilité projet",
         description: "Analyse financière TRI/VAN pour projet énergie ou mines",
         type: "rapport",
@@ -473,10 +528,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "agriculture",
     categorie: "Agriculture & Agro-industrie",
     emoji: "🌾",
     templates: [
       {
+        key: "plan_agricole",
         label: "Plan de développement agricole",
         description: "Plan d'affaires exploitation agricole / agro-industrielle",
         type: "rapport",
@@ -486,6 +543,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Analyse agronomique (sol, climat, filière), plan cultural, besoins en intrants et équipements, projections de rendement et de chiffre d'affaires, compte d'exploitation prévisionnel, plan de financement, analyse des risques climatiques.",
       },
       {
+        key: "etude_filiere",
         label: "Étude de filière agricole",
         description: "Analyse filière (cacao, café, coton, riz, etc.) pays CEMAC/UEMOA",
         type: "rapport",
@@ -495,6 +553,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Cartographie des acteurs (producteurs, coopératives, industriels, exportateurs), volumes et prix, infrastructures, politiques publiques, contraintes et opportunités, recommandations de structuration de la filière.",
       },
       {
+        key: "campagne_agricole",
         label: "Rapport campagne agricole",
         description: "Bilan de campagne — rendements, ventes, marges",
         type: "rapport",
@@ -506,10 +565,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "transport_logistique",
     categorie: "Transport & Logistique",
     emoji: "🚚",
     templates: [
       {
+        key: "audit_supply_chain",
         label: "Étude logistique — chaîne d'approvisionnement",
         description: "Audit supply chain avec recommandations d'optimisation",
         type: "rapport",
@@ -519,6 +580,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Cartographie flux physiques et d'information, analyse coûts logistiques (transport, stockage, manutention), délais de livraison, ruptures, recommandations d'optimisation (modal, routier, entreposage, SI, KPIs logistiques).",
       },
       {
+        key: "transport_urbain",
         label: "Plan de transport urbain",
         description: "Étude de schéma directeur transport pour collectivité",
         type: "rapport",
@@ -528,6 +590,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Diagnostic mobilité (enquêtes origine-destination, offre existante), projections de demande, scénarios d'infrastructure (BRT, bus, voirie), plan de financement, calendrier de mise en œuvre, indicateurs de performance.",
       },
       {
+        key: "bp_flotte_transport",
         label: "Business plan flotte transport",
         description: "Dossier de financement création/extension flotte de transport",
         type: "rapport",
@@ -539,10 +602,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "tech_digital",
     categorie: "Tech, Digital & SI",
     emoji: "💻",
     templates: [
       {
+        key: "cdc_si",
         label: "Cahier des charges SI",
         description: "Cahier des charges fonctionnel et technique d'un projet SI",
         type: "rapport",
@@ -552,6 +617,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Contexte et enjeux métier, périmètre, exigences fonctionnelles (use cases), exigences non-fonctionnelles (sécurité, performance, conformité RGPD/CAMTEL), architecture cible, livrables, planning, critères de recette.",
       },
       {
+        key: "audit_cybersecurite",
         label: "Rapport d'audit cybersécurité",
         description: "Audit sécurité informatique avec recommandations ISO 27001",
         type: "rapport",
@@ -561,6 +627,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Périmètre et méthodologie (ISO 27001, NIST), cartographie des actifs, analyse des vulnérabilités techniques et organisationnelles, tests d'intrusion, évaluation des risques, recommandations hiérarchisées avec plan de remédiation.",
       },
       {
+        key: "pitch_tech_startup",
         label: "Pitch deck startup tech",
         description: "Pitch de levée pour startup tech africaine",
         type: "slides",
@@ -572,10 +639,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "education_formation",
     categorie: "Éducation & Formation",
     emoji: "🎓",
     templates: [
       {
+        key: "plan_strategique_etablissement",
         label: "Plan stratégique établissement",
         description: "Plan stratégique pluriannuel pour établissement scolaire/universitaire",
         type: "rapport",
@@ -585,6 +654,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Diagnostic (effectifs, taux de réussite, ressources, infrastructures), vision et axes stratégiques, objectifs SMART, plan d'action par axe, plan de financement, gouvernance et suivi.",
       },
       {
+        key: "rapport_pedagogique",
         label: "Rapport pédagogique annuel",
         description: "Rapport annuel d'activités pédagogiques",
         type: "rapport",
@@ -594,6 +664,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Effectifs et mouvements, résultats aux examens officiels, encadrement pédagogique, programmes parcourus, activités péri-éducatives, difficultés rencontrées, perspectives année suivante.",
       },
       {
+        key: "module_formation_pro",
         label: "Module de formation professionnelle",
         description: "Support de formation professionnelle certifiante",
         type: "slides",
@@ -605,10 +676,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "immobilier",
     categorie: "Immobilier & Construction",
     emoji: "🏢",
     templates: [
       {
+        key: "faisabilite_immobiliere",
         label: "Étude de faisabilité immobilière",
         description: "Étude technique, juridique et financière d'un projet immobilier",
         type: "rapport",
@@ -618,6 +691,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Analyse du foncier (titre, servitudes, PLU), étude de marché (offre/demande, prix m²), programme constructible, CAPEX construction, planning, commercialisation, compte d'exploitation, retour sur investissement.",
       },
       {
+        key: "expertise_immobiliere",
         label: "Rapport expertise immobilière",
         description: "Rapport d'expertise et valorisation d'un bien immobilier",
         type: "rapport",
@@ -629,10 +703,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "tourisme",
     categorie: "Tourisme & Hôtellerie",
     emoji: "🏨",
     templates: [
       {
+        key: "bp_hotel",
         label: "Business plan hôtel / resort",
         description: "Business plan complet pour création hôtel ou resort",
         type: "rapport",
@@ -642,6 +718,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Étude de marché touristique, concept et positionnement, programme (chambres, F&B, SPA), CAPEX, prévisions RevPar/ADR/TO, compte d'exploitation 5 ans, plan de financement, stratégie marketing.",
       },
       {
+        key: "performance_hoteliere",
         label: "Rapport performance hôtelière",
         description: "Rapport mensuel KPIs hôteliers (TO, ADR, RevPAR, GOP)",
         type: "rapport",
@@ -653,10 +730,12 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
     ],
   },
   {
+    key: "communication_marketing",
     categorie: "Communication & Marketing",
     emoji: "📣",
     templates: [
       {
+        key: "plan_communication",
         label: "Plan de communication 360°",
         description: "Stratégie communication multicanale pour marque/produit",
         type: "rapport",
@@ -666,6 +745,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Diagnostic de marque, insights consommateurs, objectifs SMART, cibles et personas, positionnement, message clé, mix médias (TV, radio, digital, OOH, influenceurs), calendrier, budget, KPIs.",
       },
       {
+        key: "brief_creatif",
         label: "Brief créatif campagne",
         description: "Brief créatif pour agence de communication",
         type: "rapport",
@@ -675,6 +755,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
         contexte: "Contexte, objectifs business et de communication, cible prioritaire, insight consommateur, promesse, ton, mandatories, livrables attendus, calendrier, budget.",
       },
       {
+        key: "bilan_campagne_com",
         label: "Rapport bilan campagne",
         description: "Bilan de performance d'une campagne de communication",
         type: "rapport",
@@ -906,11 +987,11 @@ export const GenerateursPage = () => {
   const handleTelechargerInfog = (kind: "pdf" | "png" | "pdf_cmyk" | "png_hd" | "svg") => {
     if (!infogResult) return;
     const map: Record<string, { b64?: string; id?: string; mime: string }> = {
-      pdf:      { b64: infogResult.pdf_base64,         id: infogResult.pdf_id,         mime: "application/pdf" },
-      png:      { b64: infogResult.png_preview_base64 || infogResult.png_base64, id: infogResult.png_preview_id || infogResult.png_id, mime: "image/png" },
-      pdf_cmyk: { b64: infogResult.pdf_cmyk_base64,    id: infogResult.pdf_cmyk_id,    mime: "application/pdf" },
-      png_hd:   { b64: infogResult.png_base64,         id: infogResult.png_id,         mime: "image/png" },
-      svg:      { b64: infogResult.svg_base64,         id: infogResult.svg_id,         mime: "image/svg+xml" },
+      pdf:      { b64: infogResult.pdf_base64 ?? undefined,         id: infogResult.pdf_id ?? undefined,         mime: "application/pdf" },
+      png:      { b64: (infogResult.png_preview_base64 || infogResult.png_base64) ?? undefined, id: (infogResult.png_preview_id || infogResult.png_id) ?? undefined, mime: "image/png" },
+      pdf_cmyk: { b64: infogResult.pdf_cmyk_base64 ?? undefined,    id: infogResult.pdf_cmyk_id ?? undefined,    mime: "application/pdf" },
+      png_hd:   { b64: infogResult.png_base64 ?? undefined,         id: infogResult.png_id ?? undefined,         mime: "image/png" },
+      svg:      { b64: infogResult.svg_base64 ?? undefined,         id: infogResult.svg_id ?? undefined,         mime: "image/svg+xml" },
     };
     const item = map[kind];
     if (!item.b64 || !item.id) { toast.error(t("generateurs.fileUnavailable")); return; }
@@ -931,9 +1012,10 @@ export const GenerateursPage = () => {
       const data = await infographieApi.genererVariantes({
         brief: infogBrief, type_gabarit: infogGabarit, pays: infogPays, nombre: 4,
       });
-      setInfogVariantes(data.variantes);
+      const wrapped = (data.variantes || []).map((v) => ({ direction: v.variante, resultat: v as ResultatInfographieReponse }));
+      setInfogVariantes(wrapped);
       // On pose la 1ère variante comme résultat principal pour l'aperçu
-      if (data.variantes?.[0]) return data.variantes[0].resultat;
+      if (wrapped[0]) return wrapped[0].resultat;
       return null;
     }, { successMsg: t("generateurs.fourVariantsGenerated") });
   };
@@ -1107,18 +1189,18 @@ export const GenerateursPage = () => {
             {t("generateurs.modelsHint", { total: TEMPLATES_PAR_METIER.reduce((s, c) => s + c.templates.length, 0) })}
           </p>
           {TEMPLATES_PAR_METIER.map((cat) => {
-            const isOpen = openCat === cat.categorie;
+            const isOpen = openCat === cat.key;
             return (
-              <div key={cat.categorie} className="rounded-xl border border-slate-700/60 overflow-hidden">
+              <div key={cat.key} className="rounded-xl border border-slate-700/60 overflow-hidden">
                 <button
-                  onClick={() => setOpenCat(isOpen ? null : cat.categorie)}
+                  onClick={() => setOpenCat(isOpen ? null : cat.key)}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800 transition-colors"
                   style={{ background: "var(--ykp-surface)" }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{cat.emoji}</span>
                     <div className="text-left">
-                      <p className="text-sm font-semibold text-white">{cat.categorie}</p>
+                      <p className="text-sm font-semibold text-white">{t(`generateurs.templates.categories.${cat.key}`, cat.categorie)}</p>
                       <p className="text-xs text-slate-500">
                         {t("generateurs.modelsCount", { count: cat.templates.length, plural: cat.templates.length > 1 ? "s" : "" })}
                         {" · "}
@@ -1139,7 +1221,7 @@ export const GenerateursPage = () => {
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 p-3" style={{ background: "var(--ykp-elevated)", borderTop: "1px solid var(--ykp-border)" }}>
                     {cat.templates.map((tpl) => (
                       <button
-                        key={tpl.label}
+                        key={tpl.key}
                         onClick={() => {
                           if (tpl.type === "rapport") {
                             setSujetRapport(tpl.sujet);
@@ -1156,14 +1238,14 @@ export const GenerateursPage = () => {
                           }
                           setTab(tpl.type as Tab);
                           setResultat(null);
-                          toast.success(t("generateurs.modelLoaded", { label: tpl.label }));
+                          toast.success(t("generateurs.modelLoaded", { label: t(`generateurs.templates.items.${tpl.key}.label`, tpl.label) }));
                         }}
                         className="group text-left p-3 rounded-xl hover:border-yukpo-500/60 hover:bg-yukpo-500/5 transition-all"
                         style={{ background: "var(--ykp-surface)", border: "1px solid var(--ykp-border)" }}
                       >
                         <div className="flex items-start justify-between gap-1.5 mb-1">
                           <p className="text-xs font-semibold text-white group-hover:text-yukpo-300 transition-colors leading-snug">
-                            {tpl.label}
+                            {t(`generateurs.templates.items.${tpl.key}.label`, tpl.label)}
                           </p>
                           <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
                             tpl.type === "rapport"
@@ -1173,9 +1255,9 @@ export const GenerateursPage = () => {
                             {tpl.type === "rapport" ? "DOCX" : "PPTX"}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 leading-snug line-clamp-2">{tpl.description}</p>
+                        <p className="text-[11px] text-slate-500 leading-snug line-clamp-2">{t(`generateurs.templates.items.${tpl.key}.description`, tpl.description)}</p>
                         <div className="flex items-center gap-0.5 text-[10px] text-yukpo-400 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Utiliser <ArrowRight className="w-2.5 h-2.5" />
+                          {t("generateurs.useTemplate")} <ArrowRight className="w-2.5 h-2.5" />
                         </div>
                       </button>
                     ))}

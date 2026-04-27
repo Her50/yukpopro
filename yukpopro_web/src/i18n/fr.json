@@ -542,7 +542,272 @@
     "writingDocumentHelper": "Yukpo construit un document professionnel de haute qualité",
     "previewTruncated": "… (aperçu tronqué)",
     "rapportPlaceholder": "Votre rapport DOCX apparaîtra ici",
-    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici"
+    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici",
+    "templates": {
+      "categories": {
+        "comptabilite_finance": "Comptabilité & Finance",
+        "juridique_conformite": "Juridique & Conformité",
+        "rh_management": "RH & Management",
+        "banque_microfinance": "Banque & Microfinance",
+        "commerce_business": "Commerce & Business",
+        "ong_projets": "ONG & Projets",
+        "ingenierie_btp": "Ingénierie & BTP",
+        "sante_publique": "Santé Publique & Épidémiologie",
+        "recherche_protocoles": "Recherche & Protocoles d'étude",
+        "suivi_evaluation": "Suivi & Évaluation de projets",
+        "assurance_cima": "Assurance & Réassurance CIMA",
+        "energie_mines": "Énergie, Mines & Pétrole",
+        "agriculture": "Agriculture & Agro-industrie",
+        "transport_logistique": "Transport & Logistique",
+        "tech_digital": "Tech, Digital & SI",
+        "education_formation": "Éducation & Formation",
+        "immobilier": "Immobilier & Construction",
+        "tourisme": "Tourisme & Hôtellerie",
+        "communication_marketing": "Communication & Marketing"
+      },
+      "items": {
+        "bilan_syscohada": {
+          "label": "Bilan SYSCOHADA commenté",
+          "description": "Bilan annuel avec analyse des ratios clés (liquidité, solvabilité, rentabilité)"
+        },
+        "note_is_tva": {
+          "label": "Note de calcul IS + TVA",
+          "description": "Calcul détaillé de l'Impôt sur les Sociétés et de la TVA collectée/déductible"
+        },
+        "audit_interne": {
+          "label": "Rapport d'audit interne",
+          "description": "Rapport d'audit des procédures comptables et points de contrôle interne"
+        },
+        "presentation_resultats": {
+          "label": "Présentation résultats financiers",
+          "description": "Slides de présentation des résultats au comité de direction"
+        },
+        "note_juridique_ohada": {
+          "label": "Note juridique OHADA",
+          "description": "Analyse d'une problématique juridique selon le droit OHADA"
+        },
+        "due_diligence": {
+          "label": "Rapport de due diligence",
+          "description": "Due diligence juridique et financière pour acquisition ou partenariat"
+        },
+        "conformite_cima": {
+          "label": "Note de conformité CIMA",
+          "description": "Vérification de conformité au Code CIMA pour compagnies d'assurance"
+        },
+        "bilan_social": {
+          "label": "Rapport bilan social",
+          "description": "Bilan social annuel — effectifs, rémunérations, formation, absentéisme"
+        },
+        "restructuration_rh": {
+          "label": "Plan de restructuration RH",
+          "description": "Note de restructuration des effectifs avec plan social"
+        },
+        "formation_management": {
+          "label": "Slides séminaire formation",
+          "description": "Support de formation professionnelle (leadership, gestion d'équipe, etc.)"
+        },
+        "analyse_credit_pme": {
+          "label": "Rapport analyse crédit PME",
+          "description": "Analyse de risque crédit pour une PME — scoring et décision"
+        },
+        "ratios_cobac": {
+          "label": "Note ratios prudentiels COBAC",
+          "description": "Calcul et commentaire des ratios prudentiels COBAC"
+        },
+        "comite_credit": {
+          "label": "Présentation comité de crédit",
+          "description": "Slides de présentation d'un dossier au comité de crédit"
+        },
+        "business_plan": {
+          "label": "Business plan complet",
+          "description": "Business plan structuré pour création ou développement d'activité"
+        },
+        "analyse_marche": {
+          "label": "Rapport analyse de marché",
+          "description": "Étude de marché sectorielle pour un pays d'Afrique subsaharienne"
+        },
+        "pitch_deck": {
+          "label": "Pitch deck investisseurs",
+          "description": "Présentation de levée de fonds pour investisseurs africains / internationaux"
+        },
+        "prospection": {
+          "label": "Rapport prospection commerciale",
+          "description": "Analyse prospects et stratégie de développement commercial"
+        },
+        "rapport_activites_ong": {
+          "label": "Rapport d'activités ONG",
+          "description": "Rapport annuel d'activités pour bailleurs et partenaires"
+        },
+        "note_conceptuelle": {
+          "label": "Note conceptuelle projet",
+          "description": "Note conceptuelle pour soumission à un appel à projets / bailleur"
+        },
+        "presentation_bailleur": {
+          "label": "Présentation bailleur de fonds",
+          "description": "Slides de présentation d'un projet à un bailleur ou comité de pilotage"
+        },
+        "avancement_travaux": {
+          "label": "Rapport d'avancement travaux",
+          "description": "Rapport mensuel d'avancement d'un chantier"
+        },
+        "note_technique_etude": {
+          "label": "Note technique étude",
+          "description": "Note technique pour une étude d'ingénierie ou d'avant-projet"
+        },
+        "situation_epidemio": {
+          "label": "Rapport de situation épidémiologique",
+          "description": "Rapport de situation épidémio hebdomadaire ou mensuel"
+        },
+        "protocole_enquete_epidemio": {
+          "label": "Protocole d'enquête épidémiologique",
+          "description": "Protocole complet pour enquête de terrain en santé publique"
+        },
+        "evaluation_programme_sante": {
+          "label": "Rapport d'évaluation programme santé",
+          "description": "Évaluation mi-parcours ou finale d'un programme de santé"
+        },
+        "formation_sante_publique": {
+          "label": "Formation — Outils de santé publique",
+          "description": "Support de formation sur les outils et méthodes en santé publique"
+        },
+        "presentation_programme_sante": {
+          "label": "Présentation programme santé",
+          "description": "Slides de présentation d'un programme ou rapport de santé publique"
+        },
+        "protocole_etude": {
+          "label": "Protocole d'étude / recherche",
+          "description": "Protocole scientifique complet pour étude ou recherche"
+        },
+        "rapport_enquete": {
+          "label": "Rapport d'enquête / sondage",
+          "description": "Rapport de résultats d'une enquête quantitative ou qualitative"
+        },
+        "presentation_protocole": {
+          "label": "Présentation protocole / résultats",
+          "description": "Slides de présentation d'un protocole ou des résultats d'étude"
+        },
+        "rapport_se": {
+          "label": "Rapport de suivi S&E",
+          "description": "Rapport trimestriel ou semestriel de suivi-évaluation d'un projet"
+        },
+        "cadre_mesure_performance": {
+          "label": "Cadre de mesure de la performance",
+          "description": "Document CMP / tableau de bord indicateurs d'un projet"
+        },
+        "presentation_se_bailleur": {
+          "label": "Présentation S&E bailleur",
+          "description": "Slides de rapport de suivi à destination du bailleur ou comité"
+        },
+        "evaluation_finale": {
+          "label": "Évaluation finale de projet",
+          "description": "Rapport d'évaluation finale selon critères OCDE/CAD"
+        },
+        "solvabilite_cima": {
+          "label": "Rapport de solvabilité CIMA",
+          "description": "Rapport annuel de solvabilité selon le Code CIMA révisé"
+        },
+        "tarification_actuarielle": {
+          "label": "Note technique tarification",
+          "description": "Note actuarielle de tarification d'un produit d'assurance"
+        },
+        "gestion_sinistre": {
+          "label": "Rapport gestion sinistre",
+          "description": "Rapport d'expertise et règlement d'un sinistre complexe"
+        },
+        "ca_assurance": {
+          "label": "Présentation conseil d'administration",
+          "description": "Slides de présentation CA compagnie d'assurance"
+        },
+        "eies_minier": {
+          "label": "Étude d'impact environnemental",
+          "description": "EIES complète pour projet minier/énergétique (norme BAD/IFC)"
+        },
+        "production_mensuelle": {
+          "label": "Rapport production mensuelle",
+          "description": "Rapport mensuel de production énergie / mines"
+        },
+        "rentabilite_mines": {
+          "label": "Note étude rentabilité projet",
+          "description": "Analyse financière TRI/VAN pour projet énergie ou mines"
+        },
+        "plan_agricole": {
+          "label": "Plan de développement agricole",
+          "description": "Plan d'affaires exploitation agricole / agro-industrielle"
+        },
+        "etude_filiere": {
+          "label": "Étude de filière agricole",
+          "description": "Analyse filière (cacao, café, coton, riz, etc.) pays CEMAC/UEMOA"
+        },
+        "campagne_agricole": {
+          "label": "Rapport campagne agricole",
+          "description": "Bilan de campagne — rendements, ventes, marges"
+        },
+        "audit_supply_chain": {
+          "label": "Étude logistique — chaîne d'approvisionnement",
+          "description": "Audit supply chain avec recommandations d'optimisation"
+        },
+        "transport_urbain": {
+          "label": "Plan de transport urbain",
+          "description": "Étude de schéma directeur transport pour collectivité"
+        },
+        "bp_flotte_transport": {
+          "label": "Business plan flotte transport",
+          "description": "Dossier de financement création/extension flotte de transport"
+        },
+        "cdc_si": {
+          "label": "Cahier des charges SI",
+          "description": "Cahier des charges fonctionnel et technique d'un projet SI"
+        },
+        "audit_cybersecurite": {
+          "label": "Rapport d'audit cybersécurité",
+          "description": "Audit sécurité informatique avec recommandations ISO 27001"
+        },
+        "pitch_tech_startup": {
+          "label": "Pitch deck startup tech",
+          "description": "Pitch de levée pour startup tech africaine"
+        },
+        "plan_strategique_etablissement": {
+          "label": "Plan stratégique établissement",
+          "description": "Plan stratégique pluriannuel pour établissement scolaire/universitaire"
+        },
+        "rapport_pedagogique": {
+          "label": "Rapport pédagogique annuel",
+          "description": "Rapport annuel d'activités pédagogiques"
+        },
+        "module_formation_pro": {
+          "label": "Module de formation professionnelle",
+          "description": "Support de formation professionnelle certifiante"
+        },
+        "faisabilite_immobiliere": {
+          "label": "Étude de faisabilité immobilière",
+          "description": "Étude technique, juridique et financière d'un projet immobilier"
+        },
+        "expertise_immobiliere": {
+          "label": "Rapport expertise immobilière",
+          "description": "Rapport d'expertise et valorisation d'un bien immobilier"
+        },
+        "bp_hotel": {
+          "label": "Business plan hôtel / resort",
+          "description": "Business plan complet pour création hôtel ou resort"
+        },
+        "performance_hoteliere": {
+          "label": "Rapport performance hôtelière",
+          "description": "Rapport mensuel KPIs hôteliers (TO, ADR, RevPAR, GOP)"
+        },
+        "plan_communication": {
+          "label": "Plan de communication 360°",
+          "description": "Stratégie communication multicanale pour marque/produit"
+        },
+        "brief_creatif": {
+          "label": "Brief créatif campagne",
+          "description": "Brief créatif pour agence de communication"
+        },
+        "bilan_campagne_com": {
+          "label": "Rapport bilan campagne",
+          "description": "Bilan de performance d'une campagne de communication"
+        }
+      }
+    }
   },
   "traduction": {
     "title": "Traduction de documents",

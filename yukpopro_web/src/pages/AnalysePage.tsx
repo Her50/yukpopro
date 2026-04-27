@@ -170,7 +170,7 @@ export const AnalysePage = () => {
                     ) : (
                       <div className="text-xs text-slate-400">
                         <span>Valeurs uniques: <span className="text-white">{String((st as Record<string, unknown>).nb_uniques ?? "-")}</span></span>
-                        {(st as Record<string, unknown>).valeur_la_plus_frequente && (
+                        {Boolean((st as Record<string, unknown>).valeur_la_plus_frequente) && (
                           <span className="ml-2">Plus fréquent: <span className="text-white">{String((st as Record<string, unknown>).valeur_la_plus_frequente)}</span></span>
                         )}
                       </div>

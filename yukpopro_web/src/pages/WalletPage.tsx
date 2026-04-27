@@ -121,7 +121,7 @@ export const WalletPage = () => {
             <option value={90}>{t("wallet.period90")}</option>
             <option value={365}>{t("wallet.period365")}</option>
           </select>
-          <Button variant="outline" size="sm" onClick={charger}>
+          <Button variant="ghost" size="sm" onClick={charger}>
             <RefreshCw className="w-4 h-4 mr-1" /> {t("wallet.refresh")}
           </Button>
         </div>
@@ -315,7 +315,7 @@ export const WalletPage = () => {
                   >
                     <td className="py-2 pr-2 text-xs">{new Date(h.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td>
                     <td className="py-2 pr-2">
-                      <Badge variant="outline" className="text-xs">{MODULE_LABELS[h.module] || h.module}</Badge>
+                      <Badge variant="slate">{MODULE_LABELS[h.module] || h.module}</Badge>
                     </td>
                     <td className="py-2 pr-2 text-right text-xs" style={{ color: "var(--ykp-text-muted)" }}>
                       {(h.tokens_input + h.tokens_output).toLocaleString()}

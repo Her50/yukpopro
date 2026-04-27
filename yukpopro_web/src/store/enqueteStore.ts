@@ -6,7 +6,7 @@ import { create } from "zustand";
  * études et leurs détails sont rechargés depuis le backend).
  */
 
-type DetailTab = "audio" | "formulaire" | "analyse" | "rapport";
+type DetailTab = "audio" | "formulaire" | "collecte" | "analyse" | "rapport";
 type FormView = "none" | "builder" | "preview" | "analytics" | "dictionnaire" | "plan";
 
 interface CreateForm {

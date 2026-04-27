@@ -555,7 +555,272 @@
     "writingDocumentHelper": "Yukpo is building a high-quality professional document",
     "previewTruncated": "… (preview truncated)",
     "rapportPlaceholder": "Your DOCX report will appear here",
-    "slidesPlaceholder": "Your PPTX presentation will appear here"
+    "slidesPlaceholder": "Your PPTX presentation will appear here",
+    "templates": {
+      "categories": {
+        "comptabilite_finance": "Accounting & Finance",
+        "juridique_conformite": "Legal & Compliance",
+        "rh_management": "HR & Management",
+        "banque_microfinance": "Banking & Microfinance",
+        "commerce_business": "Commerce & Business",
+        "ong_projets": "NGO & Projects",
+        "ingenierie_btp": "Engineering & Construction",
+        "sante_publique": "Public Health & Epidemiology",
+        "recherche_protocoles": "Research & Study Protocols",
+        "suivi_evaluation": "Monitoring & Evaluation",
+        "assurance_cima": "Insurance & CIMA Reinsurance",
+        "energie_mines": "Energy, Mining & Oil",
+        "agriculture": "Agriculture & Agribusiness",
+        "transport_logistique": "Transport & Logistics",
+        "tech_digital": "Tech, Digital & IS",
+        "education_formation": "Education & Training",
+        "immobilier": "Real Estate & Construction",
+        "tourisme": "Tourism & Hospitality",
+        "communication_marketing": "Communication & Marketing"
+      },
+      "items": {
+        "bilan_syscohada": {
+          "label": "Annotated SYSCOHADA balance sheet",
+          "description": "Annual balance sheet with key ratio analysis (liquidity, solvency, profitability)"
+        },
+        "note_is_tva": {
+          "label": "Corporate tax + VAT calculation note",
+          "description": "Detailed corporate income tax and collected/deductible VAT calculation"
+        },
+        "audit_interne": {
+          "label": "Internal audit report",
+          "description": "Audit report on accounting procedures and internal control points"
+        },
+        "presentation_resultats": {
+          "label": "Financial results presentation",
+          "description": "Slide deck presenting results to the executive committee"
+        },
+        "note_juridique_ohada": {
+          "label": "OHADA legal note",
+          "description": "Analysis of a legal issue under OHADA law"
+        },
+        "due_diligence": {
+          "label": "Due diligence report",
+          "description": "Legal and financial due diligence for acquisition or partnership"
+        },
+        "conformite_cima": {
+          "label": "CIMA compliance note",
+          "description": "CIMA Code compliance check for insurance companies"
+        },
+        "bilan_social": {
+          "label": "Social audit report",
+          "description": "Annual social audit — workforce, compensation, training, absenteeism"
+        },
+        "restructuration_rh": {
+          "label": "HR restructuring plan",
+          "description": "Workforce restructuring note with social plan"
+        },
+        "formation_management": {
+          "label": "Training seminar slides",
+          "description": "Professional training material (leadership, team management, etc.)"
+        },
+        "analyse_credit_pme": {
+          "label": "SME credit analysis report",
+          "description": "Credit risk analysis for an SME — scoring and decision"
+        },
+        "ratios_cobac": {
+          "label": "COBAC prudential ratios note",
+          "description": "Calculation and commentary on COBAC prudential ratios"
+        },
+        "comite_credit": {
+          "label": "Credit committee presentation",
+          "description": "Slide deck presenting a file to the credit committee"
+        },
+        "business_plan": {
+          "label": "Complete business plan",
+          "description": "Structured business plan for creation or business development"
+        },
+        "analyse_marche": {
+          "label": "Market analysis report",
+          "description": "Sectoral market study for a sub-Saharan African country"
+        },
+        "pitch_deck": {
+          "label": "Investor pitch deck",
+          "description": "Fundraising presentation for African / international investors"
+        },
+        "prospection": {
+          "label": "Sales prospecting report",
+          "description": "Prospect analysis and commercial development strategy"
+        },
+        "rapport_activites_ong": {
+          "label": "NGO activity report",
+          "description": "Annual activity report for donors and partners"
+        },
+        "note_conceptuelle": {
+          "label": "Project concept note",
+          "description": "Concept note for submission to a call for proposals / donor"
+        },
+        "presentation_bailleur": {
+          "label": "Donor presentation",
+          "description": "Slide deck presenting a project to a donor or steering committee"
+        },
+        "avancement_travaux": {
+          "label": "Construction progress report",
+          "description": "Monthly progress report for a construction site"
+        },
+        "note_technique_etude": {
+          "label": "Technical study note",
+          "description": "Technical note for an engineering or preliminary project study"
+        },
+        "situation_epidemio": {
+          "label": "Epidemiological situation report",
+          "description": "Weekly or monthly epidemiological situation report"
+        },
+        "protocole_enquete_epidemio": {
+          "label": "Epidemiological survey protocol",
+          "description": "Complete protocol for public health field investigation"
+        },
+        "evaluation_programme_sante": {
+          "label": "Health program evaluation report",
+          "description": "Mid-term or final evaluation of a health program"
+        },
+        "formation_sante_publique": {
+          "label": "Training — Public health tools",
+          "description": "Training material on public health tools and methods"
+        },
+        "presentation_programme_sante": {
+          "label": "Health program presentation",
+          "description": "Slide deck for a public health program or report"
+        },
+        "protocole_etude": {
+          "label": "Study / research protocol",
+          "description": "Complete scientific protocol for a study or research project"
+        },
+        "rapport_enquete": {
+          "label": "Survey / poll report",
+          "description": "Results report of a quantitative or qualitative survey"
+        },
+        "presentation_protocole": {
+          "label": "Protocol / results presentation",
+          "description": "Slide deck presenting a protocol or study results"
+        },
+        "rapport_se": {
+          "label": "M&E monitoring report",
+          "description": "Quarterly or semi-annual monitoring & evaluation report for a project"
+        },
+        "cadre_mesure_performance": {
+          "label": "Performance measurement framework",
+          "description": "PMF document / project indicators dashboard"
+        },
+        "presentation_se_bailleur": {
+          "label": "M&E donor presentation",
+          "description": "Monitoring report slides for the donor or steering committee"
+        },
+        "evaluation_finale": {
+          "label": "Final project evaluation",
+          "description": "Final evaluation report following OECD/DAC criteria"
+        },
+        "solvabilite_cima": {
+          "label": "CIMA solvency report",
+          "description": "Annual solvency report under the revised CIMA Code"
+        },
+        "tarification_actuarielle": {
+          "label": "Actuarial pricing note",
+          "description": "Actuarial pricing note for an insurance product"
+        },
+        "gestion_sinistre": {
+          "label": "Claims management report",
+          "description": "Expert report and settlement of a complex claim"
+        },
+        "ca_assurance": {
+          "label": "Board of directors presentation",
+          "description": "Board presentation slides for an insurance company"
+        },
+        "eies_minier": {
+          "label": "Environmental impact assessment",
+          "description": "Full ESIA for a mining/energy project (AfDB/IFC standard)"
+        },
+        "production_mensuelle": {
+          "label": "Monthly production report",
+          "description": "Monthly production report for energy / mining"
+        },
+        "rentabilite_mines": {
+          "label": "Project profitability study",
+          "description": "IRR/NPV financial analysis for an energy or mining project"
+        },
+        "plan_agricole": {
+          "label": "Agricultural development plan",
+          "description": "Business plan for an agricultural / agribusiness operation"
+        },
+        "etude_filiere": {
+          "label": "Agricultural value chain study",
+          "description": "Value chain analysis (cocoa, coffee, cotton, rice, etc.) for CEMAC/WAEMU countries"
+        },
+        "campagne_agricole": {
+          "label": "Agricultural campaign report",
+          "description": "Campaign review — yields, sales, margins"
+        },
+        "audit_supply_chain": {
+          "label": "Logistics study — supply chain",
+          "description": "Supply chain audit with optimization recommendations"
+        },
+        "transport_urbain": {
+          "label": "Urban transport plan",
+          "description": "Master transport plan study for a local authority"
+        },
+        "bp_flotte_transport": {
+          "label": "Transport fleet business plan",
+          "description": "Financing file for creating/expanding a transport fleet"
+        },
+        "cdc_si": {
+          "label": "IS specifications document",
+          "description": "Functional and technical specifications for an IS project"
+        },
+        "audit_cybersecurite": {
+          "label": "Cybersecurity audit report",
+          "description": "IT security audit with ISO 27001 recommendations"
+        },
+        "pitch_tech_startup": {
+          "label": "Tech startup pitch deck",
+          "description": "Fundraising pitch for an African tech startup"
+        },
+        "plan_strategique_etablissement": {
+          "label": "Institution strategic plan",
+          "description": "Multi-year strategic plan for a school or university"
+        },
+        "rapport_pedagogique": {
+          "label": "Annual academic report",
+          "description": "Annual report of academic activities"
+        },
+        "module_formation_pro": {
+          "label": "Professional training module",
+          "description": "Certifying professional training material"
+        },
+        "faisabilite_immobiliere": {
+          "label": "Real estate feasibility study",
+          "description": "Technical, legal and financial study of a real estate project"
+        },
+        "expertise_immobiliere": {
+          "label": "Real estate appraisal report",
+          "description": "Appraisal and valuation report for a real estate asset"
+        },
+        "bp_hotel": {
+          "label": "Hotel / resort business plan",
+          "description": "Complete business plan for creating a hotel or resort"
+        },
+        "performance_hoteliere": {
+          "label": "Hotel performance report",
+          "description": "Monthly hotel KPI report (Occ, ADR, RevPAR, GOP)"
+        },
+        "plan_communication": {
+          "label": "360° communication plan",
+          "description": "Multichannel communication strategy for a brand/product"
+        },
+        "brief_creatif": {
+          "label": "Campaign creative brief",
+          "description": "Creative brief for a communication agency"
+        },
+        "bilan_campagne_com": {
+          "label": "Campaign review report",
+          "description": "Performance review of a communication campaign"
+        }
+      }
+    }
   },
   "traduction": {
     "title": "Document Translation",

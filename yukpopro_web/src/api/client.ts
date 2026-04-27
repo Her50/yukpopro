@@ -1,5 +1,10 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
+
+type AxiosErrorLike<T = unknown> = {
+  response?: { status?: number; data?: T };
+  message?: string;
+};
 import type {
   CopiloteResponse,
   AgentChatRequest,
@@ -17,14 +22,14 @@ import type {
 
 // ── Axios instance ────────────────────────────────────────────────────────────
 
-const http: AxiosInstance = axios.create({
+const http: any = axios.create({
   baseURL: "/api/v1",
   timeout: 120_000,  // 2 min — agents Yukpo peuvent être lents
   headers: { "Content-Type": "application/json" },
 });
 
 // Injecter le token JWT à chaque requête
-http.interceptors.request.use((config) => {
+http.interceptors.request.use((config: any) => {
   const token = localStorage.getItem("yukpopro_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
@@ -32,8 +37,8 @@ http.interceptors.request.use((config) => {
 
 // Gestion centralisée des erreurs
 http.interceptors.response.use(
-  (res) => res,
-  (error: AxiosError<{ detail?: string }>) => {
+  (res: any) => res,
+  (error: AxiosErrorLike<{ detail?: string }>) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("yukpopro_token");
       localStorage.removeItem("yukpopro_user");
@@ -503,12 +508,26 @@ export const adminApi = {
     const { data } = await http.get("/pro/admin/stats");
     return data;
   },
-  statsAvancees: async () => {
-    const { data } = await http.get("/pro/admin/stats/avancees");
+  statsAvancees: async (params: { pays?: string; continent?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.pays) qs.set("pays", params.pays);
+    if (params.continent) qs.set("continent", params.continent);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    const { data } = await http.get(`/pro/admin/stats/avancees${suffix}`);
     return data;
   },
-  statsRevenus: async () => {
-    const { data } = await http.get("/pro/admin/stats/revenus");
+  statsRevenus: async (params: { date_debut?: string; date_fin?: string; pays?: string; continent?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.date_debut) qs.set("date_debut", params.date_debut);
+    if (params.date_fin) qs.set("date_fin", params.date_fin);
+    if (params.pays) qs.set("pays", params.pays);
+    if (params.continent) qs.set("continent", params.continent);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    const { data } = await http.get(`/pro/admin/stats/revenus${suffix}`);
+    return data;
+  },
+  geoOptions: async () => {
+    const { data } = await http.get("/pro/admin/geo/options");
     return data;
   },
   changerMetier: async (userId: number, metier: string, pays?: string) => {
@@ -534,7 +553,21 @@ export const adminApi = {
       { montant, motif });
     return data;
   },
-  promotion: async (montant: number, cible: "tous" | "plan" | "ids", opts: { plan?: string; user_ids?: number[]; motif?: string } = {}) => {
+  promotion: async (
+    montant: number,
+    cible: "tous" | "plan" | "ids" | "consommation",
+    opts: {
+      plan?: string;
+      user_ids?: number[];
+      motif?: string;
+      seuil_credits_min?: number;
+      seuil_credits_max?: number;
+      seuil_appels_min?: number;
+      periode_jours?: number;
+      pays?: string;
+      continent?: string;
+    } = {},
+  ) => {
     const { data } = await http.post(`/pro/admin/promotions`, { montant, cible, ...opts });
     return data;
   },

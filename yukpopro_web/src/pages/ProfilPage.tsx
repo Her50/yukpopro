@@ -248,7 +248,7 @@ export const ProfilPage = () => {
   useEffect(() => {
     if (!profil) profilApi.get().then(setProfil).catch(console.error);
     else {
-      setCvAvailable(profil.cv_disponible ?? false);
+      setCvAvailable((profil as any).cv_disponible ?? false);
       if ((profil as any).has_photo && !photoUrl) {
         profilApi.getPhotoBlobUrl().then(setPhotoUrl).catch(() => {});
       }
