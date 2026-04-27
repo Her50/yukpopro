@@ -793,6 +793,37 @@ const RevenusTab = () => {
 
   const resetPeriode = () => { setDateDebut(""); setDateFin(""); };
 
+  const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
+  const appliquerPreset = (preset: "semaine" | "mois" | "trimestre" | "annee" | "7j" | "30j" | "90j") => {
+    const now = new Date();
+    let debut = new Date(now);
+    let fin = new Date(now);
+    if (preset === "semaine") {
+      const jour = (now.getDay() + 6) % 7; // lundi = 0
+      debut = new Date(now); debut.setDate(now.getDate() - jour);
+    } else if (preset === "mois") {
+      debut = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (preset === "trimestre") {
+      const q = Math.floor(now.getMonth() / 3);
+      debut = new Date(now.getFullYear(), q * 3, 1);
+    } else if (preset === "annee") {
+      debut = new Date(now.getFullYear(), 0, 1);
+    } else if (preset === "7j") {
+      debut = new Date(now); debut.setDate(now.getDate() - 6);
+    } else if (preset === "30j") {
+      debut = new Date(now); debut.setDate(now.getDate() - 29);
+    } else if (preset === "90j") {
+      debut = new Date(now); debut.setDate(now.getDate() - 89);
+    }
+    const d = fmtISO(debut), f = fmtISO(fin);
+    setDateDebut(d); setDateFin(f);
+    setLoading(true);
+    adminApi.statsRevenus({
+      date_debut: d, date_fin: f,
+      pays: geoFilter.pays || undefined, continent: geoFilter.continent || undefined,
+    }).then(setData).catch(() => toast.error("Erreur de chargement")).finally(() => setLoading(false));
+  };
+
   if (loading || !data) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>;
 
   const success = data.par_statut.success || 0;
@@ -813,7 +844,17 @@ const RevenusTab = () => {
   return (
     <div className="space-y-6">
       {/* Filtres */}
-      <Card className="p-4">
+      <Card className="p-4 space-y-3">
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("semaine")}>Cette semaine</Button>
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("mois")}>Ce mois</Button>
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("trimestre")}>Ce trimestre</Button>
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("annee")}>Cette année</Button>
+          <span className="border-l mx-1" style={{ borderColor: "var(--ykp-border)" }} />
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("7j")}>7 derniers jours</Button>
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("30j")}>30 derniers jours</Button>
+          <Button size="sm" variant="ghost" onClick={() => appliquerPreset("90j")}>90 derniers jours</Button>
+        </div>
         <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="text-xs uppercase font-semibold block mb-1" style={{ color: "var(--ykp-text-muted)" }}>Du</label>
