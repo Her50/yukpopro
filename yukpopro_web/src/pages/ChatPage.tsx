@@ -152,6 +152,8 @@ export const ChatPage = () => {
             contexteConversation: content,
           });
         });
+        const nb = res.fichiers_generes.length;
+        toast.success(nb === 1 ? "Document prêt — lien de téléchargement disponible" : `${nb} documents prêts au téléchargement`);
       }
     } catch (err: any) {
       const detail = err?.response?.data?.detail;
@@ -946,23 +948,39 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
           </div>
         )}
 
-        {/* Fichiers générés (téléchargement) */}
+        {/* Fichiers générés — carte téléchargement proéminente */}
         {message.fichiers && message.fichiers.length > 0 && !message.loading && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {message.fichiers.map((f, i) => {
-              const nomFichier = f.split(/[/\\]/).pop() || f;
-              return (
-                <a
-                  key={i}
-                  href={`/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`}
-                  download={nomFichier}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yukpo-700 border border-yukpo-500 hover:bg-yukpo-600 text-white text-xs font-medium transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Télécharger — {nomFichier}
-                </a>
-              );
-            })}
+          <div className="mt-4 rounded-xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-yukpo-500/10 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <Download className="w-4 h-4 text-emerald-300" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-emerald-100">
+                  {message.fichiers.length === 1 ? "Document prêt à télécharger" : `${message.fichiers.length} documents prêts à télécharger`}
+                </div>
+                <div className="text-[11px] text-slate-400">Cliquez pour récupérer votre fichier — également disponible dans <a href="/documents" className="underline hover:text-yukpo-300">Mes documents</a></div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {message.fichiers.map((f, i) => {
+                const nomFichier = f.split(/[/\\]/).pop() || f;
+                const ext = (nomFichier.split(".").pop() || "").toLowerCase();
+                const labelExt = ext === "docx" ? "Word" : ext === "pptx" ? "PowerPoint" : ext === "pdf" ? "PDF" : ext === "xlsx" ? "Excel" : ext.toUpperCase();
+                return (
+                  <a
+                    key={i}
+                    href={`/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`}
+                    download={nomFichier}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Télécharger {labelExt}</span>
+                    <span className="text-xs font-normal opacity-80 truncate max-w-[180px]">— {nomFichier}</span>
+                  </a>
+                );
+              })}
+            </div>
           </div>
         )}
 
