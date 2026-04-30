@@ -82,7 +82,8 @@ async def sauvegarder_etude(etude, user_id: int) -> None:
 
     try:
         data = _etude_to_dict(etude)
-        now = datetime.now(timezone.utc)
+        # Colonnes TIMESTAMP WITHOUT TIME ZONE → datetime naïf requis par asyncpg
+        now = datetime.utcnow()
         async with async_session_maker() as session:
             result = await session.get(EtudeDB, etude.etude_id)
             if result:
