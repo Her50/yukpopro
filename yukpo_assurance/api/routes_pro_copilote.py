@@ -999,6 +999,7 @@ async def _orchestrer_llm(
     ia_client,
     a_fichiers: bool = False,
     contenu_fichiers: str = "",
+    dernier_doc: dict | None = None,
 ) -> dict:
     """
     Orchestrateur IA central — remplace toutes les détections par mots-clés.
@@ -1021,12 +1022,29 @@ async def _orchestrer_llm(
     pays   = (getattr(profil, "pays",   "") or "Afrique")       if profil else "Afrique"
     fichiers_ctx = "Fichiers joints: OUI — l'utilisateur a envoyé des documents" if a_fichiers else "Fichiers joints: NON"
 
+    # Contexte du dernier document généré dans la session — permet au LLM de
+    # détecter sémantiquement (sans regex) une intention de modification.
+    dernier_doc_ctx = ""
+    if dernier_doc and dernier_doc.get("titre"):
+        _apercu = (dernier_doc.get("apercu") or "")[:600]
+        dernier_doc_ctx = (
+            f"\nDOCUMENT PRÉCÉDEMMENT GÉNÉRÉ DANS CETTE SESSION :\n"
+            f"  - Titre : {dernier_doc.get('titre')}\n"
+            f"  - Type : {dernier_doc.get('type_doc')}\n"
+            f"  - Format : {dernier_doc.get('format')}\n"
+            f"  - Aperçu : {_apercu}\n"
+            f"Si le message courant fait référence à CE document (modification, "
+            f"complément, reformulation, version alternative, ajustement de "
+            f"longueur/style, plainte sur le contenu) → mettre mode_edition=true "
+            f"ET reprendre le même type_doc/sous_type que le précédent.\n"
+        )
+
     prompt = f"""Tu es l'orchestrateur de Yukpo Pro, plateforme professionnelle africaine.
 Analyse ce message et retourne UNIQUEMENT un objet JSON valide. Pas de markdown, pas d'explication.
 
 Message: \"{message[:700]}\"
 Profil: {metier} | Pays: {pays}
-{fichiers_ctx}
+{fichiers_ctx}{dernier_doc_ctx}
 
 RÈGLES DE CLASSIFICATION:
 - "generateur" → l'utilisateur veut CRÉER/GÉNÉRER/RÉDIGER un document téléchargeable, OU demande si Yukpo PEUT créer/générer un tel document (même sous forme de question comme "est-ce que tu peux me générer...", "peux-tu créer...", "tu peux faire un rapport..."). Dans ce cas, générer directement le document demandé.
@@ -1097,8 +1115,20 @@ MODULES DISPONIBLES (pour modules_suggeres) :
 
 modules_suggeres : liste de 0 à 2 clés de modules dont la pertinence est évidente pour ce message. Laisser [] si aucun module n'est spécifiquement adapté à la demande (conversation générale, question juridique, etc.).
 
+MODE_EDITION (booléen) :
+  - true : SI le message demande de modifier/compléter/reformuler/ajuster/améliorer
+    le DOCUMENT PRÉCÉDEMMENT GÉNÉRÉ ci-dessus (formulations explicites OU
+    implicites — toute référence sémantique au précédent doc compte).
+    Indices : "modifie/ajoute/complète/change/reformule/développe/réduis",
+    "ce rapport/ce document/celui-ci/le précédent",
+    "fais plus court/plus long/plus chiffré", "j'aimerais une autre version",
+    "le précédent était trop X", "tu n'as pas inclus Y", références à des
+    sections/chapitres/tableaux du précédent, etc.
+    Quand mode_edition=true → reprendre EXACTEMENT type_doc et sous_type du précédent.
+  - false : sujet totalement nouveau, ou pas de doc précédent.
+
 JSON REQUIS (tous les champs, null si non applicable):
-{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "mode": "standard", "style_specifique": null, "langue_cible": null, "format_cible": null, "confiance": 0.9, "modules_suggeres": []}}"""
+{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "mode": "standard", "style_specifique": null, "mode_edition": false, "langue_cible": null, "format_cible": null, "confiance": 0.9, "modules_suggeres": []}}"""
 
     try:
         reponse = await asyncio.wait_for(
@@ -2291,12 +2321,30 @@ async def copilote_chat(
     # ── Étape 0b : Orchestration LLM — classification unifiée ───────────────
     # Un seul appel gpt-4o-mini remplace les 3 détections par mots-clés + la
     # détection d'agent. Fallback automatique vers les mots-clés si LLM indispo.
+    # On lui passe AUSSI le dernier doc généré dans la session pour qu'il
+    # détecte sémantiquement (sans regex) une intention de modification.
+    _dernier_doc_session = None
+    for _m in reversed(session.get("messages", [])[-12:]):
+        if (_m.get("role") == "assistant"
+                and (_m.get("meta") or {}).get("agent_utilise") == "generateur"
+                and (_m.get("meta") or {}).get("titre")):
+            _dernier_doc_session = {
+                "titre":    _m["meta"].get("titre"),
+                "type_doc": _m["meta"].get("type_doc"),
+                "format":   _m["meta"].get("format"),
+                "apercu":   (_m["meta"].get("apercu") or "")[:600],
+                "sujet":    _m["meta"].get("sujet"),
+                "chemin_fichier": _m["meta"].get("chemin_fichier"),
+            }
+            break
+
     orchestration = await _orchestrer_llm(
         message=req.message,
         profil=profil,
         ia_client=ia_client,
         a_fichiers=bool(req.fichiers),
         contenu_fichiers=contenu_fichiers,
+        dernier_doc=_dernier_doc_session,
     )
     _intention      = orchestration["intention"]
     _sous_type      = orchestration.get("sous_type") or ""
@@ -2308,6 +2356,7 @@ async def copilote_chat(
     _lc_orch        = orchestration.get("langue_cible") or "en"
     _fc_orch        = orchestration.get("format_cible") or _format_orch
     _modules_llm    = orchestration.get("modules_suggeres") or []  # suggestions sémantiques LLM
+    _mode_edition_llm = bool(orchestration.get("mode_edition"))
     # Validation
     if _format_orch not in {"docx", "pdf", "pptx", "xlsx", "markdown"}:
         _format_orch = "docx"
@@ -2361,60 +2410,43 @@ async def copilote_chat(
     # de l'intention « modifier le rapport précédent » dans la session.
     _effective_doc_ref = req.document_ref
 
-    # Auto-détection : l'utilisateur veut MODIFIER le dernier doc généré
-    # On vérifie même si l'orchestrateur a classé en 'conversation' — un
-    # message court type « complète la section X » sera mal classé sinon.
-    if _effective_doc_ref is None and _intention in ("generateur", "conversation", "agent_metier"):
-        _MODIFICATION_PATTERNS = (
-            "modifie", "modifier", "modification",
-            "ajoute", "ajouter", "rajoute", "rajouter",
-            "complete", "complète", "completer", "compléter",
-            "enleve", "enlève", "enlever", "supprime", "supprimer",
-            "remplace", "remplacer",
-            "change", "changer",
-            "ameliore", "améliore", "ameliorer", "améliorer",
-            "reformule", "reformuler",
-            "developpe", "développe", "developper", "développer",
-            "approfondi", "approfondir",
-            "ce rapport", "ce document", "ce fichier", "celui-ci", "celui ci",
-            "le rapport precedent", "le rapport précédent",
-            "le doc precedent", "le doc précédent",
-            "le document genere", "le document généré",
-            "tu viens de generer", "tu viens de générer",
-            "tu as genere", "tu as généré",
-            "que tu as fait", "que tu viens de faire",
-            "dans le rapport", "dans le document",
-            "section ", "chapitre ", "paragraphe ",
-            "page ", "tableau ",
-            "rendre plus", "rends-le plus", "rends le plus",
-        )
-        _msg_low_modif = (req.message or "").lower()
-        _est_modification = any(p in _msg_low_modif for p in _MODIFICATION_PATTERNS)
+    # Décision sémantique de l'orchestrateur LLM (si dernier doc disponible).
+    # Fallback regex uniquement si le LLM n'a pas tranché ET qu'un doc existe.
+    if _effective_doc_ref is None and _dernier_doc_session is not None:
+        _est_modification = _mode_edition_llm
+        if not _est_modification:
+            # Garde-fou regex (cas où le LLM est indisponible / a sous-classifié)
+            _MODIFICATION_PATTERNS_FALLBACK = (
+                "modifie", "modifier", "modification", "ajoute", "ajouter",
+                "complete", "complète", "completer", "compléter",
+                "remplace", "reformule", "ameliore", "améliore",
+                "ce rapport", "ce document", "le précédent", "le precedent",
+                "tu viens de", "fais plus", "rends-le", "rends le",
+                "dans le rapport", "dans le document",
+            )
+            _msg_low_modif = (req.message or "").lower()
+            _est_modification = any(p in _msg_low_modif for p in _MODIFICATION_PATTERNS_FALLBACK)
+            if _est_modification:
+                logger.info("[Copilote] mode_edition activé via fallback regex (LLM n'a pas tranché)")
         if _est_modification:
-            # Retrouver le dernier document généré dans la session
-            _last_gen_meta = None
-            for _m in reversed(session.get("messages", [])[-12:]):
-                if (_m.get("role") == "assistant"
-                        and (_m.get("meta") or {}).get("agent_utilise") == "generateur"
-                        and (_m.get("meta") or {}).get("titre")):
-                    _last_gen_meta = _m.get("meta") or {}
-                    break
-            if _last_gen_meta:
-                from types import SimpleNamespace as _SNS
-                _effective_doc_ref = _SNS(
-                    id=_last_gen_meta.get("doc_id") or 0,
-                    titre=_last_gen_meta.get("titre", "Document précédent"),
-                    type_doc=_last_gen_meta.get("type_doc") or "rapport_analyse",
-                    contenu_genere=_last_gen_meta.get("apercu", "") or "",
-                    meta=_last_gen_meta,
-                )
-                # Force l'intention generateur si l'orchestrateur s'est trompé
-                _intention = "generateur"
-                logger.info(
-                    f"[Copilote] Modification détectée → mode édition activé "
-                    f"sur dernier doc '{(_last_gen_meta.get('titre') or '')[:50]}' "
-                    f"(type={_last_gen_meta.get('type_doc')})"
-                )
+            from types import SimpleNamespace as _SNS
+            _effective_doc_ref = _SNS(
+                id=0,
+                titre=_dernier_doc_session.get("titre", "Document précédent"),
+                type_doc=_dernier_doc_session.get("type_doc") or "rapport_analyse",
+                contenu_genere=_dernier_doc_session.get("apercu", "") or "",
+                meta=_dernier_doc_session,
+            )
+            # Force l'intention generateur si l'orchestrateur a classé ailleurs
+            _intention = "generateur"
+            # Préserve type/sous_type du précédent si LLM ne les a pas répétés
+            if not _type_doc_o:
+                _type_doc_o = _dernier_doc_session.get("type_doc") or "rapport_analyse"
+            logger.info(
+                f"[Copilote] mode_edition={_est_modification} (LLM={_mode_edition_llm}) "
+                f"sur '{(_dernier_doc_session.get('titre') or '')[:50]}' "
+                f"(type={_dernier_doc_session.get('type_doc')})"
+            )
 
     if _effective_doc_ref is not None:
         _intention  = "generateur"
