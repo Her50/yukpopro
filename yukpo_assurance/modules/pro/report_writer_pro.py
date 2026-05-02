@@ -1252,6 +1252,7 @@ class ReportWriterPro:
             from docx.shared import Pt, RGBColor, Cm, Inches
             from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.oxml.ns import qn
+            from docx.oxml import OxmlElement
         except ImportError:
             # python-docx non disponible — retourner le markdown sauvegardé
             logger.warning("[ReportWriter] python-docx non disponible — génération Markdown uniquement")
@@ -1267,13 +1268,84 @@ class ReportWriterPro:
             section.bottom_margin = Cm(2.5)
             section.left_margin   = Cm(3)
             section.right_margin  = Cm(2.5)
+            # Marges header/footer
+            section.header_distance = Cm(1.2)
+            section.footer_distance = Cm(1.2)
+            section.different_first_page_header_footer = True  # pas de header/footer sur page de garde
+
+        # ── En-tête + pied de page (à partir de la page 2) ────────────────
+        for section in sections_doc:
+            # Header : sujet à gauche, ligne séparatrice
+            header = section.header
+            h_para = header.paragraphs[0]
+            h_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            sujet_court = (sujet[:80] + "…") if len(sujet) > 80 else sujet
+            h_run = h_para.add_run(sujet_court)
+            h_run.font.size = Pt(8.5)
+            h_run.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+            h_run.italic = True
+            # Bordure basse pour séparer le header
+            h_pPr = h_para._element.get_or_add_pPr()
+            h_pBdr = OxmlElement("w:pBdr")
+            h_bot = OxmlElement("w:bottom")
+            h_bot.set(qn("w:val"), "single"); h_bot.set(qn("w:sz"), "4")
+            h_bot.set(qn("w:space"), "1"); h_bot.set(qn("w:color"), "C0C8D2")
+            h_pBdr.append(h_bot); h_pPr.append(h_pBdr)
+
+            # Footer : "Page X / Y" centré + numéro auto
+            footer = section.footer
+            f_para = footer.paragraphs[0]
+            f_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            def _add_field(paragraph, instr_text: str):
+                """Insère un champ Word natif (PAGE, NUMPAGES…)."""
+                fld_run = paragraph.add_run()
+                fld_char_begin = OxmlElement("w:fldChar")
+                fld_char_begin.set(qn("w:fldCharType"), "begin")
+                fld_run._r.append(fld_char_begin)
+                instr = OxmlElement("w:instrText")
+                instr.set(qn("xml:space"), "preserve")
+                instr.text = instr_text
+                fld_run._r.append(instr)
+                fld_char_end = OxmlElement("w:fldChar")
+                fld_char_end.set(qn("w:fldCharType"), "end")
+                fld_run._r.append(fld_char_end)
+                fld_run.font.size = Pt(9)
+                fld_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+
+            f_run_pre = f_para.add_run("Page ")
+            f_run_pre.font.size = Pt(9); f_run_pre.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+            _add_field(f_para, "PAGE")
+            f_run_sep = f_para.add_run(" / ")
+            f_run_sep.font.size = Pt(9); f_run_sep.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+            _add_field(f_para, "NUMPAGES")
 
         # Compteurs pour numérotation automatique
         _compteur_tableau = [0]
         _compteur_figure  = [0]
 
         # ── Page de garde ─────────────────────────────────────────────────
-        # Logo / en-tête (texte si pas d'image)
+        # Logo entreprise si disponible dans le profil (logo_url ou logo_b64)
+        logo_inserted = False
+        if self._profil:
+            logo_b64 = getattr(self._profil, "logo_b64", None) or getattr(self._profil, "logo_base64", None)
+            if logo_b64:
+                try:
+                    import base64 as _b64, io as _io, tempfile as _tmp
+                    _data = _b64.b64decode(logo_b64.split(",")[-1] if "," in logo_b64 else logo_b64)
+                    _suf = ".png" if _data[:4] == b"\x89PNG" else ".jpg"
+                    _f = _tmp.NamedTemporaryFile(delete=False, suffix=_suf)
+                    _f.write(_data); _f.close()
+                    p_logo = doc.add_paragraph()
+                    p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_logo.add_run().add_picture(_f.name, width=Inches(1.8))
+                    import os as _os; _os.unlink(_f.name)
+                    doc.add_paragraph()
+                    logo_inserted = True
+                except Exception as _le:
+                    logger.debug(f"[ReportWriter] Logo non inséré : {_le}")
+
+        # Bandeau "Rapport professionnel"
         p_header = doc.add_paragraph()
         p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = p_header.add_run("RAPPORT PROFESSIONNEL")
@@ -1333,6 +1405,41 @@ class ReportWriterPro:
         run_date.font.size = Pt(10)
         run_date.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
 
+        doc.add_page_break()
+
+        # ── Sommaire / Table des matières (champ Word natif) ──────────────
+        # L'utilisateur clique-droit > "Mettre à jour les champs" pour
+        # peupler le sommaire automatiquement à partir des Heading 1/2/3.
+        p_toc_titre = doc.add_paragraph()
+        p_toc_titre.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        run_toc_titre = p_toc_titre.add_run("SOMMAIRE")
+        run_toc_titre.bold = True
+        run_toc_titre.font.size = Pt(16)
+        run_toc_titre.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
+        doc.add_paragraph()
+
+        p_toc = doc.add_paragraph()
+        toc_run = p_toc.add_run()
+        # fldChar begin
+        fld_b = OxmlElement("w:fldChar")
+        fld_b.set(qn("w:fldCharType"), "begin"); fld_b.set(qn("w:dirty"), "true")
+        toc_run._r.append(fld_b)
+        # instrText : TOC \o "1-3" \h \z \u
+        instr = OxmlElement("w:instrText")
+        instr.set(qn("xml:space"), "preserve")
+        instr.text = 'TOC \\o "1-3" \\h \\z \\u'
+        toc_run._r.append(instr)
+        # fldChar separate (placeholder text)
+        fld_s = OxmlElement("w:fldChar"); fld_s.set(qn("w:fldCharType"), "separate")
+        toc_run._r.append(fld_s)
+        # placeholder visible avant refresh
+        ph = OxmlElement("w:r")
+        ph_t = OxmlElement("w:t")
+        ph_t.text = "Cliquez-droit ici puis « Mettre à jour les champs » pour générer le sommaire."
+        ph.append(ph_t); toc_run._r.append(ph)
+        # fldChar end
+        fld_e = OxmlElement("w:fldChar"); fld_e.set(qn("w:fldCharType"), "end")
+        toc_run._r.append(fld_e)
         doc.add_page_break()
 
         # ── Corps du rapport (rendu ligne par ligne, robuste) ─────────────
