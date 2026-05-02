@@ -65,8 +65,16 @@ notebooks/
 *.zip
 *.tar.gz
 
-# Node.js (si présent)
+# Node.js (récursif — frontend/node_modules etc.)
 node_modules/
+**/node_modules/
+**/node_modules
+**/dist/
+**/.next/
+**/.cache/
+
+# Frontend embarqué (servi séparément en prod, pas nécessaire au backend)
+frontend/
 
 # Requirements non-cloud
 requirements.txt
