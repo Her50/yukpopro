@@ -1085,12 +1085,29 @@ export const GenerateursPage = () => {
     ajouterFichiers(e.dataTransfer.files);
   };
 
+  const toastTelechargement = (res: any) => {
+    if (!res?.fichier) return;
+    toast.success((tt) => (
+      <span className="flex items-center gap-3">
+        <span>{t("generateurs.documentReady")}</span>
+        <a
+          href={generateurApi.telecharger(res.fichier)}
+          download={res.fichier}
+          onClick={() => toast.dismiss(tt.id)}
+          className="px-3 py-1 bg-yukpo-500 hover:bg-yukpo-600 text-white text-xs rounded-md font-medium"
+        >
+          {t("common.download")}
+        </a>
+      </span>
+    ), { duration: 12000 });
+  };
+
   const handleAnalyserEtGenerer = async (e: FormEvent) => {
     e.preventDefault();
     if (!instructionFichiers.trim()) return toast.error(t("generateurs.describeWhatToGenerate"));
     if (fichiers.length === 0) return toast.error(t("generateurs.addAtLeastOneFile"));
     const estSlides = FORMATS_SLIDES.has(typeSortieFichiers);
-    await runJob("fichiers", () => generateurApi.analyserEtGenerer({
+    const res = await runJob("fichiers", () => generateurApi.analyserEtGenerer({
       instruction: instructionFichiers,
       type_sortie: estSlides ? "slides" : "rapport",
       type_doc: typeSortieFichiers,
@@ -1098,14 +1115,16 @@ export const GenerateursPage = () => {
       format_sortie: estSlides ? "pptx" : "docx",
       fichiers,
     }), { successMsg: t("generateurs.documentFromFiles", { count: fichiers.length }) });
+    toastTelechargement(res);
   };
 
   const handleGenererRapport = async (e: FormEvent) => {
     e.preventDefault();
     if (!sujetRapport.trim()) return;
+    let res: any;
     if (fichiersRapport.length > 0) {
       const instruction = [sujetRapport, contexteRapport].filter(Boolean).join("\n\n");
-      await runJob("rapport", () => generateurApi.analyserEtGenerer({
+      res = await runJob("rapport", () => generateurApi.analyserEtGenerer({
         instruction,
         type_sortie: "rapport",
         type_doc: typeRapport,
@@ -1114,7 +1133,7 @@ export const GenerateursPage = () => {
         fichiers: fichiersRapport,
       }), { successMsg: t("generateurs.reportFromFiles", { count: fichiersRapport.length }) });
     } else {
-      await runJob("rapport", () => generateurApi.rapport({
+      res = await runJob("rapport", () => generateurApi.rapport({
         sujet: sujetRapport,
         type_rapport: typeRapport,
         mode: modeRapport,
@@ -1122,14 +1141,16 @@ export const GenerateursPage = () => {
         format_sortie: formatRapport as "docx" | "pdf" | "markdown",
       }), { successMsg: t("generateurs.reportSuccess") });
     }
+    toastTelechargement(res);
   };
 
   const handleGenererSlides = async (e: FormEvent) => {
     e.preventDefault();
     if (!sujetSlides.trim()) return;
+    let res: any;
     if (fichiersSlides.length > 0) {
       const instruction = [sujetSlides, contexteSlides].filter(Boolean).join("\n\n");
-      await runJob("slides", () => generateurApi.analyserEtGenerer({
+      res = await runJob("slides", () => generateurApi.analyserEtGenerer({
         instruction,
         type_sortie: "slides",
         type_doc: typeSlides,
@@ -1138,7 +1159,7 @@ export const GenerateursPage = () => {
         fichiers: fichiersSlides,
       }), { successMsg: t("generateurs.presentationFromFiles", { count: fichiersSlides.length }) });
     } else {
-      await runJob("slides", () => generateurApi.slides({
+      res = await runJob("slides", () => generateurApi.slides({
         sujet: sujetSlides,
         type_pres: typeSlides,
         mode: modeSlides,
@@ -1146,6 +1167,7 @@ export const GenerateursPage = () => {
         format_sortie: formatSlides as "pptx" | "pdf" | "markdown",
       }), { successMsg: t("generateurs.presentationSuccess") });
     }
+    toastTelechargement(res);
   };
 
   return (

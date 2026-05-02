@@ -733,14 +733,35 @@ class ReportWriterPro:
             pays_info   = f"Pays : {self._profil.pays}"
         devise_locale = vocabulaire_devise(self._profil.pays if self._profil else None)
 
+        # Détection région/domaine pour adapter les références
+        regions_africaines = {
+            "CM", "GA", "CG", "CD", "TD", "CF",  # CEMAC
+            "SN", "CI", "BF", "ML", "TG", "BJ", "NE", "GW",  # UEMOA
+            "MA", "TN", "DZ", "EG", "LY", "MR",  # Maghreb
+            "GH", "NG", "KE", "TZ", "ET", "ZA", "RW", "UG",  # autres
+        }
+        pays_code = (self._profil.pays if self._profil else "").upper()[:2]
+        contexte_regional = (
+            "Tu maîtrises le droit OHADA/UEMOA/CEMAC, la fiscalité africaine (CGI, TVA, IRPP, IS, TSE), "
+            "la comptabilité SYSCOHADA révisé 2017, les marchés africains, les bailleurs (BM, AFD, BAD). "
+            if pays_code in regions_africaines else
+            "Tu adaptes tes références réglementaires et fiscales au pays/région pertinents pour le sujet "
+            "(IFRS, US GAAP, normes locales selon le contexte). "
+        )
+
+        # Détection sujet pour skip CIMA/SYSCOHADA si non pertinent
+        sujet_str = (sujet + " " + (instruction_utilisateur or "")).lower()
+        sujet_assurance = any(k in sujet_str for k in ("assurance", "cima", "police", "sinistre", "réassurance", "branche auto", "vie ", "ird", "solvabilité"))
+        sujet_juridique_ohada = any(k in sujet_str for k in ("ohada", "acte uniforme", "ccja", "syscohada"))
+
         system = (
-            "Tu es un expert senior polyvalent en Afrique francophone : rédacteur de rapports professionnels, "
-            "analyste financier, data analyst, juriste d'entreprise et consultant en stratégie, "
-            "avec 25 ans d'expérience au service de multinationales, cabinets d'audit Big4, "
-            "bailleurs de fonds (Banque Mondiale, AFD, BAD) et conseils d'administration. "
-            "Tu maîtrises : droit OHADA/UEMOA/CEMAC, fiscalité africaine (CGI, TVA, IRPP, IS, TSE), "
-            "comptabilité SYSCOHADA révisé 2017, finance d'entreprise, analyse de données avancée, "
-            "management RH, gestion de projet, marchés africains. "
+            "Tu es un consultant senior polyvalent (rédacteur de rapports, analyste financier, "
+            "data analyst, juriste d'entreprise, stratège), 25 ans d'expérience en cabinets Big4, "
+            "bailleurs de fonds et conseils d'administration. "
+            f"{contexte_regional}"
+            "Tu adaptes tes références (réglementaires, fiscales, comptables) au sujet ET au pays "
+            "du demandeur. Si le sujet est hors zone régionale, tu utilises les normes pertinentes "
+            "(internationales ou locales). "
             f"{metier_info} {pays_info}\n\n"
             "🚫 RÈGLE NUMÉRO 1 — INTERDICTION ABSOLUE D'INVENTER OU DE MOBILISER TA MÉMOIRE :\n"
             "• Tu n'as PAS le droit d'utiliser tes connaissances d'entraînement comme source de chiffres.\n"
