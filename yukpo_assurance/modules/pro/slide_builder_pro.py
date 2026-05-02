@@ -502,7 +502,8 @@ class SlideBuilderPro:
             f"• Messages clés tirés des données réelles fournies\n"
             f"• Langage professionnel niveau direction générale / investisseurs\n"
             f"• Devise locale OBLIGATOIRE pour tous les montants : {devise_locale}\n"
-            f"• Contexte africain : OHADA, SYSCOHADA, BEAC/BCEAO, CEMAC/UEMOA si pertinent\n"
+            f"• Références réglementaires : adapter au pays/secteur (OHADA/SYSCOHADA/BEAC/CEMAC "
+            f"si Afrique francophone ; IFRS/normes locales sinon — ne pas forcer un cadre régional non pertinent)\n"
             f"• Chaque slide doit avoir un titre percutant et un message accrocheur\n\n"
             f"RÉPONDS UNIQUEMENT EN JSON (sans balise markdown) :\n"
             f'{{"slides": ['
@@ -532,41 +533,74 @@ class SlideBuilderPro:
             )
             return self._parser_slides_json(reponse_ia.contenu, structure)
 
-        # Chunking : parallélise la génération pour modes longs (detaille/expert)
-        import asyncio as _asyncio
+        # Chunking SÉQUENTIEL avec contexte cumulatif (élimine les doublons
+        # de slides quand on a plusieurs lots pour les modes longs).
         lots = [structure[i:i + taille_lot] for i in range(0, len(structure), taille_lot)]
 
-        async def _gen_lot(sous_struct: list[dict], idx: int, total: int) -> list[dict]:
+        def _resumer_slides_pour_contexte(slides: list[dict], max_chars: int = 2000) -> str:
+            if not slides:
+                return ""
+            morceaux = []
+            for j, s in enumerate(slides, 1):
+                titre = (s.get("titre") or "").strip()
+                msg = (s.get("message_cle") or "").strip()
+                points = s.get("points") or []
+                pts_courts = [str(p)[:80] for p in points[:3]] if isinstance(points, list) else []
+                ligne = f"{j}. « {titre} » — {msg[:120]}"
+                if pts_courts:
+                    ligne += " | " + " · ".join(pts_courts)
+                morceaux.append(ligne)
+            r = "\n".join(morceaux)
+            return r[:max_chars] + ("…" if len(r) > max_chars else "")
+
+        slides_out: list[dict] = []
+        for idx, lot in enumerate(lots):
             titres_lot = "\n".join(
                 f'{i+1}. "{s["titre"]}" (type: {s["type"]})'
-                for i, s in enumerate(sous_struct)
+                for i, s in enumerate(lot)
             )
             prompt_lot = prompt.replace(
                 f"SLIDES À GÉNÉRER ({nb_slides} slides) :\n{titres_str}",
-                f"⚙️ LOT {idx+1}/{total} — génère UNIQUEMENT ces {len(sous_struct)} slides :\n{titres_lot}",
+                f"⚙️ LOT {idx+1}/{len(lots)} — génère UNIQUEMENT ces {len(lot)} slides :\n{titres_lot}",
             )
-            rep = await ia_client.appeler(
-                prompt=prompt_lot, systeme=systeme_prompt, mode=ModeIA.REDACTION,
-                max_tokens_override=_TOKENS_PAR_MODE[mode],
-                json_attendu=True, utiliser_cache=False,
-            )
-            return self._parser_slides_json(rep.contenu, sous_struct)
-
-        resultats = await _asyncio.gather(
-            *[_gen_lot(lot, i, len(lots)) for i, lot in enumerate(lots)],
-            return_exceptions=True,
-        )
-        slides_out: list[dict] = []
-        for i, r in enumerate(resultats):
-            if isinstance(r, Exception):
+            resume_prec = _resumer_slides_pour_contexte(slides_out)
+            if resume_prec:
+                prompt_lot = (
+                    f"📚 SLIDES DÉJÀ GÉNÉRÉES — NE PAS DUPLIQUER, NE PAS REFORMULER :\n"
+                    f"{resume_prec}\n"
+                    f"{'─'*50}\n"
+                    f"⚠️ Tes nouvelles slides doivent COMPLÉTER les précédentes (pas répéter "
+                    f"leurs titres, leurs messages-clés ou leurs points). Construis sur ce qui "
+                    f"a déjà été dit avec angles différents et nouvelles données.\n\n"
+                    + prompt_lot
+                )
+            try:
+                rep = await ia_client.appeler(
+                    prompt=prompt_lot, systeme=systeme_prompt, mode=ModeIA.REDACTION,
+                    max_tokens_override=_TOKENS_PAR_MODE[mode],
+                    json_attendu=True, utiliser_cache=False,
+                )
+                slides_out.extend(self._parser_slides_json(rep.contenu, lot))
+            except Exception as e:
+                logger.warning(f"[SlideBuilder] Lot {idx+1} échoué : {e}")
                 slides_out.extend(
                     {"titre": s["titre"], "type": s["type"], "points": [],
                      "kpis": [], "message_cle": "", "note": ""}
-                    for s in lots[i]
+                    for s in lot
                 )
-            else:
-                slides_out.extend(r)
-        return slides_out
+
+        # ── Anti-doublon final : déduplication par titre ────────────────
+        vus_titres = set()
+        slides_dedup: list[dict] = []
+        for s in slides_out:
+            t_norm = (s.get("titre") or "").strip().lower()
+            if t_norm and t_norm in vus_titres:
+                logger.info(f"[SlideBuilder] Doublon supprimé : {s.get('titre')}")
+                continue
+            if t_norm:
+                vus_titres.add(t_norm)
+            slides_dedup.append(s)
+        return slides_dedup
 
     def _parser_slides_json(self, texte: str, structure: list[dict]) -> list[dict]:
         import json, re
