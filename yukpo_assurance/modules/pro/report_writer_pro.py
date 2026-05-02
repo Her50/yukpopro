@@ -796,23 +796,23 @@ class ReportWriterPro:
         instruction_brute = (instruction_utilisateur or sujet).strip()
         a_du_rag_ou_donnees = bool(contexte_enrichi)
         regle_anti_placeholder = (
-            "\n\n🚫 INTERDICTION ABSOLUE D'UTILISER DES PLACEHOLDERS :\n"
-            "• Ne JAMAIS écrire X%, Y FCFA, A1, B1, G1, H1, [chiffre], [montant], [à compléter], etc.\n"
-            "• Tous les chiffres DOIVENT venir soit du contexte fourni (pièces jointes/RAG), "
-            "soit de connaissances réglementaires officielles vérifiables (ex: SMIG CIMA, taux IS, plafonds CNPS).\n"
-            "• Si une donnée précise n'est PAS disponible dans le contexte ni dans tes connaissances "
-            "officielles : écris explicitement 'Donnée non disponible dans les sources fournies — "
-            "à collecter auprès de [source recommandée]' au lieu d'inventer un placeholder.\n"
-            "• Préfère un rapport plus court avec des données réelles à un rapport long avec des trous."
+            "\n\n📊 RÈGLES SUR LES DONNÉES CHIFFRÉES :\n"
+            "• Pas de placeholders bruts (X%, Y FCFA, [chiffre], [montant]) — toujours qualifier.\n"
+            "• Priorité 1 : chiffres exacts du contexte/RAG (les CITER tels quels).\n"
+            "• Priorité 2 : données réglementaires officielles avec source (ex: 'SMIG CIMA 2024 = 36 270 FCFA, source: Code du travail Cameroun').\n"
+            "• Priorité 3 : estimations explicites avec ordre de grandeur et source — "
+            "format autorisé : 'estimé entre X et Y selon [source]' ou 'fourchette typique du secteur : X-Y selon [étude/organisme]'.\n"
+            "• Si aucune donnée disponible : 'Donnée à collecter (source recommandée : [organisme])' avec impact analysé.\n"
+            "• Toujours préférer 1 chiffre estimé sourcé à 'donnée non disponible' (sauf si vraiment impossible)."
         ) if a_du_rag_ou_donnees else (
-            "\n\n⚠️ AUCUNE DONNÉE SOURCE FOURNIE — RÈGLE STRICTE :\n"
-            "• Tu n'as ni pièces jointes ni RAG ciblé. Base-toi UNIQUEMENT sur tes connaissances "
-            "officielles vérifiables (textes CIMA, OHADA, SYSCOHADA, codes nationaux, statistiques "
-            "publiques notoires) et CITE les sources précises (article, année, organisme).\n"
-            "• Pour tout chiffre que tu ne peux pas sourcer avec certitude, écris : "
-            "'Donnée à collecter — non publique au moment de la rédaction'. "
-            "JAMAIS de X, Y, A1, B1 ou autres placeholders.\n"
-            "• Le rapport peut être plus court mais doit rester FACTUEL."
+            "\n\n📊 RÈGLES SUR LES DONNÉES CHIFFRÉES (sans pièces jointes) :\n"
+            "• Utilise tes connaissances officielles vérifiables : textes réglementaires (CIMA, OHADA, SYSCOHADA, codes nationaux), "
+            "statistiques publiques notoires, ratios sectoriels typiques. CITE les sources (article, année, organisme).\n"
+            "• Estimations sourcées autorisées avec ordre de grandeur : 'estimé entre X et Y selon [source/étude]', "
+            "'fourchette typique du secteur : X-Y%'. Toujours qualifier l'incertitude.\n"
+            "• Pas de placeholders bruts (X%, Y FCFA, [chiffre]). Si vraiment indisponible : "
+            "'Donnée à collecter (source recommandée : [organisme])'.\n"
+            "• Le rapport doit rester DENSE et FACTUEL : préfère une analyse avec estimations sourcées à un texte vide."
         )
 
         def _construire_prompt_lot(sous_structure: list[str], idx_lot: int, total_lots: int) -> str:
@@ -1068,32 +1068,76 @@ class ReportWriterPro:
                     if len(rows) >= 2:
                         cols = [c.strip() for c in rows[0].split('|') if c.strip()]
                         if cols:
+                            from docx.oxml.ns import qn as _qn
+                            from docx.oxml import OxmlElement as _OxmlElement
                             _compteur_tableau[0] += 1
+                            num_table = _compteur_tableau[0]
                             tbl = doc.add_table(rows=len(rows), cols=len(cols))
                             tbl.style = 'Table Grid'
+                            tbl.autofit = True
+                            # Détection alignement par colonne (chiffres → droite)
+                            def _est_numerique(v: str) -> bool:
+                                return bool(_re.match(
+                                    r'^[\s\-+]*[\d\s.,]+[\s%]*(FCFA|XAF|XOF|€|\$|F)?\s*$', (v or "").strip()
+                                ))
+                            colonnes_numeriques = set()
+                            for ci in range(len(cols)):
+                                vals = []
+                                for r_line in rows[1:]:
+                                    cells_r = [c.strip() for c in r_line.split('|') if c.strip()]
+                                    if ci < len(cells_r):
+                                        vals.append(cells_r[ci].strip('*'))
+                                if vals and sum(1 for v in vals if _est_numerique(v)) >= max(1, len(vals) // 2):
+                                    colonnes_numeriques.add(ci)
+
                             for ri, row_line in enumerate(rows):
                                 cells = [c.strip() for c in row_line.split('|') if c.strip()]
+                                est_total = ri > 0 and len(cells) > 0 and _re.match(
+                                    r'^\s*\*?\*?\s*(total|sous-total|subtotal|grand total|moyenne|écart)',
+                                    cells[0], _re.IGNORECASE,
+                                )
                                 for ci in range(len(cols)):
                                     val = cells[ci].strip('*') if ci < len(cells) else ""
                                     cell = tbl.cell(ri, ci)
                                     cell.text = val
-                                    if cell.paragraphs[0].runs:
-                                        run = cell.paragraphs[0].runs[0]
+                                    para = cell.paragraphs[0]
+                                    if para.runs:
+                                        run = para.runs[0]
                                         run.font.size = Pt(10)
                                         if ri == 0:
                                             run.bold = True
                                             run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-                                            cell.paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                        elif est_total:
+                                            run.bold = True
+                                    # Alignement
                                     if ri == 0:
-                                        from docx.oxml.ns import qn as _qn
-                                        from docx.oxml import OxmlElement as _OxmlElement
-                                        tc = cell._tc
-                                        tcPr = tc.get_or_add_tcPr()
-                                        shd = _OxmlElement('w:shd')
-                                        shd.set(_qn('w:val'), 'clear')
-                                        shd.set(_qn('w:color'), 'auto')
-                                        shd.set(_qn('w:fill'), '0047AB')
-                                        tcPr.append(shd)
+                                        para.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                    elif ci in colonnes_numeriques:
+                                        para.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                                    else:
+                                        para.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                                    # Couleur de fond
+                                    tc = cell._tc
+                                    tcPr = tc.get_or_add_tcPr()
+                                    shd = _OxmlElement('w:shd')
+                                    shd.set(_qn('w:val'), 'clear')
+                                    shd.set(_qn('w:color'), 'auto')
+                                    if ri == 0:
+                                        shd.set(_qn('w:fill'), '0047AB')   # en-tête bleu
+                                    elif est_total:
+                                        shd.set(_qn('w:fill'), 'D9E5F5')   # ligne total bleu pâle
+                                    elif ri % 2 == 0:
+                                        shd.set(_qn('w:fill'), 'F4F7FB')   # zebra ligne paire
+                                    else:
+                                        shd.set(_qn('w:fill'), 'FFFFFF')
+                                    tcPr.append(shd)
+                            # Légende du tableau
+                            cap = doc.add_paragraph()
+                            cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                            cap_run = cap.add_run(f"Tableau {num_table}")
+                            cap_run.italic = True
+                            cap_run.font.size = Pt(9)
+                            cap_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
                             doc.add_paragraph()
                     continue
 
@@ -1145,6 +1189,9 @@ class ReportWriterPro:
                     j += 1
                 para_text = " ".join(para_lines)
                 p_obj = doc.add_paragraph()
+                p_obj.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+                p_obj.paragraph_format.space_after = Pt(6)
+                p_obj.paragraph_format.line_spacing = 1.15
                 _ajouter_inline(p_obj, para_text, Pt(11))
                 i = j
                 continue

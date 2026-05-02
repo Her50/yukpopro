@@ -595,11 +595,12 @@ async def analyser_et_generer(
             type_final = type_doc
 
         chemin_fichier = resultat.get("fichier") or resultat.get("chemin_fichier")
+        nom_fich = Path(chemin_fichier).name if chemin_fichier else None
         await _sauvegarder_doc_genere(
             db=db, user_id=current_user.user_id,
             titre=instruction[:100],
             type_doc=type_final,
-            fichier=chemin_fichier,
+            fichier=nom_fich,
             contenu_genere=resultat.get("contenu_markdown", "")[:5000],
             meta={
                 "mode": mode,
@@ -608,7 +609,16 @@ async def analyser_et_generer(
                 "nb_fichiers": len(fichiers),
                 "noms_fichiers": [f.filename for f in fichiers],
             },
+            fichier_path=Path(chemin_fichier) if chemin_fichier else None,
         )
+
+        # Exposer fichier/markdown/url_telechargement pour que le frontend
+        # affiche directement la carte de téléchargement (cf. GenerateursPage).
+        if nom_fich:
+            resultat["fichier"] = nom_fich
+            resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
+        if "contenu_markdown" in resultat and "markdown" not in resultat:
+            resultat["markdown"] = resultat["contenu_markdown"]
 
         return {
             **resultat,
