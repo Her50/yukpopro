@@ -1047,6 +1047,7 @@ SOUS-TYPES generateur (choisir le plus précis):
 - "contrat" : contrat (bail, travail, prestation, vente, service), convention, avenant, lettre officielle, lettre commerciale, mise en demeure, résiliation, attestation, certificat, statuts, règlement intérieur, PV, note de service, charte, cahier des charges
 - "rapport" : rapport, note de synthèse, plan d'action, compte-rendu, business plan, analyse, étude, note juridique
 - "slides" : présentation PowerPoint, slides, deck, support de formation
+- "tableur" : tableau Excel, classeur XLSX, tableau de bord, suivi de KPIs, modèle financier, base de données
 - "cv" : CV, curriculum vitae, lettre de motivation, lettre d'emploi
 
 TYPES PRÉCIS (choisir le plus proche):
@@ -1055,12 +1056,30 @@ contrat_bail, contrat_travail, contrat_prestation, contrat_vente, convention, st
 lettre_officielle, lettre_commerciale, lettre_mise_en_demeure, lettre_resiliation, lettre_emploi,
 attestation, certificat, proces_verbal,
 slides_bilan_activite, slides_rapport_direction, slides_proposition_client, slides_pitch_projet, slides_formation,
+tableur_kpi, tableur_financier, tableur_suivi, tableur_generique,
 cv, lettre_motivation
 
 AGENTS DISPONIBLES (pour agent_metier):
 drh, comptable, daf, juriste, banquier, commercial, daa, ingenieur, microfinance, ong, douanier, cv_emploi, recherche_emploi
 
-FORMAT: "docx" pour Word, "pptx" pour PowerPoint
+FORMAT (format de sortie demandé par l'utilisateur — DÉTECTER finement) :
+  - "docx" : Word (par défaut pour rapport/contrat sans précision)
+  - "pdf"  : PDF (si user dit "en pdf", "format pdf", "fichier pdf")
+  - "pptx" : PowerPoint (par défaut pour slides)
+  - "xlsx" : Excel (par défaut pour tableur ; ou si user dit "en excel", "tableau excel", "xlsx")
+  - "markdown" : si demandé explicitement
+
+MODE (longueur/profondeur demandée) :
+  - "flash"    : note express 1-2 pages / 5-7 slides
+  - "standard" : 3-5 pages / 10-15 slides (DÉFAUT)
+  - "complet"  : 10-30 pages / 20-30 slides (si user dit "complet", "détaillé", "approfondi", "exhaustif")
+  - "expert"   : 30+ pages / 30-40 slides (si user dit "expert", "très détaillé", "rapport d'expertise", "très complet")
+
+STYLE_SPECIFIQUE : si l'utilisateur précise un style ou cabinet de référence
+  ("style cabinet d'avocat", "format Big4", "norme CIMA stricte", "ton McKinsey",
+  "registre administratif", "ton institutionnel BAD/AFD"…), le retourner verbatim.
+  Sinon : null.
+
 LANGUE_CIBLE (si traduction): fr, en, es, pt, ar
 FORMAT_CIBLE (si conversion): docx, pdf, pptx, xlsx, csv, txt, jpg
 
@@ -1079,7 +1098,7 @@ MODULES DISPONIBLES (pour modules_suggeres) :
 modules_suggeres : liste de 0 à 2 clés de modules dont la pertinence est évidente pour ce message. Laisser [] si aucun module n'est spécifiquement adapté à la demande (conversation générale, question juridique, etc.).
 
 JSON REQUIS (tous les champs, null si non applicable):
-{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "langue_cible": null, "format_cible": null, "confiance": 0.9, "modules_suggeres": []}}"""
+{{"intention": "...", "sous_type": "...", "type_doc": "...", "agent": null, "format": "docx", "mode": "standard", "style_specifique": null, "langue_cible": null, "format_cible": null, "confiance": 0.9, "modules_suggeres": []}}"""
 
     try:
         reponse = await asyncio.wait_for(
@@ -1087,7 +1106,7 @@ JSON REQUIS (tous les champs, null si non applicable):
                 prompt=prompt,
                 mode=ModeIA.PRECISION,
                 utiliser_cache=False,
-                max_tokens_override=150,
+                max_tokens_override=300,  # élargi pour mode + style_specifique
             ),
             timeout=8.0,
         )
@@ -2283,10 +2302,17 @@ async def copilote_chat(
     _sous_type      = orchestration.get("sous_type") or ""
     _type_doc_o     = orchestration.get("type_doc") or ""
     _agent_orch     = orchestration.get("agent")
-    _format_orch    = orchestration.get("format") or "docx"
+    _format_orch    = (orchestration.get("format") or "docx").lower()
+    _mode_orch      = (orchestration.get("mode") or "standard").lower()
+    _style_orch     = orchestration.get("style_specifique") or ""
     _lc_orch        = orchestration.get("langue_cible") or "en"
     _fc_orch        = orchestration.get("format_cible") or _format_orch
     _modules_llm    = orchestration.get("modules_suggeres") or []  # suggestions sémantiques LLM
+    # Validation
+    if _format_orch not in {"docx", "pdf", "pptx", "xlsx", "markdown"}:
+        _format_orch = "docx"
+    if _mode_orch not in {"flash", "standard", "complet", "expert"}:
+        _mode_orch = "standard"
 
     # ── Étape 0b-ter : Détection plainte "données simulées" ─────────────────
     # Si l'utilisateur conteste un document précédent ("tu as inventé",
@@ -2755,6 +2781,13 @@ async def copilote_chat(
                 )
 
             contexte_gen = "\n\n".join(contexte_gen_parts) or None
+            # Style spécifique demandé par l'utilisateur (cabinet d'avocat, Big4…)
+            if _style_orch:
+                contexte_gen = (contexte_gen or "") + (
+                    f"\n\n[STYLE / RÉFÉRENTIEL DEMANDÉ PAR L'UTILISATEUR]\n"
+                    f"{_style_orch}\n"
+                    f"Adapte le ton, le vocabulaire, la mise en page et les références à ce style."
+                )
 
             if _sous_type == "slides":
                 from modules.pro.slide_builder_pro import SlideBuilderPro
@@ -2765,7 +2798,6 @@ async def copilote_chat(
                     "slides_proposition_client": "proposition_client",
                     "slides_pitch_projet": "pitch_projet",
                     "slides_formation": "formation",
-                    # alias directs (mode édition : type_doc stocké sans préfixe "slides_")
                     "bilan_activite": "bilan_activite",
                     "rapport_direction": "rapport_direction",
                     "proposition_client": "proposition_client",
@@ -2774,35 +2806,78 @@ async def copilote_chat(
                     "analyse_marche": "analyse_marche",
                 }
                 type_pres = type_pres_map.get(_type_doc_o, "rapport_direction")
+                # Mapping mode rapport → mode slides
+                _MODE_SLIDES = {
+                    "flash": "executive", "standard": "executive",
+                    "complet": "detaille", "expert": "expert",
+                }
+                mode_slides = _MODE_SLIDES.get(_mode_orch, "executive")
+                # Format slides : pptx par défaut, pdf si demandé
+                fmt_slides = "pdf" if _format_orch == "pdf" else "pptx"
                 res_doc = await asyncio.wait_for(
                     builder.generer(
                         sujet=sujet_gen,
                         type_pres=type_pres,
-                        mode="executive",
+                        mode=mode_slides,
                         contexte=contexte_gen,
-                        format_sortie="pptx",
+                        format_sortie=fmt_slides,
+                    ),
+                    timeout=300.0 if mode_slides in ("detaille", "expert") else 240.0,
+                )
+                ext = fmt_slides.upper()
+                type_doc_gen = _type_doc_o or "slides"
+            elif _sous_type == "tableur" or _format_orch == "xlsx":
+                # Génération Excel via DocumentGenerateur
+                from modules.documents.generateur import DocumentGenerateur
+                xls_builder = DocumentGenerateur()
+                demande_excel = (req.message or sujet_gen).strip()
+                ctx_excel = (contexte_gen or "")[:6000]
+                res_xls = await asyncio.wait_for(
+                    xls_builder._generer_excel_ia(
+                        demande=demande_excel, contexte=ctx_excel, theme="blue",
                     ),
                     timeout=240.0,
                 )
-                ext = "PPTX"
-                type_doc_gen = _type_doc_o or "slides"
+                # Le DocumentGenerateur retourne un dict avec data_b64 — on persiste en fichier
+                if res_xls and res_xls.get("data_b64"):
+                    import base64 as _b64
+                    from pathlib import Path as _P
+                    _xls_dir = _P("data/generated/pro_data")
+                    _xls_dir.mkdir(parents=True, exist_ok=True)
+                    _filename = res_xls.get("filename") or f"{sujet_gen[:40].replace(' ', '_')}.xlsx"
+                    _xls_path = _xls_dir / _filename
+                    _xls_path.write_bytes(_b64.b64decode(res_xls["data_b64"]))
+                    res_doc = {
+                        "chemin_fichier": str(_xls_path),
+                        "fichier": str(_xls_path),
+                        "nom_fichier": _filename,
+                        "apercu": res_xls.get("title", ""),
+                    }
+                else:
+                    res_doc = {"fichier": None, "chemin_fichier": None, "apercu": "Échec génération Excel"}
+                ext = "XLSX"
+                type_doc_gen = _type_doc_o or "tableur_generique"
             else:
                 from modules.pro.report_writer_pro import ReportWriterPro
                 writer = ReportWriterPro(profil=profil)
                 type_doc_gen = _type_doc_o or _detecter_type_document(req.message)
+                # Format rapport : docx par défaut ; pdf si demandé
+                fmt_rapport = "pdf" if _format_orch == "pdf" else (
+                    "markdown" if _format_orch == "markdown" else "docx"
+                )
                 res_doc = await asyncio.wait_for(
                     writer.generer(
                         sujet=sujet_gen,
                         type_rapport=type_doc_gen,
-                        mode="standard",
+                        mode=_mode_orch,
                         contexte=contexte_gen,
-                        format_sortie="docx",
+                        format_sortie=fmt_rapport,
                         instruction_utilisateur=req.message,
                         forcer_recherche_web=_force_web_search,
                     ),
-                    timeout=420.0 if _force_web_search else 360.0,
+                    timeout=480.0 if _force_web_search or _mode_orch in ("complet", "expert") else 360.0,
                 )
-                ext = "DOCX"
+                ext = fmt_rapport.upper()
 
             chemin_fichier = res_doc.get("fichier") or res_doc.get("chemin_fichier")
             apercu = res_doc.get("apercu", "")
