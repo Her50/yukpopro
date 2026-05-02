@@ -34,8 +34,105 @@ interface CategorieTemplates {
 
 const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
   {
+    key: "universel",
+    categorie: "Universel — sans biais sectoriel",
+    emoji: "🌍",
+    templates: [
+      {
+        key: "rapport_analyse_generique",
+        label: "Rapport d'analyse",
+        description: "Rapport structuré sur n'importe quel sujet — pas de biais régional",
+        type: "rapport",
+        typeDoc: "rapport_analyse",
+        mode: "standard",
+        sujet: "",
+        contexte: "Analyse approfondie avec contexte, méthodologie, constats chiffrés, conclusions et recommandations actionnables. Adapter les références réglementaires/sectorielles au sujet et au pays.",
+      },
+      {
+        key: "note_synthese_generique",
+        label: "Note de synthèse",
+        description: "Synthèse exécutive courte et dense sur un sujet précis",
+        type: "rapport",
+        typeDoc: "note_de_synthese",
+        mode: "flash",
+        sujet: "",
+        contexte: "Synthèse en 2-3 pages : contexte, enjeux, faits chiffrés, options, recommandation. Sans biais régional — adapter au sujet.",
+      },
+      {
+        key: "rapport_financier_generique",
+        label: "Rapport financier",
+        description: "Analyse financière adaptée au référentiel du pays (IFRS/local)",
+        type: "rapport",
+        typeDoc: "rapport_financier",
+        mode: "standard",
+        sujet: "",
+        contexte: "Analyse financière complète : compte de résultat, bilan, flux de trésorerie, ratios (rentabilité, liquidité, solvabilité, endettement). Utiliser le référentiel comptable pertinent (IFRS, US GAAP, normes locales).",
+      },
+      {
+        key: "note_juridique_generique",
+        label: "Note juridique",
+        description: "Note juridique adaptée au droit applicable (national/international)",
+        type: "rapport",
+        typeDoc: "note_juridique",
+        mode: "standard",
+        sujet: "",
+        contexte: "Analyse juridique : qualification du problème, textes applicables (à identifier selon le pays/secteur), jurisprudence pertinente, risques et recommandations.",
+      },
+      {
+        key: "rapport_rh_generique",
+        label: "Rapport RH",
+        description: "Bilan ou note RH (sans hypothèse régionale)",
+        type: "rapport",
+        typeDoc: "rapport_rh",
+        mode: "standard",
+        sujet: "",
+        contexte: "Effectifs, rémunérations, formation, absentéisme, climat social, conformité au droit du travail applicable. Adapter aux organismes sociaux du pays.",
+      },
+      {
+        key: "rapport_audit_generique",
+        label: "Rapport d'audit",
+        description: "Audit générique (procédures, contrôle, conformité)",
+        type: "rapport",
+        typeDoc: "rapport_audit",
+        mode: "complet",
+        sujet: "",
+        contexte: "Évaluation des procédures et du contrôle interne, identification des risques (opérationnels, financiers, conformité), constats hiérarchisés, recommandations correctives avec plan d'action priorisé.",
+      },
+      {
+        key: "plan_action_generique",
+        label: "Plan d'action",
+        description: "Plan d'action structuré avec responsables, délais, KPIs",
+        type: "rapport",
+        typeDoc: "plan_action",
+        mode: "standard",
+        sujet: "",
+        contexte: "Diagnostic, objectifs SMART, actions priorisées (matrice impact/effort), responsables, délais, ressources, KPIs de suivi, mécanisme de reporting.",
+      },
+      {
+        key: "compte_rendu_generique",
+        label: "Compte-rendu",
+        description: "Compte-rendu de réunion / d'événement professionnel",
+        type: "rapport",
+        typeDoc: "compte_rendu",
+        mode: "flash",
+        sujet: "",
+        contexte: "Date, participants, ordre du jour, points discutés (avec décisions et arguments), actions à mener (responsable + délai), prochaine échéance.",
+      },
+      {
+        key: "presentation_executive_generique",
+        label: "Présentation exécutive",
+        description: "Slides exécutifs (5-8 slides) sur un sujet",
+        type: "slides",
+        typeDoc: "rapport_direction",
+        mode: "executive",
+        sujet: "",
+        contexte: "Synthèse percutante : contexte, problème, analyse, options, recommandation, plan. KPIs clés et visuels.",
+      },
+    ],
+  },
+  {
     key: "comptabilite_finance",
-    categorie: "Comptabilité & Finance",
+    categorie: "Afrique francophone — Comptabilité & Finance",
     emoji: "🧮",
     templates: [
       {
@@ -82,7 +179,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
   },
   {
     key: "juridique_conformite",
-    categorie: "Juridique & Conformité",
+    categorie: "Afrique francophone — Juridique & Conformité",
     emoji: "⚖️",
     templates: [
       {
@@ -156,7 +253,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
   },
   {
     key: "banque_microfinance",
-    categorie: "Banque & Microfinance",
+    categorie: "Afrique francophone — Banque & Microfinance (COBAC)",
     emoji: "🏦",
     templates: [
       {
@@ -445,7 +542,7 @@ const TEMPLATES_PAR_METIER: CategorieTemplates[] = [
   },
   {
     key: "assurance_cima",
-    categorie: "Assurance & Réassurance CIMA",
+    categorie: "Afrique francophone — Assurance & Réassurance (Code CIMA)",
     emoji: "🛡️",
     templates: [
       {
