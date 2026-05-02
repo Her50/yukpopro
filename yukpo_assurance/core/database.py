@@ -29,7 +29,21 @@ logger = logging.getLogger("yukpo_assurance.database")
 def _build_engine():
     url = settings.DATABASE_URL
     if url.startswith("postgresql"):
-        return create_async_engine(url, pool_size=10, max_overflow=20, echo=False)
+        # Pool serré pour rester sous le quota Postgres Fly (≈ 25-100 slots
+        # selon le plan, dont une part réservée SUPERUSER). 5+10 par worker
+        # × 2 workers (Dockerfile WORKERS=2) = 30 connexions max.
+        # pool_recycle : recycle les connexions > 1h (évite zombies).
+        # pool_pre_ping : invalide les connexions cassées avant emprunt.
+        # pool_timeout : ne bloque pas une requête > 30s en attente de slot.
+        return create_async_engine(
+            url,
+            pool_size=5,
+            max_overflow=10,
+            pool_recycle=3600,
+            pool_pre_ping=True,
+            pool_timeout=30,
+            echo=False,
+        )
     # Dev local / test : SQLite async (ne nécessite pas de serveur)
     sqlite_url = url if url.startswith("sqlite") else "sqlite+aiosqlite:///./yukpo_assurance.db"
     return create_async_engine(
