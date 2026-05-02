@@ -340,7 +340,7 @@ export interface GenererRapportRequest {
   type_rapport: string;
   mode: string;
   contexte?: string;
-  format_sortie?: "docx" | "markdown";
+  format_sortie?: "docx" | "pdf" | "markdown";
 }
 
 export interface GenererSlidesRequest {
@@ -348,7 +348,7 @@ export interface GenererSlidesRequest {
   type_pres: string;
   mode: string;
   contexte?: string;
-  format_sortie?: "pptx" | "markdown";
+  format_sortie?: "pptx" | "pdf" | "markdown";
 }
 
 export interface GenerateurResult {

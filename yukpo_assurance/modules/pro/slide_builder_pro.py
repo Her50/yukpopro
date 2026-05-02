@@ -415,9 +415,16 @@ class SlideBuilderPro:
 
         nom_fichier = self._nom_fichier(sujet, type_pres, mode)
 
-        if format_sortie == "pptx":
+        if format_sortie in ("pptx", "pdf"):
             chemin = await self._construire_pptx(nom_fichier, sujet, slides_contenu, type_pres, mode)
             chemin_str = str(chemin) if chemin else None
+            if format_sortie == "pdf" and chemin_str:
+                pdf_path = await self._convertir_en_pdf(Path(chemin_str))
+                if pdf_path:
+                    chemin_str = str(pdf_path)
+                else:
+                    logger.warning("[SlideBuilder] Conversion PDF échouée — PPTX retourné")
+                    format_sortie = "pptx"
         else:
             chemin_str = None
 
@@ -432,9 +439,10 @@ class SlideBuilderPro:
             except Exception:
                 pass
 
+        ext_map = {"pptx": ".pptx", "pdf": ".pdf", "markdown": ".md"}
         return {
             "chemin_fichier":   chemin_str,
-            "nom_fichier":      nom_fichier + (".pptx" if format_sortie == "pptx" else ".md"),
+            "nom_fichier":      nom_fichier + ext_map.get(format_sortie, ".md"),
             "contenu_markdown": contenu_md,
             "nb_slides":        len(slides_contenu),
             "mode":             mode,
@@ -627,6 +635,36 @@ class SlideBuilderPro:
         ]
 
     # ── Construction PPTX ─────────────────────────────────────────────────────
+
+    async def _convertir_en_pdf(self, pptx_path: Path) -> Optional[Path]:
+        """Convertit un PPTX en PDF via LibreOffice headless."""
+        import asyncio as _aio
+        try:
+            pptx_path = Path(pptx_path)
+            if not pptx_path.exists():
+                return None
+            out_dir = pptx_path.parent
+            for cmd in ("soffice", "libreoffice"):
+                try:
+                    proc = await _aio.create_subprocess_exec(
+                        cmd, "--headless", "--convert-to", "pdf",
+                        "--outdir", str(out_dir), str(pptx_path),
+                        stdout=_aio.subprocess.PIPE, stderr=_aio.subprocess.PIPE,
+                    )
+                    _, err = await _aio.wait_for(proc.communicate(), timeout=120)
+                    if proc.returncode == 0:
+                        pdf_path = out_dir / (pptx_path.stem + ".pdf")
+                        if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                            logger.info(f"[SlideBuilder] PDF généré : {pdf_path.name}")
+                            return pdf_path
+                except FileNotFoundError:
+                    continue
+                except _aio.TimeoutError:
+                    return None
+            return None
+        except Exception as e:
+            logger.error(f"[SlideBuilder] Conversion PDF échouée : {e}")
+            return None
 
     async def _construire_pptx(
         self,

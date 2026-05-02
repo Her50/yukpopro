@@ -658,7 +658,7 @@ class ReportWriterPro:
         # 2. Construire le document
         nom_fichier = self._nom_fichier(sujet, type_rapport, mode)
 
-        if format_sortie == "docx":
+        if format_sortie in ("docx", "pdf"):
             chemin = await self._construire_docx(
                 nom_fichier=nom_fichier,
                 sujet=sujet,
@@ -667,6 +667,14 @@ class ReportWriterPro:
                 sections=contenu_sections,
             )
             chemin_str = str(chemin)
+            # Conversion DOCX → PDF via LibreOffice headless si demandé
+            if format_sortie == "pdf":
+                pdf_path = await self._convertir_en_pdf(chemin)
+                if pdf_path:
+                    chemin_str = str(pdf_path)
+                else:
+                    logger.warning("[ReportWriter] Conversion PDF échouée — DOCX retourné")
+                    format_sortie = "docx"
         else:
             chemin_str = None
 
@@ -683,14 +691,16 @@ class ReportWriterPro:
             except Exception:
                 pass
 
+        ext_map = {"docx": ".docx", "pdf": ".pdf", "markdown": ".md"}
         return {
             "chemin_fichier":  chemin_str,
-            "nom_fichier":     nom_fichier + (".docx" if format_sortie == "docx" else ".md"),
+            "nom_fichier":     nom_fichier + ext_map.get(format_sortie, ".md"),
             "contenu_markdown": contenu_md,
             "nb_sections":     len(contenu_sections),
             "mode":            mode,
             "type_rapport":    type_rapport,
             "sujet":           sujet,
+            "format":          format_sortie,
             "genere_le":       datetime.utcnow().isoformat(),
         }
 
@@ -1168,6 +1178,42 @@ class ReportWriterPro:
         except Exception as e:
             logger.warning(f"[ReportWriter] Pass révision échoué (non bloquant) : {e}")
             return sections
+
+    async def _convertir_en_pdf(self, docx_path: Path) -> Optional[Path]:
+        """
+        Convertit un DOCX en PDF via LibreOffice headless.
+        Retourne le chemin du PDF ou None si LibreOffice indisponible/échec.
+        """
+        import asyncio as _aio
+        try:
+            docx_path = Path(docx_path)
+            if not docx_path.exists():
+                return None
+            out_dir = docx_path.parent
+            for cmd in ("soffice", "libreoffice"):
+                try:
+                    proc = await _aio.create_subprocess_exec(
+                        cmd, "--headless", "--convert-to", "pdf",
+                        "--outdir", str(out_dir), str(docx_path),
+                        stdout=_aio.subprocess.PIPE,
+                        stderr=_aio.subprocess.PIPE,
+                    )
+                    _, err = await _aio.wait_for(proc.communicate(), timeout=120)
+                    if proc.returncode == 0:
+                        pdf_path = out_dir / (docx_path.stem + ".pdf")
+                        if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                            logger.info(f"[ReportWriter] PDF généré : {pdf_path.name} ({pdf_path.stat().st_size} octets)")
+                            return pdf_path
+                    logger.warning(f"[ReportWriter] {cmd} code={proc.returncode} : {err.decode()[:200]}")
+                except FileNotFoundError:
+                    continue
+                except _aio.TimeoutError:
+                    logger.error(f"[ReportWriter] Timeout conversion PDF via {cmd}")
+                    return None
+            return None
+        except Exception as e:
+            logger.error(f"[ReportWriter] Conversion PDF échouée : {e}")
+            return None
 
     # ── Construction DOCX ──────────────────────────────────────────────────────
 

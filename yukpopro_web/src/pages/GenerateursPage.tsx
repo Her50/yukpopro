@@ -1119,7 +1119,7 @@ export const GenerateursPage = () => {
         type_rapport: typeRapport,
         mode: modeRapport,
         contexte: contexteRapport || undefined,
-        format_sortie: formatRapport as "docx" | "markdown",
+        format_sortie: formatRapport as "docx" | "pdf" | "markdown",
       }), { successMsg: t("generateurs.reportSuccess") });
     }
   };
@@ -1143,7 +1143,7 @@ export const GenerateursPage = () => {
         type_pres: typeSlides,
         mode: modeSlides,
         contexte: contexteSlides || undefined,
-        format_sortie: formatSlides as "pptx" | "markdown",
+        format_sortie: formatSlides as "pptx" | "pdf" | "markdown",
       }), { successMsg: t("generateurs.presentationSuccess") });
     }
   };
@@ -1964,7 +1964,7 @@ export const GenerateursPage = () => {
               <div className="flex gap-3 items-center">
                 {fichiersRapport.length === 0 && (
                   <div className="flex gap-2">
-                    {["docx", "markdown"].map((fmt) => (
+                    {["docx", "pdf", "markdown"].map((fmt) => (
                       <label key={fmt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition-colors ${
                         formatRapport === fmt ? "border-yukpo-500 bg-yukpo-500/10 text-yukpo-300" : "border-slate-600 text-slate-400 hover:border-slate-500"
                       }`}>
@@ -2052,7 +2052,7 @@ export const GenerateursPage = () => {
               <div className="flex gap-3 items-center">
                 {fichiersSlides.length === 0 && (
                   <div className="flex gap-2">
-                    {["pptx", "markdown"].map((fmt) => (
+                    {["pptx", "pdf", "markdown"].map((fmt) => (
                       <label key={fmt} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition-colors ${
                         formatSlides === fmt ? "border-yukpo-500 bg-yukpo-500/10 text-yukpo-300" : "border-slate-600 text-slate-400 hover:border-slate-500"
                       }`}>

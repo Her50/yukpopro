@@ -27,10 +27,16 @@ ENV PYTHONUNBUFFERED=1 \
     WORKERS=2
 
 # Dépendances système runtime minimales (cloud/simulation mode)
+# libreoffice-core/writer/impress : conversion DOCX/PPTX → PDF en mode --headless
+# fonts-dejavu-core : rendu correct des caractères latins étendus dans les PDF
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     curl \
     libglib2.0-0 \
+    libreoffice-core \
+    libreoffice-writer \
+    libreoffice-impress \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les packages Python compilés depuis le builder
