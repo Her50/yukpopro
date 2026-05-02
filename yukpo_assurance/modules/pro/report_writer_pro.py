@@ -444,6 +444,124 @@ def _analyser_excel_pandas(contexte: str) -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Helper graphiques (matplotlib lazy-import)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _generer_png_depuis_tableau(
+    headers: list[str],
+    rows:    list[str],
+    colonnes_num: set,
+) -> Optional[bytes]:
+    """
+    Génère un PNG (bar chart ou line chart) depuis un tableau markdown.
+    Retourne None si non graphable.
+    `rows` = lignes brutes markdown ("| ... | ... |"). `colonnes_num` = indices.
+    """
+    try:
+        import io as _io
+        import re as _re
+        # Extraire valeurs numériques par cellule
+        def _to_float(v: str) -> Optional[float]:
+            v = (v or "").strip().strip("*").replace(" ", " ")
+            v = _re.sub(r"[^\d,.\-]", "", v.replace(" ", "").replace(",", "."))
+            try:
+                return float(v) if v else None
+            except ValueError:
+                return None
+
+        labels: list[str] = []
+        series: dict[int, list[float]] = {ci: [] for ci in sorted(colonnes_num)}
+        for row_line in rows:
+            cells = [c.strip() for c in row_line.split("|") if c.strip()]
+            if not cells:
+                continue
+            # exclure lignes total/moyenne du graphique
+            if _re.match(r"^\s*\*?\*?\s*(total|moyenne|sous-total|grand total)",
+                         cells[0], _re.IGNORECASE):
+                continue
+            label = cells[0].strip("*")[:18]
+            labels.append(label)
+            for ci in sorted(colonnes_num):
+                val = _to_float(cells[ci]) if ci < len(cells) else None
+                series[ci].append(val if val is not None else 0.0)
+
+        if not labels or not any(any(v != 0 for v in s) for s in series.values()):
+            return None
+        if len(labels) > 20:  # tableau trop dense — pas lisible en chart
+            return None
+
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        plt.rcParams["font.family"] = "DejaVu Sans"
+        palette = ["#0047AB", "#16A34A", "#F59E0B", "#DC2626", "#7C3AED",
+                   "#0EA5E9", "#10B981", "#F97316"]
+
+        fig, ax = plt.subplots(figsize=(9, 4.5), dpi=110)
+        fig.patch.set_facecolor("#FFFFFF")
+        ax.set_facecolor("#FFFFFF")
+
+        n_series = len(series)
+        # Choix de type : >1 série OU >8 labels → barres ; sinon courbe si tendance
+        nombres_x = [i for i in range(len(labels))]
+        if n_series == 1 and len(labels) >= 5:
+            ci = list(series.keys())[0]
+            ax.plot(nombres_x, series[ci], marker="o", color=palette[0],
+                    linewidth=2.2, markersize=5, markerfacecolor="white",
+                    markeredgewidth=1.5, label=headers[ci] if ci < len(headers) else "")
+            ax.fill_between(nombres_x, series[ci], alpha=0.10, color=palette[0])
+        else:
+            largeur_totale = 0.78
+            w = largeur_totale / max(n_series, 1)
+            for i, (ci, vals) in enumerate(series.items()):
+                offset = (i - (n_series - 1) / 2) * w
+                bars = ax.bar(
+                    [x + offset for x in nombres_x], vals, width=w * 0.92,
+                    color=palette[i % len(palette)],
+                    label=headers[ci] if ci < len(headers) else f"Col {ci}",
+                    alpha=0.92, zorder=3,
+                )
+                if len(vals) <= 12:
+                    for bar in bars:
+                        h = bar.get_height()
+                        if h != 0:
+                            ax.annotate(
+                                f"{h:,.0f}" if abs(h) >= 100 else f"{h:.1f}",
+                                xy=(bar.get_x() + bar.get_width() / 2, h),
+                                xytext=(0, 3), textcoords="offset points",
+                                ha="center", fontsize=7, color="#374151",
+                            )
+
+        ax.set_xticks(nombres_x)
+        ax.set_xticklabels(labels, rotation=30 if len(labels) > 5 else 0,
+                           ha="right" if len(labels) > 5 else "center", fontsize=8)
+        ax.tick_params(colors="#6B7280", labelsize=8)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#E5E7EB")
+        ax.spines["bottom"].set_color("#E5E7EB")
+        ax.grid(axis="y", linestyle="--", alpha=0.4, color="#E5E7EB")
+        if n_series > 1 or (n_series == 1 and headers):
+            ax.legend(loc="best", fontsize=8, frameon=False)
+        # Format milliers sur Y
+        try:
+            ax.yaxis.set_major_formatter(
+                plt.FuncFormatter(lambda x, _: f"{x:,.0f}".replace(",", " "))
+            )
+        except Exception:
+            pass
+        fig.tight_layout(pad=1.5)
+        buf = _io.BytesIO()
+        fig.savefig(buf, format="png", dpi=110, bbox_inches="tight",
+                    facecolor="#FFFFFF")
+        plt.close(fig)
+        return buf.getvalue()
+    except Exception as e:
+        logger.debug(f"[ReportWriter] Graphique échoué : {e}")
+        return None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Erreurs métier
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -516,7 +634,7 @@ class ReportWriterPro:
         if not structure:  # garde-fou
             structure = structure_brute
 
-        # 1. Générer le contenu via IA
+        # 1. Générer le contenu via IA (séquentiel + contexte cumulatif)
         contenu_sections = await self._generer_contenu_ia(
             sujet=sujet,
             type_rapport=type_rapport,
@@ -527,6 +645,14 @@ class ReportWriterPro:
             langue=langue,
             instruction_utilisateur=instruction_utilisateur,
             forcer_recherche_web=forcer_recherche_web,
+        )
+
+        # 1.5 Pass de révision (sauf flash) — densifie les sections faibles
+        contenu_sections = await self._pass_revision(
+            sections=contenu_sections,
+            sujet=sujet,
+            instruction=instruction_utilisateur or sujet,
+            mode=mode,
         )
 
         # 2. Construire le document
@@ -848,11 +974,24 @@ class ReportWriterPro:
                 f"Chaque section doit être COMPLÈTE et AUTONOME."
             )
 
-        async def _generer_un_lot(sous_structure: list[str], idx: int, total: int) -> list[dict]:
+        async def _generer_un_lot(
+            sous_structure: list[str], idx: int, total: int,
+            sections_precedentes_resume: str = "",
+        ) -> list[dict]:
+            prompt_lot = _construire_prompt_lot(sous_structure, idx, total)
+            if sections_precedentes_resume:
+                prompt_lot = (
+                    f"📚 SECTIONS DÉJÀ RÉDIGÉES (pour cohérence et éviter répétitions) :\n"
+                    f"{sections_precedentes_resume}\n"
+                    f"{'─'*60}\n"
+                    f"⚠️ Reprends les chiffres/conclusions ci-dessus quand tu y fais référence. "
+                    f"Évite de reformuler ce qui a déjà été dit. Construis SUR le travail précédent.\n\n"
+                    + prompt_lot
+                )
             reponse = await ia_client.appeler(
-                prompt=_construire_prompt_lot(sous_structure, idx, total),
+                prompt=prompt_lot,
                 systeme=system,
-                mode=ModeIA.REDACTION,  # Claude Sonnet 4.6 primaire, GPT-4o fallback
+                mode=ModeIA.REDACTION,
                 max_tokens_override=_TOKENS_PAR_MODE[mode],
                 json_attendu=True,
                 utiliser_cache=False,
@@ -862,19 +1001,19 @@ class ReportWriterPro:
         if len(lots) == 1:
             return await _generer_un_lot(lots[0], 0, 1)
 
-        # Parallélisation des lots : gain de latence net, chaque lot ~15-30s
-        resultats = await asyncio.gather(
-            *[_generer_un_lot(lot, i, len(lots)) for i, lot in enumerate(lots)],
-            return_exceptions=True,
-        )
-
+        # ── Génération SÉQUENTIELLE avec contexte cumulatif ──────────────────
+        # Plus lent (~30s/lot vs 30s total en parallèle) mais cohérence forte :
+        # chaque lot voit un résumé des sections précédentes → références
+        # croisées, pas de répétitions, fil narratif continu.
         sections: list[dict] = []
-        for i, res in enumerate(resultats):
-            if isinstance(res, Exception):
-                logger.warning(f"[ReportWriter] Lot {i+1} échoué : {res} → sections placeholder")
-                sections.extend({"titre": t, "contenu": f"[Lot {i+1} indisponible]"} for t in lots[i])
-            else:
+        for i, lot in enumerate(lots):
+            resume_precedent = self._resumer_sections_pour_contexte(sections, max_chars=2500)
+            try:
+                res = await _generer_un_lot(lot, i, len(lots), resume_precedent)
                 sections.extend(res)
+            except Exception as e:
+                logger.warning(f"[ReportWriter] Lot {i+1} échoué : {e} → sections placeholder")
+                sections.extend({"titre": t, "contenu": f"[Lot {i+1} indisponible]"} for t in lot)
         return sections
 
     def _parser_sections_json(self, texte: str, structure: list[str]) -> list[dict]:
@@ -913,6 +1052,122 @@ class ReportWriterPro:
             sections = [{"titre": "Rapport", "contenu": texte}]
 
         return sections
+
+    def _resumer_sections_pour_contexte(self, sections: list[dict], max_chars: int = 2500) -> str:
+        """
+        Résume les sections déjà rédigées pour les transmettre au prochain lot.
+        Garde les titres + 2-3 premières lignes (pour les chiffres/conclusions clés)
+        + tableaux markdown (très denses en information).
+        """
+        if not sections:
+            return ""
+        import re as _re
+        morceaux: list[str] = []
+        for s in sections:
+            titre = s.get("titre", "").strip()
+            contenu = s.get("contenu", "").strip()
+            if not titre or not contenu:
+                continue
+            lignes = contenu.split("\n")
+            extraits: list[str] = []
+            # 3 premières lignes non vides (en général : intro de section)
+            for ligne in lignes:
+                if ligne.strip() and not ligne.startswith("#"):
+                    extraits.append(ligne.strip())
+                    if len(extraits) >= 3:
+                        break
+            # Tableaux markdown (très utiles pour cohérence chiffres)
+            in_table = False
+            for ligne in lignes:
+                if "|" in ligne and ligne.strip().startswith("|"):
+                    extraits.append(ligne.strip())
+                    in_table = True
+                elif in_table:
+                    if "|" not in ligne:
+                        in_table = False
+            morceaux.append(f"### {titre}\n" + "\n".join(extraits[:8]))
+        resume = "\n\n".join(morceaux)
+        return resume[:max_chars] + ("…" if len(resume) > max_chars else "")
+
+    async def _pass_revision(
+        self, sections: list[dict], sujet: str, instruction: str, mode: str,
+    ) -> list[dict]:
+        """
+        Pass de révision : 1 appel critique pour identifier les sections faibles,
+        puis 1 réécriture ciblée. Améliore profondeur, cohérence, élimine redites.
+        Skippé en mode 'flash' (rapport court — pas le coût d'un appel sup).
+        """
+        if mode == "flash" or len(sections) < 2:
+            return sections
+        from core.ia_client import ModeIA, ia_client
+        try:
+            apercu = "\n\n".join(
+                f"### {s['titre']}\n{(s.get('contenu') or '')[:1200]}" for s in sections
+            )[:14000]
+            prompt_critique = (
+                f"Tu es éditeur senior. Voici un rapport sur '{sujet}' (extraits de chaque section).\n\n"
+                f"{apercu}\n\n"
+                f"{'─'*50}\n"
+                f"Identifie en JSON les 0 à 3 sections les PLUS faibles (creuses, "
+                f"placeholders, redites avec d'autres sections, manque de chiffres/sources).\n"
+                f"Format strict : {{\"sections_a_reecrire\": [{{\"titre\": \"...\", \"raison\": \"...\", "
+                f"\"directive\": \"que faire pour l'améliorer en 1 phrase\"}}]}}\n"
+                f"Si le rapport est globalement bon, retourne {{\"sections_a_reecrire\": []}}."
+            )
+            r = await ia_client.appeler(
+                prompt=prompt_critique, mode=ModeIA.ANALYSE,
+                max_tokens_override=2000, json_attendu=True, utiliser_cache=False,
+            )
+            import json as _json, re as _re
+            txt = r.contenu.strip()
+            m = _re.search(r'\{[\s\S]*\}', txt)
+            if not m:
+                return sections
+            critique = _json.loads(m.group(0))
+            faibles = critique.get("sections_a_reecrire", [])[:3]
+            if not faibles:
+                return sections
+            logger.info(f"[ReportWriter] Pass révision : {len(faibles)} sections à réécrire")
+
+            # Réécriture ciblée — 1 seul appel pour toutes les sections faibles
+            titres_faibles = {f["titre"]: f for f in faibles}
+            sections_a_reecrire = [
+                s for s in sections if s.get("titre") in titres_faibles
+            ]
+            if not sections_a_reecrire:
+                return sections
+            directives = "\n".join(
+                f"- '{f['titre']}' → {f.get('directive', '')} (raison : {f.get('raison', '')})"
+                for f in faibles
+            )
+            anciennes_versions = "\n\n".join(
+                f"### {s['titre']} (ancienne version)\n{s.get('contenu', '')}"
+                for s in sections_a_reecrire
+            )[:18000]
+            prompt_revise = (
+                f"Réécris en mieux ces sections du rapport '{sujet}'.\n\n"
+                f"DEMANDE INITIALE : {instruction}\n\n"
+                f"DIRECTIVES :\n{directives}\n\n"
+                f"VERSIONS ACTUELLES À AMÉLIORER :\n{anciennes_versions}\n\n"
+                f"Retourne JSON strict : {{\"sections\": [{{\"titre\": \"même titre exact\", "
+                f"\"contenu\": \"version améliorée — plus dense, plus chiffrée, mieux articulée\"}}]}}.\n"
+                f"Densifie. Ajoute tableaux markdown si pertinent. Cite tes sources."
+            )
+            r2 = await ia_client.appeler(
+                prompt=prompt_revise, mode=ModeIA.REDACTION,
+                max_tokens_override=12000, json_attendu=True, utiliser_cache=False,
+            )
+            nouvelles = self._parser_sections_json(
+                r2.contenu, [s["titre"] for s in sections_a_reecrire]
+            )
+            par_titre = {s["titre"]: s for s in nouvelles if s.get("contenu")}
+            for s in sections:
+                if s["titre"] in par_titre and len(par_titre[s["titre"]].get("contenu", "")) > 200:
+                    s["contenu"] = par_titre[s["titre"]]["contenu"]
+            return sections
+        except Exception as e:
+            logger.warning(f"[ReportWriter] Pass révision échoué (non bloquant) : {e}")
+            return sections
 
     # ── Construction DOCX ──────────────────────────────────────────────────────
 
@@ -1139,6 +1394,33 @@ class ReportWriterPro:
                             cap_run.font.size = Pt(9)
                             cap_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
                             doc.add_paragraph()
+
+                            # ── Graphique auto si colonnes numériques ──────
+                            if colonnes_numeriques and len(rows) >= 3:
+                                png_bytes = _generer_png_depuis_tableau(
+                                    headers=cols, rows=rows[1:],
+                                    colonnes_num=colonnes_numeriques,
+                                )
+                                if png_bytes:
+                                    _compteur_figure[0] += 1
+                                    num_fig = _compteur_figure[0]
+                                    try:
+                                        import io as _io
+                                        p_img = doc.add_paragraph()
+                                        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                        run_img = p_img.add_run()
+                                        run_img.add_picture(_io.BytesIO(png_bytes), width=Inches(5.8))
+                                        cap_fig = doc.add_paragraph()
+                                        cap_fig.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                        cf_run = cap_fig.add_run(
+                                            f"Figure {num_fig} — Visualisation du tableau {num_table}"
+                                        )
+                                        cf_run.italic = True
+                                        cf_run.font.size = Pt(9)
+                                        cf_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+                                        doc.add_paragraph()
+                                    except Exception as _e_img:
+                                        logger.debug(f"[ReportWriter] Insertion figure échouée: {_e_img}")
                     continue
 
                 # ── Bullet sous-indentés (  - ou    •) ──────────────────
