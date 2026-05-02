@@ -2357,9 +2357,68 @@ async def copilote_chat(
     # Si l'utilisateur a ouvert un document depuis "Mes Documents" et demande
     # une amélioration dans le chat, on bypass le classifier et on force la
     # génération en mode édition avec le type et le contenu d'origine.
-    if req.document_ref is not None:
+    # `_effective_doc_ref` peut venir du frontend OU d'une auto-détection
+    # de l'intention « modifier le rapport précédent » dans la session.
+    _effective_doc_ref = req.document_ref
+
+    # Auto-détection : l'utilisateur veut MODIFIER le dernier doc généré
+    # On vérifie même si l'orchestrateur a classé en 'conversation' — un
+    # message court type « complète la section X » sera mal classé sinon.
+    if _effective_doc_ref is None and _intention in ("generateur", "conversation", "agent_metier"):
+        _MODIFICATION_PATTERNS = (
+            "modifie", "modifier", "modification",
+            "ajoute", "ajouter", "rajoute", "rajouter",
+            "complete", "complète", "completer", "compléter",
+            "enleve", "enlève", "enlever", "supprime", "supprimer",
+            "remplace", "remplacer",
+            "change", "changer",
+            "ameliore", "améliore", "ameliorer", "améliorer",
+            "reformule", "reformuler",
+            "developpe", "développe", "developper", "développer",
+            "approfondi", "approfondir",
+            "ce rapport", "ce document", "ce fichier", "celui-ci", "celui ci",
+            "le rapport precedent", "le rapport précédent",
+            "le doc precedent", "le doc précédent",
+            "le document genere", "le document généré",
+            "tu viens de generer", "tu viens de générer",
+            "tu as genere", "tu as généré",
+            "que tu as fait", "que tu viens de faire",
+            "dans le rapport", "dans le document",
+            "section ", "chapitre ", "paragraphe ",
+            "page ", "tableau ",
+            "rendre plus", "rends-le plus", "rends le plus",
+        )
+        _msg_low_modif = (req.message or "").lower()
+        _est_modification = any(p in _msg_low_modif for p in _MODIFICATION_PATTERNS)
+        if _est_modification:
+            # Retrouver le dernier document généré dans la session
+            _last_gen_meta = None
+            for _m in reversed(session.get("messages", [])[-12:]):
+                if (_m.get("role") == "assistant"
+                        and (_m.get("meta") or {}).get("agent_utilise") == "generateur"
+                        and (_m.get("meta") or {}).get("titre")):
+                    _last_gen_meta = _m.get("meta") or {}
+                    break
+            if _last_gen_meta:
+                from types import SimpleNamespace as _SNS
+                _effective_doc_ref = _SNS(
+                    id=_last_gen_meta.get("doc_id") or 0,
+                    titre=_last_gen_meta.get("titre", "Document précédent"),
+                    type_doc=_last_gen_meta.get("type_doc") or "rapport_analyse",
+                    contenu_genere=_last_gen_meta.get("apercu", "") or "",
+                    meta=_last_gen_meta,
+                )
+                # Force l'intention generateur si l'orchestrateur s'est trompé
+                _intention = "generateur"
+                logger.info(
+                    f"[Copilote] Modification détectée → mode édition activé "
+                    f"sur dernier doc '{(_last_gen_meta.get('titre') or '')[:50]}' "
+                    f"(type={_last_gen_meta.get('type_doc')})"
+                )
+
+    if _effective_doc_ref is not None:
         _intention  = "generateur"
-        _type_doc_o = req.document_ref.type_doc or _type_doc_o
+        _type_doc_o = _effective_doc_ref.type_doc or _type_doc_o
         if _type_doc_o.startswith("slides") or _type_doc_o in (
             "bilan_activite", "rapport_direction", "proposition_client",
             "pitch_projet", "formation", "analyse_marche",
@@ -2368,6 +2427,9 @@ async def copilote_chat(
             _format_orch = "pptx"
         elif _type_doc_o in ("cv", "lettre_emploi", "lettre_motivation"):
             _sous_type = "cv"
+        elif _type_doc_o.startswith("tableur"):
+            _sous_type = "tableur"
+            _format_orch = "xlsx"
         else:
             _sous_type = _sous_type or "rapport"
 
@@ -2755,9 +2817,9 @@ async def copilote_chat(
                 contexte_gen_parts.append(f"[Données des fichiers joints]\n{contenu_fichiers[:6000]}")
 
             # Mode édition : on injecte le contenu source et les instructions utilisateur
-            _is_edit = req.document_ref is not None
+            _is_edit = _effective_doc_ref is not None
             if _is_edit:
-                dref = req.document_ref
+                dref = _effective_doc_ref
                 contexte_gen_parts.insert(
                     0,
                     f"[Document source à améliorer — titre: {dref.titre}]\n"
@@ -2888,18 +2950,27 @@ async def copilote_chat(
             )
 
             _ajouter_message(session, "user", req.message)
-            _ajouter_message(session, "assistant", reponse_gen, {"agent_utilise": "generateur"})
+            # Meta enrichi pour permettre la modification ultérieure dans le chat
+            # (auto-détection de l'intention "modifie ce rapport").
+            titre_sauv = (_effective_doc_ref.titre if _is_edit else sujet_gen)[:100]
+            meta_msg = {
+                "agent_utilise": "generateur",
+                "titre": titre_sauv,
+                "type_doc": type_doc_gen,
+                "format": ext.lower(),
+                "sujet": sujet_gen,
+                "apercu": (apercu or "")[:6000],
+                "chemin_fichier": chemin_fichier,
+            }
+            _ajouter_message(session, "assistant", reponse_gen, meta_msg)
             await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=3)
-            # Réutilise le titre déjà généré par LLM côté sujet_gen (évite
-            # un second appel LLM). En mode édition on garde le titre d'origine.
-            titre_sauv = (req.document_ref.titre if _is_edit else sujet_gen)[:100]
             meta_sauv = {
                 "source": "chat",
                 "format": ext.lower(),
                 "avec_fichiers": bool(contenu_fichiers),
             }
             if _is_edit:
-                meta_sauv["edited_from"] = req.document_ref.id
+                meta_sauv["edited_from"] = getattr(_effective_doc_ref, "id", 0) or 0
                 meta_sauv["instructions"] = req.message[:500]
             await _sauvegarder_doc_db(
                 db=db, user_id=current_user.user_id,
