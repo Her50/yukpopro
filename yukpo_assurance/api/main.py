@@ -247,21 +247,27 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"  [DB] Init DB non critique: {e}")
 
-    # ── Création automatique du compte super_admin au premier démarrage ─────────
+    # ── Création / reset du compte super_admin au démarrage ────────────────────
     async def _creer_super_admin():
         import os as _os, secrets as _sec, bcrypt as _bcrypt
         from datetime import datetime as _dtt
         from core.database import UtilisateurDB as _UDB, async_session_maker as _asm2
         from sqlalchemy import select as _sel2
 
-        _admin_email = _os.environ.get("SUPER_ADMIN_EMAIL", "admin@yukpopro.cm")
-        _admin_pwd   = _os.environ.get("SUPER_ADMIN_PASSWORD", "")
-        _admin_nom   = _os.environ.get("SUPER_ADMIN_NOM",      "Yukpo Admin")
+        _admin_email = _os.environ.get("BOOTSTRAP_ADMIN_EMAIL") or _os.environ.get("SUPER_ADMIN_EMAIL", "admin@yukpopro.cm")
+        _admin_pwd   = _os.environ.get("BOOTSTRAP_ADMIN_PASSWORD") or _os.environ.get("SUPER_ADMIN_PASSWORD", "")
+        _admin_nom   = _os.environ.get("SUPER_ADMIN_NOM", "Yukpo Admin")
+        _reset       = _os.environ.get("BOOTSTRAP_ADMIN_RESET", "").lower() in ("1", "true", "yes")
 
         async with _asm2() as _sess:
+            # Cherche un super_admin par email d'abord, sinon n'importe quel super_admin
             _existing = (await _sess.execute(
-                _sel2(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+                _sel2(_UDB).where(_UDB.email == _admin_email)
             )).scalars().first()
+            if not _existing:
+                _existing = (await _sess.execute(
+                    _sel2(_UDB).where(_UDB.role.in_(["super_admin", "yukpo_owner"]))
+                )).scalars().first()
 
             if not _existing:
                 _pwd = _admin_pwd or _sec.token_urlsafe(16)
@@ -274,9 +280,30 @@ async def lifespan(app: FastAPI):
                 )
                 _sess.add(_u)
                 await _sess.commit()
-                logger.info(f"  [Admin] Compte super_admin créé : {_admin_email} | pwd={_pwd if not _admin_pwd else '(depuis env)'}")
+                logger.warning(
+                    f"  [Admin] ✅ Compte super_admin CRÉÉ : email={_admin_email} "
+                    f"username={_uname} role=super_admin "
+                    f"password={_pwd if not _admin_pwd else '(depuis env BOOTSTRAP_ADMIN_PASSWORD)'}"
+                )
+            elif _reset and _admin_pwd:
+                # Reset password sur demande explicite
+                _hashed = _bcrypt.hashpw(_admin_pwd[:72].encode(), _bcrypt.gensalt()).decode()
+                _existing.hashed_password = _hashed
+                _existing.actif = True
+                if _existing.role not in ("super_admin", "yukpo_owner"):
+                    _existing.role = "super_admin"
+                _existing.tentatives_echec = 0
+                _existing.bloque_jusqu_au = None
+                await _sess.commit()
+                logger.warning(
+                    f"  [Admin] 🔁 Password RÉINITIALISÉ pour {_existing.email} "
+                    f"(role={_existing.role}). RETIRE BOOTSTRAP_ADMIN_RESET maintenant !"
+                )
             else:
-                logger.info(f"  [Admin] Compte super_admin déjà existant : {_existing.email}")
+                logger.info(
+                    f"  [Admin] Compte super_admin déjà existant : {_existing.email} "
+                    f"(role={_existing.role}, actif={_existing.actif})"
+                )
 
     try:
         import asyncio as _aio
