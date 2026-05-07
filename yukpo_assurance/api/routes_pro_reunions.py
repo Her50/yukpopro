@@ -48,6 +48,216 @@ LANGUE_LABELS: dict[str, str] = {
 }
 
 
+# ── Parseur de sous-titres (VTT / SRT) ───────────────────────────────────────
+
+def _parser_vtt(contenu: str) -> dict:
+    """
+    Parse un fichier WebVTT (Teams, Zoom, Meet) en transcript structuré.
+
+    Format Teams typique :
+        WEBVTT
+
+        00:00:01.234 --> 00:00:04.567
+        <v Jean Dupont>Bonjour à tous, on commence la réunion.</v>
+
+        00:00:05.000 --> 00:00:09.123
+        <v Marie Martin>Très bien, je présente d'abord les chiffres.</v>
+
+    Format Zoom typique : pas de balise <v>, le speaker est en début de ligne.
+    Format Meet (Captions) : pas de speaker, juste le texte par segment.
+
+    Retourne :
+        {
+            "transcript": "Jean Dupont: Bonjour à tous...\n\nMarie Martin: ...",
+            "segments":   [{"speaker": "...", "debut": 1.234, "fin": 4.567, "texte": "..."}],
+            "participants": ["Jean Dupont", "Marie Martin"],
+            "duree_secondes": 9.123,
+        }
+    """
+    import re
+    lignes = contenu.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    segments: list[dict] = []
+    participants_set: set[str] = set()
+    duree_max = 0.0
+
+    def _ts_to_seconds(ts: str) -> float:
+        # "00:00:04.567" ou "00:00:04,567"
+        ts = ts.strip().replace(",", ".")
+        parts = ts.split(":")
+        try:
+            if len(parts) == 3:
+                h, m, s = parts
+            elif len(parts) == 2:
+                h, m, s = "0", parts[0], parts[1]
+            else:
+                return 0.0
+            return int(h) * 3600 + int(m) * 60 + float(s)
+        except (ValueError, IndexError):
+            return 0.0
+
+    i = 0
+    n = len(lignes)
+    re_ts   = re.compile(r"(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})")
+    re_speaker_v   = re.compile(r"<v\s+([^>]+?)>(.*?)(?:</v>)?$", re.IGNORECASE)
+    re_speaker_pre = re.compile(r"^([A-ZÀ-Ý][\wÀ-ÿ\-' ]{1,40}?)\s*:\s*(.+)$")
+
+    while i < n:
+        m_ts = re_ts.search(lignes[i])
+        if not m_ts:
+            i += 1
+            continue
+        debut = _ts_to_seconds(m_ts.group(1))
+        fin   = _ts_to_seconds(m_ts.group(2))
+        duree_max = max(duree_max, fin)
+        i += 1
+        # Bloc de texte jusqu'à ligne vide
+        bloc: list[str] = []
+        while i < n and lignes[i].strip() != "":
+            bloc.append(lignes[i].strip())
+            i += 1
+        texte_bloc = " ".join(bloc).strip()
+        if not texte_bloc:
+            continue
+        # Détection du speaker
+        speaker = ""
+        m_v = re_speaker_v.search(texte_bloc)
+        if m_v:
+            speaker = m_v.group(1).strip()
+            texte = m_v.group(2).strip()
+            # Nettoyage tags HTML restants
+            texte = re.sub(r"<[^>]+>", "", texte).strip()
+        else:
+            m_pre = re_speaker_pre.match(texte_bloc)
+            if m_pre and len(m_pre.group(1).split()) <= 4:
+                speaker = m_pre.group(1).strip()
+                texte = m_pre.group(2).strip()
+            else:
+                texte = re.sub(r"<[^>]+>", "", texte_bloc).strip()
+        if not texte:
+            continue
+        if speaker:
+            participants_set.add(speaker)
+        segments.append({
+            "speaker": speaker, "debut": debut, "fin": fin, "texte": texte,
+        })
+
+    # Construction du transcript narratif (regroupé par speaker consécutif)
+    transcript_lignes: list[str] = []
+    last_speaker = None
+    buffer: list[str] = []
+    for seg in segments:
+        sp = seg["speaker"]
+        if sp != last_speaker and buffer:
+            prefix = f"{last_speaker}: " if last_speaker else ""
+            transcript_lignes.append(prefix + " ".join(buffer))
+            buffer = []
+        buffer.append(seg["texte"])
+        last_speaker = sp
+    if buffer:
+        prefix = f"{last_speaker}: " if last_speaker else ""
+        transcript_lignes.append(prefix + " ".join(buffer))
+
+    return {
+        "transcript": "\n\n".join(transcript_lignes),
+        "segments":   segments,
+        "participants": sorted(participants_set),
+        "duree_secondes": int(duree_max),
+        "nb_segments": len(segments),
+    }
+
+
+def _parser_srt(contenu: str) -> dict:
+    """SRT = même structure que VTT (on réutilise le parseur)."""
+    return _parser_vtt(contenu)
+
+
+@router.post(
+    "/importer-replay",
+    summary="Importer replay réunion (vidéo Teams/Zoom/Meet ou sous-titres .vtt/.srt)",
+)
+async def importer_replay(
+    fichier: UploadFile = File(...),
+    langue: str = Form("auto"),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Pipeline replay 100% serveur :
+
+    - **Vidéo (.mp4, .webm, .mkv, .mov)** → Whisper extrait l'audio et transcrit.
+      Coût normal de transcription. Pas d'identification automatique des speakers.
+    - **Sous-titres (.vtt, .srt)** — exportés depuis Teams / Zoom / Meet — parsés
+      directement, **gratuit**, **rapide**, **avec speakers labellisés** (Teams).
+
+    Retourne le même format que `/transcrire-direct` pour rester compatible avec
+    le pipeline de génération de PV.
+    """
+    nom = (fichier.filename or "").lower()
+    contenu = await fichier.read()
+    if len(contenu) < 100:
+        raise HTTPException(400, "Fichier vide ou tronqué")
+    taille_mb = len(contenu) / (1024 * 1024)
+
+    # ── Cas 1 : sous-titres → parsing local, gratuit ─────────────────────────
+    if nom.endswith(".vtt") or nom.endswith(".srt"):
+        try:
+            txt = contenu.decode("utf-8", errors="replace")
+            parser = _parser_vtt if nom.endswith(".vtt") else _parser_srt
+            res = parser(txt)
+        except Exception as e:
+            logger.error(f"[ProReunions] Parsing sous-titres échoué : {e}")
+            raise HTTPException(400, "Fichier de sous-titres illisible")
+
+        if not res.get("transcript"):
+            raise HTTPException(422, "Aucun texte exploitable dans les sous-titres")
+
+        logger.info(
+            f"[ProReunions] Sous-titres importés | user={current_user.user_id} "
+            f"segments={res['nb_segments']} participants={len(res['participants'])} "
+            f"duree={res['duree_secondes']}s"
+        )
+        # Pas de débit crédits : aucun appel IA payant n'a été fait
+        return {
+            "transcription": res["transcript"],
+            "transcription_originale": None,
+            "langue_detectee": "auto",
+            "langue_cible":    langue,
+            "traduit":         False,
+            "longueur":        len(res["transcript"]),
+            "source":          "sous-titres",
+            "format_source":   "vtt" if nom.endswith(".vtt") else "srt",
+            "participants_detectes": res["participants"],
+            "duree_secondes":  res["duree_secondes"],
+            "nb_segments":     res["nb_segments"],
+        }
+
+    # ── Cas 2 : vidéo/audio → on délègue au pipeline Whisper existant ────────
+    extensions_videos = {".mp4", ".webm", ".mkv", ".mov", ".m4v", ".avi"}
+    extensions_audio  = {".mp3", ".m4a", ".wav", ".ogg", ".flac", ".opus", ".aac", ".3gp"}
+    ext_match = nom.rsplit(".", 1)[-1] if "." in nom else ""
+    if not (("." + ext_match) in extensions_videos or ("." + ext_match) in extensions_audio):
+        raise HTTPException(
+            400,
+            "Format non supporté. Acceptés : .mp4, .webm, .mkv, .mov, .mp3, .m4a, "
+            ".wav, .vtt, .srt"
+        )
+
+    # On reconstitue un UploadFile virtuel pour réutiliser transcrire_direct_pro
+    from io import BytesIO
+    from fastapi import UploadFile as _UF
+    from starlette.datastructures import Headers as _H
+    audio_uf = _UF(
+        filename=fichier.filename,
+        file=BytesIO(contenu),
+        headers=_H({"content-type": fichier.content_type or "video/mp4"}),
+    )
+    res = await transcrire_direct_pro(
+        audio=audio_uf, langue=langue, current_user=current_user,
+    )
+    res["source"] = "video" if ("." + ext_match) in extensions_videos else "audio"
+    res["format_source"] = ext_match
+    return res
+
+
 # ── Transcription directe (sans reunion_id) ───────────────────────────────────
 
 @router.post(

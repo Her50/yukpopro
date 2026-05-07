@@ -13,7 +13,7 @@ import {
   Plus, Users, Calendar, Trash2, Mic, MicOff,
   FileText, CheckCircle, Clock, Sparkles, X, Download,
   Radio, Square, Languages, ChevronDown, AlertCircle,
-  Play, Pause, Pencil, RefreshCw,
+  Play, Pause, Pencil, RefreshCw, Upload, Video,
 } from "lucide-react";
 import { reunionsApi } from "@/api/client";
 import { DemoBanner } from "@/components/DemoBanner";
@@ -236,6 +236,53 @@ const FormulaireReunion = ({
   const handleTogglePause = () => {
     if (recorder.isPaused) recorder.resume();
     else recorder.pause();
+  };
+
+  const handleImporterReplay = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";  // reset pour pouvoir réuploader le même fichier
+    if (!file) return;
+    const tailleMB = file.size / (1024 * 1024);
+    if (tailleMB > 500) {
+      toast.error(`Fichier trop volumineux (${tailleMB.toFixed(1)} MB > 500 MB)`);
+      return;
+    }
+    setTranscribing(true);
+    try {
+      const res = await reunionsApi.importerReplay(file, langue);
+      const texte = res.transcription || "";
+      const meta: string[] = [];
+      if (res.source === "sous-titres") {
+        meta.push("📝 Importé depuis sous-titres .vtt/.srt (gratuit)");
+        if (res.participants_detectes?.length) {
+          meta.push(`Participants : ${res.participants_detectes.join(", ")}`);
+        }
+        if (res.duree_secondes) {
+          meta.push(`Durée : ${Math.floor(res.duree_secondes / 60)} min`);
+        }
+      } else {
+        meta.push(`🎬 Replay ${res.source} transcrit via Whisper (langue : ${res.langue_detectee})`);
+      }
+      const entete = meta.length ? `\n[${meta.join(" · ")}]` : "";
+      setNotes(prev =>
+        prev.trim() ? prev + "\n\n--- Replay importé ---\n" + texte + entete : texte + entete,
+      );
+      // Pré-remplir participants si détectés
+      if (res.participants_detectes?.length && participants.length === 0) {
+        setParticipants(res.participants_detectes.map(nom => ({ nom })));
+      }
+      setTranscriptionDone(true);
+      toast.success(
+        res.source === "sous-titres"
+          ? `Sous-titres importés — ${res.participants_detectes?.length || 0} participant(s), ${texte.length} caractères`
+          : `Replay transcrit — ${texte.length} caractères`,
+      );
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Échec import replay";
+      toast.error(typeof msg === "string" ? msg : "Échec import replay");
+    } finally {
+      setTranscribing(false);
+    }
   };
 
   const handleSave = () => {
@@ -473,13 +520,28 @@ const FormulaireReunion = ({
                 {/* Boutons enregistrement */}
                 <div className="flex gap-2">
                   {!recorder.isRecording ? (
-                    <button
-                      onClick={handleStartRecording}
-                      disabled={transcribing}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
-                    >
-                      <Mic className="w-4 h-4" /> {t('reunions.startRecording')}
-                    </button>
+                    <>
+                      <button
+                        onClick={handleStartRecording}
+                        disabled={transcribing}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+                      >
+                        <Mic className="w-4 h-4" /> {t('reunions.startRecording')}
+                      </button>
+                      <label
+                        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white text-sm font-medium cursor-pointer transition-colors ${transcribing ? "opacity-50 pointer-events-none" : ""}`}
+                        title="Importer un replay Teams/Zoom/Meet (vidéo, .vtt ou .srt)"
+                      >
+                        <Upload className="w-4 h-4" /> Importer replay
+                        <input
+                          type="file"
+                          accept=".mp4,.webm,.mkv,.mov,.m4v,.avi,.mp3,.m4a,.wav,.ogg,.flac,.opus,.aac,.3gp,.vtt,.srt,video/*,audio/*"
+                          className="hidden"
+                          onChange={handleImporterReplay}
+                          disabled={transcribing}
+                        />
+                      </label>
+                    </>
                   ) : (
                     <>
                       <button

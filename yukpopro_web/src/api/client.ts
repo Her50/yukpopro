@@ -829,6 +829,27 @@ export const reunionsApi = {
     return data;
   },
 
+  importerReplay: async (file: File, langue: string = "auto"): Promise<{
+    transcription: string;
+    langue_detectee: string;
+    traduit: boolean;
+    longueur: number;
+    source: "video" | "audio" | "sous-titres";
+    format_source: string;
+    participants_detectes?: string[];
+    duree_secondes?: number;
+    nb_segments?: number;
+  }> => {
+    const formData = new FormData();
+    formData.append("fichier", file);
+    formData.append("langue", langue);
+    const { data } = await http.post("/pro/reunions/importer-replay", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 600_000,  // gros replay vidéo possible
+    });
+    return data;
+  },
+
   genererRapport: async (payload: {
     transcription: string;
     titre?: string;
