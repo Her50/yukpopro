@@ -1120,9 +1120,28 @@ class EtudeDB(Base):
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:
-    """Crée toutes les tables et ajoute les colonnes manquantes (migrations sans Alembic)."""
+    """Crée toutes les tables et ajoute les colonnes manquantes (migrations sans Alembic).
+
+    Sérialisé entre workers gunicorn via pg_advisory_lock (PostgreSQL),
+    pour éviter UniqueViolationError sur pg_class_relname_nsp_index quand
+    plusieurs workers tentent CREATE TABLE en parallèle.
+    """
+    is_postgres = settings.DATABASE_URL.startswith("postgresql")
+    _LOCK_KEY = 9712  # clé arbitraire, partagée par tous les workers
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        if is_postgres:
+            try:
+                await conn.execute(text(f"SELECT pg_advisory_lock({_LOCK_KEY})"))
+            except Exception as e:
+                logger.warning(f"[DB] pg_advisory_lock indisponible: {e}")
+        try:
+            await conn.run_sync(Base.metadata.create_all)
+        finally:
+            if is_postgres:
+                try:
+                    await conn.execute(text(f"SELECT pg_advisory_unlock({_LOCK_KEY})"))
+                except Exception:
+                    pass
 
     # ── Migrations colonnes manquantes (ALTER TABLE IF NOT EXISTS) ─────────────
     # PostgreSQL 9.6+ supporte ADD COLUMN IF NOT EXISTS.

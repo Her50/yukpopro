@@ -532,6 +532,89 @@ async def lancer_recherche_marches(
     return {"nb_marches": len(marches), "marches": marches}
 
 
+@router.get("/marches/diagnostic",
+            summary="Diagnostic des sources d'appels d'offres (sans débit crédits)")
+async def diagnostic_marches(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Test à blanc des 3 sources d'appels d'offres + état crédits.
+    Aucun débit, aucune persistance — utile pour comprendre pourquoi
+    la liste est vide ou erratique.
+    """
+    import os, asyncio as _asyncio
+    from modules.pro.service_profil import get_or_create
+    from modules.pro.scheduler_marches import (
+        _fetch_serper_marches, _fetch_dgmarket, _fetch_ungm,
+        _mots_cles_marches,
+    )
+    from modules.pro.scheduler_emploi import _info_pays
+
+    profil, _ = await get_or_create(current_user.user_id, db)
+    pays = (getattr(profil, "pays", None) or "CM").upper()
+    info = _info_pays(pays)
+    termes = _mots_cles_marches(profil)
+
+    # Solde crédits suffisant ?
+    credits_ok = True
+    credits_solde = None
+    credits_restants_yukpo = None
+    try:
+        from modules.pro.service_credits import solde_utilisateur, MULTIPLICATEUR_YUKPO
+        s = await solde_utilisateur(current_user.user_id, db)
+        credits_restants_yukpo = s.get("credits_restants", 0)
+        # Forfait recherche = 2 FCFA × multiplicateur
+        cout_credits = 2.0 * MULTIPLICATEUR_YUKPO
+        credits_ok = credits_restants_yukpo >= cout_credits
+        credits_solde = s.get("credits_en_fcfa_equiv", 0)
+    except Exception as e:
+        logger.debug(f"[Diagnostic marchés] solde indisponible : {e}")
+
+    # Test des 3 sources en parallèle (try/except chacun)
+    serper_key = bool(os.getenv("SERPER_API_KEY") or os.getenv("SERPAPI_KEY"))
+    serper_res, dgm_res, ungm_res = await _asyncio.gather(
+        _fetch_serper_marches(termes, pays, info) if serper_key else _vide(),
+        _fetch_dgmarket(pays),
+        _fetch_ungm(termes),
+        return_exceptions=True,
+    )
+
+    def _stat(name: str, res) -> dict:
+        if isinstance(res, Exception):
+            return {"source": name, "ok": False, "nb": 0, "erreur": str(res)[:200]}
+        return {"source": name, "ok": True, "nb": len(res),
+                "exemples": [r.get("titre", "")[:80] for r in res[:3]]}
+
+    return {
+        "user_id": current_user.user_id,
+        "pays":    pays,
+        "termes":  termes,
+        "credits_ok":   credits_ok,
+        "credits_solde_fcfa_equivalent": credits_solde,
+        "credits_yukpo_restants": credits_restants_yukpo,
+        "cout_recherche_fcfa": 2.0,
+        "serper_api_key_configuree": serper_key,
+        "sources": [
+            _stat("Serper", serper_res),
+            _stat("dgMarket", dgm_res),
+            _stat("UNGM", ungm_res),
+        ],
+        "total_avis_potentiels": sum(
+            (s.get("nb", 0) for s in [_stat("S", serper_res), _stat("D", dgm_res), _stat("U", ungm_res)])
+        ),
+        "marches_actuellement_en_db": len(profil.marches_publics_recents or []),
+        "derniere_recherche": (
+            profil.derniere_recherche_marches.isoformat()
+            if profil.derniere_recherche_marches else None
+        ),
+    }
+
+
+async def _vide() -> list:
+    return []
+
+
 @router.get("/badges", summary="Mes badges et progression XP")
 async def mes_badges(
     current_user: TokenData = Depends(get_current_user),
