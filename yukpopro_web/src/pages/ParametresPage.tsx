@@ -1,11 +1,78 @@
 import { useState } from "react";
-import { Lock, Bell, Palette, AlertTriangle, Eye, EyeOff, CheckCircle, Sun, Moon, UserCog, ArrowRight } from "lucide-react";
+import { Lock, Bell, Palette, AlertTriangle, Eye, EyeOff, CheckCircle, Sun, Moon, UserCog, ArrowRight, Mic, Copy, Check } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui";
 import { authApi } from "@/api/client";
 import { useUIStore } from "@/store";
+
+const ExtensionTokenBlock = () => {
+  const [copied, setCopied] = useState(false);
+  const [show, setShow] = useState(false);
+  const token = (typeof localStorage !== "undefined" && localStorage.getItem("yukpopro_token")) || "";
+  const apiUrl = "https://yukpopro-backend.fly.dev";
+
+  const copy = () => {
+    if (!token) { toast.error("Connectez-vous d'abord"); return; }
+    navigator.clipboard.writeText(token).then(() => {
+      setCopied(true);
+      toast.success("Token copié — collez-le dans l'extension");
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-slate-400">
+        Capturez l'audio de vos réunions <strong>Teams / Meet / Zoom / Webex</strong> directement
+        depuis Chrome. L'extension envoie l'audio à Yukpo qui le transcrit et génère le PV.
+      </p>
+
+      <div className="bg-slate-900/40 border border-slate-700 rounded-lg p-4 space-y-3">
+        <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+          Étape 1 — Installer l'extension
+        </div>
+        <ol className="text-xs text-slate-400 list-decimal list-inside space-y-1">
+          <li>Téléchargez le dossier <code className="text-sky-300">yukpo_capture_extension/</code> du projet.</li>
+          <li>Ouvrez <code className="text-sky-300">chrome://extensions</code> et activez le mode développeur.</li>
+          <li>Cliquez « Charger l'extension non empaquetée » et sélectionnez le dossier.</li>
+        </ol>
+      </div>
+
+      <div className="bg-slate-900/40 border border-slate-700 rounded-lg p-4 space-y-3">
+        <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+          Étape 2 — Coller votre token dans l'extension
+        </div>
+        <div className="flex gap-2">
+          <input
+            type={show ? "text" : "password"}
+            readOnly
+            value={token || "(connectez-vous d'abord)"}
+            className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-slate-200"
+          />
+          <button onClick={() => setShow(s => !s)}
+            className="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
+            title={show ? "Masquer" : "Afficher"}>
+            {show ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={copy} disabled={!token}
+            className="px-3 py-2 rounded bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5">
+            {copied ? <><Check className="w-3.5 h-3.5" /> Copié</> : <><Copy className="w-3.5 h-3.5" /> Copier</>}
+          </button>
+        </div>
+        <div className="text-xs text-slate-500">
+          Backend URL à configurer dans l'extension : <code className="text-sky-300">{apiUrl}</code>
+        </div>
+      </div>
+
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-200">
+        ⚠️ Ce token est <strong>personnel</strong>. Ne le partagez avec personne. Il donne
+        accès à votre compte Yukpo Pro.
+      </div>
+    </div>
+  );
+};
 
 const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
   <Card className="p-6 space-y-5 bg-slate-800/50 border border-slate-700">
@@ -190,6 +257,11 @@ export const ParametresPage = () => {
           <div className="flex-1 h-px bg-slate-700" />
           <span>{t("parametres.dark")}</span><Moon className="w-4 h-4" />
         </div>
+      </Section>
+
+      {/* Extension Capture (réunions en ligne) */}
+      <Section icon={Mic} title="Connecter mon extension Yukpo Capture">
+        <ExtensionTokenBlock />
       </Section>
 
       {/* Notifications */}

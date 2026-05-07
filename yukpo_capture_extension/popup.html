@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Yukpo Capture</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 14px;
+      width: 320px;
+      font-size: 13px;
+    }
+    h1 {
+      font-size: 15px;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo {
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .platform {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .platform.detected { border-color: #10b981; color: #6ee7b7; }
+    .platform.none     { color: #94a3b8; }
+    button {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-rec { background: #dc2626; color: white; }
+    .btn-rec:hover:not(:disabled) { background: #ef4444; }
+    .btn-stop { background: #475569; color: white; }
+    .btn-stop:hover:not(:disabled) { background: #64748b; }
+    .row { display: flex; gap: 6px; margin-top: 8px; }
+    .row > * { flex: 1; }
+    label.toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #cbd5e1;
+      cursor: pointer;
+      margin: 6px 0;
+    }
+    .config {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #1e293b;
+    }
+    .config summary {
+      cursor: pointer;
+      font-size: 12px;
+      color: #94a3b8;
+      list-style: none;
+    }
+    .config summary::before { content: "⚙ "; }
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 12px;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+    .field { margin-top: 8px; }
+    .field label { font-size: 11px; color: #94a3b8; }
+    .save { background: #3b82f6; color: white; margin-top: 8px; }
+    .status { font-size: 11px; color: #64748b; margin-top: 8px; min-height: 14px; }
+    .status.err { color: #f87171; }
+    .status.ok  { color: #6ee7b7; }
+    .footer { font-size: 10px; color: #475569; margin-top: 10px; text-align: center; }
+    a { color: #60a5fa; }
+    .pulse {
+      width: 8px; height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+  </style>
+</head>
+<body>
+  <h1><span class="logo"></span> Yukpo Capture</h1>
+
+  <div id="platform" class="platform none">Détection de la réunion…</div>
+
+  <div id="recording-info" style="display:none; padding:8px; background:#7f1d1d33; border:1px solid #b91c1c66; border-radius:8px; margin-bottom:10px; font-size:12px;">
+    <span class="pulse"></span> Enregistrement en cours…
+  </div>
+
+  <button id="btn-start" class="btn-rec">🎙 Démarrer la capture</button>
+  <button id="btn-stop"  class="btn-stop" style="display:none;">■ Arrêter et envoyer à Yukpo</button>
+
+  <label class="toggle">
+    <input type="checkbox" id="also-mic" checked>
+    Inclure mon micro (recommandé)
+  </label>
+
+  <div class="status" id="status"></div>
+
+  <details class="config">
+    <summary>Configuration</summary>
+    <div class="field">
+      <label>Token Yukpo (JWT)</label>
+      <input id="cfg-token" type="password" placeholder="Collez votre token ici">
+    </div>
+    <div class="field">
+      <label>Backend URL</label>
+      <input id="cfg-url" type="url" placeholder="https://yukpopro-backend.fly.dev">
+    </div>
+    <div class="field">
+      <label>Langue cible</label>
+      <select id="cfg-langue">
+        <option value="auto">Détection auto</option>
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="ar">Arabe</option>
+        <option value="pt">Português</option>
+      </select>
+    </div>
+    <button id="btn-save-cfg" class="save">Enregistrer la config</button>
+    <div class="footer">
+      Récupérez votre token depuis <strong>Paramètres → Connecter mon extension</strong>
+      sur Yukpo Pro.
+    </div>
+  </details>
+
+  <script src="popup.js"></script>
+</body>
+</html>

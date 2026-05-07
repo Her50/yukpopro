@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "Yukpo Capture",
+  "version": "1.0.0",
+  "description": "Capture audio des réunions Teams / Meet / Zoom et envoie à Yukpo Pro pour transcription + génération de PV.",
+  "permissions": [
+    "tabCapture",
+    "activeTab",
+    "scripting",
+    "storage",
+    "notifications",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://*.microsoft.com/*",
+    "https://teams.live.com/*",
+    "https://*.zoom.us/*",
+    "https://*.zoom.com/*",
+    "https://meet.google.com/*",
+    "https://*.webex.com/*",
+    "https://*.yukpomnang.com/*",
+    "https://yukpopro-backend.fly.dev/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Yukpo Capture",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://teams.microsoft.com/*",
+        "https://teams.live.com/*",
+        "https://meet.google.com/*",
+        "https://*.zoom.us/*",
+        "https://*.zoom.com/*",
+        "https://*.webex.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["offscreen.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
