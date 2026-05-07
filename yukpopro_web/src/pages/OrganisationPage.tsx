@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, FormEvent } from "react";
 import { Building2, Users, Mail, Trash2, Crown, Shield, UserMinus, Plus, RefreshCw, Copy, Check, Receipt, AlertCircle } from "lucide-react";
 import { Card, Button, Spinner } from "@/components/ui";
+import { CountryPicker } from "@/components/CountryPicker";
 import { orgsApi, type Organisation, type OrgMembre, type OrgInvite, type OrgFacture } from "@/api/client";
 import toast from "react-hot-toast";
 
@@ -167,26 +168,40 @@ const CreerOrgForm = ({ onCreated }: { onCreated: () => void }) => {
         <form onSubmit={submit} className="space-y-4">
           <Input label="Nom de l'organisation" value={nom} onChange={setNom} required />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Pays (ISO 2)" value={pays} onChange={setPays} maxLength={2} />
+            <div>
+              <label className="text-xs uppercase font-semibold text-slate-400 block mb-1">Pays</label>
+              <div className="text-slate-100">
+                <CountryPicker value={pays} onChange={setPays} />
+              </div>
+            </div>
             <Input label="Secteur (optionnel)" value={secteur} onChange={setSecteur} />
           </div>
           <div>
             <label className="text-xs uppercase font-semibold text-slate-400 block mb-1">
-              Prix par siège (FCFA / mois)
+              Tarif par utilisateur actif <span className="text-slate-500 normal-case">(FCFA / mois)</span>
             </label>
             <input type="number" value={prix} min={0} step={500}
               onChange={e => setPrix(parseInt(e.target.value) || 0)}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              Montant facturé chaque mois <strong>par membre actif</strong> de votre organisation
+              (vous compris). Exemple : si 5 personnes utilisent Yukpo Pro dans votre équipe au cours
+              du mois, vous payez {(prix * 5).toLocaleString("fr-FR")} FCFA pour ce mois. La facturation
+              se fait sur le <strong>pic d'utilisateurs actifs</strong> du mois (pas de prorata).
+              Vous pouvez ajuster ce tarif selon votre négociation interne.
+            </p>
           </div>
           <div>
             <label className="text-xs uppercase font-semibold text-slate-400 block mb-1">
-              Domaine email pour auto-join (optionnel — vérification requise après création)
+              Domaine email pour rattachement automatique <span className="text-slate-500 normal-case">(optionnel)</span>
             </label>
             <input value={domain} onChange={e => setDomain(e.target.value)}
               placeholder="entreprise.com"
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
             <p className="text-xs text-slate-500 mt-1">
-              Tout email se terminant par ce domaine sera rattaché automatiquement comme membre.
+              Tout collègue qui se créera un compte avec un email <code className="text-sky-300">@{domain || "entreprise.com"}</code>
+              {" "}sera rattaché automatiquement à votre organisation comme membre. Vérification du domaine requise
+              après création (DNS TXT) — sinon, vous devrez inviter manuellement chaque membre.
             </p>
           </div>
 
@@ -468,16 +483,25 @@ const SettingsTab = ({ org, onUpdated }: { org: Organisation; onUpdated: () => v
       <form onSubmit={sauvegarder} className="space-y-4">
         <Input label="Nom" value={nom} onChange={setNom} />
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Pays (ISO 2)" value={pays} onChange={setPays} maxLength={2} />
+          <div>
+            <label className="text-xs uppercase font-semibold text-slate-400 block mb-1">Pays</label>
+            <div className="text-slate-100">
+              <CountryPicker value={pays} onChange={setPays} />
+            </div>
+          </div>
           <Input label="Secteur" value={secteur} onChange={setSecteur} />
         </div>
         <div>
           <label className="text-xs uppercase font-semibold text-slate-400 block mb-1">
-            Domaine email auto-join {org.domain_verifie ? <span className="text-emerald-400">· vérifié</span> : <span className="text-amber-400">· à vérifier</span>}
+            Domaine email pour rattachement automatique
+            {org.domain_verifie ? <span className="text-emerald-400 normal-case"> · vérifié</span> : <span className="text-amber-400 normal-case"> · à vérifier</span>}
           </label>
           <input value={domain} onChange={e => setDomain(e.target.value)}
             placeholder="entreprise.com"
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+          <p className="text-xs text-slate-500 mt-1">
+            Tout nouvel utilisateur avec un email de ce domaine rejoint l'organisation automatiquement.
+          </p>
         </div>
         <Button type="submit" loading={busy} icon={<RefreshCw className="w-4 h-4" />}>
           Enregistrer
