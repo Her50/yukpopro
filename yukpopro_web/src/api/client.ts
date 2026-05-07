@@ -354,6 +354,133 @@ export const generateurApi = {
   },
 };
 
+// ── Organisations (plan Entreprise) ──────────────────────────────────────────
+
+export interface Organisation {
+  id: number;
+  nom: string;
+  slug: string;
+  owner_id: number;
+  plan: string;
+  prix_par_siege_fcfa: number;
+  devise: string;
+  max_seats: number | null;
+  statut: string;
+  domain_auto_join: string | null;
+  domain_verifie: boolean;
+  pays: string | null;
+  secteur: string | null;
+  settings: Record<string, any>;
+  cree_le: string;
+  mon_role?: "owner" | "admin" | "member";
+}
+
+export interface OrgMembre {
+  id: number;
+  org_id: number;
+  user_id: number;
+  role: "owner" | "admin" | "member";
+  statut: string;
+  joined_at: string;
+  last_active_at: string;
+  email: string;
+  nom: string;
+  username: string;
+}
+
+export interface OrgInvite {
+  id: number;
+  org_id: number;
+  email: string;
+  role: "admin" | "member";
+  statut: string;
+  invite_par: number;
+  expires_at: string;
+  cree_le: string;
+  accepte_le: string | null;
+  token?: string;
+  lien_acceptation?: string;
+}
+
+export interface OrgFacture {
+  id: number;
+  org_id: number;
+  period_debut: string;
+  period_fin: string;
+  sieges_max: number;
+  sieges_factures: number;
+  prix_unitaire_fcfa: number;
+  montant_total_fcfa: number;
+  devise: string;
+  statut: string;
+  transaction_ref: string | null;
+  paye_le: string | null;
+}
+
+export const orgsApi = {
+  monOrg: async (): Promise<Organisation | null> => {
+    try {
+      const { data } = await http.get("/pro/orgs/me");
+      return data;
+    } catch (err: any) {
+      if (err?.response?.status === 404) return null;
+      throw err;
+    }
+  },
+  creer: async (payload: {
+    nom: string; pays?: string; secteur?: string;
+    prix_par_siege_fcfa?: number; devise?: string;
+    max_seats?: number | null; domain_auto_join?: string;
+  }): Promise<Organisation> => {
+    const { data } = await http.post("/pro/orgs", payload);
+    return data;
+  },
+  update: async (orgId: number, payload: Partial<Organisation>): Promise<Organisation> => {
+    const { data } = await http.patch(`/pro/orgs/${orgId}`, payload);
+    return data;
+  },
+  membres: async (orgId: number): Promise<{ membres: OrgMembre[]; mon_role: string }> => {
+    const { data } = await http.get(`/pro/orgs/${orgId}/members`);
+    return data;
+  },
+  changerRole: async (orgId: number, userId: number, role: "admin" | "member") => {
+    const { data } = await http.patch(`/pro/orgs/${orgId}/members/${userId}`, { role });
+    return data;
+  },
+  retirerMembre: async (orgId: number, userId: number) => {
+    const { data } = await http.delete(`/pro/orgs/${orgId}/members/${userId}`);
+    return data;
+  },
+  quitter: async (orgId: number) => {
+    const { data } = await http.post(`/pro/orgs/${orgId}/leave`);
+    return data;
+  },
+  invitations: async (orgId: number): Promise<{ invitations: OrgInvite[] }> => {
+    const { data } = await http.get(`/pro/orgs/${orgId}/invites`);
+    return data;
+  },
+  inviter: async (orgId: number, email: string, role: "admin" | "member" = "member"): Promise<OrgInvite> => {
+    const { data } = await http.post(`/pro/orgs/${orgId}/invites`, { email, role });
+    return data;
+  },
+  revoquerInvite: async (orgId: number, inviteId: number) => {
+    const { data } = await http.delete(`/pro/orgs/${orgId}/invites/${inviteId}`);
+    return data;
+  },
+  detailInvite: async (token: string) => {
+    const { data } = await http.get(`/pro/orgs/invites/${token}`);
+    return data as { invitation: OrgInvite; organisation: Partial<Organisation> & { nom: string } };
+  },
+  accepterInvite: async (token: string) => {
+    const { data } = await http.post(`/pro/orgs/invites/${token}/accept`);
+    return data as { message: string; org_id: number; role: string };
+  },
+  factures: async (orgId: number): Promise<{ factures: OrgFacture[] }> => {
+    const { data } = await http.get(`/pro/orgs/${orgId}/billing`);
+    return data;
+  },
+};
+
 // ── Abonnement ────────────────────────────────────────────────────────────────
 
 export const abonnementApi = {

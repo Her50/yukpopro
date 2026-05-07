@@ -22,6 +22,8 @@ const MarchesPage = lazy(() => import("@/pages/MarchesPage").then(m => ({ defaul
 const EnquetesPage = lazy(() => import("@/pages/EnquetesPage").then(m => ({ default: m.EnquetesPage })));
 const PublicFormPage = lazy(() => import("@/pages/PublicFormPage").then(m => ({ default: m.PublicFormPage })));
 const ParametresPage = lazy(() => import("@/pages/ParametresPage").then(m => ({ default: m.ParametresPage })));
+const OrganisationPage = lazy(() => import("@/pages/OrganisationPage").then(m => ({ default: m.OrganisationPage })));
+const InviteAcceptPage = lazy(() => import("@/pages/InviteAcceptPage").then(m => ({ default: m.InviteAcceptPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +69,8 @@ export default function App() {
               <Route path="/marches"        element={<MarchesPage />} />
               <Route path="/enquetes"       element={<EnquetesPage />} />
               <Route path="/parametres"     element={<ParametresPage />} />
+              <Route path="/organisation"   element={<OrganisationPage />} />
+              <Route path="/orgs/invites/:token" element={<InviteAcceptPage />} />
               {/* Redirections legacy */}
               <Route path="/copilote"    element={<Navigate to="/chat" replace />} />
               <Route path="/agents"      element={<Navigate to="/chat" replace />} />

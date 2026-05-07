@@ -5,7 +5,7 @@ import {
   LayoutDashboard, MessageSquare, User, LogOut,
   ChevronLeft, ChevronRight, Sparkles, Shield, CreditCard,
   Users, Languages, FileText, FolderOpen, Briefcase, Gavel, ClipboardList, Radio,
-  Sun, Moon, Settings, Wallet,
+  Sun, Moon, Settings, Wallet, Building2,
 } from "lucide-react";
 import { cn, YukpoLogo, Badge } from "@/components/ui";
 import { useAuthStore, useProfilStore, useUIStore } from "@/store";
@@ -26,6 +26,7 @@ const NAV_KEYS = [
   { path: "/parametres",     icon: Settings,        key: "parametres",     badge: null,  adminOnly: false },
   { path: "/wallet",         icon: Wallet,          key: "wallet",         badge: null,  adminOnly: false },
   { path: "/abonnement",     icon: CreditCard,      key: "abonnement",     badge: null,  adminOnly: false },
+  { path: "/organisation",   icon: Building2,       key: "organisation",   badge: null,  adminOnly: false },
   { path: "/admin",          icon: Shield,          key: "admin",          badge: "ADM", adminOnly: true  },
   { path: "/admin/paiements", icon: Wallet,         key: "adminPaiements", badge: "ADM", adminOnly: true  },
 ];
