@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield,
+  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2,
 } from 'lucide-react'
+import { authAPI } from '../api/client'
+import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
 import { SUPPORTED_LANGUAGES } from '../i18n'
@@ -73,9 +75,10 @@ function LangMenu() {
 
 export default function Layout() {
   const { t } = useTranslation()
-  const { user, logout } = useAuth()
+  const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const handleLogout = () => { logout(); navigate('/login') }
 
@@ -112,11 +115,15 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* User pill */}
-        <div className="px-4 py-3 border-b border-brand-600 text-sm">
+        {/* User pill — clic = ouvre modal modifier nom */}
+        <button
+          onClick={() => setProfileOpen(true)}
+          className="w-full text-left px-4 py-3 border-b border-brand-600 text-sm hover:bg-white/5 transition-colors"
+          title="Modifier mon nom"
+        >
           <div className="font-semibold">{user?.user_nom || 'Utilisateur'}</div>
-          <div className="text-brand-300 text-xs capitalize">{user?.role || 'agent'}</div>
-        </div>
+          <div className="text-brand-300 text-xs capitalize">{user?.role || 'agent'} · clic pour modifier</div>
+        </button>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
@@ -164,6 +171,84 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {profileOpen && (
+        <ProfileModal
+          initialNom={user?.nom || ''}
+          initialPrenoms={user?.prenoms || ''}
+          onClose={() => setProfileOpen(false)}
+          onSaved={async () => { await refreshUser(); setProfileOpen(false) }}
+        />
+      )}
+    </div>
+  )
+}
+
+function ProfileModal({
+  initialNom, initialPrenoms, onClose, onSaved,
+}: {
+  initialNom: string; initialPrenoms: string;
+  onClose: () => void; onSaved: () => Promise<void> | void;
+}) {
+  const [nom, setNom] = useState(initialNom)
+  const [prenoms, setPrenoms] = useState(initialPrenoms)
+  const [busy, setBusy] = useState(false)
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!prenoms.trim() && !nom.trim()) {
+      toast.error('Saisissez au moins le nom OU le prénom')
+      return
+    }
+    setBusy(true)
+    try {
+      await authAPI.updateProfile({
+        nom: nom.trim() || undefined,
+        prenoms: prenoms.trim() || undefined,
+      })
+      toast.success('Profil mis à jour')
+      await onSaved()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur de mise à jour')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-gray-900">Mon profil</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+        </div>
+        <p className="text-xs text-gray-500">
+          Ces informations sont utilisées pour personnaliser votre expérience (salutation, signature des documents).
+        </p>
+        <form onSubmit={submit} className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-gray-700 block mb-1">Prénom(s)</label>
+            <input value={prenoms} onChange={e => setPrenoms(e.target.value)}
+              placeholder="Marie"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-700 block mb-1">Nom</label>
+            <input value={nom} onChange={e => setNom(e.target.value)}
+              placeholder="Dupont"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+          </div>
+          <div className="flex gap-2 justify-end pt-2">
+            <button type="button" onClick={onClose}
+              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900">Annuler</button>
+            <button type="submit" disabled={busy}
+              className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-1.5">
+              {busy && <Loader2 size={14} className="animate-spin" />}
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

@@ -16,6 +16,7 @@ interface AuthCtx {
   token: string | null
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, nom: string) => Promise<void>
+  refreshUser: () => Promise<void>
   logout: () => void
   loading: boolean
 }
@@ -44,6 +45,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!r.ok) throw new Error('Identifiants incorrects')
     const data = await r.json()
     localStorage.setItem('bureau_token', data.access_token)
+    // On charge SYNCHRONIQUEMENT /auth/me avant de retourner pour que le
+    // <PrivateRoute> voie un user défini quand le navigate('/dashboard')
+    // suit (sinon : double-clic nécessaire car l'useEffect n'a pas encore
+    // tourné quand la navigation se déclenche).
+    try {
+      const me = await authAPI.me()
+      setUser(me.data)
+    } catch (e) {
+      console.warn('[Auth] /auth/me après login a échoué:', e)
+    }
     setToken(data.access_token)
   }
 
@@ -61,6 +72,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login(email, password)
   }
 
+  const refreshUser = async () => {
+    try {
+      const r = await authAPI.me()
+      setUser(r.data)
+    } catch (e) {
+      console.warn('[Auth] refreshUser échoué:', e)
+    }
+  }
+
   const logout = () => {
     localStorage.removeItem('bureau_token')
     setToken(null)
@@ -68,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, refreshUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

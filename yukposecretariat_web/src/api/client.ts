@@ -38,11 +38,18 @@ api.interceptors.response.use(
 
 // ─── Auth (partagée avec YukpoPro) ────────────────────────────────────────────
 const authApi = axios.create({ baseURL: import.meta.env.VITE_API_URL?.replace('/bureau', '') || '/api/v1' })
+authApi.interceptors.request.use(cfg => {
+  const token = localStorage.getItem('bureau_token')
+  if (token) cfg.headers.Authorization = `Bearer ${token}`
+  return cfg
+})
 
 export const authAPI = {
   login: (email: string, password: string) =>
     authApi.post('/auth/token', { username: email, password }, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }),
-  me: () => authApi.get('/auth/me', { headers: { Authorization: `Bearer ${localStorage.getItem('bureau_token')}` } }),
+  me: () => authApi.get('/auth/me'),
+  updateProfile: (data: { nom?: string; prenoms?: string; telephone?: string }) =>
+    authApi.patch('/auth/profile', data),
 }
 
 // ─── Rédaction ────────────────────────────────────────────────────────────────

@@ -654,12 +654,7 @@ async def change_password(
 
 @auth_router.get("/me")
 async def me(current_user: TokenData = Depends(get_current_user)):
-    """Retourne les informations de l'utilisateur connecté.
-
-    En plus du JWT, va lire `nom` / `prenoms` / `email` depuis la DB
-    pour permettre au frontend d'afficher un VRAI nom (le JWT peut
-    n'avoir que l'email si l'utilisateur ne s'est jamais nommé).
-    """
+    """Retourne les informations de l'utilisateur connecté."""
     nom_clean: str | None = None
     prenoms_clean: str | None = None
     email_clean: str | None = None
@@ -672,29 +667,81 @@ async def me(current_user: TokenData = Depends(get_current_user)):
             )
             u = r.scalar_one_or_none()
             if u:
-                nom_clean     = u.nom
-                prenoms_clean = u.prenoms
+                nom_clean     = (u.nom or "").strip() or None
+                prenoms_clean = (u.prenoms or "").strip() or None
                 email_clean   = u.email
     except Exception as e:
         logger.debug(f"[Auth/me] lookup nom DB échoué: {e}")
 
-    # Si nom contient @ (cas d'un compte créé sans nom propre = email mis comme nom),
-    # on prend la partie avant @ et on la capitalise pour avoir au moins quelque chose.
-    affichage_nom = nom_clean or current_user.user_nom or ""
-    if "@" in affichage_nom:
-        affichage_nom = affichage_nom.split("@")[0].replace(".", " ").replace("_", " ").title()
+    # Si `nom` est juste l'email (cas de comptes créés sans nom propre),
+    # on l'ignore pour que le frontend puisse fallback proprement.
+    nom_propre = nom_clean
+    if nom_propre and "@" in nom_propre:
+        nom_propre = None
+
+    # Calcul d'un nom d'affichage pour fallback systématique.
+    affichage_nom = (
+        prenoms_clean or
+        nom_propre or
+        (current_user.user_nom if current_user.user_nom and "@" not in current_user.user_nom else None) or
+        ""
+    )
+    # Dernier recours : extraire un nom lisible depuis l'email
+    if not affichage_nom and email_clean and "@" in email_clean:
+        local = email_clean.split("@")[0]
+        affichage_nom = local.replace(".", " ").replace("_", " ").replace("-", " ").title()
 
     return {
         "user_id": current_user.user_id,
-        "user_nom": affichage_nom,            # prêt pour affichage
+        "user_nom": affichage_nom or "Utilisateur",
         "user_nom_brut": current_user.user_nom,
-        "nom": nom_clean,
+        "nom": nom_propre,            # null si c'est l'email
         "prenoms": prenoms_clean,
         "email": email_clean,
         "role": current_user.role,
         "compagnie_id": current_user.compagnie_id,
         "permissions": list(ROLE_PERMISSIONS.get(current_user.role, set())),
     }
+
+
+class UpdateProfileRequest(BaseModel):
+    nom: Optional[str] = Field(None, min_length=1, max_length=100)
+    prenoms: Optional[str] = Field(None, min_length=1, max_length=150)
+    telephone: Optional[str] = Field(None, max_length=30)
+
+
+@auth_router.patch("/profile", summary="Modifier mon profil (nom, prénoms, téléphone)")
+async def update_profile(
+    req: UpdateProfileRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Permet à l'utilisateur de mettre à jour son nom/prénoms/téléphone."""
+    from sqlalchemy import select, update as sa_update
+    from core.database import async_session_maker, UtilisateurDB
+    from datetime import datetime as _dt
+
+    data = req.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(400, "Aucun champ à mettre à jour")
+    # Validation : nom et prenoms ne doivent pas contenir @
+    for k in ("nom", "prenoms"):
+        if k in data and "@" in data[k]:
+            raise HTTPException(400, f"Le champ {k} ne doit pas contenir d'email")
+
+    async with async_session_maker() as session:
+        r = await session.execute(
+            select(UtilisateurDB).where(UtilisateurDB.id == current_user.user_id)
+        )
+        u = r.scalar_one_or_none()
+        if not u:
+            raise HTTPException(404, "Utilisateur introuvable")
+        for k, v in data.items():
+            setattr(u, k, v.strip() if isinstance(v, str) else v)
+        u.modifie_le = _dt.utcnow()
+        await session.commit()
+
+    logger.info(f"[Auth/Profile] user_id={current_user.user_id} profil mis à jour : {list(data.keys())}")
+    return {"succes": True, "message": "Profil mis à jour", "champs_modifies": list(data.keys())}
 
 
 # ─── 2FA TOTP ────────────────────────────────────────────────────────────────
