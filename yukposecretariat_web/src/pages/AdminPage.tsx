@@ -12,17 +12,17 @@ import { useAuth } from '../context/AuthContext'
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'yukpo_owner']
 
-const MODULE_LABELS: Record<string, string> = {
-  redaction:    'Rédaction Yukpo',
-  ocr:          'Scan / OCR',
-  audio:        'Audio Yukpo',
-  traduction:   'Traduction Yukpo',
-  infographie:  'Infographie',
-  designerpro:  'Designer Pro',
-  gestion:      'Gestion',
-  documents:    'Mes Documents',
-  bureau:       'Yukpo Secrétariat',
-  inconnu:      'Autre',
+const MODULE_LABEL_KEYS: Record<string, string> = {
+  redaction:    'abonnement.modLabelRedaction',
+  ocr:          'abonnement.modLabelOcr',
+  audio:        'abonnement.modLabelAudio',
+  traduction:   'abonnement.modLabelTraduction',
+  infographie:  'abonnement.modLabelInfographie',
+  designerpro:  'abonnement.modLabelDesignerPro',
+  gestion:      'admin.modLabelGestionShort',
+  documents:    'abonnement.modLabelDocuments',
+  bureau:       'abonnement.modLabelBureau',
+  inconnu:      'abonnement.modLabelOther',
 }
 
 function fmtFcfa(n: number | null | undefined): string {
@@ -93,7 +93,7 @@ export default function AdminPage() {
       qc.invalidateQueries({ queryKey: ['admin-detail'] })
       qc.invalidateQueries({ queryKey: ['admin-stats'] })
     },
-    onError: (e: any) => toast.error(e?.response?.data?.detail || 'Erreur'),
+    onError: (e: any) => toast.error(e?.response?.data?.detail || t('admin.errGeneric')),
   })
 
   const bloquerM = useMutation({
@@ -147,7 +147,7 @@ export default function AdminPage() {
         <div className="space-y-4">
           {statsQ.isLoading && (
             <div className="text-center py-8 text-gray-500">
-              <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement…
+              <Loader2 className="inline animate-spin mr-2" size={16} /> {t('common.loading')}
             </div>
           )}
           {statsQ.data && (
@@ -181,8 +181,8 @@ export default function AdminPage() {
                         return (
                           <div key={m.module}>
                             <div className="flex items-center justify-between text-sm">
-                              <span className="font-medium text-gray-700">{MODULE_LABELS[m.module] || m.module}</span>
-                              <span className="text-gray-500 text-xs">{fmtNb(m.credits)} crédits · {fmtNb(m.appels)} appels</span>
+                              <span className="font-medium text-gray-700">{MODULE_LABEL_KEYS[m.module] ? t(MODULE_LABEL_KEYS[m.module]) : m.module}</span>
+                              <span className="text-gray-500 text-xs">{t('admin.creditsCallsLine', { credits: fmtNb(m.credits), calls: fmtNb(m.appels) })}</span>
                             </div>
                             <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">
                               <div className="bg-amber-500 h-full" style={{ width: `${Math.max(2, pct)}%` }} />
@@ -241,7 +241,7 @@ export default function AdminPage() {
 
           {usersQ.isLoading && (
             <div className="text-center py-8 text-gray-500">
-              <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement…
+              <Loader2 className="inline animate-spin mr-2" size={16} /> {t('common.loading')}
             </div>
           )}
 
@@ -284,7 +284,7 @@ export default function AdminPage() {
                       <td className="px-3 py-2 text-xs">
                         {u.actif
                           ? <span className="text-emerald-600">{t('admin.active')}</span>
-                          : <span className="text-red-600">⏸ {u.bloque_jusqu_au ? t('admin.blocked').replace('⏸ ', '') : t('admin.inactive').replace('⏸ ', '')}</span>}
+                          : <span className="text-red-600">⏸ {u.bloque_jusqu_au ? t('admin.blockedShort') : t('admin.inactiveShort')}</span>}
                       </td>
                       <td className="px-3 py-2 text-right">
                         <button onClick={() => setUserOuvert(u.id)}
@@ -391,7 +391,7 @@ function UserDetailModal({
               <Info label={t('admin.infoCreatedOn')} value={fmtDate(data.utilisateur.cree_le)} />
               <Info label={t('admin.lastLogin')} value={fmtDate(data.utilisateur.derniere_connexion, true)} />
               <Info label={t('admin.infoConnections')} value={fmtNb(data.utilisateur.nb_connexions)} />
-              <Info label={t('common.status')} value={data.utilisateur.actif ? t('admin.active') : (data.utilisateur.bloque_jusqu_au ? t('admin.infoBlockedUntil', { date: fmtDate(data.utilisateur.bloque_jusqu_au, true) }) : t('admin.inactive').replace('⏸ ', ''))} />
+              <Info label={t('common.status')} value={data.utilisateur.actif ? t('admin.active') : (data.utilisateur.bloque_jusqu_au ? t('admin.infoBlockedUntil', { date: fmtDate(data.utilisateur.bloque_jusqu_au, true) }) : t('admin.inactiveShort'))} />
             </div>
 
             {/* Solde crédits */}
@@ -478,8 +478,8 @@ function UserDetailModal({
                 <div className="space-y-1.5">
                   {data.top_modules_30j.map((m: any) => (
                     <div key={m.module} className="flex items-center justify-between text-xs">
-                      <span>{MODULE_LABELS[m.module] || m.module}</span>
-                      <span className="font-medium">{fmtNb(m.credits)} crédits · {fmtNb(m.appels)} appels</span>
+                      <span>{MODULE_LABEL_KEYS[m.module] ? t(MODULE_LABEL_KEYS[m.module]) : m.module}</span>
+                      <span className="font-medium">{t('admin.creditsCallsLine', { credits: fmtNb(m.credits), calls: fmtNb(m.appels) })}</span>
                     </div>
                   ))}
                 </div>
@@ -504,9 +504,9 @@ function UserDetailModal({
                       {data.dernieres_consommations.map((co: any) => (
                         <tr key={co.id}>
                           <td className="px-2 py-1.5 text-gray-500">{fmtDate(co.date, true)}</td>
-                          <td className="px-2 py-1.5">{MODULE_LABELS[co.module] || co.module}</td>
+                          <td className="px-2 py-1.5">{MODULE_LABEL_KEYS[co.module] ? t(MODULE_LABEL_KEYS[co.module]) : co.module}</td>
                           <td className="px-2 py-1.5 text-gray-500">
-                            {(co.modele || '').startsWith('forfait:') ? (co.modele || '').replace('forfait:', 'Forfait ') : co.modele}
+                            {(co.modele || '').startsWith('forfait:') ? t('abonnement.forfaitPrefix', { name: (co.modele || '').replace('forfait:', '') }) : co.modele}
                           </td>
                           <td className="px-2 py-1.5 text-right font-semibold text-amber-700">{fmtNb(co.credits_debites)}</td>
                         </tr>
@@ -548,16 +548,16 @@ function PromotionsTab() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (montant <= 0) { toast.error('Montant invalide'); return }
+    if (montant <= 0) { toast.error(t('admin.errAmountInvalid')); return }
     let user_ids: number[] | undefined
     if (cible === 'ids') {
       user_ids = userIdsRaw.split(/[\s,]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
-      if (!user_ids.length) { toast.error('Liste IDs invalide'); return }
+      if (!user_ids.length) { toast.error(t('admin.errIdsList')); return }
     }
     if (cible === 'consommation' && !seuilCreditsMin && !seuilCreditsMax && !seuilAppelsMin) {
-      toast.error("Au moins un seuil requis pour cible 'consommation'"); return
+      toast.error(t('admin.errThresholdRequired')); return
     }
-    if (!confirm(`Distribuer ${fmtNb(montant)} crédits Yukpo à la cible "${cible}" ?`)) return
+    if (!confirm(t('admin.confirmDistribute', { credits: fmtNb(montant), target: cible }))) return
 
     setBusy(true)
     try {
@@ -572,13 +572,13 @@ function PromotionsTab() {
         motif: motif || undefined,
       })
       const data = (r as any).data || r
-      toast.success(data.message || `Distribué à ${data.beneficiaires} utilisateur(s)`)
+      toast.success(data.message || t('admin.distributedToBeneficiaries', { n: data.beneficiaires }))
       setMontant(1000); setUserIdsRaw(''); setMotif('')
       setSeuilCreditsMin(''); setSeuilCreditsMax(''); setSeuilAppelsMin('')
       qc.invalidateQueries({ queryKey: ['admin-stats'] })
       qc.invalidateQueries({ queryKey: ['admin-utilisateurs'] })
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Erreur distribution')
+      toast.error(err?.response?.data?.detail || t('admin.errDistribution'))
     } finally { setBusy(false) }
   }
 
@@ -597,17 +597,17 @@ function PromotionsTab() {
           <label className="text-sm font-medium text-gray-700 block mb-1">{t('admin.promotionAmount')}</label>
           <input type="number" min={1} value={montant} onChange={e => setMontant(parseInt(e.target.value) || 0)}
             className="w-full border rounded-lg px-3 py-2 text-sm" />
-          <p className="text-xs text-gray-400 mt-1">≈ {fmtFcfa(Math.round(montant * 0.6))} de valeur par bénéficiaire</p>
+          <p className="text-xs text-gray-400 mt-1">{t('admin.fcfaPerBeneficiary', { amount: fmtFcfa(Math.round(montant * 0.6)) })}</p>
         </div>
 
         <div>
           <label className="text-sm font-medium text-gray-700 block mb-2">{t('admin.promotionTarget')}</label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { v: 'tous',        lbl: t('admin.promotionTargetAll'),    d: 'Utilisateurs actifs' },
-              { v: 'role',        lbl: t('admin.promotionTargetRole'),   d: 'agent, admin…' },
-              { v: 'ids',         lbl: t('admin.promotionTargetIds'),    d: 'Utilisateurs précis' },
-              { v: 'consommation',lbl: t('admin.promotionTargetConsom'), d: 'Selon seuils d\'usage' },
+              { v: 'tous',        lbl: t('admin.promotionTargetAll'),    d: t('admin.targetTousDesc') },
+              { v: 'role',        lbl: t('admin.promotionTargetRole'),   d: t('admin.targetRoleDesc') },
+              { v: 'ids',         lbl: t('admin.promotionTargetIds'),    d: t('admin.targetIdsDesc') },
+              { v: 'consommation',lbl: t('admin.promotionTargetConsom'), d: t('admin.targetConsomDesc') },
             ].map(c => (
               <button key={c.v} type="button" onClick={() => setCible(c.v as any)}
                 className={`text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
@@ -637,7 +637,7 @@ function PromotionsTab() {
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1">{t('admin.userIdsLabel')}</label>
             <textarea value={userIdsRaw} onChange={e => setUserIdsRaw(e.target.value)} rows={3}
-              placeholder="ex: 12, 34, 56"
+              placeholder={t('admin.userIdsPlaceholder')}
               className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
           </div>
         )}
@@ -648,17 +648,17 @@ function PromotionsTab() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label={t('admin.thresholdCreditsMin')}>
                 <input type="number" min={0} value={seuilCreditsMin} onChange={e => setSeuilCreditsMin(e.target.value)}
-                  placeholder="ex: 1000"
+                  placeholder={t('admin.thresholdMinPlaceholder')}
                   className="w-full border rounded-lg px-3 py-2 text-sm" />
               </Field>
               <Field label={t('admin.thresholdCreditsMax')}>
                 <input type="number" min={0} value={seuilCreditsMax} onChange={e => setSeuilCreditsMax(e.target.value)}
-                  placeholder="ex: 5000"
+                  placeholder={t('admin.thresholdMaxPlaceholder')}
                   className="w-full border rounded-lg px-3 py-2 text-sm" />
               </Field>
               <Field label={t('admin.thresholdCallsMin')}>
                 <input type="number" min={0} value={seuilAppelsMin} onChange={e => setSeuilAppelsMin(e.target.value)}
-                  placeholder="ex: 50"
+                  placeholder={t('admin.thresholdCallsPlaceholder')}
                   className="w-full border rounded-lg px-3 py-2 text-sm" />
               </Field>
               <Field label={t('admin.thresholdPeriod')}>
@@ -673,7 +673,7 @@ function PromotionsTab() {
         <div>
           <label className="text-sm font-medium text-gray-700 block mb-1">{t('admin.promotionMotif')}</label>
           <input value={motif} onChange={e => setMotif(e.target.value)}
-            placeholder="ex: Promotion lancement, compensation panne du 15/05…"
+            placeholder={t('admin.motifPlaceholder')}
             className="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
 
@@ -768,14 +768,14 @@ function RevenusTab() {
   if (revenusQ.isLoading) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement des revenus…
+        <Loader2 className="inline animate-spin mr-2" size={16} /> {t('admin.loadingRevenus')}
       </div>
     )
   }
   if (revenusQ.isError) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-        <AlertCircle className="inline mr-2" size={14} /> Impossible de charger les revenus.
+        <AlertCircle className="inline mr-2" size={14} /> {t('admin.errLoadRevenus')}
       </div>
     )
   }
@@ -822,7 +822,7 @@ function RevenusTab() {
           </div>
           <div className="text-2xl font-bold text-emerald-900 mt-1">{fmtFcfa(d.ca_total_fcfa)}</div>
           <div className="text-[10px] text-emerald-700 mt-0.5">
-            {fmtNb(d.nb_transactions_total)} recharge(s) · {fmtNb(d.nb_clients_payants)} client(s)
+            {t('admin.rechargesAndClients', { recharges: fmtNb(d.nb_transactions_total), clients: fmtNb(d.nb_clients_payants) })}
           </div>
         </div>
 
@@ -830,7 +830,7 @@ function RevenusTab() {
           <div className="text-xs text-gray-500 uppercase">{t('admin.kpiCaToday')}</div>
           <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_aujourdhui?.montant)}</div>
           <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-            <span>{fmtNb(d.ca_aujourdhui?.transactions ?? 0)} tx</span>
+            <span>{t('admin.txCount', { n: fmtNb(d.ca_aujourdhui?.transactions ?? 0) })}</span>
             <VariationBadge actuel={d.ca_aujourdhui?.montant ?? 0} precedent={d.ca_aujourdhui_precedent?.montant ?? 0} />
           </div>
         </div>
@@ -839,7 +839,7 @@ function RevenusTab() {
           <div className="text-xs text-gray-500 uppercase">{t('admin.kpiCa7j')}</div>
           <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_7j?.montant)}</div>
           <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-            <span>{fmtNb(d.ca_7j?.transactions ?? 0)} tx</span>
+            <span>{t('admin.txCount', { n: fmtNb(d.ca_7j?.transactions ?? 0) })}</span>
             <VariationBadge actuel={d.ca_7j?.montant ?? 0} precedent={d.ca_7j_precedent?.montant ?? 0} />
           </div>
         </div>
@@ -848,7 +848,7 @@ function RevenusTab() {
           <div className="text-xs text-gray-500 uppercase">{t('admin.kpiCa30j')}</div>
           <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_30j?.montant)}</div>
           <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
-            <span>{fmtNb(d.ca_30j?.transactions ?? 0)} tx</span>
+            <span>{t('admin.txCount', { n: fmtNb(d.ca_30j?.transactions ?? 0) })}</span>
             <VariationBadge actuel={d.ca_30j?.montant ?? 0} precedent={d.ca_30j_precedent?.montant ?? 0} />
           </div>
         </div>
@@ -861,7 +861,7 @@ function RevenusTab() {
             <div className="text-xs text-amber-700 uppercase">{t('admin.periodTitle')}</div>
             <div className="text-2xl font-bold text-amber-900">{fmtFcfa(d.ca_periode?.montant)}</div>
             <div className="text-[10px] text-amber-700">
-              {fmtNb(d.ca_periode?.transactions ?? 0)} recharge(s) · {fmtNb(d.ca_periode?.clients ?? 0)} client(s)
+              {t('admin.rechargesAndClients', { recharges: fmtNb(d.ca_periode?.transactions ?? 0), clients: fmtNb(d.ca_periode?.clients ?? 0) })}
             </div>
           </div>
           <div className="text-right">
@@ -879,7 +879,7 @@ function RevenusTab() {
             <BarChart3 size={14} className="text-amber-600" /> {t('admin.evolutionMonthly')}
           </h3>
           {(d.evolution_12mois || []).length === 0 ? (
-            <p className="text-sm text-gray-500">Aucune recharge sur la période.</p>
+            <p className="text-sm text-gray-500">{t('admin.noRechargesPeriod')}</p>
           ) : (
             <div className="space-y-2">
               {d.evolution_12mois.map((m: any) => {
@@ -888,7 +888,7 @@ function RevenusTab() {
                   <div key={m.mois}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-gray-600">{m.mois}</span>
-                      <span className="text-gray-500">{fmtFcfa(m.montant)} · {fmtNb(m.transactions)} tx</span>
+                      <span className="text-gray-500">{t('admin.monthAxis', { amount: fmtFcfa(m.montant), tx: fmtNb(m.transactions) })}</span>
                     </div>
                     <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">
                       <div className="bg-emerald-500 h-full" style={{ width: `${Math.max(2, pct)}%` }} />
@@ -917,7 +917,7 @@ function RevenusTab() {
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-gray-700 truncate pr-2">{p.pack}</span>
                       <span className="text-gray-500 whitespace-nowrap">
-                        {fmtFcfa(p.montant)} · {fmtNb(p.transactions)} tx · {fmtNb(p.credits)} crédits
+                        {t('admin.packLine', { amount: fmtFcfa(p.montant), tx: fmtNb(p.transactions), credits: fmtNb(p.credits) })}
                       </span>
                     </div>
                     <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">

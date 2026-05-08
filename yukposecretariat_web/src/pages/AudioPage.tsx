@@ -155,13 +155,13 @@ export default function AudioPage() {
         {/* Contexte */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Contexte <span className="font-normal text-gray-400">(optionnel)</span>
+            {t('audio.contextLabel')} <span className="font-normal text-gray-400">{t('audio.contextOptional')}</span>
           </label>
           <textarea
             value={contexte}
             onChange={e => setContexte(e.target.value)}
             rows={2}
-            placeholder="Participants, objet de la réunion, date..."
+            placeholder={t('audio.contextPlaceholder')}
             className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           />
         </div>

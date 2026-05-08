@@ -92,7 +92,7 @@ export default function RedactionPage() {
   const goToTexteAvecReformulation = (texteSource: string, hint?: string) => {
     setReformuler(texteSource + (hint ? `\n\n[Source : ${hint}]` : ''))
     setTab('texte')
-    toast.success("Texte transféré dans l'onglet Texte — précisez le type de document attendu")
+    toast.success(t('redaction.transferredToText'))
     // Scroll en haut pour voir le formulaire
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
   }
@@ -137,9 +137,9 @@ export default function RedactionPage() {
       </div>
 
       {tab === 'texte' && <TabTexte reformuler={reformuler} setReformuler={setReformuler} />}
-      {tab === 'scan'  && <TabScan onAmeliorer={(t) => goToTexteAvecReformulation(t, 'Scan OCR')} />}
-      {tab === 'audio' && <TabAudio onAmeliorer={(t) => goToTexteAvecReformulation(t, 'Dictée / audio')} />}
-      {tab === 'doc'   && <TabDocExistant onAmeliorer={(t) => goToTexteAvecReformulation(t, 'Document importé')} />}
+      {tab === 'scan'  && <TabScan onAmeliorer={(txt) => goToTexteAvecReformulation(txt, t('redaction.sourceScan'))} />}
+      {tab === 'audio' && <TabAudio onAmeliorer={(txt) => goToTexteAvecReformulation(txt, t('redaction.sourceAudio'))} />}
+      {tab === 'doc'   && <TabDocExistant onAmeliorer={(txt) => goToTexteAvecReformulation(txt, t('redaction.sourceDoc'))} />}
     </div>
   )
 }
@@ -218,37 +218,37 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           {typeChoisi && <p className="text-xs text-gray-400 mt-1">{typeChoisi.description}</p>}
         </div>
 
-        <CountryPicker label="Contexte pays" value={pays} onChange={setPays} />
+        <CountryPicker label={t('redaction.countryContext')} value={pays} onChange={setPays} />
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">{t('redaction.infosTitle')}</label>
           <p className="text-xs text-gray-400 mb-2">
-            Décrivez librement : noms, dates, montants, objet. (texte libre ou JSON)
+            {t('redaction.infosFreeText')}
           </p>
           <textarea
             value={informations}
             onChange={e => setInformations(e.target.value)}
             rows={4}
-            placeholder={`Exemple :\nDestinataire : M. le Directeur\nObjet : Demande d'agrément\nDate : 22 avril 2026`}
+            placeholder={t('redaction.infosPlaceholderExample')}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            {t('redaction.textToReformulate')} <span className="text-gray-400 font-normal">(optionnel — alimenté auto par les onglets Scan / Audio / Document)</span>
+            {t('redaction.textToReformulate')} <span className="text-gray-400 font-normal">{t('redaction.reformulateOptional')}</span>
           </label>
           <textarea
             value={reformuler}
             onChange={e => setReformuler(e.target.value)}
             rows={4}
-            placeholder="Collez ici un brouillon — ou utilisez les autres onglets pour le générer automatiquement"
+            placeholder={t('redaction.reformulatePlaceholder')}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
           {reformuler && (
             <div className="mt-1 flex items-center justify-between text-xs">
-              <span className="text-gray-400">{reformuler.length} caractères</span>
-              <button onClick={() => setReformuler('')} className="text-red-500 hover:text-red-600">Effacer</button>
+              <span className="text-gray-400">{reformuler.length} {t('common.characters')}</span>
+              <button onClick={() => setReformuler('')} className="text-red-500 hover:text-red-600">{t('redaction.clear')}</button>
             </div>
           )}
         </div>
@@ -257,9 +257,9 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           <label className="block text-sm font-semibold text-gray-700 mb-2">{t('redaction.depth')}</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              { cle: 'court',    label: t('redaction.depthShort'),    desc: '1-2 pages · rapide',          emoji: '⚡' },
-              { cle: 'standard', label: t('redaction.depthStandard'), desc: '3-5 pages',                   emoji: '📄' },
-              { cle: 'long',     label: t('redaction.depthLong'),     desc: '10+ pages · modèle puissant', emoji: '📚' },
+              { cle: 'court',    label: t('redaction.depthShort'),    desc: t('redaction.depthShortDesc'),    emoji: '⚡' },
+              { cle: 'standard', label: t('redaction.depthStandard'), desc: t('redaction.depthStandardDesc'), emoji: '📄' },
+              { cle: 'long',     label: t('redaction.depthLong'),     desc: t('redaction.depthLongDesc'),     emoji: '📚' },
             ] as const).map(m => (
               <button key={m.cle} type="button" onClick={() => setMode(m.cle)}
                 className={`p-2.5 rounded-lg border text-left transition-colors ${
@@ -276,8 +276,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           </div>
           {mode === 'long' && (
             <p className="text-xs text-blue-600 mt-1">
-              Mode long : utilise un modèle plus puissant (Sonnet/Opus) avec capacité 24K tokens.
-              La génération peut prendre 30-60s.
+              {t('redaction.longModeNote')}
             </p>
           )}
         </div>
@@ -384,12 +383,12 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           onClick={() => inputRef.current?.click()}
           className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors">
           {preview ? (
-            <img src={preview} alt="Aperçu" className="max-h-48 mx-auto rounded-lg object-contain" />
+            <img src={preview} alt={t('common.preview')} className="max-h-48 mx-auto rounded-lg object-contain" />
           ) : (
             <>
               <Upload size={32} className="mx-auto text-gray-300 mb-2" />
-              <p className="text-sm text-gray-500">Glissez une image ici ou cliquez</p>
-              <p className="text-xs text-gray-400 mt-1">JPG, PNG, TIFF, WEBP — max 20 Mo</p>
+              <p className="text-sm text-gray-500">{t('redaction.scanDropHint')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('redaction.scanDropAccept')}</p>
             </>
           )}
           <input ref={inputRef} type="file" accept="image/*" className="hidden"
@@ -425,7 +424,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         <button onClick={scanner} disabled={loading || !fichier}
           className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
-          {loading ? 'Numérisation en cours…' : 'Numériser'}
+          {loading ? t('redaction.scanning') : t('redaction.doScan')}
         </button>
       </div>
 
@@ -548,17 +547,17 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            {t('redaction.context')} <span className="font-normal text-gray-400">(optionnel)</span>
+            {t('redaction.context')} <span className="font-normal text-gray-400">{t('redaction.audioContextOptional')}</span>
           </label>
           <textarea value={contexte} onChange={e => setContexte(e.target.value)} rows={2}
-            placeholder="Participants, objet, date..."
+            placeholder={t('redaction.audioContextPlaceholder')}
             className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none" />
         </div>
 
         <button onClick={transcrire} disabled={loading || !fichier}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Mic size={18} />}
-          {loading ? 'Transcription en cours (peut prendre 30s)…' : 'Transcrire et formater'}
+          {loading ? t('redaction.transcribingLong') : t('redaction.transcribeAndFormat')}
         </button>
       </div>
 
@@ -573,7 +572,7 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           color="purple"
           extra={(
             <details className="border-t border-gray-100 pt-3 mt-3">
-              <summary className="text-xs text-gray-400 cursor-pointer">Transcription brute</summary>
+              <summary className="text-xs text-gray-400 cursor-pointer">{t('redaction.rawTranscriptLabel')}</summary>
               <p className="text-xs text-gray-500 mt-2 italic">{resultat.transcription_brute}</p>
             </details>
           )}
@@ -595,46 +594,45 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
   const runOp = useLongOps((s) => s.run)
 
   const REGISTRES = [
-    { cle: 'professionnel', label: 'Professionnel' },
-    { cle: 'administratif', label: 'Administratif' },
-    { cle: 'commercial',    label: 'Commercial' },
-    { cle: 'juridique',     label: 'Juridique' },
-    { cle: 'simplifie',     label: 'Simplifié' },
-    { cle: 'concis',        label: 'Concis' },
+    { cle: 'professionnel', label: t('redaction.regProfessionnel') },
+    { cle: 'administratif', label: t('redaction.regAdministratif') },
+    { cle: 'commercial',    label: t('redaction.regCommercial') },
+    { cle: 'juridique',     label: t('redaction.regJuridique') },
+    { cle: 'simplifie',     label: t('redaction.regSimplifie') },
+    { cle: 'concis',        label: t('redaction.regConcis') },
   ]
 
   const reformulerTexte = async () => {
-    if (!texte.trim()) { toast.error('Collez le texte à améliorer'); return }
+    if (!texte.trim()) { toast.error(t('redaction.errPasteText')); return }
     try {
       await runOp('docameliore', async () => {
         const r = await redactionAPI.reformuler({ texte, registre, pays })
         return r.data
       })
-      toast.success('Texte reformulé !')
+      toast.success(t('redaction.okReformulated'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de reformulation')
+      toast.error(err.response?.data?.detail || t('redaction.errReformulate'))
     }
   }
 
   return (
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-        <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          Collez ici un brouillon ou un document existant. Yukpo peut le <strong>reformuler</strong> (changer le registre,
-          corriger, professionnaliser) ou — via l'onglet <strong>Texte</strong> — le transformer en un autre type
-          de document (lettre, contrat, PV, attestation, etc.).
-        </p>
+        <p
+          className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3"
+          dangerouslySetInnerHTML={{ __html: t('redaction.docHint') }}
+        />
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">{t('redaction.textToImprove')}</label>
           <textarea value={texte} onChange={e => setTexte(e.target.value)} rows={10}
-            placeholder="Collez votre brouillon ici…"
+            placeholder={t('redaction.textPlaceholder')}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y" />
           {texte && (
             <div className="mt-1 flex items-center justify-between text-xs">
-              <span className="text-gray-400">{texte.length} caractères · ~{Math.round(texte.split(/\s+/).length)} mots</span>
-              <button onClick={() => setTexte('')} className="text-red-500 hover:text-red-600">Effacer</button>
+              <span className="text-gray-400">{t('redaction.charsAndWords', { c: texte.length, w: Math.round(texte.split(/\s+/).length) })}</span>
+              <button onClick={() => setTexte('')} className="text-red-500 hover:text-red-600">{t('redaction.clear')}</button>
             </div>
           )}
         </div>
@@ -656,7 +654,7 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
           <button onClick={reformulerTexte} disabled={loading || !texte.trim()}
             className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
-            {loading ? 'Reformulation…' : t('redaction.reformulate')}
+            {loading ? t('redaction.reformulating') : t('redaction.reformulate')}
           </button>
           <button onClick={() => onAmeliorer(texte)} disabled={!texte.trim()}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">

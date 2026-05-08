@@ -21,7 +21,7 @@ export default function ClientsPage() {
   const [recherche, setRecherche] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ nom: '', telephone: '', email: '', adresse: '', notes: '' })
-  const [whatsappMsg, setWhatsappMsg] = useState('Bonjour, votre document est prêt.')
+  const [whatsappMsg, setWhatsappMsg] = useState(t('clients.defaultWhatsappMessage'))
 
   const { data, isLoading } = useQuery({
     queryKey: ['clients', recherche],

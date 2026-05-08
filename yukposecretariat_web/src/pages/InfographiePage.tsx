@@ -9,15 +9,15 @@ import { CountryPicker } from '../components/CountryPicker'
 import DesignerProPanel from '../components/DesignerProPanel'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
-const CAT_LABELS: Record<string, string> = {
-  print: '🖨️ Impression standard',
-  evenement: '🎉 Événementiel',
-  corporate: '🏢 Corporate',
-  grand_format: '📐 Grand format',
-  social_media: '📱 Réseaux sociaux',
-  commercial: '🛍️ Commercial',
-  officiel: '📜 Officiel / Diplômes',
-  custom: '✏️ Format personnalisé',
+const CAT_LABEL_KEYS: Record<string, string> = {
+  print: 'infographie.catPrint',
+  evenement: 'infographie.catEvenement',
+  corporate: 'infographie.catCorporate',
+  grand_format: 'infographie.catGrandFormat',
+  social_media: 'infographie.catSocialMedia',
+  commercial: 'infographie.catCommercial',
+  officiel: 'infographie.catOfficiel',
+  custom: 'infographie.catCustom',
 }
 
 interface Gabarit {
@@ -27,8 +27,8 @@ interface Gabarit {
 
 type Mode = 'brief' | 'modele' | 'custom' | 'pro'
 
-function formatCredits(n: number) {
-  return new Intl.NumberFormat('fr-FR').format(n) + ' crédits'
+function formatCredits(n: number, suffix = 'crédits') {
+  return new Intl.NumberFormat('fr-FR').format(n) + ' ' + suffix
 }
 
 function b64download(b64: string, filename: string, mimeType: string) {
@@ -156,7 +156,7 @@ export default function InfographiePage() {
       setVarianteActive(0)
       const first = list[0]
       if (first) setResultat(first as InfographieResult)
-      toast.success(`${list.length} ${t('infographie.variantsOk')}`)
+      toast.success(t('infographie.okVariantsCount', { n: list.length, label: t('infographie.variantsOk') }))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
       toast.error(err.response?.data?.detail || err.message || t('infographie.variantsErrLabel'))
@@ -205,7 +205,7 @@ export default function InfographiePage() {
           { key: 'brief', label: t('infographie.modeBrief') },
           { key: 'modele', label: t('infographie.modeModele') },
           { key: 'custom', label: t('infographie.modeCustom') },
-          { key: 'pro', label: '✨ Multi-page Yukpo' },
+          { key: 'pro', label: t('infographie.modeProMultipage') },
         ] as { key: Mode; label: string }[]).map(m => (
           <button key={m.key} onClick={() => { setMode(m.key); setResultat(null) }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === m.key ? 'bg-white shadow text-orange-600' : 'text-gray-800 hover:text-gray-900'}`}>
@@ -228,10 +228,10 @@ export default function InfographiePage() {
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm appearance-none bg-white pr-10 focus:outline-none focus:ring-2 focus:ring-orange-400">
                 <option value="">{t('infographie.labelSelect')}</option>
                 {categories.map(cat => (
-                  <optgroup key={cat} label={CAT_LABELS[cat] || cat}>
+                  <optgroup key={cat} label={CAT_LABEL_KEYS[cat] ? t(CAT_LABEL_KEYS[cat]) : cat}>
                     {gabarits.filter(g => g.categorie === cat).map(g => (
                       <option key={g.cle} value={g.cle}>
-                        {g.label} ({g.width_mm}×{g.height_mm}mm) — {formatCredits(g.prix_fcfa)}
+                        {g.label} ({g.width_mm}×{g.height_mm}mm) — {formatCredits(g.prix_fcfa, t('infographie.creditsSuffix'))}
                       </option>
                     ))}
                   </optgroup>
@@ -298,9 +298,7 @@ export default function InfographiePage() {
             {mode === 'modele' ? t('infographie.briefHintModele') : t('infographie.briefHint')}
           </p>
           <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={5}
-            placeholder={mode === 'modele'
-              ? "Ex : \"Flyer pour la conférence 'Leadership Africain' à Yaoundé le 15 mars. Logo CMEF. Speakers : Dr Mbarga, Prof Diallo. Inscription gratuite via WhatsApp.\""
-              : "Ex : \"Flyer pour l'ouverture de ma boutique 'Mode Chic' à Akwa. 30% de réduction le 1er jour. Tél : 699 00 11 22. Couleurs vertes et dorées.\""}
+            placeholder={mode === 'modele' ? t('infographie.briefPlaceholderModele') : t('infographie.briefPlaceholder')}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
         </div>
 
@@ -336,11 +334,11 @@ export default function InfographiePage() {
                 <button key={idx} onClick={() => choisirVariante(idx)}
                   className={`relative rounded-xl overflow-hidden border-2 transition-colors ${active ? 'border-pink-500 ring-2 ring-pink-300' : 'border-gray-200 hover:border-pink-300'}`}>
                   {preview ? (
-                    <img src={`data:image/png;base64,${preview}`} alt={`Variante ${idx + 1}`} className="w-full h-32 object-cover" />
+                    <img src={`data:image/png;base64,${preview}`} alt={t('infographie.variantAlt', { n: idx + 1 })} className="w-full h-32 object-cover" />
                   ) : (
-                    <div className="w-full h-32 bg-gray-100 flex items-center justify-center text-xs text-gray-400">N°{idx + 1}</div>
+                    <div className="w-full h-32 bg-gray-100 flex items-center justify-center text-xs text-gray-400">{t('infographie.variantNumber', { n: idx + 1 })}</div>
                   )}
-                  <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">N°{idx + 1}</span>
+                  <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">{t('infographie.variantNumber', { n: idx + 1 })}</span>
                 </button>
               )
             })}
@@ -404,7 +402,7 @@ export default function InfographiePage() {
           {/* Preview PNG */}
           {resultat.png_base64 ? (
             <img src={`data:image/png;base64,${resultat.png_base64}`}
-              alt="Aperçu infographie"
+              alt={t('infographie.previewAlt')}
               className="w-full rounded-xl border border-gray-200 object-contain max-h-96" />
           ) : (
             <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-400 text-sm">

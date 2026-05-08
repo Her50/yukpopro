@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Receipt, Plus, Trash2, Loader2, Download } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
@@ -13,8 +14,9 @@ type DevisInfos = {
 }
 type DevisResult = { pdf_base64: string; sous_total: number; tva: number; total_ttc: number }
 
+// Default secretariat name, will be replaced at component init via t()
 const INFOS_DEFAUT: DevisInfos = {
-  client_nom: '', client_contact: '', nom_secretariat: 'Mon Secrétariat',
+  client_nom: '', client_contact: '', nom_secretariat: '',
   adresse_secretariat: '', tel_secretariat: '', notes: '', validite_jours: 15,
 }
 const LIGNES_DEFAUT: Ligne[] = [{ description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' }]
@@ -32,6 +34,14 @@ export default function DevisPage() {
   const resultat = useLongOps((s) => s.resultats.devis) as DevisResult | null
   const runOp = useLongOps((s) => s.run)
 
+  // Initialise le nom de secrétariat par défaut (traduit) si vide
+  useEffect(() => {
+    if (!infos.nom_secretariat) {
+      setInfos({ ...infos, nom_secretariat: t('devis.secretariatDefault') })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const ajouterLigne = () => setLignes([...lignes, { description: '', quantite: 1, prix_unitaire_fcfa: 0, unite: 'u' }])
   const supprimerLigne = (i: number) => setLignes(lignes.filter((_, idx) => idx !== i))
   const modifierLigne = (i: number, key: keyof Ligne, val: string | number) =>
@@ -42,8 +52,8 @@ export default function DevisPage() {
   const total = sousTotal + tva
 
   const generer = async () => {
-    if (!infos.client_nom) { toast.error('Nom du client requis'); return }
-    if (lignes.some(l => !l.description)) { toast.error('Toutes les lignes doivent avoir une description'); return }
+    if (!infos.client_nom) { toast.error(t('devis.errClientName')); return }
+    if (lignes.some(l => !l.description)) { toast.error(t('devis.errLineDescription')); return }
     try {
       await runOp<DevisResult>('devis', async () => {
         const payload = { ...infos, lignes, validite_jours: +infos.validite_jours }
@@ -97,11 +107,11 @@ export default function DevisPage() {
         {/* Infos */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { key: 'client_nom', label: 'Client *', span: 2 },
-            { key: 'client_contact', label: 'Tel/Email client', span: 2 },
-            { key: 'nom_secretariat', label: 'Nom secrétariat', span: 1 },
-            { key: 'tel_secretariat', label: 'Téléphone', span: 1 },
-            { key: 'adresse_secretariat', label: 'Adresse', span: 2 },
+            { key: 'client_nom', label: t('devis.fieldClient'), span: 2 },
+            { key: 'client_contact', label: t('devis.fieldClientContact'), span: 2 },
+            { key: 'nom_secretariat', label: t('devis.fieldSecretariatName'), span: 1 },
+            { key: 'tel_secretariat', label: t('devis.fieldPhone'), span: 1 },
+            { key: 'adresse_secretariat', label: t('devis.fieldAddress'), span: 2 },
           ].map(({ key, label, span }) => (
             <div key={key} className={`col-span-${span}`}>
               <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
@@ -178,8 +188,8 @@ export default function DevisPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="font-bold text-gray-900">Total TTC : {formatFCFA(resultat.total_ttc)}</div>
-              <div className="text-xs text-gray-400">TVA incluse : {formatFCFA(resultat.tva)}</div>
+              <div className="font-bold text-gray-900">{t('devis.totalTtcLabel', { amount: formatFCFA(resultat.total_ttc) })}</div>
+              <div className="text-xs text-gray-400">{t('devis.tvaIncluded', { amount: formatFCFA(resultat.tva) })}</div>
             </div>
             <button onClick={telechargerPDF}
               className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">

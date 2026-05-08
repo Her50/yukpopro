@@ -14,16 +14,16 @@ const LANGUES = [
   { code: 'sw', label: '🇹🇿 Swahili' },
 ]
 
-const CONTEXTES = [
-  { code: '', label: 'Général' },
-  { code: 'comptabilite', label: 'Comptabilité SYSCOHADA' },
-  { code: 'juridique', label: 'Juridique OHADA' },
-  { code: 'rh', label: 'Ressources humaines' },
-  { code: 'finance', label: 'Finance / Banque' },
-  { code: 'assurance', label: 'Assurance CIMA' },
-  { code: 'commercial', label: 'Commercial / Marketing' },
-  { code: 'medical', label: 'Médical / Santé' },
-  { code: 'ong', label: 'ONG / Développement' },
+const CONTEXTES: { code: string; labelKey: string }[] = [
+  { code: '', labelKey: 'traduction.ctxGeneral' },
+  { code: 'comptabilite', labelKey: 'traduction.ctxComptabilite' },
+  { code: 'juridique', labelKey: 'traduction.ctxJuridique' },
+  { code: 'rh', labelKey: 'traduction.ctxRh' },
+  { code: 'finance', labelKey: 'traduction.ctxFinance' },
+  { code: 'assurance', labelKey: 'traduction.ctxAssurance' },
+  { code: 'commercial', labelKey: 'traduction.ctxCommercial' },
+  { code: 'medical', labelKey: 'traduction.ctxMedical' },
+  { code: 'ong', labelKey: 'traduction.ctxOng' },
 ]
 
 type Mode = 'texte' | 'fichier'
@@ -52,7 +52,7 @@ export default function TraductionPage() {
 
   const traduireTexte = async () => {
     if (!contenu.trim()) { toast.error(t('traduction.errEmpty')); return }
-    if (langSource === langCible) { toast.error('La langue source et cible doivent être différentes'); return }
+    if (langSource === langCible) { toast.error(t('traduction.errSameLang')); return }
     try {
       await runOp<TradResult>('traduction', async () => {
         const r = await traductionAPI.traduireTexte({
@@ -70,7 +70,7 @@ export default function TraductionPage() {
 
   const traduireFichier = async () => {
     const file = fileRef.current?.files?.[0]
-    if (!file) { toast.error('Sélectionnez un fichier'); return }
+    if (!file) { toast.error(t('traduction.errSelectFile')); return }
     try {
       await runOp<TradResult>('traduction', async () => {
         const fd = new FormData()
@@ -148,16 +148,16 @@ export default function TraductionPage() {
           <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.context')}</label>
           <select value={contexte} onChange={e => setContexte(e.target.value)}
             className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
-            {CONTEXTES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+            {CONTEXTES.map(c => <option key={c.code} value={c.code}>{t(c.labelKey)}</option>)}
           </select>
         </div>
 
         {/* Input selon mode */}
         {mode === 'texte' ? (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Texte à traduire</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('traduction.textToTranslate')}</label>
             <textarea value={contenu} onChange={e => setContenu(e.target.value)} rows={7}
-              placeholder="Collez votre texte ici…"
+              placeholder={t('traduction.textPlaceholder')}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
             <p className="text-xs text-gray-400 mt-1">{t('traduction.wordsCount', { n: contenu.split(/\s+/).filter(Boolean).length })}</p>
           </div>
@@ -170,7 +170,7 @@ export default function TraductionPage() {
             >
               <Upload size={28} className="mx-auto text-gray-400 mb-2" />
               <p className="text-sm text-gray-500">{fichierNom || t('traduction.clickToSelect')}</p>
-              <p className="text-xs text-gray-400 mt-1">PDF, DOCX, TXT, PNG/JPG (max 20 MB)</p>
+              <p className="text-xs text-gray-400 mt-1">{t('traduction.fileAccept')}</p>
               <input ref={fileRef} type="file" className="hidden"
                 accept=".pdf,.docx,.txt,.md,.csv,.png,.jpg,.jpeg,.webp"
                 onChange={e => setFichierNom(e.target.files?.[0]?.name || '')} />
@@ -193,12 +193,12 @@ export default function TraductionPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-bold text-gray-900">{t('traduction.result')}</h2>
-              <p className="text-xs text-gray-400">{resultat.nb_mots_source} mots source → {resultat.nb_mots_cible} mots traduits</p>
+              <p className="text-xs text-gray-400">{t('traduction.wordsCountStat', { src: resultat.nb_mots_source, tgt: resultat.nb_mots_cible })}</p>
             </div>
             {resultat.fichier_id && (
               <button onClick={() => telecharger(resultat.fichier_id!)}
                 className="flex items-center gap-1.5 bg-orange-500 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-orange-600 transition-colors">
-                <Download size={14} /> Télécharger DOCX
+                <Download size={14} /> {t('traduction.downloadDocx')}
               </button>
             )}
           </div>

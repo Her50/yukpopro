@@ -43,10 +43,10 @@ export default function DashboardPage() {
   ]
 
   const REDACTION_MODES = [
-    { tab: 'texte', label: t('redaction.tabText'),     icon: FileText,   color: 'bg-blue-500',   desc: '30+ types de documents IA' },
+    { tab: 'texte', label: t('redaction.tabText'),     icon: FileText,   color: 'bg-blue-500',   desc: t('dashboard.redactionDescTexte') },
     { tab: 'scan',  label: t('redaction.tabScan'),     icon: Scan,       color: 'bg-green-500',  desc: t('redaction.tabScanDesc') },
-    { tab: 'audio', label: t('redaction.tabAudio'),    icon: Mic,        color: 'bg-purple-500', desc: 'Dictée / audio → Word' },
-    { tab: 'doc',   label: t('redaction.tabDocument'), icon: FolderOpen, color: 'bg-amber-500',  desc: 'Améliorer un brouillon' },
+    { tab: 'audio', label: t('redaction.tabAudio'),    icon: Mic,        color: 'bg-purple-500', desc: t('dashboard.redactionDescAudio') },
+    { tab: 'doc',   label: t('redaction.tabDocument'), icon: FolderOpen, color: 'bg-amber-500',  desc: t('dashboard.redactionDescDoc') },
   ] as const
 
   const { data: caisse } = useQuery({
@@ -68,7 +68,7 @@ export default function DashboardPage() {
   const totalJour = caisse?.rapport?.total_entrees ?? 0
   const enAttente = travaux?.travaux?.filter((tt: { statut: string }) => tt.statut === 'en_attente').length ?? 0
   const enCours = travaux?.travaux?.filter((tt: { statut: string }) => tt.statut === 'en_cours').length ?? 0
-  const prenom = prenomAffichage(user) || 'secrétaire'
+  const prenom = prenomAffichage(user) || t('dashboard.fallbackName')
 
   return (
     <div className="space-y-6">
@@ -110,8 +110,7 @@ export default function DashboardPage() {
           </button>
         </div>
         <p className="text-xs text-gray-500 mb-3">
-          Tous les modes de production de documents en un seul endroit. Vous pouvez chaîner :
-          un scan ou un audio peut être renvoyé vers le mode Texte pour être reformulé / converti.
+          {t('dashboard.redactionHubHint')}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {REDACTION_MODES.map(({ tab, label, icon: Icon, color, desc }) => (

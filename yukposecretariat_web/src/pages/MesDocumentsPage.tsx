@@ -155,13 +155,13 @@ export default function MesDocumentsPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <Loader2 size={24} className="animate-spin mr-2" />
-          Chargement…
+          {t('common.loading')}
         </div>
       ) : filtres.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
           <FolderOpen size={40} className="mx-auto text-gray-300 mb-3" />
           <p className="text-gray-500 font-medium">{t('documents.noDocs')}</p>
-          <p className="text-gray-400 text-sm mt-1">Les documents générés apparaîtront ici automatiquement</p>
+          <p className="text-gray-400 text-sm mt-1">{t('documents.noDocsHint')}</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
@@ -233,7 +233,7 @@ export default function MesDocumentsPage() {
                 value={instructions}
                 onChange={e => setInstructions(e.target.value)}
                 rows={3}
-                placeholder="Ex : Change la couleur principale en rouge, ajoute le logo ACME, modifie le titre en 'Grand Opening'…"
+                placeholder={t('documents.modifyInstructionsPlaceholder')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
               />
             </div>
@@ -249,11 +249,11 @@ export default function MesDocumentsPage() {
 
             {modifierResult && (
               <div className="space-y-3 border-t border-gray-100 pt-3">
-                <p className="text-xs font-semibold text-green-600">✓ Visuel mis à jour — téléchargez le résultat</p>
+                <p className="text-xs font-semibold text-green-600">{t('documents.visualUpdatedHint')}</p>
                 {modifierResult.png_base64 && (
                   <img
                     src={`data:image/png;base64,${modifierResult.png_base64}`}
-                    alt="Aperçu visuel modifié"
+                    alt={t('documents.previewAlt')}
                     className="w-full rounded-xl border border-gray-200 object-contain max-h-72"
                   />
                 )}

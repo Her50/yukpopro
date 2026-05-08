@@ -8,12 +8,12 @@ import { fr } from 'date-fns/locale'
 import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 
-const MODES_PAIEMENT = [
-  { code: 'especes', label: '💵 Espèces' },
-  { code: 'orange_money', label: '🟠 Orange Money' },
-  { code: 'mtn_momo', label: '🟡 MTN MoMo' },
-  { code: 'virement', label: '🏦 Virement' },
-  { code: 'cheque', label: '📄 Chèque' },
+const MODES_PAIEMENT: { code: string; labelKey: string }[] = [
+  { code: 'especes', labelKey: 'caisse.modeCash' },
+  { code: 'orange_money', labelKey: 'caisse.modeOrange' },
+  { code: 'mtn_momo', labelKey: 'caisse.modeMtn' },
+  { code: 'virement', labelKey: 'caisse.modeBank' },
+  { code: 'cheque', labelKey: 'caisse.modeCheck' },
 ]
 
 function formatFCFA(n: number) {
@@ -104,7 +104,7 @@ export default function CaissePage() {
             {rapport.repartition.map((r: { mode: string; montant: number; pourcentage: number }) => (
               <div key={r.mode}>
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>{MODES_PAIEMENT.find(m => m.code === r.mode)?.label ?? r.mode}</span>
+                  <span>{(() => { const mp = MODES_PAIEMENT.find(m => m.code === r.mode); return mp ? t(mp.labelKey) : r.mode })()}</span>
                   <span>{formatFCFA(r.montant)} ({r.pourcentage}%)</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -128,17 +128,17 @@ export default function CaissePage() {
           <div className="text-center py-8 text-gray-400 text-sm">{t('caisse.noTx')}</div>
         ) : (
           <div className="space-y-2">
-            {transactions.map(t => (
-              <div key={t.id} className="bg-white rounded-xl border border-gray-100 p-3 flex items-center justify-between gap-3">
+            {transactions.map(tx => (
+              <div key={tx.id} className="bg-white rounded-xl border border-gray-100 p-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-medium text-gray-900">{t.libelle}</div>
+                  <div className="text-sm font-medium text-gray-900">{tx.libelle}</div>
                   <div className="text-xs text-gray-400">
-                    {MODES_PAIEMENT.find(m => m.code === t.mode_paiement)?.label ?? t.mode_paiement}
-                    · {new Date(t.horodatage).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    {(() => { const mp = MODES_PAIEMENT.find(m => m.code === tx.mode_paiement); return mp ? t(mp.labelKey) : tx.mode_paiement })()}
+                    · {new Date(tx.horodatage).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
-                <div className={`text-sm font-bold ${t.type === 'entree' ? 'text-green-600' : 'text-red-500'}`}>
-                  {t.type === 'entree' ? '+' : '-'}{formatFCFA(t.montant_fcfa)}
+                <div className={`text-sm font-bold ${tx.type === 'entree' ? 'text-green-600' : 'text-red-500'}`}>
+                  {tx.type === 'entree' ? '+' : '-'}{formatFCFA(tx.montant_fcfa)}
                 </div>
               </div>
             ))}
@@ -180,7 +180,7 @@ export default function CaissePage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t('caisse.label')}</label>
               <input
-                type="text" placeholder="Paiement lettre client Mme Ateba..."
+                type="text" placeholder={t('caisse.labelPlaceholder')}
                 value={form.libelle}
                 onChange={e => setForm(f => ({ ...f, libelle: e.target.value }))}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -195,7 +195,7 @@ export default function CaissePage() {
                     className={`py-2 rounded-lg text-xs font-medium ${
                       form.mode_paiement === m.code ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
                     }`}
-                  >{m.label}</button>
+                  >{t(m.labelKey)}</button>
                 ))}
               </div>
             </div>

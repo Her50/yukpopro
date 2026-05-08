@@ -18,18 +18,17 @@ const COLONNES: { statut: Statut; labelKey: string; color: string }[] = [
 ]
 
 // Types de travail clarifiés (libellés explicites + couleurs distinctes pour éviter la confusion)
-const TYPES_TRAVAIL: { cle: string; label: string; emoji: string; desc: string; tag: string }[] = [
-  { cle: 'redaction_doc', label: 'Rédaction document IA',  emoji: '📝', desc: 'Génération automatique d\'un document (lettre, contrat, attestation, PV…)', tag: 'bg-blue-100 text-blue-700' },
-  { cle: 'saisie',        label: 'Saisie / Retranscription', emoji: '⌨️', desc: 'Recopier ou retranscrire un document existant', tag: 'bg-slate-100 text-slate-700' },
-  { cle: 'scan',          label: 'Scan / Numérisation',    emoji: '📷', desc: 'Numériser un document papier en texte (OCR)', tag: 'bg-green-100 text-green-700' },
-  { cle: 'audio',         label: 'Transcription audio',     emoji: '🎙', desc: 'Transcrire un audio en document', tag: 'bg-purple-100 text-purple-700' },
-  { cle: 'traduction',    label: 'Traduction',              emoji: '🌐', desc: 'Traduire un document', tag: 'bg-cyan-100 text-cyan-700' },
-  { cle: 'infographie',   label: 'Infographie / Visuel',    emoji: '🎨', desc: 'Création de flyer, faire-part, brochure, carte…', tag: 'bg-orange-100 text-orange-700' },
-  { cle: 'impression',    label: 'Impression / Repro',      emoji: '🖨️', desc: 'Impression et reprographie', tag: 'bg-amber-100 text-amber-700' },
-  { cle: 'autre',         label: 'Autre',                   emoji: '📄', desc: 'Autre type de travail', tag: 'bg-gray-100 text-gray-700' },
+const TYPES_TRAVAIL: { cle: string; labelKey: string; emoji: string; descKey: string; tag: string }[] = [
+  { cle: 'redaction_doc', labelKey: 'kanban.typeRedactionDoc', emoji: '📝', descKey: 'kanban.typeRedactionDocDesc', tag: 'bg-blue-100 text-blue-700' },
+  { cle: 'saisie',        labelKey: 'kanban.typeSaisie',       emoji: '⌨️', descKey: 'kanban.typeSaisieDesc',       tag: 'bg-slate-100 text-slate-700' },
+  { cle: 'scan',          labelKey: 'kanban.typeScan',         emoji: '📷', descKey: 'kanban.typeScanDesc',         tag: 'bg-green-100 text-green-700' },
+  { cle: 'audio',         labelKey: 'kanban.typeAudio',        emoji: '🎙', descKey: 'kanban.typeAudioDesc',        tag: 'bg-purple-100 text-purple-700' },
+  { cle: 'traduction',    labelKey: 'kanban.typeTraduction',   emoji: '🌐', descKey: 'kanban.typeTraductionDesc',   tag: 'bg-cyan-100 text-cyan-700' },
+  { cle: 'infographie',   labelKey: 'kanban.typeInfographie',  emoji: '🎨', descKey: 'kanban.typeInfographieDesc',  tag: 'bg-orange-100 text-orange-700' },
+  { cle: 'impression',    labelKey: 'kanban.typeImpression',   emoji: '🖨️', descKey: 'kanban.typeImpressionDesc',   tag: 'bg-amber-100 text-amber-700' },
+  { cle: 'autre',         labelKey: 'kanban.typeAutre',        emoji: '📄', descKey: 'kanban.typeAutreDesc',        tag: 'bg-gray-100 text-gray-700' },
 ]
 
-const labelType = (cle: string) => TYPES_TRAVAIL.find(t => t.cle === cle)?.label || cle
 const tagType   = (cle: string) => TYPES_TRAVAIL.find(t => t.cle === cle)?.tag   || 'bg-gray-100 text-gray-600'
 
 interface BonTravail {
@@ -103,13 +102,13 @@ export default function KanbanPage() {
       if (res?.whatsapp_envoye) {
         toast.success(t('kanban.completed') + ' · WhatsApp ✓')
       } else if (res?.whatsapp_raison) {
-        toast(`${t('kanban.completed')} · WhatsApp non envoyé (${res.whatsapp_raison.slice(0, 80)})`, { icon: '⚠️' })
+        toast(`${t('kanban.completed')} · ${t('kanban.whatsappNotSent', { reason: res.whatsapp_raison.slice(0, 80) })}`, { icon: '⚠️' })
       } else {
         toast.success(t('kanban.completed'))
       }
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.detail || 'Erreur terminaison')
+      toast.error(err?.response?.data?.detail || t('kanban.errEnd'))
     },
   })
 
@@ -129,8 +128,8 @@ export default function KanbanPage() {
   // Étape de validation : ouvre la pop-up de confirmation
   const tenterCreer = () => {
     if (!formValide) {
-      if (!whatsAppValide(form.client_whatsapp)) toast.error('Numéro WhatsApp invalide')
-      else toast.error('Remplissez tous les champs obligatoires')
+      if (!whatsAppValide(form.client_whatsapp)) toast.error(t('kanban.errInvalidWhatsapp'))
+      else toast.error(t('kanban.errFillRequired'))
       return
     }
     setShowConfirm(true)
@@ -145,7 +144,7 @@ export default function KanbanPage() {
             <KanbanSquare className="text-indigo-600" size={24} />
             {t('kanban.title')}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">{travaux.length} bons de travail</p>
+          <p className="text-gray-500 text-sm mt-1">{t('kanban.tasksCount', { n: travaux.length })}</p>
         </div>
         <button onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
@@ -185,7 +184,7 @@ export default function KanbanPage() {
                               )}
                             </div>
                             <span className={clsx('text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0', tagType(b.type_travail))}>
-                              {labelType(b.type_travail)}
+                              {(() => { const tt = TYPES_TRAVAIL.find(x => x.cle === b.type_travail); return tt ? t(tt.labelKey) : b.type_travail })()}
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 line-clamp-2">{b.description}</div>
@@ -245,7 +244,7 @@ export default function KanbanPage() {
             <Field label={t('kanban.clientWhatsapp')}>
               <input type="tel" value={form.client_whatsapp}
                 onChange={e => setForm(f => ({ ...f, client_whatsapp: e.target.value }))}
-                placeholder="+237 690 12 34 56"
+                placeholder={t('kanban.whatsappPlaceholder')}
                 className={clsx(
                   "w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2",
                   form.client_whatsapp.length > 4 && !whatsAppValide(form.client_whatsapp)
@@ -253,11 +252,11 @@ export default function KanbanPage() {
                     : "border-gray-300 focus:ring-indigo-500"
                 )} />
               <p className="text-xs text-gray-400 mt-1">
-                Format international (+237xxx). Ce numéro sera utilisé pour notifier le client par WhatsApp à la fin du travail.
+                {t('kanban.whatsappFormatHint')}
               </p>
               {form.client_whatsapp.length > 4 && !whatsAppValide(form.client_whatsapp) && (
                 <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                  <AlertTriangle size={11} /> Numéro invalide
+                  <AlertTriangle size={11} /> {t('kanban.invalidNumber')}
                 </p>
               )}
             </Field>
@@ -270,26 +269,26 @@ export default function KanbanPage() {
 
             <Field label={t('kanban.workType')}>
               <div className="grid grid-cols-2 gap-2">
-                {TYPES_TRAVAIL.map(t => (
-                  <button key={t.cle} type="button"
-                    onClick={() => setForm(f => ({ ...f, type_travail: t.cle }))}
+                {TYPES_TRAVAIL.map(tt => (
+                  <button key={tt.cle} type="button"
+                    onClick={() => setForm(f => ({ ...f, type_travail: tt.cle }))}
                     className={clsx(
                       "text-left p-2 rounded-lg border transition-colors",
-                      form.type_travail === t.cle
+                      form.type_travail === tt.cle
                         ? "border-indigo-500 bg-indigo-50"
                         : "border-gray-200 hover:border-gray-300"
                     )}>
                     <div className="text-xs font-semibold flex items-center gap-1.5">
-                      <span>{t.emoji}</span> {t.label}
+                      <span>{tt.emoji}</span> {t(tt.labelKey)}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-0.5 leading-tight">{t.desc}</div>
+                    <div className="text-[10px] text-gray-400 mt-0.5 leading-tight">{t(tt.descKey)}</div>
                   </button>
                 ))}
               </div>
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Montant (FCFA)">
+              <Field label={t('kanban.amountFcfa')}>
                 <input type="number" min={0} value={form.montant_fcfa}
                   onChange={e => setForm(f => ({ ...f, montant_fcfa: +e.target.value }))}
                   className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -316,18 +315,18 @@ export default function KanbanPage() {
           <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4">
             <div className="flex items-center gap-2 text-amber-500">
               <AlertTriangle size={22} />
-              <h3 className="font-bold text-gray-900">Confirmer le numéro WhatsApp</h3>
+              <h3 className="font-bold text-gray-900">{t('kanban.confirmModalTitle')}</h3>
             </div>
-            <p className="text-sm text-gray-600">
-              Ce numéro sera utilisé pour <strong>notifier automatiquement</strong> le client par WhatsApp
-              dès que vous cliquerez sur « Terminer » dans le Kanban. Vérifiez bien qu'il est correct.
-            </p>
+            <p
+              className="text-sm text-gray-600"
+              dangerouslySetInnerHTML={{ __html: t('kanban.confirmModalDesc') }}
+            />
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-              <div className="text-xs text-green-600 font-semibold uppercase">WhatsApp</div>
+              <div className="text-xs text-green-600 font-semibold uppercase">{t('kanban.whatsappLabel')}</div>
               <div className="text-2xl font-bold text-green-700 mt-1 font-mono">
                 {normaliserWhatsApp(form.client_whatsapp)}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Client : {form.client_nom}</div>
+              <div className="text-xs text-gray-500 mt-1">{t('kanban.clientLabel')} : {form.client_nom}</div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)}
@@ -337,7 +336,7 @@ export default function KanbanPage() {
               <button onClick={() => creerMutation.mutate(form)} disabled={creerMutation.isPending}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center justify-center gap-1.5 disabled:opacity-60">
                 {creerMutation.isPending && <Loader2 size={14} className="animate-spin" />}
-                <Check size={14} /> Confirmer et créer
+                <Check size={14} /> {t('kanban.confirmAndCreate')}
               </button>
             </div>
           </div>
@@ -371,11 +370,14 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
   const [message, setMessage] = useState('')
   const [envoyer, setEnvoyer] = useState(true)
   const reste = bon.montant_fcfa - bon.acompte_fcfa
-  const messageDefaut =
-    `Bonjour ${bon.client_nom},\n\n` +
-    `Bonne nouvelle : votre travail « ${bon.description.slice(0, 80)} » est terminé et prêt à être récupéré.\n\n` +
-    (reste > 0 ? `Reste à régler : ${formatFCFA(reste)}.\n\n` : 'Le règlement est à jour, merci.\n\n') +
-    `Cordialement.`
+  const paymentLine = reste > 0
+    ? t('kanban.remainingDue', { amount: formatFCFA(reste) })
+    : t('kanban.paymentUpToDate')
+  const messageDefaut = t('kanban.messageDefault', {
+    name: bon.client_nom,
+    desc: bon.description.slice(0, 80),
+    paymentLine,
+  })
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
@@ -388,11 +390,11 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
         </div>
 
         <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
-          <div><strong>Client :</strong> {bon.client_nom}</div>
-          <div><strong>Description :</strong> {bon.description}</div>
+          <div><strong>{t('kanban.clientLabel')} :</strong> {bon.client_nom}</div>
+          <div><strong>{t('kanban.descriptionLabel')} :</strong> {bon.description}</div>
           {bon.client_whatsapp && (
             <div className="flex items-center gap-1 text-green-700">
-              <MessageCircle size={12} /> <strong>WhatsApp :</strong> {bon.client_whatsapp}
+              <MessageCircle size={12} /> <strong>{t('kanban.whatsappLabel')} :</strong> {bon.client_whatsapp}
             </div>
           )}
         </div>
@@ -406,7 +408,7 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
         {envoyer && (
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-1">
-              Message <span className="text-gray-400 font-normal">(laisser vide pour le message par défaut)</span>
+              {t('kanban.messageLabel')} <span className="text-gray-400 font-normal">{t('kanban.messageDefaultHint')}</span>
             </label>
             <textarea rows={6} value={message}
               onChange={e => setMessage(e.target.value)}
@@ -417,7 +419,7 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
 
         <div className="flex gap-2">
           <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-medium">Annuler</button>
+            className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-medium">{t('common.cancel')}</button>
           <button onClick={() => onConfirm(message.trim() || undefined, envoyer)} disabled={loading}
             className="flex-1 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center gap-1.5 disabled:opacity-60">
             {loading && <Loader2 size={14} className="animate-spin" />}
