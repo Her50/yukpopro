@@ -37,7 +37,10 @@ api.interceptors.response.use(
 )
 
 // ─── Auth (partagée avec YukpoPro) ────────────────────────────────────────────
-const authApi = axios.create({ baseURL: import.meta.env.VITE_API_URL?.replace('/bureau', '') || '/api/v1' })
+const authApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL?.replace('/bureau', '') || '/api/v1',
+  timeout: 15_000,
+})
 authApi.interceptors.request.use(cfg => {
   const token = localStorage.getItem('bureau_token')
   if (token) cfg.headers.Authorization = `Bearer ${token}`

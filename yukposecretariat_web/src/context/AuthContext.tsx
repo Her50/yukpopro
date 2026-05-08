@@ -41,20 +41,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const params = new URLSearchParams({ username: email, password })
-    const r = await fetch('/api/v1/auth/token', { method: 'POST', body: params })
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 15_000)
+    let r: Response
+    try {
+      r = await fetch('/api/v1/auth/token', { method: 'POST', body: params, signal: ctrl.signal })
+    } finally { clearTimeout(t) }
     if (!r.ok) throw new Error('Identifiants incorrects')
     const data = await r.json()
     localStorage.setItem('bureau_token', data.access_token)
-    // On charge SYNCHRONIQUEMENT /auth/me avant de retourner pour que le
-    // <PrivateRoute> voie un user défini quand le navigate('/dashboard')
-    // suit (sinon : double-clic nécessaire car l'useEffect n'a pas encore
-    // tourné quand la navigation se déclenche).
+
+    // Décode le JWT pour pré-remplir un user (pas bloquant) — protège
+    // contre un timeout /auth/me qui ferait pendre la connexion à l'infini.
     try {
-      const me = await authAPI.me()
-      setUser(me.data)
-    } catch (e) {
-      console.warn('[Auth] /auth/me après login a échoué:', e)
-    }
+      const payload = JSON.parse(atob(data.access_token.split('.')[1]))
+      setUser({
+        user_id: payload.sub || payload.user_id || 0,
+        user_nom: payload.nom || payload.username || email.split('@')[0],
+        role: payload.role || 'agent',
+      })
+    } catch {}
+
+    // Charge /auth/me en arrière-plan pour enrichir le user (nom, prenoms…).
+    authAPI.me().then(me => setUser(me.data)).catch(e => {
+      console.warn('[Auth] /auth/me après login a échoué (non bloquant):', e)
+    })
+
     setToken(data.access_token)
   }
 
