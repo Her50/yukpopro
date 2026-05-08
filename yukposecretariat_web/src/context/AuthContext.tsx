@@ -11,6 +11,7 @@ interface AuthCtx {
   user: User | null
   token: string | null
   login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, nom: string) => Promise<void>
   logout: () => void
   loading: boolean
 }
@@ -42,6 +43,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(data.access_token)
   }
 
+  const register = async (email: string, password: string, nom: string) => {
+    const r = await fetch('/api/v1/auth/register/pro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, nom }),
+    })
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}))
+      throw new Error(err.detail || 'Inscription échouée')
+    }
+    // Auto-login après inscription
+    await login(email, password)
+  }
+
   const logout = () => {
     localStorage.removeItem('bureau_token')
     setToken(null)
@@ -49,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
