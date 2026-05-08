@@ -225,6 +225,7 @@
     "reformulatedText": "Umformulierter Text",
     "micUnavailable": "Mikrofon nicht verfügbar",
     "recording": "Aufnahme läuft…",
+    "keepScreenOnHint": "In diesem Browser wird die Aufnahme gestoppt, wenn der Bildschirm sich ausschaltet. Deaktivieren Sie die automatische Sperre in den Geräteeinstellungen.",
     "countryContext": "Länderkontext",
     "infosFreeText": "Frei beschreiben: Namen, Daten, Beträge, Betreff. (Freitext oder JSON)",
     "infosPlaceholderExample": "Beispiel:\nEmpfänger: Herr Direktor\nBetreff: Antrag auf Genehmigung\nDatum: 22. April 2026",

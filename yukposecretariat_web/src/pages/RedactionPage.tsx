@@ -25,6 +25,7 @@ import { redactionAPI, ocrAPI, audioAPI } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
 import { CountryPicker } from '../components/CountryPicker'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
+import { acquireWakeLock, releaseWakeLock, wakeLockSupported } from '../utils/wakeLock'
 import { useState } from 'react'
 
 interface TypeDoc { cle: string; label: string; categorie: string; prix_base_fcfa: number; description: string }
@@ -488,11 +489,15 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
         setFichier(new File([blob], 'dictee.webm', { type: 'audio/webm' }))
         stream.getTracks().forEach(t => t.stop())
+        releaseWakeLock()
       }
       mr.start(); mediaRef.current = mr; setRecording(true)
+      // Empêche l'écran de s'éteindre pendant la dictée (Chrome/Edge/Android).
+      // Sur iOS Safari : pas supporté → l'utilisateur doit garder l'écran allumé.
+      acquireWakeLock()
     } catch { toast.error(t('redaction.micUnavailable')) }
   }
-  const stop = () => { mediaRef.current?.stop(); setRecording(false) }
+  const stop = () => { mediaRef.current?.stop(); setRecording(false); releaseWakeLock() }
 
   const transcrire = async () => {
     if (!fichier) { toast.error(t('audio.noAudio')); return }
@@ -538,9 +543,16 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           </div>
         )}
         {recording && (
-          <div className="flex items-center gap-2 text-red-500 text-sm animate-pulse">
-            <Circle size={10} className="fill-red-500" /> {t('redaction.recording')}
-          </div>
+          <>
+            <div className="flex items-center gap-2 text-red-500 text-sm animate-pulse">
+              <Circle size={10} className="fill-red-500" /> {t('redaction.recording')}
+            </div>
+            {!wakeLockSupported() && (
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                ⚠️ {t('redaction.keepScreenOnHint')}
+              </div>
+            )}
+          </>
         )}
 
         <div>

@@ -18,7 +18,8 @@
     "adminPaiements": "MoMo Payments",
     "logout": "Sign Out",
     "collapseMenu": "Collapse menu",
-    "expandMenu": "Expand menu"
+    "expandMenu": "Expand menu",
+    "organisation": "Organisation"
   },
   "common": {
     "loading": "Loading…",
@@ -225,7 +226,10 @@
     "expertiseDebutant": "Beginner (0-2 years)",
     "expertiseIntermediaire": "Intermediate (2-5 years)",
     "expertiseSenior": "Senior (5-10 years)",
-    "expertiseExpert": "Expert (10+ years)"
+    "expertiseExpert": "Expert (10+ years)",
+    "audioTranscribing": "Transcribing your audio message…",
+    "audioTranscriptionEmpty": "No speech detected in the recording",
+    "audioTranscriptionError": "Audio transcription error"
   },
   "emploi": {
     "title": "Job Offers",

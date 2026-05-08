@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
+import { acquireWakeLock, releaseWakeLock, wakeLockSupported } from '../utils/wakeLock'
 
 type AudioResult = {
   transcription_brute: string; document_formate: string; duree_secondes?: number;
@@ -46,10 +47,12 @@ export default function AudioPage() {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
         setFichier(new File([blob], 'dictee.webm', { type: 'audio/webm' }))
         stream.getTracks().forEach(t => t.stop())
+        releaseWakeLock()
       }
       mr.start()
       mediaRef.current = mr
       setRecording(true)
+      acquireWakeLock()
     } catch {
       toast.error(t('redaction.micUnavailable'))
     }
@@ -58,6 +61,7 @@ export default function AudioPage() {
   const arreterEnregistrement = () => {
     mediaRef.current?.stop()
     setRecording(false)
+    releaseWakeLock()
   }
 
   const transcrire = async () => {
@@ -132,9 +136,16 @@ export default function AudioPage() {
         )}
 
         {recording && (
-          <div className="flex items-center gap-2 text-red-500 text-sm animate-pulse">
-            <Circle size={10} className="fill-red-500" /> {t('audio.recording')}
-          </div>
+          <>
+            <div className="flex items-center gap-2 text-red-500 text-sm animate-pulse">
+              <Circle size={10} className="fill-red-500" /> {t('audio.recording')}
+            </div>
+            {!wakeLockSupported() && (
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                ⚠️ {t('redaction.keepScreenOnHint')}
+              </div>
+            )}
+          </>
         )}
 
         {/* Type de document */}

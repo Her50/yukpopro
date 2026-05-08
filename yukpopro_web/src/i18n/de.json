@@ -18,7 +18,8 @@
     "adminPaiements": "MoMo Payments",
     "logout": "Abmelden",
     "collapseMenu": "Menü reduzieren",
-    "expandMenu": "Menü erweitern"
+    "expandMenu": "Menü erweitern",
+    "organisation": "Organisation"
   },
   "common": {
     "loading": "Laden…",
@@ -50,7 +51,15 @@
     "noData": "Keine Daten verfügbar",
     "credits": "Credits",
     "or": "oder",
-    "tagline": "Professionelle Intelligenz"
+    "tagline": "Professionelle Intelligenz",
+    "more": "Voir plus",
+    "less": "Voir moins",
+    "optional": "Optionnel",
+    "required": "Requis",
+    "comingSoon": "Bientôt disponible",
+    "new": "NOUVEAU",
+    "pro": "PRO",
+    "beta": "BÊTA"
   },
   "auth": {
     "login": "Anmelden",
@@ -71,7 +80,9 @@
     "loggingIn": "Anmelden…",
     "registering": "Konto erstellen…",
     "loginError": "Ungültige E-Mail oder Passwort",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "registerError": "Erreur lors de la création du compte",
+    "logoutSuccess": "Vous avez été déconnecté"
   },
   "chat": {
     "placeholder": "Stellen Sie Ihre professionelle Frage…",
@@ -109,7 +120,37 @@
     "expertiseDebutant": "Débutant (0-2 ans)",
     "expertiseIntermediaire": "Intermédiaire (2-5 ans)",
     "expertiseSenior": "Senior (5-10 ans)",
-    "expertiseExpert": "Expert (10+ ans)"
+    "expertiseExpert": "Expert (10+ ans)",
+    "title": "Yukpo Pro Copilote",
+    "mainPlaceholder": "Posez votre question, envoyez un document, demandez une traduction…",
+    "attachPlaceholder": "Décrivez ce que vous voulez faire avec ce fichier…",
+    "newSession": "Nouvelle session",
+    "history": "Historique",
+    "attach": "Joindre un fichier",
+    "sending": "Envoi…",
+    "copyMessage": "Copier",
+    "messageCopied": "Message copié",
+    "errorSend": "Erreur lors de l'envoi",
+    "sessionCleared": "Session effacée",
+    "welcomeTitle": "Bonjour, je suis votre Copilote Pro",
+    "welcomeSubtitle": "Posez-moi vos questions professionnelles, juridiques, fiscales, comptables…",
+    "recordingTitle": "Enregistrement en cours",
+    "speakRealtime": "Parlez — votre message s'affiche en temps réel",
+    "speakClear": "Parlez clairement dans votre microphone",
+    "myProfile": "Mon profil",
+    "new": "Nouveau",
+    "configureProfile": "Configurer mon profil pour des réponses personnalisées",
+    "modalDesc": "Votre profil configure Yukpo : plus il est précis, plus les réponses sont adaptées.",
+    "profession": "Métier / Profession *",
+    "creditsExhausted": "Crédits épuisés",
+    "downloadFile": "Télécharger",
+    "rapporteur": "Rapporteur",
+    "traducteur": "Traducteur",
+    "rapporteurOn": "Mode rapporteur activé — je prendrai des notes",
+    "rapporteurOff": "Mode rapporteur désactivé",
+    "audioTranscribing": "Ihre Audionachricht wird transkribiert…",
+    "audioTranscriptionEmpty": "Keine Sprache in der Aufnahme erkannt",
+    "audioTranscriptionError": "Fehler bei der Audio-Transkription"
   },
   "emploi": {
     "title": "Stellenangebote",
@@ -122,7 +163,66 @@
     "partial": "Teilweise",
     "searching": "Suche…",
     "saveConfig": "Konfiguration speichern",
-    "launchSearch": "Suche starten"
+    "launchSearch": "Suche starten",
+    "subtitle": "Veille emploi personnalisée par Yukpo IA",
+    "activate": "Activer la veille",
+    "deactivate": "Désactiver la veille",
+    "active": "Veille active",
+    "inactive": "Veille inactive",
+    "search": "Lancer une recherche",
+    "searchingNow": "Recherche en cours…",
+    "lastSearch": "Dernière recherche",
+    "config": "Config",
+    "configTitle": "Configuration de la recherche",
+    "watchAuto": "Veille automatique",
+    "watchActiveFreq": "Active — toutes les {{hours}}h",
+    "watchOff": "Désactivée",
+    "searchFreq": "Fréquence de recherche automatique",
+    "profileDesc": "Décrivez le poste idéal, vos compétences clés, secteur et localisation préférés.",
+    "saving": "Sauvegarde…",
+    "noOffersDesc": "Lancez une recherche ou activez la veille automatique",
+    "emptyDesc": "Activez la veille automatique ou lancez une recherche manuelle. Yukpo Pro parcourt Google Jobs, Adzuna, Remotive, Jooble et d'autres sources.",
+    "recentOffers": "Offres récentes",
+    "noKeyword": "Aucune offre pour \"{{keyword}}\"",
+    "clearSearch": "Effacer la recherche",
+    "matchScore": "Compatibilité",
+    "apply": "Postuler",
+    "seeOffer": "Voir l'offre",
+    "seeFullOffer": "Voir l'offre complète",
+    "frequency": "Fréquence de recherche",
+    "profilSearch": "Mon profil de recherche",
+    "profilSearchPlaceholder": "Décrivez le poste recherché, secteur, localisation, prétentions…\nEx: Poste: Directeur Financier\nSecteur: Finance/Banque\nVille: Douala",
+    "cvSection": "Mon CV",
+    "cvAvailable": "CV disponible",
+    "cvStored": "Enregistré ✓",
+    "deleteCV": "Supprimer",
+    "cvUploadBtn": "Uploader mon CV",
+    "noCV": "Aucun CV — les offres seront moins précises",
+    "cvUsed": "CV enregistré — utilisé pour le matching des offres",
+    "pasteText": "Coller le texte",
+    "uploadFile": "Uploader un fichier",
+    "cvPastePlaceholder": "Collez ici le contenu de votre CV (texte brut ou Markdown)…",
+    "saveCV": "Enregistrer le CV",
+    "clickOrDrop": "Cliquez ou glissez votre CV",
+    "uploading": "Upload en cours…",
+    "profileMissing": "Profil de recherche non configuré",
+    "profileMissingDesc": "Renseignez votre profil dans la configuration pour recevoir des offres pertinentes.",
+    "configure": "Configurer →",
+    "sourcesTitle": "Sources de recherche",
+    "sourcesFooter": "Sources : Indeed · Emploi.cm · JobAfrica · LinkedIn — mis à jour automatiquement",
+    "nbOffers": "{{count}} offre(s) trouvée(s)",
+    "simulated": "Suggestion IA",
+    "simBadge": "Suggestion YukpoPro — aucune offre réelle trouvée",
+    "simNote": "Ces suggestions sont générées par YukpoPro car les sources d'emploi étaient indisponibles. Relancez pour obtenir de vraies offres.",
+    "realOffer": "Offre réelle",
+    "veille": "Veille",
+    "offresFound": "Offres trouvées",
+    "frequencyLabel": "Fréquence",
+    "cvFormats": "PDF, DOCX, TXT — max 5 Mo",
+    "resultsFor": "Résultats pour \"{{keyword}}\"",
+    "loading": "Chargement des offres…",
+    "activeLabel": "Active",
+    "inactiveLabel": "Inactive"
   },
   "marches": {
     "title": "Ausschreibungen",
@@ -130,7 +230,46 @@
     "searchNow": "Jetzt suchen",
     "noMarches": "Noch keine Ausschreibungen",
     "emptyTitle": "Keine Ausschreibungen gefunden",
-    "clearFilters": "Filter löschen"
+    "clearFilters": "Filter löschen",
+    "search": "Lancer une recherche",
+    "searching": "Recherche en cours…",
+    "noMarchesDesc": "Lancez une recherche pour trouver les appels d'offres de votre secteur",
+    "emptyDesc": "Yukpo surveille ARMP, dgMarket (Banque Mondiale), UNGM et les plateformes nationales.",
+    "watchDesc": "Yukpo surveille les plateformes nationales et internationales en temps réel.",
+    "filters": "Filtres",
+    "filterKeyword": "Rechercher dans les appels d'offres…",
+    "filterSecteur": "Secteur",
+    "filterSource": "Source",
+    "seeDetails": "Voir le détail",
+    "deadline": "Date limite",
+    "organisme": "Organisme",
+    "sources": "Sources actives",
+    "sourcesTitle": "Sources actives",
+    "nbMarches": "{{count}} avis trouvé(s)",
+    "lastSearch": "Dernière recherche",
+    "autoFreq": "Mis à jour automatiquement",
+    "allTenders": "Tous les appels d'offres",
+    "noKeyword": "Aucun résultat pour \"{{keyword}}\"",
+    "frequencyLabel": "Fréquence",
+    "veille": "Veille",
+    "status": "Statut",
+    "filterTitle": "Filtrer les résultats",
+    "resetFilters": "Réinitialiser",
+    "sectorLabel": "Secteur :",
+    "sourceLabel": "Source :",
+    "sourcesActiveTitle": "Sources de veille actives",
+    "hideLabel": "Masquer",
+    "showLabel": "Voir",
+    "updateFreq": "Mise à jour :",
+    "loadingText": "Chargement des appels d'offres…",
+    "noFilterResults": "Aucun résultat pour ces filtres",
+    "noFilterResultsDesc": "Essayez d'autres mots-clés ou supprimez les filtres actifs.",
+    "deleteFilters": "Supprimer les filtres",
+    "viewLink": "Voir",
+    "searchPlaceholder": "Rechercher par titre, organisme, lieu…",
+    "noMarchesLoaded": "Aucun appel d'offres chargé",
+    "noMarchesLoadedDesc": "Yukpo surveille ARMP, dgMarket (Banque Mondiale), UNGM et les plateformes nationales. Lancez une recherche pour charger les dernières offres.",
+    "launchSearchNow": "Lancer une recherche maintenant"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -139,7 +278,32 @@
     "recentConversations": "Letzte Gespräche",
     "quickAccess": "Schnellzugriff",
     "matchedJobs": "Passende Stellenangebote",
-    "tenders": "Öffentliche Ausschreibungen"
+    "tenders": "Öffentliche Ausschreibungen",
+    "stats": "Statistiques d'usage",
+    "activity": "Activité récente",
+    "credits": "Crédits restants",
+    "plan": "Mon abonnement",
+    "upgrade": "Passer à Pro",
+    "nbRequetes": "Requêtes copilote",
+    "nbRapports": "Rapports générés",
+    "nbTraductions": "Traductions",
+    "nbSlides": "Présentations",
+    "noConversations": "Aucune conversation encore.",
+    "start": "Démarrer",
+    "noOffers": "Aucune offre récente.",
+    "configureWatch": "Configurer la veille emploi →",
+    "progression": "Progression",
+    "monthlyQuota": "Quota mensuel",
+    "viewPlan": "Voir mon plan →",
+    "viewAll": "Voir tout →",
+    "usageActivity": "Votre activité sur la plateforme",
+    "conversations": "Conversations",
+    "docsGenerated": "Documents générés",
+    "translations": "Traductions",
+    "agentsActivated": "Agents activés",
+    "almostQuota": "Quota presque atteint —",
+    "upgradeLink": "mettre à niveau",
+    "updatedEvery": "Mis à jour toutes les 6h"
   },
   "generateurs": {
     "title": "Yukpo Studio",
@@ -297,17 +461,445 @@
     "writingDocumentHelper": "Yukpo construit un document professionnel de haute qualité",
     "previewTruncated": "… (aperçu tronqué)",
     "rapportPlaceholder": "Votre rapport DOCX apparaîtra ici",
-    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici"
+    "slidesPlaceholder": "Votre présentation PPTX apparaîtra ici",
+    "rapport": "Rapport",
+    "slides": "Présentation",
+    "modeles": "Modèles",
+    "conversion": "Conversion",
+    "infographie": "Infographie",
+    "analyser": "Analyser & Générer",
+    "downloadDoc": "Télécharger le document",
+    "generate": "Générer",
+    "newDoc": "Nouveau document",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Sujet ou thème du document…",
+    "context": "Contexte",
+    "contextPlaceholder": "Contexte, instructions spécifiques…",
+    "mode": "Mode",
+    "docType": "Type de document",
+    "selectTemplate": "Choisir un modèle",
+    "useTemplate": "Utiliser ce modèle",
+    "noResult": "Aucun résultat généré",
+    "tabRapport": "Rapports Word",
+    "tabSlides": "PowerPoint",
+    "tabConversion": "Conversion",
+    "tabModeles": "Bibliothèque",
+    "tabInfog": "Designer Pro",
+    "tabDesignerPro": "Designer Pro",
+    "useThis": "Utiliser",
+    "subjectRapport": "Sujet du rapport *",
+    "subjectSlides": "Sujet de la présentation *",
+    "subjectRapportPlaceholder": "Ex: Analyse de la situation financière de l'entreprise XYZ pour l'exercice 2024…",
+    "subjectSlidesPlaceholder": "Ex: Résultats financiers Q3 2024 pour le conseil d'administration…",
+    "contextExtra": "Contexte / Données supplémentaires",
+    "contextExtraPlaceholder": "Données financières, informations spécifiques, instructions particulières…",
+    "contextData": "Contexte / Données",
+    "contextDataPlaceholder": "Données clés à inclure, KPIs, messages principaux…",
+    "typeRapport": "Type de rapport",
+    "typeSlides": "Type de présentation",
+    "dropFilesHere": "Glissez vos fichiers ici",
+    "filesLoaded": "{{count}} fichier(s) chargé(s)",
+    "generateWithFiles": "Analyser et générer ({{count}} fichier{{plural}})",
+    "generateReport": "Générer le rapport",
+    "generateSlides": "Générer la présentation",
+    "convertTo": "Convertir vers",
+    "noResultGenerated": "Aucun résultat généré",
+    "savedInDocs": "Sauvegardé dans Mes Documents",
+    "briefPlaceholder": "Ex: Flyer pour la formation 'Souscription Risques Industriels' organisée par YukpoAssurance Douala, le 15 mai 2026 à l'hôtel Hilton. Cible : courtiers et souscripteurs CIMA.",
+    "instructionsLabel": "Instructions / Contenu",
+    "infogSubtitlePlaceholder": "Sous-titre",
+    "infogOrgPlaceholder": "Nom de l'organisation",
+    "infogContactPlaceholder": "Tel / email / adresse",
+    "infogDatePlaceholder": "Date événement",
+    "infogLieuPlaceholder": "Lieu",
+    "infogSloganPlaceholder": "Slogan / accroche",
+    "infogCorpsPlaceholder": "Corps de texte principal (max 300 caractères)",
+    "infogDetailsPlaceholder": "Détails (1 par ligne, max 6 lignes)",
+    "templates": {
+      "categories": {
+        "comptabilite_finance": "Comptabilité & Finance",
+        "juridique_conformite": "Juridique & Conformité",
+        "rh_management": "RH & Management",
+        "banque_microfinance": "Banque & Microfinance",
+        "commerce_business": "Commerce & Business",
+        "ong_projets": "ONG & Projets",
+        "ingenierie_btp": "Ingénierie & BTP",
+        "sante_publique": "Santé Publique & Épidémiologie",
+        "recherche_protocoles": "Recherche & Protocoles d'étude",
+        "suivi_evaluation": "Suivi & Évaluation de projets",
+        "assurance_cima": "Assurance & Réassurance CIMA",
+        "energie_mines": "Énergie, Mines & Pétrole",
+        "agriculture": "Agriculture & Agro-industrie",
+        "transport_logistique": "Transport & Logistique",
+        "tech_digital": "Tech, Digital & SI",
+        "education_formation": "Éducation & Formation",
+        "immobilier": "Immobilier & Construction",
+        "tourisme": "Tourisme & Hôtellerie",
+        "communication_marketing": "Communication & Marketing"
+      },
+      "items": {
+        "bilan_syscohada": {
+          "label": "Bilan SYSCOHADA commenté",
+          "description": "Bilan annuel avec analyse des ratios clés (liquidité, solvabilité, rentabilité)"
+        },
+        "note_is_tva": {
+          "label": "Note de calcul IS + TVA",
+          "description": "Calcul détaillé de l'Impôt sur les Sociétés et de la TVA collectée/déductible"
+        },
+        "audit_interne": {
+          "label": "Rapport d'audit interne",
+          "description": "Rapport d'audit des procédures comptables et points de contrôle interne"
+        },
+        "presentation_resultats": {
+          "label": "Présentation résultats financiers",
+          "description": "Slides de présentation des résultats au comité de direction"
+        },
+        "note_juridique_ohada": {
+          "label": "Note juridique OHADA",
+          "description": "Analyse d'une problématique juridique selon le droit OHADA"
+        },
+        "due_diligence": {
+          "label": "Rapport de due diligence",
+          "description": "Due diligence juridique et financière pour acquisition ou partenariat"
+        },
+        "conformite_cima": {
+          "label": "Note de conformité CIMA",
+          "description": "Vérification de conformité au Code CIMA pour compagnies d'assurance"
+        },
+        "bilan_social": {
+          "label": "Rapport bilan social",
+          "description": "Bilan social annuel — effectifs, rémunérations, formation, absentéisme"
+        },
+        "restructuration_rh": {
+          "label": "Plan de restructuration RH",
+          "description": "Note de restructuration des effectifs avec plan social"
+        },
+        "formation_management": {
+          "label": "Slides séminaire formation",
+          "description": "Support de formation professionnelle (leadership, gestion d'équipe, etc.)"
+        },
+        "analyse_credit_pme": {
+          "label": "Rapport analyse crédit PME",
+          "description": "Analyse de risque crédit pour une PME — scoring et décision"
+        },
+        "ratios_cobac": {
+          "label": "Note ratios prudentiels COBAC",
+          "description": "Calcul et commentaire des ratios prudentiels COBAC"
+        },
+        "comite_credit": {
+          "label": "Présentation comité de crédit",
+          "description": "Slides de présentation d'un dossier au comité de crédit"
+        },
+        "business_plan": {
+          "label": "Business plan complet",
+          "description": "Business plan structuré pour création ou développement d'activité"
+        },
+        "analyse_marche": {
+          "label": "Rapport analyse de marché",
+          "description": "Étude de marché sectorielle pour un pays d'Afrique subsaharienne"
+        },
+        "pitch_deck": {
+          "label": "Pitch deck investisseurs",
+          "description": "Présentation de levée de fonds pour investisseurs africains / internationaux"
+        },
+        "prospection": {
+          "label": "Rapport prospection commerciale",
+          "description": "Analyse prospects et stratégie de développement commercial"
+        },
+        "rapport_activites_ong": {
+          "label": "Rapport d'activités ONG",
+          "description": "Rapport annuel d'activités pour bailleurs et partenaires"
+        },
+        "note_conceptuelle": {
+          "label": "Note conceptuelle projet",
+          "description": "Note conceptuelle pour soumission à un appel à projets / bailleur"
+        },
+        "presentation_bailleur": {
+          "label": "Présentation bailleur de fonds",
+          "description": "Slides de présentation d'un projet à un bailleur ou comité de pilotage"
+        },
+        "avancement_travaux": {
+          "label": "Rapport d'avancement travaux",
+          "description": "Rapport mensuel d'avancement d'un chantier"
+        },
+        "note_technique_etude": {
+          "label": "Note technique étude",
+          "description": "Note technique pour une étude d'ingénierie ou d'avant-projet"
+        },
+        "situation_epidemio": {
+          "label": "Rapport de situation épidémiologique",
+          "description": "Rapport de situation épidémio hebdomadaire ou mensuel"
+        },
+        "protocole_enquete_epidemio": {
+          "label": "Protocole d'enquête épidémiologique",
+          "description": "Protocole complet pour enquête de terrain en santé publique"
+        },
+        "evaluation_programme_sante": {
+          "label": "Rapport d'évaluation programme santé",
+          "description": "Évaluation mi-parcours ou finale d'un programme de santé"
+        },
+        "formation_sante_publique": {
+          "label": "Formation — Outils de santé publique",
+          "description": "Support de formation sur les outils et méthodes en santé publique"
+        },
+        "presentation_programme_sante": {
+          "label": "Présentation programme santé",
+          "description": "Slides de présentation d'un programme ou rapport de santé publique"
+        },
+        "protocole_etude": {
+          "label": "Protocole d'étude / recherche",
+          "description": "Protocole scientifique complet pour étude ou recherche"
+        },
+        "rapport_enquete": {
+          "label": "Rapport d'enquête / sondage",
+          "description": "Rapport de résultats d'une enquête quantitative ou qualitative"
+        },
+        "presentation_protocole": {
+          "label": "Présentation protocole / résultats",
+          "description": "Slides de présentation d'un protocole ou des résultats d'étude"
+        },
+        "rapport_se": {
+          "label": "Rapport de suivi S&E",
+          "description": "Rapport trimestriel ou semestriel de suivi-évaluation d'un projet"
+        },
+        "cadre_mesure_performance": {
+          "label": "Cadre de mesure de la performance",
+          "description": "Document CMP / tableau de bord indicateurs d'un projet"
+        },
+        "presentation_se_bailleur": {
+          "label": "Présentation S&E bailleur",
+          "description": "Slides de rapport de suivi à destination du bailleur ou comité"
+        },
+        "evaluation_finale": {
+          "label": "Évaluation finale de projet",
+          "description": "Rapport d'évaluation finale selon critères OCDE/CAD"
+        },
+        "solvabilite_cima": {
+          "label": "Rapport de solvabilité CIMA",
+          "description": "Rapport annuel de solvabilité selon le Code CIMA révisé"
+        },
+        "tarification_actuarielle": {
+          "label": "Note technique tarification",
+          "description": "Note actuarielle de tarification d'un produit d'assurance"
+        },
+        "gestion_sinistre": {
+          "label": "Rapport gestion sinistre",
+          "description": "Rapport d'expertise et règlement d'un sinistre complexe"
+        },
+        "ca_assurance": {
+          "label": "Présentation conseil d'administration",
+          "description": "Slides de présentation CA compagnie d'assurance"
+        },
+        "eies_minier": {
+          "label": "Étude d'impact environnemental",
+          "description": "EIES complète pour projet minier/énergétique (norme BAD/IFC)"
+        },
+        "production_mensuelle": {
+          "label": "Rapport production mensuelle",
+          "description": "Rapport mensuel de production énergie / mines"
+        },
+        "rentabilite_mines": {
+          "label": "Note étude rentabilité projet",
+          "description": "Analyse financière TRI/VAN pour projet énergie ou mines"
+        },
+        "plan_agricole": {
+          "label": "Plan de développement agricole",
+          "description": "Plan d'affaires exploitation agricole / agro-industrielle"
+        },
+        "etude_filiere": {
+          "label": "Étude de filière agricole",
+          "description": "Analyse filière (cacao, café, coton, riz, etc.) pays CEMAC/UEMOA"
+        },
+        "campagne_agricole": {
+          "label": "Rapport campagne agricole",
+          "description": "Bilan de campagne — rendements, ventes, marges"
+        },
+        "audit_supply_chain": {
+          "label": "Étude logistique — chaîne d'approvisionnement",
+          "description": "Audit supply chain avec recommandations d'optimisation"
+        },
+        "transport_urbain": {
+          "label": "Plan de transport urbain",
+          "description": "Étude de schéma directeur transport pour collectivité"
+        },
+        "bp_flotte_transport": {
+          "label": "Business plan flotte transport",
+          "description": "Dossier de financement création/extension flotte de transport"
+        },
+        "cdc_si": {
+          "label": "Cahier des charges SI",
+          "description": "Cahier des charges fonctionnel et technique d'un projet SI"
+        },
+        "audit_cybersecurite": {
+          "label": "Rapport d'audit cybersécurité",
+          "description": "Audit sécurité informatique avec recommandations ISO 27001"
+        },
+        "pitch_tech_startup": {
+          "label": "Pitch deck startup tech",
+          "description": "Pitch de levée pour startup tech africaine"
+        },
+        "plan_strategique_etablissement": {
+          "label": "Plan stratégique établissement",
+          "description": "Plan stratégique pluriannuel pour établissement scolaire/universitaire"
+        },
+        "rapport_pedagogique": {
+          "label": "Rapport pédagogique annuel",
+          "description": "Rapport annuel d'activités pédagogiques"
+        },
+        "module_formation_pro": {
+          "label": "Module de formation professionnelle",
+          "description": "Support de formation professionnelle certifiante"
+        },
+        "faisabilite_immobiliere": {
+          "label": "Étude de faisabilité immobilière",
+          "description": "Étude technique, juridique et financière d'un projet immobilier"
+        },
+        "expertise_immobiliere": {
+          "label": "Rapport expertise immobilière",
+          "description": "Rapport d'expertise et valorisation d'un bien immobilier"
+        },
+        "bp_hotel": {
+          "label": "Business plan hôtel / resort",
+          "description": "Business plan complet pour création hôtel ou resort"
+        },
+        "performance_hoteliere": {
+          "label": "Rapport performance hôtelière",
+          "description": "Rapport mensuel KPIs hôteliers (TO, ADR, RevPAR, GOP)"
+        },
+        "plan_communication": {
+          "label": "Plan de communication 360°",
+          "description": "Stratégie communication multicanale pour marque/produit"
+        },
+        "brief_creatif": {
+          "label": "Brief créatif campagne",
+          "description": "Brief créatif pour agence de communication"
+        },
+        "bilan_campagne_com": {
+          "label": "Rapport bilan campagne",
+          "description": "Bilan de performance d'une campagne de communication"
+        }
+      }
+    }
   },
   "traduction": {
     "title": "Dokumentenübersetzung",
     "translate": "Übersetzen",
-    "translating": "Übersetzen…"
+    "translating": "Übersetzen…",
+    "subtitle": "Traduisez vos documents dans la langue de votre choix",
+    "sourceLang": "Langue source",
+    "targetLang": "Langue cible",
+    "translateText": "Traduire le texte",
+    "download": "Télécharger la traduction",
+    "downloadTranslation": "Télécharger la traduction",
+    "uploadFile": "Joindre un document",
+    "pasteText": "Coller du texte",
+    "textMode": "Texte",
+    "fileMode": "Document",
+    "result": "Résultat",
+    "translated": "Texte traduit",
+    "translatedDoc": "Document traduit",
+    "sourceText": "Texte à traduire",
+    "context": "Contexte métier",
+    "uploadDoc": "Glissez votre document ici ou",
+    "browse": "parcourir",
+    "formats": "PDF, Word, TXT, CSV, Excel, PowerPoint, Image",
+    "translateDoc": "Traduire le document",
+    "afroSubtitle": "Traduction avec terminologie métier africaine — SYSCOHADA, OHADA, COBAC, FCFA, UEMOA, CEMAC préservés.",
+    "sourceLabel": "Texte source",
+    "sourcePlaceholder": "Collez ici le texte à traduire — rapport, contrat, email, note de synthèse…",
+    "wordCount": "{{count}} mots",
+    "translateBtn": "Traduire",
+    "docLabel": "Document à traduire",
+    "clickSelectFile": "Cliquez pour sélectionner un fichier",
+    "maxSize": "Maximum 20 MB",
+    "supportedFormats": "Formats supportés",
+    "ocrDesc": "Les images sont analysées par reconnaissance intelligente (OCR). Le texte extrait est traduit et retourné.",
+    "translatingFile": "Traduction en cours…",
+    "translateFileBtn": "Traduire le fichier",
+    "translationLabel": "Traduction",
+    "copyText": "Copier le texte",
+    "translatingDoc": "Yukpo Pro traduit votre document…",
+    "afroTerminology": "Yukpo applique la terminologie métier africaine",
+    "resultHere": "La traduction apparaîtra ici",
+    "fileReady": "Fichier traduit prêt",
+    "downloadTranslatedFile": "Télécharger le fichier traduit ({{ext}})",
+    "savedInDocs": "Sauvegardé dans Mes Documents"
   },
   "reunions": {
     "title": "Meetings",
     "newMeeting": "Neues Meeting",
-    "generating": "Generierung…"
+    "generating": "Generierung…",
+    "subtitle": "Enregistrement IA + PV automatique",
+    "new": "Nouvelle réunion",
+    "generate": "Générer le rapport",
+    "download": "Télécharger le rapport",
+    "participants": "Participants",
+    "addParticipant": "Ajouter un participant",
+    "agenda": "Ordre du jour",
+    "notes": "Notes & décisions",
+    "noMeetings": "Aucune réunion",
+    "noMeetingsDesc": "Créez votre première réunion pour commencer",
+    "recording": "Enregistrement",
+    "transcription": "Transcription",
+    "analysis": "Analyse",
+    "done": "Terminé",
+    "draft": "Brouillon",
+    "startRecording": "Démarrer l'enregistrement",
+    "stopRecording": "Arrêter",
+    "generateReport": "Générer le rapport IA",
+    "downloadReport": "Télécharger le rapport",
+    "language": "Langue de la réunion",
+    "deleteMeeting": "Supprimer",
+    "titleLabel": "Titre de la réunion",
+    "dateLabel": "Date",
+    "add": "Ajouter",
+    "audioRecording": "Enregistrement audio",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "stopAndTranscribe": "Arrêter et transcrire",
+    "transcribing": "Transcription…",
+    "liveTranscription": "Transcription live :",
+    "translateLiveMode": "Traduire en direct pendant la réunion",
+    "targetLangLabel": "Langue cible :",
+    "transcriptionDone": "Transcription terminée — modifiez si nécessaire avant de sauvegarder",
+    "notesLabel": "Notes textuelles *",
+    "notesOr": "(ou ajoutées par transcription)",
+    "notesPlaceholder": "Saisissez les points clés, ou utilisez l'enregistrement pour transcrire automatiquement…",
+    "sparklesInfo": "Yukpo Pro génère un rapport structuré avec participants identifiés, décisions, plan d'action et suivi. L'enregistrement est transcrit par Yukpo (15+ langues supportées).",
+    "toAnalyze": "À analyser",
+    "reportsGenerated": "Rapports générés",
+    "createFirst": "Créer ma première réunion",
+    "onboardStep1": "1. Enregistrez",
+    "onboardStep1Desc": "Cliquez Démarrer — l'audio est capturé et transcrit automatiquement par Yukpo en 15+ langues.",
+    "onboardStep2": "2. Rapport Yukpo",
+    "onboardStep2Desc": "Yukpo Pro génère un rapport structuré : participants, décisions, plan d'action avec responsables.",
+    "onboardStep3": "3. Suivi & Export",
+    "onboardStep3Desc": "Téléchargez le rapport Markdown et suivez les recommandations et actions assignées.",
+    "pageSubtitle": "Enregistrez, transcrivez (15+ langues) et générez des rapports percutants avec plan d'action.",
+    "viewReport": "Voir le rapport",
+    "analyzeWithYukpo": "Analyser avec Yukpo Pro",
+    "analyzing": "Analyse en cours…",
+    "savedInDocs": "Sauvegardé dans Mes Documents — {{file}}",
+    "editModeInfo": "Mode édition — modifiez le rapport, puis cliquez \"Sauvegarder & DOCX\" pour régénérer le fichier Word",
+    "saveAndDocx": "Sauvegarder & DOCX",
+    "editReport": "Éditer le rapport",
+    "retranscribe": "Retranscription",
+    "editTranscriptionTitle": "Éditer la transcription",
+    "editTranscriptionDesc": "Corrigez ou complétez la transcription avant de générer le rapport. Yukpo Pro utilisera ce texte pour produire un rapport anonymisé et structuré.",
+    "generateWithText": "Générer le rapport avec ce texte",
+    "noMicro": "Microphone non disponible sur ce navigateur.",
+    "statusBrouillon": "Brouillon",
+    "statusEnreg": "Enreg. en cours",
+    "statusTranscription": "Transcription…",
+    "statusAnalyse": "Yukpo analyse…",
+    "statusTermine": "Rapport prêt",
+    "waitingForSpeech": "En attente de parole…",
+    "transcribingMeeting": "Yukpo transcrit votre réunion…",
+    "sameStreamDesc": "(même micro, pas de 2e capture)",
+    "titlePlaceholder": "Réunion mensuelle équipe finance",
+    "recordingDuration": "{{duration}} d'enregistrement",
+    "namePlaceholder": "Nom",
+    "rolePlaceholder": "Rôle"
   },
   "language": {
     "select": "Sprache",
@@ -325,7 +917,8 @@
     "ru": "Русский",
     "hi": "हिन्दी",
     "tr": "Türkçe",
-    "am": "አማርኛ"
+    "am": "አማርኛ",
+    "auto": "Automatique"
   },
   "theme": {
     "dark": "Dunkles Design",
@@ -401,7 +994,30 @@
       "default": "Dokument",
       "slides": "Praesentation",
       "cv": "Lebenslauf",
-      "traduction": "Uebersetzung"
+      "traduction": "Uebersetzung",
+      "rapport_analyse": "Rapport",
+      "rapport_financier": "Rapport financier",
+      "rapport_rh": "Rapport RH",
+      "rapport_audit": "Rapport audit",
+      "note_juridique": "Note juridique",
+      "note_de_synthese": "Note de synthese",
+      "plan_action": "Plan d action",
+      "compte_rendu": "Compte-rendu",
+      "contrat_bail": "Contrat de bail",
+      "contrat_travail": "Contrat de travail",
+      "contrat_prestation": "Contrat prestation",
+      "contrat_vente": "Contrat vente",
+      "contrat_generique": "Contrat",
+      "convention": "Convention",
+      "statuts": "Statuts",
+      "reglement_interieur": "Reglement interieur",
+      "lettre_officielle": "Lettre officielle",
+      "lettre_commerciale": "Lettre commerciale",
+      "lettre_mise_en_demeure": "Mise en demeure",
+      "lettre_resiliation": "Resiliation",
+      "lettre_emploi": "Lettre emploi",
+      "attestation": "Attestation",
+      "certificat": "Certificat"
     }
   },
   "login": {
@@ -428,5 +1044,321 @@
       "countries": "Länder abgedeckt",
       "uptime": "Verfügbarkeit"
     }
+  },
+  "profil": {
+    "title": "Mon Profil Professionnel",
+    "subtitle": "Personnalisez votre expérience Yukpo Pro",
+    "saveBtn": "Enregistrer le profil",
+    "saveSuccess": "Profil enregistré",
+    "saveError": "Erreur lors de l'enregistrement",
+    "identity": "Identité professionnelle",
+    "metier": "Métier",
+    "metierPlaceholder": "Choisissez votre métier",
+    "specialite": "Spécialité",
+    "specialitePlaceholder": "Ex : Expert-comptable SYSCOHADA, DRH grands comptes…",
+    "pays": "Pays d'exercice",
+    "paysPlaceholder": "Choisissez votre pays",
+    "secteur": "Secteur d'activité",
+    "secteurPlaceholder": "Choisissez votre secteur",
+    "secteurCustomPlaceholder": "Précisez votre secteur…",
+    "niveau": "Niveau d'expérience",
+    "bio": "Bio / Présentation",
+    "bioPlaceholder": "Décrivez votre profil en quelques lignes…",
+    "annees": "Années d'expérience",
+    "anneesPlaceholder": "Ex : 8",
+    "employer": "Contexte employeur",
+    "entreprise": "Entreprise",
+    "entreprisePlaceholder": "Nom de votre entreprise",
+    "tailleEntreprise": "Taille de l'entreprise",
+    "aiPrefs": "Préférences IA",
+    "langueReponse": "Langue des réponses IA",
+    "styleReponse": "Style de réponse",
+    "formatPrefere": "Format préféré",
+    "cv": "CV & Recherche d'emploi",
+    "cvUpload": "Uploader votre CV",
+    "cvUploadDesc": "PDF, Word (.docx) ou texte brut — max 10 Mo",
+    "cvUploaded": "CV chargé",
+    "cvDelete": "Supprimer le CV",
+    "cvDeleteConfirm": "Supprimer votre CV ?",
+    "cvUploadSuccess": "CV enregistré avec succès",
+    "cvUploadError": "Erreur lors de l'upload du CV",
+    "cvDeleteSuccess": "CV supprimé",
+    "cvOrPaste": "ou collez le texte de votre CV",
+    "cvTextPlaceholder": "Collez ici le texte de votre CV…",
+    "cvSaveText": "Enregistrer le texte du CV",
+    "selectFile": "Choisir un fichier",
+    "dragDropFile": "Glissez votre fichier ici ou cliquez",
+    "niveaux": {
+      "junior": "Junior",
+      "intermediaire": "Intermédiaire",
+      "senior": "Senior",
+      "expert": "Expert",
+      "dirigeant": "Dirigeant"
+    },
+    "styles": {
+      "professionnel": "Professionnel",
+      "didactique": "Didactique",
+      "direct": "Direct",
+      "vulgarise": "Vulgarisé"
+    },
+    "formats": {
+      "flash": "Flash",
+      "standard": "Standard",
+      "complet": "Complet"
+    },
+    "tailles": {
+      "tpe": "TPE (< 10 salariés)",
+      "pme": "PME (10-250 salariés)",
+      "grande": "Grande entreprise (> 250)"
+    }
+  },
+  "abonnement": {
+    "title": "Abonnement & Crédits",
+    "pageTitle": "Abonnement & Paiement",
+    "pageSubtitle": "Tous les 13 agents Yukpo sont accessibles à tous les utilisateurs. Seul le quota de crédits varie selon le plan.",
+    "creditInfoTitle": "Qu'est-ce qu'un crédit Yukpo ?",
+    "creditInfoDesc": "Chaque échange avec Yukpo consomme des crédits selon la complexité de la demande. Une question simple coûte ~5 crédits, une analyse de document ~20-50 crédits, un rapport complet ~100-300 crédits. Les plans payants se renouvellent chaque mois. Le plan gratuit offre 3 000 crédits uniques sans renouvellement.",
+    "creditsYukpoLeft": "/ {{count}} crédits Yukpo restants",
+    "creditsYukpoUsed": "{{count}} crédits Yukpo utilisés",
+    "renewalDate": "Renouvellement le {{date}}",
+    "noRenewal": "Sans renouvellement",
+    "fcfaAvailable": "≈ {{count}} FCFA d'utilisation Yukpo disponible",
+    "expiryDate": "Abonnement expire le {{date}}",
+    "refresh": "Actualiser",
+    "rechargeTitle": "Recharger des crédits",
+    "rechargeSubtitle": "Achetez des crédits supplémentaires sans changer de plan · 0,6 FCFA / crédit",
+    "rechargeBtn": "Recharger",
+    "currentBadge": "Actuel",
+    "freeLabel": "Gratuit",
+    "chooseBtn": "Choisir",
+    "step2Title": "Mode de paiement",
+    "step2Subtitle": "Plan {{name}} — {{price}} FCFA",
+    "selectOperator": "Choisir votre opérateur Mobile Money :",
+    "phoneMoMoLabel": "Numéro de téléphone Mobile Money",
+    "getInstructions": "Recevoir les instructions",
+    "step3Title": "Instructions de paiement",
+    "step3Subtitle": "Effectuez le paiement depuis votre téléphone",
+    "paymentRefLabel": "Votre référence de paiement",
+    "amountToPay": "Montant à payer",
+    "howToPay": "Comment payer :",
+    "refExpiry": "Conservez votre référence. Vous en aurez besoin pour confirmer votre abonnement. La demande expire dans 30 minutes.",
+    "paymentDoneBtn": "J'ai effectué le paiement",
+    "step4Title": "Confirmer le paiement",
+    "step4Subtitle": "Entrez votre référence pour activer l'abonnement",
+    "payRefLabel": "Référence de paiement *",
+    "momoSenderLabel": "Numéro MoMo utilisé pour le paiement",
+    "momoRequired": "Obligatoire — sert à vérifier la réception de votre paiement.",
+    "txIdLabel": "ID Transaction Mobile Money (optionnel)",
+    "txIdPlaceholder": "Numéro de transaction reçu par SMS",
+    "provisionalWarning": "⚠️ Activation provisoire. Votre abonnement sera activé immédiatement mais vérifié sous 3h. Si le paiement n'est pas reçu sur notre compte MoMo, l'abonnement sera automatiquement annulé.",
+    "activateBtn": "Activer mon abonnement",
+    "successTitle": "Abonnement activé !",
+    "successDesc": "Votre plan {{name}} est maintenant actif. Accédez à tous les agents et fonctionnalités YukpoPro.",
+    "startUsingBtn": "Commencer à utiliser YukpoPro",
+    "payHistoryTitle": "Historique des paiements",
+    "choosePack": "Choisissez un pack — les crédits s'ajoutent immédiatement à votre solde :",
+    "creditsUnit": "crédits",
+    "rechargeRefLabel": "Référence de recharge",
+    "amountLabel": "Montant",
+    "paymentMadeBtn": "J'ai effectué le paiement",
+    "momoSenderRechargeLabel": "Numéro MoMo expéditeur (obligatoire)",
+    "confirmRechargeBtn": "Confirmer la recharge",
+    "rechargeSuccessTitle": "Crédits ajoutés !",
+    "rechargeSuccessDesc": "Vos crédits sont immédiatement disponibles.",
+    "closeBtn": "Fermer",
+    "rechargePackTitle": "Recharger des crédits",
+    "currentPlan": "Mon abonnement actuel",
+    "freemium": "Gratuit",
+    "starter": "Starter",
+    "pro": "Pro",
+    "business": "Business",
+    "creditsLeft": "Crédits restants",
+    "creditsUsed": "Crédits consommés",
+    "upgrade": "Passer à Pro",
+    "manage": "Gérer mon abonnement"
+  },
+  "parametres": {
+    "title": "Paramètres",
+    "subtitle": "Sécurité, apparence et préférences de votre compte",
+    "security": "Sécurité",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "changePassword": "Changer le mot de passe",
+    "updating": "Mise à jour…",
+    "passwordSuccess": "Mot de passe modifié avec succès",
+    "passwordError": "Erreur lors du changement de mot de passe",
+    "rules": {
+      "minLength": "8 caractères minimum",
+      "uppercase": "Une majuscule",
+      "number": "Un chiffre",
+      "match": "Les mots de passe correspondent"
+    },
+    "appearance": "Apparence",
+    "displayMode": "Mode d'affichage",
+    "darkModeOn": "Mode sombre activé",
+    "lightModeOn": "Mode clair activé",
+    "light": "Clair",
+    "dark": "Sombre",
+    "notifications": "Notifications",
+    "notifEmail": "Notifications par email",
+    "notifEmailDesc": "Résumés hebdomadaires, alertes de sécurité",
+    "notifPush": "Notifications push",
+    "notifPushDesc": "Alertes en temps réel dans le navigateur",
+    "dangerZone": "Zone de danger",
+    "dangerDesc": "La suppression de votre compte est irréversible. Toutes vos données (profil, documents, historique) seront définitivement effacées.",
+    "typeToConfirm": "Tapez",
+    "confirmWord": "SUPPRIMER",
+    "confirmPlaceholder": "SUPPRIMER",
+    "toConfirm": "pour confirmer",
+    "deleteAccount": "Supprimer définitivement mon compte",
+    "deleteContactSupport": "Contactez le support à support@yukpomnang.com pour supprimer votre compte.",
+    "account": "Compte",
+    "editProfile": "Modifier mon profil",
+    "editProfileDesc": "Nom, avatar, pays, secteur, documents"
+  },
+  "enquetes": {
+    "title": "Enquêtes & Études",
+    "subtitle": "Terrain · Transcription · Formulaire ODK · Analyse · Rapport académique",
+    "newStudy": "Nouvelle étude",
+    "newStudyTitle": "Nouvelle étude de terrain",
+    "create": "Créer l'étude",
+    "creating": "Création…",
+    "studies": "études",
+    "reports": "rapports",
+    "audios": "audios",
+    "noStudies": "Aucune étude — créez votre première étude de terrain.",
+    "errorLoad": "Impossible de charger les études",
+    "errorStudy": "Erreur chargement étude",
+    "titleRequired": "Titre requis",
+    "errorCreate": "Erreur création",
+    "studyCreated": "Étude créée !",
+    "form": {
+      "title": "Titre",
+      "terrain": "Terrain / Zone géographique",
+      "methodologie": "Méthodologie",
+      "modeEtude": "Mode d'étude",
+      "population": "Population cible",
+      "contexte": "Contexte & objectif de l'étude",
+      "questions": "Questions de recherche",
+      "questionsHint": "(une par ligne)"
+    },
+    "tabs": {
+      "audio": "Audios",
+      "formulaire": "Formulaire",
+      "analyse": "Analyse",
+      "rapport": "Rapport"
+    },
+    "audio": {
+      "uploadAudio": "Uploader un audio terrain",
+      "uploadDesc": "MP3, M4A, WAV, OGG, WebM · Yukpo transcrit automatiquement",
+      "transcribing": "Transcription Yukpo en cours…",
+      "transcribedCount": "entretien(s) transcrit(s)",
+      "noAudio": "Uploadez au moins un entretien pour lancer l'analyse.",
+      "questionsTitle": "Questions de recherche"
+    },
+    "formulaire": {
+      "qualitativeOnly": "En mode qualitatif pur, la collecte se fait via entretiens audio. Passez en mode quantitatif ou mixte pour activer les formulaires.",
+      "option1": "Option 1 — Uploader votre protocole",
+      "option1Recommended": "(recommandé)",
+      "option1Desc": "PDF / DOCX / TXT — Yukpo extrait les objectifs, la population, les variables, et construit automatiquement le formulaire XLSForm",
+      "option2": "Option 2 — Décrire le sujet manuellement",
+      "option2Desc": "Si vous n'avez pas encore de protocole — renseignez juste le contexte, Yukpo génère le formulaire professionnel",
+      "formTitle": "Titre du formulaire",
+      "formObjectif": "Objectif de l'étude",
+      "formPopulation": "Population cible",
+      "formNbQuestions": "Nombre de questions",
+      "formDescription": "Description du sujet",
+      "chooseFile": "Choisir fichier PDF/DOCX",
+      "analyzeGenerate": "Analyser & générer",
+      "analyzing": "Analyse…",
+      "generate": "Générer le formulaire",
+      "generating": "Génération en cours…",
+      "copyLink": "Copier lien collecte",
+      "viewResponses": "Voir les réponses",
+      "sections": "Sections du formulaire",
+      "responses": "réponse(s) collectée(s)",
+      "noResponses": "Partagez le lien de collecte avec vos répondants ou importez via KoBoCollect.",
+      "autoSaved": "Le XLSForm est automatiquement sauvegardé dans Mes Documents dès le téléchargement."
+    },
+    "analyse": {
+      "noDataWarning": "Uploadez des audios (mode qualitatif) ou collectez des réponses formulaire avant d'analyser.",
+      "thematic": "Codage thématique",
+      "thematicDesc": "Yukpo identifie les thèmes émergents, catégories et patterns dans vos entretiens. Analyse phénoménologique complète avec saturation théorique.",
+      "statistical": "Analyse statistique",
+      "statisticalDesc": "Fréquences, distributions, statistiques descriptives sur toutes les questions fermées de votre formulaire.",
+      "targeted": "Analyse ciblée Yukpo",
+      "targetedDesc": "Yukpo lit votre contexte et vos questions de recherche, puis décide quelles croisements et corrélations sont réellement pertinents.",
+      "openEnded": "Analyse questions ouvertes",
+      "openEndedDesc": "Yukpo analyse les réponses libres de votre formulaire : thèmes dominants, sentiments, citations représentatives.",
+      "launch": "Lancer",
+      "relaunch": "Relancer",
+      "done": "Terminé",
+      "resultsTitle": "Résultats",
+      "themes": "thème(s) identifié(s)",
+      "saturation": "Saturation atteinte",
+      "hypotheses": "Hypothèses testées",
+      "crossings": "croisement(s) pertinent(s)"
+    },
+    "rapport": {
+      "generateBtn": "Générer le rapport académique",
+      "regenBtn": "Regénérer le rapport",
+      "generating": "Génération en cours…",
+      "downloadWord": "Télécharger Word (.docx)",
+      "needAnalysis": "Lancez une analyse (onglet Analyse) avant de générer le rapport.",
+      "themes": "Thèmes identifiés",
+      "charts": "Graphiques"
+    }
+  },
+  "wallet": {
+    "title": "Mon Wallet",
+    "subtitle": "Solde, consommations et historique de crédits",
+    "available": "Solde disponible",
+    "credits": "crédits Yukpo",
+    "fcfaValue": "FCFA de valeur",
+    "activePlan": "Plan actif",
+    "renewal": "Renouvellement",
+    "usage": "Utilisation",
+    "used": "utilisés",
+    "allocated": "alloués",
+    "manageSubscription": "Gérer abonnement",
+    "recharge": "Recharger crédits",
+    "consumed": "Consommés",
+    "aiCalls": "Appels IA",
+    "requests": "requêtes",
+    "valueLabel": "Valeur FCFA",
+    "fcfaEquiv": "FCFA équiv.",
+    "avgPerDay": "Moyenne/jour",
+    "creditsPerDay": "crédits/jour",
+    "period7": "7 jours",
+    "period30": "30 jours",
+    "period90": "90 jours",
+    "period365": "1 an",
+    "refresh": "Actualiser",
+    "dailyConsumption": "Consommation quotidienne",
+    "activeDays": "jours actifs",
+    "topConsumers": "Top consommateurs",
+    "noConsumption": "Aucune consommation sur la période.",
+    "noData": "Aucune donnée.",
+    "history": "Historique détaillé",
+    "historyCount": "dernière(s)",
+    "noHistory": "Aucune consommation enregistrée.",
+    "colDate": "Date",
+    "colModule": "Module",
+    "colModel": "Modèle",
+    "colTokens": "Tokens",
+    "colCost": "Coût",
+    "colCredits": "Crédits",
+    "creditsPerPeriod": "crédits sur {{days}}j",
+    "onPeriod": "sur {{days}} jours"
+  },
+  "designerPro": {
+    "heading": "Designer Pro — visuels multi-page",
+    "subheading": "Faire-part, brochures, menus, livres photo, programmes… L'IA choisit la mise en page, intègre tes médias et applique tes modifications en langage naturel.",
+    "mediaLibrary": "Médiathèque",
+    "generate": "Générer le visuel",
+    "generating": "Génération multi-page (peut prendre 1–2 min)…",
+    "modify": "Modifier en langage naturel",
+    "apply": "Appliquer"
   }
 }

@@ -12,6 +12,8 @@
  * Protocole : voir docs/translate_live_spec.md §3.
  */
 
+import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
+
 export type SourceMode = "microphone" | "display";
 export type TranslateStatus =
   | "idle"
@@ -132,6 +134,9 @@ export class TranslateLiveClient {
       await this._connectWS();
       await this._setupAudioPipeline();
       this.setStatus("streaming");
+      // Empêche l'écran de s'éteindre pendant la transcription/traduction live.
+      // Sur iOS Safari : pas supporté → no-op silencieux.
+      acquireWakeLock();
     } catch (err: any) {
       const msg = err?.message || String(err);
       this.setStatus("error", msg);
@@ -180,6 +185,7 @@ export class TranslateLiveClient {
     } catch {/* ignore */}
     this.ws = null;
 
+    releaseWakeLock();
     this.setStatus("closed");
   }
 

@@ -225,6 +225,7 @@
     "reformulatedText": "Texte reformulé",
     "micUnavailable": "Microphone non accessible",
     "recording": "Enregistrement en cours…",
+    "keepScreenOnHint": "Sur ce navigateur, l'enregistrement s'arrête si l'écran s'éteint. Désactivez la mise en veille automatique dans les réglages de votre appareil.",
     "countryContext": "Contexte pays",
     "infosFreeText": "Décrivez librement : noms, dates, montants, objet. (texte libre ou JSON)",
     "infosPlaceholderExample": "Exemple :\nDestinataire : M. le Directeur\nObjet : Demande d'agrément\nDate : 22 avril 2026",

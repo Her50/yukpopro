@@ -225,6 +225,7 @@
     "reformulatedText": "Reformulated text",
     "micUnavailable": "Microphone not accessible",
     "recording": "Recording…",
+    "keepScreenOnHint": "On this browser, recording stops if the screen turns off. Disable auto-lock in your device settings.",
     "countryContext": "Country context",
     "infosFreeText": "Describe freely: names, dates, amounts, subject. (free text or JSON)",
     "infosPlaceholderExample": "Example:\nRecipient: The Director\nSubject: Application for approval\nDate: April 22, 2026",

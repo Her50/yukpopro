@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, copiloteApi, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, reunionsApi, type UploadedFile } from "@/api/client";
+import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 import { cn } from "@/components/ui";
 import type { CopiloteMessage, NavigationSuggestion } from "@/types";
 import { METIERS, PAYS_AFRIQUE } from "@/types";
@@ -259,6 +260,7 @@ export const ChatPage = () => {
       setAudioModalOpen(true);
       setAudioSeconds(0);
       timerRef.current = setInterval(() => setAudioSeconds(s => s + 1), 1000);
+      acquireWakeLock();
       return;
     }
 
@@ -284,6 +286,8 @@ export const ChatPage = () => {
       setAudioModalOpen(true);
       setAudioSeconds(0);
       timerRef.current = setInterval(() => setAudioSeconds(s => s + 1), 1000);
+      // Empêche l'écran de s'éteindre pendant l'enregistrement (Chrome/Edge/Android).
+      acquireWakeLock();
     } catch (err) {
       toast.error(t("chat.micPermissionError"));
     }
@@ -298,6 +302,7 @@ export const ChatPage = () => {
       recognitionRef.current = null;
       setIsRecording(false);
       setAudioModalOpen(false);
+      releaseWakeLock();
       if (send && input.trim()) {
         sendMessage(input.trim(), []);
         setInput("");
@@ -305,24 +310,39 @@ export const ChatPage = () => {
       return;
     }
 
-    // MediaRecorder
+    // MediaRecorder — onstop déclenchera envoyerAudio() qui transcrira puis enverra
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      // Si l'utilisateur annule (send=false), on désactive le flag pour bypass envoyerAudio
+      if (!send) (mediaRecorderRef.current as MediaRecorder & { _cancelled?: boolean })._cancelled = true;
       mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
     setAudioModalOpen(false);
+    releaseWakeLock();
   };
 
   const envoyerAudio = async (blob: Blob) => {
-    // Transcription côté client indisponible → on joint l'audio comme fichier
-    const audioFile: AttachedFile = {
-      id: crypto.randomUUID(),
-      name: `message_audio_${Date.now()}.webm`,
-      size: blob.size,
-      type: blob.type,
-      content: await blobToBase64(blob),
-    };
-    sendMessage("[Message audio — transcription en cours]", [audioFile]);
+    const mr = mediaRecorderRef.current as (MediaRecorder & { _cancelled?: boolean }) | null;
+    if (mr?._cancelled) return; // utilisateur a annulé l'enregistrement
+    // Transcription côté serveur via Whisper (endpoint réunion réutilisé).
+    // Une fois transcrit, on envoie le résultat comme un message texte normal —
+    // l'orchestrateur du chat le traite alors comme une question écrite classique.
+    const toastId = toast.loading(t("chat.audioTranscribing"));
+    try {
+      const fd = new FormData();
+      fd.append("audio", blob, `audio_${Date.now()}.webm`);
+      fd.append("langue", "auto");
+      const res = await reunionsApi.transcrireDirect(fd);
+      const texte = (res.transcription || "").trim();
+      if (!texte) {
+        toast.error(t("chat.audioTranscriptionEmpty"), { id: toastId });
+        return;
+      }
+      toast.dismiss(toastId);
+      sendMessage(texte, []);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || t("chat.audioTranscriptionError"), { id: toastId });
+    }
   };
 
   const blobToBase64 = (blob: Blob): Promise<string> =>

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 
 // ── Enregistrement audio persistant ──────────────────────────────────────────
 // Les ressources (MediaRecorder, MediaStream, timer) vivent au niveau module
@@ -75,6 +76,9 @@ export const useRecorderStore = create<RecorderState>((set, get) => ({
       set({ isRecording: true, isPaused: false, duration: 0, audioBlob: null, mimeType: mimeType || "audio/webm", liveSpeech: "" });
       _stopTimer();
       _tick();
+      // Empêche l'écran de s'éteindre pendant l'enregistrement (Chrome/Edge/Android).
+      // Sur iOS Safari : pas supporté → no-op silencieux, l'utilisateur doit garder l'écran allumé.
+      acquireWakeLock();
 
       // SpeechRecognition best-effort pour live
       const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -123,6 +127,7 @@ export const useRecorderStore = create<RecorderState>((set, get) => ({
     const mr = _mediaRecorder;
     if (!mr || mr.state === "inactive") {
       set({ isRecording: false, isPaused: false });
+      releaseWakeLock();
       resolve(null);
       return;
     }
@@ -132,6 +137,7 @@ export const useRecorderStore = create<RecorderState>((set, get) => ({
       const blob = new Blob(_chunks, { type: mr.mimeType || "audio/webm" });
       _mediaRecorder = null;
       set({ audioBlob: blob, isRecording: false, isPaused: false });
+      releaseWakeLock();
       resolve(blob);
     };
     mr.stop();
@@ -148,6 +154,7 @@ export const useRecorderStore = create<RecorderState>((set, get) => ({
     _stream = null;
     _mediaRecorder = null;
     _chunks = [];
+    releaseWakeLock();
     set({ isRecording: false, isPaused: false, duration: 0, audioBlob: null, mimeType: "", liveSpeech: "" });
   },
 

@@ -225,6 +225,7 @@
     "reformulatedText": "Texto reformulado",
     "micUnavailable": "Microfone inacessível",
     "recording": "Gravando…",
+    "keepScreenOnHint": "Neste navegador, a gravação para se a tela for desligada. Desative o bloqueio automático nas configurações do dispositivo.",
     "countryContext": "Contexto do país",
     "infosFreeText": "Descreva livremente: nomes, datas, valores, assunto. (texto livre ou JSON)",
     "infosPlaceholderExample": "Exemplo:\nDestinatário: Sr. Diretor\nAssunto: Pedido de aprovação\nData: 22 de abril de 2026",
