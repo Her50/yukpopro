@@ -601,8 +601,7 @@ export const ChatPage = () => {
                       ? t('chat.attachPlaceholder')
                       : t('chat.mainPlaceholder')
                   }
-                  disabled={isLoading}
-                  className="flex-1 bg-transparent text-white text-sm placeholder-slate-500 py-3 pr-2 resize-none focus:outline-none min-h-[48px] max-h-[160px] overflow-y-auto disabled:opacity-50"
+                  className="flex-1 bg-transparent text-white text-sm placeholder-slate-500 py-3 pr-2 resize-none focus:outline-none min-h-[48px] max-h-[160px] overflow-y-auto"
                   style={{ height: "48px" }}
                 />
 
