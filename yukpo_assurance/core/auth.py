@@ -10,7 +10,7 @@ from typing import Optional
 
 from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger("yukpo_assurance.auth")
 
