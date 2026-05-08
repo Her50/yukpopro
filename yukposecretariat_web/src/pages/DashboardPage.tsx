@@ -22,6 +22,27 @@ function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
 }
 
+/**
+ * Retourne le prénom à afficher dans la salutation.
+ * Priorité : prenoms du DB → nom (1er mot) → user_nom (1er mot, sans @ si email).
+ */
+function prenomAffichage(user: { prenoms?: string | null; nom?: string | null; user_nom?: string } | null): string {
+  if (!user) return ''
+  if (user.prenoms && user.prenoms.trim()) {
+    return user.prenoms.trim().split(' ')[0]
+  }
+  const candidats = [user.nom, user.user_nom].filter((s): s is string => !!s && s.trim().length > 0)
+  for (const c of candidats) {
+    const propre = c.includes('@')
+      ? c.split('@')[0].replace(/[._]/g, ' ').trim()
+      : c.trim()
+    if (propre) {
+      return propre.split(' ')[0].charAt(0).toUpperCase() + propre.split(' ')[0].slice(1)
+    }
+  }
+  return ''
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -52,7 +73,7 @@ export default function DashboardPage() {
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Bonjour, {user?.user_nom?.split(' ')[0] ?? 'secrétaire'} 👋
+          Bonjour, {prenomAffichage(user) || 'secrétaire'} 👋
         </h1>
         <p className="text-gray-500 text-sm mt-1">Que souhaitez-vous faire aujourd'hui ?</p>
       </div>

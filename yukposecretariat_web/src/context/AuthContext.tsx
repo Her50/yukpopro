@@ -4,6 +4,10 @@ import { authAPI } from '../api/client'
 interface User {
   user_id: number
   user_nom: string
+  user_nom_brut?: string
+  nom?: string | null
+  prenoms?: string | null
+  email?: string | null
   role: string
 }
 

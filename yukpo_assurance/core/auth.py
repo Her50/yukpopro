@@ -654,10 +654,43 @@ async def change_password(
 
 @auth_router.get("/me")
 async def me(current_user: TokenData = Depends(get_current_user)):
-    """Retourne les informations de l'utilisateur connecté"""
+    """Retourne les informations de l'utilisateur connecté.
+
+    En plus du JWT, va lire `nom` / `prenoms` / `email` depuis la DB
+    pour permettre au frontend d'afficher un VRAI nom (le JWT peut
+    n'avoir que l'email si l'utilisateur ne s'est jamais nommé).
+    """
+    nom_clean: str | None = None
+    prenoms_clean: str | None = None
+    email_clean: str | None = None
+    try:
+        from sqlalchemy import select
+        from core.database import async_session_maker, UtilisateurDB
+        async with async_session_maker() as session:
+            r = await session.execute(
+                select(UtilisateurDB).where(UtilisateurDB.id == current_user.user_id)
+            )
+            u = r.scalar_one_or_none()
+            if u:
+                nom_clean     = u.nom
+                prenoms_clean = u.prenoms
+                email_clean   = u.email
+    except Exception as e:
+        logger.debug(f"[Auth/me] lookup nom DB échoué: {e}")
+
+    # Si nom contient @ (cas d'un compte créé sans nom propre = email mis comme nom),
+    # on prend la partie avant @ et on la capitalise pour avoir au moins quelque chose.
+    affichage_nom = nom_clean or current_user.user_nom or ""
+    if "@" in affichage_nom:
+        affichage_nom = affichage_nom.split("@")[0].replace(".", " ").replace("_", " ").title()
+
     return {
         "user_id": current_user.user_id,
-        "user_nom": current_user.user_nom,
+        "user_nom": affichage_nom,            # prêt pour affichage
+        "user_nom_brut": current_user.user_nom,
+        "nom": nom_clean,
+        "prenoms": prenoms_clean,
+        "email": email_clean,
         "role": current_user.role,
         "compagnie_id": current_user.compagnie_id,
         "permissions": list(ROLE_PERMISSIONS.get(current_user.role, set())),
