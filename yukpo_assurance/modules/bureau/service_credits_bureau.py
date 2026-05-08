@@ -49,11 +49,12 @@ PLANS_BUREAU: dict[str, dict] = {
         "id": "gratuit",
         "nom": "Pay-as-you-go",
         "prix_fcfa": 0,
-        "credits_mois": 0,           # plus de crédits offerts auto, recharge à la demande
+        "credits_mois": 3_000,       # crédits offerts UNE SEULE FOIS à la création
+                                     # (pas de renouvellement — voir _renouveler_si_expire)
         "duree_jours": 0,
         "modules": ["redaction", "ocr", "audio", "traduction", "infographie", "gestion", "documents"],
-        "description": "Sans abonnement — rechargez votre solde à la demande (minimum 1 000 FCFA = 20 000 crédits)",
-        "label_credits": "Recharge libre — 1 FCFA = 20 crédits",
+        "description": "Sans abonnement — 3 000 crédits offerts à la création, puis rechargez à la demande (minimum 1 000 FCFA)",
+        "label_credits": "3 000 crédits offerts à la création · recharge 0,6 FCFA / crédit",
     },
     "secretariat": {
         "id": "secretariat",

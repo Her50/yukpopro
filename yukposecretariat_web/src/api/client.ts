@@ -189,6 +189,21 @@ export const abonnementAPI = {
   historique: () => api.get('/abonnement/historique'),
 }
 
+// ─── Admin Secrétariat ─────────────────────────────────────────────────────────
+export const adminAPI = {
+  utilisateurs: (params?: { recherche?: string; page?: number; par_page?: number; actifs_seulement?: boolean }) =>
+    api.get('/admin/utilisateurs', { params }),
+  detailsUtilisateur: (user_id: number) =>
+    api.get(`/admin/utilisateurs/${user_id}`),
+  ajouterCredits: (user_id: number, credits: number, raison?: string) =>
+    api.post(`/admin/utilisateurs/${user_id}/credits-bonus`, { credits, raison }),
+  bloquer: (user_id: number, jours: number = 7) =>
+    api.post(`/admin/utilisateurs/${user_id}/bloquer`, null, { params: { jours } }),
+  debloquer: (user_id: number) =>
+    api.post(`/admin/utilisateurs/${user_id}/debloquer`),
+  stats: () => api.get('/admin/stats'),
+}
+
 // ─── Mes Documents ────────────────────────────────────────────────────────────
 export const documentsAPI = {
   lister: () => api.get('/documents/'),

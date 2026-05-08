@@ -4,23 +4,26 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen, CreditCard, Globe, ChevronDown,
+  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
 import { SUPPORTED_LANGUAGES } from '../i18n'
 
+const ADMIN_ROLES = ['admin', 'super_admin', 'yukpo_owner']
+
 const NAV_KEYS = [
-  { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard },
-  { to: '/redaction',   key: 'redaction',   icon: FileText },
-  { to: '/infographie', key: 'infographie', icon: Image },
-  { to: '/traduction',  key: 'traduction',  icon: Languages },
-  { to: '/documents',   key: 'documents',   icon: FolderOpen },
-  { to: '/kanban',      key: 'kanban',      icon: KanbanSquare },
-  { to: '/devis',       key: 'devis',       icon: Receipt },
-  { to: '/caisse',      key: 'caisse',      icon: Wallet },
-  { to: '/clients',     key: 'clients',     icon: Users },
-  { to: '/abonnement',  key: 'abonnement',  icon: CreditCard },
+  { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
+  { to: '/redaction',   key: 'redaction',   icon: FileText,        adminOnly: false },
+  { to: '/infographie', key: 'infographie', icon: Image,           adminOnly: false },
+  { to: '/traduction',  key: 'traduction',  icon: Languages,       adminOnly: false },
+  { to: '/documents',   key: 'documents',   icon: FolderOpen,      adminOnly: false },
+  { to: '/kanban',      key: 'kanban',      icon: KanbanSquare,    adminOnly: false },
+  { to: '/devis',       key: 'devis',       icon: Receipt,         adminOnly: false },
+  { to: '/caisse',      key: 'caisse',      icon: Wallet,          adminOnly: false },
+  { to: '/clients',     key: 'clients',     icon: Users,           adminOnly: false },
+  { to: '/abonnement',  key: 'abonnement',  icon: CreditCard,      adminOnly: false },
+  { to: '/admin',       key: 'admin',       icon: Shield,          adminOnly: true  },
 ]
 
 function LangMenu() {
@@ -117,7 +120,7 @@ export default function Layout() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
-          {NAV_KEYS.map(({ to, key, icon: Icon }) => (
+          {NAV_KEYS.filter(item => !item.adminOnly || ADMIN_ROLES.includes(user?.role || '')).map(({ to, key, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

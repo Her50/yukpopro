@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import RedactionPage from './pages/RedactionPage'
 import InfographiePage from './pages/InfographiePage'
+import AdminPage from './pages/AdminPage'
 import KanbanPage from './pages/KanbanPage'
 import DevisPage from './pages/DevisPage'
 import CaissePage from './pages/CaissePage'
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="caisse" element={<CaissePage />} />
         <Route path="clients" element={<ClientsPage />} />
         <Route path="abonnement" element={<AbonnementPage />} />
+        <Route path="admin" element={<AdminPage />} />
       </Route>
     </Routes>
   )
