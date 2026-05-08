@@ -175,7 +175,7 @@ export default function DashboardPage() {
                     tt.statut === 'en_cours' ? 'bg-blue-100 text-blue-700' :
                     tt.statut === 'livre' ? 'bg-purple-100 text-purple-700' :
                     'bg-gray-100 text-gray-600'
-                  }`}>{tt.statut.replace('_', ' ')}</span>
+                  }`}>{t(`kanban.status.${tt.statut}`, tt.statut.replace('_', ' '))}</span>
                 </div>
               </div>
             ))}

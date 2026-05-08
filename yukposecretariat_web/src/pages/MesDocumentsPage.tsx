@@ -177,7 +177,7 @@ export default function MesDocumentsPage() {
                   <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${extColor[doc.extension] || 'bg-gray-100 text-gray-600'}`}>
                     {doc.extension}
                   </span>
-                  <span className="text-xs text-gray-400">{doc.taille_ko} Ko</span>
+                  <span className="text-xs text-gray-400">{t('common.fileSizeKo', { n: doc.taille_ko })}</span>
                   <span className="text-xs text-gray-400 hidden sm:inline">·</span>
                   <span className="text-xs text-gray-400 hidden sm:inline">{dateLocale(doc.date_creation)}</span>
                 </div>

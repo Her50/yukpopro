@@ -16,6 +16,16 @@ type OcrResult = {
 
 const FORMATS_VALIDES = ['lettre', 'formulaire', 'recu', 'manuscrit', 'tableau']
 const FORMATS_MANUSCRIT = ['lettre', 'rapport', 'liste', 'paragraphe']
+const FMT_LABEL_KEYS: Record<string, string> = {
+  lettre: 'redaction.fmtLettre',
+  formulaire: 'redaction.fmtFormulaire',
+  recu: 'redaction.fmtRecu',
+  manuscrit: 'redaction.fmtManuscrit',
+  tableau: 'redaction.fmtTableau',
+  rapport: 'redaction.fmtRapport',
+  liste: 'redaction.fmtListe',
+  paragraphe: 'redaction.fmtParagraphe',
+}
 
 export default function OcrPage() {
   const { t } = useTranslation()
@@ -138,7 +148,7 @@ export default function OcrPage() {
               {FORMATS_VALIDES.map(f => (
                 <button key={f} onClick={() => setTypeAttendu(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${typeAttendu === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                >{f}</button>
+                >{t(FMT_LABEL_KEYS[f])}</button>
               ))}
             </div>
           </div>
@@ -151,7 +161,7 @@ export default function OcrPage() {
               {FORMATS_MANUSCRIT.map(f => (
                 <button key={f} onClick={() => setFormaterEn(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${formaterEn === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                >{f}</button>
+                >{t(FMT_LABEL_KEYS[f])}</button>
               ))}
             </div>
           </div>

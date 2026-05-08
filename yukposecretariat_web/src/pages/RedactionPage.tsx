@@ -206,7 +206,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
             >
               <option value="">{t('infographie.labelSelect')}</option>
               {categories.map(cat => (
-                <optgroup key={cat} label={typesData?.categories?.[cat] ?? cat}>
+                <optgroup key={cat} label={typesData?.categories?.[cat] ?? cat /* API-provided */}>
                   {types.filter(t => t.categorie === cat).map(t => (
                     <option key={t.cle} value={t.cle}>{t.label} — {formatFCFA(t.prix_base_fcfa)}</option>
                   ))}
@@ -296,7 +296,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <h2 className="font-bold text-gray-900">{resultat.titre}</h2>
-              <p className="text-xs text-gray-400">{resultat.nb_mots} mots · {formatFCFA(resultat.prix_fcfa)}</p>
+              <p className="text-xs text-gray-400">{t('redaction.wordsAndPrice', { n: resultat.nb_mots, price: formatFCFA(resultat.prix_fcfa) })}</p>
             </div>
             {resultat.word_base64 && (
               <button
@@ -320,6 +320,16 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
 
 const FORMATS_VALIDES = ['lettre', 'formulaire', 'recu', 'manuscrit', 'tableau']
 const FORMATS_MANUSCRIT = ['lettre', 'rapport', 'liste', 'paragraphe']
+const FMT_LABEL_KEYS: Record<string, string> = {
+  lettre: 'redaction.fmtLettre',
+  formulaire: 'redaction.fmtFormulaire',
+  recu: 'redaction.fmtRecu',
+  manuscrit: 'redaction.fmtManuscrit',
+  tableau: 'redaction.fmtTableau',
+  rapport: 'redaction.fmtRapport',
+  liste: 'redaction.fmtListe',
+  paragraphe: 'redaction.fmtParagraphe',
+}
 
 function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
   const { t } = useTranslation()
@@ -403,7 +413,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium ${!typeAttendu ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t('ocr.autoDetect')}</button>
               {FORMATS_VALIDES.map(f => (
                 <button key={f} onClick={() => setTypeAttendu(f)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${typeAttendu === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{f}</button>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${typeAttendu === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t(FMT_LABEL_KEYS[f])}</button>
               ))}
             </div>
           </div>
@@ -415,7 +425,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
             <div className="flex flex-wrap gap-2">
               {FORMATS_MANUSCRIT.map(f => (
                 <button key={f} onClick={() => setFormaterEn(f)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${formaterEn === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{f}</button>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${formaterEn === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t(FMT_LABEL_KEYS[f])}</button>
               ))}
             </div>
           </div>
@@ -430,7 +440,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 
       {resultat && (
         <ResultatBlock
-          title={resultat.type_document}
+          title={resultat.type_document /* API-provided */}
           subtitle={t('ocr.confidence', { pct: Math.round(resultat.confiance * 100) })}
           markdown={resultat.texte_structure}
           wordB64={resultat.word_base64}
@@ -524,7 +534,7 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         {fichier && (
           <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
             <Mic size={14} className="text-purple-500" />
-            {fichier.name} — {(fichier.size / 1024).toFixed(0)} Ko
+            {fichier.name} — {t('common.fileSizeKo', { n: (fichier.size / 1024).toFixed(0) })}
           </div>
         )}
         {recording && (
@@ -538,7 +548,7 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           <div className="flex flex-wrap gap-2">
             {types.map(t => (
               <button key={t.cle} onClick={() => setTypeDoc(t.cle)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${typeDoc === t.cle ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t.label}</button>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${typeDoc === t.cle ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t.label /* API-provided */}</button>
             ))}
           </div>
         </div>
@@ -563,8 +573,8 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 
       {resultat && (
         <ResultatBlock
-          title={resultat.type_document}
-          subtitle={resultat.duree_secondes ? `${Math.round(resultat.duree_secondes)}s audio` : ''}
+          title={resultat.type_document /* API-provided */}
+          subtitle={resultat.duree_secondes ? t('audio.durationSec', { n: Math.round(resultat.duree_secondes) }) : ''}
           markdown={resultat.document_formate}
           wordB64={resultat.word_base64}
           downloadName="transcription.docx"
@@ -666,7 +676,7 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
       {resultat?.texte_reformule && (
         <ResultatBlock
           title={t('redaction.reformulatedText')}
-          subtitle={resultat.nb_mots ? `${resultat.nb_mots} mots · ${formatFCFA(resultat.prix_fcfa || 0)}` : ''}
+          subtitle={resultat.nb_mots ? t('redaction.wordsAndPrice', { n: resultat.nb_mots, price: formatFCFA(resultat.prix_fcfa || 0) }) : ''}
           markdown={resultat.texte_reformule}
           onAmeliorer={() => onAmeliorer(resultat.texte_reformule!)}
           color="amber"

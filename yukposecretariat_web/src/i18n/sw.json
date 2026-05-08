@@ -84,7 +84,10 @@
     "reset": "Réinitialiser",
     "apply": "Appliquer",
     "loadingFailed": "Impossible de charger",
-    "noConsumption": "Aucune consommation."
+    "noConsumption": "Aucune consommation.",
+    "fileSizeKo": "{{n}} Ko",
+    "wordsCount": "{{n}} mots",
+    "loading2": "Chargement…"
   },
   "auth": {
     "login": "Ingia",
@@ -377,7 +380,16 @@
     "regCommercial": "Commercial",
     "regJuridique": "Juridique",
     "regSimplifie": "Simplifié",
-    "regConcis": "Concis"
+    "regConcis": "Concis",
+    "fmtLettre": "Lettre",
+    "fmtFormulaire": "Formulaire",
+    "fmtRecu": "Reçu",
+    "fmtManuscrit": "Manuscrit",
+    "fmtTableau": "Tableau",
+    "fmtRapport": "Rapport",
+    "fmtListe": "Liste",
+    "fmtParagraphe": "Paragraphe",
+    "wordsAndPrice": "{{n}} mots · {{price}}"
   },
   "ocr": {
     "title": "Scanner → Texte",
@@ -419,7 +431,8 @@
     "rawTranscript": "Transcription brute",
     "contextLabel": "Contexte",
     "contextOptional": "(optionnel)",
-    "contextPlaceholder": "Participants, objet de la réunion, date..."
+    "contextPlaceholder": "Participants, objet de la réunion, date...",
+    "durationSec": "{{n}}s audio"
   },
   "traduction": {
     "title": "Traduction Yukpo",
@@ -458,7 +471,16 @@
     "ctxAssurance": "Assurance CIMA",
     "ctxCommercial": "Commercial / Marketing",
     "ctxMedical": "Médical / Santé",
-    "ctxOng": "ONG / Développement"
+    "ctxOng": "ONG / Développement",
+    "langFr": "🇫🇷 Français",
+    "langEn": "🇬🇧 Anglais",
+    "langEs": "🇪🇸 Espagnol",
+    "langPt": "🇵🇹 Portugais",
+    "langAr": "🇲🇦 Arabe",
+    "langZh": "🇨🇳 Mandarin",
+    "langWo": "🇸🇳 Wolof",
+    "langHa": "🇳🇬 Haoussa",
+    "langSw": "🇹🇿 Swahili"
   },
   "documents": {
     "title": "Mes Documents",
@@ -558,7 +580,18 @@
     "typeImpression": "Impression / Repro",
     "typeImpressionDesc": "Impression et reprographie",
     "typeAutre": "Autre",
-    "typeAutreDesc": "Autre type de travail"
+    "typeAutreDesc": "Autre type de travail",
+    "status": {
+      "en_attente": "en attente",
+      "en_cours": "en cours",
+      "en_revision": "en révision",
+      "livre": "livré",
+      "paye": "payé",
+      "annule": "annulé",
+      "termine": "terminé",
+      "facture": "facturé"
+    },
+    "whatsappSentSuffix": "WhatsApp ✓"
   },
   "devis": {
     "title": "Devis & Factures",
@@ -865,7 +898,12 @@
     "targetConsomDesc": "Selon seuils d'usage",
     "fcfaPerBeneficiary": "≈ {{amount}} de valeur par bénéficiaire",
     "blockedShort": "Bloqué",
-    "inactiveShort": "Inactif"
+    "inactiveShort": "Inactif",
+    "loadingInline": "Chargement…",
+    "targetLabelTous": "Tous",
+    "targetLabelIds": "Liste IDs",
+    "targetLabelConsommation": "Consommation",
+    "targetLabelRole": "Par rôle"
   },
   "designerPro": {
     "heading": "Designer Pro — visuels multi-page",

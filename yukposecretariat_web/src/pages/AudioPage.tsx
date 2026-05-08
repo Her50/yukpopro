@@ -127,7 +127,7 @@ export default function AudioPage() {
         {fichier && (
           <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
             <Mic size={14} className="text-purple-500" />
-            {fichier.name} — {(fichier.size / 1024).toFixed(0)} Ko
+            {fichier.name} — {t('common.fileSizeKo', { n: (fichier.size / 1024).toFixed(0) })}
           </div>
         )}
 
@@ -144,7 +144,7 @@ export default function AudioPage() {
             {types.map(t => (
               <button key={t.cle} onClick={() => setTypeDoc(t.cle)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium ${typeDoc === t.cle ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-              >{t.label}</button>
+              >{t.label /* API-provided */}</button>
             ))}
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function AudioPage() {
             <div>
               <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-lg">{resultat.type_document}</span>
               {resultat.duree_secondes && (
-                <span className="ml-2 text-xs text-gray-400">{Math.round(resultat.duree_secondes)}s audio</span>
+                <span className="ml-2 text-xs text-gray-400">{t('audio.durationSec', { n: Math.round(resultat.duree_secondes) })}</span>
               )}
             </div>
             {resultat.word_base64 && (

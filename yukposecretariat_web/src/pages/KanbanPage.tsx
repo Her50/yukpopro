@@ -100,7 +100,7 @@ export default function KanbanPage() {
       qc.invalidateQueries({ queryKey: ['travaux'] })
       setShowTerminer(null)
       if (res?.whatsapp_envoye) {
-        toast.success(t('kanban.completed') + ' · WhatsApp ✓')
+        toast.success(t('kanban.completed') + ' · ' + t('kanban.whatsappSentSuffix'))
       } else if (res?.whatsapp_raison) {
         toast(`${t('kanban.completed')} · ${t('kanban.whatsappNotSent', { reason: res.whatsapp_raison.slice(0, 80) })}`, { icon: '⚠️' })
       } else {
@@ -203,7 +203,7 @@ export default function KanbanPage() {
                             {next && (
                               <button onClick={() => modifierStatut.mutate({ id: b.id, statut: next })}
                                 className="flex-1 text-xs py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium flex items-center justify-center gap-1">
-                                <Check size={11} /> {next.replace('_', ' ')}
+                                <Check size={11} /> {t(`kanban.status.${next}`, next.replace('_', ' '))}
                               </button>
                             )}
                             {peutTerminer && (

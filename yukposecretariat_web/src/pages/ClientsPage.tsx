@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Plus, Search, Phone, X, Loader2, MessageCircle } from 'lucide-react'
 import { gestionAPI } from '../api/client'
@@ -16,12 +16,20 @@ function formatFCFA(n: number) {
 }
 
 export default function ClientsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const qc = useQueryClient()
   const [recherche, setRecherche] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ nom: '', telephone: '', email: '', adresse: '', notes: '' })
-  const [whatsappMsg, setWhatsappMsg] = useState(t('clients.defaultWhatsappMessage'))
+  const defaultMsg = t('clients.defaultWhatsappMessage')
+  const [whatsappMsg, setWhatsappMsg] = useState(defaultMsg)
+  // Si l'utilisateur n'a pas édité manuellement, on resynchronise sur le
+  // message par défaut traduit dès qu'il change de langue.
+  const previousDefaultRef = useRef(defaultMsg)
+  useEffect(() => {
+    setWhatsappMsg(prev => (prev === previousDefaultRef.current ? defaultMsg : prev))
+    previousDefaultRef.current = defaultMsg
+  }, [i18n.language, defaultMsg])
 
   const { data, isLoading } = useQuery({
     queryKey: ['clients', recherche],

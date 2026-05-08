@@ -376,7 +376,7 @@ function UserDetailModal({
 
         {loading && (
           <div className="text-center py-8 text-gray-500">
-            <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement…
+            <Loader2 className="inline animate-spin mr-2" size={16} /> {t('admin.loadingInline')}
           </div>
         )}
 
@@ -557,7 +557,11 @@ function PromotionsTab() {
     if (cible === 'consommation' && !seuilCreditsMin && !seuilCreditsMax && !seuilAppelsMin) {
       toast.error(t('admin.errThresholdRequired')); return
     }
-    if (!confirm(t('admin.confirmDistribute', { credits: fmtNb(montant), target: cible }))) return
+    const targetLabel = cible === 'tous' ? t('admin.targetLabelTous')
+      : cible === 'ids' ? t('admin.targetLabelIds')
+      : cible === 'consommation' ? t('admin.targetLabelConsommation')
+      : t('admin.targetLabelRole')
+    if (!confirm(t('admin.confirmDistribute', { credits: fmtNb(montant), target: targetLabel }))) return
 
     setBusy(true)
     try {

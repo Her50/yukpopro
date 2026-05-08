@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
-const LANGUES = [
-  { code: 'fr', label: '🇫🇷 Français' }, { code: 'en', label: '🇬🇧 Anglais' },
-  { code: 'es', label: '🇪🇸 Espagnol' }, { code: 'pt', label: '🇵🇹 Portugais' },
-  { code: 'ar', label: '🇲🇦 Arabe' }, { code: 'zh', label: '🇨🇳 Mandarin' },
-  { code: 'wo', label: '🇸🇳 Wolof' }, { code: 'ha', label: '🇳🇬 Haoussa' },
-  { code: 'sw', label: '🇹🇿 Swahili' },
+const LANGUES: { code: string; labelKey: string }[] = [
+  { code: 'fr', labelKey: 'traduction.langFr' }, { code: 'en', labelKey: 'traduction.langEn' },
+  { code: 'es', labelKey: 'traduction.langEs' }, { code: 'pt', labelKey: 'traduction.langPt' },
+  { code: 'ar', labelKey: 'traduction.langAr' }, { code: 'zh', labelKey: 'traduction.langZh' },
+  { code: 'wo', labelKey: 'traduction.langWo' }, { code: 'ha', labelKey: 'traduction.langHa' },
+  { code: 'sw', labelKey: 'traduction.langSw' },
 ]
 
 const CONTEXTES: { code: string; labelKey: string }[] = [
@@ -128,7 +128,7 @@ export default function TraductionPage() {
             <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.sourceLang')}</label>
             <select value={langSource} onChange={e => setLangSource(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
-              {LANGUES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              {LANGUES.map(l => <option key={l.code} value={l.code}>{t(l.labelKey)}</option>)}
             </select>
           </div>
           <button onClick={swapLangues} className="mt-5 p-2 rounded-full bg-orange-50 hover:bg-orange-100 transition-colors">
@@ -138,7 +138,7 @@ export default function TraductionPage() {
             <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.targetLang')}</label>
             <select value={langCible} onChange={e => setLangCible(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
-              {LANGUES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              {LANGUES.map(l => <option key={l.code} value={l.code}>{t(l.labelKey)}</option>)}
             </select>
           </div>
         </div>
