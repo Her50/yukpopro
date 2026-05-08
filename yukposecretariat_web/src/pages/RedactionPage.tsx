@@ -102,7 +102,7 @@ export default function RedactionPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Sparkles className="text-brand-600" size={24} />
-          Rédaction IA
+          Rédaction Yukpo
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           Hub unifié — texte, scan, audio et document existant. Vous pouvez chaîner les modes :
@@ -617,7 +617,7 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
         <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          Collez ici un brouillon ou un document existant. L'IA peut le <strong>reformuler</strong> (changer le registre,
+          Collez ici un brouillon ou un document existant. Yukpo peut le <strong>reformuler</strong> (changer le registre,
           corriger, professionnaliser) ou — via l'onglet <strong>Texte</strong> — le transformer en un autre type
           de document (lettre, contrat, PV, attestation, etc.).
         </p>
@@ -700,7 +700,7 @@ function ResultatBlock({
         <div className="flex gap-2">
           <button onClick={onAmeliorer}
             className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-xl">
-            <Sparkles size={14} /> Améliorer dans Rédaction IA
+            <Sparkles size={14} /> Améliorer dans Rédaction Yukpo
           </button>
           {wordB64 && downloadName && (
             <button onClick={() => downloadDocx(wordB64, downloadName)}

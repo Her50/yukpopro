@@ -94,12 +94,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Rédaction IA — hub principal */}
+      {/* Rédaction Yukpo — hub principal */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-gray-700 flex items-center gap-2">
             <Sparkles size={16} className="text-brand-600" />
-            Rédaction IA
+            Rédaction Yukpo
           </h2>
           <button onClick={() => navigate('/redaction')}
             className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">

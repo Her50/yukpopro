@@ -1,17 +1,17 @@
 {
   "nav": {
     "dashboard": "Tableau de bord",
-    "redaction": "Rédaction IA",
+    "redaction": "Rédaction Yukpo",
     "ocr": "Scan → Texte",
     "audio": "Audio → Doc",
-    "infographie": "Designer Pro",
-    "traduction": "Traduction IA",
+    "infographie": "Designer Pro Yukpo",
+    "traduction": "Traduction Yukpo",
     "documents": "Mes Documents",
     "kanban": "File de travaux",
     "devis": "Devis & Factures",
     "caisse": "Caisse",
     "clients": "Clients",
-    "abonnement": "Abonnement",
+    "abonnement": "Crédits Yukpo",
     "logout": "Déconnexion"
   },
   "common": {
@@ -46,7 +46,7 @@
   "auth": {
     "login": "Se connecter",
     "loginTitle": "Bienvenue sur Yukpo Secrétariat",
-    "loginSubtitle": "Back-office professionnel propulsé par l'IA",
+    "loginSubtitle": "Back-office professionnel propulsé par Yukpo",
     "email": "Adresse e-mail",
     "password": "Mot de passe",
     "loggingIn": "Connexion…",

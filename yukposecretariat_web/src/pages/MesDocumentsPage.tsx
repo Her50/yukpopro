@@ -16,7 +16,7 @@ function dateLocale(ts: number) {
   })
 }
 
-const FILTRES = ['Tous', 'Rédaction IA', 'Scan / OCR', 'Traduction', 'Audio → Doc', 'Infographie PDF', 'Devis', 'Facture']
+const FILTRES = ['Tous', 'Rédaction Yukpo', 'Scan / OCR', 'Traduction Yukpo', 'Audio → Doc', 'Infographie PDF', 'Devis', 'Facture']
 
 type ModifierResult = { pdf_base64?: string; png_base64?: string; pdf_id?: string; png_id?: string; titre?: string }
 
@@ -176,7 +176,7 @@ export default function MesDocumentsPage() {
                   <button
                     onClick={() => { setModifierDoc(doc); setInstructions(''); setModifierResult(null) }}
                     className="p-2 rounded-lg bg-purple-50 text-purple-500 hover:bg-purple-100 transition-colors"
-                    title="Modifier via IA" aria-label="Modifier">
+                    title="Modifier avec Yukpo" aria-label="Modifier">
                     <Wand2 size={16} />
                   </button>
                 )}

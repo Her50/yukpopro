@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CreditCard, Zap, CheckCircle2, Loader2, Plus, AlertCircle, RefreshCw, Wallet } from 'lucide-react'
+import { CreditCard, Zap, CheckCircle2, Loader2, Plus, AlertCircle, RefreshCw, Wallet, BarChart3, Clock, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { abonnementAPI } from '../api/client'
 
@@ -36,7 +36,23 @@ const RECHARGES_PRERELEES = [
   { fcfa: 50_000, desc: 'Pro' },
 ]
 
-const MULTIPLICATEUR = 20  // 1 FCFA = 20 crédits Yukpo
+// Ratio aligné sur YukpoPro : 0,6 FCFA = 1 crédit Yukpo (≈ 1.667 crédits / FCFA)
+const FCFA_PAR_CREDIT = 0.6
+const creditsForFcfa = (fcfa: number): number => Math.floor(fcfa / FCFA_PAR_CREDIT)
+const fcfaForCredits = (credits: number): number => Math.round(credits * FCFA_PAR_CREDIT)
+
+const MODULE_LABELS: Record<string, string> = {
+  redaction:    'Rédaction Yukpo',
+  ocr:          'Scan / OCR',
+  audio:        'Audio Yukpo',
+  traduction:   'Traduction Yukpo',
+  infographie:  'Infographie',
+  designerpro:  'Designer Pro',
+  gestion:      'Gestion (Kanban/Devis/Caisse)',
+  documents:    'Mes Documents',
+  bureau:       'Yukpo Secrétariat',
+  inconnu:      'Autre',
+}
 
 function fmtFcfa(n: number | null | undefined): string {
   return (n ?? 0).toLocaleString('fr-FR') + ' FCFA'
@@ -47,7 +63,7 @@ function fmtNb(n: number | null | undefined): string {
 
 export default function AbonnementPage() {
   const qc = useQueryClient()
-  const [onglet, setOnglet] = useState<'recharge' | 'historique'>('recharge')
+  const [onglet, setOnglet] = useState<'recharge' | 'consommation' | 'historique'>('recharge')
   const [montantCustom, setMontantCustom] = useState<number>(1000)
   const [operateur, setOperateur] = useState('orange_money')
   const [numero, setNumero] = useState('')
@@ -73,6 +89,16 @@ export default function AbonnementPage() {
       return r.data
     },
     enabled: onglet === 'historique',
+    retry: 1,
+  })
+
+  const walletQ = useQuery({
+    queryKey: ['bureau-wallet'],
+    queryFn: async () => {
+      const r = await abonnementAPI.wallet(30)
+      return r.data
+    },
+    enabled: onglet === 'consommation',
     retry: 1,
   })
 
@@ -105,7 +131,7 @@ export default function AbonnementPage() {
     onError: (e: any) => toast.error(e?.response?.data?.detail || 'Erreur confirmation'),
   })
 
-  const creditsAttendus = montantCustom * MULTIPLICATEUR
+  const creditsAttendus = creditsForFcfa(montantCustom)
 
   return (
     <div className="space-y-6">
@@ -124,10 +150,10 @@ export default function AbonnementPage() {
             <div className="text-white/70 text-xs uppercase tracking-wide">Solde actuel</div>
             <div className="text-4xl font-bold mt-1">
               {fmtNb(Math.round(monAbo?.credits_restants ?? 0))}
-              <span className="text-base font-normal text-white/70 ml-1">crédits</span>
+              <span className="text-base font-normal text-white/70 ml-1">crédits Yukpo</span>
             </div>
             <div className="text-white/80 text-sm mt-1">
-              ≈ {fmtFcfa(Math.round((monAbo?.credits_restants ?? 0) / MULTIPLICATEUR))} d'usage
+              ≈ {fmtFcfa(fcfaForCredits(monAbo?.credits_restants ?? 0))} d'usage restant
             </div>
           </div>
           <div className="text-right">
@@ -137,21 +163,22 @@ export default function AbonnementPage() {
           </div>
         </div>
         <div className="mt-4 text-xs text-white/70 leading-relaxed">
-          🔄 Tarification : <strong>1 FCFA = {MULTIPLICATEUR} crédits Yukpo</strong> ·
-          minimum recharge 1 000 FCFA · les crédits ne périment jamais.
+          🔄 Tarification Yukpo : <strong>0,6 FCFA = 1 crédit</strong> · minimum recharge
+          1 000 FCFA · vos crédits ne périment jamais.
         </div>
       </div>
 
-      <nav className="flex gap-2 border-b">
+      <nav className="flex gap-2 border-b overflow-x-auto">
         {([
-          ['recharge',   'Recharger des crédits'],
-          ['historique', 'Historique'],
-        ] as const).map(([key, label]) => (
-          <button key={key} onClick={() => setOnglet(key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+          ['recharge',     'Recharger',         Plus],
+          ['consommation', 'Ma consommation',   BarChart3],
+          ['historique',   'Historique paiements', Clock],
+        ] as const).map(([key, label, Icon]) => (
+          <button key={key} onClick={() => setOnglet(key as any)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
               onglet === key ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}>
-            {label}
+            <Icon size={14} /> {label}
           </button>
         ))}
       </nav>
@@ -207,6 +234,108 @@ export default function AbonnementPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Consommation détaillée (30 derniers jours) */}
+      {onglet === 'consommation' && (
+        <div className="space-y-4">
+          {walletQ.isLoading && (
+            <div className="text-center py-8 text-gray-500">
+              <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement…
+            </div>
+          )}
+          {walletQ.isError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+              <AlertCircle className="inline mr-2" size={14} /> Impossible de charger les statistiques
+            </div>
+          )}
+          {walletQ.data && (
+            <>
+              {/* KPIs période */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <KPI label="Crédits consommés" value={fmtNb(walletQ.data.totaux?.credits_consommes ?? 0)} sub="30 derniers jours" />
+                <KPI label="Appels totaux" value={fmtNb(walletQ.data.totaux?.appels ?? 0)} sub={`${walletQ.data.totaux?.nb_appels_llm ?? 0} LLM · ${walletQ.data.totaux?.nb_forfaits ?? 0} forfaits`} />
+                <KPI label="Valeur consommée" value={fmtFcfa(walletQ.data.totaux?.valeur_fcfa_payee ?? 0)} sub="≈ équivalent FCFA" />
+                <KPI label="Modules utilisés" value={fmtNb(walletQ.data.top_modules?.length ?? 0)} sub="différents" />
+              </div>
+
+              {/* Top modules consommateurs */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <TrendingUp size={14} className="text-brand-600" /> Top modules consommateurs
+                </h3>
+                {(walletQ.data.top_modules || []).length === 0 ? (
+                  <p className="text-sm text-gray-500">Aucune consommation sur cette période.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {walletQ.data.top_modules.map((m: any) => {
+                      const total = walletQ.data.totaux?.credits_consommes || 1
+                      const pct = (m.credits / total) * 100
+                      return (
+                        <div key={m.module}>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-gray-700">
+                              {MODULE_LABELS[m.module] || m.module}
+                            </span>
+                            <span className="text-gray-500 text-xs">
+                              {fmtNb(m.credits)} crédits · {fmtNb(m.appels)} appel{m.appels > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">
+                            <div className="bg-brand-500 h-full transition-all" style={{ width: `${Math.max(2, pct)}%` }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Historique récent */}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <h3 className="text-sm font-semibold text-gray-700 p-4 border-b">
+                  Historique récent (200 dernières opérations)
+                </h3>
+                {(walletQ.data.historique || []).length === 0 ? (
+                  <p className="p-4 text-sm text-gray-500">Aucune consommation.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-500 uppercase">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-semibold">Date</th>
+                          <th className="text-left px-3 py-2 font-semibold">Module</th>
+                          <th className="text-left px-3 py-2 font-semibold">Type</th>
+                          <th className="text-right px-3 py-2 font-semibold">Tokens</th>
+                          <th className="text-right px-3 py-2 font-semibold">Crédits</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {walletQ.data.historique.slice(0, 50).map((h: any) => (
+                          <tr key={h.id} className="hover:bg-gray-50">
+                            <td className="px-3 py-2 text-gray-500">
+                              {h.date ? new Date(h.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                            </td>
+                            <td className="px-3 py-2 font-medium">{MODULE_LABELS[h.module] || h.module}</td>
+                            <td className="px-3 py-2 text-gray-500">
+                              {h.modele?.startsWith('forfait:') ? `Forfait ${h.modele.replace('forfait:', '')}` : h.modele || 'Yukpo'}
+                            </td>
+                            <td className="px-3 py-2 text-right text-gray-500">
+                              {h.tokens_input + h.tokens_output > 0 ? fmtNb(h.tokens_input + h.tokens_output) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right font-semibold text-brand-700">
+                              {fmtNb(h.credits_debites)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -316,6 +445,16 @@ export default function AbonnementPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function KPI({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-3">
+      <div className="text-xs text-gray-500 uppercase tracking-wide">{label}</div>
+      <div className="text-xl font-bold text-gray-900 mt-1">{value}</div>
+      {sub && <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>}
     </div>
   )
 }

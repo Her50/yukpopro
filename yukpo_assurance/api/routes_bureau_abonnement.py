@@ -323,15 +323,17 @@ async def initier_recharge_custom(
 ):
     """
     Mode pay-as-you-go : l'utilisateur saisit le montant qu'il veut recharger
-    (minimum 1 000 FCFA). Les crédits Yukpo ajoutés = montant_fcfa × 20.
+    (minimum 1 000 FCFA). Tarif aligné sur YukpoPro : 0,6 FCFA = 1 crédit Yukpo
+    (équivalent à 1 000 FCFA → ~1 667 crédits, 5 000 FCFA → ~8 333 crédits).
     """
-    from modules.bureau.service_credits_bureau import MULTIPLICATEUR_YUKPO
     if req.operateur not in OPERATEURS:
         raise HTTPException(400, f"Opérateur non supporté : {', '.join(OPERATEURS.keys())}")
     if req.montant_fcfa < 1000:
         raise HTTPException(400, "Montant minimum : 1 000 FCFA")
 
-    credits_a_creer = int(req.montant_fcfa * MULTIPLICATEUR_YUKPO)
+    # Ratio YukpoPro : 0,6 FCFA / crédit (équivaut à 5/3 crédits par FCFA)
+    FCFA_PAR_CREDIT = 0.6
+    credits_a_creer = int(req.montant_fcfa / FCFA_PAR_CREDIT)
     reference = f"YKS-RC-{uuid.uuid4().hex[:8].upper()}"
 
     instructions = _generer_instructions_paiement(
@@ -484,6 +486,122 @@ async def confirmer_recharge_credits_bureau(
         "message":         f"{credits_a_ajouter:,} crédits ajoutés à votre solde !",
         "credits_ajoutes": credits_a_ajouter,
         "pack_nom":        pack.get("nom", pack_id),
+    }
+
+
+@router.get("/wallet", summary="Wallet Bureau — solde + consommation détaillée")
+async def wallet_bureau(
+    jours: int = 30,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Dashboard wallet complet pour YukpoSecrétariat :
+      - solde actuel + équivalent FCFA
+      - top modules consommateurs sur N derniers jours
+      - historique détaillé des consommations
+      - série temporelle quotidienne
+      - séparation LLM vs forfaits
+    Aligné sur le wallet YukpoPro.
+    """
+    from datetime import timedelta
+    from sqlalchemy import select, func, and_
+    from core.database import ConsommationBureauDB
+    from modules.bureau.service_credits_bureau import (
+        solde_utilisateur_bureau, MULTIPLICATEUR_YUKPO,
+    )
+
+    jours = max(1, min(365, jours))
+    since = datetime.utcnow() - timedelta(days=jours)
+    FCFA_PAR_CREDIT = 0.6
+
+    solde = await solde_utilisateur_bureau(current_user.user_id, db)
+
+    # Historique (200 dernières lignes)
+    rows = (await db.execute(
+        select(ConsommationBureauDB)
+        .where(and_(
+            ConsommationBureauDB.user_id == current_user.user_id,
+            ConsommationBureauDB.cree_le >= since,
+        ))
+        .order_by(ConsommationBureauDB.cree_le.desc())
+        .limit(200)
+    )).scalars().all()
+
+    historique = [{
+        "id":              r.id,
+        "date":            r.cree_le.isoformat() if r.cree_le else None,
+        "modele":          r.modele,
+        "module":          r.module or "inconnu",
+        "tokens_input":    r.tokens_input or 0,
+        "tokens_output":   r.tokens_output or 0,
+        "cout_fcfa":       round(r.cout_fcfa or 0.0, 2),
+        "credits_debites": round(r.credits_debites or 0.0, 1),
+    } for r in rows]
+
+    # Top modules
+    agg_module = (await db.execute(
+        select(
+            ConsommationBureauDB.module,
+            func.sum(ConsommationBureauDB.credits_debites).label("credits"),
+            func.count(ConsommationBureauDB.id).label("appels"),
+            func.sum(ConsommationBureauDB.tokens_input + ConsommationBureauDB.tokens_output).label("tokens"),
+        )
+        .where(and_(
+            ConsommationBureauDB.user_id == current_user.user_id,
+            ConsommationBureauDB.cree_le >= since,
+        ))
+        .group_by(ConsommationBureauDB.module)
+        .order_by(func.sum(ConsommationBureauDB.credits_debites).desc())
+    )).all()
+
+    top_modules = [{
+        "module":  m or "inconnu",
+        "credits": round(c or 0.0, 1),
+        "appels":  int(a or 0),
+        "tokens":  int(t or 0),
+    } for (m, c, a, t) in agg_module]
+
+    # Série quotidienne
+    agg_jour = (await db.execute(
+        select(
+            func.date(ConsommationBureauDB.cree_le).label("jour"),
+            func.sum(ConsommationBureauDB.credits_debites).label("credits"),
+            func.count(ConsommationBureauDB.id).label("appels"),
+        )
+        .where(and_(
+            ConsommationBureauDB.user_id == current_user.user_id,
+            ConsommationBureauDB.cree_le >= since,
+        ))
+        .group_by(func.date(ConsommationBureauDB.cree_le))
+        .order_by(func.date(ConsommationBureauDB.cree_le))
+    )).all()
+
+    serie_jour = [{
+        "jour":    str(j),
+        "credits": round(c or 0.0, 1),
+        "appels":  int(a or 0),
+    } for (j, c, a) in agg_jour]
+
+    total_credits = sum(m["credits"] for m in top_modules)
+    total_appels  = sum(m["appels"]  for m in top_modules)
+    nb_llm        = sum(1 for r in rows if not (r.modele or "").startswith("forfait:"))
+    nb_forfait    = len(rows) - nb_llm
+
+    return {
+        "solde":         solde,
+        "periode_jours": jours,
+        "ratio_fcfa_par_credit": FCFA_PAR_CREDIT,
+        "totaux": {
+            "credits_consommes": round(total_credits, 1),
+            "appels":            total_appels,
+            "valeur_fcfa_payee": round(total_credits * FCFA_PAR_CREDIT, 0),
+            "nb_appels_llm":     nb_llm,
+            "nb_forfaits":       nb_forfait,
+        },
+        "top_modules": top_modules,
+        "serie_jour":  serie_jour,
+        "historique":  historique,
     }
 
 

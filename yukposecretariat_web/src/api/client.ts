@@ -182,6 +182,8 @@ export const abonnementAPI = {
     api.post('/abonnement/initier-recharge', data),
   initierRechargeCustom: (data: { montant_fcfa: number; operateur: string; numero_telephone: string; pays?: string }) =>
     api.post('/abonnement/initier-recharge-custom', data),
+  wallet: (jours: number = 30) =>
+    api.get('/abonnement/wallet', { params: { jours } }),
   confirmerRecharge: (data: { reference_paiement: string; transaction_id?: string }) =>
     api.post('/abonnement/confirmer-recharge', data),
   historique: () => api.get('/abonnement/historique'),

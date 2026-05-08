@@ -205,7 +205,7 @@ export default function InfographiePage() {
           { key: 'brief', label: t('infographie.modeBrief') },
           { key: 'modele', label: t('infographie.modeModele') },
           { key: 'custom', label: t('infographie.modeCustom') },
-          { key: 'pro', label: '✨ Multi-page IA' },
+          { key: 'pro', label: '✨ Multi-page Yukpo' },
         ] as { key: Mode; label: string }[]).map(m => (
           <button key={m.key} onClick={() => { setMode(m.key); setResultat(null) }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${mode === m.key ? 'bg-white shadow text-orange-600' : 'text-gray-800 hover:text-gray-900'}`}>
