@@ -301,6 +301,10 @@ class DemandeDocument:
     reformuler_texte: Optional[str] = None   # Texte existant à reformuler/corriger
     style_supplementaire: Optional[str] = None
     user_id: Optional[int] = None
+    # Mode de profondeur : "court" (1-2 pages, rapide), "standard" (3-5 pages),
+    # "long" (10+ pages — utilise Sonnet/Opus + max_tokens 24k pour rapports
+    # détaillés type analyses, business plans, mémoires, etc.)
+    mode: str = "standard"  # court | standard | long
 
 
 @dataclass
@@ -385,11 +389,33 @@ Pays / contexte : {pays}
 
 Produis le document complet et professionnel."""
 
+    # Choix adaptatif modèle + tokens selon le mode demandé.
+    # Mode "long" → Sonnet/Opus si dispo (mode REDACTION primaire est Sonnet),
+    # max_tokens 24k pour vraiment produire 10+ pages.
+    _MAX_TOKENS_PAR_MODE = {
+        "court":    4096,
+        "standard": getattr(settings, "IA_MAX_TOKENS_DOCUMENT", 8192),
+        "long":     24000,
+    }
+    mode_choisi = (demande.mode or "standard").lower()
+    if mode_choisi not in _MAX_TOKENS_PAR_MODE:
+        mode_choisi = "standard"
+    max_tokens = _MAX_TOKENS_PAR_MODE[mode_choisi]
+    if mode_choisi == "long":
+        # Indication explicite au LLM de produire un document long et détaillé
+        prompt = (
+            f"⚠️ MODE LONG — Produis un document EXHAUSTIF et DÉTAILLÉ (10-20 pages "
+            f"équivalentes). Sections nombreuses, sous-sections, tableaux récapitulatifs, "
+            f"annexes pertinentes, recommandations actionnables. Ne synthétise pas "
+            f"prématurément — pousse jusqu'au niveau de détail attendu pour un cabinet "
+            f"professionnel.\n\n"
+        ) + prompt
+
     reponse = await ia_client.appeler(
         prompt=prompt,
-        mode=ModeIA.REDACTION,
+        mode=ModeIA.REDACTION,  # primaire = Sonnet (équivalent Big4) ; fallback GPT-4o
         systeme=systeme,
-        max_tokens_override=getattr(settings, "IA_MAX_TOKENS_DOCUMENT", 8192),
+        max_tokens_override=max_tokens,
     )
 
     contenu = reponse.contenu

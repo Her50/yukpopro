@@ -196,6 +196,8 @@ export const gestionAPI = {
   travaux: (statut?: string) => api.get('/gestion/travaux', { params: statut ? { statut } : {} }),
   creerTravail: (data: Record<string, unknown>) => api.post('/gestion/travaux', data),
   modifierTravail: (id: number, data: Record<string, unknown>) => api.patch(`/gestion/travaux/${id}`, data),
+  terminerTravail: (id: number, data?: { message_personnalise?: string; envoyer_whatsapp?: boolean }) =>
+    api.post(`/gestion/travaux/${id}/terminer`, data || { envoyer_whatsapp: true }),
 
   // Devis & Facture
   genererDevis: (data: Record<string, unknown>) => api.post('/gestion/devis', data),

@@ -77,12 +77,23 @@ async def traduire_texte(
         "Retourne UNIQUEMENT la traduction, sans explication ni balises."
     )
 
+    # Choix adaptatif du modèle selon la longueur :
+    # - texte court (< 1500 mots) → Haiku (rapide, suffisant pour traduction simple)
+    # - texte long (≥ 1500 mots) → Sonnet (qualité, cohérence terminologique)
+    nb_mots_estime = len(demande.contenu.split())
+    _modele_force = (
+        ModelePrioritaire.CLAUDE_SONNET if nb_mots_estime >= 1500
+        else ModelePrioritaire.CLAUDE_HAIKU
+    )
+    _max_tokens = 16000 if nb_mots_estime >= 1500 else 4096
+
     try:
         reponse_ia = await ia_client.appeler(
             prompt=f"Traduis ce texte :\n\n{demande.contenu}",
-            mode=ModeIA.COPILOTE,
-            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            mode=ModeIA.REDACTION if nb_mots_estime >= 1500 else ModeIA.COPILOTE,
+            forcer_modele=_modele_force,
             systeme=prompt_sys,
+            max_tokens_override=_max_tokens,
         )
         texte_traduit = reponse_ia.contenu
     except Exception as e:
@@ -210,12 +221,25 @@ async def traduire_fichier(
         f"Contexte : {ctx}. Préserve sigles, noms propres, FCFA, OHADA, SYSCOHADA. "
         "Retourne UNIQUEMENT la traduction."
     )
+    # Fichier → souvent volumineux : Sonnet par défaut + max_tokens élevé.
+    # On garde Haiku uniquement si le fichier extrait est très court.
+    nb_mots_fichier = len(texte_source.split())
+    _modele_force = (
+        ModelePrioritaire.CLAUDE_SONNET if nb_mots_fichier >= 800
+        else ModelePrioritaire.CLAUDE_HAIKU
+    )
+    _max_tokens = 24000 if nb_mots_fichier >= 800 else 6000
+    # On ne tronque plus le texte à 6000 chars : laisser Sonnet gérer le contexte
+    # 200k. Sécurité 60k chars max pour éviter explosion coûts.
+    texte_a_traduire = texte_source[:60000]
+
     try:
         reponse_ia = await ia_client.appeler(
-            prompt=f"Traduis ce texte :\n\n{texte_source[:6000]}",
-            mode=ModeIA.COPILOTE,
-            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            prompt=f"Traduis ce texte :\n\n{texte_a_traduire}",
+            mode=ModeIA.REDACTION if nb_mots_fichier >= 800 else ModeIA.COPILOTE,
+            forcer_modele=_modele_force,
             systeme=prompt_sys,
+            max_tokens_override=_max_tokens,
         )
         texte_traduit = reponse_ia.contenu
     except Exception as e:

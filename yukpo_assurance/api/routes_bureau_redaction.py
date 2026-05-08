@@ -38,6 +38,10 @@ class DemandeGeneration(BaseModel):
     pays: str = Field(default="CM", description="Code pays : CM SN CI TG BJ CG GA RDC BF ML NE")
     reformuler_texte: Optional[str] = Field(None, description="Texte existant à reformuler (si fourni, 'informations' optionnel)")
     style_supplementaire: Optional[str] = Field(None, description="Instructions de style additionnelles")
+    mode: str = Field(
+        default="standard",
+        description="Profondeur du document : 'court' (1-2 pages, rapide) | 'standard' (3-5 pages) | 'long' (10+ pages, modèle puissant Sonnet/Opus)"
+    )
 
 
 class DemandeReformulation(BaseModel):
@@ -117,6 +121,7 @@ async def generer_document(
             reformuler_texte=demande.reformuler_texte,
             style_supplementaire=demande.style_supplementaire,
             user_id=current_user.user_id,
+            mode=demande.mode,
         )
         doc = await _generer(req)
     except ValueError as e:

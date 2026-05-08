@@ -54,10 +54,45 @@ async def get_db():
 
 # ─── Schémas ──────────────────────────────────────────────────────────────────
 
+_TYPES_TRAVAIL_VALIDES = {
+    "redaction_doc",   # Génération de document IA (lettre, contrat, attestation…)
+    "scan",            # Numérisation OCR d'un document papier
+    "saisie",          # Saisie/retranscription manuelle d'un document existant
+    "traduction",      # Traduction d'un document
+    "infographie",     # Création visuel/imprimé (flyer, faire-part, brochure…)
+    "impression",      # Impression / reprographie
+    "audio",           # Transcription audio → document
+    "autre",
+}
+
+
+def _normaliser_whatsapp(numero: str, indicatif_defaut: str = "+237") -> str:
+    """
+    Normalise un numéro WhatsApp au format international E.164.
+    Accepte : '+237 690 12 34 56', '690123456', '00237690123456', etc.
+    Retourne : '+237690123456'.
+    Lève ValueError si invalide.
+    """
+    if not numero or not numero.strip():
+        raise ValueError("Numéro WhatsApp obligatoire")
+    raw = numero.strip().replace(" ", "").replace("-", "").replace(".", "")
+    # Préfixe 00 → +
+    if raw.startswith("00"):
+        raw = "+" + raw[2:]
+    if not raw.startswith("+"):
+        # Pas d'indicatif → on ajoute le défaut
+        raw = indicatif_defaut + raw
+    digits = "".join(c for c in raw[1:] if c.isdigit())
+    if not (8 <= len(digits) <= 15):
+        raise ValueError(f"Numéro WhatsApp invalide : {numero}")
+    return "+" + digits
+
+
 class BonTravailCreate(BaseModel):
-    client_nom: str
-    description: str
-    type_travail: str = "redaction"
+    client_nom: str = Field(min_length=2, max_length=200)
+    client_whatsapp: str = Field(..., min_length=8, description="Numéro WhatsApp client au format international (+237…)")
+    description: str = Field(min_length=2)
+    type_travail: str = "redaction_doc"
     montant_fcfa: int = Field(ge=0, default=0)
     acompte_fcfa: int = Field(ge=0, default=0)
     echeance: Optional[date] = None
@@ -66,10 +101,16 @@ class BonTravailCreate(BaseModel):
 
 class BonTravailUpdate(BaseModel):
     statut: Optional[str] = None
+    client_whatsapp: Optional[str] = None
     montant_fcfa: Optional[int] = None
     acompte_fcfa: Optional[int] = None
     notes: Optional[str] = None
     echeance: Optional[date] = None
+
+
+class TerminerBonTravailRequest(BaseModel):
+    message_personnalise: Optional[str] = None
+    envoyer_whatsapp: bool = True
 
 
 class LigneDevisSchema(BaseModel):
@@ -140,6 +181,7 @@ async def lister_travaux(
                 {
                     "id": b.id,
                     "client_nom": b.client_nom,
+                    "client_whatsapp": getattr(b, "client_whatsapp", None),
                     "description": b.description,
                     "type_travail": b.type_travail,
                     "statut": b.statut,
@@ -148,6 +190,11 @@ async def lister_travaux(
                     "reste_a_payer": b.montant_fcfa - b.acompte_fcfa,
                     "echeance": b.echeance.isoformat() if b.echeance else None,
                     "notes": b.notes,
+                    "notif_fin_envoyee": getattr(b, "notif_fin_envoyee", False) or False,
+                    "notif_fin_horodatage": (
+                        b.notif_fin_horodatage.isoformat()
+                        if getattr(b, "notif_fin_horodatage", None) else None
+                    ),
                     "cree_le": b.cree_le.isoformat(),
                 }
                 for b in bons
@@ -169,11 +216,26 @@ async def creer_bon_travail(
     autorise, plan, msg = await verifier_acces_module(current_user.user_id, "gestion")
     if not autorise:
         raise HTTPException(403, msg)
+
+    # Validation type travail
+    if bon.type_travail not in _TYPES_TRAVAIL_VALIDES:
+        raise HTTPException(
+            400,
+            f"Type de travail invalide. Valides : {sorted(_TYPES_TRAVAIL_VALIDES)}"
+        )
+
+    # Validation + normalisation WhatsApp
+    try:
+        whatsapp_norm = _normaliser_whatsapp(bon.client_whatsapp)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
     try:
         from core.database import BureauBonTravailDB
         nouveau = BureauBonTravailDB(
             user_id=current_user.user_id,
             client_nom=bon.client_nom,
+            client_whatsapp=whatsapp_norm,
             description=bon.description,
             type_travail=bon.type_travail,
             statut="en_attente",
@@ -191,7 +253,11 @@ async def creer_bon_travail(
             await debiter_forfait(current_user.user_id, "kanban_action", module="gestion")
         except Exception:
             pass
-        return {"id": nouveau.id, "statut": "en_attente", "message": "Bon de travail créé"}
+        return {
+            "id": nouveau.id, "statut": "en_attente",
+            "client_whatsapp": whatsapp_norm,
+            "message": "Bon de travail créé",
+        }
     except ImportError:
         return {"id": None, "statut": "en_attente", "message": "Enregistrement temporaire (DB non migrée)"}
 
@@ -241,6 +307,94 @@ async def modifier_bon_travail(
         raise
     except ImportError:
         return {"id": bon_id, "message": "DB non migrée"}
+
+
+@router.post("/travaux/{bon_id}/terminer", tags=["Bureau — Gestion"])
+async def terminer_bon_travail(
+    bon_id: int,
+    req: TerminerBonTravailRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Marque un bon de travail comme livré ET envoie un message WhatsApp au client
+    pour l'informer que son travail est terminé.
+    """
+    import os, httpx
+    from core.database import BureauBonTravailDB
+    q = select(BureauBonTravailDB).where(
+        BureauBonTravailDB.id == bon_id,
+        BureauBonTravailDB.user_id == current_user.user_id,
+    )
+    res = await db.execute(q)
+    bon = res.scalar_one_or_none()
+    if not bon:
+        raise HTTPException(404, "Bon de travail introuvable")
+
+    # Met à jour le statut → livre
+    bon.statut = "livre"
+    bon.modifie_le = datetime.utcnow()
+
+    # Notification WhatsApp via Meta Business API
+    notif_status = {"envoye": False, "raison": None}
+    if req.envoyer_whatsapp and bon.client_whatsapp:
+        whatsapp_phone_id = os.getenv("META_WHATSAPP_PHONE_ID")
+        whatsapp_token    = os.getenv("META_WHATSAPP_TOKEN")
+        if not (whatsapp_phone_id and whatsapp_token):
+            notif_status["raison"] = "WhatsApp non configuré côté serveur"
+        else:
+            # Numéro destinataire (sans le +)
+            dest = bon.client_whatsapp.lstrip("+")
+            message = (req.message_personnalise or
+                f"Bonjour {bon.client_nom},\n\n"
+                f"Bonne nouvelle : votre travail « {bon.description[:80]} » est terminé "
+                f"et prêt à être récupéré.\n\n"
+                f"{f'Reste à régler : {bon.montant_fcfa - bon.acompte_fcfa} FCFA.' if (bon.montant_fcfa - bon.acompte_fcfa) > 0 else 'Le règlement est à jour, merci.'}\n\n"
+                f"Cordialement."
+            )
+            try:
+                async with httpx.AsyncClient(timeout=15) as client:
+                    r = await client.post(
+                        f"https://graph.facebook.com/v19.0/{whatsapp_phone_id}/messages",
+                        headers={
+                            "Authorization": f"Bearer {whatsapp_token}",
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "messaging_product": "whatsapp",
+                            "to": dest,
+                            "type": "text",
+                            "text": {"body": message},
+                        },
+                    )
+                if r.status_code == 200:
+                    notif_status["envoye"] = True
+                    bon.notif_fin_envoyee = True
+                    bon.notif_fin_horodatage = datetime.utcnow()
+                else:
+                    notif_status["raison"] = f"Meta API: HTTP {r.status_code} {r.text[:200]}"
+                    logger.warning(f"[Kanban/WA] Échec envoi : {notif_status['raison']}")
+            except Exception as e:
+                notif_status["raison"] = f"Exception : {e}"
+                logger.error(f"[Kanban/WA] {e}")
+
+    await db.commit()
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait
+        await debiter_forfait(current_user.user_id, "kanban_action", module="gestion")
+        if notif_status["envoye"]:
+            await debiter_forfait(current_user.user_id, "whatsapp_message", module="gestion")
+    except Exception:
+        pass
+
+    return {
+        "id": bon_id,
+        "statut": "livre",
+        "whatsapp_envoye":  notif_status["envoye"],
+        "whatsapp_destinataire": bon.client_whatsapp,
+        "whatsapp_raison":  notif_status["raison"],
+        "message": "Travail terminé" + (" + client notifié par WhatsApp" if notif_status["envoye"] else ""),
+    }
 
 
 # ─── Devis & Facturation ──────────────────────────────────────────────────────

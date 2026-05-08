@@ -150,6 +150,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
   const [typeDoc, setTypeDoc] = useLongOpField<string>('redaction', 'typeDoc', '')
   const [pays, setPays] = useLongOpField<string>('redaction', 'pays', 'CM')
   const [informations, setInformations] = useLongOpField<string>('redaction', 'informations', '')
+  const [mode, setMode] = useLongOpField<'court' | 'standard' | 'long'>('redaction', 'mode', 'standard')
   const loading = useLongOps((s) => s.loading.redaction)
   const resultat = useLongOps((s) => s.resultats.redaction) as RedactionResult | null
   const runOp = useLongOps((s) => s.run)
@@ -178,6 +179,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           informations: infosParsed(),
           pays,
           reformuler_texte: reformuler || undefined,
+          mode,
         })
         return r.data as RedactionResult
       })
@@ -250,13 +252,42 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           )}
         </div>
 
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Profondeur du document</label>
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { cle: 'court',    label: 'Court',     desc: '1-2 pages · rapide',          emoji: '⚡' },
+              { cle: 'standard', label: 'Standard',  desc: '3-5 pages',                   emoji: '📄' },
+              { cle: 'long',     label: 'Long',      desc: '10+ pages · modèle puissant', emoji: '📚' },
+            ] as const).map(m => (
+              <button key={m.cle} type="button" onClick={() => setMode(m.cle)}
+                className={`p-2.5 rounded-lg border text-left transition-colors ${
+                  mode === m.cle
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                <div className="text-sm font-semibold flex items-center gap-1">
+                  <span>{m.emoji}</span> {m.label}
+                </div>
+                <div className="text-[10px] text-gray-400 mt-0.5">{m.desc}</div>
+              </button>
+            ))}
+          </div>
+          {mode === 'long' && (
+            <p className="text-xs text-blue-600 mt-1">
+              Mode long : utilise un modèle plus puissant (Sonnet/Opus) avec capacité 24K tokens.
+              La génération peut prendre 30-60s.
+            </p>
+          )}
+        </div>
+
         <button
           onClick={generer}
           disabled={loading || !typeDoc}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
-          {loading ? 'Génération en cours…' : 'Générer le document'}
+          {loading ? (mode === 'long' ? 'Génération longue en cours (30-60s)…' : 'Génération en cours…') : 'Générer le document'}
         </button>
       </div>
 

@@ -908,13 +908,17 @@ class BureauBonTravailDB(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False, index=True)
     client_nom = Column(String(200), nullable=False)
+    client_whatsapp = Column(String(30), nullable=True, index=True)  # +237xxx — obligatoire pour notif fin
     description = Column(Text, nullable=False)
-    type_travail = Column(String(50), default="redaction")  # redaction|ocr|infographie|impression|saisie
+    type_travail = Column(String(50), default="redaction_doc")
+    # redaction_doc | scan | infographie | impression | saisie | traduction | autre
     statut = Column(String(30), default="en_attente", index=True)  # en_attente|en_cours|en_revision|livre|paye|annule
     montant_fcfa = Column(Integer, default=0)
     acompte_fcfa = Column(Integer, default=0)
     echeance = Column(DateTime, nullable=True)
     notes = Column(Text, default="")
+    notif_fin_envoyee = Column(Boolean, default=False)  # WA envoyé à la fin
+    notif_fin_horodatage = Column(DateTime, nullable=True)
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
     modifie_le = Column(DateTime, default=datetime.utcnow)
 
@@ -1170,6 +1174,10 @@ async def init_db() -> None:
         ("copilote_sessions",    "modifie_le",                 "TIMESTAMP", None),
         # CompagnieDB — webhook HMAC secret
         ("compagnies",           "webhook_secret",             "VARCHAR(128)", None),
+        # BureauBonTravailDB — WhatsApp client + notif de fin
+        ("bureau_bons_travail",  "client_whatsapp",            "VARCHAR(30)",  None),
+        ("bureau_bons_travail",  "notif_fin_envoyee",          "BOOLEAN",      "FALSE"),
+        ("bureau_bons_travail",  "notif_fin_horodatage",       "TIMESTAMP",    None),
     ]
     async with engine.begin() as conn:
         for table, col, col_type, default in _nouvelles_colonnes:
