@@ -885,14 +885,23 @@ class ReportWriterPro:
                         f"[ReportWriter] Web injecté: {resultat_web.nb_sources} sources, "
                         f"{len(resultat_web.contexte_formate)} chars"
                     )
-                elif forcer_recherche_web or not contexte_enrichi:
-                    # Aucune source trouvée et pas de fallback → REFUS
+                elif forcer_recherche_web:
+                    # L'utilisateur a EXPLICITEMENT demandé des données réelles
+                    # (plainte « tu as inventé ») → on refuse vraiment.
                     raise SourcesInsuffisantesError(
                         raison=(
                             resultat_web.raison_echec
                             or "Aucune source fiable trouvée pour ce sujet."
                         ),
                         sources_essayees=resultat_web.sources_urls,
+                    )
+                else:
+                    # Pas de sources web mais pas en mode strict → on continue
+                    # en mode 'template', le LLM génère un draft basé sur ses
+                    # connaissances générales avec disclaimer "à compléter".
+                    logger.info(
+                        f"[ReportWriter] Pas de sources web pour {type_rapport} "
+                        f"→ génération en mode template (draft)"
                     )
             except SourcesInsuffisantesError:
                 raise
@@ -903,18 +912,9 @@ class ReportWriterPro:
                         raison=f"Recherche web indisponible : {e}",
                     )
 
-        # ── Garde-fou final : pas de données du tout ⇒ refus ─────────────────
-        # Pour un rapport technique, refuser d'inventer si rien n'est exploitable.
-        if type_rapport in _TYPES_RAG and not contexte_enrichi:
-            raise SourcesInsuffisantesError(
-                raison=(
-                    "Aucune source vérifiable disponible pour ce rapport "
-                    "(pas de pièces jointes, pas de correspondance dans le corpus "
-                    "réglementaire local, pas de résultat sur les sites web fiables). "
-                    "Veuillez fournir un document source (rapport annuel, données "
-                    "comptables, état CIMA, etc.) pour permettre une rédaction factuelle."
-                ),
-            )
+        # Plus de garde-fou bloquant : si pas de contexte, on génère quand même
+        # un draft template. L'utilisateur peut demander une régénération avec
+        # ses propres données ensuite (plainte « tu as inventé » → web search forcé).
 
         # Construire le prompt utilisateur
         sections_str = "\n".join(f"{i+1}. **{s}**" for i, s in enumerate(structure))
