@@ -212,6 +212,8 @@ export const adminAPI = {
   debloquer: (user_id: number) =>
     api.post(`/admin/utilisateurs/${user_id}/debloquer`),
   stats: () => api.get('/admin/stats'),
+  statsRevenus: (params?: { date_debut?: string; date_fin?: string }) =>
+    api.get('/admin/stats/revenus', { params }),
   lancerPromotion: (data: {
     montant: number; cible: 'tous' | 'ids' | 'consommation' | 'role';
     user_ids?: number[]; role?: string;

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Shield, Users, Search, X, Loader2, Plus, Lock, Unlock, TrendingUp,
   Wallet, BarChart3, Eye, AlertCircle, Megaphone, LayoutDashboard,
+  DollarSign, ArrowUpRight, ArrowDownRight, Calendar,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { adminAPI } from '../api/client'
@@ -43,7 +44,7 @@ function fmtDate(iso: string | null | undefined, withTime = false): string {
 export default function AdminPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const [tab, setTab] = useState<'overview' | 'utilisateurs' | 'promotions'>('overview')
+  const [tab, setTab] = useState<'overview' | 'utilisateurs' | 'revenus' | 'promotions'>('overview')
   const [recherche, setRecherche] = useState('')
   const [page, setPage] = useState(1)
   const [userOuvert, setUserOuvert] = useState<number | null>(null)
@@ -127,6 +128,7 @@ export default function AdminPage() {
         {([
           ['overview',     "Vue d'ensemble", LayoutDashboard],
           ['utilisateurs', 'Utilisateurs',   Users],
+          ['revenus',      'Revenus CA',     DollarSign],
           ['promotions',   'Promotions',     Megaphone],
         ] as const).map(([key, label, Icon]) => (
           <button key={key} onClick={() => setTab(key as any)}
@@ -310,6 +312,9 @@ export default function AdminPage() {
           )}
         </div>
       )}
+
+      {/* Revenus */}
+      {tab === 'revenus' && <RevenusTab />}
 
       {/* Promotions */}
       {tab === 'promotions' && <PromotionsTab />}
@@ -684,6 +689,283 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className="text-xs text-gray-500 block mb-1">{label}</label>
       {children}
+    </div>
+  )
+}
+
+// ─── Revenus CA ────────────────────────────────────────────────────────────────
+
+type RangePreset = 'all' | '7j' | '30j' | '90j' | 'mois' | 'annee' | 'custom'
+
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function isoMinusDays(jours: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - jours)
+  return d.toISOString().slice(0, 10)
+}
+
+function debutMoisISO(): string {
+  const d = new Date()
+  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10)
+}
+
+function debutAnneeISO(): string {
+  const d = new Date()
+  return new Date(d.getFullYear(), 0, 1).toISOString().slice(0, 10)
+}
+
+function variationPct(actuel: number, precedent: number): number | null {
+  if (!precedent) return actuel > 0 ? 100 : null
+  return ((actuel - precedent) / precedent) * 100
+}
+
+function VariationBadge({ actuel, precedent }: { actuel: number; precedent: number }) {
+  const v = variationPct(actuel, precedent)
+  if (v === null) return null
+  const positif = v >= 0
+  const Icon = positif ? ArrowUpRight : ArrowDownRight
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${
+      positif ? 'text-emerald-600' : 'text-red-600'
+    }`}>
+      <Icon size={10} /> {Math.abs(v).toFixed(1)}%
+    </span>
+  )
+}
+
+function RevenusTab() {
+  const [preset, setPreset] = useState<RangePreset>('30j')
+  const [dateDebut, setDateDebut] = useState<string>(isoMinusDays(30))
+  const [dateFin, setDateFin]     = useState<string>(todayISO())
+
+  const appliquerPreset = (p: RangePreset) => {
+    setPreset(p)
+    if (p === 'all') { setDateDebut(''); setDateFin('') }
+    else if (p === '7j')   { setDateDebut(isoMinusDays(7));   setDateFin(todayISO()) }
+    else if (p === '30j')  { setDateDebut(isoMinusDays(30));  setDateFin(todayISO()) }
+    else if (p === '90j')  { setDateDebut(isoMinusDays(90));  setDateFin(todayISO()) }
+    else if (p === 'mois') { setDateDebut(debutMoisISO());    setDateFin(todayISO()) }
+    else if (p === 'annee'){ setDateDebut(debutAnneeISO());   setDateFin(todayISO()) }
+  }
+
+  const params = preset === 'all'
+    ? undefined
+    : { date_debut: dateDebut || undefined, date_fin: dateFin || undefined }
+
+  const revenusQ = useQuery({
+    queryKey: ['admin-revenus', preset, dateDebut, dateFin],
+    queryFn: async () => (await adminAPI.statsRevenus(params)).data,
+    retry: 1,
+  })
+
+  if (revenusQ.isLoading) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <Loader2 className="inline animate-spin mr-2" size={16} /> Chargement des revenus…
+      </div>
+    )
+  }
+  if (revenusQ.isError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+        <AlertCircle className="inline mr-2" size={14} /> Impossible de charger les revenus.
+      </div>
+    )
+  }
+
+  const d = revenusQ.data
+  if (!d) return null
+
+  const periodeActive = !!(dateDebut || dateFin)
+  const evolutionMax = Math.max(1, ...(d.evolution_12mois || []).map((m: any) => m.montant || 0))
+
+  return (
+    <div className="space-y-4">
+      {/* Présets de période */}
+      <div className="bg-white rounded-xl border border-gray-200 p-3 flex flex-wrap items-center gap-2">
+        <Calendar size={14} className="text-gray-400" />
+        <span className="text-xs text-gray-500 mr-1">Période :</span>
+        {([
+          ['7j',    '7 jours'],
+          ['30j',   '30 jours'],
+          ['90j',   '3 mois'],
+          ['mois',  'Ce mois'],
+          ['annee', 'Cette année'],
+          ['all',   'Tout'],
+        ] as const).map(([k, lbl]) => (
+          <button key={k} onClick={() => appliquerPreset(k as RangePreset)}
+            className={`text-xs px-2.5 py-1 rounded-full border transition ${
+              preset === k ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-600 hover:bg-gray-50 border-gray-200'
+            }`}>{lbl}</button>
+        ))}
+        <div className="flex items-center gap-1 ml-2">
+          <input type="date" value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPreset('custom') }}
+            className="text-xs border rounded px-2 py-1" />
+          <span className="text-xs text-gray-400">→</span>
+          <input type="date" value={dateFin} onChange={e => { setDateFin(e.target.value); setPreset('custom') }}
+            className="text-xs border rounded px-2 py-1" />
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-4">
+          <div className="text-xs text-emerald-700 uppercase tracking-wide flex items-center gap-1">
+            <DollarSign size={11} /> CA total
+          </div>
+          <div className="text-2xl font-bold text-emerald-900 mt-1">{fmtFcfa(d.ca_total_fcfa)}</div>
+          <div className="text-[10px] text-emerald-700 mt-0.5">
+            {fmtNb(d.nb_transactions_total)} recharge(s) · {fmtNb(d.nb_clients_payants)} client(s)
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <div className="text-xs text-gray-500 uppercase">CA aujourd'hui</div>
+          <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_aujourdhui?.montant)}</div>
+          <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
+            <span>{fmtNb(d.ca_aujourdhui?.transactions ?? 0)} tx</span>
+            <VariationBadge actuel={d.ca_aujourdhui?.montant ?? 0} precedent={d.ca_aujourdhui_precedent?.montant ?? 0} />
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <div className="text-xs text-gray-500 uppercase">CA 7 jours</div>
+          <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_7j?.montant)}</div>
+          <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
+            <span>{fmtNb(d.ca_7j?.transactions ?? 0)} tx</span>
+            <VariationBadge actuel={d.ca_7j?.montant ?? 0} precedent={d.ca_7j_precedent?.montant ?? 0} />
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <div className="text-xs text-gray-500 uppercase">CA 30 jours</div>
+          <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(d.ca_30j?.montant)}</div>
+          <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
+            <span>{fmtNb(d.ca_30j?.transactions ?? 0)} tx</span>
+            <VariationBadge actuel={d.ca_30j?.montant ?? 0} precedent={d.ca_30j_precedent?.montant ?? 0} />
+          </div>
+        </div>
+      </div>
+
+      {/* Bandeau période personnalisée */}
+      {periodeActive && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-xs text-amber-700 uppercase">CA sur la période sélectionnée</div>
+            <div className="text-2xl font-bold text-amber-900">{fmtFcfa(d.ca_periode?.montant)}</div>
+            <div className="text-[10px] text-amber-700">
+              {fmtNb(d.ca_periode?.transactions ?? 0)} recharge(s) · {fmtNb(d.ca_periode?.clients ?? 0)} client(s)
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-amber-700 uppercase">vs période précédente</div>
+            <div className="text-sm font-semibold text-amber-900">{fmtFcfa(d.ca_periode_precedente?.montant)}</div>
+            <VariationBadge actuel={d.ca_periode?.montant ?? 0} precedent={d.ca_periode_precedente?.montant ?? 0} />
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Évolution mensuelle */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <BarChart3 size={14} className="text-amber-600" /> Évolution mensuelle (CA)
+          </h3>
+          {(d.evolution_12mois || []).length === 0 ? (
+            <p className="text-sm text-gray-500">Aucune recharge sur la période.</p>
+          ) : (
+            <div className="space-y-2">
+              {d.evolution_12mois.map((m: any) => {
+                const pct = ((m.montant || 0) / evolutionMax) * 100
+                return (
+                  <div key={m.mois}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-gray-600">{m.mois}</span>
+                      <span className="text-gray-500">{fmtFcfa(m.montant)} · {fmtNb(m.transactions)} tx</span>
+                    </div>
+                    <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">
+                      <div className="bg-emerald-500 h-full" style={{ width: `${Math.max(2, pct)}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Top packs */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <TrendingUp size={14} className="text-amber-600" /> Top packs / recharges
+          </h3>
+          {(d.par_pack || []).length === 0 ? (
+            <p className="text-sm text-gray-500">Aucune donnée.</p>
+          ) : (
+            <div className="space-y-2">
+              {d.par_pack.slice(0, 8).map((p: any) => {
+                const max = d.par_pack[0]?.montant || 1
+                const pct = ((p.montant || 0) / max) * 100
+                return (
+                  <div key={p.pack}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-gray-700 truncate pr-2">{p.pack}</span>
+                      <span className="text-gray-500 whitespace-nowrap">
+                        {fmtFcfa(p.montant)} · {fmtNb(p.transactions)} tx · {fmtNb(p.credits)} crédits
+                      </span>
+                    </div>
+                    <div className="bg-gray-100 rounded-full h-2 mt-1 overflow-hidden">
+                      <div className="bg-amber-500 h-full" style={{ width: `${Math.max(2, pct)}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dernières transactions */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <h3 className="text-sm font-semibold text-gray-700 p-4 border-b flex items-center gap-2">
+          <Wallet size={14} className="text-amber-600" /> Dernières recharges (20)
+        </h3>
+        {(d.dernieres_transactions || []).length === 0 ? (
+          <p className="text-sm text-gray-500 p-6 text-center">Aucune recharge enregistrée.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-gray-50 text-gray-500 uppercase">
+                <tr>
+                  <th className="text-left px-3 py-2">Date</th>
+                  <th className="text-left px-3 py-2">Utilisateur</th>
+                  <th className="text-left px-3 py-2">Pack</th>
+                  <th className="text-right px-3 py-2">Crédits</th>
+                  <th className="text-right px-3 py-2">Montant</th>
+                  <th className="text-left px-3 py-2">Référence</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {d.dernieres_transactions.map((t: any) => (
+                  <tr key={t.reference || `${t.user_id}-${t.date}`} className="hover:bg-gray-50">
+                    <td className="px-3 py-2 text-gray-500 whitespace-nowrap">{fmtDate(t.date, true)}</td>
+                    <td className="px-3 py-2">
+                      <div className="font-medium text-gray-900">{t.nom || t.email || `#${t.user_id}`}</div>
+                      {t.email && <div className="text-[10px] text-gray-500">{t.email}</div>}
+                    </td>
+                    <td className="px-3 py-2 text-gray-600">{t.pack_nom}</td>
+                    <td className="px-3 py-2 text-right font-medium text-amber-700">{fmtNb(t.credits)}</td>
+                    <td className="px-3 py-2 text-right font-semibold text-emerald-700">{fmtFcfa(t.montant)}</td>
+                    <td className="px-3 py-2 text-gray-400 font-mono text-[10px]">{t.reference}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

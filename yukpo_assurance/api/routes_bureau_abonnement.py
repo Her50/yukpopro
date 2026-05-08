@@ -465,12 +465,14 @@ async def confirmer_recharge_credits_bureau(
         raise HTTPException(500, "Erreur lors de l'ajout des crédits.")
 
     historique = prefs.get("bureau_historique_recharges", [])
+    _now = datetime.utcnow()
     historique.insert(0, {
         "reference": req.reference_paiement,
         "pack_nom":  pack.get("nom", pack_id),
         "credits":   credits_a_ajouter,
         "montant":   attente["montant"],
-        "date":      datetime.utcnow().strftime("%d/%m/%Y %H:%M"),
+        "date":      _now.strftime("%d/%m/%Y %H:%M"),
+        "date_iso":  _now.isoformat(),
     })
     prefs["bureau_historique_recharges"] = historique[:20]
     prefs.pop("bureau_recharge_en_attente", None)

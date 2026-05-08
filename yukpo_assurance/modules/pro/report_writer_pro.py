@@ -798,55 +798,13 @@ class ReportWriterPro:
         if contexte and ("===" in contexte or " | " in contexte or "Feuille :" in contexte):
             contexte_enrichi = _analyser_excel_pandas(contexte)
 
-        # ── Enrichissement RAG automatique pour rapports techniques ──────────
-        # Sans pièce jointe, le LLM n'a aucune donnée à exploiter et produit des
-        # placeholders (X%, A1, B1...). On injecte le corpus réglementaire/stats.
+        # ── Liste des types qui DÉCLENCHENT une recherche web ────────────────
+        # (RAG corpus local désactivé sur demande — on se contente de la
+        # recherche web fiable et des connaissances générales du LLM)
         _TYPES_RAG = {
             "rapport_financier", "rapport_audit", "rapport_rh",
             "note_juridique", "note_de_synthese", "rapport_analyse",
         }
-        if type_rapport in _TYPES_RAG:
-            try:
-                from modules.rag.rag_retriever import (
-                    rechercher_pour_metier, rechercher_corpus_reglementaire,
-                )
-                pays_profil = self._profil.pays if self._profil else None
-                metier_profil = self._profil.metier if self._profil else None
-                requete_rag = (instruction_utilisateur or sujet or "").strip()
-                contexte_rag = ""
-                if requete_rag:
-                    if metier_profil:
-                        contexte_rag = rechercher_pour_metier(
-                            question=requete_rag,
-                            metier=metier_profil,
-                            pays=pays_profil,
-                            top_k=10,
-                        )
-                    else:
-                        contexte_rag = rechercher_corpus_reglementaire(
-                            question=requete_rag,
-                            pays=pays_profil,
-                            top_k=10,
-                        )
-                if contexte_rag:
-                    bloc_rag = (
-                        f"\n\n{'═'*60}\n"
-                        f"DONNÉES RÉGLEMENTAIRES & STATISTIQUES OFFICIELLES "
-                        f"(corpus indexé — citer textuellement) :\n"
-                        f"{'═'*60}\n{contexte_rag}"
-                    )
-                    contexte_enrichi = (contexte_enrichi or "") + bloc_rag
-                    logger.info(
-                        f"[ReportWriter] RAG injecté ({len(contexte_rag)} chars) "
-                        f"pour {type_rapport} pays={pays_profil}"
-                    )
-                else:
-                    logger.warning(
-                        f"[ReportWriter] RAG vide pour {type_rapport} "
-                        f"(question={requete_rag[:80]!r}, pays={pays_profil})"
-                    )
-            except Exception as e:
-                logger.warning(f"[ReportWriter] Enrichissement RAG échoué: {e}")
 
         # ── Recherche web réelle (sources fiables) ───────────────────────────
         # Déclenchée si :
@@ -1261,6 +1219,21 @@ class ReportWriterPro:
 
         doc = Document()
 
+        # ── Force Word/LibreOffice à mettre à jour les champs (TOC, PAGE,
+        # NUMPAGES) à l'ouverture. Sinon le sommaire reste vide ou affiche
+        # toutes les entrées avec « Page 1 ».
+        try:
+            settings_el = doc.settings.element
+            update_fields_el = OxmlElement("w:updateFields")
+            update_fields_el.set(qn("w:val"), "true")
+            # Évite les doublons si déjà présent
+            existing = settings_el.find(qn("w:updateFields"))
+            if existing is not None:
+                settings_el.remove(existing)
+            settings_el.append(update_fields_el)
+        except Exception as _e:
+            logger.debug(f"[ReportWriter] updateFields setting non posé: {_e}")
+
         # ── Styles de page ────────────────────────────────────────────────
         sections_doc = doc.sections
         for section in sections_doc:
@@ -1407,9 +1380,11 @@ class ReportWriterPro:
 
         doc.add_page_break()
 
-        # ── Sommaire / Table des matières (champ Word natif) ──────────────
-        # L'utilisateur clique-droit > "Mettre à jour les champs" pour
-        # peupler le sommaire automatiquement à partir des Heading 1/2/3.
+        # ── Sommaire (statique — fonctionne dans Word ET LibreOffice/PDF) ──
+        # On écrit chaque section sous forme "1. Titre" en hiérarchie. Pas
+        # de numéros de page (impossibles à calculer côté python-docx sans
+        # rendu réel) — le compromis : un index lisible immédiatement
+        # disponible, sans dépendre d'une mise à jour manuelle des champs.
         p_toc_titre = doc.add_paragraph()
         p_toc_titre.alignment = WD_ALIGN_PARAGRAPH.LEFT
         run_toc_titre = p_toc_titre.add_run("SOMMAIRE")
@@ -1418,28 +1393,18 @@ class ReportWriterPro:
         run_toc_titre.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
         doc.add_paragraph()
 
-        p_toc = doc.add_paragraph()
-        toc_run = p_toc.add_run()
-        # fldChar begin
-        fld_b = OxmlElement("w:fldChar")
-        fld_b.set(qn("w:fldCharType"), "begin"); fld_b.set(qn("w:dirty"), "true")
-        toc_run._r.append(fld_b)
-        # instrText : TOC \o "1-3" \h \z \u
-        instr = OxmlElement("w:instrText")
-        instr.set(qn("xml:space"), "preserve")
-        instr.text = 'TOC \\o "1-3" \\h \\z \\u'
-        toc_run._r.append(instr)
-        # fldChar separate (placeholder text)
-        fld_s = OxmlElement("w:fldChar"); fld_s.set(qn("w:fldCharType"), "separate")
-        toc_run._r.append(fld_s)
-        # placeholder visible avant refresh
-        ph = OxmlElement("w:r")
-        ph_t = OxmlElement("w:t")
-        ph_t.text = "Cliquez-droit ici puis « Mettre à jour les champs » pour générer le sommaire."
-        ph.append(ph_t); toc_run._r.append(ph)
-        # fldChar end
-        fld_e = OxmlElement("w:fldChar"); fld_e.set(qn("w:fldCharType"), "end")
-        toc_run._r.append(fld_e)
+        for idx, sec in enumerate(sections, start=1):
+            titre_sec = (sec.get("titre") or "").strip() or f"Section {idx}"
+            p_entry = doc.add_paragraph()
+            p_entry.paragraph_format.space_after = Pt(4)
+            run_num = p_entry.add_run(f"{idx}. ")
+            run_num.bold = True
+            run_num.font.size = Pt(11)
+            run_num.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
+            run_t = p_entry.add_run(titre_sec)
+            run_t.font.size = Pt(11)
+            run_t.font.color.rgb = RGBColor(0x1A, 0x1A, 0x2E)
+
         doc.add_page_break()
 
         # ── Corps du rapport (rendu ligne par ligne, robuste) ─────────────

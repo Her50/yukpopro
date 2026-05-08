@@ -479,3 +479,216 @@ async def stats_globales(
             for (uid, cr) in top_users
         ],
     }
+
+
+# ── Revenus / CA ──────────────────────────────────────────────────────────────
+
+def _parser_date_recharge(entry: dict) -> Optional[datetime]:
+    """Parse une entrée d'historique : prend `date_iso` en priorité, sinon
+    le format affiché `%d/%m/%Y %H:%M` (legacy). Retourne None si illisible."""
+    iso = entry.get("date_iso")
+    if iso:
+        try:
+            return datetime.fromisoformat(iso)
+        except (ValueError, TypeError):
+            pass
+    affichee = entry.get("date")
+    if affichee:
+        try:
+            return datetime.strptime(affichee, "%d/%m/%Y %H:%M")
+        except (ValueError, TypeError):
+            pass
+    return None
+
+
+@router.get("/stats/revenus", summary="Chiffre d'affaires recharges Secrétariat")
+async def stats_revenus(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    date_debut: Optional[str] = Query(None, description="ISO YYYY-MM-DD — début"),
+    date_fin: Optional[str] = Query(None, description="ISO YYYY-MM-DD — fin"),
+):
+    """
+    CA YukpoSecrétariat — agrégé depuis `profil.preferences.bureau_historique_recharges`
+    (les recharges Secrétariat ne passent pas par PaymentTransactionV2DB).
+
+    Retourne :
+      - ca_total_fcfa, ca_aujourdhui, ca_7j, ca_30j, ca_periode (+ comparaisons)
+      - evolution_12mois (par mois)
+      - par_pack (top packs)
+      - dernieres_transactions (20)
+      - nb_clients_payants
+    """
+    _exiger_admin(current_user)
+    from modules.pro.profil_pro import ProfilProfessionnelDB
+
+    now = datetime.utcnow()
+    today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    j7 = now - timedelta(days=7)
+    j30 = now - timedelta(days=30)
+
+    custom_debut: Optional[datetime] = None
+    custom_fin: Optional[datetime] = None
+    if date_debut:
+        try:
+            custom_debut = datetime.fromisoformat(date_debut)
+        except ValueError:
+            raise HTTPException(400, "date_debut invalide (ISO YYYY-MM-DD)")
+    if date_fin:
+        try:
+            custom_fin = datetime.fromisoformat(date_fin)
+            if custom_fin.hour == 0 and custom_fin.minute == 0:
+                custom_fin = custom_fin + timedelta(days=1) - timedelta(seconds=1)
+        except ValueError:
+            raise HTTPException(400, "date_fin invalide (ISO YYYY-MM-DD)")
+
+    # Charge tous les profils ayant au moins une recharge confirmée
+    profils_res = await db.execute(select(ProfilProfessionnelDB))
+    profils = profils_res.scalars().all()
+
+    # Hydrate emails
+    user_ids_set: set[int] = {p.user_id for p in profils}
+    users_map: dict[int, UtilisateurDB] = {}
+    if user_ids_set:
+        u_res = await db.execute(
+            select(UtilisateurDB).where(UtilisateurDB.id.in_(user_ids_set))
+        )
+        users_map = {u.id: u for u in u_res.scalars().all()}
+
+    # Aplatit toutes les recharges en une liste de dicts datés
+    transactions: list[dict] = []
+    for p in profils:
+        prefs = p.preferences or {}
+        historique = prefs.get("bureau_historique_recharges") or []
+        if not isinstance(historique, list):
+            continue
+        for entry in historique:
+            if not isinstance(entry, dict):
+                continue
+            dt = _parser_date_recharge(entry)
+            if dt is None:
+                continue
+            try:
+                montant = float(entry.get("montant") or 0)
+            except (ValueError, TypeError):
+                montant = 0.0
+            try:
+                credits = int(entry.get("credits") or 0)
+            except (ValueError, TypeError):
+                credits = 0
+            user = users_map.get(p.user_id)
+            transactions.append({
+                "user_id":   p.user_id,
+                "email":     user.email if user else None,
+                "nom":       user.nom if user else None,
+                "reference": entry.get("reference") or "",
+                "pack_nom":  entry.get("pack_nom") or "—",
+                "credits":   credits,
+                "montant":   montant,
+                "date":      dt,
+            })
+
+    def _periode_total(debut: datetime, fin: Optional[datetime] = None) -> dict:
+        somme = 0.0
+        n = 0
+        clients: set[int] = set()
+        for t in transactions:
+            if t["date"] < debut:
+                continue
+            if fin is not None and t["date"] > fin:
+                continue
+            somme += t["montant"]
+            n += 1
+            clients.add(t["user_id"])
+        return {"montant": somme, "transactions": n, "clients": len(clients)}
+
+    ca_total = sum(t["montant"] for t in transactions)
+    nb_total = len(transactions)
+    nb_clients_payants = len({t["user_id"] for t in transactions})
+
+    ca_jour = _periode_total(today)
+    ca_7j = _periode_total(j7)
+    ca_30j = _periode_total(j30)
+
+    # Comparaisons période précédente
+    ca_jour_prec = _periode_total(today - timedelta(days=1), today - timedelta(seconds=1))
+    ca_7j_prec = _periode_total(j7 - timedelta(days=7), j7 - timedelta(seconds=1))
+    ca_30j_prec = _periode_total(j30 - timedelta(days=30), j30 - timedelta(seconds=1))
+
+    ca_periode: dict = {"montant": 0.0, "transactions": 0, "clients": 0}
+    ca_periode_prec: dict = {"montant": 0.0, "transactions": 0, "clients": 0}
+    if custom_debut is not None or custom_fin is not None:
+        d = custom_debut or datetime(1970, 1, 1)
+        f = custom_fin or now
+        ca_periode = _periode_total(d, f)
+        duree = f - d
+        d_prec = d - duree - timedelta(seconds=1)
+        f_prec = d - timedelta(seconds=1)
+        if d_prec.year >= 1970:
+            ca_periode_prec = _periode_total(d_prec, f_prec)
+
+    # Évolution mensuelle (12 derniers mois ou période custom)
+    debut_evol = custom_debut or (now - timedelta(days=365))
+    fin_evol = custom_fin or now
+    par_mois: dict[str, dict] = {}
+    for t in transactions:
+        if t["date"] < debut_evol or t["date"] > fin_evol:
+            continue
+        cle = t["date"].strftime("%Y-%m")
+        slot = par_mois.setdefault(cle, {"mois": cle, "montant": 0.0, "transactions": 0})
+        slot["montant"] += t["montant"]
+        slot["transactions"] += 1
+    evolution = sorted(par_mois.values(), key=lambda x: x["mois"])
+
+    # Par pack
+    par_pack_map: dict[str, dict] = {}
+    for t in transactions:
+        if custom_debut and t["date"] < custom_debut:
+            continue
+        if custom_fin and t["date"] > custom_fin:
+            continue
+        slot = par_pack_map.setdefault(
+            t["pack_nom"],
+            {"pack": t["pack_nom"], "montant": 0.0, "transactions": 0, "credits": 0},
+        )
+        slot["montant"] += t["montant"]
+        slot["transactions"] += 1
+        slot["credits"] += t["credits"]
+    par_pack = sorted(par_pack_map.values(), key=lambda x: x["montant"], reverse=True)
+    top_pack = par_pack[0] if par_pack else None
+
+    # 20 dernières transactions
+    dernieres = sorted(transactions, key=lambda x: x["date"], reverse=True)[:20]
+    dernieres_serialise = [
+        {
+            "reference":  t["reference"],
+            "user_id":    t["user_id"],
+            "email":      t["email"],
+            "nom":        t["nom"],
+            "pack_nom":   t["pack_nom"],
+            "credits":    t["credits"],
+            "montant":    t["montant"],
+            "date":       t["date"].isoformat(),
+        }
+        for t in dernieres
+    ]
+
+    return {
+        "devise": "XAF",  # Secrétariat n'a pas (encore) de paiements multi-devises
+        "ca_total_fcfa":          round(ca_total, 0),
+        "nb_transactions_total":  nb_total,
+        "nb_clients_payants":     nb_clients_payants,
+        "ca_aujourdhui":          {**ca_jour,    "montant": round(ca_jour["montant"], 0)},
+        "ca_7j":                  {**ca_7j,      "montant": round(ca_7j["montant"], 0)},
+        "ca_30j":                 {**ca_30j,     "montant": round(ca_30j["montant"], 0)},
+        "ca_aujourdhui_precedent":{**ca_jour_prec, "montant": round(ca_jour_prec["montant"], 0)},
+        "ca_7j_precedent":        {**ca_7j_prec,   "montant": round(ca_7j_prec["montant"], 0)},
+        "ca_30j_precedent":       {**ca_30j_prec,  "montant": round(ca_30j_prec["montant"], 0)},
+        "ca_periode":             {**ca_periode,  "montant": round(ca_periode["montant"], 0)},
+        "ca_periode_precedente":  {**ca_periode_prec, "montant": round(ca_periode_prec["montant"], 0)},
+        "evolution_12mois":       [{**e, "montant": round(e["montant"], 0)} for e in evolution],
+        "par_pack":               [{**p, "montant": round(p["montant"], 0)} for p in par_pack],
+        "top_pack":               {**top_pack, "montant": round(top_pack["montant"], 0)} if top_pack else None,
+        "dernieres_transactions": dernieres_serialise,
+        "filtres": {"date_debut": date_debut, "date_fin": date_fin},
+    }
