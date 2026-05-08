@@ -204,7 +204,7 @@ export default function AbonnementPage() {
                   <div className="text-xs text-gray-400">{r.desc}</div>
                   <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(r.fcfa)}</div>
                   <div className="text-xs text-brand-600 mt-1 flex items-center gap-1">
-                    <Zap size={10} /> {fmtNb(r.fcfa * MULTIPLICATEUR)} crédits
+                    <Zap size={10} /> {fmtNb(creditsForFcfa(r.fcfa))} crédits
                   </div>
                 </button>
               ))}
