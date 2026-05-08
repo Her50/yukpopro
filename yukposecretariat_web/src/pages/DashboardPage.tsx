@@ -1,18 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
-import { FileText, Scan, Mic, Image, KanbanSquare, Wallet, ArrowRight } from 'lucide-react'
+import { FileText, Scan, Mic, FolderOpen, Image, KanbanSquare, Wallet, ArrowRight, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { gestionAPI } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { DemoBanner } from '../components/DemoBanner'
 
 const ACCES_RAPIDES = [
-  { label: 'Rédiger un document', icon: FileText, to: '/redaction', color: 'bg-blue-500', desc: '30+ types de documents IA' },
-  { label: 'Numériser un document', icon: Scan, to: '/ocr', color: 'bg-green-500', desc: 'Photo → texte structuré' },
-  { label: 'Dicter un texte', icon: Mic, to: '/audio', color: 'bg-purple-500', desc: 'Audio → Word en 1 clic' },
   { label: 'Créer une infographie', icon: Image, to: '/infographie', color: 'bg-orange-500', desc: 'Flyers, cartes, affiches' },
   { label: 'Gérer les travaux', icon: KanbanSquare, to: '/kanban', color: 'bg-indigo-500', desc: 'File Kanban' },
   { label: 'Caisse du jour', icon: Wallet, to: '/caisse', color: 'bg-emerald-500', desc: 'Enregistrer une recette' },
 ]
+
+const REDACTION_MODES = [
+  { tab: 'texte', label: 'Texte',     icon: FileText,   color: 'bg-blue-500',   desc: '30+ types de documents IA' },
+  { tab: 'scan',  label: 'Scan',      icon: Scan,       color: 'bg-green-500',  desc: 'Image / papier → Word' },
+  { tab: 'audio', label: 'Audio',     icon: Mic,        color: 'bg-purple-500', desc: 'Dictée / audio → Word' },
+  { tab: 'doc',   label: 'Document',  icon: FolderOpen, color: 'bg-amber-500',  desc: 'Améliorer un brouillon' },
+] as const
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA'
@@ -69,7 +73,42 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Accès rapides */}
+      {/* Rédaction IA — hub principal */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+            <Sparkles size={16} className="text-brand-600" />
+            Rédaction IA
+          </h2>
+          <button onClick={() => navigate('/redaction')}
+            className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+            Ouvrir le hub <ArrowRight size={12} />
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          Tous les modes de production de documents en un seul endroit. Vous pouvez chaîner :
+          un scan ou un audio peut être renvoyé vers le mode Texte pour être reformulé / converti.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {REDACTION_MODES.map(({ tab, label, icon: Icon, color, desc }) => (
+            <button
+              key={tab}
+              onClick={() => navigate(`/redaction?tab=${tab}`)}
+              className="flex flex-col items-start gap-2 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-brand-200 transition-all text-left"
+            >
+              <div className={`${color} text-white rounded-xl p-2.5`}>
+                <Icon size={18} />
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-gray-900">{label}</div>
+                <div className="text-xs text-gray-400 mt-0.5">{desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Autres accès rapides */}
       <div>
         <h2 className="text-base font-semibold text-gray-700 mb-3">Accès rapides</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

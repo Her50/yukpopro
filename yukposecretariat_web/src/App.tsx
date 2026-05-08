@@ -4,8 +4,6 @@ import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import RedactionPage from './pages/RedactionPage'
-import OcrPage from './pages/OcrPage'
-import AudioPage from './pages/AudioPage'
 import InfographiePage from './pages/InfographiePage'
 import KanbanPage from './pages/KanbanPage'
 import DevisPage from './pages/DevisPage'
@@ -30,8 +28,9 @@ function AppRoutes() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="redaction" element={<RedactionPage />} />
-        <Route path="ocr" element={<OcrPage />} />
-        <Route path="audio" element={<AudioPage />} />
+        {/* Anciennes routes redirigées vers le hub Rédaction IA (avec onglet pré-sélectionné) */}
+        <Route path="ocr"   element={<Navigate to="/redaction?tab=scan"  replace />} />
+        <Route path="audio" element={<Navigate to="/redaction?tab=audio" replace />} />
         <Route path="infographie" element={<InfographiePage />} />
         <Route path="traduction" element={<TraductionPage />} />
         <Route path="documents" element={<MesDocumentsPage />} />

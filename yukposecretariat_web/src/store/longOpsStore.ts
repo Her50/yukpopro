@@ -10,7 +10,7 @@ import { create } from 'zustand'
  * dictionnaires génériques : chaque page pousse les champs qu'elle gère.
  */
 
-export type LongOpKey = 'ocr' | 'audio' | 'infographie' | 'traduction' | 'redaction' | 'devis'
+export type LongOpKey = 'ocr' | 'audio' | 'infographie' | 'traduction' | 'redaction' | 'devis' | 'docameliore'
 
 interface LongOpsState {
   forms: Record<LongOpKey, Record<string, any>>
@@ -26,13 +26,13 @@ interface LongOpsState {
 }
 
 const emptyForms = (): LongOpsState['forms'] => ({
-  ocr: {}, audio: {}, infographie: {}, traduction: {}, redaction: {}, devis: {},
+  ocr: {}, audio: {}, infographie: {}, traduction: {}, redaction: {}, devis: {}, docameliore: {},
 })
 const emptyLoading = (): LongOpsState['loading'] => ({
-  ocr: false, audio: false, infographie: false, traduction: false, redaction: false, devis: false,
+  ocr: false, audio: false, infographie: false, traduction: false, redaction: false, devis: false, docameliore: false,
 })
 const emptyResultats = (): LongOpsState['resultats'] => ({
-  ocr: null, audio: null, infographie: null, traduction: null, redaction: null, devis: null,
+  ocr: null, audio: null, infographie: null, traduction: null, redaction: null, devis: null, docameliore: null,
 })
 
 export const useLongOps = create<LongOpsState>((set, get) => ({

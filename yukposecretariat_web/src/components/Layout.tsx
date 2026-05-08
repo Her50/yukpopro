@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  LayoutDashboard, FileText, Scan, Mic, Image, KanbanSquare,
+  LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
   Languages, FolderOpen, CreditCard, Globe, ChevronDown,
 } from 'lucide-react'
@@ -13,8 +13,6 @@ import { SUPPORTED_LANGUAGES } from '../i18n'
 const NAV_KEYS = [
   { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard },
   { to: '/redaction',   key: 'redaction',   icon: FileText },
-  { to: '/ocr',         key: 'ocr',         icon: Scan },
-  { to: '/audio',       key: 'audio',       icon: Mic },
   { to: '/infographie', key: 'infographie', icon: Image },
   { to: '/traduction',  key: 'traduction',  icon: Languages },
   { to: '/documents',   key: 'documents',   icon: FolderOpen },
