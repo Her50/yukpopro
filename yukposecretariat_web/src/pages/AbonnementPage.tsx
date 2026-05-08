@@ -60,8 +60,11 @@ const MODULE_LABELS: Record<string, string> = {
   documents: 'Mes Documents',
 }
 
-function fmtFcfa(n: number): string {
-  return n.toLocaleString('fr-FR') + ' FCFA'
+function fmtFcfa(n: number | null | undefined): string {
+  return (n ?? 0).toLocaleString('fr-FR') + ' FCFA'
+}
+function fmtNb(n: number | null | undefined): string {
+  return (n ?? 0).toLocaleString('fr-FR')
 }
 
 export default function AbonnementPage() {
@@ -174,19 +177,19 @@ export default function AbonnementPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-white/70 text-xs uppercase tracking-wide">Plan actif</div>
-              <div className="text-3xl font-bold mt-1">{monAbo.nom_plan}</div>
-              <div className="text-white/80 text-sm mt-1">{monAbo.label_credits}</div>
+              <div className="text-3xl font-bold mt-1">{monAbo.nom_plan ?? '—'}</div>
+              <div className="text-white/80 text-sm mt-1">{monAbo.label_credits ?? ''}</div>
             </div>
             <div className="text-right">
               <div className="text-white/70 text-xs uppercase tracking-wide">Crédits restants</div>
-              <div className="text-3xl font-bold mt-1">{Math.round(monAbo.credits_restants).toLocaleString('fr-FR')}</div>
-              <div className="text-white/80 text-sm mt-1">sur {monAbo.credits_alloues.toLocaleString('fr-FR')}</div>
+              <div className="text-3xl font-bold mt-1">{Math.round(monAbo.credits_restants ?? 0).toLocaleString('fr-FR')}</div>
+              <div className="text-white/80 text-sm mt-1">sur {(monAbo.credits_alloues ?? 0).toLocaleString('fr-FR')}</div>
             </div>
           </div>
           <div className="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
             <div
               className="bg-white h-full transition-all"
-              style={{ width: `${Math.min(100, monAbo.pct_utilise)}%` }}
+              style={{ width: `${Math.min(100, monAbo.pct_utilise ?? 0)}%` }}
             />
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
@@ -266,7 +269,7 @@ export default function AbonnementPage() {
                 <Zap size={14} /> {p.label_credits}
               </div>
               <div className="flex flex-wrap gap-1 mt-3">
-                {p.modules.map(m => (
+                {(p.modules ?? []).map(m => (
                   <span key={m} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-full">
                     {MODULE_LABELS[m] || m}
                   </span>
@@ -303,7 +306,7 @@ export default function AbonnementPage() {
               <Package className="text-brand-500 mb-2" size={24} />
               <h3 className="font-bold">{p.nom}</h3>
               <div className="text-2xl font-bold text-brand-600 mt-1">
-                {p.credits.toLocaleString('fr-FR')} <span className="text-xs font-normal text-gray-500">crédits</span>
+                {fmtNb(p.credits)} <span className="text-xs font-normal text-gray-500">crédits</span>
               </div>
               <div className="text-lg font-semibold text-gray-800 mt-1">{fmtFcfa(p.prix_fcfa)}</div>
               <button
@@ -350,7 +353,7 @@ export default function AbonnementPage() {
                 <div key={h.reference} className="p-3 flex items-center justify-between text-sm">
                   <div>
                     <div className="font-semibold">{h.pack_nom}</div>
-                    <div className="text-xs text-gray-500">{h.credits.toLocaleString('fr-FR')} crédits · {h.reference}</div>
+                    <div className="text-xs text-gray-500">{fmtNb(h.credits)} crédits · {h.reference}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold">{fmtFcfa(h.montant)}</div>
