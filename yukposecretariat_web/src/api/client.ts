@@ -202,6 +202,12 @@ export const adminAPI = {
   debloquer: (user_id: number) =>
     api.post(`/admin/utilisateurs/${user_id}/debloquer`),
   stats: () => api.get('/admin/stats'),
+  lancerPromotion: (data: {
+    montant: number; cible: 'tous' | 'ids' | 'consommation' | 'role';
+    user_ids?: number[]; role?: string;
+    seuil_credits_min?: number; seuil_credits_max?: number; seuil_appels_min?: number;
+    periode_jours?: number; motif?: string;
+  }) => api.post('/admin/promotion', data),
 }
 
 // ─── Mes Documents ────────────────────────────────────────────────────────────

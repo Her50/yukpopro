@@ -49,6 +49,18 @@ class CreditsBonusRequest(BaseModel):
     raison: Optional[str] = Field(None, description="Note interne (audit)")
 
 
+class PromotionRequest(BaseModel):
+    montant: int = Field(..., gt=0, le=1_000_000, description="Crédits à distribuer par utilisateur")
+    cible: str = Field(..., description="tous | ids | consommation | role")
+    user_ids: Optional[list[int]] = None
+    role: Optional[str] = None
+    seuil_credits_min: Optional[float] = None  # consommation min sur la période
+    seuil_credits_max: Optional[float] = None
+    seuil_appels_min:  Optional[int]   = None
+    periode_jours: int = 30
+    motif: Optional[str] = None
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.get("/utilisateurs", summary="Liste utilisateurs Secrétariat avec leurs crédits")
@@ -267,6 +279,103 @@ async def debloquer_utilisateur(
     await db.commit()
     logger.info(f"[BureauAdmin] user_id={user_id} débloqué par admin={current_user.user_id}")
     return {"succes": True}
+
+
+@router.post("/promotion", summary="Distribuer des crédits bonus en masse (campagne)")
+async def lancer_promotion(
+    req: PromotionRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Distribue `montant` crédits à tous les utilisateurs d'une cible.
+    Cibles possibles :
+      - tous          : tous les utilisateurs actifs
+      - ids           : liste explicite (req.user_ids)
+      - role          : tous les users avec un rôle donné (req.role)
+      - consommation  : users dépassant des seuils sur N derniers jours
+                        (seuil_credits_min/max + seuil_appels_min)
+    """
+    _exiger_admin(current_user)
+    if req.cible not in ("tous", "ids", "consommation", "role"):
+        raise HTTPException(400, "Cible invalide (tous | ids | consommation | role)")
+
+    # Construire la liste user_ids cible
+    target_ids: list[int] = []
+
+    if req.cible == "ids":
+        target_ids = req.user_ids or []
+        if not target_ids:
+            raise HTTPException(400, "user_ids vide")
+
+    elif req.cible == "role":
+        if not req.role:
+            raise HTTPException(400, "role manquant")
+        rows = (await db.execute(
+            select(UtilisateurDB.id).where(UtilisateurDB.role == req.role)
+        )).scalars().all()
+        target_ids = list(rows)
+
+    elif req.cible == "tous":
+        rows = (await db.execute(
+            select(UtilisateurDB.id).where(UtilisateurDB.actif == True)  # noqa: E712
+        )).scalars().all()
+        target_ids = list(rows)
+
+    elif req.cible == "consommation":
+        if req.seuil_credits_min is None and req.seuil_credits_max is None and req.seuil_appels_min is None:
+            raise HTTPException(400, "Au moins un seuil requis (credits_min/max ou appels_min)")
+        since = datetime.utcnow() - timedelta(days=req.periode_jours)
+        agg = (await db.execute(
+            select(
+                ConsommationBureauDB.user_id,
+                func.sum(ConsommationBureauDB.credits_debites).label("credits"),
+                func.count(ConsommationBureauDB.id).label("appels"),
+            )
+            .where(ConsommationBureauDB.cree_le >= since)
+            .group_by(ConsommationBureauDB.user_id)
+        )).all()
+        for (uid, credits, appels) in agg:
+            credits = float(credits or 0)
+            appels = int(appels or 0)
+            if req.seuil_credits_min is not None and credits < req.seuil_credits_min: continue
+            if req.seuil_credits_max is not None and credits > req.seuil_credits_max: continue
+            if req.seuil_appels_min  is not None and appels  < req.seuil_appels_min:  continue
+            target_ids.append(uid)
+
+    if not target_ids:
+        return {
+            "succes": True, "beneficiaires": 0, "montant_total": 0,
+            "message": "Aucun utilisateur ne correspond à la cible",
+        }
+
+    # Distribuer les crédits via get_ou_creer_credits_bureau
+    from modules.bureau.service_credits_bureau import get_ou_creer_credits_bureau
+
+    nb_ok = 0
+    for uid in target_ids:
+        try:
+            credit = await get_ou_creer_credits_bureau(uid, db)
+            credit.credits_alloues += req.montant
+            credit.mise_a_jour = datetime.utcnow()
+            nb_ok += 1
+        except Exception as e:
+            logger.warning(f"[BureauAdmin/Promotion] échec uid={uid}: {e}")
+    await db.commit()
+
+    logger.info(
+        f"[BureauAdmin/Promotion] cible={req.cible} montant={req.montant} "
+        f"beneficiaires={nb_ok}/{len(target_ids)} motif={req.motif or '-'} "
+        f"par admin={current_user.user_id}"
+    )
+
+    return {
+        "succes":         True,
+        "beneficiaires":  nb_ok,
+        "cible_taille":   len(target_ids),
+        "montant_total":  nb_ok * req.montant,
+        "message":        f"{req.montant:,} crédits distribués à {nb_ok} utilisateur(s)",
+    }
 
 
 @router.get("/stats", summary="Statistiques globales Secrétariat")

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Shield, Users, Search, X, Loader2, Plus, Lock, Unlock, TrendingUp,
-  Wallet, BarChart3, Eye, AlertCircle,
+  Wallet, BarChart3, Eye, AlertCircle, Megaphone, LayoutDashboard,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { adminAPI } from '../api/client'
@@ -43,7 +43,7 @@ function fmtDate(iso: string | null | undefined, withTime = false): string {
 export default function AdminPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const [tab, setTab] = useState<'stats' | 'utilisateurs'>('stats')
+  const [tab, setTab] = useState<'overview' | 'utilisateurs' | 'promotions'>('overview')
   const [recherche, setRecherche] = useState('')
   const [page, setPage] = useState(1)
   const [userOuvert, setUserOuvert] = useState<number | null>(null)
@@ -63,7 +63,7 @@ export default function AdminPage() {
   const statsQ = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => (await adminAPI.stats()).data,
-    enabled: tab === 'stats',
+    enabled: tab === 'overview',
     retry: 1,
   })
 
@@ -123,13 +123,14 @@ export default function AdminPage() {
       </header>
 
       {/* Tabs */}
-      <nav className="flex gap-2 border-b">
+      <nav className="flex gap-2 border-b overflow-x-auto">
         {([
-          ['stats',        'Statistiques',  BarChart3],
-          ['utilisateurs', 'Utilisateurs',  Users],
+          ['overview',     "Vue d'ensemble", LayoutDashboard],
+          ['utilisateurs', 'Utilisateurs',   Users],
+          ['promotions',   'Promotions',     Megaphone],
         ] as const).map(([key, label, Icon]) => (
           <button key={key} onClick={() => setTab(key as any)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-1.5 ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
               tab === key ? 'border-amber-600 text-amber-700' : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}>
             <Icon size={14} /> {label}
@@ -137,8 +138,8 @@ export default function AdminPage() {
         ))}
       </nav>
 
-      {/* Stats */}
-      {tab === 'stats' && (
+      {/* Vue d'ensemble */}
+      {tab === 'overview' && (
         <div className="space-y-4">
           {statsQ.isLoading && (
             <div className="text-center py-8 text-gray-500">
@@ -309,6 +310,9 @@ export default function AdminPage() {
           )}
         </div>
       )}
+
+      {/* Promotions */}
+      {tab === 'promotions' && <PromotionsTab />}
 
       {/* Modal détails utilisateur */}
       {userOuvert && (
@@ -516,6 +520,170 @@ function Info({ label, value }: { label: string; value: string | number }) {
     <div>
       <div className="text-xs text-gray-500">{label}</div>
       <div className="text-sm font-medium text-gray-900">{value}</div>
+    </div>
+  )
+}
+
+function PromotionsTab() {
+  const [montant, setMontant] = useState(1000)
+  const [cible, setCible] = useState<'tous' | 'ids' | 'consommation' | 'role'>('tous')
+  const [role, setRole] = useState('agent')
+  const [userIdsRaw, setUserIdsRaw] = useState('')
+  const [motif, setMotif] = useState('')
+  const [seuilCreditsMin, setSeuilCreditsMin] = useState('')
+  const [seuilCreditsMax, setSeuilCreditsMax] = useState('')
+  const [seuilAppelsMin, setSeuilAppelsMin] = useState('')
+  const [periodeJours, setPeriodeJours] = useState(30)
+  const [busy, setBusy] = useState(false)
+  const qc = useQueryClient()
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (montant <= 0) { toast.error('Montant invalide'); return }
+    let user_ids: number[] | undefined
+    if (cible === 'ids') {
+      user_ids = userIdsRaw.split(/[\s,]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
+      if (!user_ids.length) { toast.error('Liste IDs invalide'); return }
+    }
+    if (cible === 'consommation' && !seuilCreditsMin && !seuilCreditsMax && !seuilAppelsMin) {
+      toast.error("Au moins un seuil requis pour cible 'consommation'"); return
+    }
+    if (!confirm(`Distribuer ${fmtNb(montant)} crédits Yukpo à la cible "${cible}" ?`)) return
+
+    setBusy(true)
+    try {
+      const r = await adminAPI.lancerPromotion({
+        montant, cible,
+        user_ids,
+        role: cible === 'role' ? role : undefined,
+        seuil_credits_min: cible === 'consommation' && seuilCreditsMin ? parseFloat(seuilCreditsMin) : undefined,
+        seuil_credits_max: cible === 'consommation' && seuilCreditsMax ? parseFloat(seuilCreditsMax) : undefined,
+        seuil_appels_min:  cible === 'consommation' && seuilAppelsMin  ? parseInt(seuilAppelsMin) : undefined,
+        periode_jours: cible === 'consommation' ? periodeJours : undefined,
+        motif: motif || undefined,
+      })
+      const data = (r as any).data || r
+      toast.success(data.message || `Distribué à ${data.beneficiaires} utilisateur(s)`)
+      setMontant(1000); setUserIdsRaw(''); setMotif('')
+      setSeuilCreditsMin(''); setSeuilCreditsMax(''); setSeuilAppelsMin('')
+      qc.invalidateQueries({ queryKey: ['admin-stats'] })
+      qc.invalidateQueries({ queryKey: ['admin-utilisateurs'] })
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Erreur distribution')
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 max-w-3xl">
+      <div className="flex items-center gap-2 mb-3">
+        <Megaphone size={18} className="text-amber-600" />
+        <h3 className="text-lg font-bold text-gray-900">Lancer une campagne</h3>
+      </div>
+      <p className="text-sm text-gray-500 mb-5">
+        Distribue des crédits Yukpo bonus à un groupe d'utilisateurs (ajouté à <code className="text-amber-700">credits_alloues</code>).
+        Idéal pour lancement, compensation panne, fidélisation des gros consommateurs, etc.
+      </p>
+
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-gray-700 block mb-1">Montant (crédits Yukpo par utilisateur)</label>
+          <input type="number" min={1} value={montant} onChange={e => setMontant(parseInt(e.target.value) || 0)}
+            className="w-full border rounded-lg px-3 py-2 text-sm" />
+          <p className="text-xs text-gray-400 mt-1">≈ {fmtFcfa(Math.round(montant * 0.6))} de valeur par bénéficiaire</p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700 block mb-2">Cible</label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { v: 'tous',        lbl: 'Tous',         d: 'Utilisateurs actifs' },
+              { v: 'role',        lbl: 'Par rôle',     d: 'agent, admin…' },
+              { v: 'ids',         lbl: 'Liste IDs',    d: 'Utilisateurs précis' },
+              { v: 'consommation',lbl: 'Consommation', d: 'Selon seuils d\'usage' },
+            ].map(c => (
+              <button key={c.v} type="button" onClick={() => setCible(c.v as any)}
+                className={`text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                  cible === c.v ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                <div className="font-semibold">{c.lbl}</div>
+                <div className="text-xs text-gray-500">{c.d}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {cible === 'role' && (
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">Rôle ciblé</label>
+            <select value={role} onChange={e => setRole(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm">
+              <option value="agent">agent</option>
+              <option value="manager">manager</option>
+              <option value="admin">admin</option>
+              <option value="super_admin">super_admin</option>
+            </select>
+          </div>
+        )}
+
+        {cible === 'ids' && (
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">IDs utilisateurs (séparés par virgule ou espace)</label>
+            <textarea value={userIdsRaw} onChange={e => setUserIdsRaw(e.target.value)} rows={3}
+              placeholder="ex: 12, 34, 56"
+              className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
+          </div>
+        )}
+
+        {cible === 'consommation' && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3">
+            <div className="text-sm font-medium text-gray-700">Seuils de consommation (au moins un requis)</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Crédits consommés ≥">
+                <input type="number" min={0} value={seuilCreditsMin} onChange={e => setSeuilCreditsMin(e.target.value)}
+                  placeholder="ex: 1000"
+                  className="w-full border rounded-lg px-3 py-2 text-sm" />
+              </Field>
+              <Field label="Crédits consommés ≤">
+                <input type="number" min={0} value={seuilCreditsMax} onChange={e => setSeuilCreditsMax(e.target.value)}
+                  placeholder="ex: 5000"
+                  className="w-full border rounded-lg px-3 py-2 text-sm" />
+              </Field>
+              <Field label="Nombre d'appels ≥">
+                <input type="number" min={0} value={seuilAppelsMin} onChange={e => setSeuilAppelsMin(e.target.value)}
+                  placeholder="ex: 50"
+                  className="w-full border rounded-lg px-3 py-2 text-sm" />
+              </Field>
+              <Field label="Période d'analyse (jours)">
+                <input type="number" min={1} max={365} value={periodeJours}
+                  onChange={e => setPeriodeJours(Math.max(1, parseInt(e.target.value) || 30))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm" />
+              </Field>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="text-sm font-medium text-gray-700 block mb-1">Motif (audit)</label>
+          <input value={motif} onChange={e => setMotif(e.target.value)}
+            placeholder="ex: Promotion lancement, compensation panne du 15/05…"
+            className="w-full border rounded-lg px-3 py-2 text-sm" />
+        </div>
+
+        <button type="submit" disabled={busy}
+          className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-semibold px-5 py-2.5 rounded-lg flex items-center gap-2">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Megaphone size={14} />}
+          {busy ? 'Distribution…' : 'Lancer la campagne'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-xs text-gray-500 block mb-1">{label}</label>
+      {children}
     </div>
   )
 }
