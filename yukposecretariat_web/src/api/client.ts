@@ -55,6 +55,108 @@ export const authAPI = {
     authApi.patch('/auth/profile', data),
 }
 
+// ─── Organisations (plan Entreprise — partagées avec YukpoPro) ───────────────
+export interface Organisation {
+  id: number
+  nom: string
+  slug: string
+  owner_id: number
+  plan: string
+  prix_par_siege_fcfa: number
+  devise: string
+  max_seats: number | null
+  statut: string
+  domain_auto_join: string | null
+  domain_verifie: boolean
+  pays: string | null
+  secteur: string | null
+  settings: Record<string, unknown>
+  cree_le: string
+  mon_role?: 'owner' | 'admin' | 'member'
+}
+
+export interface OrgMembre {
+  id: number
+  org_id: number
+  user_id: number
+  role: 'owner' | 'admin' | 'member'
+  statut: string
+  joined_at: string
+  last_active_at: string
+  email: string
+  nom: string
+  username: string
+}
+
+export interface OrgInvite {
+  id: number
+  org_id: number
+  email: string
+  role: 'admin' | 'member'
+  statut: string
+  invite_par: number
+  expires_at: string
+  cree_le: string
+  accepte_le: string | null
+  token?: string
+  lien_acceptation?: string
+}
+
+export interface OrgFacture {
+  id: number
+  org_id: number
+  period_debut: string
+  period_fin: string
+  sieges_max: number
+  sieges_factures: number
+  prix_unitaire_fcfa: number
+  montant_total_fcfa: number
+  devise: string
+  statut: string
+  transaction_ref: string | null
+  paye_le: string | null
+}
+
+export const orgsAPI = {
+  monOrg: async (): Promise<Organisation | null> => {
+    try {
+      const r = await authApi.get('/pro/orgs/me')
+      return r.data as Organisation
+    } catch (err: unknown) {
+      const e = err as { response?: { status?: number } }
+      if (e?.response?.status === 404) return null
+      throw err
+    }
+  },
+  creer: (payload: {
+    nom: string; pays?: string; secteur?: string;
+    prix_par_siege_fcfa?: number; devise?: string;
+    max_seats?: number | null; domain_auto_join?: string;
+  }) => authApi.post('/pro/orgs', payload).then(r => r.data as Organisation),
+  update: (orgId: number, payload: Partial<Organisation>) =>
+    authApi.patch(`/pro/orgs/${orgId}`, payload).then(r => r.data as Organisation),
+  membres: (orgId: number) =>
+    authApi.get(`/pro/orgs/${orgId}/members`).then(r => r.data as { membres: OrgMembre[]; mon_role: string }),
+  changerRole: (orgId: number, userId: number, role: 'admin' | 'member') =>
+    authApi.patch(`/pro/orgs/${orgId}/members/${userId}`, { role }).then(r => r.data),
+  retirerMembre: (orgId: number, userId: number) =>
+    authApi.delete(`/pro/orgs/${orgId}/members/${userId}`).then(r => r.data),
+  quitter: (orgId: number) =>
+    authApi.post(`/pro/orgs/${orgId}/leave`).then(r => r.data),
+  invitations: (orgId: number) =>
+    authApi.get(`/pro/orgs/${orgId}/invites`).then(r => r.data as { invitations: OrgInvite[] }),
+  inviter: (orgId: number, email: string, role: 'admin' | 'member' = 'member') =>
+    authApi.post(`/pro/orgs/${orgId}/invites`, { email, role }).then(r => r.data as OrgInvite),
+  revoquerInvite: (orgId: number, inviteId: number) =>
+    authApi.delete(`/pro/orgs/${orgId}/invites/${inviteId}`).then(r => r.data),
+  detailInvite: (token: string) =>
+    authApi.get(`/pro/orgs/invites/${token}`).then(r => r.data as { invitation: OrgInvite; organisation: Partial<Organisation> & { nom: string } }),
+  accepterInvite: (token: string) =>
+    authApi.post(`/pro/orgs/invites/${token}/accept`).then(r => r.data as { message: string; org_id: number; role: string }),
+  factures: (orgId: number) =>
+    authApi.get(`/pro/orgs/${orgId}/billing`).then(r => r.data as { factures: OrgFacture[] }),
+}
+
 // ─── Rédaction ────────────────────────────────────────────────────────────────
 export const redactionAPI = {
   types: () => api.get('/redaction/types'),

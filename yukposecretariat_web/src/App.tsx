@@ -13,6 +13,7 @@ import ClientsPage from './pages/ClientsPage'
 import TraductionPage from './pages/TraductionPage'
 import MesDocumentsPage from './pages/MesDocumentsPage'
 import AbonnementPage from './pages/AbonnementPage'
+import OrganisationPage from './pages/OrganisationPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route path="caisse" element={<CaissePage />} />
         <Route path="clients" element={<ClientsPage />} />
         <Route path="abonnement" element={<AbonnementPage />} />
+        <Route path="organisation" element={<OrganisationPage />} />
         <Route path="admin" element={<AdminPage />} />
       </Route>
     </Routes>

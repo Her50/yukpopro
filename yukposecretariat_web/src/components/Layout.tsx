@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2,
+  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2, Building2,
 } from 'lucide-react'
 import { authAPI } from '../api/client'
 import toast from 'react-hot-toast'
@@ -25,6 +25,7 @@ const NAV_KEYS = [
   { to: '/caisse',      key: 'caisse',      icon: Wallet,          adminOnly: false },
   { to: '/clients',     key: 'clients',     icon: Users,           adminOnly: false },
   { to: '/abonnement',  key: 'abonnement',  icon: CreditCard,      adminOnly: false },
+  { to: '/organisation',key: 'organisation',icon: Building2,       adminOnly: false },
   { to: '/admin',       key: 'admin',       icon: Shield,          adminOnly: true  },
 ]
 
