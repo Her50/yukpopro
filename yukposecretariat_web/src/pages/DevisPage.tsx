@@ -1,6 +1,7 @@
 import { Receipt, Plus, Trash2, Loader2, Download } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
@@ -23,6 +24,7 @@ function formatFCFA(n: number) {
 }
 
 export default function DevisPage() {
+  const { t } = useTranslation()
   const [mode, setMode] = useLongOpField<'devis' | 'facture'>('devis', 'mode', 'devis')
   const [infos, setInfos] = useLongOpField<DevisInfos>('devis', 'infos', INFOS_DEFAUT)
   const [lignes, setLignes] = useLongOpField<Ligne[]>('devis', 'lignes', LIGNES_DEFAUT)
@@ -50,10 +52,10 @@ export default function DevisPage() {
           : await gestionAPI.genererFacture(payload)
         return r.data as DevisResult
       })
-      toast.success(`${mode === 'devis' ? 'Devis' : 'Facture'} généré(e) !`)
+      toast.success(t('devis.okGen'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de génération')
+      toast.error(err.response?.data?.detail || t('devis.errGen'))
     }
   }
 
@@ -75,9 +77,9 @@ export default function DevisPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Receipt className="text-teal-600" size={24} />
-          Devis & Factures
+          {t('devis.title')}
         </h1>
-        <p className="text-gray-500 text-sm mt-1">PDF professionnel en FCFA avec TVA 19.25%</p>
+        <p className="text-gray-500 text-sm mt-1">{t('devis.subtitle')}</p>
       </div>
 
       {/* Mode */}
@@ -87,7 +89,7 @@ export default function DevisPage() {
             className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-colors ${
               mode === m ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'
             }`}
-          >{m}</button>
+          >{m === 'devis' ? t('devis.tabDevisLabel') : t('devis.tabFactureLabel')}</button>
         ))}
       </div>
 
@@ -116,28 +118,28 @@ export default function DevisPage() {
         {/* Lignes */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-semibold text-gray-700">Lignes du document</label>
+            <label className="text-sm font-semibold text-gray-700">{t('devis.items')}</label>
             <button onClick={ajouterLigne}
               className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium">
-              <Plus size={14} /> Ajouter
+              <Plus size={14} /> {t('common.add')}
             </button>
           </div>
           <div className="space-y-2">
             {lignes.map((l, i) => (
               <div key={i} className="flex gap-2 items-start">
                 <input
-                  type="text" placeholder="Description"
+                  type="text" placeholder={t('common.description')}
                   value={l.description}
                   onChange={e => modifierLigne(i, 'description', e.target.value)}
                   className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none"
                 />
                 <input
-                  type="number" placeholder="Qté" value={l.quantite} min={1}
+                  type="number" placeholder={t('devis.qtyShort')} value={l.quantite} min={1}
                   onChange={e => modifierLigne(i, 'quantite', +e.target.value)}
                   className="w-14 border border-gray-200 rounded-lg px-2 py-2 text-sm text-center focus:outline-none"
                 />
                 <input
-                  type="number" placeholder="Prix" value={l.prix_unitaire_fcfa} min={0}
+                  type="number" placeholder={t('devis.priceShort')} value={l.prix_unitaire_fcfa} min={0}
                   onChange={e => modifierLigne(i, 'prix_unitaire_fcfa', +e.target.value)}
                   className="w-24 border border-gray-200 rounded-lg px-2 py-2 text-sm text-right focus:outline-none"
                 />
@@ -152,13 +154,13 @@ export default function DevisPage() {
         {/* Totaux aperçu */}
         <div className="border-t border-gray-100 pt-3 space-y-1 text-sm">
           <div className="flex justify-between text-gray-500">
-            <span>Sous-total HT</span><span>{formatFCFA(sousTotal)}</span>
+            <span>{t('devis.subtotal')}</span><span>{formatFCFA(sousTotal)}</span>
           </div>
           <div className="flex justify-between text-gray-500">
-            <span>TVA 19.25%</span><span>{formatFCFA(tva)}</span>
+            <span>{t('devis.tva')}</span><span>{formatFCFA(tva)}</span>
           </div>
           <div className="flex justify-between font-bold text-gray-900 text-base">
-            <span>Total TTC</span><span>{formatFCFA(total)}</span>
+            <span>{t('devis.total')}</span><span>{formatFCFA(total)}</span>
           </div>
         </div>
 
@@ -168,7 +170,7 @@ export default function DevisPage() {
           className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Receipt size={18} />}
-          {loading ? 'Génération…' : `Générer le ${mode}`}
+          {loading ? t('devis.generating') : t('devis.generatePdf')}
         </button>
       </div>
 
@@ -181,10 +183,10 @@ export default function DevisPage() {
             </div>
             <button onClick={telechargerPDF}
               className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">
-              <Download size={16} /> Télécharger PDF
+              <Download size={16} /> {t('common.download')} PDF
             </button>
           </div>
-          <p className="text-xs text-gray-400 text-center">Paiement : Espèces · Orange Money · MTN MoMo</p>
+          <p className="text-xs text-gray-400 text-center">{t('devis.paymentMethods')}</p>
         </div>
       )}
     </div>

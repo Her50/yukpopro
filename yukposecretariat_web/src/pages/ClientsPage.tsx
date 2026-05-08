@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Plus, Search, Phone, X, Loader2, MessageCircle } from 'lucide-react'
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 
 interface Client {
@@ -15,6 +16,7 @@ function formatFCFA(n: number) {
 }
 
 export default function ClientsPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [recherche, setRecherche] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -33,9 +35,9 @@ export default function ClientsPage() {
       qc.invalidateQueries({ queryKey: ['clients'] })
       setShowModal(false)
       setForm({ nom: '', telephone: '', email: '', adresse: '', notes: '' })
-      toast.success('Client créé')
+      toast.success(t('clients.saved'))
     },
-    onError: () => toast.error('Erreur'),
+    onError: () => toast.error(t('clients.errSave')),
   })
 
   const ouvrirWhatsapp = async (clientId: number) => {
@@ -43,7 +45,7 @@ export default function ClientsPage() {
       const r = await gestionAPI.whatsappClient(clientId, whatsappMsg)
       window.open(r.data.whatsapp_url, '_blank')
     } catch {
-      toast.error('Erreur')
+      toast.error(t('common.error'))
     }
   }
 
@@ -56,15 +58,15 @@ export default function ClientsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Users className="text-violet-600" size={24} />
-            Clients
+            {t('clients.title')}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">{data?.total ?? 0} clients enregistrés</p>
+          <p className="text-gray-500 text-sm mt-1">{t('clients.countRegistered', { n: data?.total ?? 0 })}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm"
         >
-          <Plus size={18} /> Nouveau
+          <Plus size={18} /> {t('clients.newClient')}
         </button>
       </div>
 
@@ -73,7 +75,7 @@ export default function ClientsPage() {
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Rechercher par nom ou téléphone…"
+          placeholder={t('clients.search')}
           value={recherche}
           onChange={e => setRecherche(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -82,7 +84,7 @@ export default function ClientsPage() {
 
       {/* Message WhatsApp par défaut */}
       <div className="bg-green-50 border border-green-200 rounded-xl p-3">
-        <label className="text-xs font-semibold text-green-700 mb-1 block">Message WhatsApp par défaut</label>
+        <label className="text-xs font-semibold text-green-700 mb-1 block">{t('clients.messageWhatsapp')}</label>
         <input
           type="text"
           value={whatsappMsg}
@@ -96,7 +98,7 @@ export default function ClientsPage() {
         <div className="flex justify-center py-10"><Loader2 size={22} className="animate-spin text-violet-600" /></div>
       ) : clients.length === 0 ? (
         <div className="text-center py-10 text-gray-400 text-sm">
-          {recherche ? 'Aucun client trouvé' : 'Aucun client enregistré'}
+          {recherche ? t('common.noResults') : t('clients.noClients')}
         </div>
       ) : (
         <div className="space-y-2">
@@ -118,10 +120,10 @@ export default function ClientsPage() {
                 </button>
               </div>
               <div className="flex gap-4 mt-3 text-xs text-gray-400">
-                <span>{c.nb_commandes} commandes</span>
-                <span>Total payé : {formatFCFA(c.total_paye_fcfa)}</span>
+                <span>{t('clients.ordersCount', { n: c.nb_commandes })}</span>
+                <span>{t('clients.totalPaid')} : {formatFCFA(c.total_paye_fcfa)}</span>
                 {c.derniere_visite && (
-                  <span>Dernière visite : {new Date(c.derniere_visite).toLocaleDateString('fr-FR')}</span>
+                  <span>{t('clients.lastVisit')} : {new Date(c.derniere_visite).toLocaleDateString('fr-FR')}</span>
                 )}
               </div>
             </div>
@@ -134,14 +136,14 @@ export default function ClientsPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-gray-900">Nouveau client</h2>
+              <h2 className="font-bold text-gray-900">{t('clients.newClient')}</h2>
               <button onClick={() => setShowModal(false)}><X size={20} className="text-gray-400" /></button>
             </div>
             {[
-              { key: 'nom', label: 'Nom complet *', type: 'text' },
-              { key: 'telephone', label: 'Téléphone *', type: 'tel' },
-              { key: 'email', label: 'Email (optionnel)', type: 'email' },
-              { key: 'adresse', label: 'Adresse / quartier', type: 'text' },
+              { key: 'nom', label: t('clients.fullName'), type: 'text' },
+              { key: 'telephone', label: t('clients.phone'), type: 'tel' },
+              { key: 'email', label: t('clients.email'), type: 'email' },
+              { key: 'adresse', label: t('clients.address'), type: 'text' },
             ].map(({ key, label, type }) => (
               <div key={key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -154,12 +156,12 @@ export default function ClientsPage() {
               </div>
             ))}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('clients.notes')}</label>
               <textarea
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 rows={2}
-                placeholder="Préférences, besoins habituels..."
+                placeholder={t('clients.notesPlaceholder')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none resize-none"
               />
             </div>
@@ -169,7 +171,7 @@ export default function ClientsPage() {
               className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {creerMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-              Créer le client
+              {t('common.create')}
             </button>
           </div>
         </div>

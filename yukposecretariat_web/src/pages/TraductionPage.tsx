@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Languages, Loader2, Download, Upload, FileText, ArrowRight } from 'lucide-react'
 import { traductionAPI } from '../api/client'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
@@ -31,6 +32,7 @@ type TradResult = {
 }
 
 export default function TraductionPage() {
+  const { t } = useTranslation()
   const [mode, setMode] = useLongOpField<Mode>('traduction', 'mode', 'texte')
   const [langSource, setLangSource] = useLongOpField<string>('traduction', 'langSource', 'fr')
   const [langCible, setLangCible] = useLongOpField<string>('traduction', 'langCible', 'en')
@@ -49,7 +51,7 @@ export default function TraductionPage() {
   }
 
   const traduireTexte = async () => {
-    if (!contenu.trim()) { toast.error('Saisissez un texte à traduire'); return }
+    if (!contenu.trim()) { toast.error(t('traduction.errEmpty')); return }
     if (langSource === langCible) { toast.error('La langue source et cible doivent être différentes'); return }
     try {
       await runOp<TradResult>('traduction', async () => {
@@ -59,10 +61,10 @@ export default function TraductionPage() {
         })
         return r.data as TradResult
       })
-      toast.success('Traduction terminée !')
+      toast.success(t('traduction.okTrans'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de traduction')
+      toast.error(err.response?.data?.detail || t('traduction.errTrans'))
     }
   }
 
@@ -79,10 +81,10 @@ export default function TraductionPage() {
         const r = await traductionAPI.traduireFichier(fd)
         return r.data as TradResult
       })
-      toast.success('Fichier traduit !')
+      toast.success(t('traduction.okTrans'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de traduction')
+      toast.error(err.response?.data?.detail || t('traduction.errTrans'))
     }
   }
 
@@ -94,7 +96,7 @@ export default function TraductionPage() {
       a.href = url; a.download = fichier_id; a.click()
       URL.revokeObjectURL(url)
     } catch {
-      toast.error('Erreur de téléchargement')
+      toast.error(t('traduction.downloadErr'))
     }
   }
 
@@ -104,9 +106,9 @@ export default function TraductionPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Languages className="text-orange-500" size={24} />
-          Traduction IA
+          {t('traduction.title')}
         </h1>
-        <p className="text-gray-500 text-sm mt-1">Traduction professionnelle avec terminologie africaine francophone</p>
+        <p className="text-gray-500 text-sm mt-1">{t('traduction.subtitle')}</p>
       </div>
 
       {/* Mode tabs */}
@@ -114,7 +116,7 @@ export default function TraductionPage() {
         {(['texte', 'fichier'] as Mode[]).map(m => (
           <button key={m} onClick={() => { setMode(m); setResultat(null) }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === m ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'}`}>
-            {m === 'texte' ? '✏️ Texte' : '📄 Fichier'}
+            {m === 'texte' ? t('traduction.modeText') : t('traduction.modeFile')}
           </button>
         ))}
       </div>
@@ -123,7 +125,7 @@ export default function TraductionPage() {
         {/* Paire de langues */}
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Langue source</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.sourceLang')}</label>
             <select value={langSource} onChange={e => setLangSource(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
               {LANGUES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
@@ -133,7 +135,7 @@ export default function TraductionPage() {
             <ArrowRight size={18} className="text-orange-500" />
           </button>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Langue cible</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.targetLang')}</label>
             <select value={langCible} onChange={e => setLangCible(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
               {LANGUES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
@@ -143,7 +145,7 @@ export default function TraductionPage() {
 
         {/* Contexte métier */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1">Contexte métier (terminologie spécialisée)</label>
+          <label className="block text-xs font-semibold text-gray-500 mb-1">{t('traduction.context')}</label>
           <select value={contexte} onChange={e => setContexte(e.target.value)}
             className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
             {CONTEXTES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
@@ -157,17 +159,17 @@ export default function TraductionPage() {
             <textarea value={contenu} onChange={e => setContenu(e.target.value)} rows={7}
               placeholder="Collez votre texte ici…"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
-            <p className="text-xs text-gray-400 mt-1">{contenu.split(/\s+/).filter(Boolean).length} mots</p>
+            <p className="text-xs text-gray-400 mt-1">{t('traduction.wordsCount', { n: contenu.split(/\s+/).filter(Boolean).length })}</p>
           </div>
         ) : (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Fichier à traduire</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('traduction.fileToTranslate')}</label>
             <div
               className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-orange-400 transition-colors"
               onClick={() => fileRef.current?.click()}
             >
               <Upload size={28} className="mx-auto text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">{fichierNom || 'Cliquez pour sélectionner'}</p>
+              <p className="text-sm text-gray-500">{fichierNom || t('traduction.clickToSelect')}</p>
               <p className="text-xs text-gray-400 mt-1">PDF, DOCX, TXT, PNG/JPG (max 20 MB)</p>
               <input ref={fileRef} type="file" className="hidden"
                 accept=".pdf,.docx,.txt,.md,.csv,.png,.jpg,.jpeg,.webp"
@@ -181,7 +183,7 @@ export default function TraductionPage() {
           disabled={loading}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Languages size={18} />}
-          {loading ? 'Traduction en cours…' : 'Traduire'}
+          {loading ? t('traduction.translating') : t('traduction.translate')}
         </button>
       </div>
 
@@ -190,7 +192,7 @@ export default function TraductionPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-bold text-gray-900">Traduction</h2>
+              <h2 className="font-bold text-gray-900">{t('traduction.result')}</h2>
               <p className="text-xs text-gray-400">{resultat.nb_mots_source} mots source → {resultat.nb_mots_cible} mots traduits</p>
             </div>
             {resultat.fichier_id && (
@@ -203,7 +205,7 @@ export default function TraductionPage() {
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <FileText size={14} className="text-orange-500" />
-              <span className="text-xs font-semibold text-gray-500 uppercase">Texte traduit</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase">{t('traduction.translatedText')}</span>
             </div>
             <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{resultat.texte_traduit}</p>
           </div>

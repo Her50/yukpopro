@@ -4,6 +4,7 @@ import { ocrAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 
@@ -17,6 +18,7 @@ const FORMATS_VALIDES = ['lettre', 'formulaire', 'recu', 'manuscrit', 'tableau']
 const FORMATS_MANUSCRIT = ['lettre', 'rapport', 'liste', 'paragraphe']
 
 export default function OcrPage() {
+  const { t } = useTranslation()
   const [mode, setMode] = useLongOpField<Mode>('ocr', 'mode', 'scanner')
   const [fichier, setFichier] = useLongOpField<File | null>('ocr', 'fichier', null)
   const [preview, setPreview] = useLongOpField<string | null>('ocr', 'preview', null)
@@ -42,7 +44,7 @@ export default function OcrPage() {
   }
 
   const scanner = async () => {
-    if (!fichier) { toast.error('Sélectionnez une image'); return }
+    if (!fichier) { toast.error(t('ocr.noFile')); return }
     try {
       await runOp<OcrResult>('ocr', async () => {
         if (mode === 'manuscrit') {
@@ -59,10 +61,10 @@ export default function OcrPage() {
         const r = await ocrAPI.scanner(fd)
         return r.data as OcrResult
       })
-      toast.success('Numérisation terminée !')
+      toast.success(t('ocr.okExtract'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur OCR')
+      toast.error(err.response?.data?.detail || t('ocr.errExtract'))
     }
   }
 
@@ -83,9 +85,9 @@ export default function OcrPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Scan className="text-green-600" size={24} />
-          Scan → Texte
+          {t('ocr.title')}
         </h1>
-        <p className="text-gray-500 text-sm mt-1">Numérisez un document ou lisez des notes manuscrites</p>
+        <p className="text-gray-500 text-sm mt-1">{t('ocr.subtitle')}</p>
       </div>
 
       {/* Mode selector */}
@@ -98,7 +100,7 @@ export default function OcrPage() {
               mode === m ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {m === 'scanner' ? '📷 Document scanné' : '✍️ Notes manuscrites'}
+            {m === 'scanner' ? t('ocr.scanModePrint') : t('ocr.scanModeHand')}
           </button>
         ))}
       </div>
@@ -112,12 +114,12 @@ export default function OcrPage() {
           className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors"
         >
           {preview ? (
-            <img src={preview} alt="Aperçu" className="max-h-48 mx-auto rounded-lg object-contain" />
+            <img src={preview} alt={t('common.preview')} className="max-h-48 mx-auto rounded-lg object-contain" />
           ) : (
             <>
               <Upload size={32} className="mx-auto text-gray-300 mb-2" />
-              <p className="text-sm text-gray-500">Glissez une image ici ou cliquez pour sélectionner</p>
-              <p className="text-xs text-gray-400 mt-1">JPG, PNG, TIFF, WEBP — max 20 Mo</p>
+              <p className="text-sm text-gray-500">{t('ocr.uploadHint')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('ocr.uploadAccept')}</p>
             </>
           )}
           <input ref={inputRef} type="file" accept="image/*" className="hidden"
@@ -127,12 +129,12 @@ export default function OcrPage() {
         {/* Options */}
         {mode === 'scanner' && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Type de document attendu</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ocr.expectedType')}</label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setTypeAttendu('')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium ${!typeAttendu ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-              >Auto-détecté</button>
+              >{t('ocr.autoDetect')}</button>
               {FORMATS_VALIDES.map(f => (
                 <button key={f} onClick={() => setTypeAttendu(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${typeAttendu === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
@@ -144,7 +146,7 @@ export default function OcrPage() {
 
         {mode === 'manuscrit' && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Formater en</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ocr.formatAs')}</label>
             <div className="flex flex-wrap gap-2">
               {FORMATS_MANUSCRIT.map(f => (
                 <button key={f} onClick={() => setFormaterEn(f)}
@@ -161,7 +163,7 @@ export default function OcrPage() {
           className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Scan size={18} />}
-          {loading ? 'Numérisation en cours…' : 'Numériser'}
+          {loading ? t('ocr.extracting') : t('ocr.extract')}
         </button>
       </div>
 
@@ -171,7 +173,7 @@ export default function OcrPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg capitalize">{resultat.type_document}</span>
-              <span className="ml-2 text-xs text-gray-400">Confiance : {Math.round(resultat.confiance * 100)}%</span>
+              <span className="ml-2 text-xs text-gray-400">{t('ocr.confidence', { pct: Math.round(resultat.confiance * 100) })}</span>
             </div>
             {resultat.word_base64 && (
               <button onClick={telechargerWord}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CreditCard, Zap, CheckCircle2, Loader2, Plus, AlertCircle, RefreshCw, Wallet, BarChart3, Clock, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { abonnementAPI } from '../api/client'
 
 interface MonAbonnement {
@@ -62,6 +63,7 @@ function fmtNb(n: number | null | undefined): string {
 }
 
 export default function AbonnementPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [onglet, setOnglet] = useState<'recharge' | 'consommation' | 'historique'>('recharge')
   const [montantCustom, setMontantCustom] = useState<number>(1000)
@@ -138,8 +140,8 @@ export default function AbonnementPage() {
       <header className="flex items-center gap-3">
         <Wallet className="text-brand-600" size={28} />
         <div>
-          <h1 className="text-2xl font-bold">Crédits</h1>
-          <p className="text-sm text-gray-500">Pay-as-you-go — rechargez votre solde à la demande, pas d'abonnement</p>
+          <h1 className="text-2xl font-bold">{t('abonnement.title')}</h1>
+          <p className="text-sm text-gray-500">{t('abonnement.subtitle')}</p>
         </div>
       </header>
 
@@ -147,32 +149,32 @@ export default function AbonnementPage() {
       <div className="bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl p-6 shadow-lg">
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
-            <div className="text-white/70 text-xs uppercase tracking-wide">Solde actuel</div>
+            <div className="text-white/70 text-xs uppercase tracking-wide">{t('abonnement.currentBalance')}</div>
             <div className="text-4xl font-bold mt-1">
               {fmtNb(Math.round(monAbo?.credits_restants ?? 0))}
-              <span className="text-base font-normal text-white/70 ml-1">crédits Yukpo</span>
+              <span className="text-base font-normal text-white/70 ml-1">{t('abonnement.creditsYukpo')}</span>
             </div>
             <div className="text-white/80 text-sm mt-1">
               ≈ {fmtFcfa(fcfaForCredits(monAbo?.credits_restants ?? 0))} d'usage restant
             </div>
           </div>
           <div className="text-right">
-            <div className="text-white/70 text-xs uppercase tracking-wide">Total consommé</div>
+            <div className="text-white/70 text-xs uppercase tracking-wide">{t('abonnement.totalConsumed')}</div>
             <div className="text-2xl font-bold mt-1">{fmtNb(Math.round(monAbo?.credits_utilises ?? 0))}</div>
             <div className="text-white/80 text-xs mt-1">depuis création du compte</div>
           </div>
         </div>
         <div className="mt-4 text-xs text-white/70 leading-relaxed">
-          🔄 Tarification Yukpo : <strong>0,6 FCFA = 1 crédit</strong> · minimum recharge
+          🔄 {t('abonnement.yukpoTariff')} : <strong>0,6 FCFA = 1 crédit</strong> · minimum recharge
           1 000 FCFA · vos crédits ne périment jamais.
         </div>
       </div>
 
       <nav className="flex gap-2 border-b overflow-x-auto">
         {([
-          ['recharge',     'Recharger',         Plus],
-          ['consommation', 'Ma consommation',   BarChart3],
-          ['historique',   'Historique paiements', Clock],
+          ['recharge',     t('abonnement.tabPacks'),     Plus],
+          ['consommation', t('abonnement.consumption'),  BarChart3],
+          ['historique',   t('abonnement.tabHistory'),   Clock],
         ] as const).map(([key, label, Icon]) => (
           <button key={key} onClick={() => setOnglet(key as any)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
@@ -188,7 +190,7 @@ export default function AbonnementPage() {
         <div className="space-y-4">
           {/* Recharges préréglées */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-700 mb-3">Recharges rapides</h2>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('abonnement.quickRecharges')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {RECHARGES_PRERELEES.map(r => (
                 <button key={r.fcfa}
@@ -213,7 +215,7 @@ export default function AbonnementPage() {
 
           {/* Recharge libre */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3">Recharge personnalisée</h2>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">{t('abonnement.customRecharge')}</h2>
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3">
               <div className="flex-1 w-full">
                 <label className="block text-xs text-gray-500 mb-1">Montant (FCFA, minimum 1 000)</label>
@@ -222,7 +224,7 @@ export default function AbonnementPage() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500" />
               </div>
               <div className="flex-1 w-full text-center sm:text-left">
-                <div className="text-xs text-gray-500">Crédits ajoutés</div>
+                <div className="text-xs text-gray-500">{t('abonnement.creditsAdded')}</div>
                 <div className="text-2xl font-bold text-brand-600">
                   {fmtNb(creditsAttendus)}
                 </div>
@@ -230,7 +232,7 @@ export default function AbonnementPage() {
               </div>
               <button onClick={() => setPaiementOuvert(true)} disabled={montantCustom < 1000}
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg px-5 py-2.5 text-sm font-semibold flex items-center gap-1.5">
-                <Plus size={14} /> Recharger
+                <Plus size={14} /> {t('abonnement.buy')}
               </button>
             </div>
           </div>
@@ -254,19 +256,19 @@ export default function AbonnementPage() {
             <>
               {/* KPIs période */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <KPI label="Crédits consommés" value={fmtNb(walletQ.data.totaux?.credits_consommes ?? 0)} sub="30 derniers jours" />
-                <KPI label="Appels totaux" value={fmtNb(walletQ.data.totaux?.appels ?? 0)} sub={`${walletQ.data.totaux?.nb_appels_llm ?? 0} LLM · ${walletQ.data.totaux?.nb_forfaits ?? 0} forfaits`} />
-                <KPI label="Valeur consommée" value={fmtFcfa(walletQ.data.totaux?.valeur_fcfa_payee ?? 0)} sub="≈ équivalent FCFA" />
-                <KPI label="Modules utilisés" value={fmtNb(walletQ.data.top_modules?.length ?? 0)} sub="différents" />
+                <KPI label={t('abonnement.consumCreditsKpi')} value={fmtNb(walletQ.data.totaux?.credits_consommes ?? 0)} sub="30 derniers jours" />
+                <KPI label={t('abonnement.totalCalls')} value={fmtNb(walletQ.data.totaux?.appels ?? 0)} sub={`${walletQ.data.totaux?.nb_appels_llm ?? 0} LLM · ${walletQ.data.totaux?.nb_forfaits ?? 0} forfaits`} />
+                <KPI label={t('abonnement.valueConsumed')} value={fmtFcfa(walletQ.data.totaux?.valeur_fcfa_payee ?? 0)} sub="≈ équivalent FCFA" />
+                <KPI label={t('abonnement.modulesUsed')} value={fmtNb(walletQ.data.top_modules?.length ?? 0)} sub="différents" />
               </div>
 
               {/* Top modules consommateurs */}
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <TrendingUp size={14} className="text-brand-600" /> Top modules consommateurs
+                  <TrendingUp size={14} className="text-brand-600" /> {t('abonnement.topConsumers')}
                 </h3>
                 {(walletQ.data.top_modules || []).length === 0 ? (
-                  <p className="text-sm text-gray-500">Aucune consommation sur cette période.</p>
+                  <p className="text-sm text-gray-500">{t('abonnement.noConsumPeriod')}</p>
                 ) : (
                   <div className="space-y-2">
                     {walletQ.data.top_modules.map((m: any) => {
@@ -295,7 +297,7 @@ export default function AbonnementPage() {
               {/* Historique récent */}
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <h3 className="text-sm font-semibold text-gray-700 p-4 border-b">
-                  Historique récent (200 dernières opérations)
+                  {t('abonnement.recentHistory')}
                 </h3>
                 {(walletQ.data.historique || []).length === 0 ? (
                   <p className="p-4 text-sm text-gray-500">Aucune consommation.</p>
@@ -304,11 +306,11 @@ export default function AbonnementPage() {
                     <table className="w-full text-xs">
                       <thead className="bg-gray-50 text-gray-500 uppercase">
                         <tr>
-                          <th className="text-left px-3 py-2 font-semibold">Date</th>
-                          <th className="text-left px-3 py-2 font-semibold">Module</th>
-                          <th className="text-left px-3 py-2 font-semibold">Type</th>
-                          <th className="text-right px-3 py-2 font-semibold">Tokens</th>
-                          <th className="text-right px-3 py-2 font-semibold">Crédits</th>
+                          <th className="text-left px-3 py-2 font-semibold">{t('abonnement.headerDate')}</th>
+                          <th className="text-left px-3 py-2 font-semibold">{t('abonnement.headerModule')}</th>
+                          <th className="text-left px-3 py-2 font-semibold">{t('abonnement.headerType')}</th>
+                          <th className="text-right px-3 py-2 font-semibold">{t('abonnement.headerTokens')}</th>
+                          <th className="text-right px-3 py-2 font-semibold">{t('abonnement.headerCredits')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -377,21 +379,21 @@ export default function AbonnementPage() {
       {paiementOuvert && !reference && (
         <div className="fixed inset-0 z-40 bg-black/50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-t-2xl md:rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-lg font-bold">Recharger {fmtFcfa(montantCustom)}</h3>
+            <h3 className="text-lg font-bold">{t('abonnement.rechargeAmount', { amount: fmtFcfa(montantCustom) })}</h3>
             <div className="bg-brand-50 border border-brand-200 rounded-lg p-3 text-sm flex items-center justify-between">
-              <span className="text-gray-600">Crédits qui seront ajoutés</span>
+              <span className="text-gray-600">{t('abonnement.creditsToBeAdded')}</span>
               <span className="text-xl font-bold text-brand-700">{fmtNb(creditsAttendus)}</span>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Opérateur Mobile Money</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('abonnement.operator')}</label>
               <select value={operateur} onChange={e => setOperateur(e.target.value)}
                 className="w-full border rounded-lg px-3 py-2 text-sm">
                 {OPERATEURS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('abonnement.phone')}</label>
               <input value={numero} onChange={e => setNumero(e.target.value.replace(/[^0-9+]/g, ''))}
                 placeholder="ex: 690000001"
                 className="w-full border rounded-lg px-3 py-2 text-sm" />
@@ -399,13 +401,13 @@ export default function AbonnementPage() {
 
             <div className="flex gap-2 justify-end">
               <button onClick={() => setPaiementOuvert(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Annuler</button>
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">{t('common.cancel')}</button>
               <button onClick={() => initier.mutate()}
                 disabled={!numero || numero.length < 8 || initier.isPending}
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold">
                 {initier.isPending
-                  ? <><Loader2 className="inline animate-spin mr-1" size={14}/>Initiation…</>
-                  : 'Initier le paiement'}
+                  ? <><Loader2 className="inline animate-spin mr-1" size={14}/>{t('abonnement.initiating')}</>
+                  : t('abonnement.buy')}
               </button>
             </div>
           </div>
@@ -418,7 +420,7 @@ export default function AbonnementPage() {
           <div className="bg-white rounded-t-2xl md:rounded-2xl max-w-lg w-full p-6 space-y-4">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <CheckCircle2 className="text-green-500" size={22} />
-              Paiement initié — Réf. {reference}
+              {t('abonnement.paymentInitiatedRef', { ref: reference })}
             </h3>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900">
               <strong>Montant :</strong> {fmtFcfa(instructions.montant_fcfa)}<br />
@@ -434,12 +436,12 @@ export default function AbonnementPage() {
             </div>
             <div className="flex gap-2 justify-end pt-2">
               <button onClick={() => { setReference(null); setInstructions(null); setPaiementOuvert(false) }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Fermer</button>
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">{t('common.close')}</button>
               <button onClick={() => confirmer.mutate()} disabled={confirmer.isPending}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold">
                 {confirmer.isPending
-                  ? <><Loader2 className="inline animate-spin mr-1" size={14}/>Validation…</>
-                  : "J'ai payé — Confirmer"}
+                  ? <><Loader2 className="inline animate-spin mr-1" size={14}/>{t('abonnement.confirming')}</>
+                  : t('abonnement.confirmPayment')}
               </button>
             </div>
           </div>

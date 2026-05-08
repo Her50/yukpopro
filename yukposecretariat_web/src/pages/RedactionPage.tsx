@@ -20,6 +20,7 @@ import {
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { redactionAPI, ocrAPI, audioAPI } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
 import { CountryPicker } from '../components/CountryPicker'
@@ -43,15 +44,15 @@ type AudioResult = {
 
 type TabKey = 'texte' | 'scan' | 'audio' | 'doc'
 
-const TABS: { key: TabKey; label: string; icon: any; color: string; ring: string; desc: string }[] = [
-  { key: 'texte', label: 'Texte',     icon: FileText,   color: 'text-blue-600',   ring: 'ring-blue-500',
-    desc: 'Générer un document depuis vos instructions' },
-  { key: 'scan',  label: 'Scan',      icon: Scan,       color: 'text-green-600',  ring: 'ring-green-500',
-    desc: 'Numériser une image / un document papier' },
-  { key: 'audio', label: 'Audio',     icon: Mic,        color: 'text-purple-600', ring: 'ring-purple-500',
-    desc: 'Dicter ou importer un audio' },
-  { key: 'doc',   label: 'Document',  icon: FolderOpen, color: 'text-amber-600',  ring: 'ring-amber-500',
-    desc: 'Améliorer un texte ou un brouillon existant' },
+const TABS: { key: TabKey; labelKey: string; icon: any; color: string; ring: string; descKey: string }[] = [
+  { key: 'texte', labelKey: 'redaction.tabText',     icon: FileText,   color: 'text-blue-600',   ring: 'ring-blue-500',
+    descKey: 'redaction.tabTextDesc' },
+  { key: 'scan',  labelKey: 'redaction.tabScan',     icon: Scan,       color: 'text-green-600',  ring: 'ring-green-500',
+    descKey: 'redaction.tabScanDesc' },
+  { key: 'audio', labelKey: 'redaction.tabAudio',    icon: Mic,        color: 'text-purple-600', ring: 'ring-purple-500',
+    descKey: 'redaction.tabAudioDesc' },
+  { key: 'doc',   labelKey: 'redaction.tabDocument', icon: FolderOpen, color: 'text-amber-600',  ring: 'ring-amber-500',
+    descKey: 'redaction.tabDocumentDesc' },
 ]
 
 function formatFCFA(n: number) { return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA' }
@@ -69,6 +70,7 @@ function downloadDocx(b64: string, name: string) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function RedactionPage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const initialTab = (params.get('tab') as TabKey) || 'texte'
   const [tab, setTab] = useState<TabKey>(
@@ -102,35 +104,33 @@ export default function RedactionPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Sparkles className="text-brand-600" size={24} />
-          Rédaction Yukpo
+          {t('redaction.title')}
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Hub unifié — texte, scan, audio et document existant. Vous pouvez chaîner les modes :
-          un scan, un audio ou un texte importé peut être renvoyé vers l'onglet Texte pour
-          être reformulé, traduit en registre pro, ou converti en lettre/contrat/PV/etc.
+          {t('redaction.subtitle')}
         </p>
       </div>
 
       {/* Tabs */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 flex gap-1 overflow-x-auto">
-        {TABS.map(t => {
-          const Icon = t.icon
-          const active = tab === t.key
+        {TABS.map(tb => {
+          const Icon = tb.icon
+          const active = tab === tb.key
           return (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
               className={`flex-1 min-w-32 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
                 active
-                  ? `bg-gradient-to-br from-gray-50 to-white shadow-sm ring-1 ${t.ring} ${t.color}`
+                  ? `bg-gradient-to-br from-gray-50 to-white shadow-sm ring-1 ${tb.ring} ${tb.color}`
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
                 <Icon size={16} />
-                <span>{t.label}</span>
+                <span>{t(tb.labelKey)}</span>
               </div>
-              <p className="text-[10px] text-gray-400 mt-0.5 leading-tight hidden sm:block">{t.desc}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5 leading-tight hidden sm:block">{t(tb.descKey)}</p>
             </button>
           )
         })}
@@ -147,6 +147,7 @@ export default function RedactionPage() {
 // ─── Onglet Texte ───────────────────────────────────────────────────────────
 
 function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReformuler: (v: string) => void }) {
+  const { t } = useTranslation()
   const [typeDoc, setTypeDoc] = useLongOpField<string>('redaction', 'typeDoc', '')
   const [pays, setPays] = useLongOpField<string>('redaction', 'pays', 'CM')
   const [informations, setInformations] = useLongOpField<string>('redaction', 'informations', '')
@@ -171,7 +172,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
   }
 
   const generer = async () => {
-    if (!typeDoc) { toast.error('Choisissez un type de document'); return }
+    if (!typeDoc) { toast.error(t('redaction.errType')); return }
     try {
       await runOp<RedactionResult>('redaction', async () => {
         const r = await redactionAPI.generer({
@@ -183,10 +184,10 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
         })
         return r.data as RedactionResult
       })
-      toast.success('Document généré !')
+      toast.success(t('redaction.okGen'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de génération')
+      toast.error(err.response?.data?.detail || t('redaction.errGen'))
     }
   }
 
@@ -196,14 +197,14 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Type de document</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('redaction.selectType')}</label>
           <div className="relative">
             <select
               value={typeDoc}
               onChange={e => setTypeDoc(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white pr-10"
             >
-              <option value="">— Sélectionner —</option>
+              <option value="">{t('infographie.labelSelect')}</option>
               {categories.map(cat => (
                 <optgroup key={cat} label={typesData?.categories?.[cat] ?? cat}>
                   {types.filter(t => t.categorie === cat).map(t => (
@@ -220,7 +221,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
         <CountryPicker label="Contexte pays" value={pays} onChange={setPays} />
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Informations du document</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">{t('redaction.infosTitle')}</label>
           <p className="text-xs text-gray-400 mb-2">
             Décrivez librement : noms, dates, montants, objet. (texte libre ou JSON)
           </p>
@@ -235,7 +236,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Texte à reformuler / améliorer <span className="text-gray-400 font-normal">(optionnel — alimenté auto par les onglets Scan / Audio / Document)</span>
+            {t('redaction.textToReformulate')} <span className="text-gray-400 font-normal">(optionnel — alimenté auto par les onglets Scan / Audio / Document)</span>
           </label>
           <textarea
             value={reformuler}
@@ -253,12 +254,12 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Profondeur du document</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('redaction.depth')}</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              { cle: 'court',    label: 'Court',     desc: '1-2 pages · rapide',          emoji: '⚡' },
-              { cle: 'standard', label: 'Standard',  desc: '3-5 pages',                   emoji: '📄' },
-              { cle: 'long',     label: 'Long',      desc: '10+ pages · modèle puissant', emoji: '📚' },
+              { cle: 'court',    label: t('redaction.depthShort'),    desc: '1-2 pages · rapide',          emoji: '⚡' },
+              { cle: 'standard', label: t('redaction.depthStandard'), desc: '3-5 pages',                   emoji: '📄' },
+              { cle: 'long',     label: t('redaction.depthLong'),     desc: '10+ pages · modèle puissant', emoji: '📚' },
             ] as const).map(m => (
               <button key={m.cle} type="button" onClick={() => setMode(m.cle)}
                 className={`p-2.5 rounded-lg border text-left transition-colors ${
@@ -287,7 +288,7 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
-          {loading ? (mode === 'long' ? 'Génération longue en cours (30-60s)…' : 'Génération en cours…') : 'Générer le document'}
+          {loading ? t('redaction.generating') : t('redaction.generate')}
         </button>
       </div>
 
@@ -322,6 +323,7 @@ const FORMATS_VALIDES = ['lettre', 'formulaire', 'recu', 'manuscrit', 'tableau']
 const FORMATS_MANUSCRIT = ['lettre', 'rapport', 'liste', 'paragraphe']
 
 function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
+  const { t } = useTranslation()
   type Mode = 'scanner' | 'manuscrit'
   const [mode, setMode] = useLongOpField<Mode>('ocr', 'mode', 'scanner')
   const [fichier, setFichier] = useLongOpField<File | null>('ocr', 'fichier', null)
@@ -341,7 +343,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
   }
 
   const scanner = async () => {
-    if (!fichier) { toast.error('Sélectionnez une image'); return }
+    if (!fichier) { toast.error(t('ocr.noFile')); return }
     try {
       await runOp<OcrResult>('ocr', async () => {
         const fd = new FormData()
@@ -356,10 +358,10 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         const r = await ocrAPI.scanner(fd)
         return r.data as OcrResult
       })
-      toast.success('Numérisation terminée !')
+      toast.success(t('ocr.okExtract'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur OCR')
+      toast.error(err.response?.data?.detail || t('ocr.errExtract'))
     }
   }
 
@@ -372,7 +374,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 mode === m ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}>
-              {m === 'scanner' ? '📷 Document scanné' : '✍️ Notes manuscrites'}
+              {m === 'scanner' ? t('ocr.scanModePrint') : t('ocr.scanModeHand')}
             </button>
           ))}
         </div>
@@ -396,10 +398,10 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 
         {mode === 'scanner' && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Type de document attendu</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ocr.expectedType')}</label>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => setTypeAttendu('')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${!typeAttendu ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Auto</button>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${!typeAttendu ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{t('ocr.autoDetect')}</button>
               {FORMATS_VALIDES.map(f => (
                 <button key={f} onClick={() => setTypeAttendu(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${typeAttendu === f ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{f}</button>
@@ -410,7 +412,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 
         {mode === 'manuscrit' && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Formater en</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ocr.formatAs')}</label>
             <div className="flex flex-wrap gap-2">
               {FORMATS_MANUSCRIT.map(f => (
                 <button key={f} onClick={() => setFormaterEn(f)}
@@ -430,7 +432,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
       {resultat && (
         <ResultatBlock
           title={resultat.type_document}
-          subtitle={`Confiance : ${Math.round(resultat.confiance * 100)}%`}
+          subtitle={t('ocr.confidence', { pct: Math.round(resultat.confiance * 100) })}
           markdown={resultat.texte_structure}
           wordB64={resultat.word_base64}
           downloadName="document-ocr.docx"
@@ -445,6 +447,7 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 // ─── Onglet Audio ───────────────────────────────────────────────────────────
 
 function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
+  const { t } = useTranslation()
   const [fichier, setFichier] = useLongOpField<File | null>('audio', 'fichier', null)
   const [typeDoc, setTypeDoc] = useLongOpField<string>('audio', 'typeDoc', 'dictee')
   const [pays, setPays] = useLongOpField<string>('audio', 'pays', 'CM')
@@ -478,12 +481,12 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         stream.getTracks().forEach(t => t.stop())
       }
       mr.start(); mediaRef.current = mr; setRecording(true)
-    } catch { toast.error('Microphone non accessible') }
+    } catch { toast.error(t('redaction.micUnavailable')) }
   }
   const stop = () => { mediaRef.current?.stop(); setRecording(false) }
 
   const transcrire = async () => {
-    if (!fichier) { toast.error('Sélectionnez ou enregistrez un audio'); return }
+    if (!fichier) { toast.error(t('audio.noAudio')); return }
     try {
       await runOp<AudioResult>('audio', async () => {
         const fd = new FormData()
@@ -494,10 +497,10 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         const r = await audioAPI.transcrire(fd)
         return r.data as AudioResult
       })
-      toast.success('Transcription terminée !')
+      toast.success(t('audio.okTranscribe'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast.error(err.response?.data?.detail || 'Erreur de transcription')
+      toast.error(err.response?.data?.detail || t('audio.errTranscribe'))
     }
   }
 
@@ -509,11 +512,11 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${
               recording ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'
             }`}>
-            {recording ? <><Square size={18} /> Arrêter</> : <><Circle size={18} className="fill-white" /> Dicter</>}
+            {recording ? <><Square size={18} /> {t('redaction.stop')}</> : <><Circle size={18} className="fill-white" /> {t('redaction.dictate')}</>}
           </button>
           <button onClick={() => inputRef.current?.click()}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gray-100 hover:bg-gray-200 text-gray-700">
-            <Upload size={18} /> Importer
+            <Upload size={18} /> {t('redaction.import')}
           </button>
           <input ref={inputRef} type="file" accept="audio/*" className="hidden"
             onChange={e => { if (e.target.files?.[0]) setFichier(e.target.files[0]) }} />
@@ -527,12 +530,12 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
         )}
         {recording && (
           <div className="flex items-center gap-2 text-red-500 text-sm animate-pulse">
-            <Circle size={10} className="fill-red-500" /> Enregistrement en cours…
+            <Circle size={10} className="fill-red-500" /> {t('redaction.recording')}
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Type de document à produire</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t('redaction.docTypeToProduce')}</label>
           <div className="flex flex-wrap gap-2">
             {types.map(t => (
               <button key={t.cle} onClick={() => setTypeDoc(t.cle)}
@@ -541,11 +544,11 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           </div>
         </div>
 
-        <CountryPicker label="Pays" value={pays} onChange={setPays} />
+        <CountryPicker label={t('common.country')} value={pays} onChange={setPays} />
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Contexte <span className="font-normal text-gray-400">(optionnel)</span>
+            {t('redaction.context')} <span className="font-normal text-gray-400">(optionnel)</span>
           </label>
           <textarea value={contexte} onChange={e => setContexte(e.target.value)} rows={2}
             placeholder="Participants, objet, date..."
@@ -583,6 +586,7 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
 // ─── Onglet Document existant ───────────────────────────────────────────────
 
 function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
+  const { t } = useTranslation()
   const [texte, setTexte] = useLongOpField<string>('docameliore', 'texte', '')
   const [registre, setRegistre] = useLongOpField<string>('docameliore', 'registre', 'professionnel')
   const [pays, setPays] = useLongOpField<string>('docameliore', 'pays', 'CM')
@@ -623,7 +627,7 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
         </p>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Texte à améliorer</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">{t('redaction.textToImprove')}</label>
           <textarea value={texte} onChange={e => setTexte(e.target.value)} rows={10}
             placeholder="Collez votre brouillon ici…"
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y" />
@@ -637,7 +641,7 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Registre cible</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t('redaction.targetRegister')}</label>
             <div className="flex flex-wrap gap-2">
               {REGISTRES.map(r => (
                 <button key={r.cle} onClick={() => setRegistre(r.cle)}
@@ -645,25 +649,25 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
               ))}
             </div>
           </div>
-          <CountryPicker label="Pays" value={pays} onChange={setPays} />
+          <CountryPicker label={t('common.country')} value={pays} onChange={setPays} />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
           <button onClick={reformulerTexte} disabled={loading || !texte.trim()}
             className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
-            {loading ? 'Reformulation…' : 'Reformuler le texte'}
+            {loading ? 'Reformulation…' : t('redaction.reformulate')}
           </button>
           <button onClick={() => onAmeliorer(texte)} disabled={!texte.trim()}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-            <ChevronRight size={16} /> Convertir en autre document
+            <ChevronRight size={16} /> {t('redaction.convertToOtherDoc')}
           </button>
         </div>
       </div>
 
       {resultat?.texte_reformule && (
         <ResultatBlock
-          title="Texte reformulé"
+          title={t('redaction.reformulatedText')}
           subtitle={resultat.nb_mots ? `${resultat.nb_mots} mots · ${formatFCFA(resultat.prix_fcfa || 0)}` : ''}
           markdown={resultat.texte_reformule}
           onAmeliorer={() => onAmeliorer(resultat.texte_reformule!)}
@@ -685,6 +689,7 @@ function ResultatBlock({
   color: 'green' | 'purple' | 'amber';
   extra?: React.ReactNode;
 }) {
+  const { t } = useTranslation()
   const colorMap = {
     green:  { btn: 'bg-green-600 hover:bg-green-700',   tag: 'bg-green-100 text-green-700' },
     purple: { btn: 'bg-purple-600 hover:bg-purple-700', tag: 'bg-purple-100 text-purple-700' },
@@ -700,7 +705,7 @@ function ResultatBlock({
         <div className="flex gap-2">
           <button onClick={onAmeliorer}
             className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-xl">
-            <Sparkles size={14} /> Améliorer dans Rédaction Yukpo
+            <Sparkles size={14} /> {t('redaction.improveInRedaction')}
           </button>
           {wordB64 && downloadName && (
             <button onClick={() => downloadDocx(wordB64, downloadName)}

@@ -4,16 +4,17 @@ import { KanbanSquare, Plus, Loader2, X, Check, MessageCircle, AlertTriangle } f
 import { gestionAPI } from '../api/client'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { DemoBanner } from '../components/DemoBanner'
 
 type Statut = 'en_attente' | 'en_cours' | 'en_revision' | 'livre' | 'paye' | 'annule'
 
-const COLONNES: { statut: Statut; label: string; color: string }[] = [
-  { statut: 'en_attente', label: 'En attente', color: 'border-gray-400' },
-  { statut: 'en_cours',   label: 'En cours',   color: 'border-blue-400' },
-  { statut: 'en_revision',label: 'Révision',   color: 'border-yellow-400' },
-  { statut: 'livre',      label: 'Livré',      color: 'border-purple-400' },
-  { statut: 'paye',       label: 'Payé ✓',    color: 'border-green-400' },
+const COLONNES: { statut: Statut; labelKey: string; color: string }[] = [
+  { statut: 'en_attente', labelKey: 'kanban.colTodo',       color: 'border-gray-400' },
+  { statut: 'en_cours',   labelKey: 'kanban.colInProgress', color: 'border-blue-400' },
+  { statut: 'en_revision',labelKey: 'kanban.colReview',     color: 'border-yellow-400' },
+  { statut: 'livre',      labelKey: 'kanban.colDelivered',  color: 'border-purple-400' },
+  { statut: 'paye',       labelKey: 'kanban.colPaid',       color: 'border-green-400' },
 ]
 
 // Types de travail clarifiés (libellés explicites + couleurs distinctes pour éviter la confusion)
@@ -54,6 +55,7 @@ function whatsAppValide(num: string): boolean {
 }
 
 export default function KanbanPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -78,11 +80,11 @@ export default function KanbanPage() {
       qc.invalidateQueries({ queryKey: ['travaux'] })
       setShowModal(false); setShowConfirm(false)
       setForm({ client_nom: '', client_whatsapp: '+237', description: '', type_travail: 'redaction_doc', montant_fcfa: 0, acompte_fcfa: 0 })
-      toast.success('Bon de travail créé')
+      toast.success(t('kanban.okCreate'))
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || 'Erreur création'
-      toast.error(typeof msg === 'string' ? msg : 'Erreur création')
+      const msg = err?.response?.data?.detail || t('kanban.errCreate')
+      toast.error(typeof msg === 'string' ? msg : t('kanban.errCreate'))
     },
   })
 
@@ -99,11 +101,11 @@ export default function KanbanPage() {
       qc.invalidateQueries({ queryKey: ['travaux'] })
       setShowTerminer(null)
       if (res?.whatsapp_envoye) {
-        toast.success('Travail terminé · client notifié par WhatsApp ✓')
+        toast.success(t('kanban.completed') + ' · WhatsApp ✓')
       } else if (res?.whatsapp_raison) {
-        toast(`Travail terminé · WhatsApp non envoyé (${res.whatsapp_raison.slice(0, 80)})`, { icon: '⚠️' })
+        toast(`${t('kanban.completed')} · WhatsApp non envoyé (${res.whatsapp_raison.slice(0, 80)})`, { icon: '⚠️' })
       } else {
-        toast.success('Travail terminé')
+        toast.success(t('kanban.completed'))
       }
     },
     onError: (err: any) => {
@@ -141,13 +143,13 @@ export default function KanbanPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <KanbanSquare className="text-indigo-600" size={24} />
-            File de travaux
+            {t('kanban.title')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">{travaux.length} bons de travail</p>
         </div>
         <button onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
-          <Plus size={18} /> Nouveau
+          <Plus size={18} /> {t('kanban.newTask')}
         </button>
       </div>
 
@@ -156,13 +158,13 @@ export default function KanbanPage() {
       ) : (
         <div className="overflow-x-auto pb-2">
           <div className="flex gap-4 min-w-max">
-            {COLONNES.map(({ statut, label, color }) => {
+            {COLONNES.map(({ statut, labelKey, color }) => {
               const bons = parColonne(statut)
               return (
                 <div key={statut} className="w-72 shrink-0">
                   <div className={clsx('border-t-4 rounded-t-lg px-3 py-2 bg-white shadow-sm', color)}>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-700">{label}</span>
+                      <span className="text-sm font-semibold text-gray-700">{t(labelKey)}</span>
                       <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{bons.length}</span>
                     </div>
                   </div>
@@ -190,12 +192,12 @@ export default function KanbanPage() {
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-semibold text-gray-700">{formatFCFA(b.montant_fcfa)}</span>
                             {b.reste_a_payer > 0 && (
-                              <span className="text-orange-500">Reste: {formatFCFA(b.reste_a_payer)}</span>
+                              <span className="text-orange-500">{t('kanban.remaining')} {formatFCFA(b.reste_a_payer)}</span>
                             )}
                           </div>
                           {b.notif_fin_envoyee && (
                             <div className="text-[10px] text-green-600 flex items-center gap-1">
-                              <Check size={10} /> Client notifié WhatsApp
+                              <Check size={10} /> {t('kanban.clientNotified')}
                             </div>
                           )}
                           <div className="flex gap-1.5">
@@ -208,9 +210,9 @@ export default function KanbanPage() {
                             {peutTerminer && (
                               <button onClick={() => setShowTerminer(b)}
                                 className="text-xs py-1.5 px-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 font-medium flex items-center gap-1"
-                                title="Terminer + notifier WhatsApp">
+                                title={t('kanban.complete')}>
                                 <MessageCircle size={11} />
-                                Terminer
+                                {t('kanban.complete')}
                               </button>
                             )}
                           </div>
@@ -230,17 +232,17 @@ export default function KanbanPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-gray-900">Nouveau bon de travail</h2>
+              <h2 className="font-bold text-gray-900">{t('kanban.newTask')}</h2>
               <button onClick={() => setShowModal(false)}><X size={20} className="text-gray-400" /></button>
             </div>
 
-            <Field label="Nom du client *">
+            <Field label={t('kanban.clientName')}>
               <input type="text" value={form.client_nom}
                 onChange={e => setForm(f => ({ ...f, client_nom: e.target.value }))}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </Field>
 
-            <Field label="Numéro WhatsApp du client *">
+            <Field label={t('kanban.clientWhatsapp')}>
               <input type="tel" value={form.client_whatsapp}
                 onChange={e => setForm(f => ({ ...f, client_whatsapp: e.target.value }))}
                 placeholder="+237 690 12 34 56"
@@ -260,13 +262,13 @@ export default function KanbanPage() {
               )}
             </Field>
 
-            <Field label="Description du travail *">
+            <Field label={t('kanban.workDescription')}>
               <textarea rows={2} value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
             </Field>
 
-            <Field label="Type de travail">
+            <Field label={t('kanban.workType')}>
               <div className="grid grid-cols-2 gap-2">
                 {TYPES_TRAVAIL.map(t => (
                   <button key={t.cle} type="button"
@@ -292,7 +294,7 @@ export default function KanbanPage() {
                   onChange={e => setForm(f => ({ ...f, montant_fcfa: +e.target.value }))}
                   className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               </Field>
-              <Field label="Acompte reçu">
+              <Field label={t('kanban.advance')}>
                 <input type="number" min={0} value={form.acompte_fcfa}
                   onChange={e => setForm(f => ({ ...f, acompte_fcfa: +e.target.value }))}
                   className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -302,7 +304,7 @@ export default function KanbanPage() {
             <button onClick={tenterCreer} disabled={creerMutation.isPending || !formValide}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl disabled:opacity-60 flex items-center justify-center gap-2">
               {creerMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-              Créer le bon de travail
+              {t('kanban.createTask')}
             </button>
           </div>
         </div>
@@ -330,7 +332,7 @@ export default function KanbanPage() {
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-medium">
-                Modifier
+                {t('common.edit')}
               </button>
               <button onClick={() => creerMutation.mutate(form)} disabled={creerMutation.isPending}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center justify-center gap-1.5 disabled:opacity-60">
@@ -365,6 +367,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function ModalTerminer({ bon, onClose, onConfirm, loading }:
   { bon: BonTravail; onClose: () => void; onConfirm: (msg?: string, envoyer?: boolean) => void; loading: boolean }) {
+  const { t } = useTranslation()
   const [message, setMessage] = useState('')
   const [envoyer, setEnvoyer] = useState(true)
   const reste = bon.montant_fcfa - bon.acompte_fcfa
@@ -379,7 +382,7 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
       <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-gray-900 flex items-center gap-2">
-            <Check size={18} className="text-green-600" /> Terminer le travail
+            <Check size={18} className="text-green-600" /> {t('kanban.completeWork')}
           </h3>
           <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
         </div>
@@ -397,7 +400,7 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input type="checkbox" checked={envoyer} onChange={e => setEnvoyer(e.target.checked)}
             className="w-4 h-4 text-green-600 rounded" />
-          <span>Notifier le client par WhatsApp à la fin</span>
+          <span>{t('kanban.notifyClientWhatsapp')}</span>
         </label>
 
         {envoyer && (
@@ -419,7 +422,7 @@ function ModalTerminer({ bon, onClose, onConfirm, loading }:
             className="flex-1 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center gap-1.5 disabled:opacity-60">
             {loading && <Loader2 size={14} className="animate-spin" />}
             <Check size={14} />
-            {envoyer ? 'Terminer + Notifier' : 'Terminer'}
+            {envoyer ? t('kanban.completeAndNotify') : t('kanban.complete')}
           </button>
         </div>
       </div>
