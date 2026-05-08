@@ -88,7 +88,7 @@ export default function Layout() {
       <div className="md:hidden flex items-center justify-between bg-brand-700 text-white px-4 py-3 sticky top-0 z-40">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center bg-white rounded-lg"
-               style={{ width: 40, height: 40, padding: 1, boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}>
+               style={{ width: 40, height: 40, padding: 5, boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <span className="font-bold text-lg">Yukpo<span className="text-sky-300">Secrétariat</span></span>
@@ -106,7 +106,7 @@ export default function Layout() {
         {/* Logo desktop */}
         <div className="hidden md:flex items-center gap-3 px-5 py-5 border-b border-brand-600">
           <div className="flex items-center justify-center bg-white rounded-xl flex-shrink-0"
-               style={{ width: 56, height: 56, padding: 2, boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}>
+               style={{ width: 56, height: 56, padding: 6, boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <div className="flex flex-col leading-tight">

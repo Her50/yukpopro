@@ -48,7 +48,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-6 flex flex-col items-center">
           <div className="flex items-center justify-center bg-white rounded-2xl mb-3"
-               style={{ width: 72, height: 72, padding: 4, boxShadow: "0 0 0 1px rgba(0,84,166,0.15), 0 4px 14px rgba(0,84,166,0.15)" }}>
+               style={{ width: 72, height: 72, padding: 8, boxShadow: "0 0 0 1px rgba(0,84,166,0.15), 0 4px 14px rgba(0,84,166,0.15)" }}>
             <img src="/logo.png" alt="Yukpo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <h1 className="text-2xl font-bold text-brand-700">Yukpo<span className="text-sky-500">Secrétariat</span></h1>
