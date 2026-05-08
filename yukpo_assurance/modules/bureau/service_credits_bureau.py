@@ -47,13 +47,13 @@ TARIFS_MODELES: dict[str, dict[str, float]] = {
 PLANS_BUREAU: dict[str, dict] = {
     "gratuit": {
         "id": "gratuit",
-        "nom": "Gratuit",
+        "nom": "Pay-as-you-go",
         "prix_fcfa": 0,
-        "credits_mois": 1_000,
+        "credits_mois": 0,           # plus de crédits offerts auto, recharge à la demande
         "duree_jours": 0,
         "modules": ["redaction", "ocr", "audio", "traduction", "infographie", "gestion", "documents"],
-        "description": "Accès à tous les modules — crédits limités pour découvrir",
-        "label_credits": "1 000 crédits / mois",
+        "description": "Sans abonnement — rechargez votre solde à la demande (minimum 1 000 FCFA = 20 000 crédits)",
+        "label_credits": "Recharge libre — 1 FCFA = 20 crédits",
     },
     "secretariat": {
         "id": "secretariat",
@@ -204,7 +204,14 @@ async def verifier_acces_module(user_id: int, module: str) -> Tuple[bool, str, s
 
 
 async def _renouveler_si_expire(credit: CreditBureauDB, db: AsyncSession) -> None:
-    """Renouvellement mensuel automatique."""
+    """
+    Renouvellement mensuel automatique — UNIQUEMENT pour les plans payants
+    avec abonnement (secretariat / infographie / complet).
+    Le plan 'gratuit' devient le mode pay-as-you-go : les crédits achetés
+    via recharge sont permanents, jamais reset.
+    """
+    if credit.plan == "gratuit":
+        return  # Pay-as-you-go : pas de reset
     if credit.periode_fin and datetime.utcnow() > credit.periode_fin:
         credit.credits_utilises = 0.0
         credit.periode_debut = datetime.utcnow()

@@ -79,6 +79,13 @@ class InitierRechargeBureauRequest(BaseModel):
     pays:             str = Field("CM")
 
 
+class InitierRechargeCustomRequest(BaseModel):
+    montant_fcfa:     int = Field(..., ge=1000, description="Montant FCFA à recharger, minimum 1000")
+    operateur:        str = Field(..., description="orange_money | mtn_momo | wave | ...")
+    numero_telephone: str = Field(..., min_length=8, max_length=15)
+    pays:             str = Field("CM")
+
+
 ADMIN_ROLES = ("admin", "super_admin", "yukpo_owner")
 
 
@@ -308,7 +315,65 @@ async def lister_packs_credits_bureau():
     return {"packs": list(PACKS_CREDITS_BUREAU.values())}
 
 
-@router.post("/initier-recharge", summary="Initier un achat de crédits bureau")
+@router.post("/initier-recharge-custom", summary="Recharge avec montant libre (min 1000 FCFA)")
+async def initier_recharge_custom(
+    req: InitierRechargeCustomRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Mode pay-as-you-go : l'utilisateur saisit le montant qu'il veut recharger
+    (minimum 1 000 FCFA). Les crédits Yukpo ajoutés = montant_fcfa × 20.
+    """
+    from modules.bureau.service_credits_bureau import MULTIPLICATEUR_YUKPO
+    if req.operateur not in OPERATEURS:
+        raise HTTPException(400, f"Opérateur non supporté : {', '.join(OPERATEURS.keys())}")
+    if req.montant_fcfa < 1000:
+        raise HTTPException(400, "Montant minimum : 1 000 FCFA")
+
+    credits_a_creer = int(req.montant_fcfa * MULTIPLICATEUR_YUKPO)
+    reference = f"YKS-RC-{uuid.uuid4().hex[:8].upper()}"
+
+    instructions = _generer_instructions_paiement(
+        operateur=req.operateur,
+        montant=req.montant_fcfa,
+        reference=reference,
+        numero=req.numero_telephone,
+    )
+
+    from modules.pro.service_profil import get_or_create
+    profil, _ = await get_or_create(current_user.user_id, db)
+    prefs = dict(profil.preferences or {})
+    prefs["bureau_recharge_en_attente"] = {
+        "reference":       reference,
+        "pack_id":         f"custom_{req.montant_fcfa}",
+        "credits":         credits_a_creer,
+        "operateur":       req.operateur,
+        "numero":          req.numero_telephone,
+        "montant":         req.montant_fcfa,
+        "date_initiation": datetime.utcnow().isoformat(),
+        "expire_a":        (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+    }
+    profil.preferences = prefs
+    await db.commit()
+
+    logger.info(
+        f"[Bureau/Recharge-Custom] Initié : user={current_user.user_id} "
+        f"montant={req.montant_fcfa} FCFA = {credits_a_creer} crédits ref={reference}"
+    )
+
+    return {
+        "reference":     reference,
+        "montant_fcfa":  req.montant_fcfa,
+        "credits":       credits_a_creer,
+        "pack_nom":      f"Recharge {req.montant_fcfa:,} FCFA".replace(",", " "),
+        "operateur":     OPERATEURS[req.operateur]["label"],
+        "instructions":  instructions,
+        "expire_dans":   "24 heures",
+    }
+
+
+@router.post("/initier-recharge", summary="Initier un achat de crédits bureau (pack préréglé)")
 async def initier_recharge_credits_bureau(
     req: InitierRechargeBureauRequest,
     current_user: TokenData = Depends(get_current_user),

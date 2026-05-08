@@ -1,30 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CreditCard, Zap, CheckCircle2, Clock, Loader2, Package, Plus, AlertCircle, RefreshCw } from 'lucide-react'
+import { CreditCard, Zap, CheckCircle2, Loader2, Plus, AlertCircle, RefreshCw, Wallet } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { abonnementAPI } from '../api/client'
-import { DemoBanner } from '../components/DemoBanner'
-
-interface Plan {
-  id: string
-  nom: string
-  prix_fcfa: number
-  credits_mois: number
-  duree_jours: number
-  modules: string[]
-  description: string
-  label_credits: string
-  badge?: string
-}
-
-interface PackCredit {
-  id: string
-  nom: string
-  credits: number
-  prix_fcfa: number
-  description: string
-  badge?: string
-}
 
 interface MonAbonnement {
   plan: string
@@ -38,27 +16,27 @@ interface MonAbonnement {
   modules_autorises: string[]
   date_fin: string | null
   prix_fcfa: number
-  renouvellement_le?: string | null
 }
 
 const OPERATEURS = [
   { id: 'orange_money', label: 'Orange Money' },
-  { id: 'mtn_momo', label: 'MTN MoMo' },
-  { id: 'wave', label: 'Wave' },
-  { id: 'moov_money', label: 'Moov Money' },
+  { id: 'mtn_momo',     label: 'MTN MoMo' },
+  { id: 'wave',         label: 'Wave' },
+  { id: 'moov_money',   label: 'Moov Money' },
   { id: 'airtel_money', label: 'Airtel Money' },
   { id: 'expressunion', label: 'Express Union' },
 ]
 
-const MODULE_LABELS: Record<string, string> = {
-  redaction: 'Rédaction IA',
-  ocr: 'Scan / OCR',
-  audio: 'Audio → Doc',
-  traduction: 'Traduction',
-  infographie: 'Infographie',
-  gestion: 'Gestion',
-  documents: 'Mes Documents',
-}
+const RECHARGES_PRERELEES = [
+  { fcfa: 1_000,  desc: 'Découverte' },
+  { fcfa: 2_000,  desc: 'Petit usage' },
+  { fcfa: 5_000,  desc: 'Usage régulier', badge: 'Populaire' },
+  { fcfa: 10_000, desc: 'Travail intensif' },
+  { fcfa: 25_000, desc: 'Volume élevé' },
+  { fcfa: 50_000, desc: 'Pro' },
+]
+
+const MULTIPLICATEUR = 20  // 1 FCFA = 20 crédits Yukpo
 
 function fmtFcfa(n: number | null | undefined): string {
   return (n ?? 0).toLocaleString('fr-FR') + ' FCFA'
@@ -69,18 +47,17 @@ function fmtNb(n: number | null | undefined): string {
 
 export default function AbonnementPage() {
   const qc = useQueryClient()
-  const [onglet, setOnglet] = useState<'plans' | 'recharge' | 'historique'>('plans')
-  const [planChoisi, setPlanChoisi] = useState<string | null>(null)
-  const [packChoisi, setPackChoisi] = useState<string | null>(null)
+  const [onglet, setOnglet] = useState<'recharge' | 'historique'>('recharge')
+  const [montantCustom, setMontantCustom] = useState<number>(1000)
   const [operateur, setOperateur] = useState('orange_money')
   const [numero, setNumero] = useState('')
   const [reference, setReference] = useState<string | null>(null)
   const [instructions, setInstructions] = useState<any>(null)
-  const [typeEnAttente, setTypeEnAttente] = useState<'plan' | 'recharge' | null>(null)
+  const [paiementOuvert, setPaiementOuvert] = useState(false)
 
   const monAboQ = useQuery<MonAbonnement>({
     queryKey: ['bureau-mon-abonnement'],
-    queryFn: async (): Promise<MonAbonnement> => {
+    queryFn: async () => {
       const r = await abonnementAPI.monAbonnement()
       return r.data as MonAbonnement
     },
@@ -89,324 +66,215 @@ export default function AbonnementPage() {
   })
   const monAbo = monAboQ.data
 
-  const plansQ = useQuery<{ plans: Plan[] }>({
-    queryKey: ['bureau-plans'],
-    queryFn: async (): Promise<{ plans: Plan[] }> => {
-      const r = await abonnementAPI.plans()
-      return r.data as { plans: Plan[] }
-    },
-    retry: 1,
-  })
-  const plansData = plansQ.data
-
-  const packsQ = useQuery<{ packs: PackCredit[] }>({
-    queryKey: ['bureau-packs'],
-    queryFn: async (): Promise<{ packs: PackCredit[] }> => {
-      const r = await abonnementAPI.packsCredits()
-      return r.data as { packs: PackCredit[] }
-    },
-    retry: 1,
-    enabled: onglet === 'recharge',
-  })
-  const packsData = packsQ.data
-
-  const { data: historique } = useQuery({
+  const historiqueQ = useQuery({
     queryKey: ['bureau-historique'],
-    queryFn: () => abonnementAPI.historique().then(r => r.data),
+    queryFn: async () => {
+      const r = await abonnementAPI.historique()
+      return r.data
+    },
     enabled: onglet === 'historique',
+    retry: 1,
   })
 
-  const initierPaiement = useMutation({
-    mutationFn: () =>
-      abonnementAPI.initier({ plan: planChoisi!, operateur, numero_telephone: numero }).then(r => r.data),
-    onSuccess: data => {
+  const initier = useMutation({
+    mutationFn: async () => {
+      const r = await abonnementAPI.initierRechargeCustom({
+        montant_fcfa: montantCustom, operateur, numero_telephone: numero,
+      })
+      return r.data
+    },
+    onSuccess: (data: any) => {
       setReference(data.reference)
       setInstructions(data.instructions)
-      setTypeEnAttente('plan')
-      toast.success(`Paiement initié : ${data.reference}`)
+      toast.success(`Paiement initié — ${fmtFcfa(data.montant_fcfa)} = ${fmtNb(data.credits)} crédits`)
     },
-    onError: (e: any) => toast.error(e.response?.data?.detail || 'Erreur initiation'),
+    onError: (e: any) => toast.error(e?.response?.data?.detail || 'Erreur initiation'),
   })
 
-  const confirmerPaiement = useMutation({
-    mutationFn: () => abonnementAPI.confirmer({ reference_paiement: reference! }).then(r => r.data),
+  const confirmer = useMutation({
+    mutationFn: async () => {
+      const r = await abonnementAPI.confirmerRecharge({ reference_paiement: reference! })
+      return r.data
+    },
     onSuccess: () => {
-      toast.success('Abonnement activé !')
-      setReference(null); setInstructions(null); setPlanChoisi(null); setTypeEnAttente(null)
+      toast.success('Crédits ajoutés ✓')
+      setReference(null); setInstructions(null); setPaiementOuvert(false)
       qc.invalidateQueries({ queryKey: ['bureau-mon-abonnement'] })
       qc.invalidateQueries({ queryKey: ['bureau-historique'] })
     },
-    onError: (e: any) => toast.error(e.response?.data?.detail || 'Erreur confirmation'),
+    onError: (e: any) => toast.error(e?.response?.data?.detail || 'Erreur confirmation'),
   })
 
-  const initierRecharge = useMutation({
-    mutationFn: () =>
-      abonnementAPI.initierRecharge({ pack_id: packChoisi!, operateur, numero_telephone: numero }).then(r => r.data),
-    onSuccess: data => {
-      setReference(data.reference)
-      setInstructions(data.instructions)
-      setTypeEnAttente('recharge')
-      toast.success(`Recharge initiée : ${data.reference}`)
-    },
-    onError: (e: any) => toast.error(e.response?.data?.detail || 'Erreur recharge'),
-  })
-
-  const confirmerRecharge = useMutation({
-    mutationFn: () => abonnementAPI.confirmerRecharge({ reference_paiement: reference! }).then(r => r.data),
-    onSuccess: () => {
-      toast.success('Crédits ajoutés !')
-      setReference(null); setInstructions(null); setPackChoisi(null); setTypeEnAttente(null)
-      qc.invalidateQueries({ queryKey: ['bureau-mon-abonnement'] })
-    },
-    onError: (e: any) => toast.error(e.response?.data?.detail || 'Erreur confirmation'),
-  })
+  const creditsAttendus = montantCustom * MULTIPLICATEUR
 
   return (
     <div className="space-y-6">
-      <DemoBanner />
       <header className="flex items-center gap-3">
-        <CreditCard className="text-brand-600" size={28} />
+        <Wallet className="text-brand-600" size={28} />
         <div>
-          <h1 className="text-2xl font-bold">Abonnement & Crédits</h1>
-          <p className="text-sm text-gray-500">Gérez votre plan et rechargez vos crédits Yukpo</p>
+          <h1 className="text-2xl font-bold">Crédits</h1>
+          <p className="text-sm text-gray-500">Pay-as-you-go — rechargez votre solde à la demande, pas d'abonnement</p>
         </div>
       </header>
 
-      {monAbo && (
-        <div className="bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl p-6 shadow-lg">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-white/70 text-xs uppercase tracking-wide">Plan actif</div>
-              <div className="text-3xl font-bold mt-1">{monAbo.nom_plan ?? '—'}</div>
-              <div className="text-white/80 text-sm mt-1">{monAbo.label_credits ?? ''}</div>
+      {/* Solde */}
+      <div className="bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl p-6 shadow-lg">
+        <div className="flex items-start justify-between flex-wrap gap-3">
+          <div>
+            <div className="text-white/70 text-xs uppercase tracking-wide">Solde actuel</div>
+            <div className="text-4xl font-bold mt-1">
+              {fmtNb(Math.round(monAbo?.credits_restants ?? 0))}
+              <span className="text-base font-normal text-white/70 ml-1">crédits</span>
             </div>
-            <div className="text-right">
-              <div className="text-white/70 text-xs uppercase tracking-wide">Crédits restants</div>
-              <div className="text-3xl font-bold mt-1">{Math.round(monAbo.credits_restants ?? 0).toLocaleString('fr-FR')}</div>
-              <div className="text-white/80 text-sm mt-1">sur {(monAbo.credits_alloues ?? 0).toLocaleString('fr-FR')}</div>
+            <div className="text-white/80 text-sm mt-1">
+              ≈ {fmtFcfa(Math.round((monAbo?.credits_restants ?? 0) / MULTIPLICATEUR))} d'usage
             </div>
           </div>
-          <div className="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-white h-full transition-all"
-              style={{ width: `${Math.min(100, monAbo.pct_utilise ?? 0)}%` }}
-            />
+          <div className="text-right">
+            <div className="text-white/70 text-xs uppercase tracking-wide">Total consommé</div>
+            <div className="text-2xl font-bold mt-1">{fmtNb(Math.round(monAbo?.credits_utilises ?? 0))}</div>
+            <div className="text-white/80 text-xs mt-1">depuis création du compte</div>
           </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {monAbo.modules_autorises?.map(m => (
-              <span key={m} className="bg-white/20 rounded-full px-3 py-1 text-xs">
-                {MODULE_LABELS[m] || m}
-              </span>
-            ))}
-          </div>
-          {monAbo.renouvellement_le && (
-            <div className="text-brand-200 text-xs mt-3 flex items-center gap-1">
-              <Clock size={12} /> Renouvellement : {monAbo.renouvellement_le}
-            </div>
-          )}
         </div>
-      )}
+        <div className="mt-4 text-xs text-white/70 leading-relaxed">
+          🔄 Tarification : <strong>1 FCFA = {MULTIPLICATEUR} crédits Yukpo</strong> ·
+          minimum recharge 1 000 FCFA · les crédits ne périment jamais.
+        </div>
+      </div>
 
       <nav className="flex gap-2 border-b">
         {([
-          ['plans', 'Plans'],
-          ['recharge', 'Recharger des crédits'],
+          ['recharge',   'Recharger des crédits'],
           ['historique', 'Historique'],
         ] as const).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setOnglet(key)}
+          <button key={key} onClick={() => setOnglet(key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              onglet === key
-                ? 'border-brand-600 text-brand-600'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
-          >
+              onglet === key ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}>
             {label}
           </button>
         ))}
       </nav>
 
-      {onglet === 'plans' && plansQ.isLoading && (
-        <div className="flex items-center justify-center py-16 text-gray-500">
-          <Loader2 className="animate-spin mr-2" size={20} /> Chargement des plans…
-        </div>
-      )}
-      {onglet === 'plans' && plansQ.isError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
-          <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
-          <div className="flex-1 text-sm">
-            <p className="font-semibold text-red-700">Impossible de charger les plans</p>
-            <p className="text-red-600 mt-1 text-xs">{(plansQ.error as any)?.message || 'Erreur réseau'}</p>
-            <button onClick={() => plansQ.refetch()}
-              className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs">
-              <RefreshCw size={11} /> Réessayer
-            </button>
+      {/* Recharge */}
+      {onglet === 'recharge' && !paiementOuvert && (
+        <div className="space-y-4">
+          {/* Recharges préréglées */}
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">Recharges rapides</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {RECHARGES_PRERELEES.map(r => (
+                <button key={r.fcfa}
+                  onClick={() => { setMontantCustom(r.fcfa); setPaiementOuvert(true) }}
+                  className={`relative bg-white rounded-xl p-4 border-2 hover:border-brand-500 hover:shadow-md transition text-left ${
+                    montantCustom === r.fcfa ? 'border-brand-500 shadow' : 'border-gray-200'
+                  }`}>
+                  {r.badge && (
+                    <span className="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                      {r.badge}
+                    </span>
+                  )}
+                  <div className="text-xs text-gray-400">{r.desc}</div>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">{fmtFcfa(r.fcfa)}</div>
+                  <div className="text-xs text-brand-600 mt-1 flex items-center gap-1">
+                    <Zap size={10} /> {fmtNb(r.fcfa * MULTIPLICATEUR)} crédits
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recharge libre */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">Recharge personnalisée</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+              <div className="flex-1 w-full">
+                <label className="block text-xs text-gray-500 mb-1">Montant (FCFA, minimum 1 000)</label>
+                <input type="number" min={1000} step={500} value={montantCustom}
+                  onChange={e => setMontantCustom(Math.max(1000, parseInt(e.target.value) || 1000))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              </div>
+              <div className="flex-1 w-full text-center sm:text-left">
+                <div className="text-xs text-gray-500">Crédits ajoutés</div>
+                <div className="text-2xl font-bold text-brand-600">
+                  {fmtNb(creditsAttendus)}
+                </div>
+                <div className="text-xs text-gray-400">≈ {fmtFcfa(montantCustom)} d'usage</div>
+              </div>
+              <button onClick={() => setPaiementOuvert(true)} disabled={montantCustom < 1000}
+                className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg px-5 py-2.5 text-sm font-semibold flex items-center gap-1.5">
+                <Plus size={14} /> Recharger
+              </button>
+            </div>
           </div>
         </div>
       )}
-      {onglet === 'plans' && plansData && (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {plansData?.plans.map(p => (
-            <div
-              key={p.id}
-              className={`bg-white rounded-xl p-5 border-2 transition ${
-                planChoisi === p.id ? 'border-brand-500 shadow-lg' : 'border-gray-200 hover:border-brand-300'
-              }`}
-            >
-              {p.badge && (
-                <span className="inline-block bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full mb-2">
-                  {p.badge}
-                </span>
-              )}
-              <h3 className="text-xl font-bold">{p.nom}</h3>
-              <div className="text-3xl font-bold text-brand-600 mt-2">
-                {p.prix_fcfa === 0 ? 'Gratuit' : fmtFcfa(p.prix_fcfa)}
-                {p.prix_fcfa > 0 && <span className="text-sm text-gray-500 font-normal"> / mois</span>}
-              </div>
-              <div className="text-sm text-gray-600 mt-2">{p.description}</div>
-              <div className="text-sm text-brand-700 font-semibold mt-3 flex items-center gap-1">
-                <Zap size={14} /> {p.label_credits}
-              </div>
-              <div className="flex flex-wrap gap-1 mt-3">
-                {(p.modules ?? []).map(m => (
-                  <span key={m} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-full">
-                    {MODULE_LABELS[m] || m}
-                  </span>
-                ))}
-              </div>
-              {p.id !== 'gratuit' && (
-                <button
-                  onClick={() => setPlanChoisi(p.id)}
-                  disabled={monAbo?.plan === p.id}
-                  className="w-full mt-4 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg py-2 text-sm font-semibold transition"
-                >
-                  {monAbo?.plan === p.id ? 'Plan actuel' : 'Choisir ce plan'}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
 
-      {onglet === 'recharge' && (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {packsData?.packs.map(p => (
-            <div
-              key={p.id}
-              className={`bg-white rounded-xl p-5 border-2 transition ${
-                packChoisi === p.id ? 'border-brand-500 shadow-lg' : 'border-gray-200 hover:border-brand-300'
-              }`}
-            >
-              {p.badge && (
-                <span className="inline-block bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full mb-2">
-                  {p.badge}
-                </span>
-              )}
-              <Package className="text-brand-500 mb-2" size={24} />
-              <h3 className="font-bold">{p.nom}</h3>
-              <div className="text-2xl font-bold text-brand-600 mt-1">
-                {fmtNb(p.credits)} <span className="text-xs font-normal text-gray-500">crédits</span>
-              </div>
-              <div className="text-lg font-semibold text-gray-800 mt-1">{fmtFcfa(p.prix_fcfa)}</div>
-              <button
-                onClick={() => setPackChoisi(p.id)}
-                className="w-full mt-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg py-2 text-sm font-semibold"
-              >
-                <Plus size={14} className="inline -mt-0.5 mr-1" />
-                Acheter
+      {/* Historique */}
+      {onglet === 'historique' && (
+        <div className="bg-white border rounded-xl divide-y">
+          {historiqueQ.isLoading && (
+            <div className="p-4 text-sm text-gray-500 flex items-center gap-2">
+              <Loader2 className="animate-spin" size={14} /> Chargement…
+            </div>
+          )}
+          {historiqueQ.isError && (
+            <div className="p-4 text-sm text-red-600 flex items-center gap-2">
+              <AlertCircle size={14} /> Impossible de charger l'historique
+              <button onClick={() => historiqueQ.refetch()} className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs">
+                <RefreshCw size={11} className="inline" /> Réessayer
               </button>
             </div>
+          )}
+          {(historiqueQ.data?.historique_recharges || []).length === 0 && !historiqueQ.isLoading && (
+            <div className="p-4 text-sm text-gray-500">Aucune recharge effectuée.</div>
+          )}
+          {(historiqueQ.data?.historique_recharges || []).map((h: any) => (
+            <div key={h.reference} className="p-3 flex items-center justify-between text-sm">
+              <div>
+                <div className="font-semibold">{h.pack_nom}</div>
+                <div className="text-xs text-gray-500">{fmtNb(h.credits)} crédits · {h.reference}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold">{fmtFcfa(h.montant)}</div>
+                <div className="text-xs text-gray-500">{h.date}</div>
+              </div>
+            </div>
           ))}
-        </div>
-      )}
-
-      {onglet === 'historique' && (
-        <div className="space-y-4">
-          <section>
-            <h3 className="text-lg font-semibold mb-2">Abonnements</h3>
-            <div className="bg-white border rounded-lg divide-y">
-              {(historique?.historique_abonnements || []).length === 0 && (
-                <div className="p-4 text-sm text-gray-500">Aucun abonnement passé.</div>
-              )}
-              {(historique?.historique_abonnements || []).map((h: any) => (
-                <div key={h.reference} className="p-3 flex items-center justify-between text-sm">
-                  <div>
-                    <div className="font-semibold capitalize">{h.plan}</div>
-                    <div className="text-xs text-gray-500">{h.operateur} · {h.reference}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">{fmtFcfa(h.montant_fcfa)}</div>
-                    <div className="text-xs text-gray-500">{new Date(h.date).toLocaleDateString('fr-FR')}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-          <section>
-            <h3 className="text-lg font-semibold mb-2">Recharges de crédits</h3>
-            <div className="bg-white border rounded-lg divide-y">
-              {(historique?.historique_recharges || []).length === 0 && (
-                <div className="p-4 text-sm text-gray-500">Aucune recharge passée.</div>
-              )}
-              {(historique?.historique_recharges || []).map((h: any) => (
-                <div key={h.reference} className="p-3 flex items-center justify-between text-sm">
-                  <div>
-                    <div className="font-semibold">{h.pack_nom}</div>
-                    <div className="text-xs text-gray-500">{fmtNb(h.credits)} crédits · {h.reference}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">{fmtFcfa(h.montant)}</div>
-                    <div className="text-xs text-gray-500">{h.date}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
       )}
 
       {/* Modal paiement */}
-      {(planChoisi || packChoisi) && !reference && (
+      {paiementOuvert && !reference && (
         <div className="fixed inset-0 z-40 bg-black/50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-t-2xl md:rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-lg font-bold">
-              Paiement {planChoisi ? `: ${plansData?.plans.find(p => p.id === planChoisi)?.nom}` : `: ${packsData?.packs.find(p => p.id === packChoisi)?.nom}`}
-            </h3>
+            <h3 className="text-lg font-bold">Recharger {fmtFcfa(montantCustom)}</h3>
+            <div className="bg-brand-50 border border-brand-200 rounded-lg p-3 text-sm flex items-center justify-between">
+              <span className="text-gray-600">Crédits qui seront ajoutés</span>
+              <span className="text-xl font-bold text-brand-700">{fmtNb(creditsAttendus)}</span>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Opérateur Mobile Money</label>
-              <select
-                value={operateur}
-                onChange={e => setOperateur(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-              >
+              <select value={operateur} onChange={e => setOperateur(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm">
                 {OPERATEURS.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
-              <input
-                value={numero}
-                onChange={e => setNumero(e.target.value.replace(/[^0-9+]/g, ''))}
+              <input value={numero} onChange={e => setNumero(e.target.value.replace(/[^0-9+]/g, ''))}
                 placeholder="ex: 690000001"
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-              />
+                className="w-full border rounded-lg px-3 py-2 text-sm" />
             </div>
 
             <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => { setPlanChoisi(null); setPackChoisi(null) }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => planChoisi ? initierPaiement.mutate() : initierRecharge.mutate()}
-                disabled={!numero || numero.length < 8 || initierPaiement.isPending || initierRecharge.isPending}
-                className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold"
-              >
-                {(initierPaiement.isPending || initierRecharge.isPending)
+              <button onClick={() => setPaiementOuvert(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Annuler</button>
+              <button onClick={() => initier.mutate()}
+                disabled={!numero || numero.length < 8 || initier.isPending}
+                className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold">
+                {initier.isPending
                   ? <><Loader2 className="inline animate-spin mr-1" size={14}/>Initiation…</>
                   : 'Initier le paiement'}
               </button>
@@ -421,7 +289,7 @@ export default function AbonnementPage() {
           <div className="bg-white rounded-t-2xl md:rounded-2xl max-w-lg w-full p-6 space-y-4">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <CheckCircle2 className="text-green-500" size={22} />
-              Paiement initié — Référence : {reference}
+              Paiement initié — Réf. {reference}
             </h3>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900">
               <strong>Montant :</strong> {fmtFcfa(instructions.montant_fcfa)}<br />
@@ -436,18 +304,11 @@ export default function AbonnementPage() {
               ))}
             </div>
             <div className="flex gap-2 justify-end pt-2">
-              <button
-                onClick={() => { setReference(null); setInstructions(null); setTypeEnAttente(null); setPlanChoisi(null); setPackChoisi(null) }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-              >
-                Fermer
-              </button>
-              <button
-                onClick={() => typeEnAttente === 'plan' ? confirmerPaiement.mutate() : confirmerRecharge.mutate()}
-                disabled={confirmerPaiement.isPending || confirmerRecharge.isPending}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold"
-              >
-                {(confirmerPaiement.isPending || confirmerRecharge.isPending)
+              <button onClick={() => { setReference(null); setInstructions(null); setPaiementOuvert(false) }}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Fermer</button>
+              <button onClick={() => confirmer.mutate()} disabled={confirmer.isPending}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 text-sm font-semibold">
+                {confirmer.isPending
                   ? <><Loader2 className="inline animate-spin mr-1" size={14}/>Validation…</>
                   : "J'ai payé — Confirmer"}
               </button>
