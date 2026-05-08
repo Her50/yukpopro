@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Search, Check } from 'lucide-react'
-import { LANGUAGES, findLanguage, searchLanguages } from '../data/languages'
+import { useTranslation } from 'react-i18next'
+import { LANGUAGES, findLanguage } from '../data/languages'
+import { normalize } from '../data/countries'
 
 interface Props {
   value: string
@@ -10,13 +12,31 @@ interface Props {
 }
 
 export function LanguagePicker({ value, onChange, label, className }: Props) {
+  const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const selected = findLanguage(value) || LANGUAGES.find((l) => l.code === 'fr') || LANGUAGES[0]
-  const results = useMemo(() => searchLanguages(query).slice(0, 100), [query])
+  // Noms de langues localisés via Intl.DisplayNames.
+  const displayNames = useMemo(() => {
+    try { return new Intl.DisplayNames([i18n.language], { type: 'language' }) }
+    catch { return null }
+  }, [i18n.language])
+  const localized = (code: string, fallback: string): string =>
+    displayNames?.of(code) || fallback
+
+  const selectedRaw = findLanguage(value) || LANGUAGES.find((l) => l.code === 'fr') || LANGUAGES[0]
+  const selected = { ...selectedRaw, name: localized(selectedRaw.code, selectedRaw.name) }
+
+  const results = useMemo(() => {
+    const n = normalize(query.trim())
+    const items = LANGUAGES.map(l => ({ ...l, name: localized(l.code, l.name) }))
+    if (!n) return items.slice(0, 100)
+    return items.filter(l =>
+      normalize(l.name).includes(n) || normalize(l.native).includes(n) || l.code.toLowerCase().includes(n),
+    ).slice(0, 100)
+  }, [query, displayNames])
 
   useEffect(() => {
     if (!open) return
@@ -53,13 +73,13 @@ export function LanguagePicker({ value, onChange, label, className }: Props) {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher une langue…"
+                placeholder={t('common.searchLanguage')}
                 className="flex-1 text-sm outline-none bg-transparent"
               />
             </div>
             <ul className="max-h-64 overflow-y-auto py-1" role="listbox">
               {results.length === 0 && (
-                <li className="px-3 py-2 text-xs text-gray-400">Aucun résultat</li>
+                <li className="px-3 py-2 text-xs text-gray-400">{t('common.noResults')}</li>
               )}
               {results.map((l) => (
                 <li key={l.code}>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Search, Check } from 'lucide-react'
-import { COUNTRIES, findCountry, searchCountries } from '../data/countries'
+import { useTranslation } from 'react-i18next'
+import { COUNTRIES, findCountry, normalize } from '../data/countries'
 
 interface Props {
   value: string
@@ -10,13 +11,32 @@ interface Props {
 }
 
 export function CountryPicker({ value, onChange, label, className }: Props) {
+  const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const selected = findCountry(value) || COUNTRIES[0]
-  const results = useMemo(() => searchCountries(query).slice(0, 100), [query])
+  // Noms de pays localisés via Intl.DisplayNames (intégré au navigateur,
+  // pas besoin de fichiers de traduction).
+  const displayNames = useMemo(() => {
+    try { return new Intl.DisplayNames([i18n.language], { type: 'region' }) }
+    catch { return null }
+  }, [i18n.language])
+  const localized = (code: string, fallback: string): string =>
+    displayNames?.of(code) || fallback
+
+  const selectedRaw = findCountry(value) || COUNTRIES[0]
+  const selected = { ...selectedRaw, name: localized(selectedRaw.code, selectedRaw.name) }
+
+  const results = useMemo(() => {
+    const n = normalize(query.trim())
+    const items = COUNTRIES.map(c => ({ ...c, name: localized(c.code, c.name) }))
+    if (!n) return items.slice(0, 100)
+    return items.filter(c =>
+      normalize(c.name).includes(n) || c.code.toLowerCase().includes(n),
+    ).slice(0, 100)
+  }, [query, displayNames])
 
   useEffect(() => {
     if (!open) return
@@ -56,13 +76,13 @@ export function CountryPicker({ value, onChange, label, className }: Props) {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher un pays…"
+                placeholder={t('common.searchCountry')}
                 className="flex-1 text-sm outline-none bg-transparent"
               />
             </div>
             <ul className="max-h-64 overflow-y-auto py-1" role="listbox">
               {results.length === 0 && (
-                <li className="px-3 py-2 text-xs text-gray-400">Aucun résultat</li>
+                <li className="px-3 py-2 text-xs text-gray-400">{t('common.noResults')}</li>
               )}
               {results.map((c) => (
                 <li key={c.code}>

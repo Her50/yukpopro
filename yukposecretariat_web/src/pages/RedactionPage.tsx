@@ -90,7 +90,7 @@ export default function RedactionPage() {
   const [reformuler, setReformuler] = useLongOpField<string>('redaction', 'reformuler', '')
 
   const goToTexteAvecReformulation = (texteSource: string, hint?: string) => {
-    setReformuler(texteSource + (hint ? `\n\n[Source : ${hint}]` : ''))
+    setReformuler(texteSource + (hint ? `\n\n[${t('redaction.sourceMarker', { source: hint })}]` : ''))
     setTab('texte')
     toast.success(t('redaction.transferredToText'))
     // Scroll en haut pour voir le formulaire

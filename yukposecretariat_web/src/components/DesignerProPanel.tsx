@@ -43,10 +43,18 @@ interface ResultatPro {
 
 const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone']
 const CAT_COMPTE = ['logo', 'banniere', 'signature', 'cachet', 'filigrane', 'tampon']
-const CAT_LABELS: Record<string, string> = {
-  photo: 'Photo', illustration: 'Illustration', scan: 'Scan', qr: 'QR code', icone: 'Icône',
-  logo: 'Logo', banniere: 'Bannière', signature: 'Signature', cachet: 'Cachet',
-  filigrane: 'Filigrane', tampon: 'Tampon',
+const CAT_LABEL_KEYS: Record<string, string> = {
+  photo: 'designerPro.catPhoto',
+  illustration: 'designerPro.catIllustration',
+  scan: 'designerPro.catScan',
+  qr: 'designerPro.catQr',
+  icone: 'designerPro.catIcone',
+  logo: 'designerPro.catLogo',
+  banniere: 'designerPro.catBanniere',
+  signature: 'designerPro.catSignature',
+  cachet: 'designerPro.catCachet',
+  filigrane: 'designerPro.catFiligrane',
+  tampon: 'designerPro.catTampon',
 }
 
 function b64download(b64: string, filename: string, mime: string) {
@@ -130,27 +138,27 @@ export default function DesignerProPanel() {
       if (porteeUpload === 'session') fd.append('session_id', sessionId)
       if (labelUpload) fd.append('label', labelUpload)
       await infographieProAPI.uploadMedia(fd)
-      toast.success('Média ajouté')
+      toast.success(t('designerPro.mediaAdded'))
       setLabelUpload('')
       if (fileRef.current) fileRef.current.value = ''
       porteeUpload === 'session' ? refetchSession() : refetchCompte()
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
-      toast.error(err.response?.data?.detail || err.message || 'Upload échoué')
+      toast.error(err.response?.data?.detail || err.message || t('designerPro.uploadFailed'))
     } finally {
       setUploading(false)
     }
   }
 
   const supprimer = async (m: Media) => {
-    if (!confirm(`Supprimer "${m.label}" ?`)) return
+    if (!confirm(t('designerPro.confirmDelete', { label: m.label }))) return
     try {
       await infographieProAPI.supprimerMedia(m.media_id, m.portee, m.portee === 'session' ? sessionId : undefined)
-      toast.success('Supprimé')
+      toast.success(t('designerPro.deleted'))
       m.portee === 'session' ? refetchSession() : refetchCompte()
       setRefsSelectionnees(r => r.filter(ref => ref !== `${m.portee}:${m.media_id}`))
     } catch {
-      toast.error('Échec suppression')
+      toast.error(t('designerPro.deleteFailed'))
     }
   }
 
@@ -160,7 +168,7 @@ export default function DesignerProPanel() {
   }
 
   const generer = async () => {
-    if (!brief.trim()) { toast.error('Décris ton projet'); return }
+    if (!brief.trim()) { toast.error(t('designerPro.errDescribeProject')); return }
     setLoading(true); setResultat(null); setPageActive(0)
     try {
       const payload = {
@@ -173,18 +181,18 @@ export default function DesignerProPanel() {
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
       setResultat(r.data as ResultatPro)
-      toast.success('Visuel généré — voir aperçu ↓')
+      toast.success(t('designerPro.okGenerated'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
-      toast.error(err.response?.data?.detail || err.message || 'Échec génération')
+      toast.error(err.response?.data?.detail || err.message || t('designerPro.errGenerate'))
     } finally {
       setLoading(false)
     }
   }
 
   const modifier = async () => {
-    if (!resultat?.projet_json_id) { toast.error('Génère d\'abord un visuel'); return }
-    if (!modifInstr.trim()) { toast.error('Décris la modification'); return }
+    if (!resultat?.projet_json_id) { toast.error(t('designerPro.errGenerateFirst')); return }
+    if (!modifInstr.trim()) { toast.error(t('designerPro.errDescribeChange')); return }
     setLoadingModif(true)
     try {
       const r = await infographieProAPI.modifier({
@@ -197,10 +205,10 @@ export default function DesignerProPanel() {
       setResultat(r.data as ResultatPro)
       setModifInstr('')
       setPageActive(0)
-      toast.success('Modifications appliquées')
+      toast.success(t('designerPro.okModified'))
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
-      toast.error(err.response?.data?.detail || err.message || 'Échec modification')
+      toast.error(err.response?.data?.detail || err.message || t('designerPro.errModify'))
     } finally {
       setLoadingModif(false)
     }
@@ -212,40 +220,40 @@ export default function DesignerProPanel() {
     <div className="space-y-5">
       <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
         <p className="text-sm text-amber-900 font-semibold flex items-center gap-1.5">
-          <Sparkles size={14} /> {t('designerPro.heading', 'Designer Pro — visuels multi-page')}
+          <Sparkles size={14} /> {t('designerPro.heading')}
         </p>
         <p className="text-xs text-amber-800 mt-1">
-          {t('designerPro.subheading', "Faire-part, brochures, menus, livres photo, programmes… L'IA choisit la mise en page, intègre tes médias et applique tes modifications en langage naturel.")}
+          {t('designerPro.subheading')}
         </p>
       </div>
 
       {/* Médiathèque */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
         <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-          <ImageIcon size={14} className="text-amber-600" /> {t('designerPro.mediaLibrary', 'Médiathèque')}
+          <ImageIcon size={14} className="text-amber-600" /> {t('designerPro.mediaLibrary')}
         </p>
 
         <div className="flex gap-1 bg-gray-100 border border-gray-200 p-1 rounded-xl w-fit text-xs">
           {(['session', 'compte'] as Portee[]).map(p => (
             <button key={p} onClick={() => setPorteeUpload(p)}
               className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${porteeUpload === p ? 'bg-white shadow-sm border border-gray-200 text-amber-700' : 'text-gray-600 hover:text-gray-900'}`}>
-              {p === 'session' ? '📁 Session (24h)' : '🏢 Mon compte (permanent)'}
+              {p === 'session' ? t('designerPro.scopeSession') : t('designerPro.scopeAccount')}
             </button>
           ))}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('designerPro.category')}</label>
             <select value={categorieUpload} onChange={e => setCategorieUpload(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 bg-white">
-              {cats.map(c => <option key={c} value={c}>{CAT_LABELS[c] || c}</option>)}
+              {cats.map(c => <option key={c} value={c}>{CAT_LABEL_KEYS[c] ? t(CAT_LABEL_KEYS[c]) : c}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Étiquette</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('designerPro.tag')}</label>
             <input value={labelUpload} onChange={e => setLabelUpload(e.target.value)}
-              placeholder="Optionnel — ex: logo entreprise"
+              placeholder={t('designerPro.tagPlaceholder')}
               className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800" />
           </div>
         </div>
@@ -255,14 +263,14 @@ export default function DesignerProPanel() {
           <button onClick={uploader} disabled={uploading}
             className="shrink-0 w-full sm:w-auto justify-center bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-colors">
             {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-            Ajouter
+            {t('common.add')}
           </button>
         </div>
 
         {tousMedias.length > 0 && (
           <div>
             <p className="text-xs text-gray-500 mb-2">
-              Sélectionne les médias à utiliser ({refsSelectionnees.length} choisi{refsSelectionnees.length > 1 ? 's' : ''})
+              {t('designerPro.selectMediasHint', { n: refsSelectionnees.length })}
             </p>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {tousMedias.map(m => {
@@ -276,10 +284,10 @@ export default function DesignerProPanel() {
                         <span style={{ background: m.couleur_dominante_hex }}
                           className="absolute top-1 left-1 w-3 h-3 rounded-full border border-white shadow" />
                       )}
-                      <span className="line-clamp-3 break-all">{m.label || m.categorie}</span>
+                      <span className="line-clamp-3 break-all">{m.label || (CAT_LABEL_KEYS[m.categorie] ? t(CAT_LABEL_KEYS[m.categorie]) : m.categorie)}</span>
                     </button>
                     <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] px-1 py-0.5 flex items-center justify-between">
-                      <span>{m.categorie}</span>
+                      <span>{CAT_LABEL_KEYS[m.categorie] ? t(CAT_LABEL_KEYS[m.categorie]) : m.categorie}</span>
                       <button onClick={() => supprimer(m)} className="hover:text-red-300">
                         <Trash2 size={10} />
                       </button>
@@ -295,36 +303,36 @@ export default function DesignerProPanel() {
       {/* Génération */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-gray-800">Brief & options</p>
+          <p className="text-sm font-semibold text-gray-800">{t('designerPro.briefAndOptions')}</p>
           <label className="flex items-center gap-2 text-xs">
             <input type="checkbox" checked={autoMode} onChange={e => setAutoMode(e.target.checked)} />
-            <span className="text-gray-700">L'IA choisit le format auto</span>
+            <span className="text-gray-700">{t('designerPro.autoFormat')}</span>
           </label>
         </div>
 
         {!autoMode && (
           <select value={cleHint} onChange={e => setCleHint(e.target.value)}
             className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm">
-            <option value="">— Choisis un projet —</option>
+            <option value="">{t('designerPro.selectProject')}</option>
             {projets.map(p => (
               <option key={p.cle} value={p.cle}>
-                {p.label} — {p.pages} pages ({p.width_mm}×{p.height_mm}mm)
+                {p.label} — {t('designerPro.pagesCount', { n: p.pages })} ({p.width_mm}×{p.height_mm}mm)
               </option>
             ))}
           </select>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <CountryPicker label="Pays" value={pays} onChange={setPays} />
-          <LanguagePicker label="Langue" value={langue} onChange={setLangue} />
+          <CountryPicker label={t('common.country')} value={pays} onChange={setPays} />
+          <LanguagePicker label={t('language.select')} value={langue} onChange={setLangue} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50 rounded-xl p-3 border border-amber-100">
           {([
-            ['creativite', '🎨 Créativité', creativite, setCreativite, 'sobre ↔ audacieux'],
-            ['densite', '📝 Densité texte', densite, setDensite, 'aéré ↔ riche'],
-            ['importanceImg', '🖼️ Place des images', importanceImg, setImportanceImg, 'texte ↔ images'],
-            ['elegance', '✨ Élégance', elegance, setElegance, 'fonctionnel ↔ cérémonial'],
+            ['creativite',    t('designerPro.sliderCreativity'),    creativite,    setCreativite,    t('designerPro.sliderCreativityHint')],
+            ['densite',       t('designerPro.sliderDensity'),       densite,       setDensite,       t('designerPro.sliderDensityHint')],
+            ['importanceImg', t('designerPro.sliderImageImportance'), importanceImg, setImportanceImg, t('designerPro.sliderImageImportanceHint')],
+            ['elegance',      t('designerPro.sliderElegance'),      elegance,      setElegance,      t('designerPro.sliderEleganceHint')],
           ] as const).map(([key, label, val, setter, hint]) => (
             <div key={key as string}>
               <div className="flex justify-between items-center text-xs text-gray-800 font-semibold mb-0.5">
@@ -339,13 +347,13 @@ export default function DesignerProPanel() {
         </div>
 
         <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={6}
-          placeholder="Ex: 'Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé, 72 ans. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale de Yaoundé, inhumation à Mbalmayo. 3 témoignages courts (en pièces jointes), photo de portrait, plan vers le cimetière.'"
+          placeholder={t('designerPro.briefPlaceholder')}
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
 
         <button onClick={generer} disabled={loading || !brief.trim()}
           className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
-          {loading ? t('designerPro.generating', 'Génération multi-page (peut prendre 1–2 min)…') : t('designerPro.generate', 'Générer le visuel')}
+          {loading ? t('designerPro.generating') : t('designerPro.generate')}
         </button>
       </div>
 
@@ -354,11 +362,11 @@ export default function DesignerProPanel() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <h2 className="font-bold text-gray-900">{resultat.projet?.titre || 'Visuel généré'}</h2>
+              <h2 className="font-bold text-gray-900">{resultat.projet?.titre || t('designerPro.visualGenerated')}</h2>
               <p className="text-xs text-gray-600">
                 {resultat.projet?.cle_projet || resultat.cle_projet_detectee} ·
-                {' '}{resultat.projet?.nombre_pages || (resultat.pages_png_base64?.length ?? 0)} page(s) ·
-                {' '}{resultat.projet?.palette || 'palette auto'}
+                {' '}{t('designerPro.pagesCount', { n: resultat.projet?.nombre_pages || (resultat.pages_png_base64?.length ?? 0) })} ·
+                {' '}{resultat.projet?.palette || t('designerPro.autoPalette')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -371,8 +379,8 @@ export default function DesignerProPanel() {
               {resultat.pdf_cmyk_base64 && (
                 <button onClick={() => b64download(resultat.pdf_cmyk_base64!, 'designer-pro-cmjn.pdf', 'application/pdf')}
                   className="flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-2 rounded-xl"
-                  title="CMJN — pour imprimerie pro">
-                  <Download size={14} /> PDF CMJN
+                  title={t('infographie.pdfCmykTitle')}>
+                  <Download size={14} /> {t('infographie.pdfCmyk')}
                 </button>
               )}
             </div>
@@ -384,15 +392,15 @@ export default function DesignerProPanel() {
                 {resultat.pages_png_base64.map((png, i) => (
                   <button key={i} onClick={() => setPageActive(i)}
                     className={`relative rounded-lg overflow-hidden border-2 transition-colors ${pageActive === i ? 'border-amber-500 ring-2 ring-amber-200' : 'border-gray-200 hover:border-amber-300'}`}>
-                    <img src={`data:image/png;base64,${png}`} alt={`Page ${i + 1}`} className="w-full aspect-[3/4] object-cover" />
-                    <span className="absolute top-1 left-1 bg-black/60 text-white text-[9px] px-1 rounded">p.{i + 1}</span>
+                    <img src={`data:image/png;base64,${png}`} alt={t('designerPro.pageAlt', { n: i + 1 })} className="w-full aspect-[3/4] object-cover" />
+                    <span className="absolute top-1 left-1 bg-black/60 text-white text-[9px] px-1 rounded">{t('designerPro.pageShort', { n: i + 1 })}</span>
                   </button>
                 ))}
               </div>
 
               <div className="bg-gray-50 rounded-xl p-3 flex justify-center">
                 <img src={`data:image/png;base64,${resultat.pages_png_base64[pageActive]}`}
-                  alt={`Aperçu page ${pageActive + 1}`}
+                  alt={t('designerPro.pagePreviewAlt', { n: pageActive + 1 })}
                   className="max-h-[600px] rounded-lg shadow border border-gray-200" />
               </div>
             </>
@@ -402,19 +410,18 @@ export default function DesignerProPanel() {
           {resultat.projet_json_id && (
             <div className="border-t border-gray-100 pt-4">
               <p className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1.5">
-                <MessageSquare size={14} className="text-amber-600" /> Modifier en langage naturel
+                <MessageSquare size={14} className="text-amber-600" /> {t('designerPro.modify')}
               </p>
               <p className="text-xs text-gray-500 mb-2">
-                Ex : "remplace la photo p.1 par celle sélectionnée", "change la couleur principale en bleu",
-                "ajoute un témoignage de Mme NGONO p.5"
+                {t('designerPro.modifyExamples')}
               </p>
               <textarea value={modifInstr} onChange={e => setModifInstr(e.target.value)} rows={2}
-                placeholder="Décris les changements à appliquer…"
+                placeholder={t('designerPro.modifyPlaceholder')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
               <button onClick={modifier} disabled={loadingModif || !modifInstr.trim()}
                 className="mt-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl disabled:opacity-50 flex items-center gap-2 shadow-sm transition-colors">
                 {loadingModif ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                {loadingModif ? t('designerPro.apply', 'Application…') : t('designerPro.modify', 'Appliquer')}
+                {loadingModif ? t('designerPro.applying') : t('designerPro.apply')}
               </button>
             </div>
           )}
