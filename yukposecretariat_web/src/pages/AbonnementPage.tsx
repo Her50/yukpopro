@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CreditCard, Zap, CheckCircle2, Clock, Loader2, Package, Plus } from 'lucide-react'
+import { CreditCard, Zap, CheckCircle2, Clock, Loader2, Package, Plus, AlertCircle, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { abonnementAPI } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
@@ -75,21 +75,37 @@ export default function AbonnementPage() {
   const [instructions, setInstructions] = useState<any>(null)
   const [typeEnAttente, setTypeEnAttente] = useState<'plan' | 'recharge' | null>(null)
 
-  const { data: monAbo } = useQuery<MonAbonnement>({
+  const monAboQ = useQuery<MonAbonnement>({
     queryKey: ['bureau-mon-abonnement'],
-    queryFn: () => abonnementAPI.monAbonnement().then(r => r.data),
+    queryFn: async (): Promise<MonAbonnement> => {
+      const r = await abonnementAPI.monAbonnement()
+      return r.data as MonAbonnement
+    },
     refetchOnWindowFocus: true,
+    retry: 1,
   })
+  const monAbo = monAboQ.data
 
-  const { data: plansData } = useQuery<{ plans: Plan[] }>({
+  const plansQ = useQuery<{ plans: Plan[] }>({
     queryKey: ['bureau-plans'],
-    queryFn: () => abonnementAPI.plans().then(r => r.data),
+    queryFn: async (): Promise<{ plans: Plan[] }> => {
+      const r = await abonnementAPI.plans()
+      return r.data as { plans: Plan[] }
+    },
+    retry: 1,
   })
+  const plansData = plansQ.data
 
-  const { data: packsData } = useQuery<{ packs: PackCredit[] }>({
+  const packsQ = useQuery<{ packs: PackCredit[] }>({
     queryKey: ['bureau-packs'],
-    queryFn: () => abonnementAPI.packsCredits().then(r => r.data),
+    queryFn: async (): Promise<{ packs: PackCredit[] }> => {
+      const r = await abonnementAPI.packsCredits()
+      return r.data as { packs: PackCredit[] }
+    },
+    retry: 1,
+    enabled: onglet === 'recharge',
   })
+  const packsData = packsQ.data
 
   const { data: historique } = useQuery({
     queryKey: ['bureau-historique'],
@@ -208,7 +224,25 @@ export default function AbonnementPage() {
         ))}
       </nav>
 
-      {onglet === 'plans' && (
+      {onglet === 'plans' && plansQ.isLoading && (
+        <div className="flex items-center justify-center py-16 text-gray-500">
+          <Loader2 className="animate-spin mr-2" size={20} /> Chargement des plans…
+        </div>
+      )}
+      {onglet === 'plans' && plansQ.isError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
+          <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
+          <div className="flex-1 text-sm">
+            <p className="font-semibold text-red-700">Impossible de charger les plans</p>
+            <p className="text-red-600 mt-1 text-xs">{(plansQ.error as any)?.message || 'Erreur réseau'}</p>
+            <button onClick={() => plansQ.refetch()}
+              className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs">
+              <RefreshCw size={11} /> Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+      {onglet === 'plans' && plansData && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {plansData?.plans.map(p => (
             <div
