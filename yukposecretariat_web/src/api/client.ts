@@ -2,7 +2,11 @@ import axios from 'axios'
 
 const BASE = import.meta.env.VITE_API_URL || '/api/v1/bureau'
 
-const api = axios.create({ baseURL: BASE })
+const api = axios.create({
+  baseURL: BASE,
+  timeout: 30_000,  // 30s par défaut pour éviter "page qui tourne indéfiniment"
+                    // (les routes longues redéfinissent leur timeout localement)
+})
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('bureau_token')
