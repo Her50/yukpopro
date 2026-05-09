@@ -231,7 +231,7 @@ export default function InfographiePage() {
                   <optgroup key={cat} label={CAT_LABEL_KEYS[cat] ? t(CAT_LABEL_KEYS[cat]) : cat}>
                     {gabarits.filter(g => g.categorie === cat).map(g => (
                       <option key={g.cle} value={g.cle}>
-                        {g.label} ({g.width_mm}×{g.height_mm}mm) — {formatCredits(g.prix_fcfa, t('infographie.creditsSuffix'))}
+                        {g.label} ({g.width_mm}×{g.height_mm}mm)
                       </option>
                     ))}
                   </optgroup>

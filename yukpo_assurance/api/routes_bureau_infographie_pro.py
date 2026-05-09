@@ -412,13 +412,15 @@ async def generer_projet(
                 tokens_output=int(meta.get("tokens_output") or 0),
                 module="infographie",
             )
-        prix = float(catalog.PROJETS_INFOGRAPHIE[demande.cle_projet].get("prix_fcfa", 0) or 0)
-        if prix > 0 and resultat.pdf_bytes:
-            # Forfait base 1 FCFA × multiplicateur=prix → cout_fcfa = prix
-            # × MULTIPLICATEUR_YUKPO (20) appliqué dans debiter_forfait → crédits débités.
+        if resultat.pdf_bytes:
+            # Forfait scalé sur le nombre de pages réellement produites
+            # (1 FCFA × nb_pages × 20 = 20 crédits/page). Le LLM est débité
+            # séparément via debiter_llm — le total reste cohérent avec la
+            # complexité réelle, pas avec un prix marché arbitraire.
+            nb_pages = int(resultat.meta.get("nb_pages") or 1) if resultat.meta else 1
             await debiter_forfait(
                 current_user.user_id, "designerpro_creation",
-                module="infographie", multiplicateur=prix,
+                module="infographie", multiplicateur=max(1.0, float(nb_pages)),
             )
     except Exception as e:
         logger.warning(f"[Designer Pro/Crédits] {e}")
@@ -620,13 +622,16 @@ Retourne UNIQUEMENT le nouveau JSON projet complet, sans markdown, sans commenta
                 tokens_output=int(rep.tokens_output or 0),
                 module="infographie",
             )
-        # Forfait modification : ¼ du prix de création (rendu + LLM moins coûteux qu'une création complète)
-        from modules.bureau import gabarits_livret as _catalog
-        prix = float(_catalog.PROJETS_INFOGRAPHIE.get(projet.cle_projet, {}).get("prix_fcfa", 0) or 0)
-        if prix > 0:
-            from modules.bureau.service_credits_bureau import debiter_forfait as _df
-            await _df(current_user.user_id, "designerpro_modification",
-                      module="infographie", multiplicateur=max(prix / 4.0, 1.0))
+        # Forfait modification : moitié du forfait création par page (¼ via le
+        # multiplicateur 0.25). LLM débité séparément pour la modif elle-même.
+        from modules.bureau.service_credits_bureau import debiter_forfait as _df
+        nb_pages = 1
+        try:
+            nb_pages = max(1, int((projet.specification or {}).get("nb_pages") or 1))
+        except Exception:
+            pass
+        await _df(current_user.user_id, "designerpro_modification",
+                  module="infographie", multiplicateur=max(0.25 * float(nb_pages), 0.25))
     except Exception as _e_debit:
         logger.warning(f"[Designer Pro/Modifier] D\u00e9bit cr\u00e9dits non bloquant : {_e_debit}")
 

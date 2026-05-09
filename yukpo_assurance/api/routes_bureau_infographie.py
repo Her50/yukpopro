@@ -224,7 +224,11 @@ async def generer_depuis_brief(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,
+                # Forfait service fixe (~20 crédits = ~12 FCFA). Le LLM est
+                # débité séparément via debiter_llm en amont — le coût total
+                # pour l'utilisateur reste raisonnable (~400-700 crédits selon
+                # la complexité du prompt).
+                multiplicateur=1.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie échoué : {_e}")
@@ -317,7 +321,11 @@ async def generer_manuel(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,
+                # Forfait service fixe (~20 crédits = ~12 FCFA). Le LLM est
+                # débité séparément via debiter_llm en amont — le coût total
+                # pour l'utilisateur reste raisonnable (~400-700 crédits selon
+                # la complexité du prompt).
+                multiplicateur=1.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie manuel échoué : {_e}")
@@ -413,7 +421,11 @@ async def generer_depuis_modele_image(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,
+                # Forfait service fixe (~20 crédits = ~12 FCFA). Le LLM est
+                # débité séparément via debiter_llm en amont — le coût total
+                # pour l'utilisateur reste raisonnable (~400-700 crédits selon
+                # la complexité du prompt).
+                multiplicateur=1.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie modèle échoué : {_e}")
@@ -490,7 +502,11 @@ async def generer_format_custom(
                 current_user.user_id,
                 "infographie_creation",
                 module="infographie",
-                multiplicateur=prix_gabarit / 20.0,
+                # Forfait service fixe (~20 crédits = ~12 FCFA). Le LLM est
+                # débité séparément via debiter_llm en amont — le coût total
+                # pour l'utilisateur reste raisonnable (~400-700 crédits selon
+                # la complexité du prompt).
+                multiplicateur=1.0,
             )
     except Exception as _e:
         logger.warning(f"[Bureau/Crédits] Debit infographie custom échoué : {_e}")
