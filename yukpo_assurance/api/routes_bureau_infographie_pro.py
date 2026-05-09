@@ -433,10 +433,12 @@ async def generer_projet(
             # débit supplémentaire.
             nb_imgs = int(resultat.meta.get("nb_images_ia") or 0)
             if nb_imgs > 0:
-                forfait_image = (
-                    "designerpro_image_premium" if demande.mode_visuel == "premium"
-                    else "designerpro_image_standard"
-                )
+                if demande.mode_visuel == "ultra":
+                    forfait_image = "designerpro_image_ultra"
+                elif demande.mode_visuel == "premium":
+                    forfait_image = "designerpro_image_premium"
+                else:
+                    forfait_image = "designerpro_image_standard"
                 await debiter_forfait(
                     current_user.user_id, forfait_image,
                     module="infographie", multiplicateur=float(nb_imgs),

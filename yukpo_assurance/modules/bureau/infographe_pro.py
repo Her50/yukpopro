@@ -1346,7 +1346,7 @@ async def generer_projet(
     # ── Pipeline images IA (Niveau 3 : Flux + vision check Premium) ────────
     nb_images_generees = 0
     duree_images_ms = 0
-    if mode_visuel in ("standard", "premium"):
+    if mode_visuel in ("standard", "premium", "ultra"):
         t_img = time.time()
         nb_images_generees = await _generer_images_ia_pour_projet(
             projet=projet,
@@ -1354,6 +1354,8 @@ async def generer_projet(
             mode=mode_visuel,
             user_id=user_id,
             session_id=session_id,
+            brief=brief,
+            pays=pays,
         )
         duree_images_ms = int((time.time() - t_img) * 1000)
 
@@ -1394,24 +1396,110 @@ async def generer_projet(
     )
 
 
+async def _construire_directive_artistique(
+    brief: str,
+    projet_titre: str,
+    pays: str,
+    mode: str,
+) -> str:
+    """
+    Étape "art director" : Claude Sonnet définit une directive visuelle
+    cohérente pour TOUTES les images du projet (palette photo, style,
+    lighting, ambiance, contexte africain…). Le résultat est ensuite
+    préfixé à chaque prompt d'image pour garantir la cohérence.
+
+    Skip silencieusement (retourne "") en mode "standard" pour économiser
+    le coût LLM sur ce tier d'entrée.
+    """
+    if mode == "standard" or mode == "sans":
+        return ""
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        prompt = (
+            f"Tu es directeur artistique senior. Définis en 60-100 mots une "
+            f"directive visuelle UNIFIÉE pour toutes les illustrations d'un projet "
+            f"intitulé « {projet_titre[:200]} » (pays : {pays}). "
+            f"Brief client :\n«{brief[:1000]}»\n\n"
+            f"Réponds STRICTEMENT par une seule phrase anglaise dense (style, lighting, "
+            f"color grading, photography reference, mood) à utiliser comme préfixe à "
+            f"chaque prompt Flux. Exemple de format : "
+            f"« Editorial corporate photography, golden hour soft lighting, warm cinematic "
+            f"color grade, candid documentary style, 35mm shallow depth of field, "
+            f"Afrocentric subjects, modern professional African setting ». "
+            f"Pas de markdown, pas de préambule."
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.REDACTION,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+        )
+        directive = (rep.contenu or "").strip().strip('"').strip("«").strip("»").strip()
+        return directive[:600]
+    except Exception as e:
+        logger.debug(f"[InfographePro] directive artistique skipped : {e}")
+        return ""
+
+
+async def _enrichir_prompt_image(
+    prompt_brut: str,
+    directive: str,
+    contexte_zone: str,
+    mode: str,
+) -> str:
+    """
+    Étape "art director" : Claude Sonnet enrichit le prompt brut du Haiku
+    avec des détails cinématographiques (lighting, lens, composition, mood,
+    references) pour matcher la qualité Midjourney/DALL-E.
+
+    Skip en mode "standard" (économie). Si Sonnet échoue → on retourne le
+    prompt brut combiné à la directive.
+    """
+    base = (directive + ". " + prompt_brut).strip(". ")
+    if mode == "standard" or mode == "sans":
+        return prompt_brut[:1500]
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        meta_prompt = (
+            f"Tu es prompt engineer expert en Flux 1.1. Enrichis le prompt suivant "
+            f"avec : sujet précis, lighting cinématographique, lens 35mm/50mm + DOF, "
+            f"color grading, composition (rule of thirds / leading lines), "
+            f"references photographiques (editorial, lifestyle, documentary, fashion), "
+            f"qualité (high detail, hyper realistic). Reste fidèle au sujet. Anglais, "
+            f"40-80 mots, dense, sans markdown.\n\n"
+            f"Directive globale du projet :\n«{directive[:300]}»\n\n"
+            f"Contexte de la zone : {contexte_zone[:200]}\n\n"
+            f"Prompt brut à enrichir :\n«{prompt_brut[:800]}»\n\n"
+            f"Réponds par le PROMPT ENRICHI seulement, sans préambule."
+        )
+        rep = await ia_client.appeler(
+            prompt=meta_prompt,
+            mode=ModeIA.REDACTION,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+        )
+        enrichi = (rep.contenu or "").strip().strip('"').strip("«").strip("»").strip()
+        if enrichi and len(enrichi) > 30:
+            return enrichi[:1500]
+    except Exception as e:
+        logger.debug(f"[InfographePro] enrichissement skipped : {e}")
+    return base[:1500]
+
+
 async def _generer_images_ia_pour_projet(
     projet: ProjetInfographie,
     medias: dict[str, msm.Media],
     mode: str,
     user_id: str,
     session_id: str,
+    brief: str = "",
+    pays: str = "CM",
 ) -> int:
     """
-    Pour chaque zone `image_ia` du projet, génère une image via fal.ai et
-    l'injecte dans le dict `medias` comme un Media de session synthétique,
-    puis transforme la zone en `image_user` pointant vers ce nouveau média.
+    Pour chaque zone `image_ia` du projet, génère une image via fal.ai
+    (Niveau 3 hybride avec art director enrichment + variants pour les
+    modes premium et ultra). Injecte les images générées dans le dict
+    `medias` comme des Media de session synthétiques.
 
-    Retourne le nombre d'images effectivement générées (utile pour la
-    facturation côté route).
-
-    En cas d'échec d'une image (timeout, contenu refusé, etc.), la zone
-    est laissée telle quelle → `_media_bytes` retournera None → le moteur
-    affichera un placeholder.
+    Retourne le nombre d'images effectivement générées.
     """
     from .image_gen import (
         generer_images_batch, valider_image_vision,
@@ -1419,7 +1507,7 @@ async def _generer_images_ia_pour_projet(
     )
 
     # 1. Collecter toutes les zones image_ia
-    zones_a_generer: list[tuple[Zone, str, str]] = []
+    zones_a_generer: list[tuple[Zone, str, str, int]] = []
     for page in projet.pages:
         for zone in page.zones:
             if zone.type != "image_ia":
@@ -1428,7 +1516,7 @@ async def _generer_images_ia_pour_projet(
             fmt = (zone.contenu or {}).get("format") or "portrait_4_3"
             if not prompt.strip():
                 continue
-            zones_a_generer.append((zone, prompt, fmt))
+            zones_a_generer.append((zone, prompt, fmt, page.numero or 1))
 
     if not zones_a_generer:
         return 0
@@ -1438,33 +1526,65 @@ async def _generer_images_ia_pour_projet(
         f"en mode {mode} (user={user_id})"
     )
 
-    mode_typed: ImageMode = "premium" if mode == "premium" else "standard"
-    prompts_batch = [(p, f) for (_z, p, f) in zones_a_generer]
-    images_bytes = await generer_images_batch(prompts_batch, mode=mode_typed)
+    # 2. Étape art director (Sonnet) : style guide unifié pour le projet
+    directive = await _construire_directive_artistique(
+        brief=brief, projet_titre=projet.titre, pays=pays, mode=mode,
+    )
+    if directive:
+        logger.info(f"[InfographePro] Directive artistique : {directive[:120]}…")
 
-    # 2. Vision check (Premium uniquement) — 1 retry max si rejet
-    if mode == "premium":
+    # 3. Enrichir chaque prompt en parallèle (Sonnet, modes premium/ultra)
+    enrichis: list[str] = []
+    if mode in ("premium", "ultra"):
+        import asyncio as _asyncio
+        contextes = [f"page {p}, slot {z.slot_id or '?'}" for (z, _p, _f, p) in zones_a_generer]
+        enrichis = list(await _asyncio.gather(*(
+            _enrichir_prompt_image(prompt_brut=p, directive=directive,
+                                    contexte_zone=ctx, mode=mode)
+            for ((_z, p, _f, _pg), ctx) in zip(zones_a_generer, contextes)
+        )))
+    else:
+        enrichis = [p for (_z, p, _f, _pg) in zones_a_generer]
+
+    # 4. Génération images (1 variante en standard, 2 variantes en premium/ultra)
+    mode_typed: ImageMode
+    if mode == "ultra":
+        mode_typed = "ultra"
+    elif mode == "premium":
+        mode_typed = "premium"
+    else:
+        mode_typed = "standard"
+    nb_variantes = 2 if mode in ("premium", "ultra") else 1
+    prompts_batch = [(enrichis[i], zones_a_generer[i][2]) for i in range(len(zones_a_generer))]
+    images_bytes = await generer_images_batch(
+        prompts_batch, mode=mode_typed, nb_variantes=nb_variantes,
+    )
+
+    # 5. Validation finale (vision check + 1 retry, modes premium/ultra)
+    if mode in ("premium", "ultra"):
         nouvelles_images: list[Optional[bytes]] = []
-        for (zone, prompt, fmt), img in zip(zones_a_generer, images_bytes):
+        for ((zone, _p_raw, fmt, _pg), prompt_enrichi, img) in zip(
+            zones_a_generer, enrichis, images_bytes,
+        ):
             if img is None:
                 nouvelles_images.append(None)
                 continue
-            ok, raison = await valider_image_vision(img, prompt)
+            ok, raison = await valider_image_vision(img, prompt_enrichi)
             if ok:
                 nouvelles_images.append(img)
                 continue
             logger.info(f"[InfographePro] Vision rejette image ({raison[:60]}) — retry")
             try:
                 from .image_gen import generer_image
-                retry_img = await generer_image(prompt, mode="premium", format_=fmt)
+                retry_img = await generer_image(prompt_enrichi, mode=mode_typed, format_=fmt)
                 nouvelles_images.append(retry_img)
             except ImageGenError:
-                nouvelles_images.append(img)  # garde l'original si retry échoue
+                nouvelles_images.append(img)
         images_bytes = nouvelles_images
 
-    # 3. Sauvegarder + injecter dans medias + remapper les zones
+    # 6. Sauvegarder + injecter dans medias + remapper les zones
     nb_ok = 0
-    for (zone, prompt, _fmt), img in zip(zones_a_generer, images_bytes):
+    for ((zone, prompt_brut, _fmt, _pg), img) in zip(zones_a_generer, images_bytes):
         if not img:
             continue
         try:
@@ -1475,7 +1595,7 @@ async def _generer_images_ia_pour_projet(
                 nom_fichier=f"ia_{zone.slot_id or 'img'}.png",
                 mime="image/png",
                 categorie="illustration",
-                label=prompt[:80],
+                label=prompt_brut[:80],
             )
             medias[media.media_id] = media
             zone.type = "image_user"

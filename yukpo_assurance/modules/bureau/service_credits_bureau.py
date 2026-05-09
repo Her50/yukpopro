@@ -107,8 +107,20 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # (~$0.025/img réel = ~15 FCFA + vision check Haiku/mini ~2 FCFA).
     # Marges réduites à ~5× pour rendre le service ultra-compétitif vs Canva
     # (~9 FCFA user/image standard, ~54 FCFA user/image premium).
-    "designerpro_image_standard": 0.75,  # 15 crédits/image = 9 FCFA user (5×)
-    "designerpro_image_premium": 4.5,    # 90 crédits/image = 54 FCFA user (3.6×)
+    # Forfaits images IA — intègrent TOUS les coûts réels par image :
+    # Flux gen + enrichment Sonnet (premium/ultra) + vision picker Sonnet
+    # (2 calls par variante en premium/ultra). Marge ~5× sur ces composantes
+    # car la marge LLM 12× ne s'applique pas aux forfaits.
+    "designerpro_image_standard":  0.75,  # 15 cr/img = 9 FCFA user
+                                          # (Flux schnell seul, marge ~5× sur 1.8 FCFA réel)
+    "designerpro_image_premium":  12.0,   # 240 cr/img = 144 FCFA user
+                                          # Couvre : Flux dev × 2 variantes (30 FCFA réel)
+                                          # + Sonnet enrichment (3) + Vision picker (6)
+                                          # = 39 FCFA réel → marge 3.7×
+    "designerpro_image_ultra":    28.0,   # 560 cr/img = 336 FCFA user
+                                          # Couvre : Flux Pro Ultra × 2 (72 FCFA réel)
+                                          # + Sonnet enrichment (3) + Vision picker (6)
+                                          # = 81 FCFA réel → marge 4.1×
     # OCR / traitement image
     "ocr_scan":              3.0,   #  60 crédits
     "ocr_manuscrit":         5.0,   # 100 crédits (vision avancée)

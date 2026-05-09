@@ -82,7 +82,7 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive] = useState(0)
   const [modifInstr, setModifInstr] = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
-  const [modeVisuel, setModeVisuel] = useState<'sans' | 'standard' | 'premium'>('sans')
+  const [modeVisuel, setModeVisuel] = useState<'sans' | 'standard' | 'premium' | 'ultra'>('sans')
 
   // Directives visuelles (sliders Phase 3)
   const [creativite, setCreativite] = useState(50)
@@ -358,11 +358,12 @@ export default function DesignerProPanel() {
           <label className="block text-sm font-semibold text-gray-800">
             {t('designerPro.visualMode')}
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {([
               { v: 'sans',     emoji: '📋', titleKey: 'designerPro.modeSans',     descKey: 'designerPro.modeSansDesc' },
               { v: 'standard', emoji: '✨', titleKey: 'designerPro.modeStandard', descKey: 'designerPro.modeStandardDesc' },
               { v: 'premium',  emoji: '🎨', titleKey: 'designerPro.modePremium',  descKey: 'designerPro.modePremiumDesc' },
+              { v: 'ultra',    emoji: '🌟', titleKey: 'designerPro.modeUltra',    descKey: 'designerPro.modeUltraDesc' },
             ] as const).map(opt => (
               <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
                 className={`p-3 rounded-xl border-2 text-left transition-all ${

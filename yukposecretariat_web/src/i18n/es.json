@@ -963,7 +963,9 @@
     "modePremiumDesc": "Flux alta calidad + chequeo visión",
     "permanentLink": "Lien permanent",
     "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
-    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur."
+    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur.",
+    "modeUltra": "Ultra",
+    "modeUltraDesc": "Flux Pro Ultra — niveau Midjourney"
   },
   "organisation": {
     "createTitle": "Crear una organización",
