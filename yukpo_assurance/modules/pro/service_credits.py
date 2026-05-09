@@ -36,6 +36,7 @@ MULTIPLICATEUR_YUKPO = 20.0   # 20× le coût réel en FCFA (marge Yukpo)
 
 # ── Tarifs par modèle (USD / 1M tokens) ───────────────────────────────────────
 TARIFS_MODELES: dict[str, dict[str, float]] = {
+    "claude-opus-4-7":         {"input": 15.00, "output": 75.00},
     "claude-opus-4-6":         {"input": 15.00, "output": 75.00},
     "claude-sonnet-4-6":       {"input":  3.00, "output": 15.00},
     "claude-sonnet-4-5":       {"input":  3.00, "output": 15.00},

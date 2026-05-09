@@ -1092,6 +1092,166 @@ def _png_par_page(pdf_bytes: bytes, dpi: int = 150) -> list[bytes]:
 
 # ─── Génération via IA ────────────────────────────────────────────────────────
 
+async def _decider_layout_avec_opus(
+    brief: str,
+    cle_projet: str,
+    desc_medias: list[dict],
+    profil: Optional[dict],
+    directives_visuelles: Optional[dict],
+    langue: str,
+    pays: str,
+) -> tuple[Optional[dict], dict]:
+    """
+    Sprint 1.1 — Layout AI : Opus 4.7 décide de la composition page-par-page.
+
+    Reçoit le catalogue COMPLET des PAGE_TEMPLATES disponibles + les médias
+    user, et retourne pour chaque page :
+      - score de pertinence par template candidat (0–100)
+      - template_recommande (id du PAGE_TEMPLATE choisi)
+      - raison concise
+      - custom_layout (proposition de composition libre si aucun template ne convient)
+
+    Retourne (decisions|None, meta_tokens). Échec silencieux → (None, {}).
+    Le pipeline Haiku continue normalement avec le template par défaut du projet.
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+
+        proj_def = catalog.PROJETS_INFOGRAPHIE.get(cle_projet)
+        if not proj_def:
+            return None, {}
+
+        pages_default = proj_def.get("pages") or []
+        if not pages_default:
+            return None, {}
+
+        catalogue_templates = []
+        for tpl_id, tpl in catalog.PAGE_TEMPLATES.items():
+            catalogue_templates.append({
+                "template_id": tpl_id,
+                "label": tpl.get("label"),
+                "description": tpl.get("description"),
+                "ambiance": tpl.get("ambiance"),
+                "slots": [
+                    {"slot_id": s.get("slot_id"), "type": s.get("type"),
+                     "requis": bool(s.get("requis", False))}
+                    for s in (tpl.get("slots") or [])
+                ],
+            })
+
+        profil = profil or {}
+        dv = directives_visuelles or {}
+
+        prompt = f"""Tu es DIRECTEUR ARTISTIQUE PRINCIPAL d'une agence design senior
+(15+ ans, références : Pentagram, Wieden+Kennedy, agences de Lagos/Dakar/Casablanca).
+
+Mission : décider de la COMPOSITION VISUELLE page-par-page d'un projet print/digital
+multi-page. Tu vas évaluer les templates disponibles et choisir le mieux adapté
+PAR PAGE, ou proposer un layout custom si aucun template ne convient parfaitement.
+
+═══════════════════════════════════════════════════
+  BRIEF CLIENT
+═══════════════════════════════════════════════════
+\"\"\"{brief[:3000]}\"\"\"
+
+Pays : {pays}   Langue : {langue}
+Métier : {profil.get("metier", "(non précisé)")}
+Organisation : {profil.get("nom_organisation", "(non précisée)")}
+Couleur primaire : {profil.get("couleur_primaire_hex", "(libre)")}
+
+Curseurs utilisateur (0–100) :
+- Créativité : {dv.get("creativite", 50)}
+- Densité texte : {dv.get("densite_texte", 50)}
+- Importance images : {dv.get("importance_images", 50)}
+- Élégance : {dv.get("elegance", 50)}
+
+═══════════════════════════════════════════════════
+  PROJET (séquence par défaut)
+═══════════════════════════════════════════════════
+Type : {proj_def.get("label")} ({cle_projet})
+Format : {proj_def.get("format_mm")} mm
+Pages par défaut : {pages_default}
+
+═══════════════════════════════════════════════════
+  CATALOGUE TEMPLATES DISPONIBLES (tous)
+═══════════════════════════════════════════════════
+{json.dumps(catalogue_templates, ensure_ascii=False)[:14000]}
+
+═══════════════════════════════════════════════════
+  MÉDIAS UTILISATEUR
+═══════════════════════════════════════════════════
+{json.dumps(desc_medias, ensure_ascii=False)[:3000] if desc_medias else "(aucun)"}
+
+═══════════════════════════════════════════════════
+  RÈGLES STRICTES
+═══════════════════════════════════════════════════
+1. Tu produis UNE décision par page de la séquence par défaut.
+2. Pour chaque page : choisis le template_id parmi le CATALOGUE qui maximise
+   l'impact visuel + cohérence narrative + adéquation au brief.
+3. Tu peux conserver le template par défaut OU le remplacer par un autre du
+   catalogue (recommandé si tu vois un meilleur fit).
+4. Si aucun template ne convient PARFAITEMENT et que tu peux proposer une
+   composition vraiment supérieure : remplis "custom_layout" avec
+   `{{"composition": "bento|asymetric|fullbleed|grille|timeline|cover_oversized",
+   "structure": "description courte 1-2 phrases", "raison": "..."}}`
+   Sinon laisse "custom_layout": null.
+5. Score de 0 à 100 = ta confiance dans ce choix vs alternatives.
+6. "raison" = 15-30 mots max, justifie le choix sur la base composition / hiérarchie / densité.
+
+═══════════════════════════════════════════════════
+  STRATÉGIE GLOBALE
+═══════════════════════════════════════════════════
+"global_strategy" : 1-2 phrases (anglais ou français) décrivant l'arc visuel du
+projet (ex: "Cover oversized impact, intérieur éditorial aéré, finale call-to-action
+plein écran"). Utilisée par le pipeline Haiku/Sonnet pour rester cohérent.
+
+═══════════════════════════════════════════════════
+  FORMAT DE SORTIE — JSON STRICT
+═══════════════════════════════════════════════════
+{{
+  "global_strategy": "...",
+  "pages": [
+    {{
+      "numero": 1,
+      "template_default": "{pages_default[0] if pages_default else ''}",
+      "template_recommande": "id_du_catalogue",
+      "score": 85,
+      "raison": "...",
+      "custom_layout": null
+    }}
+  ]
+}}
+
+Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
+
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.ANALYSE,
+            json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+        )
+        try:
+            data = json.loads(rep.contenu)
+        except json.JSONDecodeError:
+            import re
+            m = re.search(r'\{.*\}', rep.contenu, re.DOTALL)
+            data = json.loads(m.group()) if m else {}
+
+        if not isinstance(data, dict) or "pages" not in data:
+            return None, {}
+
+        meta = {
+            "layout_ai_modele": rep.modele_utilise,
+            "layout_ai_tokens_input": rep.tokens_input,
+            "layout_ai_tokens_output": rep.tokens_output,
+            "layout_ai_decisions": data,
+        }
+        return data, meta
+    except Exception as e:
+        logger.warning(f"[InfographePro] Layout AI Opus échoué : {e}")
+        return None, {}
+
+
 async def generer_projet_depuis_brief(
     brief: str,
     cle_projet: str,
@@ -1100,6 +1260,7 @@ async def generer_projet_depuis_brief(
     profil: Optional[dict] = None,
     langue: str = "fr",
     directives_visuelles: Optional[dict] = None,
+    layout_ai: bool = False,
 ) -> ProjetInfographie:
     """
     L'IA reçoit le catalogue de pages + descripteurs des médias disponibles,
@@ -1143,6 +1304,41 @@ async def generer_projet_depuis_brief(
         f"en respectant ces curseurs.\n"
     )
 
+    # Sprint 1.1 — Layout AI : Opus 4.7 décide composition pré-Haiku
+    layout_decisions: Optional[dict] = None
+    layout_meta: dict = {}
+    bloc_layout_ai = ""
+    if layout_ai:
+        layout_decisions, layout_meta = await _decider_layout_avec_opus(
+            brief=brief, cle_projet=cle_projet, desc_medias=desc_medias,
+            profil=profil, directives_visuelles=directives_visuelles,
+            langue=langue, pays=pays,
+        )
+        if layout_decisions:
+            strat = (layout_decisions.get("global_strategy") or "")[:400]
+            pages_dec = layout_decisions.get("pages") or []
+            pages_dec_compact = [
+                {
+                    "numero": p.get("numero"),
+                    "template_recommande": p.get("template_recommande"),
+                    "score": p.get("score"),
+                    "raison": (p.get("raison") or "")[:200],
+                    "custom_layout": p.get("custom_layout"),
+                }
+                for p in pages_dec
+            ]
+            bloc_layout_ai = (
+                f"\n═══════════════════════════════════════════════════\n"
+                f"  LAYOUT AI — DÉCISIONS DU DIRECTEUR ARTISTIQUE (Opus 4.7)\n"
+                f"═══════════════════════════════════════════════════\n"
+                f"Stratégie globale : {strat}\n\n"
+                f"Décisions page-par-page (à RESPECTER strictement) :\n"
+                f"{json.dumps(pages_dec_compact, ensure_ascii=False, indent=2)}\n\n"
+                f"RÈGLE : pour chaque page, utilise EXACTEMENT le `template_recommande` ci-dessus\n"
+                f"comme valeur de `template`. Si `custom_layout` est non-null, ajoute aussi un\n"
+                f"champ `notes` à la page reflétant l'intention de composition décrite.\n"
+            )
+
     prompt = f"""Tu es directeur artistique senior et copywriter expert (15+ ans agence pro).
 
 ═══════════════════════════════════════════════════
@@ -1175,7 +1371,7 @@ Couleurs accents : {', '.join(couleurs_acc) if couleurs_acc else "(libres)"}
   MÉDIATHÈQUE UTILISATEUR DISPONIBLE
 ═══════════════════════════════════════════════════
 {json.dumps(desc_medias, ensure_ascii=False, indent=2) if desc_medias else "(aucun média uploadé)"}
-{bloc_directives}
+{bloc_directives}{bloc_layout_ai}
 ═══════════════════════════════════════════════════
   RÈGLES STRICTES
 ═══════════════════════════════════════════════════
@@ -1304,6 +1500,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "tokens_input": reponse.tokens_input,
             "tokens_output": reponse.tokens_output,
             "fallback_utilise": reponse.fallback_utilise,
+            **layout_meta,
         },
     )
     return projet
@@ -1335,11 +1532,16 @@ async def generer_projet(
     """
     medias = msm.resoudre_refs(medias_refs or [], user_id, session_id) if medias_refs else {}
 
+    # Sprint 1.1 — Layout AI (Opus 4.7) actif uniquement en premium/ultra
+    # (le coût Opus n'est pas justifié sur les modes économiques)
+    layout_ai_active = mode_visuel in ("premium", "ultra")
+
     t0 = time.time()
     projet = await generer_projet_depuis_brief(
         brief=brief, cle_projet=cle_projet, medias=medias,
         pays=pays, profil=profil, langue=langue,
         directives_visuelles=directives_visuelles,
+        layout_ai=layout_ai_active,
     )
     t_ia = time.time() - t0
 
@@ -1392,6 +1594,10 @@ async def generer_projet(
             "mode_visuel": mode_visuel,
             "nb_images_ia": nb_images_generees,
             "duree_images_ms": duree_images_ms,
+            "layout_ai_active": layout_ai_active,
+            "layout_ai_modele": (projet.meta or {}).get("layout_ai_modele"),
+            "layout_ai_tokens_input": (projet.meta or {}).get("layout_ai_tokens_input"),
+            "layout_ai_tokens_output": (projet.meta or {}).get("layout_ai_tokens_output"),
         },
     )
 

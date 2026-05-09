@@ -62,6 +62,7 @@ def _redis_est_disponible() -> bool:
 
 # ── Tarifs API (USD / token) — source : openai.com/api/pricing + anthropic.com/pricing ──
 TARIFS_INPUT = {
+    "claude-opus-4-7":             15.0 / 1_000_000,
     "claude-opus-4-6":             15.0 / 1_000_000,
     "claude-sonnet-4-6":            3.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   0.25 / 1_000_000,
@@ -69,6 +70,7 @@ TARIFS_INPUT = {
     "gpt-4o-mini":                 0.15 / 1_000_000,
 }
 TARIFS_OUTPUT = {
+    "claude-opus-4-7":             75.0 / 1_000_000,
     "claude-opus-4-6":             75.0 / 1_000_000,
     "claude-sonnet-4-6":           15.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   1.25 / 1_000_000,
@@ -86,7 +88,7 @@ class ModeIA(str, Enum):
 
 
 class ModelePrioritaire(str, Enum):
-    CLAUDE_OPUS    = "claude-opus-4-6"
+    CLAUDE_OPUS    = "claude-opus-4-7"          # Niveau 5 : layout AI / décisions de composition pro
     CLAUDE_SONNET  = "claude-sonnet-4-6"       # Optimal pour CIMA/sinistres/rédaction
     CLAUDE_HAIKU   = "claude-haiku-4-5-20251001"
     GPT4O          = "gpt-4o"                  # Primaire GPT — analyse/rédaction/vision
