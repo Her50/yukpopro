@@ -39,6 +39,7 @@ interface ResultatPro {
   pages_png_base64?: string[]
   projet_json_id?: string
   cle_projet_detectee?: string
+  download_url?: string
 }
 
 const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone']
@@ -281,7 +282,7 @@ export default function DesignerProPanel() {
                 return (
                   <div key={ref} className={`relative rounded-xl border-2 overflow-hidden transition-colors ${actif ? 'border-amber-500 ring-2 ring-amber-200' : 'border-gray-200'}`}>
                     <button onClick={() => toggleRef(m)}
-                      className="block w-full bg-gray-50 aspect-square flex items-center justify-center text-[10px] text-gray-500 p-1">
+                      className="w-full bg-gray-50 aspect-square flex items-center justify-center text-[10px] text-gray-500 p-1">
                       {m.couleur_dominante_hex && (
                         <span style={{ background: m.couleur_dominante_hex }}
                           className="absolute top-1 left-1 w-3 h-3 rounded-full border border-white shadow" />
@@ -396,7 +397,7 @@ export default function DesignerProPanel() {
                 {' '}{resultat.projet?.palette || t('designerPro.autoPalette')}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {resultat.pdf_base64 && (
                 <button onClick={() => b64download(resultat.pdf_base64!, 'designer-pro.pdf', 'application/pdf')}
                   className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-2 rounded-xl">
@@ -410,8 +411,21 @@ export default function DesignerProPanel() {
                   <Download size={14} /> {t('infographie.pdfCmyk')}
                 </button>
               )}
+              {resultat.download_url && (
+                <a href={resultat.download_url} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium px-3 py-2 rounded-xl"
+                  title={t('designerPro.permanentLinkTitle')}>
+                  🔗 {t('designerPro.permanentLink')}
+                </a>
+              )}
             </div>
           </div>
+
+          {resultat.download_url && (
+            <p className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+              📁 {t('designerPro.savedToDocuments')}
+            </p>
+          )}
 
           {resultat.pages_png_base64 && resultat.pages_png_base64.length > 0 && (
             <>

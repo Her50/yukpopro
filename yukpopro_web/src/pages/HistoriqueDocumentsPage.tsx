@@ -23,6 +23,7 @@ import { cn } from "@/components/ui";
 const resolveIcon = (type: string): React.ReactNode => {
   if (!type) return <FileText className="w-4 h-4 text-slate-400" />;
   if (type.startsWith("slides")) return <Presentation className="w-4 h-4 text-orange-400" />;
+  if (type === "designerpro") return <span className="text-base">🎨</span>;
   if (type.startsWith("contrat") || type.startsWith("convention") || type.startsWith("statuts"))
     return <span className="text-base">📋</span>;
   if (type.startsWith("lettre") || type.startsWith("courrier"))
@@ -40,12 +41,21 @@ const resolveIcon = (type: string): React.ReactNode => {
 const resolveColor = (type: string): string => {
   if (!type) return "slate";
   if (type.startsWith("slides")) return "purple";
+  if (type === "designerpro") return "purple";
   if (type.startsWith("contrat") || type.startsWith("convention")) return "gold";
   if (type.startsWith("lettre") || type.startsWith("courrier")) return "green";
   if (type === "cv" || type === "lettre_emploi") return "red";
   if (type === "traduction") return "green";
   if (type.startsWith("rapport") || type.startsWith("note") || type.startsWith("plan")) return "cyan";
   return "slate";
+};
+
+// Designer Pro : fichiers servis par /bureau/documents/, pas /pro/generateurs/.
+const downloadUrlPour = (typeDoc: string, fichier: string): string => {
+  if (typeDoc === "designerpro") {
+    return `/api/v1/bureau/documents/${encodeURIComponent(fichier)}`;
+  }
+  return `/api/v1/pro/generateurs/fichier/${encodeURIComponent(fichier)}`;
 };
 
 const resolveLabel = (type: string, t: (k: string, opts?: any) => string): string => {
@@ -276,7 +286,7 @@ export const HistoriqueDocumentsPage = () => {
                 {/* Télécharger */}
                 {doc.fichier && (
                   <a
-                    href={generateurApi.telecharger(doc.fichier)}
+                    href={downloadUrlPour(doc.type_doc, doc.fichier)}
                     download={doc.fichier}
                     className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
                     title={t("common.download")}

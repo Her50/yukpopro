@@ -960,7 +960,10 @@
     "modeStandard": "قياسي",
     "modeStandardDesc": "Flux سريع — صور بالذكاء",
     "modePremium": "Premium",
-    "modePremiumDesc": "Flux جودة عالية + فحص بصري"
+    "modePremiumDesc": "Flux جودة عالية + فحص بصري",
+    "permanentLink": "Lien permanent",
+    "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
+    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur."
   },
   "organisation": {
     "createTitle": "إنشاء مؤسسة",

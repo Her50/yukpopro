@@ -447,10 +447,45 @@ async def generer_projet(
     ts = int(time.time())
     artefacts = _persister_projet_pro(current_user.user_id, demande.cle_projet, ts, resultat)
 
+    # Enregistrement dans l'historique YukpoPro (`/pro/documents/historique`)
+    # pour que l'utilisateur retrouve le visuel dans Mes Documents.
+    try:
+        from core.database import async_session_maker, DocumentGenereDB
+        async with async_session_maker() as _db:
+            _db.add(DocumentGenereDB(
+                user_id=current_user.user_id,
+                compagnie_id=getattr(current_user, "compagnie_id", None),
+                titre=(resultat.projet.titre or demande.cle_projet)[:300] if resultat.projet else demande.cle_projet,
+                type_doc="designerpro",
+                fichier=artefacts.get("pdf_id"),
+                contenu_source=demande.brief[:2000],
+                session_id=f"designerpro_{ts}",
+                meta={
+                    "cle_projet": demande.cle_projet,
+                    "nombre_pages": (resultat.meta or {}).get("nombre_pages"),
+                    "mode_visuel": demande.mode_visuel,
+                    "nb_images_ia": (resultat.meta or {}).get("nb_images_ia", 0),
+                    "format_mm": (resultat.meta or {}).get("format_mm"),
+                    "pdf_cmyk_id": artefacts.get("pdf_cmyk_id"),
+                    "pages_png_ids": artefacts.get("pages_png_ids", []),
+                    "projet_json_id": artefacts.get("projet_json_id"),
+                },
+            ))
+            await _db.commit()
+    except Exception as _e_hist:
+        logger.warning(f"[Designer Pro/Historique] Sauvegarde historique non bloquante : {_e_hist}")
+
+    # URL directe de téléchargement (utilisable depuis le frontend)
+    download_url = (
+        f"/api/v1/bureau/documents/{artefacts['pdf_id']}"
+        if artefacts.get("pdf_id") else None
+    )
+
     return {
         "projet": _serialiser_projet_pour_reponse(resultat.projet),
         **artefacts,
         "meta": resultat.meta,
+        "download_url": download_url,
     }
 
 

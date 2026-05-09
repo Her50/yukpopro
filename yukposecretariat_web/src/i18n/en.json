@@ -960,7 +960,10 @@
     "modeStandard": "Standard",
     "modeStandardDesc": "Fast Flux — AI illustrations",
     "modePremium": "Premium",
-    "modePremiumDesc": "High-quality Flux + vision check"
+    "modePremiumDesc": "High-quality Flux + vision check",
+    "permanentLink": "Lien permanent",
+    "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
+    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur."
   },
   "organisation": {
     "createTitle": "Create an organization",

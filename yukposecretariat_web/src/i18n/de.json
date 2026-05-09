@@ -960,7 +960,10 @@
     "modeStandard": "Standard",
     "modeStandardDesc": "Flux schnell — KI-Bilder",
     "modePremium": "Premium",
-    "modePremiumDesc": "Flux hohe Qualität + Vision-Check"
+    "modePremiumDesc": "Flux hohe Qualität + Vision-Check",
+    "permanentLink": "Lien permanent",
+    "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
+    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur."
   },
   "organisation": {
     "createTitle": "Organisation erstellen",

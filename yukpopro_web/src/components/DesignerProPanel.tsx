@@ -26,6 +26,7 @@ interface ResultatPro {
   projet?: { cle_projet: string; titre: string; nombre_pages: number; palette: string }
   pdf_id?: string; pdf_base64?: string; pdf_cmyk_base64?: string
   pages_png_base64?: string[]; projet_json_id?: string; cle_projet_detectee?: string
+  download_url?: string
 }
 
 const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone']
@@ -260,7 +261,7 @@ export default function DesignerProPanel() {
                     actif ? 'border-amber-500 ring-2 ring-amber-200 shadow-md' : 'border-gray-200 hover:border-amber-300'
                   }`}>
                     <button onClick={() => toggleRef(m)}
-                      className="block w-full bg-gray-50 aspect-square flex items-center justify-center p-1">
+                      className="w-full bg-gray-50 aspect-square flex items-center justify-center p-1">
                       {m.couleur_dominante_hex && (
                         <span style={{ background: m.couleur_dominante_hex }}
                           className="absolute top-1 left-1 w-2.5 h-2.5 rounded-full border border-white shadow-sm" />
@@ -403,8 +404,21 @@ export default function DesignerProPanel() {
                   <Download size={13} /> PDF CMJN
                 </button>
               )}
+              {resultat.download_url && (
+                <a href={resultat.download_url} target="_blank" rel="noreferrer"
+                  className={BTN_SEC + ' bg-slate-800 hover:bg-slate-700 text-slate-100 shadow-sm'}
+                  title="Lien permanent — fichier conservé dans Mes Documents">
+                  🔗 Lien permanent
+                </a>
+              )}
             </div>
           </div>
+
+          {resultat.download_url && (
+            <p className="text-xs text-slate-400 bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2">
+              📁 Sauvegardé dans <strong>Mes Documents</strong> — accessible depuis le menu pour téléchargement ultérieur.
+            </p>
+          )}
 
           {resultat.pages_png_base64 && resultat.pages_png_base64.length > 0 && (
             <>

@@ -1714,7 +1714,7 @@ export const GenerateursPage = () => {
                       <optgroup key={cat} label={cat.toUpperCase()}>
                         {items.map(g => (
                           <option key={g.cle} value={g.cle}>
-                            {g.label} — {g.width_mm}×{g.height_mm}mm — {g.prix_fcfa.toLocaleString("fr-FR")} {t("generateurs.credits")}
+                            {g.label} — {g.width_mm}×{g.height_mm}mm
                           </option>
                         ))}
                       </optgroup>
@@ -1945,9 +1945,7 @@ export const GenerateursPage = () => {
                       {infogResult.specification.palette && (
                         <p><span className="text-slate-500">{t("generateurs.specPalette")}</span> {infogResult.specification.palette}</p>
                       )}
-                      {typeof infogResult.prix_fcfa === "number" && infogResult.prix_fcfa > 0 && (
-                        <p><span className="text-slate-500">{t("generateurs.indicativePrintPrice")}</span> {formatAmount(infogResult.prix_fcfa, infogPays)}</p>
-                      )}
+                      {/* Prix indicatif retiré — n'a plus de sens dans le pricing crédits unifié */}
                     </div>
                   )}
                   <span className="flex items-center gap-1.5 text-[11px] text-green-400">

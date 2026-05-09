@@ -960,7 +960,10 @@
     "modeStandard": "Standard",
     "modeStandardDesc": "Flux rápido — ilustraciones IA",
     "modePremium": "Premium",
-    "modePremiumDesc": "Flux alta calidad + chequeo visión"
+    "modePremiumDesc": "Flux alta calidad + chequeo visión",
+    "permanentLink": "Lien permanent",
+    "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
+    "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur."
   },
   "organisation": {
     "createTitle": "Crear una organización",
