@@ -42,6 +42,7 @@ TARIFS_MODELES: dict[str, dict[str, float]] = {
     "claude-sonnet-4-5":       {"input":  3.00, "output": 15.00},
     "claude-haiku-4-5-20251001": {"input": 0.25, "output":  1.25},
     "claude-haiku-4-5":        {"input":  0.25, "output":  1.25},
+    "gpt-4-turbo":             {"input": 10.00, "output": 30.00},   # Équivalent Opus
     "gpt-4o":                  {"input":  2.50, "output": 10.00},
     "gpt-4o-mini":             {"input":  0.15, "output":  0.60},
     # Fallback

@@ -66,6 +66,7 @@ TARIFS_INPUT = {
     "claude-opus-4-6":             15.0 / 1_000_000,
     "claude-sonnet-4-6":            3.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   0.25 / 1_000_000,
+    "gpt-4-turbo":                 10.0 / 1_000_000,   # Équivalent Opus (raisonnement haut de gamme)
     "gpt-4o":                       2.5 / 1_000_000,
     "gpt-4o-mini":                 0.15 / 1_000_000,
 }
@@ -74,6 +75,7 @@ TARIFS_OUTPUT = {
     "claude-opus-4-6":             75.0 / 1_000_000,
     "claude-sonnet-4-6":           15.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   1.25 / 1_000_000,
+    "gpt-4-turbo":                 30.0 / 1_000_000,   # Équivalent Opus (raisonnement haut de gamme)
     "gpt-4o":                      10.0 / 1_000_000,
     "gpt-4o-mini":                  0.60 / 1_000_000,
 }
@@ -91,14 +93,18 @@ class ModelePrioritaire(str, Enum):
     CLAUDE_OPUS    = "claude-opus-4-7"          # Niveau 5 : layout AI / décisions de composition pro
     CLAUDE_SONNET  = "claude-sonnet-4-6"       # Optimal pour CIMA/sinistres/rédaction
     CLAUDE_HAIKU   = "claude-haiku-4-5-20251001"
+    GPT4_TURBO     = "gpt-4-turbo"             # Équivalent GPT d'Opus — raisonnement haut de gamme
     GPT4O          = "gpt-4o"                  # Primaire GPT — analyse/rédaction/vision
     GPT4O_MINI     = "gpt-4o-mini"             # Léger/économique — équivalent GPT de Haiku
 
 # Mapping Claude → GPT équivalent (utilisé quand Claude est indisponible)
+# Politique : GPT primaire / Claude fallback. Pour Opus (raisonnement haut de
+# gamme : layout AI, directeur artistique, analyse complexe) → gpt-4-turbo.
+# Pour Sonnet (rédaction, analyse standard) → gpt-4o. Pour Haiku → gpt-4o-mini.
 _CLAUDE_TO_GPT: dict[str, str] = {
     ModelePrioritaire.CLAUDE_HAIKU.value:  ModelePrioritaire.GPT4O_MINI.value,
     ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT4O.value,
-    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4O.value,
+    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4_TURBO.value,
 }
 
 
