@@ -427,6 +427,16 @@ async def generer_projet(
                 tokens_output=int(meta.get("layout_ai_tokens_output") or 0),
                 module="infographie",
             )
+        # Sprint 1.2 — Débit séparé du Vision Picker Sonnet (5 archétypes)
+        if meta.get("picker_modele") and (
+            meta.get("picker_tokens_input") or meta.get("picker_tokens_output")
+        ):
+            await debiter_llm(
+                current_user.user_id, modele=meta.get("picker_modele", "claude-sonnet-4-6"),
+                tokens_input=int(meta.get("picker_tokens_input") or 0),
+                tokens_output=int(meta.get("picker_tokens_output") or 0),
+                module="infographie",
+            )
         if resultat.pdf_bytes:
             # Forfait scalé sur le nombre de pages réellement produites
             # (1 FCFA × nb_pages × 20 = 20 crédits/page). Le LLM est débité

@@ -1199,6 +1199,29 @@ Pages par défaut : {pages_default}
 6. "raison" = 15-30 mots max, justifie le choix sur la base composition / hiérarchie / densité.
 
 ═══════════════════════════════════════════════════
+  SPRINT 1.2 — VARIANTS DE COMPOSITION (5 archétypes)
+═══════════════════════════════════════════════════
+Pour CHAQUE page, tu produis aussi une liste "variants" de 3 propositions
+ALTERNATIVES choisies parmi ces 5 ARCHÉTYPES de composition :
+
+  - "grille_classique"  → grille régulière 2 ou 3 colonnes, hiérarchie typo
+                          claire, lecture linéaire (éditorial sobre, rapport)
+  - "asymetric"          → composition asymétrique avec un point d'ancrage
+                          dominant + texte décalé (impact, modernité)
+  - "bento"              → grille modulaire bento (cards de tailles variées),
+                          dense visuellement (data viz, portfolio, dashboard)
+  - "fullbleed_cover"   → image/visuel pleine page (bord à bord) + texte
+                          minimal sur overlay (impact maximum, cover, hero)
+  - "timeline_horiz"    → progression horizontale type timeline ou parcours
+                          (programme, étapes, story-telling chronologique)
+
+Chaque variant : `{{"archetype": "...", "score": 0-100, "raison": "≤15 mots",
+"justification_compo": "comment cet archétype sert l'objectif de cette page"}}`.
+
+La 1ère variante DOIT être la meilleure (score le + élevé). Les 2 suivantes
+sont des alternatives crédibles avec un angle différent.
+
+═══════════════════════════════════════════════════
   STRATÉGIE GLOBALE
 ═══════════════════════════════════════════════════
 "global_strategy" : 1-2 phrases (anglais ou français) décrivant l'arc visuel du
@@ -1217,7 +1240,15 @@ plein écran"). Utilisée par le pipeline Haiku/Sonnet pour rester cohérent.
       "template_recommande": "id_du_catalogue",
       "score": 85,
       "raison": "...",
-      "custom_layout": null
+      "custom_layout": null,
+      "variants": [
+        {{"archetype": "fullbleed_cover", "score": 88, "raison": "...",
+          "justification_compo": "..."}},
+        {{"archetype": "asymetric", "score": 76, "raison": "...",
+          "justification_compo": "..."}},
+        {{"archetype": "grille_classique", "score": 64, "raison": "...",
+          "justification_compo": "..."}}
+      ]
     }}
   ]
 }}
@@ -1240,16 +1271,147 @@ Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
         if not isinstance(data, dict) or "pages" not in data:
             return None, {}
 
+        # Sprint 1.2 — Vision picker Sonnet : ré-évalue les variants page-par-page
+        # selon des critères critiques (équilibre, hiérarchie, lisibilité, impact
+        # éditorial). Sonnet a un œil critique différent d'Opus → 2nde opinion.
+        # Si Sonnet est plus confiant qu'Opus pour une autre variant → on bascule.
+        picker_meta = await _picker_variants_sonnet(
+            decisions=data, brief=brief, pays=pays, langue=langue,
+        )
+
         meta = {
             "layout_ai_modele": rep.modele_utilise,
             "layout_ai_tokens_input": rep.tokens_input,
             "layout_ai_tokens_output": rep.tokens_output,
             "layout_ai_decisions": data,
+            **picker_meta,
         }
         return data, meta
     except Exception as e:
         logger.warning(f"[InfographePro] Layout AI Opus échoué : {e}")
         return None, {}
+
+
+async def _picker_variants_sonnet(
+    decisions: dict,
+    brief: str,
+    pays: str,
+    langue: str,
+) -> dict:
+    """
+    Sprint 1.2 — Vision Picker Sonnet (text-eval, pas de rendu).
+
+    Reçoit les variants Opus et ré-évalue chaque page selon 4 critères :
+      - équilibre visuel (occupation espace, respiration)
+      - hiérarchie (point d'ancrage clair, parcours œil)
+      - lisibilité (densité, contrastes implicites)
+      - impact éditorial (cohérence avec brief + ambition créative)
+
+    Pour chaque page : Sonnet pick une variant + score réajusté + critique courte.
+    Si Sonnet pick != variants[0] (top Opus) → on log un override + on bascule
+    `archetype_final` sur le pick Sonnet (le pipeline Haiku reçoit cet archétype).
+
+    Échec silencieux → on garde les picks Opus (variants[0] par page).
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+
+        pages_dec = decisions.get("pages") or []
+        if not pages_dec:
+            return {}
+
+        # Compact payload : on n'envoie que ce dont Sonnet a besoin
+        pages_input = [
+            {
+                "numero": p.get("numero"),
+                "template_recommande": p.get("template_recommande"),
+                "raison_opus": (p.get("raison") or "")[:200],
+                "variants": [
+                    {
+                        "archetype": v.get("archetype"),
+                        "score_opus": v.get("score"),
+                        "justification": (v.get("justification_compo") or "")[:200],
+                    }
+                    for v in (p.get("variants") or [])[:5]
+                ],
+            }
+            for p in pages_dec
+        ]
+
+        prompt = (
+            f"Tu es CRITIQUE EDITORIAL & ART REVIEWER (15+ ans, ex-Pentagram, ex-Magnum).\n"
+            f"Mission : ré-évaluer les variants de composition proposés par le directeur\n"
+            f"artistique (Opus) selon 4 CRITÈRES STRICTS, page par page :\n"
+            f"  1. Équilibre visuel (occupation espace, respiration, balance masse)\n"
+            f"  2. Hiérarchie (point d'ancrage clair, parcours œil, lecture)\n"
+            f"  3. Lisibilité (densité texte vs visuel, contrastes implicites)\n"
+            f"  4. Impact éditorial (cohérence avec brief + ambition créative)\n\n"
+            f"Tu ne vois PAS les images — tu raisonnes sur la SÉMANTIQUE des archétypes\n"
+            f"de composition (grille_classique / asymetric / bento / fullbleed_cover /\n"
+            f"timeline_horiz) et leur adéquation au contenu de chaque page.\n\n"
+            f"Pour CHAQUE page, choisis UNE variant (ton pick) avec un score réajusté\n"
+            f"(0-100) + critique courte (≤25 mots). Si tu changes du pick Opus, justifie.\n\n"
+            f"BRIEF :\n«{brief[:1500]}»\n"
+            f"Pays : {pays}   Langue : {langue}\n\n"
+            f"VARIANTS À ÉVALUER :\n{json.dumps(pages_input, ensure_ascii=False, indent=1)}\n\n"
+            f"FORMAT DE SORTIE — JSON STRICT :\n"
+            f"{{\n"
+            f"  \"picks\": [\n"
+            f"    {{\"numero\": 1, \"archetype_final\": \"...\", \"score_sonnet\": 92,\n"
+            f"     \"critique\": \"...\", \"override_opus\": false}}\n"
+            f"  ]\n"
+            f"}}\n\n"
+            f"Retourne UNIQUEMENT le JSON."
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.ANALYSE,
+            json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+        )
+        try:
+            picker_data = json.loads(rep.contenu)
+        except json.JSONDecodeError:
+            import re
+            m = re.search(r'\{.*\}', rep.contenu, re.DOTALL)
+            picker_data = json.loads(m.group()) if m else {}
+
+        if not isinstance(picker_data, dict) or "picks" not in picker_data:
+            return {}
+
+        # Application : on injecte archetype_final sur la décision Opus (mute)
+        picks_by_page = {p.get("numero"): p for p in (picker_data.get("picks") or [])}
+        nb_overrides = 0
+        for page in pages_dec:
+            pick = picks_by_page.get(page.get("numero"))
+            if not pick:
+                continue
+            arche_final = pick.get("archetype_final")
+            page["archetype_final"] = arche_final
+            page["picker_score"] = pick.get("score_sonnet")
+            page["picker_critique"] = (pick.get("critique") or "")[:300]
+            # Détection override Opus
+            top_opus = (page.get("variants") or [{}])[0].get("archetype")
+            if arche_final and arche_final != top_opus:
+                page["picker_override"] = True
+                nb_overrides += 1
+            else:
+                page["picker_override"] = False
+
+        logger.info(
+            f"[InfographePro] Vision picker Sonnet : {nb_overrides}/{len(pages_dec)} "
+            f"overrides Opus"
+        )
+        return {
+            "picker_modele": rep.modele_utilise,
+            "picker_tokens_input": rep.tokens_input,
+            "picker_tokens_output": rep.tokens_output,
+            "picker_overrides": nb_overrides,
+            "picker_picks": picker_data.get("picks"),
+        }
+    except Exception as e:
+        logger.warning(f"[InfographePro] Vision picker Sonnet échoué : {e}")
+        return {}
 
 
 async def generer_projet_depuis_brief(
@@ -1324,19 +1486,27 @@ async def generer_projet_depuis_brief(
                     "score": p.get("score"),
                     "raison": (p.get("raison") or "")[:200],
                     "custom_layout": p.get("custom_layout"),
+                    # Sprint 1.2 — archétype final retenu après vision picker Sonnet
+                    "archetype_final": p.get("archetype_final"),
+                    "picker_critique": p.get("picker_critique"),
                 }
                 for p in pages_dec
             ]
             bloc_layout_ai = (
                 f"\n═══════════════════════════════════════════════════\n"
-                f"  LAYOUT AI — DÉCISIONS DU DIRECTEUR ARTISTIQUE (Opus 4.7)\n"
+                f"  LAYOUT AI — DÉCISIONS DIRECTEUR ARTISTIQUE (Opus 4.7) +\n"
+                f"  VISION PICKER (Sonnet 4.6 — 5 archétypes : grille_classique /\n"
+                f"  asymetric / bento / fullbleed_cover / timeline_horiz)\n"
                 f"═══════════════════════════════════════════════════\n"
                 f"Stratégie globale : {strat}\n\n"
                 f"Décisions page-par-page (à RESPECTER strictement) :\n"
                 f"{json.dumps(pages_dec_compact, ensure_ascii=False, indent=2)}\n\n"
-                f"RÈGLE : pour chaque page, utilise EXACTEMENT le `template_recommande` ci-dessus\n"
-                f"comme valeur de `template`. Si `custom_layout` est non-null, ajoute aussi un\n"
-                f"champ `notes` à la page reflétant l'intention de composition décrite.\n"
+                f"RÈGLE : pour chaque page,\n"
+                f"  • utilise EXACTEMENT le `template_recommande` comme valeur de `template`\n"
+                f"  • si `archetype_final` est défini : ajoute un champ `notes` à la page\n"
+                f"    reflétant cet archétype de composition (ex: 'Composition fullbleed_cover\n"
+                f"    : visuel pleine page bord-à-bord, texte minimal en overlay bas-gauche')\n"
+                f"  • si `custom_layout` est non-null, complète `notes` avec sa structure\n"
             )
 
     prompt = f"""Tu es directeur artistique senior et copywriter expert (15+ ans agence pro).
@@ -1598,6 +1768,11 @@ async def generer_projet(
             "layout_ai_modele": (projet.meta or {}).get("layout_ai_modele"),
             "layout_ai_tokens_input": (projet.meta or {}).get("layout_ai_tokens_input"),
             "layout_ai_tokens_output": (projet.meta or {}).get("layout_ai_tokens_output"),
+            # Sprint 1.2 — Vision picker Sonnet
+            "picker_modele": (projet.meta or {}).get("picker_modele"),
+            "picker_tokens_input": (projet.meta or {}).get("picker_tokens_input"),
+            "picker_tokens_output": (projet.meta or {}).get("picker_tokens_output"),
+            "picker_overrides": (projet.meta or {}).get("picker_overrides"),
         },
     )
 
