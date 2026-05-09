@@ -1225,11 +1225,23 @@ Couleurs accents : {', '.join(couleurs_acc) if couleurs_acc else "(libres)"}
         {{"slot_id": "...", "type": "qr", "contenu": {{"donnees": "https://...", "legende": "..."}}}},
         {{"slot_id": "photos", "type": "image_user", "contenu": {{"items": [
           {{"ref_media": "session:abc", "legende": "..."}}
-        ]}}}}
+        ]}}}},
+        {{"slot_id": "...", "type": "image_ia", "contenu": {{
+          "prompt": "Description visuelle DÉTAILLÉE en anglais pour génération d'image (30-60 mots, style/sujet/ambiance/composition explicites — adapté au contexte africain quand pertinent : tenue, peau, environnement)",
+          "format": "portrait_4_3 | portrait_16_9 | landscape_4_3 | landscape_16_9 | square"
+        }}}}
       ]
     }}
   ]
 }}
+
+Note pour les slots image :
+- Si tu trouves un média user pertinent → utilise "image_user" avec ref_media.
+- SINON pour les slots qui demandent un visuel (couverture, illustration de fond,
+  motif décoratif, page de garde, scène d'ambiance) → propose "image_ia" avec un
+  prompt anglais détaillé. Le moteur générera l'image via Flux. Évite "image_ia"
+  pour des portraits de personnes réelles (utilise une photo user) ou des
+  signatures/cachets (toujours user).
 
 Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
@@ -1305,8 +1317,17 @@ async def generer_projet(
     dpi_pages: int = 150,
     dpi_pages_hd: int = 300,
     directives_visuelles: Optional[dict] = None,
+    mode_visuel: str = "sans",   # "sans" | "standard" | "premium"
 ) -> ResultatProjet:
-    """Pipeline complet : brief + médias → projet IA → PDF + PNG par page."""
+    """
+    Pipeline complet : brief + médias → projet IA → (génération images IA si
+    `mode_visuel != "sans"`) → PDF + PNG par page.
+
+    `mode_visuel` :
+    - "sans"     : aucune image IA générée — placeholder pour les slots image_ia
+    - "standard" : Flux schnell via fal.ai (rapide, ~1s/image)
+    - "premium"  : Flux dev via fal.ai (qualité supérieure, ~5-10s/image)
+    """
     medias = msm.resoudre_refs(medias_refs or [], user_id, session_id) if medias_refs else {}
 
     t0 = time.time()
@@ -1316,6 +1337,20 @@ async def generer_projet(
         directives_visuelles=directives_visuelles,
     )
     t_ia = time.time() - t0
+
+    # ── Pipeline images IA (Niveau 3 : Flux + vision check Premium) ────────
+    nb_images_generees = 0
+    duree_images_ms = 0
+    if mode_visuel in ("standard", "premium"):
+        t_img = time.time()
+        nb_images_generees = await _generer_images_ia_pour_projet(
+            projet=projet,
+            medias=medias,
+            mode=mode_visuel,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        duree_images_ms = int((time.time() - t_img) * 1000)
 
     pdf = rendre_projet_pdf(projet, medias, mode_couleur="rgb")
     pdf_cmyk = None
@@ -1347,5 +1382,101 @@ async def generer_projet(
             "tokens_output": (projet.meta or {}).get("tokens_output"),
             "modele": (projet.meta or {}).get("modele"),
             "medias_utilises": len(medias),
+            "mode_visuel": mode_visuel,
+            "nb_images_ia": nb_images_generees,
+            "duree_images_ms": duree_images_ms,
         },
     )
+
+
+async def _generer_images_ia_pour_projet(
+    projet: ProjetInfographie,
+    medias: dict[str, msm.Media],
+    mode: str,
+    user_id: str,
+    session_id: str,
+) -> int:
+    """
+    Pour chaque zone `image_ia` du projet, génère une image via fal.ai et
+    l'injecte dans le dict `medias` comme un Media de session synthétique,
+    puis transforme la zone en `image_user` pointant vers ce nouveau média.
+
+    Retourne le nombre d'images effectivement générées (utile pour la
+    facturation côté route).
+
+    En cas d'échec d'une image (timeout, contenu refusé, etc.), la zone
+    est laissée telle quelle → `_media_bytes` retournera None → le moteur
+    affichera un placeholder.
+    """
+    from .image_gen import (
+        generer_images_batch, valider_image_vision,
+        ImageMode, ImageGenError,
+    )
+
+    # 1. Collecter toutes les zones image_ia
+    zones_a_generer: list[tuple[Zone, str, str]] = []
+    for page in projet.pages:
+        for zone in page.zones:
+            if zone.type != "image_ia":
+                continue
+            prompt = (zone.contenu or {}).get("prompt") or ""
+            fmt = (zone.contenu or {}).get("format") or "portrait_4_3"
+            if not prompt.strip():
+                continue
+            zones_a_generer.append((zone, prompt, fmt))
+
+    if not zones_a_generer:
+        return 0
+
+    logger.info(
+        f"[InfographePro] Génération de {len(zones_a_generer)} image(s) IA "
+        f"en mode {mode} (user={user_id})"
+    )
+
+    mode_typed: ImageMode = "premium" if mode == "premium" else "standard"
+    prompts_batch = [(p, f) for (_z, p, f) in zones_a_generer]
+    images_bytes = await generer_images_batch(prompts_batch, mode=mode_typed)
+
+    # 2. Vision check (Premium uniquement) — 1 retry max si rejet
+    if mode == "premium":
+        nouvelles_images: list[Optional[bytes]] = []
+        for (zone, prompt, fmt), img in zip(zones_a_generer, images_bytes):
+            if img is None:
+                nouvelles_images.append(None)
+                continue
+            ok, raison = await valider_image_vision(img, prompt)
+            if ok:
+                nouvelles_images.append(img)
+                continue
+            logger.info(f"[InfographePro] Vision rejette image ({raison[:60]}) — retry")
+            try:
+                from .image_gen import generer_image
+                retry_img = await generer_image(prompt, mode="premium", format_=fmt)
+                nouvelles_images.append(retry_img)
+            except ImageGenError:
+                nouvelles_images.append(img)  # garde l'original si retry échoue
+        images_bytes = nouvelles_images
+
+    # 3. Sauvegarder + injecter dans medias + remapper les zones
+    nb_ok = 0
+    for (zone, prompt, _fmt), img in zip(zones_a_generer, images_bytes):
+        if not img:
+            continue
+        try:
+            media = msm.ajouter_media(
+                portee="session",
+                owner_id=session_id or user_id,
+                contenu=img,
+                nom_fichier=f"ia_{zone.slot_id or 'img'}.png",
+                mime="image/png",
+                categorie="illustration",
+                label=prompt[:80],
+            )
+            medias[media.media_id] = media
+            zone.type = "image_user"
+            zone.contenu = {**(zone.contenu or {}), "ref_media": f"session:{media.media_id}"}
+            nb_ok += 1
+        except Exception as e:
+            logger.warning(f"[InfographePro] Sauvegarde image IA échouée : {e}")
+
+    return nb_ok

@@ -953,7 +953,14 @@
     "catSignature": "Signatur",
     "catCachet": "Stempel",
     "catFiligrane": "Wasserzeichen",
-    "catTampon": "Siegel"
+    "catTampon": "Siegel",
+    "visualMode": "KI-Visualisierungsmodus",
+    "modeSans": "Ohne KI-Bilder",
+    "modeSansDesc": "Templates + Ihre Medien",
+    "modeStandard": "Standard",
+    "modeStandardDesc": "Flux schnell — KI-Bilder",
+    "modePremium": "Premium",
+    "modePremiumDesc": "Flux hohe Qualität + Vision-Check"
   },
   "organisation": {
     "createTitle": "Organisation erstellen",

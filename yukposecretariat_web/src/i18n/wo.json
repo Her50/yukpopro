@@ -393,7 +393,8 @@
     "fmtListe": "Liste",
     "fmtParagraphe": "Paragraphe",
     "wordsAndPrice": "{{n}} mots · {{price}}",
-    "sourceMarker": "Source : {{source}}"
+    "sourceMarker": "Source : {{source}}",
+    "keepScreenOnHint": "Sur ce navigateur, l'enregistrement s'arrête si l'écran s'éteint. Désactivez la mise en veille automatique dans les réglages de votre appareil."
   },
   "ocr": {
     "title": "Scanner → Texte",
@@ -970,7 +971,14 @@
     "catSignature": "Signature",
     "catCachet": "Cachet",
     "catFiligrane": "Filigrane",
-    "catTampon": "Tampon"
+    "catTampon": "Tampon",
+    "visualMode": "Mode visuel IA",
+    "modeSans": "Sans IA visuelle",
+    "modeSansDesc": "Templates + tes médias seuls",
+    "modeStandard": "Standard",
+    "modeStandardDesc": "Flux rapide — illustrations IA",
+    "modePremium": "Premium",
+    "modePremiumDesc": "Flux haute qualité + vérif vision"
   },
   "organisation": {
     "createTitle": "Créer une organisation",

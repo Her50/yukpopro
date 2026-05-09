@@ -953,7 +953,14 @@
     "catSignature": "Firma",
     "catCachet": "Sello",
     "catFiligrane": "Marca de agua",
-    "catTampon": "Cuño"
+    "catTampon": "Cuño",
+    "visualMode": "Modo visual IA",
+    "modeSans": "Sin IA visual",
+    "modeSansDesc": "Plantillas + tus medios",
+    "modeStandard": "Standard",
+    "modeStandardDesc": "Flux rápido — ilustraciones IA",
+    "modePremium": "Premium",
+    "modePremiumDesc": "Flux alta calidad + chequeo visión"
   },
   "organisation": {
     "createTitle": "Crear una organización",

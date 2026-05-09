@@ -68,6 +68,7 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive]   = useState(0)
   const [modifInstr, setModifInstr]   = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
+  const [modeVisuel, setModeVisuel]   = useState<'sans' | 'standard' | 'premium'>('sans')
 
   const [creativite, setCreativite]     = useState(50)
   const [densite, setDensite]           = useState(50)
@@ -149,7 +150,7 @@ export default function DesignerProPanel() {
     if (!brief.trim()) { toast.error('Décris ton projet'); return }
     setLoading(true); setResultat(null); setPageActive(0)
     try {
-      const payload = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true, directives_visuelles: directives }
+      const payload = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true, directives_visuelles: directives, mode_visuel: modeVisuel }
       const r = autoMode
         ? await infographieProApi.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProApi.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
@@ -342,6 +343,28 @@ export default function DesignerProPanel() {
           <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={6}
             placeholder="Ex : Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale, inhumation à Mbalmayo…"
             className={INPUT + ' resize-none leading-relaxed'} />
+        </div>
+
+        <div>
+          <label className={LABEL}>{t('designerPro.visualMode', 'Mode visuel IA')}</label>
+          <div className="grid grid-cols-3 gap-2 mt-1">
+            {([
+              { v: 'sans',     emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
+              { v: 'standard', emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
+              { v: 'premium',  emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + vision check' },
+            ] as const).map(opt => (
+              <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
+                className={`p-2.5 rounded-lg border-2 text-left transition-all ${
+                  modeVisuel === opt.v
+                    ? 'border-violet-500 bg-violet-500/10 shadow-sm'
+                    : 'border-slate-700 hover:border-slate-600 bg-slate-900/40'
+                }`}>
+                <div className="text-lg">{opt.emoji}</div>
+                <div className="text-xs font-bold text-slate-100 mt-0.5">{t(opt.titleKey, opt.fb)}</div>
+                <div className="text-[10px] text-slate-400 leading-tight">{t(opt.descKey, opt.fbDesc)}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <button onClick={generer} disabled={loading || !brief.trim()} className={BTN_PRIMARY}>

@@ -953,7 +953,14 @@
     "catSignature": "توقيع",
     "catCachet": "ختم",
     "catFiligrane": "علامة مائية",
-    "catTampon": "طابع"
+    "catTampon": "طابع",
+    "visualMode": "وضع المرئيات بالذكاء",
+    "modeSans": "بدون توليد مرئي",
+    "modeSansDesc": "قوالب + وسائطك فقط",
+    "modeStandard": "قياسي",
+    "modeStandardDesc": "Flux سريع — صور بالذكاء",
+    "modePremium": "Premium",
+    "modePremiumDesc": "Flux جودة عالية + فحص بصري"
   },
   "organisation": {
     "createTitle": "إنشاء مؤسسة",

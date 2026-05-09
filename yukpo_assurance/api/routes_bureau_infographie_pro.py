@@ -59,6 +59,8 @@ class DemandeProjetPro(BaseModel):
     export_cmyk: bool = Field(default=True)
     directives_visuelles: Optional[dict] = Field(default=None,
         description="Curseurs UI : creativite, densite_texte, importance_images, elegance (0–100)")
+    mode_visuel: str = Field(default="sans",
+        description="'sans' (templates seuls) | 'standard' (Flux schnell rapide) | 'premium' (Flux dev haute qualité)")
 
 
 class DemandeAutoPro(BaseModel):
@@ -72,6 +74,7 @@ class DemandeAutoPro(BaseModel):
         description="Hint optionnel (l'IA peut le suivre ou s'en écarter selon le brief)")
     export_cmyk: bool = Field(default=True)
     directives_visuelles: Optional[dict] = None
+    mode_visuel: str = Field(default="sans")
 
 
 class DemandeModifierProjet(BaseModel):
@@ -80,6 +83,7 @@ class DemandeModifierProjet(BaseModel):
     medias_refs_supplementaires: Optional[list[str]] = None
     pays: str = Field(default="CM")
     directives_visuelles: Optional[dict] = None
+    mode_visuel: str = Field(default="sans")
 
 
 # ─── Médiathèque ──────────────────────────────────────────────────────────────
@@ -397,6 +401,7 @@ async def generer_projet(
             langue=demande.langue,
             export_cmyk=demande.export_cmyk,
             directives_visuelles=demande.directives_visuelles,
+            mode_visuel=demande.mode_visuel,
         )
     except Exception as e:
         logger.error(f"[Designer Pro] Génération échouée : {e}")
@@ -422,6 +427,20 @@ async def generer_projet(
                 current_user.user_id, "designerpro_creation",
                 module="infographie", multiplicateur=max(1.0, float(nb_pages)),
             )
+            # Forfait images IA (Flux via fal.ai) — débité par image effectivement
+            # générée, selon le mode choisi par l'utilisateur. 0 image générée
+            # (mode "sans" ou aucun slot image_ia produit par le LLM) → pas de
+            # débit supplémentaire.
+            nb_imgs = int(resultat.meta.get("nb_images_ia") or 0)
+            if nb_imgs > 0:
+                forfait_image = (
+                    "designerpro_image_premium" if demande.mode_visuel == "premium"
+                    else "designerpro_image_standard"
+                )
+                await debiter_forfait(
+                    current_user.user_id, forfait_image,
+                    module="infographie", multiplicateur=float(nb_imgs),
+                )
     except Exception as e:
         logger.warning(f"[Designer Pro/Crédits] {e}")
 
@@ -518,6 +537,7 @@ async def generer_auto(
         medias_refs=demande.medias_refs,
         export_cmyk=demande.export_cmyk,
         directives_visuelles=demande.directives_visuelles,
+        mode_visuel=demande.mode_visuel,
     )
     res = await generer_projet(sub, current_user)
     if isinstance(res, dict):

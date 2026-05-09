@@ -81,6 +81,7 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive] = useState(0)
   const [modifInstr, setModifInstr] = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
+  const [modeVisuel, setModeVisuel] = useState<'sans' | 'standard' | 'premium'>('sans')
 
   // Directives visuelles (sliders Phase 3)
   const [creativite, setCreativite] = useState(50)
@@ -176,6 +177,7 @@ export default function DesignerProPanel() {
         medias_refs: refsSelectionnees,
         export_cmyk: true,
         directives_visuelles: directives,
+        mode_visuel: modeVisuel,
       }
       const r = autoMode
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
@@ -349,6 +351,31 @@ export default function DesignerProPanel() {
         <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={6}
           placeholder={t('designerPro.briefPlaceholder')}
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
+
+        {/* Mode visuel IA — Niveau 3 hybride avec génération d'images Flux */}
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-gray-800">
+            {t('designerPro.visualMode')}
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { v: 'sans',     emoji: '📋', titleKey: 'designerPro.modeSans',     descKey: 'designerPro.modeSansDesc' },
+              { v: 'standard', emoji: '✨', titleKey: 'designerPro.modeStandard', descKey: 'designerPro.modeStandardDesc' },
+              { v: 'premium',  emoji: '🎨', titleKey: 'designerPro.modePremium',  descKey: 'designerPro.modePremiumDesc' },
+            ] as const).map(opt => (
+              <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${
+                  modeVisuel === opt.v
+                    ? 'border-amber-500 bg-amber-50 shadow-sm'
+                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                }`}>
+                <div className="text-xl">{opt.emoji}</div>
+                <div className="text-xs font-bold text-gray-900 mt-1">{t(opt.titleKey)}</div>
+                <div className="text-[10px] text-gray-500 leading-tight mt-0.5">{t(opt.descKey)}</div>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <button onClick={generer} disabled={loading || !brief.trim()}
           className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">

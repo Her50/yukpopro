@@ -85,6 +85,8 @@ class Settings(BaseSettings):
     ELEVENLABS_API_KEY: str = ""
     # Hugging Face Inference API (NLLB-200 pour langues africaines)
     HUGGINGFACE_TOKEN: str = ""
+    # fal.ai — génération d'images via Flux (Designer Pro, modes Standard/Premium)
+    FAL_KEY: str = ""
 
     def __init__(self, **data):
         super().__init__(**data)

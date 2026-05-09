@@ -953,7 +953,14 @@
     "catSignature": "Signature",
     "catCachet": "Stamp",
     "catFiligrane": "Watermark",
-    "catTampon": "Seal"
+    "catTampon": "Seal",
+    "visualMode": "AI visual mode",
+    "modeSans": "No AI visuals",
+    "modeSansDesc": "Templates + your media only",
+    "modeStandard": "Standard",
+    "modeStandardDesc": "Fast Flux — AI illustrations",
+    "modePremium": "Premium",
+    "modePremiumDesc": "High-quality Flux + vision check"
   },
   "organisation": {
     "createTitle": "Create an organization",

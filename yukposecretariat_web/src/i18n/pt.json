@@ -953,7 +953,14 @@
     "catSignature": "Assinatura",
     "catCachet": "Carimbo",
     "catFiligrane": "Marca d'água",
-    "catTampon": "Selo"
+    "catTampon": "Selo",
+    "visualMode": "Modo visual IA",
+    "modeSans": "Sem IA visual",
+    "modeSansDesc": "Templates + suas mídias",
+    "modeStandard": "Standard",
+    "modeStandardDesc": "Flux rápido — ilustrações IA",
+    "modePremium": "Premium",
+    "modePremiumDesc": "Flux alta qualidade + verificação"
   },
   "organisation": {
     "createTitle": "Criar uma organização",
