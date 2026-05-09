@@ -436,7 +436,7 @@ async def generer_specification_depuis_brief(
     `variante_hint` force une direction créative alternative (utilisé pour générer
     4 variantes parallèles : "classique", "audacieux", "minimaliste", "festif").
     """
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
     gabarit_info = GABARITS.get(type_gabarit, GABARITS["flyer_a5"])
     profil = profil or {}
@@ -521,10 +521,13 @@ Catégorie : {gabarit_info.get('categorie', 'print')}{hint_ligne}
 
 Retourne UNIQUEMENT le JSON, sans commentaire ni markdown."""
 
+    # Forcer Haiku 4.5 — la spec est du JSON structuré, Haiku est ~12× moins
+    # cher que Sonnet/GPT-4o sans perte de qualité perceptible sur ce format.
     reponse = await ia_client.appeler(
         prompt=prompt,
         mode=ModeIA.REDACTION,  # temp 0.4 — équilibre créativité / JSON fiable
         json_attendu=True,
+        forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
     )
 
     try:

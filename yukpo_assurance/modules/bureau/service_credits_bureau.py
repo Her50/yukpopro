@@ -104,10 +104,11 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     "designerpro_media_upload":  0.5,   # 10 crédits (stockage + normalisation Pillow)
     # Génération d'images IA (fal.ai) — multiplicateur = nb_images générées.
     # Standard = Flux schnell (~$0.003/img réel = ~1.8 FCFA), Premium = Flux dev
-    # (~$0.025/img réel = ~15 FCFA + vision check Claude Sonnet ~3 FCFA).
-    # Marges : Standard ~12×, Premium ~14× sur la composante image.
-    "designerpro_image_standard": 3.0,  # 60 crédits/image = 36 FCFA user
-    "designerpro_image_premium": 18.0,  # 360 crédits/image = 216 FCFA user
+    # (~$0.025/img réel = ~15 FCFA + vision check Haiku/mini ~2 FCFA).
+    # Marges réduites à ~5× pour rendre le service ultra-compétitif vs Canva
+    # (~9 FCFA user/image standard, ~54 FCFA user/image premium).
+    "designerpro_image_standard": 0.75,  # 15 crédits/image = 9 FCFA user (5×)
+    "designerpro_image_premium": 4.5,    # 90 crédits/image = 54 FCFA user (3.6×)
     # OCR / traitement image
     "ocr_scan":              3.0,   #  60 crédits
     "ocr_manuscrit":         5.0,   # 100 crédits (vision avancée)

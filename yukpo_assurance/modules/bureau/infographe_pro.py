@@ -1105,7 +1105,7 @@ async def generer_projet_depuis_brief(
     L'IA reçoit le catalogue de pages + descripteurs des médias disponibles,
     et produit la structure complète du projet (textes par slot + assignations médias).
     """
-    from core.ia_client import ia_client, ModeIA
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
     proj_def = catalog.PROJETS_INFOGRAPHIE.get(cle_projet)
     if not proj_def:
@@ -1245,10 +1245,15 @@ Note pour les slots image :
 
 Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
+    # On force Haiku 4.5 pour cette étape : la sortie est du JSON structuré
+    # avec contenus prédéfinis (titres, listes, prompts d'images), pas du
+    # raisonnement complexe → Haiku suffit largement et est ~12× moins cher
+    # que Sonnet/GPT-4o sans perte de qualité perceptible.
     reponse = await ia_client.appeler(
         prompt=prompt,
         mode=ModeIA.REDACTION,
         json_attendu=True,
+        forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
     )
     try:
         data = json.loads(reponse.contenu)
