@@ -3083,47 +3083,19 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "format_sortie": data.get("format_sortie") or "pptx",
         }
     elif type_sortie == "visuel":
-        # Designer Pro — auto-détection du projet imprimable adapté au brief.
-        # Le moteur Designer Pro choisit lui-même le bon gabarit dans
-        # PROJETS_INFOGRAPHIE (incluant custom_libre composition Opus si
-        # aucun ne match, cf. gabarits_livret.py:custom_libre).
-        endpoint_cible = "/api/v1/bureau/infographie-pro/generer-auto"
-        # mode_visuel : "ultra" pour rendu pro imprimable, "standard"
-        # pour preview rapide. Par défaut on prend premium (compromis
-        # qualité/coût pour cartes de visite, flyers, brochures).
-        mode_visuel_map = {
-            "infographie_carte_visite": "premium",
-            "infographie_flyer":        "ultra",   # photo héroïque
-            "infographie_brochure":     "premium",
-            "infographie_livret":       "premium",
-            "infographie_menu":         "premium",
-            "infographie_cv_graphique": "premium",
-            "infographie_invitation":   "ultra",
-            "infographie_packaging":    "ultra",
-            "infographie_post_social":  "premium",
-            "infographie_album":        "premium",
-            "infographie_rapport_visuel":"premium",
-            "infographie_custom":       "premium",
-        }
-        mode_visuel = mode_visuel_map.get(template_id, "premium")
-        # cle_projet_hint : fournir un raccourci optionnel vers le catalog
-        # PROJETS_INFOGRAPHIE existant (livret_deces_8p, brochure_corporate_4p,
-        # etc.). Si template_id="infographie_custom" ou hint inconnu →
-        # custom_libre composition Opus dynamique sur le brief.
-        hint_map = {
-            "infographie_brochure":     "brochure_corporate_4p",
-            "infographie_menu":         "menu_resto_4p",
-            "infographie_album":        "livre_photo_a4_8p",
-            "infographie_rapport_visuel":"magazine_corporate_12p",
-        }
-        cle_projet_hint = hint_map.get(template_id) or "custom_libre"
+        # FREEFORM LAYOUT — composition LLM directe sans templates rigides.
+        # Le LLM (gpt-4-turbo via LLM_PRIMAIRE) compose un JSON de primitives
+        # géométriques (rectangles, textes positionnés, images, QR, lignes,
+        # ornements) à partir du brief, et le renderer ReportLab rasterise.
+        # Couvre TOUS les visuels imprimables : carte de visite, flyer, BD,
+        # packaging, CV graphique, post social, affiche, dépliant, etc.
+        # Aucun catalogue de templates limitant la créativité.
+        endpoint_cible = "/api/v1/bureau/freeform/generer"
         payload_pret = {
             "brief": demande.brief,
             "pays": "CM",
             "langue": data.get("langue") or "fr",
-            "mode_visuel": mode_visuel,
             "export_cmyk": True,
-            "cle_projet_hint": cle_projet_hint,
         }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
