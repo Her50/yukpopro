@@ -82,7 +82,7 @@ def _date_debut(jours: int) -> datetime:
 
 @router.get("/dashboard", summary="KPIs synthétiques cross-app")
 async def dashboard(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     admin: TokenData = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
@@ -205,7 +205,7 @@ async def dashboard(
 
 @router.get("/usage", summary="Usage agrégé par jour")
 async def usage(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     admin: TokenData = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
@@ -281,7 +281,7 @@ async def usage(
 
 @router.get("/cost", summary="Coûts agrégés (USD/FCFA/crédits)")
 async def cost(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     admin: TokenData = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
@@ -338,7 +338,7 @@ async def cost(
 
 @router.get("/by-feature", summary="Consommation par feature (module)")
 async def by_feature(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     limit: int = Query(50, ge=1, le=500),
     admin: TokenData = Depends(_require_admin),
@@ -395,7 +395,7 @@ async def by_feature(
 
 @router.get("/by-provider", summary="Consommation par fournisseur LLM/IA")
 async def by_provider(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     admin: TokenData = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
@@ -462,7 +462,7 @@ async def by_provider(
 
 @router.get("/by-user", summary="Top utilisateurs consommateurs")
 async def by_user(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     jours: int = Query(30, ge=1, le=365),
     limit: int = Query(20, ge=1, le=100),
     admin: TokenData = Depends(_require_admin),
@@ -516,7 +516,7 @@ async def by_user(
 
 @router.get("/alerts", summary="Alertes actives (seuils dépassés)")
 async def alerts(
-    scope: str = Query("both", regex="^(pro|sec|both)$"),
+    scope: str = Query("both", pattern="^(pro|sec|both)$"),
     admin: TokenData = Depends(_require_admin),
 ):
     """Évalue les seuils statiques et retourne les alertes actives.
