@@ -871,46 +871,22 @@ export default function DesignerProPanel() {
           💡 {t('designerPro.briefHint', "Décris en langage naturel — Yukpo détecte format/mode/directives auto.")}
         </p>
 
-        {/* Sprint UX4 — Card devis automatique */}
-        {brief.trim().length >= 30 && (
-          <div className="space-y-2">
-            {devisLoading && !devis && (
-              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-600">
-                <Loader2 size={14} className="animate-spin" />
-                {t('designerPro.devisLoading', 'Estimation du coût en cours…')}
-              </div>
-            )}
-            {devis && devis.peut_payer && (
-              <div className="rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50 p-3 space-y-1">
-                <p className="text-xs font-bold text-emerald-900">
-                  {modeEmoji(devis.mode_visuel_recommande)} {t('designerPro.modeAutoDetected', '{{mode}} recommandé', { mode: devis.mode_visuel_recommande })}
-                  <span className="ml-2 text-[11px] text-emerald-700 font-normal">
-                    ({devis.label_projet} · {devis.nombre_pages_estime} page(s))
-                  </span>
-                </p>
-                <p className="text-xs text-emerald-800">
-                  {t('designerPro.devisEstime', 'Coût estimé')} : <b>{devis.fcfa_user.toLocaleString()} FCFA</b>
-                  <span className="text-[11px] opacity-70 ml-1">({devis.credits_estimes.toLocaleString()} crédits)</span>
-                  · Solde : {devis.credits_disponibles.toLocaleString()} crédits ✓
-                </p>
-              </div>
-            )}
-            {devis && !devis.peut_payer && (
-              <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 space-y-2">
-                <p className="text-xs font-bold text-amber-900">
-                  ⚠ {t('designerPro.creditsInsuffisants', 'Solde insuffisant')}
-                </p>
-                <p className="text-xs text-amber-800">
-                  Mode {devis.mode_visuel_recommande} demanderait {devis.fcfa_user.toLocaleString()} FCFA
-                  ({devis.credits_estimes.toLocaleString()} crédits). Tu as {devis.credits_disponibles.toLocaleString()} crédits.
-                </p>
-                {devis.fallback_si_solde_insuffisant && (
-                  <button onClick={() => setModeVisuel(devis.fallback_si_solde_insuffisant)}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 rounded-lg">
-                    Utiliser le mode {devis.fallback_si_solde_insuffisant} à la place
-                  </button>
-                )}
-              </div>
+        {/* Sprint UX4 (refondu boîte noire) — Devis SILENCIEUX */}
+        {devis && !devis.peut_payer && (
+          <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 space-y-2">
+            <p className="text-xs font-bold text-amber-900">
+              ⚠ {t('designerPro.creditsInsuffisants', 'Solde insuffisant')}
+            </p>
+            <p className="text-xs text-amber-800">
+              Mode {devis.mode_visuel_recommande} demanderait {devis.fcfa_user.toLocaleString()} FCFA
+              ({devis.credits_estimes.toLocaleString()} crédits).
+              Tu as {devis.credits_disponibles.toLocaleString()} crédits.
+            </p>
+            {devis.fallback_si_solde_insuffisant && (
+              <button onClick={() => setModeVisuel(devis.fallback_si_solde_insuffisant)}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 rounded-lg">
+                Utiliser le mode {devis.fallback_si_solde_insuffisant} à la place
+              </button>
             )}
           </div>
         )}

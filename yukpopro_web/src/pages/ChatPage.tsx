@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, copiloteApi, reunionsApi, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, type UploadedFile } from "@/api/client";
 import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 import { cn } from "@/components/ui";
 import type { CopiloteMessage, NavigationSuggestion } from "@/types";
@@ -123,6 +123,93 @@ export const ChatPage = () => {
 
     try {
       const activeDoc = activeDocument();
+
+      // Sprint G1 — Orchestrateur silencieux (boîte noire) :
+      // 1. Détecter intent + devis interne (sans afficher au user)
+      // 2. Si intent = génération doc/visuel ET peut_payer → générer silencieux
+      // 3. Si intent = génération ET solde insuffisant → afficher carte amber bloquante
+      // 4. Sinon (conversationnel/ambigu) → flow chatApi.send normal
+      const briefAvecContexte = content.trim() + (activeDoc ?
+        `\n\n[Contexte : doc actif "${activeDoc.titre}" type=${activeDoc.type_doc}]` : "");
+
+      let orch: any = null;
+      try {
+        orch = await generateurApi.orchestrer({
+          brief: briefAvecContexte,
+          contexte_fichiers: files.length > 0
+            ? files.map(f => `${f.name} (${f.type})`).join(", ") : undefined,
+        });
+      } catch { /* fallback silencieux : pas d'orchestration → flow normal */ }
+
+      const isGeneration = orch && (
+        orch.intent_detecte === "generation_rapport" ||
+        orch.intent_detecte === "generation_slides" ||
+        orch.intent_detecte === "generation_visuel"
+      );
+
+      // Cas 1 : génération détectée mais SOLDE INSUFFISANT → bloquer avec explication
+      if (isGeneration && orch.peut_payer === false) {
+        const fb = orch.fallback_si_solde_insuffisant;
+        const fbMsg = fb
+          ? `\n\n💡 Mode économique disponible : **${fb.mode}** à ${fb.fcfa_user.toLocaleString()} FCFA (${fb.credits.toLocaleString()} crédits).`
+          : "";
+        updateLastAssistantMessage(
+          `⚠️ **Solde insuffisant pour cette génération**\n\n` +
+          `${orch.template_label} demande ${orch.fcfa_user.toLocaleString()} FCFA (${orch.credits_estimes.toLocaleString()} crédits).\n` +
+          `Tu as ${orch.credits_disponibles.toLocaleString()} crédits.${fbMsg}\n\n` +
+          `[→ Recharger mes crédits](/abonnement)`,
+          null,
+        );
+        return;
+      }
+
+      // Cas 2 : génération détectée + solde OK → exécuter SILENCIEUSEMENT
+      if (isGeneration && orch.peut_payer === true) {
+        const cible = orch.endpoint_cible || "";
+        try {
+          if (orch.type_sortie === "rapport" || cible.includes("rapport")) {
+            const r = await generateurApi.rapport(orch.payload_pret as any);
+            updateLastAssistantMessage(
+              `✓ ${orch.template_label} généré.\n` +
+              (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
+              null, r.fichier_genere ? [r.fichier_genere] : undefined,
+            );
+            if (r.fichier_genere) {
+              addDocument({
+                titre: orch.template_label || content.slice(0, 60),
+                type: "rapport", fichier: r.fichier_genere,
+                contexteConversation: content,
+              });
+              toast.success("Document prêt");
+            }
+            return;
+          }
+          if (orch.type_sortie === "slides" || cible.includes("slides")) {
+            const r = await generateurApi.slides(orch.payload_pret as any);
+            updateLastAssistantMessage(
+              `✓ ${orch.template_label} généré.\n` +
+              (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
+              null, r.fichier_genere ? [r.fichier_genere] : undefined,
+            );
+            if (r.fichier_genere) {
+              addDocument({
+                titre: orch.template_label || content.slice(0, 60),
+                type: "slides", fichier: r.fichier_genere,
+                contexteConversation: content,
+              });
+              toast.success("Présentation prête");
+            }
+            return;
+          }
+          // generation_visuel → bascule Designer Pro (TODO Sprint G1.2)
+        } catch (genErr: any) {
+          // Si l'endpoint cible échoue → fallback chat normal pour ne pas bloquer
+          // eslint-disable-next-line no-console
+          console.warn("[ChatPage/G1] génération échouée, fallback chat:", genErr);
+        }
+      }
+
+      // Cas 3 (par défaut) : conversationnel/ambigu → chatApi.send normal
       const res = await chatApi.send({
         message: content.trim(),
         pays: profil?.pays,
