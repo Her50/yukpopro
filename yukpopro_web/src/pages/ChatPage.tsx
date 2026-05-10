@@ -14,7 +14,7 @@ import {
   ChevronLeft, ChevronRight, Bot, Sparkles, Download,
   FileText, Image, Table, Globe, BarChart2,
   Pencil, Save, User as UserIcon, Mic, MicOff,
-  Copy, Check,
+  Copy, Check, Camera,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
@@ -77,6 +77,11 @@ export const ChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Camera scan (document/reçu/carte) — getUserMedia + capture canvas → File
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
   const messages = activeMessages();
   const metierCtx = METIERS_CONFIG[profil?.metier ?? "default"] ?? METIERS_CONFIG.default;
@@ -511,6 +516,63 @@ export const ChatPage = () => {
     else startRecording();
   };
 
+  // ── Camera scan (document, reçu, carte de visite, identité, etc.) ────────
+  // getUserMedia { facingMode: "environment" } pour utiliser la caméra arrière
+  // sur mobile (meilleure résolution + autofocus). Sur desktop, prend la
+  // webcam par défaut. Capture via canvas → JPG 90% qualité → injecte comme
+  // File dans le pipeline d'attachement existant (handleFileSelect).
+  const handleCameraClick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+      });
+      setCameraStream(stream);
+      setCameraModalOpen(true);
+      setTimeout(() => {
+        if (videoRef.current) videoRef.current.srcObject = stream;
+      }, 100);
+    } catch (err: any) {
+      toast.error(t("chat.cameraPermissionError", "Accès caméra refusé"));
+    }
+  };
+
+  const closeCameraModal = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((tr) => tr.stop());
+      setCameraStream(null);
+    }
+    setCameraModalOpen(false);
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+    canvasRef.current.width = videoRef.current.videoWidth;
+    canvasRef.current.height = videoRef.current.videoHeight;
+    ctx.drawImage(videoRef.current, 0, 0);
+    canvasRef.current.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File(
+          [blob],
+          `scan_${Date.now()}.jpg`,
+          { type: "image/jpeg" },
+        );
+        // Réutilise handleFileSelect via un FileList synthétique
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        if (fileInputRef.current) {
+          fileInputRef.current.files = dt.files;
+          fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        closeCameraModal();
+      },
+      "image/jpeg",
+      0.92,
+    );
+  };
+
   const formatDureeAudio = (sec: number) => {
     const m = Math.floor(sec / 60).toString().padStart(2, "0");
     const s = (sec % 60).toString().padStart(2, "0");
@@ -765,6 +827,17 @@ export const ChatPage = () => {
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
 
+                {/* Bouton caméra (scan document/reçu/carte) */}
+                <button
+                  type="button"
+                  onClick={handleCameraClick}
+                  disabled={isLoading || uploadingFile}
+                  className="flex-shrink-0 p-3 text-slate-400 hover:text-yukpo-400 transition-colors disabled:opacity-40"
+                  title={t("chat.cameraCapture", "Scanner un document avec la caméra")}
+                >
+                  <Camera className="w-5 h-5" />
+                </button>
+
                 {/* Input texte */}
                 <textarea
                   ref={inputRef}
@@ -806,15 +879,72 @@ export const ChatPage = () => {
         </div>
       </div>
 
-      {/* Input fichier caché */}
+      {/* Input fichier caché — large couverture MIME pour tous les usages
+          (documents, slides, tableurs, images, audio, archives, texte) */}
       <input
         ref={fileInputRef}
         type="file"
         multiple
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.ppt,.pptx"
+        accept=".pdf,.doc,.docx,.odt,.rtf,.xls,.xlsx,.ods,.csv,.tsv,.ppt,.pptx,.odp,.txt,.md,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tiff,.tif,.svg,.heic,.heif,.mp3,.wav,.m4a,.ogg,.webm,.zip"
         onChange={handleFileSelect}
         className="hidden"
       />
+
+      {/* ── Modal Camera (scan document) ─────────────────────────────────── */}
+      <AnimatePresence>
+        {cameraModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-900 border border-slate-700 rounded-2xl p-4 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold text-sm flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-yukpo-400" />
+                  {t("chat.cameraCapture", "Scanner un document")}
+                </h3>
+                <button
+                  onClick={closeCameraModal}
+                  className="p-1 text-slate-400 hover:text-white"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full rounded-lg mb-3 bg-black aspect-video object-cover"
+              />
+              <canvas ref={canvasRef} className="hidden" />
+              <div className="flex gap-2">
+                <button
+                  onClick={closeCameraModal}
+                  className="flex-1 px-4 py-2 rounded-lg border border-slate-600 text-slate-400 hover:text-white hover:border-slate-500 text-sm"
+                >
+                  {t("common.cancel", "Annuler")}
+                </button>
+                <button
+                  onClick={capturePhoto}
+                  className="flex-1 px-4 py-2 rounded-lg bg-yukpo-600 hover:bg-yukpo-500 text-white font-medium flex items-center justify-center gap-2 text-sm"
+                >
+                  <Camera className="w-4 h-4" />
+                  {t("chat.takePhoto", "Capturer")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Modal Audio ─────────────────────────────────────────────────── */}
       <AnimatePresence>

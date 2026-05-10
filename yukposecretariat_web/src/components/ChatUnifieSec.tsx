@@ -16,7 +16,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Loader2, Sparkles, Paperclip, Mic, Image as ImageIcon,
-  FileText, Send, X, Download,
+  FileText, Send, X, Download, Camera,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
@@ -73,6 +73,11 @@ export default function ChatUnifieSec() {
   const [recording, setRecording] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  // Camera scan (document, reçu, carte de visite, ordonnance, identité, etc.)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
 
   // Sprint S1 — Web Audio capture (📤 enregistrer dictée vocale)
   const demarrerEnregistrement = async () => {
@@ -100,6 +105,50 @@ export default function ChatUnifieSec() {
     mediaRecorderRef.current?.stop()
     mediaRecorderRef.current = null
     setRecording(false)
+  }
+
+  // ── Camera scan (cas d'usage secrétariat : ordonnance, factures, cartes,
+  // documents administratifs photographiés directement plutôt que scannés)
+  const demarrerCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+      })
+      setCameraStream(stream)
+      setCameraOpen(true)
+      setTimeout(() => {
+        if (videoRef.current) videoRef.current.srcObject = stream
+      }, 100)
+    } catch (e: any) {
+      toast.error(t('chatUnifie.cameraRefused', 'Caméra refusée : ') + (e?.message || ''))
+    }
+  }
+
+  const fermerCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(tr => tr.stop())
+      setCameraStream(null)
+    }
+    setCameraOpen(false)
+  }
+
+  const capturerPhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    if (!ctx) return
+    canvasRef.current.width = videoRef.current.videoWidth
+    canvasRef.current.height = videoRef.current.videoHeight
+    ctx.drawImage(videoRef.current, 0, 0)
+    canvasRef.current.toBlob(
+      (blob) => {
+        if (!blob) return
+        const file = new File([blob], `scan_${Date.now()}.jpg`, { type: 'image/jpeg' })
+        ajouterFichier(file)
+        fermerCamera()
+      },
+      'image/jpeg',
+      0.92,
+    )
   }
 
   const ajouterFichier = (file: File | null) => {
@@ -548,7 +597,8 @@ export default function ChatUnifieSec() {
 
       {/* ── Composer ─────────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-300 rounded-2xl p-2 flex items-end gap-2 shadow-sm">
-        <input ref={fileRef} type="file" accept="image/*,.pdf,.docx,.xlsx,.txt"
+        <input ref={fileRef} type="file"
+          accept=".pdf,.doc,.docx,.odt,.rtf,.xls,.xlsx,.ods,.csv,.tsv,.ppt,.pptx,.odp,.txt,.md,image/*,.heic,.heif,audio/*,.zip"
           onChange={e => ajouterFichier(e.target.files?.[0] || null)}
           className="hidden" />
         <input ref={audioRef} type="file" accept="audio/*"
@@ -556,7 +606,7 @@ export default function ChatUnifieSec() {
           className="hidden" />
         <button onClick={() => fileRef.current?.click()} type="button"
           className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-          title={t('chatUnifie.attachFile', 'Attacher fichier (image/PDF/DOCX)')}>
+          title={t('chatUnifie.attachFile', 'Attacher fichier (image/PDF/Word/PPT/Excel/audio)')}>
           <Paperclip size={18} />
         </button>
         <button onClick={recording ? arreterEnregistrement : demarrerEnregistrement}
@@ -564,6 +614,11 @@ export default function ChatUnifieSec() {
           className={`p-2 rounded-lg ${recording ? 'bg-red-100 text-red-600 animate-pulse' : 'hover:bg-gray-100 text-gray-600'}`}
           title={recording ? t('chatUnifie.stopRecord', 'Arrêter l\'enregistrement') : t('chatUnifie.startRecord', 'Enregistrer une note vocale')}>
           <Mic size={18} />
+        </button>
+        <button onClick={demarrerCamera} type="button"
+          className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+          title={t('chatUnifie.cameraScan', 'Scanner avec la caméra (document, ordonnance, carte)')}>
+          <Camera size={18} />
         </button>
         <textarea
           value={message} onChange={e => setMessage(e.target.value)}
@@ -581,6 +636,37 @@ export default function ChatUnifieSec() {
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         </button>
       </div>
+
+      {/* ── Modal Camera (scan document) ─────────────────────────────── */}
+      {cameraOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-gray-300 rounded-2xl p-4 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-gray-900 font-semibold text-sm flex items-center gap-2">
+                <Camera size={16} className="text-amber-600" />
+                {t('chatUnifie.cameraScan', 'Scanner avec la caméra')}
+              </h3>
+              <button onClick={fermerCamera} className="p-1 text-gray-400 hover:text-gray-700"
+                aria-label="Fermer">
+                <X size={16} />
+              </button>
+            </div>
+            <video ref={videoRef} autoPlay playsInline muted
+              className="w-full rounded-lg mb-3 bg-black aspect-video object-cover" />
+            <canvas ref={canvasRef} className="hidden" />
+            <div className="flex gap-2">
+              <button onClick={fermerCamera}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-sm">
+                {t('common.cancel', 'Annuler')}
+              </button>
+              <button onClick={capturerPhoto}
+                className="flex-1 px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium flex items-center justify-center gap-2 text-sm">
+                <Camera size={16} /> {t('chatUnifie.takePhoto', 'Capturer')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

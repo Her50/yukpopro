@@ -23,19 +23,42 @@ _DATA_DIR = Path(__file__).parent.parent / "data" / "generated" / "bureau"
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 _MIME_AUTORISES = {
-    "image/jpeg", "image/jpg", "image/png", "image/tiff",
-    "image/webp", "image/bmp",
+    # Images standard
+    "image/jpeg", "image/jpg", "image/png", "image/tiff", "image/tif",
+    "image/webp", "image/bmp", "image/gif",
+    # iOS / appareils photo modernes (HEIC/HEIF)
+    "image/heic", "image/heif",
+    # SVG (vectoriel — pas d'OCR mais utile pour analyse layout)
+    "image/svg+xml",
+    # Génériques permissifs (certains navigateurs envoient un type vide
+    # depuis getUserMedia sur Safari iOS)
+    "application/octet-stream",
 }
 from config.settings import settings as _s_ocr
 _TAILLE_MAX_BYTES = getattr(_s_ocr, "MAX_DOC_SIZE_MB", 50) * 1024 * 1024
 
 
 def _valider_upload(file: UploadFile) -> None:
-    if file.content_type not in _MIME_AUTORISES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Format non supporté : {file.content_type}. Acceptés : JPG, PNG, TIFF, WEBP, BMP",
-        )
+    # Tolerant : on regarde aussi l'extension si content_type est vide ou
+    # generique (cas Safari iOS getUserMedia, ou octet-stream multipart).
+    ct = (file.content_type or "").lower()
+    nom = (file.filename or "").lower()
+    if ct in _MIME_AUTORISES:
+        return
+    # Fallback par extension fichier
+    ok_ext = any(nom.endswith(ext) for ext in (
+        ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".webp", ".bmp",
+        ".gif", ".heic", ".heif", ".svg",
+    ))
+    if ok_ext:
+        return
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            f"Format non supporté : {file.content_type or '(absent)'} / {nom}. "
+            f"Acceptés : JPG, JPEG, PNG, TIFF, WEBP, BMP, GIF, HEIC, HEIF, SVG."
+        ),
+    )
 
 
 @router.post("/scanner", tags=["Bureau — OCR"])
