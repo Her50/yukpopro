@@ -42,8 +42,8 @@ interface ResultatPro {
   download_url?: string
 }
 
-const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone']
-const CAT_COMPTE = ['logo', 'banniere', 'signature', 'cachet', 'filigrane', 'tampon']
+const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone', 'reference_style']
+const CAT_COMPTE = ['logo', 'banniere', 'signature', 'cachet', 'filigrane', 'tampon', 'reference_style']
 const CAT_LABEL_KEYS: Record<string, string> = {
   photo: 'designerPro.catPhoto',
   illustration: 'designerPro.catIllustration',
@@ -56,6 +56,7 @@ const CAT_LABEL_KEYS: Record<string, string> = {
   cachet: 'designerPro.catCachet',
   filigrane: 'designerPro.catFiligrane',
   tampon: 'designerPro.catTampon',
+  reference_style: 'designerPro.catReferenceStyle',
 }
 
 function b64download(b64: string, filename: string, mime: string) {
@@ -178,12 +179,18 @@ export default function DesignerProPanel() {
     if (!brief.trim()) { toast.error(t('designerPro.errDescribeProject')); return }
     setLoading(true); setResultat(null); setPageActive(0)
     try {
-      const payload = {
+      // Sprint 1.6 — détection auto d'une réf. style parmi les médias sélectionnés
+      const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
+        && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
+      const payload: any = {
         brief, pays, langue,
         medias_refs: refsSelectionnees,
         export_cmyk: true,
         directives_visuelles: directives,
         mode_visuel: modeVisuel,
+      }
+      if (refStyle) {
+        payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
       const r = autoMode
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })

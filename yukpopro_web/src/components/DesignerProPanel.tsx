@@ -29,12 +29,12 @@ interface ResultatPro {
   download_url?: string
 }
 
-const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone']
-const CAT_COMPTE  = ['logo', 'banniere', 'signature', 'cachet', 'filigrane', 'tampon']
+const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone', 'reference_style']
+const CAT_COMPTE  = ['logo', 'banniere', 'signature', 'cachet', 'filigrane', 'tampon', 'reference_style']
 const CAT_LABELS: Record<string, string> = {
   photo: 'Photo', illustration: 'Illustration', scan: 'Scan', qr: 'QR code', icone: 'Icône',
   logo: 'Logo', banniere: 'Bannière', signature: 'Signature', cachet: 'Cachet',
-  filigrane: 'Filigrane', tampon: 'Tampon',
+  filigrane: 'Filigrane', tampon: 'Tampon', reference_style: '🎨 Référence style',
 }
 
 function b64download(b64: string, filename: string, mime: string) {
@@ -156,7 +156,14 @@ export default function DesignerProPanel() {
     if (!brief.trim()) { toast.error('Décris ton projet'); return }
     setLoading(true); setResultat(null); setPageActive(0)
     try {
-      const payload = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true, directives_visuelles: directives, mode_visuel: modeVisuel }
+      // Sprint 1.6 — détection auto d'une réf. style parmi les médias sélectionnés
+      const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
+        && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
+      const payload: any = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true,
+        directives_visuelles: directives, mode_visuel: modeVisuel }
+      if (refStyle) {
+        payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
+      }
       const r = autoMode
         ? await infographieProApi.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProApi.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })

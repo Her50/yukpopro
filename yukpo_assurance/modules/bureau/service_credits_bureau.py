@@ -123,6 +123,11 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
                                           # Couvre : Flux Pro Ultra × 2 (72 FCFA réel)
                                           # + Sonnet enrichment (3) + Vision picker (6)
                                           # = 81 FCFA réel → marge 4.1×
+    # Sprint 1.6 — Brand LoRA training (one-shot par LoRA, ~$200 fal.ai)
+    # Multiplicateur passé = coût FCFA total (200 000) → 1× ce coût en crédits
+    # internes. Le forfait base = 1 cr / FCFA passé ; marge gérée via le delta
+    # entre coût réel ($200 = ~120 000 FCFA) et prix client (200 000 FCFA = 1.7×).
+    "designerpro_brand_lora_training": 1.0,  # multiplicateur = coût en FCFA
     "designerpro_image_ultra_plus": 60.0, # 1200 cr/img = 720 FCFA user
                                           # Sprint 1.5 — Ensemble 3 modèles :
                                           # Flux Pro Ultra (36) + Recraft v3 (24)

@@ -1965,6 +1965,10 @@ async def generer_projet(
     dpi_pages_hd: int = 300,
     directives_visuelles: Optional[dict] = None,
     mode_visuel: str = "sans",   # "sans" | "standard" | "premium" | "ultra" | "ultra_plus"
+    reference_style_ref: Optional[str] = None,   # Sprint 1.6 — "session:abc"|"compte:def"
+    reference_strength: float = 0.65,
+    brand_lora_url: Optional[str] = None,        # Sprint 1.6 — URL LoRA fal.ai
+    brand_lora_scale: float = 0.85,
 ) -> ResultatProjet:
     """
     Pipeline complet : brief + médias → projet IA → (génération images IA si
@@ -1996,6 +2000,23 @@ async def generer_projet(
     # ── Pipeline images IA (Niveau 3 : Flux + vision check Premium) ────────
     nb_images_generees = 0
     duree_images_ms = 0
+    # Sprint 1.6 — résolution référence style (URL publique du média réf)
+    ref_url_resolved: Optional[str] = None
+    if reference_style_ref and reference_style_ref in medias:
+        try:
+            from . import mediatheque_session as _msm2
+            ref_media = medias[reference_style_ref]
+            # On a besoin d'une URL publique pour fal.ai. On utilise une dataURL
+            # base64 (fal.ai accepte data:image/png;base64,...).
+            ref_bytes = _msm2.lire_bytes(ref_media)
+            import base64 as _b64
+            ref_url_resolved = (
+                f"data:{ref_media.mime or 'image/png'};base64,"
+                f"{_b64.b64encode(ref_bytes).decode('ascii')}"
+            )
+        except Exception as e:
+            logger.warning(f"[InfographePro] Référence style {reference_style_ref} non résolue : {e}")
+
     if mode_visuel in ("standard", "premium", "ultra", "ultra_plus"):
         t_img = time.time()
         nb_images_generees = await _generer_images_ia_pour_projet(
@@ -2006,6 +2027,10 @@ async def generer_projet(
             session_id=session_id,
             brief=brief,
             pays=pays,
+            reference_url=ref_url_resolved,
+            reference_strength=reference_strength,
+            brand_lora_url=brand_lora_url,
+            brand_lora_scale=brand_lora_scale,
         )
         duree_images_ms = int((time.time() - t_img) * 1000)
 
@@ -2051,6 +2076,9 @@ async def generer_projet(
             "picker_tokens_input": (projet.meta or {}).get("picker_tokens_input"),
             "picker_tokens_output": (projet.meta or {}).get("picker_tokens_output"),
             "picker_overrides": (projet.meta or {}).get("picker_overrides"),
+            # Sprint 1.6 — IP-Adapter / Brand LoRA
+            "reference_style_active": bool(ref_url_resolved),
+            "brand_lora_active": bool(brand_lora_url),
         },
     )
 
@@ -2151,6 +2179,10 @@ async def _generer_images_ia_pour_projet(
     session_id: str,
     brief: str = "",
     pays: str = "CM",
+    reference_url: Optional[str] = None,        # Sprint 1.6 — IP-Adapter
+    reference_strength: float = 0.65,
+    brand_lora_url: Optional[str] = None,        # Sprint 1.6 — Brand LoRA
+    brand_lora_scale: float = 0.85,
 ) -> int:
     """
     Pour chaque zone `image_ia` du projet, génère une image via fal.ai
@@ -2221,6 +2253,10 @@ async def _generer_images_ia_pour_projet(
     prompts_batch = [(enrichis[i], zones_a_generer[i][2]) for i in range(len(zones_a_generer))]
     images_bytes = await generer_images_batch(
         prompts_batch, mode=mode_typed, nb_variantes=nb_variantes,
+        reference_url=reference_url,
+        reference_strength=reference_strength,
+        brand_lora_url=brand_lora_url,
+        brand_lora_scale=brand_lora_scale,
     )
 
     # 5. Validation finale (vision check + 1 retry, modes premium/ultra/ultra_plus)

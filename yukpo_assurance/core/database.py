@@ -1121,6 +1121,39 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 1.6 — Brand LoRA (Designer Pro) ──────────────────────────────────
+
+
+class BrandLoraDB(Base):
+    """
+    Brand LoRA entraîné pour une organisation : permet d'injecter le style
+    visuel d'une marque dans toutes les générations d'images Flux dev.
+
+    Coût d'entraînement : ~120-200 EUR via fal-ai/flux-lora-fast-training
+    (~1500 secondes GPU). Stocké comme `lora_url` (URL fal.ai du fichier .safetensors).
+    L'org peut avoir plusieurs LoRA actifs (ex: "été", "hiver", "campagne X").
+    """
+    __tablename__ = "brand_loras"
+
+    lora_id          = Column(String(36), primary_key=True, index=True)
+    compagnie_id     = Column(Integer, nullable=False, index=True)
+    user_id_createur = Column(Integer, nullable=False)
+    label            = Column(String(120), nullable=False)
+    trigger_word     = Column(String(80), nullable=False)        # ex: "ACMECORP"
+    description      = Column(String(500), nullable=True)
+    fal_request_id   = Column(String(120), nullable=True)        # tracking fal.ai
+    lora_url         = Column(String(500), nullable=True)        # URL .safetensors
+    statut           = Column(String(30), nullable=False, default="pending", index=True)
+    # pending | training | ready | failed
+    nb_images_train  = Column(Integer, nullable=False, default=0)
+    cout_paye_fcfa   = Column(Integer, nullable=False, default=0)
+    actif            = Column(Boolean, default=True, index=True)
+    cree_le          = Column(DateTime, default=datetime.utcnow, nullable=False)
+    training_demarre = Column(DateTime, nullable=True)
+    training_fini    = Column(DateTime, nullable=True)
+    erreur           = Column(String(500), nullable=True)
+
+
 # ─── INIT & HELPERS ───────────────────────────────────────────────────────────
 
 async def init_db() -> None:

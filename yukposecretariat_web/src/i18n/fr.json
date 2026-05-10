@@ -1059,6 +1059,7 @@
     "catSignature": "Signature",
     "catCachet": "Cachet",
     "catFiligrane": "Filigrane",
-    "catTampon": "Tampon"
+    "catTampon": "Tampon",
+    "catReferenceStyle": "🎨 Référence style"
   }
 }

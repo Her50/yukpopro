@@ -81,6 +81,10 @@ async def generer_image(
     format_: str = "portrait_4_3",
     seed: Optional[int] = None,
     timeout_s: float = 60.0,
+    reference_url: Optional[str] = None,        # Sprint 1.6 — IP-Adapter Flux
+    reference_strength: float = 0.65,            # Sprint 1.6 — 0.0-1.0
+    brand_lora_url: Optional[str] = None,        # Sprint 1.6 — Brand LoRA path
+    brand_lora_scale: float = 0.85,              # Sprint 1.6 — 0.0-1.5
 ) -> bytes:
     """
     Génère 1 image via fal.ai et retourne les octets PNG.
@@ -98,8 +102,11 @@ async def generer_image(
 
     # ultra_plus utilise generer_image_ensemble (3 modèles + vision picker)
     if mode == "ultra_plus":
-        return await generer_image_ensemble(prompt, format_=format_,
-                                             timeout_s=timeout_s, seed=seed)
+        return await generer_image_ensemble(
+            prompt, format_=format_, timeout_s=timeout_s, seed=seed,
+            reference_url=reference_url, reference_strength=reference_strength,
+            brand_lora_url=brand_lora_url, brand_lora_scale=brand_lora_scale,
+        )
     if mode == "ultra":
         modele = _FAL_MODEL_PRO_ULTRA
     elif mode == "premium":
@@ -136,6 +143,25 @@ async def generer_image(
             payload["guidance_scale"] = 3.5
     if seed is not None:
         payload["seed"] = seed
+
+    # Sprint 1.6 — IP-Adapter Flux (référence image style)
+    # Flux 1.1 Pro Ultra accepte `image_prompt` natif (IP-Adapter intégré).
+    # Flux dev accepte `image_url` + `strength` pour image-to-image guidance.
+    # Flux schnell ne supporte pas → on ignore silencieusement la référence.
+    if reference_url:
+        if mode == "ultra":
+            payload["image_prompt"] = reference_url
+            payload["image_prompt_strength"] = max(0.0, min(1.0, reference_strength))
+        elif mode == "premium":
+            payload["image_url"] = reference_url
+            payload["strength"] = max(0.0, min(1.0, reference_strength))
+
+    # Sprint 1.6 — Brand LoRA (sur Flux dev seulement)
+    if brand_lora_url and mode == "premium":
+        payload["loras"] = [{
+            "path": brand_lora_url,
+            "scale": max(0.0, min(1.5, brand_lora_scale)),
+        }]
 
     headers = {
         "Authorization": f"Key {api_key}",
@@ -208,7 +234,11 @@ async def _appel_fal_modele(
         return None
 
 
-async def _gen_flux_pro_ultra(prompt: str, format_: str, seed: Optional[int]) -> Optional[bytes]:
+async def _gen_flux_pro_ultra(
+    prompt: str, format_: str, seed: Optional[int],
+    reference_url: Optional[str] = None,
+    reference_strength: float = 0.65,
+) -> Optional[bytes]:
     image_size = _TAILLES_PAR_FORMAT.get(format_, "portrait_4_3")
     ar_map = {
         "square_hd": "1:1", "portrait_4_3": "3:4", "portrait_16_9": "9:16",
@@ -221,6 +251,9 @@ async def _gen_flux_pro_ultra(prompt: str, format_: str, seed: Optional[int]) ->
     }
     if seed is not None:
         payload["seed"] = seed
+    if reference_url:
+        payload["image_prompt"] = reference_url
+        payload["image_prompt_strength"] = max(0.0, min(1.0, reference_strength))
     return await _appel_fal_modele(_FAL_MODEL_PRO_ULTRA, payload)
 
 
@@ -265,6 +298,10 @@ async def generer_image_ensemble(
     format_: str = "portrait_4_3",
     timeout_s: float = 90.0,
     seed: Optional[int] = None,
+    reference_url: Optional[str] = None,
+    reference_strength: float = 0.65,
+    brand_lora_url: Optional[str] = None,
+    brand_lora_scale: float = 0.85,
 ) -> bytes:
     """
     Sprint 1.5 — Ensemble 3 modèles en parallèle :
@@ -281,8 +318,14 @@ async def generer_image_ensemble(
     if not api_key:
         raise ImageGenNotConfigured("FAL_KEY non configuré")
 
+    # Sprint 1.6 — IP-Adapter passé à Flux Pro Ultra (le seul des 3 qui le supporte
+    # nativement via image_prompt). Recraft et Ideogram fonctionnent au prompt seul.
+    # Brand LoRA n'est pas appliquée en mode ensemble (les 3 modèles ne partagent
+    # pas le même format de LoRA — Brand LoRA est réservée au mode premium Flux dev).
     flux_t, recraft_t, ideogram_t = await asyncio.gather(
-        _gen_flux_pro_ultra(prompt, format_, seed),
+        _gen_flux_pro_ultra(prompt, format_, seed,
+                             reference_url=reference_url,
+                             reference_strength=reference_strength),
         _gen_recraft(prompt, format_, seed),
         _gen_ideogram(prompt, format_, seed),
         return_exceptions=False,
@@ -340,6 +383,10 @@ async def generer_images_batch(
     mode: ImageMode = "standard",
     concurrence: int = 3,
     nb_variantes: int = 1,
+    reference_url: Optional[str] = None,        # Sprint 1.6
+    reference_strength: float = 0.65,
+    brand_lora_url: Optional[str] = None,        # Sprint 1.6
+    brand_lora_scale: float = 0.85,
 ) -> list[Optional[bytes]]:
     """
     Génère plusieurs images en parallèle (limit = `concurrence`).
@@ -357,7 +404,13 @@ async def generer_images_batch(
     async def _one_image(p: str, fmt: str, seed: Optional[int]) -> Optional[bytes]:
         async with semaphore:
             try:
-                return await generer_image(p, mode=mode, format_=fmt, seed=seed)
+                return await generer_image(
+                    p, mode=mode, format_=fmt, seed=seed,
+                    reference_url=reference_url,
+                    reference_strength=reference_strength,
+                    brand_lora_url=brand_lora_url,
+                    brand_lora_scale=brand_lora_scale,
+                )
             except ImageGenNotConfigured:
                 return None
             except ImageGenError as e:

@@ -986,7 +986,8 @@
     "autoQuestions": "Pour affiner",
     "autoMode": "Mode",
     "autoArche": "Archétype",
-    "credits": "crédits"
+    "credits": "crédits",
+    "catReferenceStyle": "🎨 Référence style"
   },
   "organisation": {
     "createTitle": "Create an organization",

@@ -36,11 +36,12 @@ TAILLE_MAX_BYTES = 15 * 1024 * 1024
 DIMENSION_MAX_PX = 4096
 
 CATEGORIES_SESSION = {
-    "photo",          # Portraits, photos d'événement
-    "illustration",   # Décors, motifs, fonds
-    "scan",           # Documents scannés (témoignages manuscrits, citations)
-    "qr",             # QR codes pré-générés (RSVP, dons, etc.)
-    "icone",          # Icônes décoratives
+    "photo",            # Portraits, photos d'événement
+    "illustration",     # Décors, motifs, fonds
+    "scan",             # Documents scannés (témoignages manuscrits, citations)
+    "qr",               # QR codes pré-générés (RSVP, dons, etc.)
+    "icone",            # Icônes décoratives
+    "reference_style",  # Sprint 1.6 — image de référence pour IP-Adapter Flux
 }
 CATEGORIES_COMPTE = {
     "logo",
@@ -49,6 +50,7 @@ CATEGORIES_COMPTE = {
     "cachet",
     "filigrane",
     "tampon",
+    "reference_style",  # Sprint 1.6 — référence persistante (charte visuelle)
 }
 
 

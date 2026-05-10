@@ -61,6 +61,15 @@ class DemandeProjetPro(BaseModel):
         description="Curseurs UI : creativite, densite_texte, importance_images, elegance (0–100)")
     mode_visuel: str = Field(default="sans",
         description="'sans' | 'standard' (Flux schnell) | 'premium' (Flux dev) | 'ultra' (Flux Pro Ultra) | 'ultra_plus' (ensemble Flux+Recraft+Ideogram, vision pick)")
+    # Sprint 1.6 — IP-Adapter + Brand LoRA
+    reference_style_ref: Optional[str] = Field(default=None,
+        description="Réf. médiathèque ('session:abc' ou 'compte:def') vers une image de style → injectée via Flux IP-Adapter (modes ultra/premium/ultra_plus)")
+    reference_strength: float = Field(default=0.65, ge=0.0, le=1.0,
+        description="Force de l'IP-Adapter (0=ignore, 1=copie fidèle)")
+    brand_lora_id: Optional[str] = Field(default=None,
+        description="ID d'un Brand LoRA entraîné de l'organisation (mode premium uniquement)")
+    brand_lora_scale: float = Field(default=0.85, ge=0.0, le=1.5,
+        description="Force d'application du LoRA (0.6=subtil, 1.2=marqué)")
 
 
 class DemandeAutoPro(BaseModel):
@@ -84,6 +93,240 @@ class DemandeModifierProjet(BaseModel):
     pays: str = Field(default="CM")
     directives_visuelles: Optional[dict] = None
     mode_visuel: str = Field(default="sans")
+
+
+# ─── Sprint 1.6 — Brand LoRA ─────────────────────────────────────────────────
+
+
+class DemandeEntrainerLora(BaseModel):
+    """Lance l'entraînement d'un Brand LoRA pour l'organisation."""
+    label: str = Field(..., min_length=2, max_length=120,
+        description="Nom du LoRA (ex: 'ACME hiver 2026')")
+    trigger_word: str = Field(..., min_length=2, max_length=80,
+        description="Mot déclencheur unique injecté dans les prompts (ex: 'ACMESTYLE')")
+    description: Optional[str] = Field(default=None, max_length=500)
+    images_refs: list[str] = Field(..., min_length=10,
+        description="≥10 références médiathèque ('session:abc'/'compte:def') vers les images d'entraînement")
+    accepter_cout: bool = Field(default=False,
+        description="Confirmation explicite du coût (~120 000 FCFA)")
+
+
+class ReponseLora(BaseModel):
+    lora_id: str
+    statut: str
+    label: str
+    trigger_word: str
+    lora_url: Optional[str] = None
+    nb_images_train: int
+    cout_paye_fcfa: int
+    cree_le: str
+    erreur: Optional[str] = None
+
+
+# Coût indicatif training (1 LoRA = ~$200 fal.ai = ~120 000 FCFA, marge 1.7×)
+_COUT_LORA_TRAINING_FCFA = 200_000
+
+
+@router.get("/brand-lora", response_model=list[ReponseLora], tags=["Bureau — Designer Pro"])
+async def lister_brand_loras(current_user: TokenData = Depends(get_current_user)):
+    """Liste les Brand LoRA actifs de l'organisation de l'utilisateur."""
+    from core.database import async_session_maker, BrandLoraDB
+    from sqlalchemy import select
+    cid = getattr(current_user, "compagnie_id", None) or 1
+    async with async_session_maker() as db:
+        rows = (await db.execute(
+            select(BrandLoraDB).where(
+                BrandLoraDB.compagnie_id == cid, BrandLoraDB.actif == True  # noqa
+            ).order_by(BrandLoraDB.cree_le.desc())
+        )).scalars().all()
+    return [
+        ReponseLora(
+            lora_id=r.lora_id, statut=r.statut, label=r.label,
+            trigger_word=r.trigger_word, lora_url=r.lora_url,
+            nb_images_train=r.nb_images_train, cout_paye_fcfa=r.cout_paye_fcfa,
+            cree_le=r.cree_le.isoformat(), erreur=r.erreur,
+        )
+        for r in rows
+    ]
+
+
+@router.post("/brand-lora/entrainer", response_model=ReponseLora, tags=["Bureau — Designer Pro"])
+async def entrainer_brand_lora(
+    demande: DemandeEntrainerLora,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Lance l'entraînement d'un Brand LoRA via fal-ai/flux-lora-fast-training.
+    Coût ~200 000 FCFA débité immédiatement (training non-remboursable).
+    Le LoRA est ensuite réutilisable à l'infini par toute l'organisation.
+    """
+    import uuid
+    from datetime import datetime
+    from core.database import async_session_maker, BrandLoraDB
+    from modules.bureau import mediatheque_session as msm
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    if not demande.accepter_cout:
+        raise HTTPException(
+            400,
+            f"Tu dois cocher 'accepter_cout' pour confirmer le débit de "
+            f"{_COUT_LORA_TRAINING_FCFA} FCFA (training non-remboursable)."
+        )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Résolution + lecture des images training
+    session_id = f"chat_{current_user.user_id}"
+    try:
+        medias = msm.resoudre_refs(demande.images_refs, str(current_user.user_id), session_id)
+    except Exception as e:
+        raise HTTPException(400, f"Médias inaccessibles : {e}")
+    if len(medias) < 10:
+        raise HTTPException(400, f"Au moins 10 images valides requises (reçu {len(medias)})")
+
+    cid = getattr(current_user, "compagnie_id", None) or 1
+    lora_id = str(uuid.uuid4())
+
+    # Création row "pending" + débit immédiat
+    async with async_session_maker() as db:
+        row = BrandLoraDB(
+            lora_id=lora_id, compagnie_id=cid,
+            user_id_createur=current_user.user_id,
+            label=demande.label, trigger_word=demande.trigger_word,
+            description=demande.description, statut="pending",
+            nb_images_train=len(medias), cout_paye_fcfa=_COUT_LORA_TRAINING_FCFA,
+            actif=True,
+        )
+        db.add(row)
+        await db.commit()
+
+    # Débit du forfait training (multiplicateur = coût en FCFA / cout_unite)
+    try:
+        await debiter_forfait(
+            current_user.user_id, "designerpro_brand_lora_training",
+            module="infographie",
+            multiplicateur=float(_COUT_LORA_TRAINING_FCFA),
+        )
+    except Exception as e:
+        logger.warning(f"[Brand LoRA] débit forfait : {e}")
+
+    # Lancement training fal.ai en arrière-plan
+    import asyncio as _asyncio
+    _asyncio.create_task(_lancer_training_lora_background(lora_id, list(medias.values()), demande.trigger_word))
+
+    return ReponseLora(
+        lora_id=lora_id, statut="pending", label=demande.label,
+        trigger_word=demande.trigger_word, lora_url=None,
+        nb_images_train=len(medias), cout_paye_fcfa=_COUT_LORA_TRAINING_FCFA,
+        cree_le=datetime.utcnow().isoformat(), erreur=None,
+    )
+
+
+async def _lancer_training_lora_background(lora_id: str, medias: list, trigger_word: str):
+    """Tâche async : appelle fal-ai/flux-lora-fast-training, attend la fin,
+    met à jour la row Brand LoRA avec l'URL résultante (ou erreur)."""
+    import httpx
+    from datetime import datetime
+    from core.database import async_session_maker, BrandLoraDB
+    from sqlalchemy import select
+    from config.settings import settings
+    from modules.bureau import mediatheque_session as msm
+    import base64 as _b64
+
+    async def _set(statut: str, **kwargs):
+        async with async_session_maker() as db:
+            row = (await db.execute(
+                select(BrandLoraDB).where(BrandLoraDB.lora_id == lora_id)
+            )).scalar_one_or_none()
+            if not row:
+                return
+            row.statut = statut
+            for k, v in kwargs.items():
+                setattr(row, k, v)
+            await db.commit()
+
+    if not settings.FAL_KEY:
+        await _set("failed", erreur="FAL_KEY non configuré", training_fini=datetime.utcnow())
+        return
+
+    try:
+        await _set("training", training_demarre=datetime.utcnow())
+        # Préparer les images en data URLs (fal-ai accepte un ZIP URL OU une liste de data URLs)
+        images_data: list[str] = []
+        for m in medias[:30]:  # cap à 30 images max (training plus long au-delà)
+            try:
+                b = msm.lire_bytes(m)
+                images_data.append(
+                    f"data:{m.mime or 'image/png'};base64,{_b64.b64encode(b).decode('ascii')}"
+                )
+            except Exception as e:
+                logger.warning(f"[Brand LoRA {lora_id}] image {m.media_id} ignorée : {e}")
+        if len(images_data) < 10:
+            await _set("failed", erreur=f"Lecture images : {len(images_data)} valides (min 10)",
+                       training_fini=datetime.utcnow())
+            return
+
+        url = "https://fal.run/fal-ai/flux-lora-fast-training"
+        payload = {
+            "images_data_url": images_data[0],   # fallback : 1ère image si pas de zip
+            "images_urls": images_data,           # liste complète
+            "trigger_word": trigger_word,
+            "create_masks": True,
+            "steps": 1000,
+            "is_style": True,
+        }
+        headers = {"Authorization": f"Key {settings.FAL_KEY}", "Content-Type": "application/json"}
+        async with httpx.AsyncClient(timeout=1800.0) as client:
+            r = await client.post(url, json=payload, headers=headers)
+        if r.status_code != 200:
+            await _set("failed", erreur=f"fal.ai HTTP {r.status_code}: {r.text[:200]}",
+                       training_fini=datetime.utcnow())
+            return
+        data = r.json()
+        # fal.ai renvoie typiquement {"diffusers_lora_file": {"url": "..."}}
+        lora_url = (
+            (data.get("diffusers_lora_file") or {}).get("url")
+            or data.get("lora_url")
+            or (data.get("config_file") or {}).get("url")
+        )
+        if not lora_url:
+            await _set("failed", erreur="fal.ai : pas d'URL LoRA dans réponse",
+                       training_fini=datetime.utcnow())
+            return
+        await _set("ready", lora_url=lora_url, training_fini=datetime.utcnow())
+        logger.info(f"[Brand LoRA {lora_id}] training OK → {lora_url}")
+    except Exception as e:
+        logger.error(f"[Brand LoRA {lora_id}] training exception : {e}", exc_info=True)
+        await _set("failed", erreur=str(e)[:500], training_fini=datetime.utcnow())
+
+
+@router.delete("/brand-lora/{lora_id}", tags=["Bureau — Designer Pro"])
+async def supprimer_brand_lora(
+    lora_id: str,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Désactive un Brand LoRA (soft-delete : actif=False)."""
+    from core.database import async_session_maker, BrandLoraDB
+    from sqlalchemy import select
+    cid = getattr(current_user, "compagnie_id", None) or 1
+    async with async_session_maker() as db:
+        row = (await db.execute(
+            select(BrandLoraDB).where(
+                BrandLoraDB.lora_id == lora_id, BrandLoraDB.compagnie_id == cid
+            )
+        )).scalar_one_or_none()
+        if not row:
+            raise HTTPException(404, "LoRA introuvable")
+        row.actif = False
+        await db.commit()
+    return {"ok": True, "lora_id": lora_id}
 
 
 # ─── Médiathèque ──────────────────────────────────────────────────────────────
@@ -389,6 +632,28 @@ async def generer_projet(
 
     profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     session_id = f"chat_{current_user.user_id}"  # session par défaut = par user
+
+    # Sprint 1.6 — résolution Brand LoRA si demandé
+    lora_url: Optional[str] = None
+    if demande.brand_lora_id:
+        try:
+            from core.database import async_session_maker, BrandLoraDB
+            from sqlalchemy import select
+            async with async_session_maker() as _db:
+                row = (await _db.execute(
+                    select(BrandLoraDB).where(BrandLoraDB.lora_id == demande.brand_lora_id)
+                )).scalar_one_or_none()
+                if row and row.statut == "ready" and row.actif:
+                    cid = getattr(current_user, "compagnie_id", None)
+                    if cid is None or row.compagnie_id == cid:
+                        lora_url = row.lora_url
+                    else:
+                        logger.warning(f"[Designer Pro] Brand LoRA {demande.brand_lora_id} : compagnie mismatch")
+                else:
+                    logger.warning(f"[Designer Pro] Brand LoRA {demande.brand_lora_id} indisponible (statut={getattr(row,'statut','?')})")
+        except Exception as e:
+            logger.warning(f"[Designer Pro] Brand LoRA résolution échouée : {e}")
+
     try:
         resultat = await _gen(
             brief=demande.brief,
@@ -402,6 +667,10 @@ async def generer_projet(
             export_cmyk=demande.export_cmyk,
             directives_visuelles=demande.directives_visuelles,
             mode_visuel=demande.mode_visuel,
+            reference_style_ref=demande.reference_style_ref,
+            reference_strength=demande.reference_strength,
+            brand_lora_url=lora_url,
+            brand_lora_scale=demande.brand_lora_scale,
         )
     except Exception as e:
         logger.error(f"[Designer Pro] Génération échouée : {e}")
