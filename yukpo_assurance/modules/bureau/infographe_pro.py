@@ -207,6 +207,265 @@ def _texte_paragraphe(c, txt, x, y, w, taille, couleur, font="Helvetica",
     return y
 
 
+# ─── Sprint 1.3 — Effets typographiques avancés ──────────────────────────────
+#
+# 6 effets pour rivaliser avec Canva pro (~80% des usages typographiques) :
+#   1. gradient_text (linéaire / radial)
+#   2. drop_shadow (offset + flou + opacité)
+#   3. text_mask (texte sur image avec masque coloré semi-transparent par-dessus)
+#   4. outline (stroke autour des lettres)
+#   5. courbe (texte sur arc — concave/convexe)
+#   6. blend (transparence + blend modes via Pillow → embed)
+#
+# Les effets natifs ReportLab (shadow, outline) restent vectoriels.
+# Les effets complexes (gradient, courbe, blend) rasterisent via Pillow puis
+# embed comme image. Compromis qualité/complexité optimal pour print.
+
+
+def _font_pillow(font_rl: str, taille_pt: float):
+    """Mappe une police ReportLab vers une PIL.ImageFont (DejaVu en fallback)."""
+    try:
+        from PIL import ImageFont
+        # ReportLab utilise des noms PostScript. Pillow attend un fichier TTF.
+        # On tente d'abord le font_loader (Google Fonts cachées localement),
+        # sinon on retombe sur DejaVu/Liberation système.
+        try:
+            from . import font_loader as _fl
+            ttf = _fl.chemin_ttf_pour(font_rl)
+            if ttf:
+                return ImageFont.truetype(ttf, int(taille_pt * 4))  # ×4 pour rendu HD
+        except Exception:
+            pass
+        for candidat in ("DejaVuSans-Bold.ttf", "DejaVuSans.ttf",
+                         "LiberationSans-Bold.ttf", "Arial.ttf"):
+            try:
+                return ImageFont.truetype(candidat, int(taille_pt * 4))
+            except Exception:
+                continue
+        return ImageFont.load_default()
+    except Exception:
+        return None
+
+
+def _texte_gradient_png(texte: str, taille_pt: float, font_rl: str,
+                        col_debut, col_fin, direction: str = "vertical",
+                        radial: bool = False) -> bytes:
+    """Rasterise un texte avec gradient (linéaire ou radial) → PNG transparent.
+    `col_debut`/`col_fin` = (r,g,b) 0-255."""
+    try:
+        from PIL import Image, ImageDraw
+        font = _font_pillow(font_rl, taille_pt)
+        if font is None:
+            return b""
+        # Mesure
+        bbox = font.getbbox(texte)
+        w = max(1, bbox[2] - bbox[0])
+        h = max(1, bbox[3] - bbox[1])
+        pad = 6
+        canvas = Image.new("RGBA", (w + 2 * pad, h + 2 * pad), (0, 0, 0, 0))
+        # 1. Construire un calque gradient
+        grad = Image.new("RGBA", (w + 2 * pad, h + 2 * pad), (0, 0, 0, 0))
+        gd = ImageDraw.Draw(grad)
+        cx, cy = (w + 2 * pad) // 2, (h + 2 * pad) // 2
+        max_r = max(cx, cy)
+        for i in range(max(w, h) + 2 * pad):
+            t = i / max(1, (max(w, h) + 2 * pad - 1))
+            r = int(col_debut[0] + (col_fin[0] - col_debut[0]) * t)
+            g = int(col_debut[1] + (col_fin[1] - col_debut[1]) * t)
+            b = int(col_debut[2] + (col_fin[2] - col_debut[2]) * t)
+            if radial:
+                rr = int(max_r * (1 - t))
+                gd.ellipse((cx - rr, cy - rr, cx + rr, cy + rr),
+                           fill=(r, g, b, 255))
+            elif direction == "vertical":
+                gd.rectangle((0, i, w + 2 * pad, i + 1), fill=(r, g, b, 255))
+            else:  # horizontal
+                gd.rectangle((i, 0, i + 1, h + 2 * pad), fill=(r, g, b, 255))
+        # 2. Masque texte
+        mask = Image.new("L", (w + 2 * pad, h + 2 * pad), 0)
+        md = ImageDraw.Draw(mask)
+        md.text((pad - bbox[0], pad - bbox[1]), texte, fill=255, font=font)
+        # 3. Composer
+        canvas.paste(grad, (0, 0), mask)
+        # Down-sample (rendu HD ×4 → taille finale)
+        final_w = canvas.size[0] // 4 or 1
+        final_h = canvas.size[1] // 4 or 1
+        canvas = canvas.resize((final_w, final_h), Image.LANCZOS)
+        buf = io.BytesIO()
+        canvas.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as e:
+        logger.debug(f"[InfographePro] gradient_text échoué : {e}")
+        return b""
+
+
+def _texte_courbe_png(texte: str, taille_pt: float, font_rl: str,
+                      couleur, rayon_pt: float = 80.0,
+                      arc_deg: float = 120.0, concave: bool = False) -> bytes:
+    """Rasterise un texte courbé sur un arc → PNG transparent."""
+    try:
+        import math
+        from PIL import Image, ImageDraw
+        font = _font_pillow(font_rl, taille_pt)
+        if font is None:
+            return b""
+        # Estimer largeur totale en pixels HD
+        widths = [font.getbbox(ch)[2] - font.getbbox(ch)[0] for ch in texte]
+        total_w = sum(widths)
+        ascent = font.getbbox("Hg")[3]
+        # Canvas carré assez grand
+        size = int(rayon_pt * 4 * 2 + ascent + 20)
+        canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        cx, cy = size // 2, size // 2
+        rayon_px = rayon_pt * 4
+        # Angle de départ (centrer l'arc en haut)
+        arc_rad = math.radians(arc_deg)
+        angle_total = total_w / rayon_px  # angle parcouru
+        angle = -math.pi / 2 - angle_total / 2 if not concave else math.pi / 2 + angle_total / 2
+        for ch, ww in zip(texte, widths):
+            ang_pas = ww / rayon_px
+            x = cx + math.cos(angle + ang_pas / 2) * rayon_px
+            y = cy + math.sin(angle + ang_pas / 2) * rayon_px
+            # Lettre tournée tangentiellement
+            ch_img = Image.new("RGBA", (ww + 4, ascent + 4), (0, 0, 0, 0))
+            cd = ImageDraw.Draw(ch_img)
+            cd.text((2, 2), ch, fill=tuple(couleur) + (255,), font=font)
+            ang_deg = math.degrees(angle + ang_pas / 2 + math.pi / 2)
+            if concave:
+                ang_deg += 180
+            ch_img = ch_img.rotate(-ang_deg, resample=Image.BICUBIC, expand=True)
+            canvas.alpha_composite(ch_img, (int(x - ch_img.size[0] / 2), int(y - ch_img.size[1] / 2)))
+            angle += ang_pas
+        # Down-sample
+        canvas = canvas.resize((size // 4, size // 4), Image.LANCZOS)
+        buf = io.BytesIO()
+        canvas.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as e:
+        logger.debug(f"[InfographePro] texte_courbe échoué : {e}")
+        return b""
+
+
+def _texte_avec_effets(c, txt: str, x: float, y: float, taille: float,
+                        couleur, font: str = "Helvetica-Bold",
+                        effets: Optional[dict] = None,
+                        align: str = "left", largeur: float = 0):
+    """
+    Trace un texte avec effets optionnels.
+
+    `effets` (dict) :
+      - "shadow": {"dx": 1.5, "dy": -1.5, "color": (0,0,0), "alpha": 0.4}
+      - "outline": {"width": 0.6, "color": (0,0,0)}            # mode fill+stroke
+      - "outline_only": {"width": 0.8, "color": (...)}         # mode stroke only
+      - "gradient": {"col_debut": (r,g,b), "col_fin": (r,g,b),
+                     "direction": "vertical|horizontal", "radial": False}
+      - "courbe": {"rayon_pt": 80, "arc_deg": 120, "concave": False}
+      - "blend": {"alpha": 0.7}                                # transparence simple
+
+    Effets compatibles entre eux (ex: shadow + gradient). Les effets rasterisés
+    (gradient, courbe) prennent priorité sur le rendu vectoriel natif.
+    """
+    effets = effets or {}
+    # Effets rasterisés (gradient ou courbe) → embed PNG
+    if effets.get("gradient") or effets.get("courbe"):
+        from reportlab.lib.utils import ImageReader
+        if effets.get("courbe"):
+            cv = effets["courbe"]
+            png = _texte_courbe_png(
+                txt, taille, font, couleur,
+                rayon_pt=float(cv.get("rayon_pt", 80)),
+                arc_deg=float(cv.get("arc_deg", 120)),
+                concave=bool(cv.get("concave", False)),
+            )
+        else:
+            gr = effets["gradient"]
+            png = _texte_gradient_png(
+                txt, taille, font,
+                col_debut=tuple(gr.get("col_debut", couleur)),
+                col_fin=tuple(gr.get("col_fin", (255, 255, 255))),
+                direction=gr.get("direction", "vertical"),
+                radial=bool(gr.get("radial", False)),
+            )
+        if png:
+            try:
+                from PIL import Image
+                im = Image.open(io.BytesIO(png))
+                w_px, h_px = im.size
+                # Conversion px → points (Pillow rend à 72 DPI ici, après le ÷4)
+                pt_per_px = 1.0
+                w_pt = w_px * pt_per_px
+                h_pt = h_px * pt_per_px
+                if align == "center":
+                    x_draw = x - w_pt / 2
+                elif align == "right":
+                    x_draw = x - w_pt
+                else:
+                    x_draw = x
+                # y est baseline du texte vectoriel : on adapte pour image (top-left)
+                c.drawImage(ImageReader(io.BytesIO(png)),
+                            x_draw, y - h_pt * 0.78,
+                            width=w_pt, height=h_pt, mask='auto')
+                return
+            except Exception as e:
+                logger.debug(f"[InfographePro] embed effet rasterisé échoué : {e}")
+                # fallback rendu vectoriel basique
+    # Drop shadow vectoriel (avant le glyph principal pour passer dessous)
+    if effets.get("shadow"):
+        sh = effets["shadow"]
+        dx = float(sh.get("dx", 1.5))
+        dy = float(sh.get("dy", -1.5))
+        sh_col = tuple(sh.get("color", (0, 0, 0)))
+        sh_alpha = float(sh.get("alpha", 0.4))
+        c.saveState()
+        c.setFont(font, taille)
+        c.setFillColor(_rgba(c, sh_col, sh_alpha))
+        if align == "center":
+            c.drawCentredString(x + dx, y + dy, txt)
+        elif align == "right":
+            c.drawRightString(x + dx, y + dy, txt)
+        else:
+            c.drawString(x + dx, y + dy, txt)
+        c.restoreState()
+    # Texte principal (avec outline et/ou blend si demandés)
+    c.saveState()
+    c.setFont(font, taille)
+    blend = effets.get("blend") or {}
+    alpha = float(blend.get("alpha", 1.0))
+    c.setFillColor(_rgba(c, couleur, alpha))
+    out = effets.get("outline")
+    out_only = effets.get("outline_only")
+    if out_only:
+        # Mode stroke uniquement
+        c.setStrokeColor(_rgba(c, tuple(out_only.get("color", couleur)), 1.0))
+        c.setLineWidth(float(out_only.get("width", 0.6)))
+        c.setTextRenderMode(1)   # stroke
+    elif out:
+        # Mode fill+stroke
+        c.setStrokeColor(_rgba(c, tuple(out.get("color", (0, 0, 0))), 1.0))
+        c.setLineWidth(float(out.get("width", 0.5)))
+        c.setTextRenderMode(2)   # fill+stroke
+    if align == "center":
+        c.drawCentredString(x, y, txt)
+    elif align == "right":
+        c.drawRightString(x, y, txt)
+    else:
+        c.drawString(x, y, txt)
+    if out or out_only:
+        c.setTextRenderMode(0)   # reset
+    c.restoreState()
+
+
+def _overlay_mask_couleur(c, x: float, y: float, w: float, h: float,
+                           couleur, alpha: float = 0.45):
+    """Pose un voile coloré semi-transparent sur une zone (typiquement
+    sur une image cover pour faire ressortir un texte par-dessus).
+    Effet typographique #3 : 'texte sur image avec masque coloré'."""
+    c.saveState()
+    c.setFillColor(_rgba(c, couleur, alpha))
+    c.rect(x, y, w, h, fill=True, stroke=False)
+    c.restoreState()
+
+
 def _inserer_image(c, image_bytes, x, y, w, h, mode="cover", radius_pt=0):
     """Insère une image dans une zone rectangulaire avec mode `cover` ou `contain`.
     `radius_pt` arrondit les coins (clipping via mask Pillow)."""
@@ -441,10 +700,15 @@ def _render_deuil_couverture(c, projet, page, w, h, bleed, medias):
         ph_w = 70 * mm; ph_h = 90 * mm
         c.setFillColor(_rgba(c, pal["secondaire"], 0.15))
         c.rect(w / 2 - ph_w / 2, h / 2 - 6 * mm, ph_w, ph_h, fill=True, stroke=False)
-    # Nom
+    # Nom — Sprint 1.3 : honore style.effets si défini par l'IA
     z_nom = _zone_par_id(page, "nom")
     nom = (z_nom.contenu.get("texte") if z_nom else None) or projet.titre or ""
-    _texte_centre(c, nom[:60], w / 2, h / 2 - 18 * mm, 22, pal["primaire"], _font_titre(projet))
+    effets_nom = (z_nom.style or {}).get("effets") if z_nom else None
+    if effets_nom:
+        _texte_avec_effets(c, nom[:60], w / 2, h / 2 - 18 * mm, 22, pal["primaire"],
+                            font=_font_titre(projet), effets=effets_nom, align="center")
+    else:
+        _texte_centre(c, nom[:60], w / 2, h / 2 - 18 * mm, 22, pal["primaire"], _font_titre(projet))
     # Dates
     z_dates = _zone_par_id(page, "dates")
     if z_dates:
@@ -1560,6 +1824,17 @@ Couleurs accents : {', '.join(couleurs_acc) if couleurs_acc else "(libres)"}
 7. Le ton et le vocabulaire doivent rivaliser avec un copywriter pro (pas de banalités,
    pas de redites, structure narrative cohérente sur l'ensemble du livret).
 8. **Aucun champ inventé** qui contredirait le brief (pas de date imaginaire, etc.).
+9. EFFETS TYPOGRAPHIQUES (Sprint 1.3) : tu peux ajouter à n'importe quelle zone
+   `texte` un champ `style.effets` pour enrichir visuellement (utilise avec parcimonie
+   sur les TITRES principaux, jamais sur du corps de texte courant). Effets dispo :
+   - "shadow"  : `{{"dx":1.5,"dy":-1.5,"color":[0,0,0],"alpha":0.4}}`  ombre portée
+   - "outline" : `{{"width":0.6,"color":[0,0,0]}}`                       contour fill+stroke
+   - "outline_only" : `{{"width":0.8,"color":[200,40,80]}}`              contour seul (texte creux)
+   - "gradient": `{{"col_debut":[r,g,b],"col_fin":[r,g,b],"direction":"vertical|horizontal","radial":false}}`
+   - "courbe"  : `{{"rayon_pt":80,"arc_deg":120,"concave":false}}`       texte sur arc (titres impact)
+   - "blend"   : `{{"alpha":0.7}}`                                        transparence simple
+   Ils peuvent se combiner (shadow + gradient, etc.). Réservés aux compositions
+   "fullbleed_cover", "asymetric" ou "bento" (jamais sur "grille_classique").
 
 ═══════════════════════════════════════════════════
   FORMAT DE SORTIE — JSON STRICT

@@ -188,6 +188,13 @@ def police_pour(famille: str, italic: bool = False, bold: bool = False) -> Optio
     return cand if cand in _REGISTERED else None
 
 
+def chemin_ttf_pour(nom_rl: str) -> Optional[str]:
+    """Sprint 1.3 — Retourne le chemin TTF d'une police déjà enregistrée.
+    Utilisé par les effets typographiques rasterisés (Pillow) qui ont besoin
+    du fichier source plutôt que du nom ReportLab."""
+    return _REGISTERED.get(nom_rl)
+
+
 def prechauffer(familles: Optional[list[str]] = None) -> dict:
     """Précharge les familles principales (à appeler au démarrage si besoin)."""
     cibles = familles or ["Playfair Display", "Lato", "Inter", "Cormorant"]
