@@ -126,6 +126,8 @@ def rendre_html_to_pdf(
     css: Optional[str] = None,
     base_url: Optional[str] = None,
     presentational_hints: bool = True,
+    cmyk: bool = False,
+    icc_name: str = "fogra39",
 ) -> bytes:
     """
     Rasterise du HTML+CSS en PDF via WeasyPrint.
@@ -135,6 +137,11 @@ def rendre_html_to_pdf(
     `base_url` : pour résoudre les URLs relatives (images, fonts, etc.).
                  Mettre une URL https:// pour télécharger des assets externes.
     `presentational_hints` : True pour respecter <font color>, <table border>...
+    `cmyk`  : Gap #9 — si True, post-traite via Ghostscript pour conversion
+              RGB → CMYK avec profil ICC (FOGRA39 par défaut). PDF
+              imprimerie-ready (offset/numérique grand volume). Si gs absent
+              (env Windows local), retourne le PDF RGB original.
+    `icc_name` : 'fogra39' | 'psocoated_v3' | 'gracol_us' (cf. pdf_print_ready)
 
     Lève ImportError si WeasyPrint n'est pas dispo (Windows local).
     """
@@ -153,6 +160,16 @@ def rendre_html_to_pdf(
         stylesheets=stylesheets,
         presentational_hints=presentational_hints,
     )
+
+    if cmyk:
+        try:
+            from .pdf_print_ready import convertir_rgb_to_cmyk
+            cmyk_bytes = convertir_rgb_to_cmyk(pdf_bytes, icc_name=icc_name)
+            if cmyk_bytes:
+                return cmyk_bytes
+            logger.info("[WeasyPrint] CMYK indispo (gs ou ICC absent) — RGB conservé")
+        except Exception as e:
+            logger.warning(f"[WeasyPrint] CMYK post-traitement KO : {e}")
     return pdf_bytes
 
 

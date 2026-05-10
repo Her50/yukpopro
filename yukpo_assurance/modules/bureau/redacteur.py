@@ -429,6 +429,19 @@ Produis le document complet et professionnel."""
     nb_mots = len(contenu.split())
     prix = calculer_prix(demande.type_doc, nb_mots)
 
+    # Glossaire auto Haiku (Gap #2 — parite ReportWriter Pro). Pour mode
+    # "long" : extraction des 8-15 termes/acronymes techniques (OHADA,
+    # SYSCOHADA, BEAC, CIMA, FCFA, IFRS, etc.) avec definitions courtes.
+    # Negligeable en cout (~1200 tokens Haiku). Sur mode standard/court,
+    # on saute (le doc est trop court pour justifier un glossaire).
+    glossaire_items: list[dict] = []
+    if mode_choisi == "long":
+        try:
+            from core.docx_glossaire import generer_glossaire_haiku
+            glossaire_items = await generer_glossaire_haiku(contenu, max_termes=12)
+        except Exception as _eg:
+            logger.debug(f"[Redacteur] Glossaire skip : {_eg}")
+
     # Export Word — métadonnées DOCX renseignées (auteur=destinataire si fourni
     # sinon "Yukpo Secrétariat", subject=type_doc, keywords=pays+catégorie).
     contenu_word: Optional[bytes] = None
@@ -438,7 +451,10 @@ Produis le document complet et professionnel."""
             "categorie": info.get("categorie", ""),
             "pays":      demande.pays,
         }
-        contenu_word = _markdown_vers_docx(contenu, info["label"], meta=meta_docx)
+        contenu_word = _markdown_vers_docx(
+            contenu, info["label"], meta=meta_docx,
+            glossaire_items=glossaire_items,
+        )
     except Exception as e:
         logger.warning(f"[Rédacteur] Export Word échoué (non bloquant) : {e}")
 
@@ -502,7 +518,11 @@ def _formater_infos(infos: dict) -> str:
     return "\n".join(lignes) if lignes else "(Générer avec un exemple représentatif)"
 
 
-def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) -> bytes:
+def _markdown_vers_docx(
+    markdown: str, titre: str,
+    meta: Optional[dict] = None,
+    glossaire_items: Optional[list[dict]] = None,
+) -> bytes:
     """
     Convertit du Markdown en .docx via python-docx.
 
@@ -850,6 +870,14 @@ def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) 
         r_lab.italic = True; r_lab.font.size = Pt(9)
     except Exception:
         pass
+
+    # Glossaire auto (Gap #2) — page finale Big4-grade si caller l'a pre-genere
+    if glossaire_items:
+        try:
+            from core.docx_glossaire import ajouter_glossaire_au_doc
+            ajouter_glossaire_au_doc(doc, glossaire_items)
+        except Exception as _eg:
+            logger.debug(f"[Redacteur] Render glossaire : {_eg}")
 
     buf = io.BytesIO()
     doc.save(buf)

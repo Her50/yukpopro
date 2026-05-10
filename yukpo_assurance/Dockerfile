@@ -55,6 +55,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxslt1.1 \
     libxmlsec1 \
     libxmlsec1-openssl \
+    # Gap #9 — Ghostscript pour conversion RGB → CMYK (print-ready imprimerie)
+    ghostscript \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les packages Python compilés depuis le builder

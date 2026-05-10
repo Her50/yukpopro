@@ -253,6 +253,110 @@ def _ensure_icc_profile_for(name: str) -> Optional[bytes]:
     return None
 
 
+def convertir_rgb_to_cmyk(
+    pdf_bytes: bytes,
+    icc_name: str = "fogra39",
+    timeout_s: int = 60,
+) -> Optional[bytes]:
+    """Conversion RGB → CMYK via Ghostscript (gs).
+
+    Le pipeline ReportLab/WeasyPrint produit du PDF RGB par défaut (sRGB).
+    Pour le print pro (offset/numérique grands volumes), l'imprimerie veut
+    du CMYK aplati avec ColorConversionStrategy + profil ICC cible.
+
+    Cette fonction :
+    1. Écrit le PDF RGB en fichier temporaire
+    2. Appelle gs avec les bons flags PDF/X (DeviceCMYK, ColorConversion=CMYK,
+       OutputICCProfile=ISOcoated_v2_eci.icc, embarquage polices forcé,
+       transparence aplatie via /printer preset)
+    3. Lit le résultat CMYK et le retourne
+
+    Retourne None si gs n'est pas dispo (image Docker sans gs) ou si la
+    conversion échoue. L'appelant est responsable du fallback (garder le
+    PDF RGB original).
+
+    Args:
+        pdf_bytes : PDF source (RGB ou mixte)
+        icc_name  : 'fogra39' (défaut Europe/Afrique) | 'psocoated_v3' |
+                    'gracol_us' (SWOP US)
+        timeout_s : timeout subprocess gs (défaut 60s)
+
+    Print-ready CMYK : compatible Heidelberg Prinect, Caldera, EFI Fiery,
+    Adobe Acrobat preflight PDF/X-1a:2001.
+    """
+    import shutil as _sh
+    import subprocess as _sp
+    import tempfile as _tmp
+    import os as _os
+
+    gs_bin = _sh.which("gs") or _sh.which("gswin64c") or _sh.which("gswin32c")
+    if not gs_bin:
+        logger.info("[PDF/CMYK] Ghostscript indisponible — skip conversion CMYK")
+        return None
+
+    icc_bytes = _ensure_icc_profile_for(icc_name)
+    if not icc_bytes:
+        logger.info(f"[PDF/CMYK] Profil ICC '{icc_name}' indispo — skip CMYK")
+        return None
+
+    in_path = None
+    out_path = None
+    icc_path = None
+    try:
+        with _tmp.NamedTemporaryFile(suffix=".pdf", delete=False) as f_in:
+            f_in.write(pdf_bytes)
+            in_path = f_in.name
+        out_fd, out_path = _tmp.mkstemp(suffix="_cmyk.pdf"); _os.close(out_fd)
+        icc_fd, icc_path = _tmp.mkstemp(suffix=".icc")
+        _os.close(icc_fd)
+        with open(icc_path, "wb") as f_icc:
+            f_icc.write(icc_bytes)
+
+        cmd = [
+            gs_bin,
+            "-dBATCH", "-dNOPAUSE", "-dQUIET", "-dSAFER",
+            "-sDEVICE=pdfwrite",
+            "-dPDFSETTINGS=/printer",
+            "-dCompatibilityLevel=1.4",
+            "-sColorConversionStrategy=CMYK",
+            "-sColorConversionStrategyForImages=CMYK",
+            "-dProcessColorModel=/DeviceCMYK",
+            "-dEmbedAllFonts=true", "-dSubsetFonts=true",
+            "-dCompressFonts=true",
+            "-dDownsampleColorImages=false",
+            "-dDownsampleGrayImages=false",
+            "-dDownsampleMonoImages=false",
+            f"-sOutputICCProfile={icc_path}",
+            "-sDefaultRGBProfile=sRGB.icc",
+            f"-sOutputFile={out_path}",
+            in_path,
+        ]
+        proc = _sp.run(
+            cmd, capture_output=True, timeout=timeout_s,
+        )
+        if proc.returncode != 0:
+            logger.warning(
+                f"[PDF/CMYK] gs returncode={proc.returncode} : "
+                f"{proc.stderr.decode(errors='ignore')[:300]}"
+            )
+            return None
+        with open(out_path, "rb") as f_out:
+            return f_out.read()
+    except _sp.TimeoutExpired:
+        logger.warning(f"[PDF/CMYK] Ghostscript timeout {timeout_s}s")
+        return None
+    except Exception as e:
+        logger.warning(f"[PDF/CMYK] Conversion échouée : {e}")
+        return None
+    finally:
+        for p in (in_path, out_path, icc_path):
+            if p and _os.path.exists(p):
+                try:
+                    _os.unlink(p)
+                except Exception:
+                    pass
+
+
 def valider_pdf_print_ready(pdf_bytes: bytes) -> dict:
     """
     Vérifie qu'un PDF respecte les critères basiques print-ready.

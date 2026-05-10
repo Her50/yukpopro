@@ -134,6 +134,101 @@ def generer_png_depuis_tableau(
         return None
 
 
+def generer_svg_depuis_tableau(
+    headers: list[str],
+    rows: list[str],
+    colonnes_num: set,
+) -> Optional[str]:
+    """Variante vectorielle SVG du chart (Gap #8 Designer Pro).
+
+    Avantage SVG : zoom infini sans pixellisation (ReportLab raster perd en
+    qualité à l'agrandissement). Embeddable dans WeasyPrint <img src="data:
+    image/svg+xml;base64,..."> ou ReportLab via svglib.
+
+    Retourne le SVG en string ou None si non graphable.
+    """
+    try:
+        import io as _io
+
+        def _to_float(v: str) -> Optional[float]:
+            v = (v or "").strip().strip("*").replace(" ", " ")
+            v = _re.sub(r"[^\d,.\-]", "", v.replace(" ", "").replace(",", "."))
+            try:
+                return float(v) if v else None
+            except ValueError:
+                return None
+
+        labels: list[str] = []
+        series: dict[int, list[float]] = {ci: [] for ci in sorted(colonnes_num)}
+        for row_line in rows:
+            cells = [c.strip() for c in row_line.split("|") if c.strip()]
+            if not cells:
+                continue
+            if _re.match(r"^\s*\*?\*?\s*(total|moyenne|sous-total|grand total)",
+                         cells[0], _re.IGNORECASE):
+                continue
+            label = cells[0].strip("*")[:18]
+            labels.append(label)
+            for ci in sorted(colonnes_num):
+                val = _to_float(cells[ci]) if ci < len(cells) else None
+                series[ci].append(val if val is not None else 0.0)
+
+        if not labels or not any(any(v != 0 for v in s) for s in series.values()):
+            return None
+        if len(labels) > 20:
+            return None
+
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        plt.rcParams["font.family"] = "DejaVu Sans"
+        palette = ["#0047AB", "#16A34A", "#F59E0B", "#DC2626", "#7C3AED",
+                   "#0EA5E9", "#10B981", "#F97316"]
+
+        fig, ax = plt.subplots(figsize=(9, 4.5), dpi=110)
+        n_series = len(series)
+        nombres_x = list(range(len(labels)))
+        if n_series == 1 and len(labels) >= 5:
+            ci = list(series.keys())[0]
+            ax.plot(nombres_x, series[ci], marker="o", color=palette[0],
+                    linewidth=2.2, markersize=5, markerfacecolor="white",
+                    markeredgewidth=1.5,
+                    label=headers[ci] if ci < len(headers) else "")
+            ax.fill_between(nombres_x, series[ci], alpha=0.10, color=palette[0])
+        else:
+            largeur_totale = 0.78
+            w = largeur_totale / max(n_series, 1)
+            for i, (ci, vals) in enumerate(series.items()):
+                offset = (i - (n_series - 1) / 2) * w
+                ax.bar(
+                    [x + offset for x in nombres_x], vals, width=w * 0.92,
+                    color=palette[i % len(palette)],
+                    label=headers[ci] if ci < len(headers) else f"Col {ci}",
+                    alpha=0.92, zorder=3,
+                )
+        ax.set_xticks(nombres_x)
+        ax.set_xticklabels(
+            labels, rotation=30 if len(labels) > 5 else 0,
+            ha="right" if len(labels) > 5 else "center", fontsize=8,
+        )
+        ax.tick_params(colors="#6B7280", labelsize=8)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#E5E7EB")
+        ax.spines["bottom"].set_color("#E5E7EB")
+        ax.grid(axis="y", linestyle="--", alpha=0.4, color="#E5E7EB")
+        if n_series > 1 or (n_series == 1 and headers):
+            ax.legend(loc="best", fontsize=8, frameon=False)
+        fig.tight_layout(pad=1.5)
+        buf = _io.StringIO()
+        fig.savefig(buf, format="svg", bbox_inches="tight")
+        plt.close(fig)
+        return buf.getvalue()
+    except Exception as e:
+        logger.debug(f"[docx_charts/SVG] Echec : {e}")
+        return None
+
+
 def detecter_colonnes_numeriques(headers: list[str], data_rows: list[str]) -> set:
     """Détecte les indices de colonnes dont la majorité des valeurs sont numériques.
     Utile pour décider quelle colonne plotter en chart.

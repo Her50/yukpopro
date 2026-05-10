@@ -2219,6 +2219,15 @@ async def generer_projet(
     """
     medias = msm.resoudre_refs(medias_refs or [], user_id, session_id) if medias_refs else {}
 
+    # Recuperer le proj_def upstream (avant generer_projet_depuis_brief qui
+    # pourrait composer dynamiquement pour custom_libre). Bug pre-existant
+    # corrige : proj_def etait reference avant d'etre defini → NameError
+    # avalee silencieusement par le try/except autour de PDF/X-1a, donc PDF
+    # non-print-ready livre en silence aux clients pro.
+    proj_def_initial = catalog.PROJETS_INFOGRAPHIE.get(cle_projet) or {
+        "format_mm": (210, 297), "bleed_mm": 3, "label": "Projet",
+    }
+
     # Layout AI (Opus 4.7 / fallback gpt-4-turbo) — composition par page,
     # variants archétypes, vision picker. Activé sur TOUS les modes visuels
     # (sauf "sans" — pas de visuel = pas de besoin de directives layout).
@@ -2280,7 +2289,7 @@ async def generer_projet(
         try:
             pdf_cmyk = rendre_projet_pdf(projet, medias, mode_couleur="cmyk")
         except Exception as e:
-            logger.warning(f"[InfographePro] CMJN échoué : {e}")
+            logger.warning(f"[InfographePro] CMJN ReportLab échoué : {e}")
 
     # Sprint 1.8c — Print-ready PDF/X-1a:2001 (post-traitement pikepdf)
     # Le CMYK est priorité (PDF/X-1a est CMYK par définition). Le RGB reste
@@ -2288,9 +2297,36 @@ async def generer_projet(
     # pour cohérence (utile aux imprimeries qui font la conversion elles-mêmes).
     try:
         from . import pdf_print_ready as _pp
+        # Pour custom_libre, recuperer le proj_def reel (compose par Opus dans
+        # generer_projet_depuis_brief) via getattr sur le projet. Sinon retomber
+        # sur proj_def_initial du catalog.
+        _pd = proj_def_initial
+        try:
+            if hasattr(projet, "format_mm") and projet.format_mm:
+                _pd = {"format_mm": tuple(projet.format_mm),
+                       "bleed_mm": getattr(projet, "bleed_mm", 3),
+                       "label": projet.titre or _pd.get("label", "Projet")}
+        except Exception:
+            pass
+        proj_def = _pd
         format_trim = (proj_def["format_mm"][0], proj_def["format_mm"][1])
         bleed_mm = float(proj_def.get("bleed_mm", 3))
         titre = projet.titre or proj_def["label"]
+        # Gap #9 — conversion RGB → CMYK via Ghostscript en fallback :
+        # ReportLab ne convertit pas les images embedded (PNG/JPG restent RGB).
+        # Ghostscript fait la vraie conversion DeviceCMYK avec profil ICC
+        # FOGRA39, garantissant un PDF print-ready imprimerie-grade. Si gs
+        # absent (image Docker minimaliste), on garde le PDF ReportLab CMYK.
+        if export_cmyk and not pdf_cmyk:
+            gs_cmyk = _pp.convertir_rgb_to_cmyk(pdf, icc_name="fogra39")
+            if gs_cmyk:
+                pdf_cmyk = gs_cmyk
+                logger.info("[InfographePro] CMYK Ghostscript fallback OK")
+        elif export_cmyk and pdf_cmyk:
+            # Renforce : passe Ghostscript pour aplatir + embed ICC + uniformiser
+            gs_cmyk = _pp.convertir_rgb_to_cmyk(pdf_cmyk, icc_name="fogra39")
+            if gs_cmyk:
+                pdf_cmyk = gs_cmyk
         if pdf_cmyk:
             pdf_cmyk = _pp.convertir_en_pdf_x1a(pdf_cmyk, titre, format_trim, bleed_mm)
         # On enrichit aussi le RGB des trim/bleed boxes (pas un vrai PDF/X mais
@@ -2302,7 +2338,8 @@ async def generer_projet(
     pages_png = _png_par_page(pdf, dpi=dpi_pages)
     pages_png_hd = _png_par_page(pdf, dpi=dpi_pages_hd) if dpi_pages_hd != dpi_pages else pages_png
 
-    proj_def = catalog.PROJETS_INFOGRAPHIE[cle_projet]
+    # On ne ré-affecte plus proj_def ici : la valeur cohérente a été calculée
+    # plus haut dans le try PDF/X-1a (catalogue OU custom_libre composé).
 
     return ResultatProjet(
         pdf_bytes=pdf,
