@@ -2964,4 +2964,5 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "endpoint_cible":         endpoint_cible,
         "payload_pret":           payload_pret,
         "raisonnement":           data.get("raisonnement_court") or "",
+        "structure_custom":       structure_custom if template_id == "custom" else None,
     }

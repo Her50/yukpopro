@@ -598,6 +598,7 @@ class ReportWriterPro:
         format_sortie:         str = "docx",   # "docx" | "markdown"
         instruction_utilisateur: Optional[str] = None,
         forcer_recherche_web:  bool = False,
+        structure_externe:     Optional[list] = None,
     ) -> dict:
         """
         Génère un rapport professionnel.
@@ -615,14 +616,25 @@ class ReportWriterPro:
             dict avec : chemin_fichier, nom_fichier, contenu_markdown,
                         nb_sections, mode, type_rapport
         """
-        if type_rapport not in _STRUCTURES:
-            type_rapport = "rapport_analyse"
         if mode not in ("flash", "standard", "complet", "expert"):
             mode = "standard"
 
-        # Le mode expert utilise la structure "complet" étendue
-        structure_mode = "complet" if mode == "expert" else mode
-        structure_brute = _STRUCTURES[type_rapport][structure_mode]
+        # Sources de structure (par ordre de priorité) :
+        # 1. structure_externe : structure custom générée à la volée par
+        #    l'orchestrateur G1 quand le brief utilisateur ne matche aucun
+        #    template prédéfini → permet une adaptation totale au prompt.
+        # 2. _STRUCTURES[type_rapport] : template prédéfini si reconnu.
+        # 3. _STRUCTURES["rapport_analyse"] : fallback générique.
+        if structure_externe and isinstance(structure_externe, list) and len(structure_externe) >= 3:
+            structure_brute = [str(s).strip() for s in structure_externe if str(s).strip()]
+            # On marque le type comme "custom" pour que le filename / labels reflètent
+            if type_rapport not in _STRUCTURES:
+                type_rapport = "custom"
+        else:
+            if type_rapport not in _STRUCTURES:
+                type_rapport = "rapport_analyse"
+            structure_mode = "complet" if mode == "expert" else mode
+            structure_brute = _STRUCTURES[type_rapport][structure_mode]
 
         # Sections meta non-LLM : "Page de garde" est dessinée nativement par
         # _construire_docx ; "Sommaire" devrait être un champ TOC Word, pas
