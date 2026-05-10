@@ -332,6 +332,122 @@ def _rgb(t: tuple) -> "RGBColor":
     return RGBColor(*t)
 
 
+def _appliquer_animations_pptx(prs, transition: str = "fade") -> None:
+    """Inject PPTX animations natives via OOXML.
+
+    python-pptx ne supporte ni transitions ni timing animations. On
+    manipule directement l'XML lxml :
+    - <p:transition> : transition slide-to-slide (fade, push, wipe, fade_smoothly)
+    - <p:timing>     : entrance animation 'fade' sur le titre de chaque slide
+                       (subTnLst → par/seq/par/par/par avec animEffect filter='fade')
+
+    Compatible : PowerPoint 2010+, Keynote, Google Slides, LibreOffice Impress.
+    Si l'OOXML est invalide, PowerPoint ignore l'animation sans planter le PPTX.
+    """
+    from lxml import etree
+    P_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
+    nsmap = {"p": P_NS}
+
+    transitions_xml = {
+        "fade":   f'<p:transition xmlns:p="{P_NS}" spd="med"><p:fade/></p:transition>',
+        "push":   f'<p:transition xmlns:p="{P_NS}" spd="med"><p:push dir="l"/></p:transition>',
+        "wipe":   f'<p:transition xmlns:p="{P_NS}" spd="med"><p:wipe dir="l"/></p:transition>',
+        "split":  f'<p:transition xmlns:p="{P_NS}" spd="med"><p:split orient="horz" dir="out"/></p:transition>',
+        "cover":  f'<p:transition xmlns:p="{P_NS}" spd="med"><p:cover dir="l"/></p:transition>',
+    }
+    trans_xml = transitions_xml.get(transition, transitions_xml["fade"])
+
+    for slide in prs.slides:
+        sld_elem = slide.element
+        # Supprimer transition existante puis ajouter la nouvelle
+        for old in sld_elem.findall(f"{{{P_NS}}}transition"):
+            sld_elem.remove(old)
+        try:
+            new_trans = etree.fromstring(trans_xml)
+            sld_elem.append(new_trans)
+        except Exception:
+            continue
+
+        # Animation entrance fade sur le 1er textbox (= le titre/header)
+        # On ne touche pas si timing déjà présent (préserve animations utilisateur)
+        existing_timing = sld_elem.findall(f"{{{P_NS}}}timing")
+        if existing_timing:
+            continue
+        # Trouver le 1er sp (shape) avec txBody pour cibler son spid
+        sp_id = None
+        try:
+            for sp in sld_elem.iter(f"{{{P_NS}}}sp"):
+                nvSpPr = sp.find(f"{{{P_NS}}}nvSpPr")
+                if nvSpPr is None:
+                    continue
+                cNvPr = nvSpPr.find(f"{{{P_NS}}}cNvPr")
+                if cNvPr is not None and cNvPr.get("id"):
+                    sp_id = cNvPr.get("id")
+                    break
+        except Exception:
+            sp_id = None
+        if not sp_id:
+            continue
+        timing_xml = f'''<p:timing xmlns:p="{P_NS}">
+  <p:tnLst>
+    <p:par>
+      <p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">
+        <p:childTnLst>
+          <p:seq concurrent="1" nextAc="seek">
+            <p:cTn id="2" dur="indefinite" nodeType="mainSeq">
+              <p:childTnLst>
+                <p:par>
+                  <p:cTn id="3" fill="hold">
+                    <p:stCondLst><p:cond delay="indefinite"/></p:stCondLst>
+                    <p:childTnLst>
+                      <p:par>
+                        <p:cTn id="4" fill="hold">
+                          <p:stCondLst><p:cond delay="0"/></p:stCondLst>
+                          <p:childTnLst>
+                            <p:par>
+                              <p:cTn id="5" presetID="10" presetClass="entr" presetSubtype="0" fill="hold" grpId="0" nodeType="afterEffect">
+                                <p:stCondLst><p:cond delay="0"/></p:stCondLst>
+                                <p:childTnLst>
+                                  <p:set>
+                                    <p:cBhvr>
+                                      <p:cTn id="6" dur="1" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>
+                                      <p:tgtEl><p:spTgt spid="{sp_id}"/></p:tgtEl>
+                                      <p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>
+                                    </p:cBhvr>
+                                    <p:to><p:strVal val="visible"/></p:to>
+                                  </p:set>
+                                  <p:animEffect transition="in" filter="fade">
+                                    <p:cBhvr>
+                                      <p:cTn id="7" dur="500"/>
+                                      <p:tgtEl><p:spTgt spid="{sp_id}"/></p:tgtEl>
+                                    </p:cBhvr>
+                                  </p:animEffect>
+                                </p:childTnLst>
+                              </p:cTn>
+                            </p:par>
+                          </p:childTnLst>
+                        </p:cTn>
+                      </p:par>
+                    </p:childTnLst>
+                  </p:cTn>
+                </p:par>
+              </p:childTnLst>
+            </p:cTn>
+            <p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>
+            <p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>
+          </p:seq>
+        </p:childTnLst>
+      </p:cTn>
+    </p:par>
+  </p:tnLst>
+</p:timing>'''
+        try:
+            timing_elem = etree.fromstring(timing_xml)
+            sld_elem.append(timing_elem)
+        except Exception:
+            pass
+
+
 def _rect(slide, left, top, width, height, fill_color, line=False):
     """Ajoute un rectangle solide."""
     shp = slide.shapes.add_shape(1, int(left), int(top), int(width), int(height))
@@ -941,6 +1057,15 @@ class SlideBuilderPro:
         nb_total = len(slides)
         for idx, slide_data in enumerate(slides):
             self._ajouter_slide(prs, slide_data, sujet, idx + 1, nb_total)
+
+        # Animations natives PPTX (transitions slide-to-slide + fade-in titre)
+        # python-pptx ne supporte pas les animations -> on injecte directement
+        # l'OOXML <p:transition> et <p:timing> via lxml. Compatible PowerPoint
+        # 2010+, Keynote, Google Slides, LibreOffice Impress.
+        try:
+            _appliquer_animations_pptx(prs, transition=self._theme.get("transition", "fade"))
+        except Exception as _e_anim:
+            logger.debug(f"[SlideBuilder] Animations XML : {_e_anim}")
 
         chemin = _OUTPUT_DIR / (nom_fichier + ".pptx")
         prs.save(str(chemin))

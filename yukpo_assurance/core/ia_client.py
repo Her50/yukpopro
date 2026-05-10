@@ -448,6 +448,7 @@ class IAClient:
                 prompt=prompt, mode=mode, systeme=systeme,
                 images_b64=images_b64, json_attendu=json_attendu, debut=debut,
                 max_tokens=max_tokens,
+                modele_original=modele,    # tier preservation pour fallback
             )
 
     # ─── Appel Claude ─────────────────────────────────────────────────────────
@@ -818,21 +819,49 @@ class IAClient:
     async def _fallback(
         self, prompt, mode, systeme, images_b64, json_attendu, debut,
         max_tokens: int = 0,
+        modele_original: Optional[ModelePrioritaire] = None,
     ) -> ReponseIA:
         """
-        Fallback selon settings.LLM_PRIMAIRE :
-          - primaire=gpt    → fallback Claude
-          - primaire=claude → fallback GPT
+        Fallback intelligent qui PRESERVE LE TIER QUALITE :
+          - Si Opus fail → gpt-4-turbo (raisonnement haut de gamme equivalent)
+          - Si Sonnet fail → gpt-4o (rédaction standard equivalent)
+          - Si Haiku fail → gpt-4o-mini (rapide+cheap equivalent)
+          - Si modele_original GPT et echec → bascule Claude tier equivalent
+
+        Avant : tout tombait sur Sonnet/gpt-4o par defaut, ce qui DEGRADAIT
+        Opus → gpt-4o (perte raisonnement). Maintenant la chaine preserve
+        le tier via _CLAUDE_TO_GPT (et son inverse implicite).
         """
+        # Mapping inverse pour preserve tier sur primaire GPT echec
+        _GPT_TO_CLAUDE = {
+            ModelePrioritaire.GPT4_TURBO.value: ModelePrioritaire.CLAUDE_OPUS,
+            ModelePrioritaire.GPT4O.value:      ModelePrioritaire.CLAUDE_SONNET,
+            ModelePrioritaire.GPT4O_MINI.value: ModelePrioritaire.CLAUDE_HAIKU,
+        }
+
         primaire = self._llm_primaire()
-        # Primaire GPT → fallback Claude
+        # Primaire GPT → fallback Claude TIER-EQUIVALENT
         if primaire == "gpt" and self._claude is not None:
-            cb = self._circuit_breakers.get(ModelePrioritaire.CLAUDE_SONNET.value)
+            # Determiner le Claude tier-equivalent du modele original
+            claude_tier = ModelePrioritaire.CLAUDE_SONNET  # defaut
+            if modele_original:
+                if modele_original.value in _GPT_TO_CLAUDE:
+                    claude_tier = _GPT_TO_CLAUDE[modele_original.value]
+                elif modele_original in (ModelePrioritaire.CLAUDE_OPUS,
+                                          ModelePrioritaire.CLAUDE_SONNET,
+                                          ModelePrioritaire.CLAUDE_HAIKU):
+                    claude_tier = modele_original
+            modele_concret = (
+                settings.CLAUDE_MODEL_PRIMAIRE
+                if claude_tier == ModelePrioritaire.CLAUDE_SONNET
+                else claude_tier.value
+            )
+            cb = self._circuit_breakers.get(claude_tier.value)
             if not (cb and cb.est_ouvert):
                 try:
                     reponse = await self._appel_claude(
                         prompt=prompt,
-                        modele=settings.CLAUDE_MODEL_PRIMAIRE,
+                        modele=modele_concret,
                         temperature=self._temperature_par_mode(mode),
                         systeme=systeme,
                         images_b64=images_b64,
@@ -840,14 +869,27 @@ class IAClient:
                         max_tokens=max_tokens or settings.IA_MAX_TOKENS,
                     )
                     reponse.fallback_utilise = True
-                    self._enregistrer_succes(ModelePrioritaire.CLAUDE_SONNET.value, time.monotonic() - debut, reponse)
+                    self._enregistrer_succes(claude_tier.value, time.monotonic() - debut, reponse)
+                    logger.info(
+                        f"[IAClient] Fallback tier-preserve : "
+                        f"{modele_original.value if modele_original else '?'} → {modele_concret}"
+                    )
                     return reponse
                 except Exception as e:
-                    logger.error(f"[IAClient] Fallback Claude aussi échoué: {e}")
-        # Sinon fallback GPT
+                    logger.error(f"[IAClient] Fallback Claude {claude_tier.value} échoué: {e}")
+        # Sinon fallback GPT TIER-EQUIVALENT
         if not settings.OPENAI_API_KEY:
             raise RuntimeError("Service IA indisponible — aucun fournisseur disponible")
-        cb = self._circuit_breakers.get(ModelePrioritaire.GPT4O.value)
+        # Determiner le GPT tier-equivalent
+        gpt_tier_value = ModelePrioritaire.GPT4O.value  # defaut
+        if modele_original:
+            if modele_original.value in _CLAUDE_TO_GPT:
+                gpt_tier_value = _CLAUDE_TO_GPT[modele_original.value]
+            elif modele_original in (ModelePrioritaire.GPT4_TURBO,
+                                      ModelePrioritaire.GPT4O,
+                                      ModelePrioritaire.GPT4O_MINI):
+                gpt_tier_value = modele_original.value
+        cb = self._circuit_breakers.get(gpt_tier_value)
         if cb and cb.est_ouvert:
             raise RuntimeError("Tous les modèles IA sont indisponibles (circuit breakers ouverts)")
         try:
@@ -858,12 +900,17 @@ class IAClient:
                 images_b64=images_b64,
                 json_attendu=json_attendu,
                 max_tokens=max_tokens or settings.IA_MAX_TOKENS,
+                modele_force=gpt_tier_value,
             )
             reponse.fallback_utilise = True
-            self._enregistrer_succes(ModelePrioritaire.GPT4O.value, time.monotonic() - debut, reponse)
+            self._enregistrer_succes(gpt_tier_value, time.monotonic() - debut, reponse)
+            logger.info(
+                f"[IAClient] Fallback tier-preserve : "
+                f"{modele_original.value if modele_original else '?'} → {gpt_tier_value}"
+            )
             return reponse
         except Exception as e:
-            logger.error(f"[IAClient] Fallback GPT aussi échoué: {e}")
+            logger.error(f"[IAClient] Fallback GPT {gpt_tier_value} aussi échoué: {e}")
             raise
 
     def _enregistrer_succes(self, modele: str, duree: float, reponse: ReponseIA):

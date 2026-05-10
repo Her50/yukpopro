@@ -1161,6 +1161,59 @@ class BulkJobDB(Base):
     erreur            = Column(Text, nullable=True)
 
 
+# ─── Marketplace templates communautaire (UGC) ──────────────────────────────
+
+
+class MarketplaceTemplateDB(Base):
+    """
+    Templates partages par la communaute. Type=designerpro_projet|slides|
+    rapport|redaction. Modere par admin avant publication. Rating
+    moyenne_etoiles (1-5) + downloads_count pour ranking. Clone par
+    utilisateur copie le payload dans son scope.
+    """
+    __tablename__ = "marketplace_templates"
+
+    id                = Column(Integer, primary_key=True, autoincrement=True)
+    user_id           = Column(Integer, nullable=False, index=True)
+    compagnie_id      = Column(Integer, nullable=True, index=True)
+    type_template     = Column(String(40), nullable=False, index=True,
+                                # designerpro_projet | slides | rapport | redaction
+                                comment="Type metier")
+    label             = Column(String(200), nullable=False)
+    description       = Column(Text, nullable=True)
+    tags              = Column(JSON, default=list,
+                                comment="['mariage', 'corporate', 'OHADA', 'CIMA']")
+    pays              = Column(String(3), nullable=True, index=True)
+    langue            = Column(String(8), default="fr")
+    payload           = Column(JSON, nullable=False, default=dict,
+                                comment="Contenu reel du template (cle_projet+pages, slides_data, rapport_structure...)")
+    preview_url       = Column(String(500), nullable=True,
+                                comment="PNG/PDF preview pour browse rapide")
+    statut            = Column(String(20), default="pending", index=True,
+                                # pending | published | rejected | archived
+                                comment="Workflow moderation")
+    moderation_note   = Column(Text, nullable=True)
+    is_public         = Column(Boolean, default=False, index=True)
+    is_featured       = Column(Boolean, default=False)
+    downloads_count   = Column(Integer, default=0)
+    rating_sum        = Column(Integer, default=0)
+    rating_count      = Column(Integer, default=0)
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+    publie_le         = Column(DateTime, nullable=True)
+
+
+class MarketplaceRatingDB(Base):
+    """Vote utilisateur sur un template (1-5 etoiles). Unicite (user, template)."""
+    __tablename__ = "marketplace_ratings"
+
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    template_id = Column(Integer, nullable=False, index=True)
+    user_id     = Column(Integer, nullable=False, index=True)
+    note        = Column(Integer, nullable=False)   # 1-5
+    commentaire = Column(Text, nullable=True)
+    cree_le     = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint C1 — Chat conversationnel Designer Pro (sessions actives) ───────
 
 

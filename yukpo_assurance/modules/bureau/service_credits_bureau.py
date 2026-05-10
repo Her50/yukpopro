@@ -129,6 +129,11 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # entre coût réel ($200 = ~120 000 FCFA) et prix client (200 000 FCFA = 1.7×).
     "designerpro_brand_lora_training": 1.0,  # multiplicateur = coût en FCFA
     "designerpro_html_render": 3.0,          # 60 cr/page (Sprint 1.4 WeasyPrint compute)
+    # Vidéo IA text-to-video (fal.ai Kling / LTX-Video / Replicate Wan2.1)
+    # Multiplicateur = duree_s // 5 (5s=1×, 10s=2×). Marge ~12× sur prix provider.
+    "bureau_video_standard":  60.0,   # 1200 cr/5s — LTX-Video ($0.05) ~marge 20×
+    "bureau_video_premium":  240.0,   # 4800 cr/5s — Kling 1.6 std ($0.20) ~marge 20×
+    "bureau_video_ultra":    600.0,   # 12000 cr/5s — Kling 1.6 pro ($0.50) ~marge 20×
     # Sprint L1.3 — Export multilingual (N PDFs en parallèle pour N langues)
     # Multiplicateur = nb_langues. Couvre LLM tokens traduction par langue + render PDF.
     "designerpro_multilingual_export": 2.0,  # 40 cr/langue = 24 FCFA/langue

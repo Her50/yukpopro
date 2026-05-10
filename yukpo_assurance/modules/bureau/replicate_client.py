@@ -271,6 +271,47 @@ async def generer_ideogram_replicate(
 # ── Brand LoRA training (Sprint R3) ──────────────────────────────────────────
 
 
+async def generer_video(
+    prompt: str,
+    duree_s: int = 5,
+    aspect_ratio: str = "16:9",
+    seed: Optional[int] = None,
+    timeout_s: float = 300.0,
+) -> bytes:
+    """Génération vidéo via Replicate (Wan2.1 — text-to-video).
+    Fallback de fal.ai pour Yukpo. Retourne MP4 bytes.
+
+    Wan2.1 (Alibaba) : text-to-video 5s, ~$0.10/vidéo, qualité comparable
+    Kling/Sora-light. 1280x720 par défaut.
+    """
+    if not (settings.REPLICATE_API_TOKEN or "").strip():
+        raise ReplicateError("REPLICATE_API_TOKEN absent")
+    payload: dict = {
+        "prompt": prompt[:2000],
+        "aspect_ratio": aspect_ratio,
+        "num_frames": 81 if duree_s <= 5 else 121,  # ~16fps × duree
+    }
+    if seed is not None:
+        payload["seed"] = int(seed)
+
+    pred = await _create_prediction(
+        "wavespeedai/wan-2.1-t2v-720p", payload, timeout_s=60.0,
+    )
+    pid = pred.get("id")
+    if pred.get("status") not in ("succeeded", "failed", "canceled") and pid:
+        pred = await _poll_until_done(pid, max_poll_s=timeout_s)
+    if pred.get("status") != "succeeded":
+        raise ReplicateError(f"Replicate Wan2.1 status={pred.get('status')} : {pred.get('error', '')[:200]}")
+    output = pred.get("output")
+    video_url = output if isinstance(output, str) else (output[0] if isinstance(output, list) and output else None)
+    if not video_url:
+        raise ReplicateError("Replicate Wan2.1 : pas d'URL vidéo dans output")
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        r = await client.get(video_url)
+        r.raise_for_status()
+        return r.content
+
+
 async def entrainer_lora(
     images_zip_url: str,
     trigger_word: str,
