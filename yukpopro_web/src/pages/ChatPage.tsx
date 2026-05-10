@@ -124,6 +124,41 @@ export const ChatPage = () => {
     try {
       const activeDoc = activeDocument();
 
+      // Audio attachés → transcription Whisper auto AVANT orchestrer/copilote.
+      // Sans ça, _extraire_texte_fichiers backend skip les .mp3/.wav/.webm
+      // (silently ignorés). On transcrit en texte qu'on injecte dans le brief
+      // pour que la suite du flow (rapport Word, traduction, analyse) marche.
+      const isAudio = (f: AttachedFile) =>
+        f.type.startsWith("audio/") || /\.(mp3|wav|m4a|webm|ogg)$/i.test(f.name);
+      const audioFiles = files.filter(isAudio);
+      const otherFiles = files.filter(f => !isAudio(f));
+      if (audioFiles.length > 0) {
+        for (const af of audioFiles) {
+          if (!af.content) continue;
+          try {
+            const bytes = atob(af.content);
+            const arr = new Uint8Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+            const blob = new Blob([arr], { type: af.type || "audio/webm" });
+            const fd = new FormData();
+            fd.append("audio", blob, af.name);
+            fd.append("langue", "auto");
+            const res = await reunionsApi.transcrireDirect(fd);
+            const txt = (res.transcription || "").trim();
+            if (txt) {
+              content = content.trim()
+                ? `${content.trim()}\n\n[Transcription "${af.name}"]\n${txt}`
+                : `[Transcription "${af.name}"]\n${txt}`;
+            }
+          } catch (e: any) {
+            // eslint-disable-next-line no-console
+            console.warn(`[ChatPage] Transcription "${af.name}" échouée:`, e);
+            toast.error(`Transcription "${af.name}" échouée`);
+          }
+        }
+        files = otherFiles;
+      }
+
       // Sprint G1 — Orchestrateur silencieux (boîte noire) :
       // 1. Détecter intent + devis interne (sans afficher au user)
       // 2. Si intent = génération doc/visuel ET peut_payer → générer silencieux
