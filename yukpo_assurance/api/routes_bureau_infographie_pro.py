@@ -946,6 +946,9 @@ class DemandeOrchestrer(BaseModel):
     pays: str = Field(default="CM")
     langue: str = Field(default="fr")
     profil: Optional[ProfilDesigner] = None
+    # Sprint 1.8a — médias déjà uploadés à analyser (l'IA décide quoi en faire)
+    medias_refs: Optional[list[str]] = Field(default=None,
+        description="Réfs médiathèque déjà uploadées ('session:abc'/'compte:def') — l'IA analyse leur catégorie/dimensions/couleur dominante et recommande où les insérer")
 
 
 class ReponseOrchestrer(BaseModel):
@@ -971,6 +974,13 @@ class ReponseOrchestrer(BaseModel):
         description="Archétype de composition principal suggéré (grille_classique|asymetric|bento|fullbleed_cover|timeline_horiz)")
     cout_estime_credits: int = Field(default=0,
         description="Estimation des crédits qui seront consommés (LLM + génération + image IA)")
+    # Sprint 1.8a — recommandations d'usage des médias uploadés
+    recommandation_medias: list[dict] = Field(default_factory=list,
+        description="Pour chaque média analysé : [{ref, role_suggere, page_cible, raison}] — l'IA dit où insérer chaque image")
+    medias_manquants: list[str] = Field(default_factory=list,
+        description="Types de médias attendus mais non fournis (ex: 'photo du défunt', 'logo entreprise')")
+    medias_refs_actifs: list[str] = Field(default_factory=list,
+        description="Sous-ensemble de medias_refs jugés pertinents par l'IA (à pré-cocher dans le formulaire)")
 
 
 @router.post("/orchestrer", response_model=ReponseOrchestrer, tags=["Bureau — Designer Pro"])
@@ -1025,6 +1035,27 @@ async def orchestrer(
 
     profil = demande.profil.model_dump(exclude_none=True) if demande.profil else {}
 
+    # Sprint 1.8a — Analyse des médias déjà uploadés
+    desc_medias_input: list[dict] = []
+    if demande.medias_refs:
+        try:
+            from modules.bureau import mediatheque_session as msm
+            session_id_local = f"chat_{current_user.user_id}"
+            medias_resolus = msm.resoudre_refs(
+                demande.medias_refs, str(current_user.user_id), session_id_local
+            )
+            for ref, m in medias_resolus.items():
+                desc_medias_input.append({
+                    "ref": ref,
+                    "categorie": m.categorie,
+                    "label": m.label or "",
+                    "dimensions_px": [m.largeur_px, m.hauteur_px] if hasattr(m, "largeur_px") else None,
+                    "couleur_dominante": getattr(m, "couleur_dominante_hex", None),
+                    "portee": m.portee,
+                })
+        except Exception as e:
+            logger.warning(f"[Orchestrer] résolution médias : {e}")
+
     prompt = f"""Tu es ASSISTANT D'ORCHESTRATION pour la suite Yukpo Designer Pro.
 Mission : analyser le besoin de l'utilisateur en langage naturel et déterminer
 EXACTEMENT le bon gabarit + paramètres optimaux à pré-remplir dans le formulaire.
@@ -1038,6 +1069,11 @@ L'utilisateur n'a pas envie de parcourir 30+ templates. Tu dois :
   6. Suggérer mode visuel IA (sans/standard/premium/ultra/ultra_plus) selon ambition
   7. Pré-remplir les curseurs créativité/densité/images/élégance (0-100)
   8. Choisir l'archétype de composition dominant
+  9. (Sprint 1.8a) ANALYSER les médias déjà uploadés : pour chaque média
+     pertinent, indique son rôle attendu (couverture, portrait personne, photo
+     événement, page intérieure, illustration de fond, logo, signature, etc.)
+     et sur quelle page le placer. Dis aussi quels médias sont SUPERFLUS pour
+     ce projet (ne pas les pré-cocher).
 
 ═══════════════════════════════════════════════════
   PROMPT UTILISATEUR
@@ -1057,6 +1093,11 @@ Organisation : {profil.get("nom_organisation", "(non précisée)")}
   CATALOGUE MULTI-PAGE (PROJETS — livrets, brochures, livres photo)
 ═══════════════════════════════════════════════════
 {json.dumps(multi_compact, ensure_ascii=False)[:6000]}
+
+═══════════════════════════════════════════════════
+  MÉDIAS DÉJÀ UPLOADÉS PAR L'UTILISATEUR
+═══════════════════════════════════════════════════
+{json.dumps(desc_medias_input, ensure_ascii=False)[:4000] if desc_medias_input else "(aucun média)"}
 
 ═══════════════════════════════════════════════════
   ARCHÉTYPES DE COMPOSITION (5)
@@ -1112,7 +1153,15 @@ Organisation : {profil.get("nom_organisation", "(non précisée)")}
   "directives_visuelles_pre": {{"creativite": 60, "densite_texte": 40,
                                  "importance_images": 75, "elegance": 80}},
   "archetype_dominant": "fullbleed_cover",
-  "cout_estime_credits": 850
+  "cout_estime_credits": 850,
+  "recommandation_medias": [
+    {{"ref": "session:abc", "role_suggere": "portrait principal couverture",
+      "page_cible": 1, "raison": "photo verticale haute résolution adaptée"}},
+    {{"ref": "compte:def", "role_suggere": "logo dos", "page_cible": 8,
+      "raison": "logo entreprise pour signature finale"}}
+  ],
+  "medias_manquants": ["photo de groupe famille", "..."],
+  "medias_refs_actifs": ["session:abc", "compte:def"]
 }}
 
 Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
@@ -1183,6 +1232,10 @@ Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
         directives_visuelles_pre=data.get("directives_visuelles_pre") or {},
         archetype_dominant=data.get("archetype_dominant"),
         cout_estime_credits=int(data.get("cout_estime_credits", 500)),
+        # Sprint 1.8a — médias
+        recommandation_medias=(data.get("recommandation_medias") or [])[:30],
+        medias_manquants=(data.get("medias_manquants") or [])[:10],
+        medias_refs_actifs=(data.get("medias_refs_actifs") or [])[:30],
     )
 
 

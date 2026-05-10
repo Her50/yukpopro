@@ -254,7 +254,13 @@ export default function DesignerProPanel() {
     if (!autoPrompt.trim()) { toast.error(t('designerPro.autoErrEmpty', 'Décris ton besoin')); return }
     setOrchestrating(true); setOrchestration(null)
     try {
-      const r = await infographieProAPI.orchestrer({ prompt: autoPrompt, pays, langue })
+      // Sprint 1.8a — passe les médias déjà uploadés (sélectionnés ou tous)
+      const allRefs = tousMedias.map(m => `${m.portee}:${m.media_id}`)
+      const refsToAnalyze = refsSelectionnees.length > 0 ? refsSelectionnees : allRefs
+      const r = await infographieProAPI.orchestrer({
+        prompt: autoPrompt, pays, langue,
+        medias_refs: refsToAnalyze.length > 0 ? refsToAnalyze : undefined,
+      } as any)
       const data = r.data
       setOrchestration(data)
       if (data?.confiance >= 0.85) {
@@ -279,6 +285,10 @@ export default function DesignerProPanel() {
     if (typeof dv.densite_texte === 'number') setDensite(dv.densite_texte)
     if (typeof dv.importance_images === 'number') setImportanceImg(dv.importance_images)
     if (typeof dv.elegance === 'number') setElegance(dv.elegance)
+    // Sprint 1.8a — pré-cocher les médias jugés pertinents
+    if (Array.isArray(orchestration.medias_refs_actifs) && orchestration.medias_refs_actifs.length > 0) {
+      setRefsSelectionnees(orchestration.medias_refs_actifs)
+    }
     toast.success(t('designerPro.autoApplied', 'Formulaire pré-rempli'))
   }
 
@@ -387,6 +397,19 @@ export default function DesignerProPanel() {
             {Array.isArray(orchestration.manques) && orchestration.manques.length > 0 && (
               <div className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 text-amber-800">
                 <span className="font-semibold">⚠ {t('designerPro.autoMissing', 'Manques')} : </span>{orchestration.manques.join(', ')}
+              </div>
+            )}
+            {Array.isArray(orchestration.recommandation_medias) && orchestration.recommandation_medias.length > 0 && (
+              <div className="text-[11px] bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5 text-emerald-800 space-y-0.5">
+                <p className="font-semibold">📷 Médias recommandés :</p>
+                {orchestration.recommandation_medias.slice(0, 6).map((m: any, i: number) => (
+                  <p key={i}>• <b>{m.role_suggere}</b> {m.page_cible ? `(p.${m.page_cible})` : ''} — <span className="opacity-80">{m.raison}</span></p>
+                ))}
+              </div>
+            )}
+            {Array.isArray(orchestration.medias_manquants) && orchestration.medias_manquants.length > 0 && (
+              <div className="text-[11px] bg-orange-50 border border-orange-200 rounded-lg px-2 py-1.5 text-orange-800">
+                <span className="font-semibold">📤 À uploader pour optimum : </span>{orchestration.medias_manquants.join(', ')}
               </div>
             )}
             {Array.isArray(orchestration.questions_clarification) && orchestration.questions_clarification.length > 0 && (

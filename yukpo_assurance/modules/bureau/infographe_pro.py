@@ -2042,6 +2042,23 @@ async def generer_projet(
         except Exception as e:
             logger.warning(f"[InfographePro] CMJN échoué : {e}")
 
+    # Sprint 1.8c — Print-ready PDF/X-1a:2001 (post-traitement pikepdf)
+    # Le CMYK est priorité (PDF/X-1a est CMYK par définition). Le RGB reste
+    # disponible pour preview/web mais on l'enrichit aussi en TrimBox/BleedBox
+    # pour cohérence (utile aux imprimeries qui font la conversion elles-mêmes).
+    try:
+        from . import pdf_print_ready as _pp
+        format_trim = (proj_def["format_mm"][0], proj_def["format_mm"][1])
+        bleed_mm = float(proj_def.get("bleed_mm", 3))
+        titre = projet.titre or proj_def["label"]
+        if pdf_cmyk:
+            pdf_cmyk = _pp.convertir_en_pdf_x1a(pdf_cmyk, titre, format_trim, bleed_mm)
+        # On enrichit aussi le RGB des trim/bleed boxes (pas un vrai PDF/X mais
+        # pratique pour imprimeurs qui chargent dans Indesign/Illustrator)
+        pdf = _pp.convertir_en_pdf_x1a(pdf, titre, format_trim, bleed_mm)
+    except Exception as e:
+        logger.warning(f"[InfographePro] PDF/X-1a post-traitement skip : {e}")
+
     pages_png = _png_par_page(pdf, dpi=dpi_pages)
     pages_png_hd = _png_par_page(pdf, dpi=dpi_pages_hd) if dpi_pages_hd != dpi_pages else pages_png
 

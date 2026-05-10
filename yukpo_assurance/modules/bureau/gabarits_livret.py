@@ -445,6 +445,97 @@ PROJETS_INFOGRAPHIE: dict[str, dict] = {
         "prix_fcfa": 6500,
         "polices": {"titre": "Playfair Display", "corps": "Lato"},
     },
+    # ── Sprint 1.8b — Pages illimitées (livres, magazines, rapports longs) ──
+    "livre_photo_a4_16p": {
+        "label": "Livre photo — 16 pages A4 carré",
+        "description": "Album photo riche : couverture, 14 pages grille variées, dos.",
+        "categorie": "evenement",
+        "format_mm": (210, 210),
+        "bleed_mm": 3,
+        "pages": ["livre_photo_couverture"]
+                 + ["livre_photo_grille"] * 14
+                 + ["livre_photo_couverture"],
+        "palette": "tropical",
+        "prix_fcfa": 30000,
+        "polices": {"titre": "Playfair Display", "corps": "Lato"},
+    },
+    "livre_photo_a4_24p": {
+        "label": "Livre photo — 24 pages A4 carré",
+        "description": "Album souvenirs grande capacité : couverture, 22 pages grille, dos.",
+        "categorie": "evenement",
+        "format_mm": (210, 210),
+        "bleed_mm": 3,
+        "pages": ["livre_photo_couverture"]
+                 + ["livre_photo_grille"] * 22
+                 + ["livre_photo_couverture"],
+        "palette": "tropical",
+        "prix_fcfa": 42000,
+        "polices": {"titre": "Playfair Display", "corps": "Lato"},
+    },
+    "livre_photo_a4_32p": {
+        "label": "Livre photo — 32 pages A4 carré (premium)",
+        "description": "Album luxe : couverture, 30 pages grille (mix portrait/paysage/full), dos.",
+        "categorie": "evenement",
+        "format_mm": (210, 210),
+        "bleed_mm": 3,
+        "pages": ["livre_photo_couverture"]
+                 + ["livre_photo_grille"] * 30
+                 + ["livre_photo_couverture"],
+        "palette": "tropical",
+        "prix_fcfa": 56000,
+        "polices": {"titre": "Playfair Display", "corps": "Lato"},
+    },
+    "magazine_corporate_12p": {
+        "label": "Magazine corporate — 12 pages A4",
+        "description": "Magazine d'entreprise : édito, 4 reportages, 4 témoignages, contact, dos.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": [
+            "brochure_couverture",
+            "brochure_propositions",
+            "brochure_propositions",
+            "brochure_propositions",
+            "brochure_propositions",
+            "brochure_temoignages",
+            "brochure_temoignages",
+            "brochure_temoignages",
+            "brochure_temoignages",
+            "brochure_propositions",
+            "brochure_contact",
+            "brochure_couverture",
+        ],
+        "palette": "corporate",
+        "prix_fcfa": 38000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
+    "magazine_corporate_24p": {
+        "label": "Magazine corporate — 24 pages A4",
+        "description": "Magazine premium : couverture, 20 pages contenu varié, contact, dos.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture"]
+                 + (["brochure_propositions", "brochure_temoignages"] * 10)
+                 + ["brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 68000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
+    "rapport_annuel_32p": {
+        "label": "Rapport annuel — 32 pages A4",
+        "description": "Rapport financier/CSR : couverture, mot du DG, 26 pages contenu, contact, dos.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture"]
+                 + (["brochure_propositions", "brochure_propositions",
+                     "brochure_temoignages"] * 10)
+                 + ["brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 95000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
 }
 
 
