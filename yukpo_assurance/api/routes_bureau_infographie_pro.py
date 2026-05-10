@@ -262,6 +262,163 @@ async def bulk_lancer(
     }
 
 
+# ─── Phase 4.3a — Catalogue formats papier internationaux ───────────────────
+
+
+@router.get("/formats-papier", tags=["Bureau — Designer Pro"])
+async def lister_formats_papier_intl(
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 4.3a — Catalogue mondial des formats papier d'impression.
+    Groupé par catégorie : ISO A, ISO B, US, carte, photo, poster,
+    grand_format, plie, calendrier.
+
+    Le LLM/UI peut choisir parmi ces formats ou composer du custom.
+    """
+    from modules.bureau import formats_papier_intl as _fp
+    return {
+        "total": len(_fp.FORMATS_PAPIER_INTL),
+        "par_categorie": _fp.lister_formats_par_categorie(),
+    }
+
+
+# ─── Phase 4.3b — Fiche specs imprimeur standalone ──────────────────────────
+
+
+@router.get("/specs-imprimeur/{pdf_id}", tags=["Bureau — Designer Pro"])
+async def specs_imprimeur_pdf(
+    pdf_id: str,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 4.3b — Génère la fiche specs imprimeur (PDF) pour un PDF déjà
+    généré. Fournit toutes les infos d'impression : format final, bleed,
+    profil ICC, grammage recommandé, type papier, finition.
+    """
+    from modules.bureau import fiche_specs_imprimeur as _fsi
+    from modules.bureau import gabarits_livret as _cat
+    if "/" in pdf_id or "\\" in pdf_id or ".." in pdf_id:
+        raise HTTPException(400, "ID invalide")
+    # On ne charge pas le PDF, on récupère juste les meta du JSON projet associé
+    # (best-effort : lookup via DocumentGenereDB ou _PROJETS_JSON_DIR)
+    try:
+        from core.database import async_session_maker, DocumentGenereDB
+        from sqlalchemy import select as _sel
+        async with async_session_maker() as db:
+            doc = (await db.execute(
+                _sel(DocumentGenereDB).where(DocumentGenereDB.fichier == pdf_id)
+            )).scalar_one_or_none()
+        if not doc:
+            raise HTTPException(404, "PDF introuvable dans l'historique")
+        meta = doc.meta or {}
+        cle_projet = meta.get("cle_projet", "")
+        proj_def = _cat.PROJETS_INFOGRAPHIE.get(cle_projet, {})
+        fmt = meta.get("format_mm") or proj_def.get("format_mm") or [210, 297]
+        bleed = float(proj_def.get("bleed_mm", 3))
+        nb_pages = int(meta.get("nombre_pages") or len(proj_def.get("pages") or []) or 1)
+        pdf_bytes = _fsi.construire_fiche_pdf_bytes(
+            cle_projet=cle_projet, titre=doc.titre or cle_projet,
+            format_trim_mm=tuple(fmt), bleed_mm=bleed,
+            nombre_pages=nb_pages, mode_couleur="CMJN", duplex=True,
+        )
+        from fastapi.responses import Response as _Resp
+        return _Resp(content=pdf_bytes, media_type="application/pdf",
+                     headers={"Content-Disposition": f'attachment; filename="specs_{pdf_id}.pdf"'})
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[specs-imprimeur {pdf_id}] {e}")
+        raise HTTPException(500, f"Génération fiche specs échouée : {e}")
+
+
+# ─── Phase 4.3c — Mode VDP : merge bulk results en 1 PDF multipage ──────────
+
+
+@router.get("/bulk/merge-pdf/{job_id}", tags=["Bureau — Designer Pro"])
+async def bulk_merge_pdf(
+    job_id: str,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 4.3c — Mode VDP simple : merge tous les PDFs réussis d'un job bulk
+    en UN SEUL PDF multipage (utile pour presses numériques type Xerox iGen,
+    HP Indigo qui préfèrent un fichier unique avec N exemplaires plutôt que
+    N PDFs séparés).
+
+    Les pages du PDF mergé sont dans l'ordre des indices CSV. La fiche specs
+    est ajoutée en première page.
+    """
+    from core.database import async_session_maker, BulkJobDB
+    from sqlalchemy import select
+    from fastapi.responses import Response as _Resp
+
+    async with async_session_maker() as db:
+        job = (await db.execute(
+            select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+        )).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, "Job introuvable")
+    if job.user_id != current_user.user_id and current_user.role != "admin":
+        raise HTTPException(403, "Accès refusé")
+    if job.statut != "done":
+        raise HTTPException(400, f"Job pas terminé (statut={job.statut})")
+    results_done = [r for r in (job.results or []) if r.get("statut") == "done"]
+    if not results_done:
+        raise HTTPException(404, "Aucun PDF généré avec succès")
+
+    # Merge via pikepdf (déjà dispo Sprint 1.8c)
+    try:
+        import pikepdf
+        from modules.bureau import fiche_specs_imprimeur as _fsi
+        from modules.bureau import gabarits_livret as _cat
+        merged = pikepdf.Pdf.new()
+        # Page 1 = fiche specs imprimeur
+        proj_def = _cat.PROJETS_INFOGRAPHIE.get(job.cle_projet, {})
+        fmt = proj_def.get("format_mm") or (210, 297)
+        bleed = float(proj_def.get("bleed_mm", 3))
+        nb_pages_proj = len(proj_def.get("pages") or [])
+        try:
+            fiche_pdf = _fsi.construire_fiche_pdf_bytes(
+                cle_projet=job.cle_projet,
+                titre=proj_def.get("label", job.cle_projet),
+                format_trim_mm=tuple(fmt), bleed_mm=bleed,
+                nombre_pages=nb_pages_proj or 1,
+                notes_speciales=f"Bulk merge — {len(results_done)} exemplaires personnalisés (job {job_id[:8]})",
+            )
+            import io as _io
+            with pikepdf.Pdf.open(_io.BytesIO(fiche_pdf)) as fiche_doc:
+                merged.pages.extend(fiche_doc.pages)
+        except Exception as e:
+            logger.warning(f"[merge-pdf {job_id}] fiche specs page : {e}")
+
+        # Pages 2..N+1 = chaque PDF généré
+        results_done_sorted = sorted(results_done, key=lambda r: r.get("index", 0))
+        for res in results_done_sorted:
+            pdf_id = res.get("pdf_id")
+            if not pdf_id:
+                continue
+            pdf_file = _DATA_DIR / pdf_id
+            if not pdf_file.exists():
+                continue
+            try:
+                with pikepdf.Pdf.open(str(pdf_file)) as src:
+                    merged.pages.extend(src.pages)
+            except Exception as e:
+                logger.warning(f"[merge-pdf {job_id}] ligne {res['index']} : {e}")
+
+        import io as _io2
+        out = _io2.BytesIO()
+        merged.save(out, linearize=True)
+        return _Resp(
+            content=out.getvalue(), media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="bulk_merged_{job.cle_projet}_{job_id[:8]}.pdf"'},
+        )
+    except Exception as e:
+        logger.error(f"[merge-pdf {job_id}] {e}")
+        raise HTTPException(500, f"Merge PDF échoué : {e}")
+
+
 # ─── Phase 4.2 — A/B testing automatique (variantes + Sonnet vision compare) ─
 
 
@@ -600,10 +757,12 @@ async def _executer_bulk_job_background(job_id: str, user_id_str: str):
     # Exécution parallèle (concurrence=4 sémaphore)
     await asyncio.gather(*(_gen_une(i, r) for i, r in enumerate(rows)))
 
-    # Construction ZIP final
+    # Construction ZIP final + fiche specs imprimeur (Phase 4.3b)
     zip_path: Optional[str] = None
     try:
-        import zipfile, io as _io
+        import zipfile
+        from modules.bureau import fiche_specs_imprimeur as _fsi
+        from modules.bureau import gabarits_livret as _cat
         async with async_session_maker() as db:
             job_final = (await db.execute(
                 select(BulkJobDB).where(BulkJobDB.job_id == job_id)
@@ -613,7 +772,34 @@ async def _executer_bulk_job_background(job_id: str, user_id_str: str):
             zip_dir = _DATA_DIR / "bulk_zips"
             zip_dir.mkdir(parents=True, exist_ok=True)
             zip_path_obj = zip_dir / f"bulk_{job_id}.zip"
+            # Préparation fiche specs (1 fois pour tout le batch)
+            proj_def = _cat.PROJETS_INFOGRAPHIE.get(cle_projet, {})
+            fmt = proj_def.get("format_mm") or (210, 297)
+            bleed = float(proj_def.get("bleed_mm", 3))
+            nb_pages_proj = len(proj_def.get("pages") or [])
+            fiche_txt = _fsi.construire_fiche_texte(
+                cle_projet=cle_projet,
+                titre=proj_def.get("label", cle_projet),
+                format_trim_mm=tuple(fmt), bleed_mm=bleed,
+                nombre_pages=nb_pages_proj or 1,
+                mode_couleur="CMJN", duplex=True,
+                notes_speciales=f"Bulk job {job_id} — {len(results_done)} exemplaires personnalisés",
+            )
+            try:
+                fiche_pdf = _fsi.construire_fiche_pdf_bytes(
+                    cle_projet=cle_projet,
+                    titre=proj_def.get("label", cle_projet),
+                    format_trim_mm=tuple(fmt), bleed_mm=bleed,
+                    nombre_pages=nb_pages_proj or 1,
+                    notes_speciales=f"Bulk job {job_id}",
+                )
+            except Exception:
+                fiche_pdf = None
             with zipfile.ZipFile(zip_path_obj, "w", zipfile.ZIP_DEFLATED) as zf:
+                # Fiche specs en TXT + PDF en tête du ZIP (visible immédiatement)
+                zf.writestr("00_FICHE_SPECS_IMPRIMEUR.txt", fiche_txt.encode("utf-8"))
+                if fiche_pdf:
+                    zf.writestr("00_FICHE_SPECS_IMPRIMEUR.pdf", fiche_pdf)
                 for res in results_done:
                     pdf_id = res.get("pdf_id")
                     if not pdf_id:
