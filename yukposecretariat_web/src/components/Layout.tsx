@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  LayoutDashboard, FileText, Image, KanbanSquare,
+  LayoutDashboard, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
-  Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2, Building2,
+  FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2, Building2,
   Sparkles, TrendingUp,
 } from 'lucide-react'
 import { authAPI } from '../api/client'
@@ -15,14 +15,14 @@ import { SUPPORTED_LANGUAGES } from '../i18n'
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'yukpo_owner']
 
+// Sprint chat-only — Rédaction / Infographie / Traduction / Conversion / OCR
+// passent désormais par le chat orchestré (POST /pro/orchestrer).
+// Les routes legacy redirigent vers /chat dans App.tsx (compat bookmarks).
+// /documents = hub historique (pas un générateur) → conservé.
 const NAV_KEYS = [
-  // Sprint S1 — Chat Unifié = entrée par défaut (tout au même endroit)
   { to: '/chat',        key: 'chat',        icon: Sparkles,        adminOnly: false },
   { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
   { to: '/analytics',   key: 'analytics',   icon: TrendingUp,      adminOnly: false },
-  { to: '/redaction',   key: 'redaction',   icon: FileText,        adminOnly: false },
-  { to: '/infographie', key: 'infographie', icon: Image,           adminOnly: false },
-  { to: '/traduction',  key: 'traduction',  icon: Languages,       adminOnly: false },
   { to: '/documents',   key: 'documents',   icon: FolderOpen,      adminOnly: false },
   { to: '/kanban',      key: 'kanban',      icon: KanbanSquare,    adminOnly: false },
   { to: '/devis',       key: 'devis',       icon: Receipt,         adminOnly: false },

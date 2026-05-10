@@ -23,6 +23,7 @@ import {
   secChatAPI, redactionAPI, ocrAPI, audioAPI, traductionAPI, infographieAPI,
   infographieProAPI,
 } from '../api/client'
+import SuggestionsChips, { type Suggestion } from './SuggestionsChips'
 
 type Attachment = {
   file: File
@@ -215,26 +216,39 @@ export default function ChatUnifieSec() {
         return
       }
 
-      toast.success(`${t('chatUnifie.intentDetected', 'Détecté')} : ${intent} (${Math.round(confiance * 100)}%)`)
-
-      // 2. Exécution selon intent
+      // Pattern boîte noire (aligné YPro) : pas de toast intent/confiance, pas
+      // de "Action exécutée: X" — l'utilisateur voit juste le résultat.
       const result = await executerSelonIntent(intent, message, attachments)
 
       const yukpoTurn: ChatTurn = {
         role: 'yukpo', ts: new Date().toISOString(),
-        content: `${t('chatUnifie.actionDone', 'Action exécutée')} : ${intent}`,
-        intent, resultat: result,
+        content: '', intent, resultat: result,
       }
       setTurns(prev => [...prev, yukpoTurn])
       setMessage(''); setAttachments([])
     } catch (e: any) {
-      const errMsg = e?.response?.data?.detail || e?.message || 'Erreur'
-      const yukpoTurn: ChatTurn = {
-        role: 'yukpo', ts: new Date().toISOString(),
-        content: `❌ ${errMsg}`, intent: 'erreur',
+      const detail = e?.response?.data?.detail
+      // Solde insuffisant (backend renvoie 402 ou code CREDITS_EPUISES) → toast
+      // simple sans prix affiché, lien vers /abonnement (politique produit ferme).
+      if (e?.response?.status === 402 ||
+          (typeof detail === 'string' && detail.includes('CREDITS_EPUISES')) ||
+          (detail && typeof detail === 'object' && detail.code === 'CREDITS_EPUISES')) {
+        const yukpoTurn: ChatTurn = {
+          role: 'yukpo', ts: new Date().toISOString(),
+          content: '⚠️ Crédits insuffisants. [→ Recharger mon compte](/abonnement)',
+          intent: 'erreur',
+        }
+        setTurns(prev => [...prev, yukpoTurn])
+        toast.error('Crédits insuffisants. Rechargez votre compte pour continuer.', { duration: 6000 })
+      } else {
+        const errMsg = (typeof detail === 'string' ? detail : detail?.message) || e?.message || 'Erreur'
+        const yukpoTurn: ChatTurn = {
+          role: 'yukpo', ts: new Date().toISOString(),
+          content: `❌ ${errMsg}`, intent: 'erreur',
+        }
+        setTurns(prev => [...prev, yukpoTurn])
+        toast.error(errMsg)
       }
-      setTurns(prev => [...prev, yukpoTurn])
-      toast.error(errMsg)
     } finally {
       setLoading(false)
     }
@@ -334,6 +348,12 @@ export default function ChatUnifieSec() {
     return null
   }
 
+  // Re-injecte une suggestion dans le textarea + relance (UX YPro)
+  const onPickSuggestion = (prompt: string) => {
+    setMessage(prompt)
+    setTimeout(() => envoyer(), 0)
+  }
+
   return (
     <div className="flex flex-col h-full max-h-[85vh]">
       {/* ── En-tête ─────────────────────────────────────────────────── */}
@@ -384,7 +404,15 @@ export default function ChatUnifieSec() {
                   ))}
                 </div>
               )}
-              {turn.role === 'yukpo' && turn.resultat && <RenduResultat result={turn.resultat} />}
+              {turn.role === 'yukpo' && turn.resultat && (
+                <>
+                  <RenduResultat result={turn.resultat} />
+                  <SuggestionsChips
+                    suggestions={turn.resultat.data?.suggestions as Suggestion[] | undefined}
+                    onPick={onPickSuggestion}
+                  />
+                </>
+              )}
             </div>
           </div>
         ))}
