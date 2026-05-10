@@ -124,13 +124,33 @@ Bundle Sec : **−251 KB** (1370 → 1120 KB) après dépendances retirées.
 
 ---
 
-## 6. CORRECTIFS RESTANTS (sprints backend dédiés)
+## 6. CORRECTIFS RESTANTS
 
-1. **Unifier les 3 orchestrateurs** en un seul `/pro/orchestrer` qui couvre rapport/slides/visuel/ocr/audio/traduction/conversion (élargir le catalogue + le schéma JSON sortie).
-2. **Étendre le schéma JSON** avec `taille`, `charte`, `options_specifiques`, `endpoint_cible`, `nombre_pages_visuel`, `cible_diffusion`.
-3. **Supprimer les 6 anti-patterns keyword backend** listés section 3 (heuristique infographie-pro 1924-1937, chat 391, archive 66-89, agent_conv 177/222/386/398, enquetes 628-635, sujet startswith 235).
-4. **Faire que `payload_pret` soit consommable directement** côté visuel (frontend `await http.post(orch.endpoint_cible, orch.payload_pret)` au lieu de hardcoder `infographieProApi.genererAuto(...)`).
-5. **Aligner Sec sur orchestrateur unifié** une fois la fusion backend faite (aujourd'hui Sec utilise `/bureau/chat/message` justifié car l'orchestrateur G1 ne couvre pas encore OCR/audio/visuel).
+### Traités dans cette session (commit suivant)
+
+| # | Item | Fichier | Statut |
+|---|------|---------|--------|
+| 1 | Bug fallback heuristique Designer Pro (« carnet de prière » → brochure) | `routes_bureau_infographie_pro.py:1888-1937` | ✅ remplacé par 2× retry LLM puis HTTPException 503 si KO (plus de mots-clés deviné) |
+| 2 | Bug `sujet.lower().startswith(("est-ce","peux-tu",...))` | `routes_pro_generateurs.py:228-243` | ✅ supprimé. Critère structurel only (`?` ou len>90) → délégation Haiku titre |
+| 3 | Schéma orchestrateur visuel manque `endpoint_cible` / `payload_pret` (parité avec `/pro/orchestrer`) | `routes_bureau_infographie_pro.py:2247+2492` | ✅ ajoutés. Frontend peut désormais `http.post(orch.endpoint_cible, orch.payload_pret)` uniformément |
+
+### Reclassés (faux positifs de l'audit initial)
+
+| # | Item flaggé | Vraie nature | Action |
+|---|-------------|--------------|--------|
+| 4 | `routes_archive.py:66-89` (`if "facture"/"contrat"/"cni" in nom_fichier`) | Code DEMO `generer_demo_ocr()` — fake data quand pas de clé IA | Pas un bug. Aucune action. |
+| 5 | `routes_chat.py:391` (`q = question.lower()` puis branchements) | Code DEMO `_reponse_demo_cima()` — fake responses CIMA en mode démo | Pas un bug. Aucune action. |
+| 6 | `routes_agent_conv.py:172-194` (`_detecter_agent_fastpath`) | Optimisation < 1ms avec fallback LLM correct (`return None` → LLM) | Garder. Performance. |
+| 7 | `routes_enquetes.py:628-635` (extraction objectif/population par mots-clés) | Heuristique soft d'extraction si non fournis ; LLM Sonnet appelé après pour la vraie génération | Garder. Optimisation pré-LLM. |
+
+### Toujours pending (sprint backend dédié)
+
+| # | Item | Effort estimé |
+|---|------|---------------|
+| A | Unifier les 3 orchestrateurs en un `/pro/orchestrer` couvrant rapport/slides/visuel/ocr/audio/traduction/conversion | 8-12h |
+| B | Aligner Sec ChatUnifieSec pour consommer `orch.endpoint_cible` + `orch.payload_pret` (post-fusion A) | 2-3h |
+| C | Tests d'exécution réseau des 30 briefs sur staging | 2h (script + diff réf) |
+| D | Étendre schéma `/pro/orchestrer` rapport+slides avec `charte` (palette/logo organisation injectée auto) | 1-2h backend + 1h frontend
 
 ---
 
@@ -140,8 +160,12 @@ Bundle Sec : **−251 KB** (1370 → 1120 KB) après dépendances retirées.
 - ✅ Toutes les routes legacy redirigent vers `/chat`
 - ✅ Pattern UX boîte noire (silencieux, pas de prix, suggestions chips) symétrique YPro ↔ Sec
 - ✅ Frontend YPro débarrassé de son keyword-routing résiduel
-- ⏳ Backend : 6 anti-patterns keyword à éliminer (sprint dédié)
-- ⏳ Schéma orchestrateur à enrichir + fusion 3 orchestrateurs (sprint dédié)
-- ⏳ Tests d'exécution réseau des 30 briefs sur staging (à lancer)
+- ✅ 2 vrais anti-patterns keyword backend éliminés (1924-1937 + 235)
+- ✅ 4 faux positifs reclassés (3 fonctions DEMO + 2 optims avec fallback LLM)
+- ✅ Schéma orchestrateur visuel uniformisé (endpoint_cible + payload_pret)
+- ⏳ Fusion 3 orchestrateurs en un seul (item A — sprint dédié 8-12h)
+- ⏳ Alignement Sec sur orchestrateur unifié (item B — post-A)
+- ⏳ Tests d'exécution réseau des 30 briefs sur staging (item C)
+- ⏳ Charte d'organisation injectée auto dans le schéma rapport+slides (item D)
 
-Builds green : Sec `vite build` 24s · YPro `vite build` 18s.
+Builds green : Sec `vite build` 24s · YPro `vite build` 18s · backend `python -m py_compile` OK.

@@ -1902,39 +1902,38 @@ BRIEF UTILISATEUR :
 {f'HINT UTILISATEUR : {hint} (utilise-le si cohérent avec le brief, sinon ignore-le).' if hint else ''}
 
 Retourne UNIQUEMENT la clé exacte (ex: "livret_deces_8p"), rien d'autre."""
-    try:
-        rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.PRECISION,
-                                       max_tokens_override=40, utiliser_cache=True)
-        if user_id and (rep.tokens_input or rep.tokens_output):
-            try:
-                from modules.bureau.service_credits_bureau import debiter_llm as _dl
-                await _dl(user_id, modele=rep.modele_utilise,
-                          tokens_input=int(rep.tokens_input or 0),
-                          tokens_output=int(rep.tokens_output or 0),
-                          module="infographie")
-            except Exception:
-                pass
-        cle = rep.contenu.strip().strip('"').strip("'").splitlines()[0].strip()
-        from modules.bureau import gabarits_livret as catalog
-        if cle in catalog.PROJETS_INFOGRAPHIE:
-            return cle
-    except Exception as e:
-        logger.warning(f"[Designer Pro/Auto] Détection LLM : {e}")
-    # Fallback heuristique
-    msg = brief.lower()
-    if "deuil" in msg or "déc" in msg or "obsèques" in msg or "memoriam" in msg:
-        return "livret_deces_8p"
-    if "mariage" in msg or "noces" in msg:
-        return "livret_mariage_4p"
-    if "menu" in msg or "restau" in msg or "carte des plats" in msg:
-        return "menu_resto_4p"
-    if "brochure" in msg or "plaquette" in msg or "présentation entreprise" in msg:
-        return "brochure_corporate_4p"
-    if "culte" in msg or "messe" in msg or "cérémonie religieuse" in msg:
-        return "programme_culte_4p"
-    if "album" in msg or "souvenir" in msg or "livre photo" in msg:
-        return "livre_photo_a4_8p"
-    return hint if hint else "brochure_corporate_4p"
+    from modules.bureau import gabarits_livret as catalog
+    # 2 tentatives LLM avant fallback. Pas de routage par mots-clés : un brief
+    # « carnet de prière 16p » mappait à tort sur brochure_corporate_4p.
+    last_err: Optional[Exception] = None
+    for _attempt in range(2):
+        try:
+            rep = await ia_client.appeler(prompt=prompt, mode=ModeIA.PRECISION,
+                                           max_tokens_override=40, utiliser_cache=(_attempt == 0))
+            if user_id and (rep.tokens_input or rep.tokens_output):
+                try:
+                    from modules.bureau.service_credits_bureau import debiter_llm as _dl
+                    await _dl(user_id, modele=rep.modele_utilise,
+                              tokens_input=int(rep.tokens_input or 0),
+                              tokens_output=int(rep.tokens_output or 0),
+                              module="infographie")
+                except Exception:
+                    pass
+            cle = rep.contenu.strip().strip('"').strip("'").splitlines()[0].strip()
+            if cle in catalog.PROJETS_INFOGRAPHIE:
+                return cle
+        except Exception as e:
+            last_err = e
+            logger.warning(f"[Designer Pro/Auto] Tentative {_attempt + 1} LLM : {e}")
+    # Échec LLM répété : si l'utilisateur a fourni un hint valide, on l'utilise ;
+    # sinon on remonte clairement l'échec au lieu de deviner par mots-clés.
+    if hint and hint in catalog.PROJETS_INFOGRAPHIE:
+        logger.info(f"[Designer Pro/Auto] LLM KO 2× → fallback sur hint utilisateur '{hint}'")
+        return hint
+    raise HTTPException(503,
+        "Détection automatique du projet indisponible — précise une clé "
+        "de projet (cle_projet_hint) ou réessaie dans quelques secondes."
+    )
 
 
 # ─── Sprint L1.3 — Export multilingual (N PDFs en parallèle) ────────────────
@@ -2247,6 +2246,13 @@ class ReponseOrchestrer(BaseModel):
         description="Types de médias attendus mais non fournis (ex: 'photo du défunt', 'logo entreprise')")
     medias_refs_actifs: list[str] = Field(default_factory=list,
         description="Sous-ensemble de medias_refs jugés pertinents par l'IA (à pré-cocher dans le formulaire)")
+    # Sprint audit chat-only — uniformisation avec /pro/orchestrer pour permettre
+    # au frontend de faire `http.post(orch.endpoint_cible, orch.payload_pret)`
+    # sans logique de routage spécifique.
+    endpoint_cible: Optional[str] = Field(default=None,
+        description="URL backend canonique pour exécuter la génération")
+    payload_pret: Optional[dict] = Field(default=None,
+        description="Body JSON prêt-à-poster sur endpoint_cible")
 
 
 @router.post("/orchestrer", response_model=ReponseOrchestrer, tags=["Bureau — Designer Pro"])
@@ -2482,10 +2488,34 @@ Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
     except Exception:
         pass
 
-    # Normalisation des champs requis
+    # Sprint audit chat-only — endpoint_cible + payload_pret pour exécution
+    # uniforme côté frontend (parité avec /pro/orchestrer rapport+slides).
+    cle_projet_final = data.get("cle_projet", "")
+    type_projet_final = data.get("type_projet", "multi")
+    if type_projet_final == "mono":
+        endpoint_cible_v = "/api/v1/bureau/infographie/generer"
+        payload_pret_v: dict = {
+            "brief": data.get("brief_enrichi") or demande.prompt,
+            "type_gabarit": cle_projet_final or "auto",
+            "pays": demande.pays,
+            "export_cmyk": True,
+        }
+    else:
+        endpoint_cible_v = "/api/v1/bureau/infographie-pro/generer-auto"
+        payload_pret_v = {
+            "brief": data.get("brief_enrichi") or demande.prompt,
+            "cle_projet_hint": cle_projet_final or None,
+            "pays": demande.pays,
+            "langue": demande.langue,
+            "export_cmyk": True,
+            "mode_visuel": data.get("mode_visuel_suggere") or "auto",
+            "directives_visuelles": data.get("directives_visuelles_pre") or {},
+            "medias_refs": data.get("medias_refs_actifs") or demande.medias_refs or None,
+        }
+
     return ReponseOrchestrer(
-        type_projet=data.get("type_projet", "multi"),
-        cle_projet=data.get("cle_projet", ""),
+        type_projet=type_projet_final,
+        cle_projet=cle_projet_final,
         label_projet=data.get("label_projet", ""),
         description_projet=data.get("description_projet", ""),
         confiance=float(data.get("confiance", 0.5)),
@@ -2502,6 +2532,8 @@ Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
         recommandation_medias=(data.get("recommandation_medias") or [])[:30],
         medias_manquants=(data.get("medias_manquants") or [])[:10],
         medias_refs_actifs=(data.get("medias_refs_actifs") or [])[:30],
+        endpoint_cible=endpoint_cible_v,
+        payload_pret=payload_pret_v,
     )
 
 

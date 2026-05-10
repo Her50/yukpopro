@@ -225,22 +225,12 @@ async def generer_rapport(
 
     profil, _ = await get_or_create(current_user.user_id, db)
 
-    # Si le "sujet" reçu ressemble à une question/instruction (point d'interrogation,
-    # amorce verbale, longueur excessive), on dérive un vrai titre via LLM.
-    # Sans ça, la page de garde, l'en-tête et le filename héritent de la phrase brute.
+    # Le LLM Haiku décide si le sujet doit être nettoyé (titre propre vs phrase
+    # brute). Plus de matching keyword startswith (fragile, multi-langue impossible).
+    # Critères structurels seulement : présence de '?' ou longueur > 90 chars.
     sujet_clean = (req.sujet or "").strip()
-    _looks_like_question = (
-        "?" in sujet_clean
-        or len(sujet_clean) > 90
-        or sujet_clean.lower().startswith((
-            "est-ce", "est ce", "peux-tu", "peux tu", "pourrais",
-            "j'aimerais", "jaimerais", "il me faut", "il faut",
-            "génère", "genere", "rédige", "redige", "fais ", "crée ", "cree ",
-            "donne-moi", "donne moi", "écris", "ecris", "prépare", "prepare",
-            "monte-moi", "monte moi", "produis",
-        ))
-    )
-    if _looks_like_question:
+    _trigger_titre_llm = "?" in sujet_clean or len(sujet_clean) > 90
+    if _trigger_titre_llm:
         try:
             from core.ia_client import ia_client
             from api.routes_pro_copilote import _generer_titre_document
