@@ -53,7 +53,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@yukpo/admin-dashboard": path.resolve(__dirname, "../packages/admin-dashboard/src"),
     },
+    // packages/admin-dashboard a lucide-react/react/axios en peerDependencies
+    // sans installation locale. dedupe force Vite/Rollup à résoudre depuis le
+    // node_modules du root (yukpopro_web), évitant l'erreur :
+    //   "Rollup failed to resolve import 'lucide-react' from packages/...".
+    dedupe: ["react", "react-dom", "lucide-react", "axios"],
   },
   server: {
     port: 3000,

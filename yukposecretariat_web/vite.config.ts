@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import path from 'path'
 
 export default defineConfig({
   plugins: [
@@ -49,6 +50,17 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@yukpo/admin-dashboard': path.resolve(__dirname, '../packages/admin-dashboard/src'),
+    },
+    // packages/admin-dashboard a lucide-react/react/axios en peerDependencies
+    // sans installation locale. dedupe force Vite/Rollup à résoudre depuis le
+    // node_modules du root (yukposecretariat_web), évitant l'erreur :
+    //   "Rollup failed to resolve import 'lucide-react' from packages/...".
+    dedupe: ['react', 'react-dom', 'lucide-react', 'axios'],
+  },
   server: {
     port: 5174,
     proxy: {
