@@ -2611,21 +2611,45 @@ async def convertir_fichier(
 # payload_pret en bypass.
 # ═════════════════════════════════════════════════════════════════════════════
 
-# Catalogue des templates pro (extrait du frontend GenerateursPage.tsx).
+# Catalogue des templates pro (synchronisé avec _STRUCTURES de
+# modules/pro/report_writer_pro.py — source de vérité côté backend).
 # (id, type_sortie, label, métier dominant, mots-clés indicatifs).
+#
+# IMPORTANT : tout type_id présent ici DOIT exister dans _STRUCTURES sinon
+# ReportWriterPro fallback sur "rapport_analyse" — c'est exactement le bug
+# qui faisait que toutes les conventions étaient générées comme des rapports.
 _CATALOGUE_TEMPLATES_G1 = [
+    # ── Rapports d'analyse / synthèse ────────────────────────────────────
     ("rapport_audit",     "rapport", "Rapport d'audit",         "auditeur",   "audit interne externe contrôle CIMA OHADA"),
     ("rapport_financier", "rapport", "Rapport financier",       "DAF",        "états financiers bilan compte résultat trésorerie"),
-    ("note_de_synthese",  "rapport", "Note de synthèse",        "analyste",   "synthèse résumé executif briefing"),
-    ("rapport_analyse",   "rapport", "Rapport d'analyse",       "analyste",   "analyse données performance KPI"),
-    ("plan_action",       "rapport", "Plan d'action",           "consultant", "plan stratégique roadmap mesures"),
-    ("compte_rendu",      "rapport", "Compte-rendu",            "secretaire", "CR réunion compte-rendu PV"),
-    ("note_juridique",    "rapport", "Note juridique",          "juriste",    "note juridique conformité OHADA"),
-    ("rapport_rh",        "rapport", "Rapport RH",              "DRH",        "ressources humaines social bilan"),
-    ("slides_executive",  "slides",  "Présentation direction",  "directeur",  "présentation CA résultats trimestriels conseil"),
-    ("slides_commercial", "slides",  "Présentation commerciale","commercial", "pitch produit présentation client offre"),
-    ("slides_formation",  "slides",  "Présentation formation",  "formateur",  "support formation cours pédagogique"),
-    ("slides_projet",     "slides",  "Présentation projet",     "chef projet","présentation projet jalons livrables"),
+    ("note_de_synthese",  "rapport", "Note de synthèse",        "analyste",   "synthèse résumé executif briefing condensé"),
+    ("rapport_analyse",   "rapport", "Rapport d'analyse",       "analyste",   "analyse données performance KPI étude"),
+    ("plan_action",       "rapport", "Plan d'action",           "consultant", "plan stratégique roadmap mesures actions"),
+    ("compte_rendu",      "rapport", "Compte-rendu",            "secretaire", "CR réunion compte-rendu PV délibération"),
+    ("rapport_rh",        "rapport", "Rapport RH",              "DRH",        "ressources humaines social bilan effectifs"),
+    ("note_juridique",    "rapport", "Note juridique",          "juriste",    "note juridique avis légal analyse droit OHADA"),
+    # ── Documents JURIDIQUES STRUCTURÉS (Préambule / Articles / Signatures) ──
+    ("convention",          "rapport", "Convention",                "juriste", "convention partenariat collaboration accord protocole MOU"),
+    ("contrat_bail",        "rapport", "Contrat de bail",           "juriste", "bail location commercial habitation immobilier loyer"),
+    ("contrat_travail",     "rapport", "Contrat de travail",        "DRH",     "contrat travail CDI CDD embauche salarié employé"),
+    ("contrat_prestation",  "rapport", "Contrat de prestation",     "juriste", "prestation service freelance consultant honoraires"),
+    ("contrat_vente",       "rapport", "Contrat de vente",          "juriste", "vente cession achat acquisition bien"),
+    ("contrat_generique",   "rapport", "Contrat générique",         "juriste", "contrat accord engagement partie clauses"),
+    ("statuts",             "rapport", "Statuts de société",        "juriste", "statuts SARL SA SAS création société entreprise OHADA"),
+    ("reglement_interieur", "rapport", "Règlement intérieur",       "juriste", "règlement intérieur entreprise discipline procédures"),
+    # ── Lettres / courriers officiels ────────────────────────────────────
+    ("lettre_officielle",       "rapport", "Lettre officielle",       "secretaire", "lettre officielle administration courrier formel"),
+    ("lettre_commerciale",      "rapport", "Lettre commerciale",      "commercial", "lettre commerciale prospection offre"),
+    ("lettre_mise_en_demeure",  "rapport", "Lettre de mise en demeure","juriste",    "mise en demeure huissier dette impayé sommation"),
+    ("lettre_resiliation",      "rapport", "Lettre de résiliation",   "secretaire", "résiliation contrat fin abonnement"),
+    ("lettre_emploi",           "rapport", "Lettre de motivation/CV", "candidat",   "candidature emploi motivation CV"),
+    ("attestation",             "rapport", "Attestation",             "secretaire", "attestation employeur travail présence salaire"),
+    ("certificat",              "rapport", "Certificat",              "secretaire", "certificat scolaire médical conformité"),
+    # ── Présentations / slides ───────────────────────────────────────────
+    ("slides_executive",  "slides",  "Présentation direction",   "directeur",  "présentation CA résultats trimestriels conseil"),
+    ("slides_commercial", "slides",  "Présentation commerciale", "commercial", "pitch produit présentation client offre"),
+    ("slides_formation",  "slides",  "Présentation formation",   "formateur",  "support formation cours pédagogique"),
+    ("slides_projet",     "slides",  "Présentation projet",      "chef projet","présentation projet jalons livrables"),
 ]
 _CREDITS_PAR_MODE_G1 = {"flash": 2000, "standard": 4500, "complet": 12000, "expert": 25000}
 _DUREE_PAR_MODE_G1 = {"flash": 120, "standard": 300, "complet": 900, "expert": 1500}
@@ -2711,15 +2735,39 @@ CATALOGUE DES TEMPLATES DISPONIBLES :
 
 REGLES :
 1. template_id = EXACTEMENT un id du catalogue ci-dessus (jamais inventer).
-2. type_sortie ∈ rapport | slides.
+
+   ⚠️ CRITIQUE — distinction RAPPORT vs DOCUMENT JURIDIQUE :
+   - Si le brief mentionne explicitement « convention », « contrat »,
+     « bail », « statuts », « règlement », « accord », « MOU » → utilise
+     le template juridique structuré correspondant (convention, contrat_bail,
+     contrat_travail, contrat_prestation, contrat_vente, contrat_generique,
+     statuts, reglement_interieur). Ces templates produisent un format
+     « Préambule / Parties / Articles numérotés / Signatures » conforme
+     au droit OHADA.
+   - Si le brief mentionne « note juridique », « avis juridique »,
+     « analyse juridique » → note_juridique (rapport d'analyse, pas
+     contrat). Ce n'est PAS la même chose qu'une convention.
+   - Si le brief mentionne « lettre », « courrier », « mise en demeure »,
+     « attestation », « certificat » → utilise le template lettre_* /
+     attestation / certificat correspondant (PAS un rapport).
+   - rapport_analyse / rapport_audit / rapport_financier / rapport_rh /
+     plan_action / compte_rendu / note_de_synthese : uniquement pour de
+     vrais rapports d'analyse, JAMAIS pour des contrats ou conventions.
+
+2. type_sortie ∈ rapport | slides. (Tous les contrats / conventions /
+   lettres / attestations sortent en type_sortie="rapport" — c'est le
+   format DOCX ; le format interne du document est piloté par template_id.)
+
 3. mode ∈ flash (1p, 2min) | standard (5-10p, 5min) | complet (15-40p, 15min) | expert (50-100p, 25min).
    - flash : urgence ou simplicité explicite
    - standard : par défaut
-   - complet : "détaillé", "audit", "trimestriel", "annuel"
-   - expert : recherche approfondie, gros volume
-4. format_sortie : "docx" pour rapports, "pptx" pour slides, "markdown" si demandé.
+   - complet : "détaillé", "audit", "trimestriel", "annuel", contrats complexes
+   - expert : recherche approfondie, gros volume, statuts complexes multi-associés
+4. format_sortie : "docx" pour rapports/contrats/lettres, "pptx" pour slides,
+   "markdown" si demandé explicitement.
 5. langue : ISO court (fr/en/es/pt/ar/de/zh/sw/wo/ha/ln/am/ru/hi/tr) — auto-détection.
-6. parametres_extraits : entités explicites du brief uniquement.
+6. parametres_extraits : entités explicites du brief uniquement (parties
+   contractantes, dates, montants, lieu, objet, durée, etc.).
 7. credits_estimes : flash=2000, standard=4500, complet=12000, expert=25000.
 8. duree_estimee_secondes : flash=120, standard=300, complet=900, expert=1500.
 
