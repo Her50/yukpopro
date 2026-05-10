@@ -511,7 +511,8 @@ class SlideBuilderPro:
             f'"points": ["point1 factuel", "point2..."], '
             f'"kpis": [{{"label": "Libellé", "valeur": "1 234 (devise locale {devise_locale})", "tendance": "hausse|baisse|stable"}}], '
             f'"message_cle": "Message fort de la slide en 1 phrase percutante", '
-            f'"note": "Note présentateur optionnelle"'
+            f'"notes_orateur": "OBLIGATOIRE — 3 à 5 phrases substantives pour le présentateur '
+            f'(contexte, transitions, anecdote, chiffre supplémentaire, anticipation question)"'
             f'}}]}}'
         )
 
@@ -651,20 +652,28 @@ class SlideBuilderPro:
                     result = []
                     for slide, struct in zip(slides, structure):
                         type_s = struct["type"]
+                        # `notes_orateur` (nouveau, mandaté par le prompt TOP 2)
+                        # avec fallback sur `note` (ancien champ optionnel) pour
+                        # rétrocompatibilité avec les réponses cached.
+                        notes_val = (
+                            slide.get("notes_orateur")
+                            or slide.get("note")
+                            or ""
+                        )
                         result.append({
-                            "titre":       str(slide.get("titre", struct["titre"]) or struct["titre"]),
-                            "type":        type_s,
-                            "points":      _normaliser_points(slide.get("points", []), type_s),
-                            "kpis":        _normaliser_kpis(slide.get("kpis", [])),
-                            "message_cle": str(slide.get("message_cle", "") or ""),
-                            "note":        str(slide.get("note", "") or ""),
+                            "titre":          str(slide.get("titre", struct["titre"]) or struct["titre"]),
+                            "type":           type_s,
+                            "points":         _normaliser_points(slide.get("points", []), type_s),
+                            "kpis":           _normaliser_kpis(slide.get("kpis", [])),
+                            "message_cle":    str(slide.get("message_cle", "") or ""),
+                            "notes_orateur":  str(notes_val or ""),
                         })
                     return result
         except Exception as e:
             logger.warning(f"[SlideBuilder] Erreur parsing JSON slides : {e}")
 
         return [
-            {"titre": s["titre"], "type": s["type"], "points": [], "kpis": [], "message_cle": "", "note": ""}
+            {"titre": s["titre"], "type": s["type"], "points": [], "kpis": [], "message_cle": "", "notes_orateur": ""}
             for s in structure
         ]
 
@@ -719,6 +728,45 @@ class SlideBuilderPro:
         prs.slide_width  = Inches(13.33)
         prs.slide_height = Inches(7.5)
 
+        # ── Métadonnées PPTX (Fichier > Propriétés sous PowerPoint) ───────
+        # Avant : 0 metadata. Après : title/author/subject/keywords/category
+        # renseignés → indexable DMS, perception "logiciel pro" immédiate.
+        try:
+            cp = prs.core_properties
+            cp.title = (sujet or "")[:255]
+            cp.subject = f"{type_pres} ({mode})"
+            if self._profil:
+                auteur = (
+                    getattr(self._profil, "nom_complet", None)
+                    or getattr(self._profil, "nom", None)
+                    or getattr(self._profil, "user_nom", None)
+                    or "Yukpo"
+                )
+                cp.author = str(auteur)[:255]
+                cp.last_modified_by = str(auteur)[:255]
+                org = (
+                    getattr(self._profil, "nom_organisation", None)
+                    or getattr(self._profil, "entreprise", None) or ""
+                )
+                if org:
+                    cp.company = str(org)[:255]
+            else:
+                cp.author = "Yukpo"
+            kw = [type_pres, mode]
+            try:
+                if self._profil:
+                    pays = getattr(self._profil, "pays", None)
+                    if pays: kw.append(str(pays))
+                    metier = getattr(self._profil, "metier", None)
+                    if metier: kw.append(str(metier))
+            except Exception:
+                pass
+            cp.keywords = ", ".join(filter(None, kw))[:255]
+            cp.category = "Présentation"
+            cp.comments = "Généré par Yukpo Pro"
+        except Exception as _e_meta:
+            logger.debug(f"[SlideBuilder] Métadonnées PPTX non posées : {_e_meta}")
+
         nb_total = len(slides)
         for idx, slide_data in enumerate(slides):
             self._ajouter_slide(prs, slide_data, sujet, idx + 1, nb_total)
@@ -765,6 +813,19 @@ class SlideBuilderPro:
         # Pied de page (sauf cover/fin)
         if type_slide not in ("cover", "fin"):
             self._slide_footer(slide, w, h, num, total)
+
+        # ── Notes orateur (TOP 2) ────────────────────────────────────────────
+        # Le LLM a généré 3-5 phrases substantives par slide (cf. prompt).
+        # On les injecte dans le panneau "Notes" PowerPoint via notes_slide.
+        # Avant : aucune note (grep notes_slide = 0). Après : presenter view
+        # natif PowerPoint utilisable en démo client / training équipe.
+        notes_txt = (slide_data.get("notes_orateur") or slide_data.get("note") or "").strip()
+        if notes_txt:
+            try:
+                ns = slide.notes_slide
+                ns.notes_text_frame.text = notes_txt
+            except Exception as _e_ns:
+                logger.debug(f"[SlideBuilder] Notes slide {num} non injectées : {_e_ns}")
 
     # ── Header commun ─────────────────────────────────────────────────────────
 
