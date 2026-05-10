@@ -47,6 +47,7 @@ class ContexteRequete:
     role_utilisateur: str = "agent"  # "agent" | "manager" | "daf" | "dg" | "courtier"
     historique: list[dict] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
+    pays: Optional[str] = None    # ISO 2 (CM/SN/CI/...) — pour recherche web réglementaire ciblée
 
 
 @dataclass
@@ -110,6 +111,19 @@ class Orchestrateur:
 
         # 3. Construction du système prompt métier
         systeme = self._construire_systeme_prompt(contexte.domaine, contexte.role_utilisateur)
+
+        # 3b. Recherche web temps réel pour domaines réglementaires complexes.
+        # Pas de RAG figé pour les codes/régulations — le LLM peut être stale
+        # sur les chiffres/articles/délais. On va chercher les sources
+        # officielles (Serper sur whitelist BIS/IAIS/CIMA-afrique/OHADA/
+        # régulateurs nationaux). Fallback : si Serper KO ou aucun résultat,
+        # le LLM utilise sa connaissance native EN MARQUANT explicitement
+        # "à vérifier sur source officielle" — jamais d'invention de chiffre.
+        bloc_sources_web = await self._chercher_sources_officielles(
+            contexte=contexte, complexite=complexite,
+        )
+        if bloc_sources_web:
+            systeme = systeme + "\n\n" + bloc_sources_web
 
         # 4. Enrichissement du prompt avec contexte historique
         prompt_enrichi = self._enrichir_prompt(contexte)
@@ -335,6 +349,109 @@ class Orchestrateur:
         if complexite == NiveauComplexite.SIMPLE:
             return ModeIA.COPILOTE
         return ModeIA.REDACTION
+
+    async def _chercher_sources_officielles(
+        self,
+        contexte: ContexteRequete,
+        complexite: NiveauComplexite,
+    ) -> Optional[str]:
+        """Recherche web temps réel sur sites officiels pour les domaines
+        réglementaires complexes. Retourne un bloc système prompt à concaténer,
+        ou None si non applicable / désactivé / silencieux.
+
+        Domaines déclencheurs : CIMA, FRAUDE, SINISTRES, COMPTABILITE,
+        SOUSCRIPTION en COMPLEXE OU MOYEN. Pourquoi : citations articles
+        Code CIMA, délais réglementaires, taux prudentiels, normes IFRS,
+        OHADA — tout ça change et le LLM peut être stale.
+
+        Comportement :
+        - Si Serper renvoie des extraits → bloc "SOURCES OFFICIELLES VÉRIFIÉES"
+          avec URLs + extraits (LLM doit les citer prioritairement).
+        - Sinon (Serper KO, no key, no result) → bloc "RECHERCHE OFFICIELLE
+          INDISPONIBLE" demandant au LLM d'utiliser ses connaissances natives
+          en marquant chaque article/délai/chiffre cité par "(à vérifier sur
+          source officielle)".
+
+        Jamais d'invention silencieuse de chiffre/article/date.
+        """
+        # Domaines réglementaires éligibles
+        regulatoires = {
+            DomaineMétier.CIMA, DomaineMétier.FRAUDE, DomaineMétier.SINISTRES,
+            DomaineMétier.COMPTABILITE, DomaineMétier.SOUSCRIPTION,
+        }
+        if contexte.domaine not in regulatoires:
+            return None
+        # Sur les requêtes simples (CIMA/COPILOTE basique), le coût web n'est
+        # pas justifié. On déclenche pour MOYEN+ uniquement.
+        if complexite == NiveauComplexite.SIMPLE:
+            return None
+
+        # Résolution du pays : prio explicite, sinon DB profil user, sinon
+        # CM (zone CIMA majoritaire pour les compagnies clientes)
+        pays = (contexte.pays or "").upper() or None
+        if not pays and contexte.user_id:
+            try:
+                from core.database import async_session_maker, UtilisateurDB
+                from sqlalchemy import select as _sel
+                async with async_session_maker() as sess:
+                    u = (await sess.execute(
+                        _sel(UtilisateurDB).where(UtilisateurDB.id == contexte.user_id)
+                    )).scalars().first()
+                    if u:
+                        pays = (getattr(u, "pays", None) or "").upper() or None
+            except Exception:
+                pass
+        if not pays:
+            pays = "CM"
+
+        try:
+            from modules.bureau.recherche_officielle_metier import chercher_reglementation
+            res = await chercher_reglementation(
+                question=contexte.texte[:1500],
+                vertical="banque_finance",   # CIMA/finance/assurance/audit comptable
+                pays=pays,
+                max_extraits=4,
+            )
+        except Exception as e:
+            logger.warning(f"[Orchestrateur/Web] Recherche officielle KO : {e}")
+            res = {"sources_trouvees": [], "extraits": [],
+                   "raison_echec": f"erreur module : {e}"}
+
+        extraits = res.get("extraits") or []
+        if extraits:
+            # Sources web verifiees disponibles → injecter
+            extraits_str = "\n\n".join(
+                f"  • [{e.get('titre', '')[:120]}]\n"
+                f"    URL : {e.get('url', '')}\n"
+                f"    Extrait : {(e.get('texte') or '')[:600]}"
+                for e in extraits
+            )
+            return (
+                "═══════════════════════════════════════════════════\n"
+                "  SOURCES OFFICIELLES — RECHERCHE WEB TEMPS RÉEL\n"
+                f"  (vertical=banque_finance/assurance/CIMA, pays={pays})\n"
+                "═══════════════════════════════════════════════════\n"
+                f"{extraits_str}\n\n"
+                "RÈGLE : cite EN PRIORITÉ ces sources officielles dans ta\n"
+                "réponse. Pour chaque article réglementaire, délai, ratio ou\n"
+                "chiffre repris : indique l'URL source. Si ces extraits ne\n"
+                "couvrent pas la question, complète avec tes connaissances\n"
+                "natives EN MARQUANT chaque élément 'à vérifier sur source\n"
+                "officielle' — jamais d'invention silencieuse."
+            )
+        # Pas d'extraits — déclarer l'indisponibilité au LLM
+        raison = res.get("raison_echec") or "aucun résultat"
+        return (
+            "═══════════════════════════════════════════════════\n"
+            "  RECHERCHE OFFICIELLE INDISPONIBLE\n"
+            "═══════════════════════════════════════════════════\n"
+            f"Raison : {raison}\n\n"
+            "RÈGLE : utilise tes connaissances natives mais MARQUE chaque\n"
+            "article réglementaire, délai, ratio ou chiffre cité par\n"
+            "'(à vérifier sur source officielle)'. Jamais d'invention\n"
+            "silencieuse d'article du Code CIMA, de date, de pourcentage,\n"
+            "de montant, de référence légale. Si tu n'es pas sûr, dis-le."
+        )
 
     def _selectionner_modele_force(
         self, domaine: DomaineMétier, complexite: NiveauComplexite,
