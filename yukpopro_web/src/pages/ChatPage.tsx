@@ -184,7 +184,12 @@ export const ChatPage = () => {
       const isGeneration = orch && (
         orch.intent_detecte === "generation_rapport" ||
         orch.intent_detecte === "generation_slides" ||
-        orch.intent_detecte === "generation_visuel"
+        orch.intent_detecte === "generation_visuel" ||
+        orch.intent_detecte === "generation_infographie" ||  // alias backend possible
+        orch.type_sortie === "rapport" ||
+        orch.type_sortie === "slides" ||
+        orch.type_sortie === "visuel" ||
+        orch.type_sortie === "infographie"                    // alias backend possible
       );
 
       // Cas 1 : génération détectée mais SOLDE INSUFFISANT → toast + lien recharge.
@@ -241,21 +246,36 @@ export const ChatPage = () => {
             }
             return;
           }
-          if (orch.type_sortie === "visuel" || orch.intent_detecte === "generation_visuel") {
+          if (
+            orch.type_sortie === "visuel" ||
+            orch.type_sortie === "infographie" ||
+            orch.intent_detecte === "generation_visuel" ||
+            orch.intent_detecte === "generation_infographie"
+          ) {
             // Bascule Designer Pro — auto-orchestrateur visuel (1 prompt → analyse + génération)
+            // Privilégie payload_pret du backend si présent (mode_visuel,
+            // export_cmyk, cle_projet_hint optimisés par l'orchestrateur Opus).
+            const payloadOrch = (orch.payload_pret as any) || {};
             const r: any = await infographieProApi.genererAuto({
-              brief: content.trim(),
-              pays: profil?.pays,
-              langue: "fr",
-            });
+              brief: payloadOrch.brief || content.trim(),
+              pays: payloadOrch.pays || profil?.pays,
+              langue: payloadOrch.langue || "fr",
+              mode_visuel: payloadOrch.mode_visuel,
+              export_cmyk: payloadOrch.export_cmyk,
+              cle_projet_hint: payloadOrch.cle_projet_hint,
+            } as any);
+            // Le backend Designer Pro retourne plusieurs champs equivalents :
+            // pdf_id, fichier, fichier_genere (alias), url_telechargement,
+            // download_url. On essaye dans l'ordre.
             const fichiers: string[] = [];
             if (Array.isArray(r.pages)) {
               for (const p of r.pages) {
                 if (p?.fichier_id) fichiers.push(p.fichier_id);
                 else if (p?.url) fichiers.push(p.url);
               }
-            } else if (r.fichier_id) {
-              fichiers.push(r.fichier_id);
+            } else {
+              const fid = r.fichier_genere || r.fichier || r.pdf_id || r.fichier_id;
+              if (fid) fichiers.push(fid);
             }
             updateLastAssistantMessage(
               `✓ ${orch.template_label || "Visuel"} généré.`,

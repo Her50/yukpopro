@@ -2704,18 +2704,18 @@ _CATALOGUE_TEMPLATES_G1 = [
     # MENU, PROGRAMME, CV graphique, INVITATION, FAIRE-PART, packaging,
     # banderole, kakemono, dépliant, etc. → route vers Designer Pro
     # (/api/v1/bureau/infographie-pro/generer-auto). PAS un Word/PPTX.
-    ("infographie_carte_visite", "infographie", "Carte de visite",       "tous",   "carte visite business card 8 cartes A4 vCard QR"),
-    ("infographie_flyer",        "infographie", "Flyer / Affiche",       "tous",   "flyer affiche A3 A4 A5 poster banderole campagne pub"),
-    ("infographie_brochure",     "infographie", "Brochure / Plaquette",  "tous",   "brochure plaquette dépliant 3 volets corporate"),
-    ("infographie_livret",       "infographie", "Livret / Programme",    "tous",   "livret faire-part mariage décès programme cérémonie"),
-    ("infographie_menu",         "infographie", "Menu restaurant",       "resto",  "menu carte restaurant entrées plats desserts"),
-    ("infographie_cv_graphique", "infographie", "CV graphique",          "candidat","CV graphique designer portfolio profil"),
-    ("infographie_invitation",   "infographie", "Invitation / Save-the-date", "tous", "invitation save the date événement gala"),
-    ("infographie_packaging",    "infographie", "Packaging produit",     "marque", "packaging emballage étiquette produit"),
-    ("infographie_post_social",  "infographie", "Post réseaux sociaux",  "marketing","post Instagram LinkedIn Facebook story banner"),
-    ("infographie_album",        "infographie", "Album / Livre photo",   "tous",   "album photo livre photo magazine portfolio"),
-    ("infographie_rapport_visuel","infographie","Rapport annuel visuel", "marketing","rapport annuel magazine 24 32 pages corporate visuel"),
-    ("infographie_custom",       "infographie", "Visuel sur mesure",     "tous",   "visuel imprimable autre BD packaging dépliant custom format"),
+    ("infographie_carte_visite", "visuel", "Carte de visite",       "tous",   "carte visite business card 8 cartes A4 vCard QR"),
+    ("infographie_flyer",        "visuel", "Flyer / Affiche",       "tous",   "flyer affiche A3 A4 A5 poster banderole campagne pub"),
+    ("infographie_brochure",     "visuel", "Brochure / Plaquette",  "tous",   "brochure plaquette dépliant 3 volets corporate"),
+    ("infographie_livret",       "visuel", "Livret / Programme",    "tous",   "livret faire-part mariage décès programme cérémonie"),
+    ("infographie_menu",         "visuel", "Menu restaurant",       "resto",  "menu carte restaurant entrées plats desserts"),
+    ("infographie_cv_graphique", "visuel", "CV graphique",          "candidat","CV graphique designer portfolio profil"),
+    ("infographie_invitation",   "visuel", "Invitation / Save-the-date", "tous", "invitation save the date événement gala"),
+    ("infographie_packaging",    "visuel", "Packaging produit",     "marque", "packaging emballage étiquette produit"),
+    ("infographie_post_social",  "visuel", "Post réseaux sociaux",  "marketing","post Instagram LinkedIn Facebook story banner"),
+    ("infographie_album",        "visuel", "Album / Livre photo",   "tous",   "album photo livre photo magazine portfolio"),
+    ("infographie_rapport_visuel","visuel","Rapport annuel visuel", "marketing","rapport annuel magazine 24 32 pages corporate visuel"),
+    ("infographie_custom",       "visuel", "Visuel sur mesure",     "tous",   "visuel imprimable autre BD packaging dépliant custom format"),
 ]
 _CREDITS_PAR_MODE_G1 = {"flash": 2000, "standard": 4500, "complet": 12000, "expert": 25000}
 _DUREE_PAR_MODE_G1 = {"flash": 120, "standard": 300, "complet": 900, "expert": 1500}
@@ -2868,7 +2868,7 @@ REGLES :
    techniques", "à imprimer", "format A3/A4/A5/A6/carré", "8 cartes
    par feuille", "recto-verso plié", "QR vCard".
 
-   → type_sortie = "infographie", template_id = un id "infographie_*"
+   → type_sortie = "visuel", template_id = un id "infographie_*"
      du catalogue (carte_visite, flyer, brochure, livret, menu,
      cv_graphique, invitation, packaging, post_social, album,
      rapport_visuel, OU custom pour briefs atypiques).
@@ -2899,10 +2899,12 @@ REGLES :
      plan_action / compte_rendu / note_de_synthese : uniquement pour de
      vrais rapports d'analyse, JAMAIS pour des contrats ou conventions.
 
-2. type_sortie ∈ rapport | slides | infographie.
+2. type_sortie ∈ rapport | slides | visuel.
    - "rapport" : DOCX (rapports d'analyse, contrats, lettres, attestations)
    - "slides" : PPTX (présentations direction/commercial/formation/projet)
-   - "infographie" : PDF print-ready CMYK (visuels imprimables Designer Pro)
+   - "visuel" : PDF print-ready CMYK (visuels imprimables Designer Pro :
+     cartes de visite, flyers, brochures, livrets, menus, CV graphique,
+     invitations, packaging, posts réseaux sociaux, albums, etc.)
 
 3. **dimensionnement libre — tu décides** la profondeur réelle attendue
    en lisant le brief :
@@ -2942,8 +2944,8 @@ REGLES :
 
 FORMAT JSON STRICT :
 {{
-  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_infographie" | "ambigu",
-  "type_sortie": "rapport" | "slides" | "infographie",
+  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_visuel" | "ambigu",
+  "type_sortie": "rapport" | "slides" | "visuel",
   "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
   "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
   "structure_custom": ["Section 1", "Section 2", "..."],  // dimensionne LIBREMENT (3 à 30 sections selon le brief), obligatoire si template_id="custom"
@@ -3069,8 +3071,8 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     # Sécurité : si template_id pointe sur infographie_* mais type_sortie="rapport"
     # (LLM hésitant), corriger automatiquement le type_sortie.
     if isinstance(template_id, str) and template_id.startswith("infographie_"):
-        type_sortie = "infographie"
-        data["type_sortie"] = "infographie"
+        type_sortie = "visuel"
+        data["type_sortie"] = "visuel"
     if type_sortie == "slides":
         endpoint_cible = "/api/v1/pro/slides/generer"
         payload_pret = {
@@ -3080,7 +3082,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "langue": data.get("langue") or "fr",
             "format_sortie": data.get("format_sortie") or "pptx",
         }
-    elif type_sortie == "infographie":
+    elif type_sortie == "visuel":
         # Designer Pro — auto-détection du projet imprimable adapté au brief.
         # Le moteur Designer Pro choisit lui-même le bon gabarit dans
         # PROJETS_INFOGRAPHIE (incluant custom_libre composition Opus si
