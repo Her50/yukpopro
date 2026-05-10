@@ -237,6 +237,30 @@ async def generer_depuis_brief(
     artefacts = _persister_artefacts(current_user.user_id, demande.type_gabarit, ts, resultat)
 
     spec = resultat.specification
+
+    # Suggestions intelligentes post-génération (Haiku)
+    suggestions: list[dict] = []
+    try:
+        from modules.pro.suggestions_intelligente import (
+            generer_suggestions_suite, detecter_manques_visuel,
+        )
+        meta_sug = {
+            "gabarit": demande.type_gabarit,
+            "palette": spec.palette if spec else "classique",
+            "langue": demande.langue,
+            "pays": demande.pays,
+            "export_cmyk": demande.export_cmyk,
+        }
+        manques = detecter_manques_visuel(meta_sug, demande.brief)
+        suggestions = await generer_suggestions_suite(
+            type_doc=f"infographie_{demande.type_gabarit}",
+            brief_original=demande.brief,
+            meta_resultat=meta_sug,
+            manques_detectes=manques,
+        )
+    except Exception as _e_sug:
+        logger.debug(f"[Infographie/Suggestions] non bloquant : {_e_sug}")
+
     return {
         "gabarit": demande.type_gabarit,
         "titre": spec.titre if spec else "",
@@ -245,6 +269,7 @@ async def generer_depuis_brief(
         **artefacts,
         "prix_fcfa": resultat.meta.get("prix_fcfa", 0),
         "meta": resultat.meta,
+        "suggestions": suggestions,
     }
 
 

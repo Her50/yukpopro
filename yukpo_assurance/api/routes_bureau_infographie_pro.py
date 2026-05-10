@@ -1836,11 +1836,38 @@ async def generer_projet(
         if artefacts.get("pdf_id") else None
     )
 
+    # Suggestions intelligentes post-génération (Haiku)
+    suggestions: list[dict] = []
+    try:
+        from modules.pro.suggestions_intelligente import (
+            generer_suggestions_suite, detecter_manques_visuel,
+        )
+        meta_sug = {
+            "cle_projet": demande.cle_projet,
+            "nb_pages": (resultat.meta or {}).get("nombre_pages"),
+            "langue": demande.langue,
+            "pays": demande.pays,
+            "mode_visuel": demande.mode_visuel,
+            "export_cmyk": demande.export_cmyk,
+            "medias_utilises": (resultat.meta or {}).get("medias_utilises"),
+            "nb_images_ia": (resultat.meta or {}).get("nb_images_ia"),
+        }
+        manques = detecter_manques_visuel(meta_sug, demande.brief)
+        suggestions = await generer_suggestions_suite(
+            type_doc=f"designerpro_{demande.cle_projet}",
+            brief_original=demande.brief,
+            meta_resultat=meta_sug,
+            manques_detectes=manques,
+        )
+    except Exception as _e_sug:
+        logger.debug(f"[DesignerPro/Suggestions] non bloquant : {_e_sug}")
+
     return {
         "projet": _serialiser_projet_pour_reponse(resultat.projet),
         **artefacts,
         "meta": resultat.meta,
         "download_url": download_url,
+        "suggestions": suggestions,
     }
 
 

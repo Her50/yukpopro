@@ -296,6 +296,30 @@ async def generer_rapport(
             resultat["fichier"] = nom_fich
         if "contenu_markdown" in resultat and "markdown" not in resultat:
             resultat["markdown"] = resultat["contenu_markdown"]
+
+        # Suggestions intelligentes post-génération (Haiku, ~0.4 FCFA absorbé)
+        try:
+            from modules.pro.suggestions_intelligente import (
+                generer_suggestions_suite, detecter_manques_doc,
+            )
+            meta_resultat = {
+                "nb_pages": resultat.get("nb_pages"),
+                "nb_sections": resultat.get("nb_sections"),
+                "langue": "fr",  # langue par défaut, le vrai est dans le payload
+                "format": req.format_sortie,
+                "mode": req.mode,
+            }
+            manques = detecter_manques_doc(meta_resultat, req.sujet)
+            resultat["suggestions"] = await generer_suggestions_suite(
+                type_doc=req.type_rapport,
+                brief_original=req.sujet,
+                meta_resultat=meta_resultat,
+                manques_detectes=manques,
+            )
+        except Exception as _e_sug:
+            logger.debug(f"[Rapports/Suggestions] non bloquant : {_e_sug}")
+            resultat["suggestions"] = []
+
         return resultat
     except HTTPException:
         raise
@@ -401,6 +425,29 @@ async def generer_slides(
         # alias pour le frontend
         if "contenu_markdown" in resultat and "markdown" not in resultat:
             resultat["markdown"] = resultat["contenu_markdown"]
+
+        # Suggestions intelligentes post-génération
+        try:
+            from modules.pro.suggestions_intelligente import (
+                generer_suggestions_suite, detecter_manques_doc,
+            )
+            meta_resultat = {
+                "nb_slides": resultat.get("nb_slides"),
+                "format": req.format_sortie,
+                "mode": req.mode,
+                "langue": "fr",
+            }
+            manques = detecter_manques_doc(meta_resultat, req.sujet)
+            resultat["suggestions"] = await generer_suggestions_suite(
+                type_doc=f"slides_{req.type_pres}",
+                brief_original=req.sujet,
+                meta_resultat=meta_resultat,
+                manques_detectes=manques,
+            )
+        except Exception as _e_sug:
+            logger.debug(f"[Slides/Suggestions] non bloquant : {_e_sug}")
+            resultat["suggestions"] = []
+
         return resultat
     except HTTPException:
         raise
