@@ -118,6 +118,8 @@ from api.routes_approvals import router as approvals_router
 from api.routes_brand_kit import router as brand_kit_router
 # Sprint 2.5 — White-label
 from api.routes_white_label import router as white_label_router
+# Sprint 2.6 — SLA + monitoring
+from api.routes_sla import router as sla_router
 from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
@@ -627,6 +629,28 @@ app.add_middleware(
 )
 
 @app.middleware("http")
+async def sla_latency_middleware(request: Request, call_next):
+    """Sprint 2.6 — track latency + status par endpoint pour Prometheus / SLA."""
+    import time as _time
+    t0 = _time.monotonic()
+    response = await call_next(request)
+    elapsed_ms = (_time.monotonic() - t0) * 1000
+    try:
+        from core import sla_metrics as _sm
+        endpoint = request.url.path
+        # Normaliser : strip {id} dynamique pour éviter explosion cardinalité
+        import re as _re
+        ep_normalized = _re.sub(r'/[0-9a-f-]{8,}', '/{id}', endpoint)
+        _sm.record_latency(ep_normalized, elapsed_ms, response.status_code)
+        if response.status_code >= 500:
+            _sm.record_incident(ep_normalized, "error",
+                                f"HTTP {response.status_code} ({elapsed_ms:.0f}ms)")
+    except Exception:
+        pass
+    return response
+
+
+@app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     """Ajoute les headers de sécurité OWASP sur toutes les réponses."""
     response = await call_next(request)
@@ -784,6 +808,7 @@ app.include_router(saml_sso_router, prefix="/api/v1/saml", tags=["SAML SSO"])
 app.include_router(approvals_router, prefix="/api/v1/approvals", tags=["Approval Workflows"])
 app.include_router(brand_kit_router, prefix="/api/v1/brand-kit", tags=["Brand Kit"])
 app.include_router(white_label_router, prefix="/api/v1/white-label", tags=["White-label"])
+app.include_router(sla_router, prefix="/api/v1", tags=["SLA & Monitoring"])
 app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])
