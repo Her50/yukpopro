@@ -499,6 +499,14 @@ class SlideBuilderPro:
             f"• Slides type 'kpi' : exactement 3-5 KPIs chiffrés avec unité, valeur réelle et tendance\n"
             f"• Slides type 'action' : actions SMART avec responsable, délai concret, ressource\n"
             f"• Slides type 'two_columns' : 'points' = [{{'gauche': [...], 'droite': [...]}}] — liste des items gauche et droite\n"
+            f"• Slides type 'chart' (NOUVEAU TOP-tier) : pour DONNÉES CHIFFRÉES dans le temps ou\n"
+            f"  comparaisons multi-catégories. Chart NATIF PowerPoint éditable (pas une image plate).\n"
+            f"  Toujours fournir : chart_type ∈ bar|column|line|pie|doughnut, categories (3-12 labels),\n"
+            f"  series (1-4 séries) avec name + values numériques cohérents, unit (devise locale ou %).\n"
+            f"  Exemple : type='chart', chart_type='column', categories=['Q1','Q2','Q3','Q4'],\n"
+            f"  series=[{{name:'CA','values':[120,145,168,192]}},{{'name':'Coûts','values':[80,85,90,95]}}],\n"
+            f"  unit='M {devise_locale}'. Si tu peux remplacer un kpi par un chart pour un slide de\n"
+            f"  données temporelles, FAIS-LE — un dirigeant lit un graphe en 2 secondes vs 30s pour un tableau.\n"
             f"• Messages clés tirés des données réelles fournies\n"
             f"• Langage professionnel niveau direction générale / investisseurs\n"
             f"• Devise locale OBLIGATOIRE pour tous les montants : {devise_locale}\n"
@@ -507,9 +515,13 @@ class SlideBuilderPro:
             f"• Chaque slide doit avoir un titre percutant et un message accrocheur\n\n"
             f"RÉPONDS UNIQUEMENT EN JSON (sans balise markdown) :\n"
             f'{{"slides": ['
-            f'{{"titre": "...", "type": "...", '
+            f'{{"titre": "...", "type": "kpi|bullets|two_columns|action|chart|cover|sommaire|fin", '
             f'"points": ["point1 factuel", "point2..."], '
             f'"kpis": [{{"label": "Libellé", "valeur": "1 234 (devise locale {devise_locale})", "tendance": "hausse|baisse|stable"}}], '
+            f'"chart_type": "bar|column|line|pie|doughnut (si type=chart)", '
+            f'"categories": ["label1", "label2", "..."], '
+            f'"series": [{{"name": "Nom série", "values": [12, 34, 56]}}], '
+            f'"unit": "M {devise_locale} | % | (vide)", '
             f'"message_cle": "Message fort de la slide en 1 phrase percutante", '
             f'"notes_orateur": "OBLIGATOIRE — 3 à 5 phrases substantives pour le présentateur '
             f'(contexte, transitions, anecdote, chiffre supplémentaire, anticipation question)"'
@@ -651,20 +663,49 @@ class SlideBuilderPro:
                 if slides:
                     result = []
                     for slide, struct in zip(slides, structure):
-                        type_s = struct["type"]
-                        # `notes_orateur` (nouveau, mandaté par le prompt TOP 2)
-                        # avec fallback sur `note` (ancien champ optionnel) pour
-                        # rétrocompatibilité avec les réponses cached.
+                        # TOP 1 : si le LLM décide d'enrichir un slide en
+                        # 'chart', on respecte sa proposition (override de
+                        # struct["type"]) — le LLM raisonne sur la donnée,
+                        # pas le squelette de structure préset.
+                        type_propose = (slide.get("type") or "").strip()
+                        type_s = type_propose if type_propose in (
+                            "chart", "kpi", "bullets", "two_columns", "action",
+                            "cover", "sommaire", "fin",
+                        ) else struct["type"]
+
                         notes_val = (
                             slide.get("notes_orateur")
                             or slide.get("note")
                             or ""
                         )
+
+                        # Chart data (TOP 1) — capturé tel-quel, validé dans
+                        # _slide_chart. Si vide ou invalide, fallback render kpi.
+                        chart_data = None
+                        if type_s == "chart":
+                            cats = slide.get("categories") or []
+                            sers = slide.get("series") or []
+                            ctype = (slide.get("chart_type") or "column").lower()
+                            if isinstance(cats, list) and isinstance(sers, list) and cats and sers:
+                                chart_data = {
+                                    "chart_type": ctype if ctype in ("bar","column","line","pie","doughnut") else "column",
+                                    "categories": [str(c)[:60] for c in cats][:12],
+                                    "series": [
+                                        {
+                                            "name": str(s.get("name", f"Série {i+1}"))[:40],
+                                            "values": [float(v) if isinstance(v, (int, float, str)) and str(v).replace(".","").replace("-","").isdigit() else 0 for v in (s.get("values") or [])][:12],
+                                        }
+                                        for i, s in enumerate(sers) if isinstance(s, dict)
+                                    ][:4],
+                                    "unit": str(slide.get("unit", "") or "")[:20],
+                                }
+
                         result.append({
                             "titre":          str(slide.get("titre", struct["titre"]) or struct["titre"]),
                             "type":           type_s,
                             "points":         _normaliser_points(slide.get("points", []), type_s),
                             "kpis":           _normaliser_kpis(slide.get("kpis", [])),
+                            "chart_data":     chart_data,
                             "message_cle":    str(slide.get("message_cle", "") or ""),
                             "notes_orateur":  str(notes_val or ""),
                         })
@@ -800,6 +841,16 @@ class SlideBuilderPro:
         elif type_slide == "kpi":
             self._slide_header(slide, slide_data["titre"], w, h, num, total)
             self._slide_kpi(slide, slide_data, w, h)
+        elif type_slide == "chart":
+            self._slide_header(slide, slide_data["titre"], w, h, num, total)
+            # Chart natif PowerPoint (TOP 1). Si chart_data invalide
+            # ou la lib pptx.chart est cassée → fallback render kpi.
+            if slide_data.get("chart_data"):
+                ok = self._slide_chart(slide, slide_data, w, h)
+                if not ok:
+                    self._slide_kpi(slide, slide_data, w, h)
+            else:
+                self._slide_kpi(slide, slide_data, w, h)
         elif type_slide == "two_columns":
             self._slide_header(slide, slide_data["titre"], w, h, num, total)
             self._slide_two_columns(slide, slide_data, w, h)
@@ -1233,6 +1284,114 @@ class SlideBuilderPro:
                 run.font.size  = Pt(13)
                 run.font.italic = True
                 run.font.color.rgb = _rgb(T["gris_texte"])
+
+    # ── Slide CHART (TOP 1 — chart NATIF PowerPoint éditable) ────────────────
+
+    def _slide_chart(self, slide, slide_data: dict, w, h) -> bool:
+        """
+        Insère un chart NATIF python-pptx (XL_CHART_TYPE + CategoryChartData).
+        Le chart est éditable dans PowerPoint (clic droit > Modifier les données),
+        contrairement à un PNG aplati. C'est ce qui distingue un deck Big4
+        d'un deck Canva.
+
+        Retourne True si le chart est rendu, False si fallback nécessaire.
+        """
+        try:
+            from pptx.util import Inches, Pt
+            from pptx.chart.data import CategoryChartData
+            from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION, XL_LEGEND_POSITION
+            from pptx.enum.text import PP_ALIGN
+            from pptx.dml.color import RGBColor
+        except Exception as e:
+            logger.warning(f"[SlideBuilder/Chart] python-pptx chart non disponible : {e}")
+            return False
+
+        cd = slide_data.get("chart_data") or {}
+        cats = cd.get("categories") or []
+        sers = cd.get("series") or []
+        if not cats or not sers:
+            return False
+
+        T = self._theme
+        # Mapping LLM string → enum python-pptx
+        type_map = {
+            "bar":      XL_CHART_TYPE.BAR_CLUSTERED,
+            "column":   XL_CHART_TYPE.COLUMN_CLUSTERED,
+            "line":     XL_CHART_TYPE.LINE,
+            "pie":      XL_CHART_TYPE.PIE,
+            "doughnut": XL_CHART_TYPE.DOUGHNUT,
+        }
+        chart_type_enum = type_map.get(cd.get("chart_type", "column"), XL_CHART_TYPE.COLUMN_CLUSTERED)
+
+        chart_data = CategoryChartData()
+        chart_data.categories = cats
+        for s in sers:
+            chart_data.add_series(s.get("name", "Série"), s.get("values", []))
+
+        # Zone du chart : header occupe ~1.15", on prend le reste du slide
+        chart_left   = Inches(0.6)
+        chart_top    = Inches(1.55)
+        chart_width  = w  - Inches(1.2)
+        chart_height = h  - Inches(2.4)
+
+        try:
+            graphic_frame = slide.shapes.add_chart(
+                chart_type_enum, chart_left, chart_top,
+                chart_width, chart_height, chart_data,
+            )
+            chart = graphic_frame.chart
+        except Exception as e:
+            logger.warning(f"[SlideBuilder/Chart] add_chart échoué : {e}")
+            return False
+
+        # Style — légende, axes, palette inspirée du thème
+        try:
+            chart.has_title = False
+            chart.has_legend = len(sers) > 1
+            if chart.has_legend:
+                chart.legend.position = XL_LEGEND_POSITION.BOTTOM
+                chart.legend.include_in_layout = False
+                chart.legend.font.size = Pt(11)
+
+            # Couleurs des séries via palette du thème
+            palette_hex = [
+                T.get("primaire", (0, 84, 166)),
+                T.get("accent",   (255, 152, 0)),
+                T.get("succes",   (16, 185, 129)),
+                T.get("alerte",   (239, 68, 68)),
+            ]
+            for i, ser in enumerate(chart.series):
+                couleur = palette_hex[i % len(palette_hex)]
+                if isinstance(couleur, tuple) and len(couleur) == 3:
+                    ser.format.fill.solid()
+                    ser.format.fill.fore_color.rgb = RGBColor(*couleur)
+                    if hasattr(ser.format.line, "color"):
+                        ser.format.line.color.rgb = RGBColor(*couleur)
+        except Exception as e:
+            logger.debug(f"[SlideBuilder/Chart] Style chart non appliqué : {e}")
+
+        # Message-clé sous le chart (si présent)
+        msg = (slide_data.get("message_cle") or "").strip()
+        if msg:
+            try:
+                from pptx.util import Inches as _In, Pt as _Pt
+                tb = slide.shapes.add_textbox(
+                    Inches(0.6), h - Inches(0.85),
+                    w - Inches(1.2), Inches(0.6),
+                )
+                tf = tb.text_frame
+                tf.word_wrap = True
+                p = tf.paragraphs[0]
+                p.alignment = PP_ALIGN.CENTER
+                run = p.add_run()
+                run.text = msg
+                run.font.size = Pt(13)
+                run.font.italic = True
+                run.font.color.rgb = RGBColor(*T.get("gris_texte", (60, 60, 60)))
+            except Exception:
+                pass
+
+        return True
 
     # ── Slide BULLETS ─────────────────────────────────────────────────────────
 
