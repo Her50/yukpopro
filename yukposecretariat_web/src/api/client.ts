@@ -1,6 +1,12 @@
 import axios from 'axios'
 
-const BASE = import.meta.env.VITE_API_URL || '/api/v1/bureau'
+// Normalisation BASE = `/api/v1/bureau` quoi que VITE_API_URL contienne.
+// Bug détecté : si VITE_API_URL=/api/v1 (cas Vercel actuel), `api.post('/redaction/...')`
+// produisait `/api/v1/redaction/*` (404, backend = `/api/v1/bureau/redaction/*`).
+// On retire un éventuel suffixe /bureau pour éviter le double préfixe.
+const _RAW_BASE = (import.meta.env.VITE_API_URL || '/api/v1').replace(/\/+$/, '')
+const _ROOT     = _RAW_BASE.replace(/\/bureau$/, '')
+const BASE      = _ROOT + '/bureau'
 
 const api = axios.create({
   baseURL: BASE,
@@ -204,21 +210,25 @@ export const audioAPI = {
 }
 
 // ─── Phase 5 — Analytics Bureau (KPIs, dashboard exécutif) ─────────────────
+// /api/v1/bureau-analytics/* est mounté HORS de /api/v1/bureau/ — on passe
+// donc par httpRoot (baseURL = /api/v1).
 export const bureauAnalyticsAPI = {
-  dashboard: (days = 30) => api.get('/bureau-analytics/dashboard', { params: { days } }),
-  usage:     (days = 30, module?: string) => api.get('/bureau-analytics/usage', { params: { days, module } }),
-  cost:      (days = 30) => api.get('/bureau-analytics/cost', { params: { days } }),
-  templates: (days = 30, limit = 20) => api.get('/bureau-analytics/templates', { params: { days, limit } }),
-  topUsers:  (days = 30, limit = 20) => api.get('/bureau-analytics/users', { params: { days, limit } }),
-  quality:   (last_minutes = 60) => api.get('/bureau-analytics/quality', { params: { last_minutes } }),
+  dashboard: (days = 30) => httpRoot.get('/bureau-analytics/dashboard', { params: { days } }),
+  usage:     (days = 30, module?: string) => httpRoot.get('/bureau-analytics/usage', { params: { days, module } }),
+  cost:      (days = 30) => httpRoot.get('/bureau-analytics/cost', { params: { days } }),
+  templates: (days = 30, limit = 20) => httpRoot.get('/bureau-analytics/templates', { params: { days, limit } }),
+  topUsers:  (days = 30, limit = 20) => httpRoot.get('/bureau-analytics/users', { params: { days, limit } }),
+  quality:   (last_minutes = 60) => httpRoot.get('/bureau-analytics/quality', { params: { last_minutes } }),
 }
 
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
+// `api` a baseURL=/api/v1/bureau (normalisé). On appelle donc /chat/message
+// pour atteindre /api/v1/bureau/chat/message côté backend.
 export const secChatAPI = {
   message: (data: {
     message: string; has_image?: boolean; has_pdf?: boolean; has_audio?: boolean;
     pays?: string; langue?: string;
-  }) => api.post('/bureau/chat/message', data, { timeout: 60_000 }),
+  }) => api.post('/chat/message', data, { timeout: 60_000 }),
 }
 
 // ─── Infographie ──────────────────────────────────────────────────────────────
@@ -275,85 +285,85 @@ export const infographieAPI = {
 
 // ─── Infographie Pro (multi-page IA + médiathèque) ────────────────────────────
 export const infographieProAPI = {
-  projets: () => api.get('/bureau/infographie-pro/projets'),
+  projets: () => api.get('/infographie-pro/projets'),
   uploadMedia: (formData: FormData) =>
-    api.post('/bureau/infographie-pro/medias', formData, {
+    api.post('/infographie-pro/medias', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120_000,
     }),
   listerMedias: (params: { portee: 'session' | 'compte'; categorie?: string; session_id?: string }) =>
-    api.get('/bureau/infographie-pro/medias', { params }),
+    api.get('/infographie-pro/medias', { params }),
   supprimerMedia: (media_id: string, portee: 'session' | 'compte', session_id?: string) =>
-    api.delete(`/bureau/infographie-pro/medias/${media_id}`, { params: { portee, session_id } }),
+    api.delete(`/infographie-pro/medias/${media_id}`, { params: { portee, session_id } }),
   generer: (data: {
     cle_projet: string; brief: string; pays?: string; langue?: string;
     profil?: ProfilInfographie; medias_refs?: string[]; export_cmyk?: boolean;
     directives_visuelles?: Record<string, number>;
-  }) => api.post('/bureau/infographie-pro/generer', data, { timeout: 360_000 }),
+  }) => api.post('/infographie-pro/generer', data, { timeout: 360_000 }),
   genererAuto: (data: {
     brief: string; pays?: string; langue?: string;
     profil?: ProfilInfographie; medias_refs?: string[];
     cle_projet_hint?: string; export_cmyk?: boolean;
     directives_visuelles?: Record<string, number>;
-  }) => api.post('/bureau/infographie-pro/generer-auto', data, { timeout: 360_000 }),
+  }) => api.post('/infographie-pro/generer-auto', data, { timeout: 360_000 }),
   modifier: (data: {
     projet_id: string; instructions: string;
     medias_refs_supplementaires?: string[]; pays?: string;
     directives_visuelles?: Record<string, number>;
-  }) => api.post('/bureau/infographie-pro/modifier', data, { timeout: 360_000 }),
+  }) => api.post('/infographie-pro/modifier', data, { timeout: 360_000 }),
   // Sprint 1.7 — Auto-orchestrateur LLM : 1 prompt → analyse complète
   orchestrer: (data: {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
-  }) => api.post('/bureau/infographie-pro/orchestrer', data, { timeout: 60_000 }),
+  }) => api.post('/infographie-pro/orchestrer', data, { timeout: 60_000 }),
   // Sprint UX4 — Devis automatique avant génération
   devis: (data: {
     brief: string; pays?: string; langue?: string;
     medias_refs?: string[]; cle_projet?: string;
-  }) => api.post('/bureau/infographie-pro/devis', data, { timeout: 60_000 }),
+  }) => api.post('/infographie-pro/devis', data, { timeout: 60_000 }),
   // Sprint L1.3 — Export multilingual
   multilingual: (data: {
     projet_id: string; langues_cibles: string[];
-  }) => api.post('/bureau/infographie-pro/multilingual', data, { timeout: 600_000 }),
+  }) => api.post('/infographie-pro/multilingual', data, { timeout: 600_000 }),
   // Sprint C1 — Chat conversationnel multi-tours
-  chatSession: () => api.get('/bureau/infographie-pro/chat/session'),
+  chatSession: () => api.get('/infographie-pro/chat/session'),
   chatMessage: (data: {
     message: string; medias_refs?: string[]; pays?: string; langue?: string;
-  }) => api.post('/bureau/infographie-pro/chat/message', data, { timeout: 60_000 }),
+  }) => api.post('/infographie-pro/chat/message', data, { timeout: 60_000 }),
   chatUpdateProjetActif: (projet_id: string) =>
-    api.post('/bureau/infographie-pro/chat/session/projet-actif', { projet_id }),
-  chatReset: () => api.post('/bureau/infographie-pro/chat/reset', {}),
+    api.post('/infographie-pro/chat/session/projet-actif', { projet_id }),
+  chatReset: () => api.post('/infographie-pro/chat/reset', {}),
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: (formData: FormData) =>
-    api.post('/bureau/infographie-pro/bulk/analyser', formData, {
+    api.post('/infographie-pro/bulk/analyser', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60_000,
     }),
   bulkLancer: (data: {
     rows: any[]; template_brief: string; mapping: Record<string, string>;
     cle_projet: string; mode_visuel?: string; pays?: string; langue?: string;
     accepter_cout: boolean;
-  }) => api.post('/bureau/infographie-pro/bulk/lancer', data, { timeout: 600_000 }),
+  }) => api.post('/infographie-pro/bulk/lancer', data, { timeout: 600_000 }),
   // Sprint 1.6 — Brand LoRA
-  brandLoraList: () => api.get('/bureau/infographie-pro/brand-lora'),
+  brandLoraList: () => api.get('/infographie-pro/brand-lora'),
   brandLoraTrain: (data: {
     label: string; trigger_word: string; description?: string;
     images_refs: string[]; accepter_cout: boolean;
-  }) => api.post('/bureau/infographie-pro/brand-lora/entrainer', data, { timeout: 60_000 }),
+  }) => api.post('/infographie-pro/brand-lora/entrainer', data, { timeout: 60_000 }),
   brandLoraDelete: (lora_id: string) =>
-    api.delete(`/bureau/infographie-pro/brand-lora/${lora_id}`),
+    api.delete(`/infographie-pro/brand-lora/${lora_id}`),
   // PUSH-3 — Flux Fill : inpainting (zone masquée) + outpainting (extension)
   inpaint: (data: {
     image_url?: string; image_b64?: string;
     mask_url?: string;  mask_b64?: string;
     prompt: string; strength?: number; seed?: number;
     accepter_cout: boolean;
-  }) => api.post('/bureau/infographie-pro/inpaint', data, { timeout: 120_000 }),
+  }) => api.post('/infographie-pro/inpaint', data, { timeout: 120_000 }),
   outpaint: (data: {
     image_url?: string; image_b64?: string;
     prompt: string;
     expand_left?: number; expand_right?: number;
     expand_top?: number;  expand_bottom?: number;
     seed?: number; accepter_cout: boolean;
-  }) => api.post('/bureau/infographie-pro/outpaint', data, { timeout: 120_000 }),
+  }) => api.post('/infographie-pro/outpaint', data, { timeout: 120_000 }),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────
