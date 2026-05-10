@@ -204,26 +204,73 @@ export default function DesignerProPanel() {
 
   const generer = async () => {
     if (!brief.trim()) { toast.error('Décris ton projet'); return }
-    setLoading(true); setResultat(null); setPageActive(0)
+    setLoading(true); setPageActive(0)
     try {
+      // Sprint C1 — Détection d'intention via chat session active
+      let intent = 'nouveau_projet'
+      let projetActifId: string | undefined
+      try {
+        const chatResp = await infographieProApi.chatMessage({
+          message: brief, medias_refs: refsSelectionnees, pays, langue,
+        })
+        intent = chatResp?.intent || 'nouveau_projet'
+        projetActifId = chatResp?.projet_actif_id
+      } catch { /* fallback silencieux */ }
+
       // Sprint 1.6 — détection auto d'une réf. style parmi les médias sélectionnés
       const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
         && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
-      const payload: any = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true,
-        directives_visuelles: directives, mode_visuel: modeVisuel }
-      if (refStyle) {
-        payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
+
+      let r: any
+      if (intent === 'modification' || intent === 'traduction' || intent === 'regenerate_seed') {
+        // Routage chat → /modifier (le backend résout via projet_actif)
+        const projetId = projetActifId || resultat?.projet_json_id
+        if (!projetId) {
+          // Fallback : pas de projet actif → nouveau projet
+          intent = 'nouveau_projet'
+        } else {
+          const instr = intent === 'regenerate_seed'
+            ? `${brief}\n\n[Génère une autre variante des mêmes specs avec un angle visuel différent]`
+            : brief
+          r = await infographieProApi.modifier({
+            projet_id: projetId, instructions: instr,
+            medias_refs_supplementaires: refsSelectionnees, pays, directives_visuelles: directives,
+          })
+          setResultat(r as ResultatPro); setBrief('')
+          toast.success(intent === 'traduction' ? 'Traduit ✓' : 'Modifié ✓')
+        }
       }
-      if (brandLoraId) payload.brand_lora_id = brandLoraId
-      const r = autoMode
-        ? await infographieProApi.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
-        : await infographieProApi.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
-      setResultat(r as ResultatPro)
-      toast.success('Visuel généré ↓')
+      if (intent === 'nouveau_projet') {
+        setResultat(null)
+        const payload: any = { brief, pays, langue, medias_refs: refsSelectionnees,
+          export_cmyk: true, directives_visuelles: directives, mode_visuel: modeVisuel }
+        if (refStyle) payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
+        if (brandLoraId) payload.brand_lora_id = brandLoraId
+        r = autoMode
+          ? await infographieProApi.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
+          : await infographieProApi.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
+        setResultat(r as ResultatPro)
+        toast.success('Visuel généré ↓')
+      }
+      // Sprint C1 — MAJ session avec projet_actif pour les futures modifs
+      if (r?.projet_json_id) {
+        try { await infographieProApi.chatUpdateProjetActif(r.projet_json_id) } catch {}
+      }
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
       toast.error(err.response?.data?.detail || err.message || 'Échec génération')
     } finally { setLoading(false) }
+  }
+
+  // Sprint C1 — bouton "Nouveau projet" reset session
+  const resetChatSession = async () => {
+    try {
+      await infographieProApi.chatReset()
+      setResultat(null); setBrief(''); setRefsSelectionnees([])
+      toast.success('Nouvelle session — projet précédent oublié')
+    } catch (e: any) {
+      toast.error('Reset session échoué')
+    }
   }
 
   const modifier = async () => {
@@ -857,7 +904,15 @@ export default function DesignerProPanel() {
       {/* ── Brief minimal (zero-config UX2) ─────────────────────────────────── */}
       <div className={CARD}>
         <div>
-          <label className={LABEL}>{t('designerPro.briefLabel', 'Brief du projet')}</label>
+          <div className="flex items-center justify-between">
+            <label className={LABEL}>{t('designerPro.briefLabel', 'Brief du projet')}</label>
+            {resultat && (
+              <button onClick={resetChatSession} type="button"
+                className="text-[10px] text-amber-600 hover:text-amber-800 font-semibold">
+                ↻ {t('designerPro.nouveauProjet', 'Nouveau projet')}
+              </button>
+            )}
+          </div>
           <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={5}
             placeholder={t('designerPro.briefPlaceholder',
               "Ex : Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale.")}

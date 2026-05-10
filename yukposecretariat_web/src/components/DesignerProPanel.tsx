@@ -225,32 +225,75 @@ export default function DesignerProPanel() {
 
   const generer = async () => {
     if (!brief.trim()) { toast.error(t('designerPro.errDescribeProject')); return }
-    setLoading(true); setResultat(null); setPageActive(0)
+    setLoading(true); setPageActive(0)
     try {
-      // Sprint 1.6 — détection auto d'une réf. style parmi les médias sélectionnés
+      // Sprint C1 — Détection d'intention via chat session
+      let intent = 'nouveau_projet'
+      let projetActifId: string | undefined
+      try {
+        const chatResp = await infographieProAPI.chatMessage({
+          message: brief, medias_refs: refsSelectionnees, pays, langue,
+        })
+        intent = chatResp?.data?.intent || 'nouveau_projet'
+        projetActifId = chatResp?.data?.projet_actif_id
+      } catch { /* fallback */ }
+
       const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
         && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
-      const payload: any = {
-        brief, pays, langue,
-        medias_refs: refsSelectionnees,
-        export_cmyk: true,
-        directives_visuelles: directives,
-        mode_visuel: modeVisuel,
+
+      let r: any
+      if (intent === 'modification' || intent === 'traduction' || intent === 'regenerate_seed') {
+        const projetId = projetActifId || resultat?.projet_json_id
+        if (!projetId) {
+          intent = 'nouveau_projet'
+        } else {
+          const instr = intent === 'regenerate_seed'
+            ? `${brief}\n\n[Génère une autre variante]`
+            : brief
+          r = await infographieProAPI.modifier({
+            projet_id: projetId, instructions: instr,
+            medias_refs_supplementaires: refsSelectionnees, pays,
+            directives_visuelles: directives,
+          })
+          setResultat(r.data as ResultatPro); setBrief('')
+          toast.success(intent === 'traduction' ? 'Traduit ✓' : 'Modifié ✓')
+        }
       }
-      if (refStyle) {
-        payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
+      if (intent === 'nouveau_projet') {
+        setResultat(null)
+        const payload: any = {
+          brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true,
+          directives_visuelles: directives, mode_visuel: modeVisuel,
+        }
+        if (refStyle) payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
+        if (brandLoraId) payload.brand_lora_id = brandLoraId
+        r = autoMode
+          ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
+          : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
+        setResultat(r.data as ResultatPro)
+        toast.success(t('designerPro.okGenerated'))
       }
-      if (brandLoraId) payload.brand_lora_id = brandLoraId
-      const r = autoMode
-        ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
-        : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
-      setResultat(r.data as ResultatPro)
-      toast.success(t('designerPro.okGenerated'))
+      // Sprint C1 — MAJ projet_actif dans la session pour les futurs messages
+      const pid = (r?.data || r)?.projet_json_id
+      if (pid) {
+        try { await infographieProAPI.chatUpdateProjetActif(pid) } catch {}
+      }
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string }
       toast.error(err.response?.data?.detail || err.message || t('designerPro.errGenerate'))
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Sprint C1 — Reset session
+  const resetChatSession = async () => {
+    try {
+      await infographieProAPI.chatReset()
+      setResultat(null); setBrief(''); setRefsSelectionnees([])
+      toast.success('Nouvelle session')
+    } catch {
+      toast.error('Reset échoué')
     }
   }
 
@@ -813,6 +856,14 @@ export default function DesignerProPanel() {
 
       {/* Génération zero-config (UX2) */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
+        {resultat && (
+          <div className="flex justify-end">
+            <button onClick={resetChatSession} type="button"
+              className="text-[10px] text-amber-600 hover:text-amber-800 font-semibold">
+              ↻ {t('designerPro.nouveauProjet', 'Nouveau projet')}
+            </button>
+          </div>
+        )}
         <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={5}
           placeholder={t('designerPro.briefPlaceholder')}
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />

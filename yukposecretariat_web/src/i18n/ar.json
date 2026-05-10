@@ -1001,7 +1001,8 @@
     "devisEstime": "Coût estimé",
     "creditsInsuffisants": "Solde insuffisant",
     "utiliserCharte": "Utiliser ma charte de marque",
-    "exportMultilingual": "Exporter en plusieurs langues"
+    "exportMultilingual": "Exporter en plusieurs langues",
+    "nouveauProjet": "Nouveau projet"
   },
   "organisation": {
     "createTitle": "إنشاء مؤسسة",

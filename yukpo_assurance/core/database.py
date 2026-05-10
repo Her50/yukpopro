@@ -1121,6 +1121,31 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint C1 — Chat conversationnel Designer Pro (sessions actives) ───────
+
+
+class DesignerProSessionDB(Base):
+    """
+    Session de chat Designer Pro : permet à l'utilisateur de continuer un
+    projet en mode conversationnel ("ajoute une page", "change la couleur",
+    "translate to English") sans repartir de zéro à chaque message.
+
+    TTL 30 min après dernière interaction (au-delà, considéré comme nouveau projet).
+    """
+    __tablename__ = "designerpro_sessions"
+
+    session_id           = Column(String(36), primary_key=True, index=True)
+    user_id              = Column(Integer, nullable=False, index=True)
+    compagnie_id         = Column(Integer, nullable=False, index=True)
+    projet_actif_id      = Column(String(120), nullable=True,
+        comment="ID du projet JSON courant (peut changer si user demande nouveau projet)")
+    historique           = Column(JSON, default=list,
+        comment="[{role:user|yukpo, ts, content, intent?, projet_id?}] — last 50 msgs")
+    derniere_interaction = Column(DateTime, default=datetime.utcnow,
+                                   onupdate=datetime.utcnow, nullable=False, index=True)
+    cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.5 — White-label (revendeurs / cabinets / agences) ──────────────
 
 

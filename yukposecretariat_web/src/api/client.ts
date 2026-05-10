@@ -283,6 +283,14 @@ export const infographieProAPI = {
   multilingual: (data: {
     projet_id: string; langues_cibles: string[];
   }) => api.post('/bureau/infographie-pro/multilingual', data, { timeout: 600_000 }),
+  // Sprint C1 — Chat conversationnel multi-tours
+  chatSession: () => api.get('/bureau/infographie-pro/chat/session'),
+  chatMessage: (data: {
+    message: string; medias_refs?: string[]; pays?: string; langue?: string;
+  }) => api.post('/bureau/infographie-pro/chat/message', data, { timeout: 60_000 }),
+  chatUpdateProjetActif: (projet_id: string) =>
+    api.post('/bureau/infographie-pro/chat/session/projet-actif', { projet_id }),
+  chatReset: () => api.post('/bureau/infographie-pro/chat/reset', {}),
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: (formData: FormData) =>
     api.post('/bureau/infographie-pro/bulk/analyser', formData, {
