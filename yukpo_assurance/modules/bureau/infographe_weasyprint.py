@@ -45,6 +45,82 @@ def is_available() -> bool:
     return _WEASYPRINT_AVAILABLE
 
 
+# ─── Sprint TOP 5 — Typographie LaTeX-quality (preset CSS global) ────────────
+#
+# CSS injecté en complément des stylesheets utilisateur. Active :
+#   - Polices Inter (Google Fonts CDN, fallback Liberation Sans / Calibri)
+#   - OpenType features : kern (crénage), liga (ligatures), pnum (chiffres
+#     proportionnels), onum (chiffres bas-de-casse), tnum optionnel.
+#   - Césure auto (hyphens: auto) — réduit drastiquement les rivières blanches
+#     en justification.
+#   - Veuves / orphelines (widows: 3, orphans: 3) — évite les paragraphes
+#     coupés à 1 ligne en bas/haut de page.
+#   - text-rendering: geometricPrecision pour le print pro.
+#
+# Critère McKinsey/BCG : pas de césure forcée, pas de veuves/orphelines, pas
+# de chiffres tabulaires en plein corps de texte. Niveau Adobe InDesign.
+TYPO_PRESET_CSS = """
+@font-face {
+  font-family: 'Inter';
+  font-weight: 400;
+  font-style: normal;
+  src: url('https://rsms.me/inter/font-files/Inter-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  font-weight: 600;
+  font-style: normal;
+  src: url('https://rsms.me/inter/font-files/Inter-SemiBold.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  font-weight: 700;
+  font-style: normal;
+  src: url('https://rsms.me/inter/font-files/Inter-Bold.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  font-weight: 900;
+  font-style: normal;
+  src: url('https://rsms.me/inter/font-files/Inter-Black.woff2') format('woff2');
+  font-display: swap;
+}
+
+html, body {
+  font-family: 'Inter', 'Liberation Sans', 'Calibri', 'DejaVu Sans', sans-serif;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'pnum' 1, 'ss01' 1;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+p, li, td {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 6 3 2;  /* min 6 chars / 3 avant / 2 après césure */
+  text-align: justify;
+  text-justify: inter-word;
+  widows: 3;
+  orphans: 3;
+}
+h1, h2, h3, h4, h5, h6 {
+  page-break-after: avoid;
+  page-break-inside: avoid;
+  hyphens: none;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+table, figure, img {
+  page-break-inside: avoid;
+}
+.numbers, .kpi, .tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+"""
+
+
 def rendre_html_to_pdf(
     html: str,
     css: Optional[str] = None,
@@ -67,11 +143,14 @@ def rendre_html_to_pdf(
             "WeasyPrint n'est pas installé sur cet environnement. "
             "Installer Cairo + Pango + GDK-PixBuf, ou déployer sur Linux."
         )
-    stylesheets = []
+    # Sprint TOP 5 — typo preset injecté EN PREMIER (le HTML utilisateur le
+    # surcharge ensuite si besoin). Inter font-face, kern+liga+pnum, hyphens,
+    # widows/orphans → niveau Adobe InDesign sur tous les rendus.
+    stylesheets = [CSS(string=TYPO_PRESET_CSS)]
     if css:
         stylesheets.append(CSS(string=css))
     pdf_bytes = HTML(string=html, base_url=base_url).write_pdf(
-        stylesheets=stylesheets or None,
+        stylesheets=stylesheets,
         presentational_hints=presentational_hints,
     )
     return pdf_bytes

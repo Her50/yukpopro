@@ -1249,6 +1249,45 @@ class ReportWriterPro:
 
         doc = Document()
 
+        # ── Polices pro (TOP 5) — Calibri pour le corps, Calibri Light pour
+        # les headings. C'est le couple polices Microsoft Office qui rend
+        # immédiatement "Big4 / cabinet pro" à l'œil. Calibri est embarqué
+        # par défaut sur Windows + Office sur Mac, fallback sur Carlito sur
+        # Linux/LibreOffice (métrique-compatible).
+        try:
+            from docx.shared import Pt as _Pt
+            normal = doc.styles["Normal"]
+            normal.font.name = "Calibri"
+            normal.font.size = _Pt(11)
+            # East Asian / Latin / Symbol fallback (Office DOCX norme)
+            rpr = normal.element.get_or_add_rPr()
+            rfonts = OxmlElement("w:rFonts")
+            rfonts.set(qn("w:ascii"), "Calibri")
+            rfonts.set(qn("w:hAnsi"), "Calibri")
+            rfonts.set(qn("w:eastAsia"), "Calibri")
+            rfonts.set(qn("w:cs"), "Calibri")
+            # Évite doublons w:rFonts
+            for child in rpr.findall(qn("w:rFonts")):
+                rpr.remove(child)
+            rpr.append(rfonts)
+            for hname in ("Heading 1", "Heading 2", "Heading 3"):
+                try:
+                    h_style = doc.styles[hname]
+                    h_style.font.name = "Calibri Light"
+                    h_rpr = h_style.element.get_or_add_rPr()
+                    h_rfonts = OxmlElement("w:rFonts")
+                    h_rfonts.set(qn("w:ascii"), "Calibri Light")
+                    h_rfonts.set(qn("w:hAnsi"), "Calibri Light")
+                    h_rfonts.set(qn("w:eastAsia"), "Calibri Light")
+                    h_rfonts.set(qn("w:cs"), "Calibri Light")
+                    for child in h_rpr.findall(qn("w:rFonts")):
+                        h_rpr.remove(child)
+                    h_rpr.append(h_rfonts)
+                except KeyError:
+                    pass
+        except Exception as _e_font:
+            logger.debug(f"[ReportWriter] Polices pro non posées : {_e_font}")
+
         # ── Métadonnées DOCX (XMP `core.xml`) — auteur, titre, mots-clés,
         # entreprise. Visibles dans Fichier > Propriétés sous Word, et
         # exploitées par les DMS (SharePoint, M-Files, etc.) pour indexer

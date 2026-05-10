@@ -516,6 +516,38 @@ def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) 
     doc = Document()
     meta = meta or {}
 
+    # ── Polices pro (TOP 5) — Calibri / Calibri Light comme Big4. ─────────
+    try:
+        normal = doc.styles["Normal"]
+        normal.font.name = "Calibri"
+        normal.font.size = Pt(11)
+        rpr = normal.element.get_or_add_rPr()
+        rfonts = OxmlElement("w:rFonts")
+        rfonts.set(qn("w:ascii"), "Calibri")
+        rfonts.set(qn("w:hAnsi"), "Calibri")
+        rfonts.set(qn("w:eastAsia"), "Calibri")
+        rfonts.set(qn("w:cs"), "Calibri")
+        for child in rpr.findall(qn("w:rFonts")):
+            rpr.remove(child)
+        rpr.append(rfonts)
+        for hname in ("Heading 1", "Heading 2", "Heading 3"):
+            try:
+                h_style = doc.styles[hname]
+                h_style.font.name = "Calibri Light"
+                h_rpr = h_style.element.get_or_add_rPr()
+                h_rfonts = OxmlElement("w:rFonts")
+                h_rfonts.set(qn("w:ascii"), "Calibri Light")
+                h_rfonts.set(qn("w:hAnsi"), "Calibri Light")
+                h_rfonts.set(qn("w:eastAsia"), "Calibri Light")
+                h_rfonts.set(qn("w:cs"), "Calibri Light")
+                for child in h_rpr.findall(qn("w:rFonts")):
+                    h_rpr.remove(child)
+                h_rpr.append(h_rfonts)
+            except KeyError:
+                pass
+    except Exception:
+        pass
+
     # ── Métadonnées (Fichier > Propriétés sous Word) ───────────────────────
     try:
         cp = doc.core_properties
