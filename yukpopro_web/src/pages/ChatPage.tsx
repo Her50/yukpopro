@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, infographieProApi, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, infographieProApi, http, type UploadedFile } from "@/api/client";
 import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 import { cn } from "@/components/ui";
 import type { CopiloteMessage, NavigationSuggestion, SuggestionSuite } from "@/types";
@@ -181,19 +181,21 @@ export const ChatPage = () => {
         });
       } catch { /* fallback silencieux : pas d'orchestration → flow normal */ }
 
-      const isGeneration = orch && (
-        orch.intent_detecte === "generation_rapport" ||
-        orch.intent_detecte === "generation_slides" ||
-        orch.intent_detecte === "generation_visuel" ||
-        orch.intent_detecte === "generation_infographie" ||  // alias backend possible
-        orch.type_sortie === "rapport" ||
-        orch.type_sortie === "slides" ||
-        orch.type_sortie === "visuel" ||
-        orch.type_sortie === "infographie"                    // alias backend possible
-      );
+      // ── Architecture plan-driven : orchestrateur LLM (Opus 4.7) compose
+      //    un PLAN d'exécution complet { endpoint, method, payload, label,
+      //    file_field_hints }. Le frontend exécute ce plan AVEUGLÉMENT, sans
+      //    aucun string matching sur intent_detecte / type_sortie. Cela laisse
+      //    le LLM router intelligemment vers n'importe quel endpoint backend
+      //    (rapport, slides, visuel imprimable, vidéo, traduction, redaction,
+      //    OCR, ou tout endpoint ajouté ultérieurement) sans modification du
+      //    frontend. Compat ascendante : si plan absent (ancien backend),
+      //    fallback sur l'endpoint_cible legacy + check sur peut_payer.
+      const plan = orch?.plan;
+      const hasPlan = plan && plan.endpoint && plan.payload;
+      const hasLegacyCible = orch?.endpoint_cible && orch?.payload_pret;
+      const isGeneration = orch && (hasPlan || hasLegacyCible);
 
       // Cas 1 : génération détectée mais SOLDE INSUFFISANT → toast + lien recharge.
-      // Pas de prix affiché (UX volonté produit : ne JAMAIS exposer les coûts en chat).
       if (isGeneration && orch.peut_payer === false) {
         updateLastAssistantMessage(
           `⚠️ Crédits insuffisants pour cette tâche.\n\n[→ Recharger mon compte](/abonnement)`,
@@ -203,96 +205,77 @@ export const ChatPage = () => {
         return;
       }
 
-      // Cas 2 : génération détectée + solde OK → exécuter SILENCIEUSEMENT
-      // Routage strictement basé sur orch.type_sortie / orch.intent_detecte (LLM).
-      // Pas de fallback substring sur endpoint_cible (anti-pattern keyword-matching).
+      // Cas 2 : génération détectée + solde OK → exécuter le PLAN aveuglément.
       if (isGeneration && orch.peut_payer === true) {
         try {
-          if (orch.type_sortie === "rapport") {
-            const r: any = await generateurApi.rapport(orch.payload_pret as any);
-            updateLastAssistantMessage(
-              `✓ ${orch.template_label} généré.\n` +
-              (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
-              null, r.fichier_genere ? [r.fichier_genere] : undefined,
-              null, undefined,
-              (r.suggestions as SuggestionSuite[]) ?? undefined,
-            );
-            if (r.fichier_genere) {
-              addDocument({
-                titre: orch.template_label || content.slice(0, 60),
-                type: "rapport", fichier: r.fichier_genere,
-                contexteConversation: content,
-              });
-              toast.success("Document prêt");
+          // Source de vérité : orch.plan (nouveau) avec fallback legacy
+          const endpoint: string = plan?.endpoint || orch.endpoint_cible;
+          const method: string = (plan?.method || "POST").toUpperCase();
+          const payload: any = plan?.payload || orch.payload_pret;
+          const label: string = plan?.label || orch.template_label || "Document";
+          const fileFieldHints: string[] = plan?.file_field_hints || [
+            "fichier_genere", "fichier", "pdf_id", "fichier_id",
+            "url_telechargement", "download_url",
+          ];
+
+          // L'instance axios `http` a baseURL=/api/v1, donc on strip
+          // ce préfixe de l'endpoint si présent pour éviter le double.
+          const url = endpoint.startsWith("/api/v1/")
+            ? endpoint.slice("/api/v1".length)
+            : endpoint;
+
+          // Timeout adapté à la durée estimée (par défaut 5 min, max 15 min)
+          const timeoutMs = Math.min(
+            900_000,
+            Math.max(120_000, (orch.duree_estimee_secondes || 120) * 1000 + 60_000),
+          );
+          const reqConf = { timeout: timeoutMs };
+          const r: any = method === "POST"
+            ? (await http.post(url, payload, reqConf)).data
+            : method === "PUT"
+              ? (await http.put(url, payload, reqConf)).data
+              : (await http.get(url, { params: payload, ...reqConf })).data;
+
+          // Extraction générique du fichier depuis la réponse.
+          // Essai 1 : réponses multi-pages (Designer Pro projets)
+          const fichiers: string[] = [];
+          if (Array.isArray(r.pages)) {
+            for (const p of r.pages) {
+              if (p?.fichier_id) fichiers.push(p.fichier_id);
+              else if (p?.url) fichiers.push(p.url);
             }
-            return;
           }
-          if (orch.type_sortie === "slides") {
-            const r: any = await generateurApi.slides(orch.payload_pret as any);
-            updateLastAssistantMessage(
-              `✓ ${orch.template_label} généré.\n` +
-              (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
-              null, r.fichier_genere ? [r.fichier_genere] : undefined,
-              null, undefined,
-              (r.suggestions as SuggestionSuite[]) ?? undefined,
-            );
-            if (r.fichier_genere) {
-              addDocument({
-                titre: orch.template_label || content.slice(0, 60),
-                type: "slides", fichier: r.fichier_genere,
-                contexteConversation: content,
-              });
-              toast.success("Présentation prête");
-            }
-            return;
-          }
-          if (
-            orch.type_sortie === "visuel" ||
-            orch.type_sortie === "infographie" ||
-            orch.intent_detecte === "generation_visuel" ||
-            orch.intent_detecte === "generation_infographie"
-          ) {
-            // Bascule Designer Pro — auto-orchestrateur visuel (1 prompt → analyse + génération)
-            // Privilégie payload_pret du backend si présent (mode_visuel,
-            // export_cmyk, cle_projet_hint optimisés par l'orchestrateur Opus).
-            const payloadOrch = (orch.payload_pret as any) || {};
-            const r: any = await infographieProApi.genererAuto({
-              brief: payloadOrch.brief || content.trim(),
-              pays: payloadOrch.pays || profil?.pays,
-              langue: payloadOrch.langue || "fr",
-              mode_visuel: payloadOrch.mode_visuel,
-              export_cmyk: payloadOrch.export_cmyk,
-              cle_projet_hint: payloadOrch.cle_projet_hint,
-            } as any);
-            // Le backend Designer Pro retourne plusieurs champs equivalents :
-            // pdf_id, fichier, fichier_genere (alias), url_telechargement,
-            // download_url. On essaye dans l'ordre.
-            const fichiers: string[] = [];
-            if (Array.isArray(r.pages)) {
-              for (const p of r.pages) {
-                if (p?.fichier_id) fichiers.push(p.fichier_id);
-                else if (p?.url) fichiers.push(p.url);
+          // Essai 2 : champ unique selon les hints du plan (multi-alias)
+          if (fichiers.length === 0) {
+            for (const hint of fileFieldHints) {
+              const v = r?.[hint];
+              if (typeof v === "string" && v) {
+                fichiers.push(v);
+                break;
               }
-            } else {
-              const fid = r.fichier_genere || r.fichier || r.pdf_id || r.fichier_id;
-              if (fid) fichiers.push(fid);
             }
-            updateLastAssistantMessage(
-              `✓ ${orch.template_label || "Visuel"} généré.`,
-              null, fichiers.length > 0 ? fichiers : undefined,
-              null, undefined,
-              (r.suggestions as SuggestionSuite[]) ?? undefined,
-            );
-            if (fichiers.length > 0) {
-              addDocument({
-                titre: orch.template_label || content.slice(0, 60),
-                type: "visuel", fichier: fichiers[0],
-                contexteConversation: content,
-              });
-              toast.success("Visuel prêt");
-            }
-            return;
           }
+
+          updateLastAssistantMessage(
+            `✓ ${label} généré.` +
+            (fichiers.length > 0
+              ? `\n[Télécharger](${generateurApi.telecharger(fichiers[0])})`
+              : ""),
+            null,
+            fichiers.length > 0 ? fichiers : undefined,
+            null, undefined,
+            (r.suggestions as SuggestionSuite[]) ?? undefined,
+          );
+          if (fichiers.length > 0) {
+            addDocument({
+              titre: label,
+              type: orch.type_sortie || plan?.type_resultat || "document",
+              fichier: fichiers[0],
+              contexteConversation: content,
+            });
+            toast.success(`${label} prêt`);
+          }
+          return;
         } catch (genErr: any) {
           // Si l'endpoint cible échoue → fallback chat normal pour ne pas bloquer
           // eslint-disable-next-line no-console

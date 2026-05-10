@@ -3179,11 +3179,47 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         except ValueError:
             pass
 
+    # ── PLAN d'exécution complet (architecture data-driven, plan-driven) ──
+    # Le frontend NE FAIT AUCUN string matching sur intent_detecte/type_sortie.
+    # Il lit `plan` et exécute aveuglément : POST plan.endpoint avec plan.payload,
+    # affiche plan.label, extrait le fichier via plan.file_field_hints.
+    # Le LLM (Opus 4.7) compose entièrement la décision : peu importe que ce
+    # soit rapport, slides, visuel imprimable, vidéo, traduction ou tout autre
+    # endpoint futur, le frontend n'a pas à connaître les types métier.
+    template_label = data.get("template_label") or template_id.replace("_", " ").title()
+    type_resultat = (
+        "pdf"  if type_sortie == "visuel"
+        else "pptx" if type_sortie == "slides"
+        else "docx"
+    )
+    plan = {
+        "label": template_label,
+        "explication_user": data.get("raisonnement_court") or "",
+        "endpoint": endpoint_cible,
+        "method": "POST",
+        "payload": payload_pret,
+        "type_resultat": type_resultat,
+        # Indices au frontend pour extraire le fichier de la réponse, dans
+        # l'ordre de priorité. Le frontend essaye chaque clé jusqu'à hit.
+        "file_field_hints": [
+            "fichier_genere", "fichier", "pdf_id",
+            "fichier_id", "url_telechargement", "download_url",
+        ],
+        # Construction de l'URL finale pour téléchargement direct (le
+        # frontend peut concaténer si besoin).
+        "download_url_pattern": (
+            "/api/v1/pro/generateurs/fichier/{fichier}"
+            if endpoint_cible.startswith("/api/v1/pro/")
+            else "/api/v1/bureau/documents/{fichier}"
+        ),
+    }
+
     return {
+        # Champs legacy conservés pour compat ascendante (anciens clients) :
         "intent_detecte":         data.get("intent_detecte") or "generation_rapport",
         "type_sortie":            type_sortie,
         "template_id":            template_id,
-        "template_label":         data.get("template_label") or template_id.replace("_", " ").title(),
+        "template_label":         template_label,
         "mode_recommande":        mode_rec,
         "format_sortie":          data.get("format_sortie") or ("pptx" if type_sortie == "slides" else "docx"),
         "langue":                 data.get("langue") or "fr",
@@ -3201,4 +3237,6 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "tokens_output_estimes":  int(tokens_output_est),
         "nb_pages_estimees":      max(1, int(tokens_output_est) // 600),
         "nb_sections_cible":      nb_sections_cible or None,
+        # NEW : plan exécutable — la source de vérité pour le frontend
+        "plan":                   plan,
     }
