@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard, MessageSquare, User, LogOut,
   ChevronLeft, ChevronRight, Sparkles, Shield, CreditCard,
-  Users, Languages, FileText, FolderOpen, Briefcase, Gavel, ClipboardList, Radio,
+  Users, FolderOpen, Briefcase, Gavel, ClipboardList, Radio,
   Sun, Moon, Settings, Wallet, Building2,
 } from "lucide-react";
 import { cn, YukpoLogo, Badge } from "@/components/ui";
@@ -12,14 +12,13 @@ import { useAuthStore, useProfilStore, useUIStore } from "@/store";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const NAV_KEYS = [
-  // Le chat orchestrera désormais TOUTE la génération de documents (rapports,
-  // slides, conversion) ET les visuels Designer Pro. L'item "/generateurs"
-  // (Yukpo Studio) est retiré du menu — la route reste accessible en
-  // backup/legacy via URL directe (/generateurs).
+  // Le chat orchestre désormais TOUT : génération de documents (rapports,
+  // slides), conversion de fichiers, traduction de documents et visuels
+  // Designer Pro. Les anciens items "/generateurs" (Yukpo Studio) et
+  // "/traduction" sont retirés du menu — leurs routes redirigent vers /chat.
   { path: "/chat",           icon: MessageSquare,   key: "chat",           badge: "PRO", adminOnly: false },
   { path: "/reunions",       icon: Users,           key: "reunions",       badge: null,  adminOnly: false },
   { path: "/mes-documents",  icon: FolderOpen,      key: "documents",      badge: null,  adminOnly: false },
-  { path: "/traduction",     icon: Languages,       key: "traduction",     badge: null,  adminOnly: false },
   { path: "/translate-live", icon: Radio,           key: "translateLive",  badge: "NEW", adminOnly: false },
   { path: "/enquetes",       icon: ClipboardList,   key: "enquetes",       badge: null,  adminOnly: false },
   { path: "/emploi",         icon: Briefcase,       key: "emploi",         badge: null,  adminOnly: false },

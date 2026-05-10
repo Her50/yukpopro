@@ -13,9 +13,7 @@ const AdminPaiementsPage = lazy(() => import("@/pages/AdminPaiementsPage").then(
 const AbonnementPage = lazy(() => import("@/pages/AbonnementPage").then(m => ({ default: m.AbonnementPage })));
 const WalletPage = lazy(() => import("@/pages/WalletPage").then(m => ({ default: m.WalletPage })));
 const ReunionsPage = lazy(() => import("@/pages/ReunionsPage").then(m => ({ default: m.ReunionsPage })));
-const TraductionPage = lazy(() => import("@/pages/TraductionPage").then(m => ({ default: m.TraductionPage })));
 const TranslateLivePage = lazy(() => import("@/pages/TranslateLivePage").then(m => ({ default: m.TranslateLivePage })));
-const GenerateursPage = lazy(() => import("@/pages/GenerateursPage").then(m => ({ default: m.GenerateursPage })));
 const HistoriqueDocumentsPage = lazy(() => import("@/pages/HistoriqueDocumentsPage").then(m => ({ default: m.HistoriqueDocumentsPage })));
 const EmploiPage = lazy(() => import("@/pages/EmploiPage").then(m => ({ default: m.EmploiPage })));
 const MarchesPage = lazy(() => import("@/pages/MarchesPage").then(m => ({ default: m.MarchesPage })));
@@ -61,9 +59,7 @@ export default function App() {
               <Route path="/admin"       element={<AdminPage />} />
               <Route path="/admin/paiements" element={<AdminPaiementsPage />} />
               {/* Pages actives */}
-              <Route path="/traduction"     element={<TraductionPage />} />
               <Route path="/translate-live" element={<TranslateLivePage />} />
-              <Route path="/generateurs"    element={<GenerateursPage />} />
               <Route path="/mes-documents"  element={<HistoriqueDocumentsPage />} />
               <Route path="/emploi"         element={<EmploiPage />} />
               <Route path="/marches"        element={<MarchesPage />} />
@@ -71,10 +67,12 @@ export default function App() {
               <Route path="/parametres"     element={<ParametresPage />} />
               <Route path="/organisation"   element={<OrganisationPage />} />
               <Route path="/orgs/invites/:token" element={<InviteAcceptPage />} />
-              {/* Redirections legacy */}
+              {/* Redirections legacy — ces fonctions sont désormais dans le chat */}
               <Route path="/copilote"    element={<Navigate to="/chat" replace />} />
               <Route path="/agents"      element={<Navigate to="/chat" replace />} />
               <Route path="/analyse"     element={<Navigate to="/chat" replace />} />
+              <Route path="/traduction"  element={<Navigate to="/chat" replace />} />
+              <Route path="/generateurs" element={<Navigate to="/chat" replace />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/chat" replace />} />

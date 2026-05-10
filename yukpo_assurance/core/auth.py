@@ -434,10 +434,18 @@ async def _login_db(req: "LoginRequest", response: "Response") -> "TokenResponse
 
         # Vérification générique (timing constant — pas d'énumération utilisateur)
         if user is None:
-            # Simuler un hash check pour éviter le timing attack
+            # Simuler un hash check pour éviter le timing attack.
+            # IMPORTANT : utiliser un hash bcrypt VALIDE (passlib≥1.7.5/bcrypt≥4
+            # rejette désormais strictement les hashs au format incorrect avec
+            # ValueError, ce qui faisait crasher /login en 500). Le hash ci-dessous
+            # est un vrai $2b$12$ — la vérification retourne False mais ne raise pas.
             from passlib.context import CryptContext
             _CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-            _CryptContext.verify(req.password, "$2b$12$dummy.hash.to.prevent.timing.attack.xx")
+            _DUMMY_HASH = "$2b$12$KIXxPfnK8HLwoU3UmfdCIeHE7jvxJhZAuWdUnG5iTQKfQqBCkHCqi"
+            try:
+                _CryptContext.verify(req.password, _DUMMY_HASH)
+            except (ValueError, Exception):
+                pass  # Timing-only — le résultat ne sert pas
             security_service.detecter_tentatives_brute_force(req.username, "login")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -462,7 +470,13 @@ async def _login_db(req: "LoginRequest", response: "Response") -> "TokenResponse
         # Vérification du mot de passe
         from passlib.context import CryptContext
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        if not pwd_context.verify(req.password, user.hashed_password):
+        try:
+            mdp_ok = pwd_context.verify(req.password, user.hashed_password)
+        except (ValueError, Exception) as _e:
+            # Hash corrompu/legacy en base → on traite comme échec, pas crash 500
+            logger.warning(f"[Auth] Hash invalide pour user_id={user.id}: {_e}")
+            mdp_ok = False
+        if not mdp_ok:
             # Incrémenter les échecs DB
             user.tentatives_echec = (user.tentatives_echec or 0) + 1
             # Auto-verrouilage après 10 tentatives échouées (DB-level)
