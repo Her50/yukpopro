@@ -182,6 +182,32 @@ async def generer_freeform(
     except Exception as e:
         logger.debug(f"[Freeform] Forfait debit non bloquant : {e}")
 
+    # Suggestions intelligentes post-génération (3-5 propositions de suite
+    # contextuelles : variantes, déclinaisons, multilingues, formats print,
+    # etc. — non bloquant, ~0.4 FCFA Haiku).
+    suggestions: list[dict] = []
+    try:
+        from modules.pro.suggestions_intelligente import (
+            generer_suggestions_suite, detecter_manques_visuel,
+        )
+        meta_sug = {
+            "format_mm": layout_json.get("format_mm"),
+            "nb_pages": nb_pages,
+            "langue": demande.langue,
+            "pays": demande.pays,
+            "export_cmyk": demande.export_cmyk,
+            "titre_layout": layout_json.get("titre"),
+        }
+        manques = detecter_manques_visuel(meta_sug, demande.brief)
+        suggestions = await generer_suggestions_suite(
+            type_doc="freeform_visuel",
+            brief_original=demande.brief,
+            meta_resultat=meta_sug,
+            manques_detectes=manques,
+        )
+    except Exception as _e_sug:
+        logger.debug(f"[Freeform/Suggestions] non bloquant : {_e_sug}")
+
     download_url = f"/api/v1/bureau/documents/{fichier_id}"
     return {
         "ok": True,
@@ -196,4 +222,5 @@ async def generer_freeform(
         "duree_compose_ms": duree_compose_ms,
         "duree_render_ms": duree_render_ms,
         "taille_octets": len(pdf_bytes),
+        "suggestions": suggestions,
     }
