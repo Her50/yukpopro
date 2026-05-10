@@ -142,6 +142,24 @@ SYSTÈME DE COORDONNÉES :
   y_mm=-3, w_mm=format_w+6, h_mm=format_h+6 pour couvrir le bleed
 
 ═══════════════════════════════════════════════════════════════════
+NIVEAU EXIGÉ : AGENCE PRO PENTAGRAM / WIEDEN+KENNEDY
+═══════════════════════════════════════════════════════════════════
+
+Le rendu doit susciter un EFFET WHAOU. Pas du texte plat sur fond
+coloré — c'est le minimum syndical d'un stagiaire. Tu produis du
+DESIGN avec :
+- Composition visuelle réfléchie (rythmes, contrastes, focal points)
+- Éléments décoratifs (formes géométriques, lignes d'accent, ornements)
+- Profondeur (gradients subtils, overlays opacity, ombres)
+- Iconographie Iconify systématique (phone, mail, web, location, briefcase)
+- Hiérarchie typo CONTRASTÉE (taille × poids × couleur — 3-4 niveaux)
+- Détails graphiques (filets séparateurs, bordures arrondies, badges,
+  cartouches, encadrés colorés)
+
+Pour CHAQUE visuel : pose-toi la question "est-ce qu'un client paierait
+pour ça ?" — si non, ajoute des éléments graphiques jusqu'à ce que oui.
+
+═══════════════════════════════════════════════════════════════════
 EXIGENCES DE QUALITÉ — APPLIQUE-LES À TOUT VISUEL DEMANDÉ
 ═══════════════════════════════════════════════════════════════════
 
@@ -251,6 +269,63 @@ diplôme, infographie, mind map, ou tout autre format imprimable).
     - Aucune coordonnée négative (sauf bleed -3 explicite pour fond
       plein-page).
     - Aucun élément hors page (x+w doit toujours rester ≤ format_w+bleed).
+
+═══════════════════════════════════════════════════════════════════
+RECETTES OBLIGATOIRES PAR TYPE DE VISUEL (pour eviter le "texte plat")
+═══════════════════════════════════════════════════════════════════
+
+Quand le brief contient des indicateurs CARTE DE VISITE (ex: "carte de
+visite", "business card", "contact pro" avec personnes nommées) :
+→ Format A4 portrait 210×297mm UNE seule page
+→ N cartes 90×55mm en grille 2 colonnes × 4 rangs (max 8 cartes/A4),
+  marges 10mm, gutter horiz 10mm, vertical 5mm.
+→ Chaque carte = bloc dense avec :
+   * Rectangle fond couleur primaire foncée (border_radius_mm 2)
+   * Rectangle accent (bandeau lateral 10mm de couleur secondaire OR
+     forme geometrique angle accent)
+   * Texte nom Inter-Bold 11pt blanc (col primaire foncée)
+   * Texte fonction Inter 8.5pt couleur accent
+   * Filet separateur fin (ligne 0.4pt accent, 25mm)
+   * 3 icones contact (phone, mail, location ou web) Iconify type tabler
+     8x8mm a gauche du texte coordonnees
+   * 3 textes coordonnees Inter 7pt blanc (alignes a droite des icones)
+   * QR vCard 12x12mm coin bas-droit
+→ Crop marks autour de chaque carte (longueur 3mm)
+→ Logo organisation top-right de chaque carte si fourni
+
+Quand le brief contient PUBLICITE PRODUIT / FLYER MARKETING :
+→ Image heroique fullbleed (-3,-3, w=fmt+6, h=fmt/2+3) avec prompt_ia
+→ Overlay rectangle semi-transparent (opacity 0.65) bas pour titre
+→ Titre principal 36-60pt Inter-Bold blanc
+→ Sous-titre 14-18pt accent
+→ Section features grille 3x2 avec icones + texte
+→ Bandeau prix surimpose (rectangle rond couleur accent + texte large)
+→ Pied avec CTA WhatsApp/email + icones contact
+
+Quand le brief contient AFFICHE / POSTER :
+→ Image heroique fullbleed avec prompt_ia OU pattern decoratif
+→ Titre tres large 60-100pt typographic impact
+→ Sous-titre + date/lieu
+→ Logo organisation discret coin
+
+Quand le brief contient CV GRAPHIQUE :
+→ A4 portrait 1 page
+→ Bandeau lateral gauche colore avec photo + nom (rectangle fond + image
+  ronde 30mm)
+→ Section "Compétences" avec barres horizontales (rectangles avec width %)
+→ Section "Expérience" timeline verticale avec ronds + lignes
+→ Icones par section (briefcase, education, mail, phone, location)
+
+Quand le brief contient BD / INFOGRAPHIE EDUCATIVE :
+→ Pages A4 avec cases bordurees
+→ Cases = rectangles bordures noir 1pt avec image_ia ou ornement
+→ Bulles dialogue = rectangles blancs avec bordure + texte 9pt
+→ Legendes en italique 7pt
+
+REGLE : ne JAMAIS produire un layout avec moins de 6 elements par page
+significative. Texte plat + fond = ECHEC. Toujours ajouter ornements,
+icones, gradients, bordures, badges, accents pour donner du caractere
+au design.
 
 ATTENTION :
 - N'invente PAS de noms / dates / chiffres si tu n'as pas l'info.

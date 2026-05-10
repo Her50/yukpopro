@@ -94,10 +94,15 @@ async def generer_suggestions_suite(
             f"     synthétiser en note executive, exporter en PDF…\n"
             f"   - slides → générer notes orateur, version print A3, ajouter\n"
             f"     graphiques, traduire, extraire une slide en flyer…\n"
-            f"   - visuel/infographie → préciser taille print (A3, A4, A5,\n"
-            f"     bannière web, post Instagram), traduire le texte du visuel,\n"
-            f"     décliner en plusieurs variantes, ajouter QR code, modifier\n"
-            f"     la palette, version CMJN imprimerie…\n"
+            f"   - visuel/infographie/freeform_visuel → suggérer améliorations\n"
+            f"     CONCRÈTES du rendu : ajouter un logo, ajouter une photo de\n"
+            f"     profil, ajouter des icônes contact (phone/mail), forcer un\n"
+            f"     design avec gradient/ombres/effets premium, mettre 8 cartes\n"
+            f"     par A4 imprimerie au lieu d'une par page, changer pour\n"
+            f"     palette premium navy/or, ajouter image héroïque générée IA,\n"
+            f"     décliner en variante alternative, format réseaux sociaux\n"
+            f"     (Instagram carré, story 9:16, LinkedIn paysage), traduire,\n"
+            f"     export CMJN imprimerie, ajouter QR code…\n"
             f"   - convention/contrat → ajouter un avenant, générer la version\n"
             f"     anglaise, créer une lettre de notification, ajouter clause…\n"
             f"   - traduction → revoir le ton, traduire vers une 2e langue,\n"
@@ -170,7 +175,10 @@ async def generer_suggestions_suite(
 
 
 def detecter_manques_visuel(meta: dict, brief: str) -> list[str]:
-    """Détecte les éléments par défaut / manquants typiques sur un visuel."""
+    """Détecte les éléments par défaut / manquants typiques sur un visuel.
+    Genère des codes de manques utilisés par generer_suggestions_suite pour
+    proposer des améliorations actionables (logo, palette, icônes, image IA,
+    photo profil, design plus dense, multi-up imprimerie, etc.)."""
     manques: list[str] = []
     brief_lower = (brief or "").lower()
 
@@ -192,6 +200,30 @@ def detecter_manques_visuel(meta: dict, brief: str) -> list[str]:
     # Logo
     if "logo" not in brief_lower and not (meta.get("medias_utilises") or 0) > 0:
         manques.append("logo_non_fourni")
+
+    # ── Améliorations design (post-rendu Freeform) ──────────────────────
+    # Toujours proposer des upgrade visuel pour pousser à un rendu plus pro
+
+    # Carte de visite : multi-up A4 imprimerie ?
+    if "carte" in brief_lower and "visite" in brief_lower:
+        manques.append("multi_cartes_par_a4")
+        manques.append("photo_profil_carte")
+        manques.append("logo_carte")
+
+    # Si pas d'image IA dans le rendu : suggérer photo héroïque
+    if not meta.get("nb_images_ia"):
+        if any(t in brief_lower for t in ("flyer", "affiche", "publicité",
+                                            "marketing", "produit", "promo")):
+            manques.append("ajouter_image_heroique_ia")
+
+    # Palette monochrome ou trop simple
+    manques.append("palette_premium")
+
+    # Pousser pour design plus dense
+    manques.append("design_plus_dense")
+
+    # Variantes
+    manques.append("variantes_couleurs_alternatives")
 
     return manques
 

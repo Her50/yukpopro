@@ -1361,11 +1361,25 @@ const MessageBubble = ({
                 <div className="text-[11px] text-slate-400">Cliquez pour récupérer votre fichier — également disponible dans <a href="/documents" className="underline hover:text-yukpo-300">Mes documents</a></div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
               {message.fichiers.map((f, i) => {
                 const nomFichier = f.split(/[/\\]/).pop() || f;
                 const ext = (nomFichier.split(".").pop() || "").toLowerCase();
-                const labelExt = ext === "docx" ? "Word" : ext === "pptx" ? "PowerPoint" : ext === "pdf" ? "PDF" : ext === "xlsx" ? "Excel" : ext.toUpperCase();
+                const labelExt = ext === "docx" ? "Word"
+                  : ext === "pptx" ? "PowerPoint"
+                  : ext === "pdf" ? "PDF"
+                  : ext === "xlsx" ? "Excel"
+                  : ext === "mp4" ? "Vidéo MP4"
+                  : ext === "png" ? "Image PNG"
+                  : ext === "jpg" ? "Image JPG"
+                  : ext.toUpperCase();
+                const iconeExt = ext === "docx" ? "📄"
+                  : ext === "pptx" ? "📊"
+                  : ext === "pdf" ? "📕"
+                  : ext === "xlsx" ? "📈"
+                  : ext === "mp4" ? "🎞️"
+                  : ext === "png" || ext === "jpg" ? "🖼️"
+                  : "📎";
                 // Détection automatique du bon endpoint backend selon le préfixe
                 // du filename (les fichiers Bureau Freeform / Designer Pro / OCR /
                 // Audio / Redaction / Slides Sec sont stockés sous /bureau/documents,
@@ -1375,16 +1389,30 @@ const MessageBubble = ({
                   ? `/api/v1/bureau/documents/${encodeURIComponent(nomFichier)}`
                   : `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`;
                 return (
-                  <a
+                  <div
                     key={i}
-                    href={downloadUrl}
-                    download={nomFichier}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800/60 border border-emerald-500/30 hover:border-emerald-400/60 transition-colors"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Télécharger {labelExt}</span>
-                    <span className="text-xs font-normal opacity-80 truncate max-w-[180px]">— {nomFichier}</span>
-                  </a>
+                    <div className="text-2xl flex-shrink-0" aria-hidden>
+                      {iconeExt}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-emerald-100 truncate">
+                        {nomFichier}
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Format : {labelExt}
+                      </div>
+                    </div>
+                    <a
+                      href={downloadUrl}
+                      download={nomFichier}
+                      className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Télécharger</span>
+                    </a>
+                  </div>
                 );
               })}
             </div>
