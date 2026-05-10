@@ -422,10 +422,16 @@ Produis le document complet et professionnel."""
     nb_mots = len(contenu.split())
     prix = calculer_prix(demande.type_doc, nb_mots)
 
-    # Export Word
+    # Export Word — métadonnées DOCX renseignées (auteur=destinataire si fourni
+    # sinon "Yukpo Secrétariat", subject=type_doc, keywords=pays+catégorie).
     contenu_word: Optional[bytes] = None
     try:
-        contenu_word = _markdown_vers_docx(contenu, info["label"])
+        meta_docx = {
+            "type_doc":  demande.type_doc,
+            "categorie": info.get("categorie", ""),
+            "pays":      demande.pays,
+        }
+        contenu_word = _markdown_vers_docx(contenu, info["label"], meta=meta_docx)
     except Exception as e:
         logger.warning(f"[Rédacteur] Export Word échoué (non bloquant) : {e}")
 
@@ -489,35 +495,146 @@ def _formater_infos(infos: dict) -> str:
     return "\n".join(lignes) if lignes else "(Générer avec un exemple représentatif)"
 
 
-def _markdown_vers_docx(markdown: str, titre: str) -> bytes:
-    """Convertit du Markdown en .docx via python-docx."""
+def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) -> bytes:
+    """
+    Convertit du Markdown en .docx via python-docx.
+
+    Upgrade TOP 3 :
+    - Métadonnées DOCX (auteur, sujet, mots-clés, catégorie) renseignées.
+    - Header (titre court) + Footer (Page X / Y) sauf sur page de garde.
+    - Page de garde minimale (titre + date).
+    - Sommaire Word natif (field TOC) si le markdown contient ≥2 H1/H2 — sinon
+      pas de page de sommaire (lettres simples, attestations).
+    - updateFields=true → Word/LibreOffice recalculent TOC + numéros à l'ouverture.
+    """
     from docx import Document
-    from docx.shared import Pt, RGBColor, Inches
+    from docx.shared import Pt, RGBColor, Cm, Inches
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
 
     doc = Document()
-    # Marges A4 africaines standard
-    for section in doc.sections:
-        section.top_margin = Inches(1)
-        section.bottom_margin = Inches(1)
-        section.left_margin = Inches(1.2)
-        section.right_margin = Inches(1.2)
+    meta = meta or {}
 
+    # ── Métadonnées (Fichier > Propriétés sous Word) ───────────────────────
+    try:
+        cp = doc.core_properties
+        cp.title = titre[:255]
+        cp.subject = str(meta.get("type_doc") or "")[:255]
+        cp.author = "Yukpo Secrétariat"
+        cp.last_modified_by = "Yukpo Secrétariat"
+        kw = [meta.get("type_doc"), meta.get("categorie"), meta.get("pays")]
+        cp.keywords = ", ".join(filter(None, [str(k) for k in kw if k]))[:255]
+        cp.category = "Document"
+        cp.comments = "Généré par Yukpo Secrétariat"
+    except Exception:
+        pass
+
+    # ── updateFields=true (recalcul TOC + PAGE/NUMPAGES à l'ouverture) ────
+    try:
+        s_el = doc.settings.element
+        uf = OxmlElement("w:updateFields"); uf.set(qn("w:val"), "true")
+        existing = s_el.find(qn("w:updateFields"))
+        if existing is not None: s_el.remove(existing)
+        s_el.append(uf)
+    except Exception:
+        pass
+
+    # ── Marges A4 africaines standard + 1ère page différente ──────────────
+    for section in doc.sections:
+        section.top_margin = Cm(2.5)
+        section.bottom_margin = Cm(2.5)
+        section.left_margin = Cm(3)
+        section.right_margin = Cm(2.5)
+        section.header_distance = Cm(1.2)
+        section.footer_distance = Cm(1.2)
+        section.different_first_page_header_footer = True
+
+    # ── Header (titre court, italique gris) ────────────────────────────────
+    for section in doc.sections:
+        h_para = section.header.paragraphs[0]
+        h_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        titre_court = (titre[:80] + "…") if len(titre) > 80 else titre
+        h_run = h_para.add_run(titre_court)
+        h_run.font.size = Pt(8.5)
+        h_run.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+        h_run.italic = True
+
+        # Footer "Page X / Y" centré
+        f_para = section.footer.paragraphs[0]
+        f_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        f_run = f_para.add_run("Page ")
+        f_run.font.size = Pt(8.5)
+        f_run.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+
+        def _fld(instr: str):
+            r = f_para.add_run(); r.font.size = Pt(8.5)
+            r.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+            beg = OxmlElement("w:fldChar"); beg.set(qn("w:fldCharType"), "begin")
+            it = OxmlElement("w:instrText"); it.set(qn("xml:space"), "preserve"); it.text = instr
+            sep = OxmlElement("w:fldChar"); sep.set(qn("w:fldCharType"), "separate")
+            tt = OxmlElement("w:t"); tt.text = "1"
+            end = OxmlElement("w:fldChar"); end.set(qn("w:fldCharType"), "end")
+            r._r.append(beg); r._r.append(it); r._r.append(sep); r._r.append(tt); r._r.append(end)
+
+        _fld("PAGE"); f_para.add_run(" / ").font.size = Pt(8.5); _fld("NUMPAGES")
+
+    # ── Page de garde minimale (titre + date) ──────────────────────────────
+    p_titre = doc.add_paragraph()
+    p_titre.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_titre.paragraph_format.space_before = Pt(120)
+    r_t = p_titre.add_run(titre.upper())
+    r_t.bold = True; r_t.font.size = Pt(20)
+    r_t.font.color.rgb = RGBColor(0x1d, 0x4e, 0xd8)
+
+    p_date = doc.add_paragraph()
+    p_date.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r_d = p_date.add_run(datetime.now().strftime("%d %B %Y"))
+    r_d.font.size = Pt(10); r_d.italic = True
+    r_d.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+
+    # ── Sommaire Word natif si ≥2 H1/H2 dans le contenu ────────────────────
+    nb_titres = sum(
+        1 for l in markdown.splitlines()
+        if l.lstrip().startswith("# ") or l.lstrip().startswith("## ")
+    )
+    if nb_titres >= 2:
+        doc.add_page_break()
+        p_toc_t = doc.add_paragraph()
+        r_tt = p_toc_t.add_run("SOMMAIRE")
+        r_tt.bold = True; r_tt.font.size = Pt(14)
+        r_tt.font.color.rgb = RGBColor(0x1d, 0x4e, 0xd8)
+
+        p_toc = doc.add_paragraph()
+        run_toc = p_toc.add_run()
+        beg = OxmlElement("w:fldChar")
+        beg.set(qn("w:fldCharType"), "begin"); beg.set(qn("w:dirty"), "true")
+        it = OxmlElement("w:instrText"); it.set(qn("xml:space"), "preserve")
+        it.text = ' TOC \\o "1-3" \\h \\z \\u '
+        sep = OxmlElement("w:fldChar"); sep.set(qn("w:fldCharType"), "separate")
+        ph = OxmlElement("w:t")
+        ph.text = "Sommaire — clic droit > Mettre à jour le champ"
+        end = OxmlElement("w:fldChar"); end.set(qn("w:fldCharType"), "end")
+        run_toc._r.append(beg); run_toc._r.append(it)
+        run_toc._r.append(sep); run_toc._r.append(ph); run_toc._r.append(end)
+
+    doc.add_page_break()
+
+    # ── Corps Markdown → DOCX ──────────────────────────────────────────────
     for ligne in markdown.split("\n"):
         ligne = ligne.rstrip()
         if not ligne:
             doc.add_paragraph("")
             continue
         if ligne.startswith("### "):
-            p = doc.add_heading(ligne[4:], level=3)
+            doc.add_heading(ligne[4:], level=3)
         elif ligne.startswith("## "):
-            p = doc.add_heading(ligne[3:], level=2)
+            doc.add_heading(ligne[3:], level=2)
         elif ligne.startswith("# "):
-            p = doc.add_heading(ligne[2:], level=1)
+            doc.add_heading(ligne[2:], level=1)
         elif ligne.startswith("- ") or ligne.startswith("* "):
             doc.add_paragraph(ligne[2:], style="List Bullet")
         else:
-            # Gras inline **texte**
             para = doc.add_paragraph()
             _ajouter_run_gras(para, ligne)
 

@@ -1249,6 +1249,48 @@ class ReportWriterPro:
 
         doc = Document()
 
+        # ── Métadonnées DOCX (XMP `core.xml`) — auteur, titre, mots-clés,
+        # entreprise. Visibles dans Fichier > Propriétés sous Word, et
+        # exploitées par les DMS (SharePoint, M-Files, etc.) pour indexer
+        # automatiquement le document. Sans ces champs, un audit "logiciel
+        # pro" ne passe pas (cf. McKinsey/BCG/Bain : metadata always set).
+        try:
+            cp = doc.core_properties
+            cp.title = (sujet or "")[:255]
+            cp.subject = f"{type_rapport} ({mode})"
+            if self._profil:
+                auteur = (
+                    getattr(self._profil, "nom_complet", None)
+                    or getattr(self._profil, "nom", None)
+                    or getattr(self._profil, "user_nom", None)
+                    or "Yukpo"
+                )
+                cp.author = str(auteur)[:255]
+                cp.last_modified_by = str(auteur)[:255]
+                org = (
+                    getattr(self._profil, "nom_organisation", None)
+                    or getattr(self._profil, "entreprise", None)
+                    or ""
+                )
+                if org:
+                    cp.company = str(org)[:255]
+            else:
+                cp.author = "Yukpo"
+            kw = [type_rapport, mode]
+            try:
+                if self._profil:
+                    pays = getattr(self._profil, "pays", None)
+                    if pays: kw.append(str(pays))
+                    metier = getattr(self._profil, "metier", None)
+                    if metier: kw.append(str(metier))
+            except Exception:
+                pass
+            cp.keywords = ", ".join(filter(None, kw))[:255]
+            cp.category = "Rapport"
+            cp.comments = "Généré par Yukpo Pro"
+        except Exception as _e_meta:
+            logger.debug(f"[ReportWriter] Métadonnées DOCX non posées : {_e_meta}")
+
         # ── Force Word/LibreOffice à mettre à jour les champs (TOC, PAGE,
         # NUMPAGES) à l'ouverture. Sinon le sommaire reste vide ou affiche
         # toutes les entrées avec « Page 1 ».
@@ -1410,11 +1452,13 @@ class ReportWriterPro:
 
         doc.add_page_break()
 
-        # ── Sommaire (statique — fonctionne dans Word ET LibreOffice/PDF) ──
-        # On écrit chaque section sous forme "1. Titre" en hiérarchie. Pas
-        # de numéros de page (impossibles à calculer côté python-docx sans
-        # rendu réel) — le compromis : un index lisible immédiatement
-        # disponible, sans dépendre d'une mise à jour manuelle des champs.
+        # ── Sommaire Word NATIF (TOC field) ────────────────────────────────
+        # Insère un vrai champ TOC `\o "1-3"` qui sera calculé par Word /
+        # LibreOffice à l'ouverture (combiné avec updateFields=true plus
+        # haut). Numéros de page automatiques + entrées cliquables (\h).
+        # Avant : sommaire statique sans numéros de page (limitation
+        # acceptée par compromis). Maintenant : sommaire dynamique de
+        # qualité Word standard, équivalent McKinsey/BCG.
         p_toc_titre = doc.add_paragraph()
         p_toc_titre.alignment = WD_ALIGN_PARAGRAPH.LEFT
         run_toc_titre = p_toc_titre.add_run("SOMMAIRE")
@@ -1423,17 +1467,29 @@ class ReportWriterPro:
         run_toc_titre.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
         doc.add_paragraph()
 
-        for idx, sec in enumerate(sections, start=1):
-            titre_sec = (sec.get("titre") or "").strip() or f"Section {idx}"
-            p_entry = doc.add_paragraph()
-            p_entry.paragraph_format.space_after = Pt(4)
-            run_num = p_entry.add_run(f"{idx}. ")
-            run_num.bold = True
-            run_num.font.size = Pt(11)
-            run_num.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
-            run_t = p_entry.add_run(titre_sec)
-            run_t.font.size = Pt(11)
-            run_t.font.color.rgb = RGBColor(0x1A, 0x1A, 0x2E)
+        # Construction du field TOC via OXML — python-docx n'expose pas
+        # nativement les fields. La séquence begin → instrText → separate
+        # → result placeholder → end est la structure Word standard.
+        p_toc = doc.add_paragraph()
+        run_toc = p_toc.add_run()
+        fld_begin = OxmlElement("w:fldChar")
+        fld_begin.set(qn("w:fldCharType"), "begin")
+        fld_begin.set(qn("w:dirty"), "true")  # force recalcul à l'ouverture
+        instr = OxmlElement("w:instrText")
+        instr.set(qn("xml:space"), "preserve")
+        instr.text = ' TOC \\o "1-3" \\h \\z \\u '
+        fld_sep = OxmlElement("w:fldChar")
+        fld_sep.set(qn("w:fldCharType"), "separate")
+        # Placeholder visible si l'app Word ne calcule pas le field (rare)
+        placeholder_t = OxmlElement("w:t")
+        placeholder_t.text = "Sommaire — clic droit > Mettre à jour le champ"
+        fld_end = OxmlElement("w:fldChar")
+        fld_end.set(qn("w:fldCharType"), "end")
+        run_toc._r.append(fld_begin)
+        run_toc._r.append(instr)
+        run_toc._r.append(fld_sep)
+        run_toc._r.append(placeholder_t)
+        run_toc._r.append(fld_end)
 
         doc.add_page_break()
 
