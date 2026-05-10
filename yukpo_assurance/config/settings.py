@@ -90,6 +90,12 @@ class Settings(BaseSettings):
     # Replicate — Sprint R1/R2/R3 : provider alternatif + fallback fal.ai +
     # Brand LoRA training par client (~$5 vs $200 chez fal.ai).
     REPLICATE_API_TOKEN: str = ""
+    # Sprint 2.5 — Vercel API pour rattacher des custom domains aux frontends
+    # (white-label revendeurs/cabinets/agences). Optionnel : si absent, le
+    # domain est juste enregistré et l'admin Vercel le configure manuellement.
+    VERCEL_API_TOKEN: str = ""
+    VERCEL_PROJECT_YPRO: str = ""           # ID Vercel du projet yukpopro_web
+    VERCEL_PROJECT_SEC: str = ""            # ID Vercel du projet yukposecretariat_web
 
     def __init__(self, **data):
         super().__init__(**data)

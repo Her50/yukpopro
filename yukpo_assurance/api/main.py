@@ -116,6 +116,8 @@ from api.routes_saml_sso import router as saml_sso_router
 from api.routes_approvals import router as approvals_router
 # Sprint 2.4 — Brand Kit verrouillé
 from api.routes_brand_kit import router as brand_kit_router
+# Sprint 2.5 — White-label
+from api.routes_white_label import router as white_label_router
 from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
@@ -781,6 +783,7 @@ app.include_router(public_designerpro_router, prefix="/api/v1/public/designerpro
 app.include_router(saml_sso_router, prefix="/api/v1/saml", tags=["SAML SSO"])
 app.include_router(approvals_router, prefix="/api/v1/approvals", tags=["Approval Workflows"])
 app.include_router(brand_kit_router, prefix="/api/v1/brand-kit", tags=["Brand Kit"])
+app.include_router(white_label_router, prefix="/api/v1/white-label", tags=["White-label"])
 app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])

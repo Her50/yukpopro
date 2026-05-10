@@ -1121,6 +1121,56 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 2.5 — White-label (revendeurs / cabinets / agences) ──────────────
+
+
+class WhiteLabelDB(Base):
+    """
+    Configuration white-label d'une organisation revendeur. Permet aux
+    cabinets / agences / partenaires de proposer YukpoPro sous leur propre
+    marque (custom domain + logo + emails transactionnels brandés).
+
+    Le custom domain est rattaché au frontend Vercel via API si
+    VERCEL_API_TOKEN est configuré, sinon le domaine est juste enregistré
+    et l'admin doit le configurer manuellement dans Vercel.
+    """
+    __tablename__ = "white_labels"
+
+    wl_id            = Column(String(36), primary_key=True, index=True)
+    compagnie_id     = Column(Integer, nullable=False, unique=True, index=True)
+    actif            = Column(Boolean, default=True, index=True)
+
+    # Custom domain (ex: "design.acmebank.cm")
+    custom_domain    = Column(String(255), nullable=True, unique=True, index=True)
+    domain_verified  = Column(Boolean, default=False)
+    domain_target    = Column(String(255), nullable=True,
+                              default="cname.vercel-dns.com")
+    vercel_project_id = Column(String(120), nullable=True)
+    vercel_added_le  = Column(DateTime, nullable=True)
+
+    # Branding visuel
+    logo_url         = Column(String(500), nullable=True)         # logo header (PNG/SVG public)
+    favicon_url      = Column(String(500), nullable=True)
+    couleur_primaire_hex = Column(String(8), nullable=True)
+    nom_marque       = Column(String(120), nullable=True)         # "ACME Studio Design"
+    tagline          = Column(String(300), nullable=True)
+
+    # Emails transactionnels
+    sender_email     = Column(String(200), nullable=True)         # "design@acmebank.cm"
+    sender_name      = Column(String(120), nullable=True)         # "ACME Studio"
+    reply_to_email   = Column(String(200), nullable=True)
+    smtp_dkim_actif  = Column(Boolean, default=False)             # validation SPF/DKIM faite
+
+    # Footer custom (mentions légales revendeur, RC, etc.)
+    footer_html      = Column(Text, nullable=True)
+
+    # Hide Yukpo branding (option premium)
+    hide_yukpo_brand = Column(Boolean, default=False)
+
+    cree_le          = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le       = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.4 — Brand Kit verrouillé par organisation ──────────────────────
 
 
