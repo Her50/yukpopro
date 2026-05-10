@@ -609,6 +609,31 @@ PROJETS_INFOGRAPHIE: dict[str, dict] = {
         "prix_fcfa": 60000,
         "polices": {"titre": "Playfair Display", "corps": "Inter"},
     },
+    # ─── Custom libre — composition Opus 4.7 dynamique ────────────────────────
+    # Pour briefs atypiques sortant du catalogue figé (BD éducative, packaging,
+    # livret 6/12/20 pages custom, CV graphique single-page, carte de visite,
+    # flyer A3 standalone, dépliant 3 volets, etc.). Le pipeline détecte le
+    # marker `dynamic` et fait composer Opus 4.7 :
+    #   - format_mm (à partir du brief : A3/A4/A5/carte/Instagram/...)
+    #   - nombre + ordre des pages parmi PAGE_TEMPLATES
+    #   - palette adaptée
+    # Aucun cap pages : 1 à 60. Bleed standard 3mm.
+    "custom_libre": {
+        "label": "Composition libre (Opus dynamique)",
+        "description": "Pour tous les briefs atypiques hors catalogue : BD éducative, "
+                       "packaging, dépliant 3 volets, CV graphique single-page, carte "
+                       "de visite, flyer A3 standalone, livret 6/12/20p personnalisé, "
+                       "menu événementiel, programme conférence, etc. Opus 4.7 compose "
+                       "la structure (format, nombre de pages, templates) à partir du brief.",
+        "categorie": "custom",
+        "format_mm": (210, 297),       # défaut A4 — sera override par Opus
+        "bleed_mm": 3,
+        "pages": [],                   # rempli dynamiquement
+        "palette": "moderne",          # défaut — sera override par Opus
+        "prix_fcfa": 0,                # 1 FCFA × nb_pages via debiter_forfait
+        "polices": {"titre": "Inter", "corps": "Inter"},
+        "dynamic": True,               # marker → composition par Opus dans pipeline
+    },
 }
 
 
@@ -629,12 +654,16 @@ def lister_projets() -> list[dict]:
     ]
 
 
-def descripteur_pour_ia(cle_projet: str) -> dict:
-    """Description détaillée du projet et de ses pages pour le prompt IA."""
-    proj = PROJETS_INFOGRAPHIE[cle_projet]
+def descripteur_pour_ia(cle_projet: str, proj_override: dict | None = None) -> dict:
+    """Description détaillée du projet et de ses pages pour le prompt IA.
+    `proj_override` permet de fournir un proj_def composé dynamiquement
+    (cas custom_libre) sans muter PROJETS_INFOGRAPHIE."""
+    proj = proj_override or PROJETS_INFOGRAPHIE[cle_projet]
     pages = []
     for idx, tpl_id in enumerate(proj["pages"]):
-        tpl = PAGE_TEMPLATES[tpl_id]
+        tpl = PAGE_TEMPLATES.get(tpl_id)
+        if not tpl:
+            continue
         pages.append({
             "numero": idx + 1,
             "template": tpl_id,
@@ -651,3 +680,19 @@ def descripteur_pour_ia(cle_projet: str) -> dict:
         "palette_suggérée": proj["palette"],
         "pages": pages,
     }
+
+
+def lister_templates_pour_composition() -> list[dict]:
+    """Catalogue compact PAGE_TEMPLATES pour le prompt Opus de composition libre.
+    Format minimal : id + label + description + ambiance + types de slots."""
+    out = []
+    for tpl_id, tpl in PAGE_TEMPLATES.items():
+        types_slots = sorted({s.get("type", "") for s in tpl.get("slots", [])})
+        out.append({
+            "id": tpl_id,
+            "label": tpl["label"],
+            "description": tpl["description"],
+            "ambiance": tpl.get("ambiance", ""),
+            "types_slots": types_slots,
+        })
+    return out

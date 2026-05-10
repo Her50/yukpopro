@@ -1723,6 +1723,142 @@ async def detecter_langue_brief(brief: str, langue_defaut: str = "fr") -> str:
     return langue_defaut
 
 
+async def _composer_custom_libre(
+    brief: str,
+    profil: Optional[dict] = None,
+    langue: str = "fr",
+    pays: str = "CM",
+    directives_visuelles: Optional[dict] = None,
+) -> dict:
+    """Compose dynamiquement un projet sur mesure via Opus 4.7 pour les briefs
+    atypiques hors catalogue figé (BD, packaging, dépliant, CV graphique,
+    carte de visite, flyer A3 standalone, livret 6/12/20p custom, etc.).
+
+    Retourne un proj_def shape-compatible avec PROJETS_INFOGRAPHIE (label,
+    format_mm, bleed_mm, pages, palette, polices).
+
+    Le LLM reçoit le brief + le catalogue PAGE_TEMPLATES + les palettes
+    disponibles, et choisit format/pages/palette adaptés. Pas de cap pages
+    (1 à 60). Format extensible : A3/A4/A5/carré/Instagram/business card/
+    paysage/portrait/personnalisé.
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire as _MP
+    templates_compact = catalog.lister_templates_pour_composition()
+    palettes_dispo = list(PALETTES.keys())
+
+    metier = (profil or {}).get("metier", "")
+    nom_org = (profil or {}).get("nom_organisation", "")
+
+    prompt = f"""Tu es directeur de création senior. À partir d'un brief client, tu dois
+COMPOSER la structure d'un projet de design éditorial : format physique, palette,
+nombre et ordre des pages choisies parmi un catalogue de templates.
+
+═══════════════════════════════════════════════════
+  BRIEF CLIENT
+═══════════════════════════════════════════════════
+\"\"\"{brief[:3000]}\"\"\"
+
+Pays : {pays}        Langue : {langue}
+Métier : {metier or "(non précisé)"}    Organisation : {nom_org or "(non précisée)"}
+
+═══════════════════════════════════════════════════
+  CATALOGUE TEMPLATES DE PAGES DISPONIBLES
+═══════════════════════════════════════════════════
+{json.dumps(templates_compact, ensure_ascii=False, indent=2)}
+
+═══════════════════════════════════════════════════
+  PALETTES DISPONIBLES
+═══════════════════════════════════════════════════
+{', '.join(palettes_dispo)}
+
+═══════════════════════════════════════════════════
+  RÈGLES
+═══════════════════════════════════════════════════
+1. Choisis le FORMAT physique adapté au brief :
+   - A3 (297×420), A4 (210×297), A5 (148×210), A6 (105×148)
+   - Carré (210×210, 148×148, 297×297) pour Instagram/album
+   - Carte de visite (90×55), Carte mariage pliée (105×148)
+   - Affiche grand format (420×594 = A2)
+   - Dépliant 3 volets : 297×210 (A4 paysage à plier)
+   - Personnalisé : adapte aux indices du brief
+2. Choisis le NOMBRE et L'ORDRE des pages parmi le catalogue.
+   - 1 page (carte visite, flyer, affiche, post Instagram)
+   - 4-12 pages (livret événement, dépliant, programme)
+   - 16-32 pages (livre photo, magazine, rapport, catalogue)
+   - 32-60 pages (livre, mémoire, dossier complet)
+3. Tu peux RÉPÉTER un template plusieurs fois (ex: 8× "brochure_propositions"
+   pour 8 pages produits successives dans un catalogue).
+4. Choisis la PALETTE et les POLICES adaptées au registre (cérémonial,
+   corporate, festif, sobre, technique, ludique).
+5. Bleed standard 3mm (5mm si format > A3).
+
+═══════════════════════════════════════════════════
+  FORMAT DE SORTIE — JSON STRICT
+═══════════════════════════════════════════════════
+{{
+  "label": "Titre court du projet (5-12 mots)",
+  "description": "Brève description de la composition (15-30 mots)",
+  "format_mm": [LARGEUR, HAUTEUR],
+  "bleed_mm": 3,
+  "pages": ["template_id_1", "template_id_2", ...],
+  "palette": "{'|'.join(palettes_dispo)}",
+  "polices": {{"titre": "Inter|Playfair Display|Cormorant|Lato|Bebas Neue", "corps": "Inter|Lato"}}
+}}
+
+Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.ANALYSE,
+            forcer_modele=_MP.CLAUDE_OPUS,   # composition = raisonnement haut niveau
+            json_attendu=True,
+            max_tokens_override=2000,
+            utiliser_cache=False,
+        )
+        try:
+            data = json.loads(rep.contenu)
+        except json.JSONDecodeError:
+            import re as _re
+            m = _re.search(r'\{[\s\S]*\}', rep.contenu or "")
+            data = json.loads(m.group()) if m else {}
+    except Exception as e:
+        logger.warning(f"[CustomLibre] Composition Opus échouée : {e} — fallback A4 1 page")
+        data = {}
+
+    # Validation + fallback sain : au moins 1 page valide
+    pages_ids = [
+        p for p in (data.get("pages") or [])
+        if p in catalog.PAGE_TEMPLATES
+    ]
+    if not pages_ids:
+        # Fallback : 1 page brochure_couverture (template universel)
+        pages_ids = ["brochure_couverture"]
+
+    fmt = data.get("format_mm") or [210, 297]
+    if (not isinstance(fmt, list)) or len(fmt) != 2:
+        fmt = [210, 297]
+    fmt = [max(50, min(1200, int(fmt[0]))), max(50, min(1700, int(fmt[1])))]
+
+    palette = data.get("palette") or "moderne"
+    if palette not in PALETTES:
+        palette = "moderne"
+
+    polices = data.get("polices") or {"titre": "Inter", "corps": "Inter"}
+
+    return {
+        "label": data.get("label", "Composition libre"),
+        "description": data.get("description", "Projet composé sur mesure par l'IA"),
+        "categorie": "custom",
+        "format_mm": tuple(fmt),
+        "bleed_mm": int(data.get("bleed_mm") or 3),
+        "pages": pages_ids,
+        "palette": palette,
+        "prix_fcfa": 0,
+        "polices": polices,
+    }
+
+
 async def generer_projet_depuis_brief(
     brief: str,
     cle_projet: str,
@@ -1743,10 +1879,23 @@ async def generer_projet_depuis_brief(
     if not proj_def:
         raise ValueError(f"Projet inconnu : {cle_projet}")
 
+    # custom_libre : composer dynamiquement le proj_def via Opus 4.7
+    proj_override: Optional[dict] = None
+    if proj_def.get("dynamic"):
+        proj_override = await _composer_custom_libre(
+            brief=brief, profil=profil, langue=langue, pays=pays,
+            directives_visuelles=directives_visuelles,
+        )
+        proj_def = proj_override
+        logger.info(
+            f"[CustomLibre] Composition Opus : {len(proj_def['pages'])} page(s), "
+            f"format {proj_def['format_mm']}, palette={proj_def['palette']}"
+        )
+
     # Sprint L1.1 — Auto-détection langue : override silencieux si différent
     langue = await detecter_langue_brief(brief, langue_defaut=langue)
 
-    desc_projet = catalog.descripteur_pour_ia(cle_projet)
+    desc_projet = catalog.descripteur_pour_ia(cle_projet, proj_override=proj_override)
     desc_medias = [msm.descripteur_pour_ia(m) for m in medias.values()]
 
     profil = profil or {}
