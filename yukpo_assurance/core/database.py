@@ -1121,6 +1121,38 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 2.2 — SAML SSO (Identity Provider config par organisation) ───────
+
+
+class SamlConfigDB(Base):
+    """
+    Configuration SAML SSO d'une organisation. 1 row par compagnie active.
+
+    L'admin de l'org colle le metadata XML de son IdP (Okta/Azure AD/Google
+    Workspace) et configure le mapping des attributs SAML → champs user
+    YukpoPro (email, nom, role).
+    """
+    __tablename__ = "saml_configs"
+
+    config_id           = Column(String(36), primary_key=True, index=True)
+    compagnie_id        = Column(Integer, nullable=False, unique=True, index=True)
+    actif               = Column(Boolean, default=True, index=True)
+    idp_metadata_xml    = Column(Text, nullable=False)            # IdP metadata XML (collé par admin)
+    idp_entity_id       = Column(String(500), nullable=False)
+    idp_sso_url         = Column(String(500), nullable=False)
+    idp_x509_cert       = Column(Text, nullable=False)             # Certificat IdP pour vérif signature
+    sp_entity_id        = Column(String(500), nullable=False)     # Notre entity ID (URL canonique)
+    sp_acs_url          = Column(String(500), nullable=False)     # Notre Assertion Consumer Service
+    # Mapping attributs SAML → user YukpoPro
+    attr_email          = Column(String(120), default="email")
+    attr_nom            = Column(String(120), default="displayName")
+    attr_role           = Column(String(120), default="role")
+    role_par_defaut     = Column(String(50), default="agent")     # si attr_role absent dans assertion
+    auto_provision      = Column(Boolean, default=True)            # créer user à la 1ère connexion
+    cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le          = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.1 — Clés API publiques (B2B / intégrations clients) ────────────
 
 

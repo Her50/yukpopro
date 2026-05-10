@@ -110,6 +110,8 @@ from api.routes_bureau_infographie_pro import router as bureau_infographie_pro_r
 # Sprint 2.1 — API publique + clés
 from api.routes_api_keys import router as api_keys_router
 from api.routes_public_designerpro import router as public_designerpro_router
+# Sprint 2.2 — SAML SSO
+from api.routes_saml_sso import router as saml_sso_router
 from api.routes_bureau_gestion import router as bureau_gestion_router
 from api.routes_bureau_traduction import router as bureau_traduction_router
 from api.routes_bureau_documents import router as bureau_documents_router
@@ -772,6 +774,7 @@ app.include_router(bureau_infographie_pro_router, prefix="/api/v1/bureau/infogra
 # Sprint 2.1 — Gestion clés API (admin org via JWT) + API publique B2B (auth par clé)
 app.include_router(api_keys_router, prefix="/api/v1/api-keys", tags=["API Keys (admin org)"])
 app.include_router(public_designerpro_router, prefix="/api/v1/public/designerpro", tags=["Public API — Designer Pro"])
+app.include_router(saml_sso_router, prefix="/api/v1/saml", tags=["SAML SSO"])
 app.include_router(bureau_gestion_router,    prefix="/api/v1/bureau/gestion",     tags=["Secrétariat — Gestion Opérationnelle"])
 app.include_router(bureau_traduction_router, prefix="/api/v1/bureau/traduction",  tags=["Secrétariat — Traduction IA"])
 app.include_router(bureau_documents_router,  prefix="/api/v1/bureau/documents",   tags=["Secrétariat — Mes Documents"])

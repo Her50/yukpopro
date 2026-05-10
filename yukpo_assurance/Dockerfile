@@ -7,6 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     python3-dev \
+    # Sprint 2.2 — build deps pour python3-saml (lxml + xmlsec)
+    libxml2-dev \
+    libxmlsec1-dev \
+    libxmlsec1-openssl \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -45,6 +50,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi8 \
     shared-mime-info \
     fonts-liberation \
+    # Sprint 2.2 — SAML SSO runtime deps (xmlsec1 pour signature/validation XML)
+    libxml2 \
+    libxslt1.1 \
+    libxmlsec1 \
+    libxmlsec1-openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les packages Python compilés depuis le builder

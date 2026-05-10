@@ -94,6 +94,9 @@ staticmap>=0.5.7               # Plans localisation (cérémonie deuil/mariage)
 # Sprint 1.4 — WeasyPrint (HTML/CSS3 → PDF). Active sur Linux (Docker prod).
 # Sur Windows local : import gracieux (try/except) — l'app fonctionne sans.
 weasyprint>=62.0
+# Sprint 2.2 — SAML SSO (Okta, Azure AD, Google Workspace, OneLogin)
+# Requires libxmlsec1-dev (Linux). Sur Windows : import gracieux.
+python3-saml>=1.16.0
 
 # ─── WhatsApp / Notifications ──────────────────────────────────────────────────
 twilio>=9.0.0
