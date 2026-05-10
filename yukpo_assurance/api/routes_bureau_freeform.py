@@ -23,7 +23,7 @@ from core.auth import get_current_user, TokenData
 router = APIRouter()
 logger = logging.getLogger("yukpo_assurance.routes_bureau_freeform")
 
-_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "generated"
+_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "generated" / "bureau"
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
