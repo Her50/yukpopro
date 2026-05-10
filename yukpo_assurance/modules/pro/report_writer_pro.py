@@ -752,8 +752,18 @@ class ReportWriterPro:
         Appelle l'IA pour générer le contenu de chaque section.
         Retourne une liste de dicts : {"titre": ..., "contenu": ...}
         """
-        from core.ia_client import ModeIA, ia_client
+        from core.ia_client import ModeIA, ia_client, ModelePrioritaire
         from core.pays_devise import vocabulaire_devise
+
+        # Mode "complet"/"expert" = rapport long (10-30+ pages, raisonnement multi-tour,
+        # cumul contexte cross-lots, niveau directeur/DG signable). Mérite Opus 4.7
+        # (fallback gpt-4-turbo) — Sonnet en mode REDACTION standard suffit pour flash/standard
+        # mais s'essouffle sur la cohérence des rapports >5000 mots.
+        _modele_long = (
+            ModelePrioritaire.CLAUDE_OPUS
+            if mode in ("complet", "expert")
+            else None
+        )
 
         # Construire le système prompt
         metier_info = ""
@@ -1012,6 +1022,7 @@ class ReportWriterPro:
                 systeme=system,
                 mode=ModeIA.REDACTION,
                 max_tokens_override=_TOKENS_PAR_MODE[mode],
+                forcer_modele=_modele_long,
                 json_attendu=True,
                 utiliser_cache=False,
             )
@@ -1118,7 +1129,14 @@ class ReportWriterPro:
         """
         if mode == "flash" or len(sections) < 2:
             return sections
-        from core.ia_client import ModeIA, ia_client
+        from core.ia_client import ModeIA, ia_client, ModelePrioritaire
+        # Pass révision = analyse + réécriture ciblée. Sur rapports complets/expert
+        # (cabinet-grade), confier l'analyse critique et la densification à Opus.
+        _modele_long = (
+            ModelePrioritaire.CLAUDE_OPUS
+            if mode in ("complet", "expert")
+            else None
+        )
         try:
             apercu = "\n\n".join(
                 f"### {s['titre']}\n{(s.get('contenu') or '')[:1200]}" for s in sections
@@ -1135,7 +1153,8 @@ class ReportWriterPro:
             )
             r = await ia_client.appeler(
                 prompt=prompt_critique, mode=ModeIA.ANALYSE,
-                max_tokens_override=2000, json_attendu=True, utiliser_cache=False,
+                max_tokens_override=2000, forcer_modele=_modele_long,
+                json_attendu=True, utiliser_cache=False,
             )
             import json as _json, re as _re
             txt = r.contenu.strip()
@@ -1174,7 +1193,8 @@ class ReportWriterPro:
             )
             r2 = await ia_client.appeler(
                 prompt=prompt_revise, mode=ModeIA.REDACTION,
-                max_tokens_override=12000, json_attendu=True, utiliser_cache=False,
+                max_tokens_override=12000, forcer_modele=_modele_long,
+                json_attendu=True, utiliser_cache=False,
             )
             nouvelles = self._parser_sections_json(
                 r2.contenu, [s["titre"] for s in sections_a_reecrire]

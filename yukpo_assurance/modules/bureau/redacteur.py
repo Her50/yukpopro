@@ -401,6 +401,12 @@ Produis le document complet et professionnel."""
     if mode_choisi not in _MAX_TOKENS_PAR_MODE:
         mode_choisi = "standard"
     max_tokens = _MAX_TOKENS_PAR_MODE[mode_choisi]
+    # Mode "long" = 10-20 pages équivalentes, contrats juridiques OHADA, plans d'affaires,
+    # mémoires. Mérite Opus 4.7 (fallback gpt-4-turbo) — Sonnet/gpt-4o s'essoufflent sur
+    # la cohérence documentaire au-delà de ~5000 mots et perdent la rigueur juridique.
+    from core.ia_client import ModelePrioritaire as _MP
+    _modele_long = _MP.CLAUDE_OPUS if mode_choisi == "long" else None
+
     if mode_choisi == "long":
         # Indication explicite au LLM de produire un document long et détaillé
         prompt = (
@@ -416,6 +422,7 @@ Produis le document complet et professionnel."""
         mode=ModeIA.REDACTION,  # primaire = Sonnet (équivalent Big4) ; fallback GPT-4o
         systeme=systeme,
         max_tokens_override=max_tokens,
+        forcer_modele=_modele_long,  # mode "long" → Opus 4.7 (fallback gpt-4-turbo)
     )
 
     contenu = reponse.contenu
