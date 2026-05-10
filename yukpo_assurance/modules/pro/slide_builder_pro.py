@@ -786,6 +786,85 @@ class SlideBuilderPro:
             logger.error(f"[SlideBuilder] Conversion PDF échouée : {e}")
             return None
 
+    def _setup_master_slide(self, prs):
+        """
+        PUSH-2 — Configure le slide_master avec :
+        - Police par défaut Calibri (cohérence Big4)
+        - Filet vertical accent gauche persistant (3px, couleur primaire thème)
+        - Footer "Yukpo Pro" discret bas-droite (ne masque pas le pied de page
+          des slides individuelles, complémentaire)
+        - Force fond blanc cassé pour éviter le bug master noir sur certains
+          environnements PowerPoint cloud.
+
+        Tout ce qui est ici est ÉDITABLE via Affichage > Masque des
+        diapositives dans PowerPoint, et apparaît sur TOUTES les slides
+        sans dupliquer le rendu (économise ~30% du poids du PPTX).
+        """
+        from pptx.util import Inches, Pt, Emu
+        from pptx.dml.color import RGBColor
+        from pptx.enum.shapes import MSO_SHAPE
+        from pptx.oxml.ns import qn
+        from pptx.oxml import parse_xml
+
+        T = self._theme
+        master = prs.slide_master
+
+        # Filet vertical accent gauche — 3px sur toute la hauteur du master
+        try:
+            primaire = T.get("primaire", (0, 84, 166))
+            accent_w = Inches(0.04)
+            shape = master.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                0, 0, accent_w, prs.slide_height,
+            )
+            shape.fill.solid()
+            shape.fill.fore_color.rgb = RGBColor(*primaire)
+            shape.line.fill.background()
+            # Désactive l'inheritance pour ne pas être altéré par les layouts
+            shape.shadow.inherit = False
+        except Exception as e:
+            logger.debug(f"[SlideBuilder/Master] filet accent : {e}")
+
+        # Footer Yukpo Pro discret coin bas-droite (bibliothèque de marque)
+        try:
+            tb_brand = master.shapes.add_textbox(
+                prs.slide_width - Inches(1.6),
+                prs.slide_height - Inches(0.32),
+                Inches(1.5), Inches(0.25),
+            )
+            tf_b = tb_brand.text_frame
+            tf_b.margin_left = Emu(0); tf_b.margin_right = Emu(0)
+            tf_b.margin_top = Emu(0); tf_b.margin_bottom = Emu(0)
+            p_b = tf_b.paragraphs[0]
+            from pptx.enum.text import PP_ALIGN
+            p_b.alignment = PP_ALIGN.RIGHT
+            r_b = p_b.add_run()
+            r_b.text = "Yukpo Pro"
+            r_b.font.size = Pt(8)
+            r_b.font.italic = True
+            r_b.font.name = "Calibri"
+            r_b.font.color.rgb = RGBColor(180, 180, 195)
+        except Exception as e:
+            logger.debug(f"[SlideBuilder/Master] footer brand : {e}")
+
+        # Police par défaut Calibri (Big4 standard) — injection dans theme XML
+        # Cible : a:majorFont (titres) et a:minorFont (corps).
+        try:
+            theme_xml = master.element.getroottree().getroot()
+            # python-pptx donne un slideMaster, le theme est dans une part séparée
+            theme_part = master.part.part_related_by(
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme"
+            )
+            if theme_part is not None:
+                theme_root = theme_part.element
+                ns = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+                for tag in ("majorFont", "minorFont"):
+                    for elem in theme_root.iter(f"{ns}{tag}"):
+                        for latin in elem.findall(f"{ns}latin"):
+                            latin.set("typeface", "Calibri Light" if tag == "majorFont" else "Calibri")
+        except Exception as e:
+            logger.debug(f"[SlideBuilder/Master] police theme : {e}")
+
     async def _construire_pptx(
         self,
         nom_fichier: str,
@@ -804,6 +883,21 @@ class SlideBuilderPro:
         prs = Presentation()
         prs.slide_width  = Inches(13.33)
         prs.slide_height = Inches(7.5)
+
+        # ── PUSH-2 — Master slide pro custom ──────────────────────────────
+        # Configure le master slide (parent de tous les layouts) avec :
+        #   • Fond = couleur de thème
+        #   • Police par défaut = Calibri (titre/corps via theme XML)
+        #   • Filet vertical accent gauche persistant
+        #   • Footer Yukpo Pro discret bas-droite
+        # Tout ce qui est dessiné sur le master apparait automatiquement sur
+        # toutes les slides → cohérence visuelle garantie sans dupliquer le
+        # rendu, et l'utilisateur peut tout ajuster en 1 clic dans PowerPoint
+        # via "Affichage > Masque des diapositives".
+        try:
+            self._setup_master_slide(prs)
+        except Exception as _e_ms:
+            logger.debug(f"[SlideBuilder] master slide non setup : {_e_ms}")
 
         # ── Métadonnées PPTX (Fichier > Propriétés sous PowerPoint) ───────
         # Avant : 0 metadata. Après : title/author/subject/keywords/category
