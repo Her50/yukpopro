@@ -2727,3 +2727,136 @@ async def lire_projet_json(
     if f"_{current_user.user_id}_" not in projet_id and current_user.role != "admin":
         raise HTTPException(403, "Accès refusé")
     return json.loads(chemin.read_text(encoding="utf-8"))
+
+
+# ─── PUSH-3 — Routes Flux Fill (inpainting + outpainting) ─────────────────────
+#
+# Expose les helpers image_gen.inpaint_flux_fill / outpaint_flux_fill via
+# 2 endpoints HTTP. UX cible : utilisateur sélectionne une image générée
+# précédemment, peint un masque sur la zone à modifier, tape le prompt →
+# reçoit le PNG retouché. Killer feature pour itérations rapides
+# ("change la couleur du logo en doré", "ajoute une plante en bas à droite",
+# "convertis ce flyer A5 carré en bannière LinkedIn 16:9").
+
+class DemandeInpaint(BaseModel):
+    image_url: str = Field(..., min_length=10,
+        description="URL HTTPS publique de l'image source (PNG/JPEG, ≤ 2K)")
+    mask_url: Optional[str] = Field(default=None,
+        description="URL HTTPS du masque PNG noir/blanc (zones blanches = à remplacer). Si None, full repaint guidé.")
+    prompt: str = Field(..., min_length=3,
+        description="Description de ce qui doit apparaître dans la zone masquée")
+    strength: float = Field(default=0.85, ge=0.0, le=1.0,
+        description="0.0 = inchangé, 1.0 = remplace complètement")
+    seed: Optional[int] = Field(default=None)
+    accepter_cout: bool = Field(default=False,
+        description="Doit être true (Flux Fill = ~Flux Pro Ultra côté coût)")
+
+
+class DemandeOutpaint(BaseModel):
+    image_url: str = Field(..., min_length=10)
+    prompt: str = Field(..., min_length=3,
+        description="Description de ce qui doit prolonger l'image dans les zones étendues")
+    expand_left: int = Field(default=0, ge=0, le=2048)
+    expand_right: int = Field(default=0, ge=0, le=2048)
+    expand_top: int = Field(default=0, ge=0, le=2048)
+    expand_bottom: int = Field(default=0, ge=0, le=2048)
+    seed: Optional[int] = Field(default=None)
+    accepter_cout: bool = Field(default=False)
+
+
+@router.post("/inpaint", tags=["Bureau — Designer Pro"])
+async def inpaint(
+    demande: DemandeInpaint,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Inpainting via Flux Fill Ultra : remplace une zone masquée d'une image
+    par une nouvelle génération guidée par prompt. ~Flux Pro Ultra côté coût.
+    """
+    from modules.bureau.image_gen import inpaint_flux_fill
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+    if not demande.accepter_cout:
+        raise HTTPException(400,
+            "Flux Fill = ~Flux Pro Ultra côté coût. Cocher 'accepter_cout' pour confirmer.")
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    png_bytes = await inpaint_flux_fill(
+        image_url=demande.image_url, prompt=demande.prompt,
+        mask_url=demande.mask_url, seed=demande.seed, strength=demande.strength,
+    )
+    if not png_bytes:
+        raise HTTPException(502, "Flux Fill indisponible (FAL_KEY absent ou échec API)")
+
+    try:
+        await debiter_forfait(current_user.user_id, "designerpro_image_ultra",
+                              module="infographie", multiplicateur=1.0)
+    except Exception as _e:
+        logger.warning(f"[Designer Pro/Inpaint] Débit non bloquant : {_e}")
+
+    fid = f"bureau_pdf_{current_user.user_id}_inpaint_{int(time.time())}.png"
+    (_DATA_DIR / fid).write_bytes(png_bytes)
+    return {
+        "ok": True, "png_id": fid,
+        "png_base64": base64.b64encode(png_bytes).decode(),
+        "size_kb": round(len(png_bytes) / 1024, 1),
+    }
+
+
+@router.post("/outpaint", tags=["Bureau — Designer Pro"])
+async def outpaint(
+    demande: DemandeOutpaint,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Outpainting via Flux Fill : étend l'image dans une ou plusieurs directions
+    en générant le contenu manquant cohérent avec le sujet. Use case killer :
+    convertir un Insta carré 1080×1080 en bannière LinkedIn 1200×627 sans
+    recadrer le sujet (étend gauche+droite).
+    """
+    from modules.bureau.image_gen import outpaint_flux_fill
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+    if not demande.accepter_cout:
+        raise HTTPException(400,
+            "Outpaint Flux Fill = ~Flux Pro Ultra. Cocher 'accepter_cout' pour confirmer.")
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+    if max(demande.expand_left, demande.expand_right,
+           demande.expand_top, demande.expand_bottom) == 0:
+        raise HTTPException(400,
+            "Au moins une direction d'extension > 0 requise (expand_left/right/top/bottom)")
+
+    png_bytes = await outpaint_flux_fill(
+        image_url=demande.image_url, prompt=demande.prompt,
+        expand_left=demande.expand_left, expand_right=demande.expand_right,
+        expand_top=demande.expand_top, expand_bottom=demande.expand_bottom,
+        seed=demande.seed,
+    )
+    if not png_bytes:
+        raise HTTPException(502, "Flux Fill indisponible (FAL_KEY absent ou échec API)")
+
+    try:
+        await debiter_forfait(current_user.user_id, "designerpro_image_ultra",
+                              module="infographie", multiplicateur=1.0)
+    except Exception as _e:
+        logger.warning(f"[Designer Pro/Outpaint] Débit non bloquant : {_e}")
+
+    fid = f"bureau_pdf_{current_user.user_id}_outpaint_{int(time.time())}.png"
+    (_DATA_DIR / fid).write_bytes(png_bytes)
+    return {
+        "ok": True, "png_id": fid,
+        "png_base64": base64.b64encode(png_bytes).decode(),
+        "size_kb": round(len(png_bytes) / 1024, 1),
+    }
