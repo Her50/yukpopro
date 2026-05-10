@@ -230,11 +230,39 @@ export const ChatPage = () => {
             Math.max(120_000, (orch.duree_estimee_secondes || 120) * 1000 + 60_000),
           );
           const reqConf = { timeout: timeoutMs };
-          let r: any = method === "POST"
-            ? (await http.post(url, payload, reqConf)).data
-            : method === "PUT"
-              ? (await http.put(url, payload, reqConf)).data
-              : (await http.get(url, { params: payload, ...reqConf })).data;
+
+          // ── Sprint chat-everything : endpoints multipart (traduction
+          //    fichier, OCR). Le plan signale needs_file_upload=true et
+          //    upload_field_name. Si l'utilisateur a joint un fichier
+          //    non-audio (audio = déjà transcrit en amont), on reconstruit
+          //    la requête en FormData et on injecte le fichier.
+          let r: any;
+          if (plan?.needs_file_upload === true && files.length > 0) {
+            const fd = new FormData();
+            const af = files[0];   // l'endpoint cible traite 1 fichier
+            // Reconstituer un Blob à partir du base64 stocké côté frontend
+            if (af.content) {
+              const bytes = atob(af.content.includes(",") ? af.content.split(",")[1] : af.content);
+              const arr = new Uint8Array(bytes.length);
+              for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+              const blob = new Blob([arr], { type: af.type || "application/octet-stream" });
+              fd.append(plan.upload_field_name || "fichier", blob, af.name);
+            }
+            // Tous les autres champs du payload deviennent des Form fields
+            for (const [k, v] of Object.entries(payload || {})) {
+              if (v !== undefined && v !== null) fd.append(k, String(v));
+            }
+            r = (await http.post(url, fd, {
+              ...reqConf,
+              headers: { "Content-Type": "multipart/form-data" },
+            })).data;
+          } else {
+            r = method === "POST"
+              ? (await http.post(url, payload, reqConf)).data
+              : method === "PUT"
+                ? (await http.put(url, payload, reqConf)).data
+                : (await http.get(url, { params: payload, ...reqConf })).data;
+          }
 
           // ── Mode async (job_id + polling) — ex: Freeform avec Flux Pro Ultra
           // qui prend 30-90s. Le backend retourne immédiatement {async:true,

@@ -507,6 +507,18 @@ async def _extraire_texte_upload(contenu: bytes, nom: str, user_id: Optional[int
                 shape.text for slide in prs.slides
                 for shape in slide.shapes if hasattr(shape, "text") and shape.text
             )
+        elif ext in (".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".gif", ".bmp", ".tiff", ".tif"):
+            # Images : OCR Vision (GPT-4o primaire, Claude fallback).
+            # Gère écriture manuscrite, scans, captures écran, photos de docs.
+            mime_map = {
+                ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                ".png": "image/png", ".webp": "image/webp",
+                ".heic": "image/heic", ".heif": "image/heif",
+                ".gif": "image/gif", ".bmp": "image/bmp",
+                ".tiff": "image/tiff", ".tif": "image/tiff",
+            }
+            texte = await _ocr_via_claude(contenu, mime_map.get(ext, "image/jpeg"))
+            return texte or f"[Aucun texte extractible de l'image {nom}]"
     except Exception as e:
         return f"[Erreur extraction {nom}: {e}]"
     return f"[Format {ext} non supporté]"
@@ -2899,12 +2911,31 @@ REGLES :
      plan_action / compte_rendu / note_de_synthese : uniquement pour de
      vrais rapports d'analyse, JAMAIS pour des contrats ou conventions.
 
-2. type_sortie ∈ rapport | slides | visuel.
+2. type_sortie ∈ rapport | slides | visuel | traduction_texte | traduction_fichier | ocr.
    - "rapport" : DOCX (rapports d'analyse, contrats, lettres, attestations)
    - "slides" : PPTX (présentations direction/commercial/formation/projet)
    - "visuel" : PDF print-ready CMYK (visuels imprimables Designer Pro :
      cartes de visite, flyers, brochures, livrets, menus, CV graphique,
      invitations, packaging, posts réseaux sociaux, albums, etc.)
+   - "traduction_texte" : l'user demande de traduire un TEXTE saisi
+     inline dans le chat (sans fichier attaché). Ex : "Traduis ceci en
+     anglais : Bonjour, comment allez-vous ?". Préserve la structure
+     du texte, terminologie métier africaine SYSCOHADA/OHADA si pertinent.
+   - "traduction_fichier" : l'user a JOINT un fichier (PDF/DOCX/XLSX/TXT)
+     et demande sa traduction. Ex : "Traduis ce contrat en anglais"
+     avec un .docx en pièce. Le backend préserve mise en page, styles,
+     tableaux. NE PAS produire un nouveau document — traduire en place.
+   - "ocr" : l'user a joint une IMAGE (photo, scan, capture) ou un PDF
+     scanné et demande l'extraction / la transcription du texte. Ex :
+     "Scanne cette facture et extrais les données", "Transcris ce
+     manuscrit". Le backend rend un DOCX structuré.
+
+   ⚠️ DISTINCTION CRITIQUE :
+   - "Traduis ce contrat en anglais" + fichier joint → traduction_fichier
+   - "Rédige un contrat en anglais" → rapport (génération from scratch)
+   - "Voici ma facture scannée, lis-la" → ocr
+   - "Fais-moi une facture-modèle" → rapport
+   - "Traduis cette phrase : ..." (texte inline) → traduction_texte
 
 3. **dimensionnement libre — tu décides** la profondeur réelle attendue
    en lisant le brief :
@@ -2944,8 +2975,8 @@ REGLES :
 
 FORMAT JSON STRICT :
 {{
-  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_visuel" | "ambigu",
-  "type_sortie": "rapport" | "slides" | "visuel",
+  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_visuel" | "traduction_texte" | "traduction_fichier" | "ocr" | "ambigu",
+  "type_sortie": "rapport" | "slides" | "visuel" | "traduction_texte" | "traduction_fichier" | "ocr",
   "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
   "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
   "structure_custom": ["Section 1", "Section 2", "..."],  // dimensionne LIBREMENT (3 à 30 sections selon le brief), obligatoire si template_id="custom"
@@ -3099,6 +3130,43 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "langue": data.get("langue") or "fr",
             "export_cmyk": True,
         }
+    elif type_sortie == "traduction_texte":
+        # Traduction d'un texte inline (sans fichier joint). Le brief
+        # contient le texte à traduire. Langue cible déduite par le LLM
+        # depuis le brief (par défaut anglais si origine fr, sinon fr).
+        langue_source = (data.get("langue") or "fr").lower()
+        langue_cible_extr = (data.get("parametres_extraits") or {}).get("langue_cible")
+        if not langue_cible_extr:
+            langue_cible_extr = "en" if langue_source == "fr" else "fr"
+        endpoint_cible = "/api/v1/pro/traduire"
+        payload_pret = {
+            "contenu": demande.brief,
+            "langue_source": langue_source,
+            "langue_cible": str(langue_cible_extr).lower()[:5],
+            "format_sortie": data.get("format_sortie") or "docx",
+            "sujet": (data.get("template_label") or "Traduction")[:200],
+        }
+    elif type_sortie == "traduction_fichier":
+        # Traduction d'un fichier joint. Le frontend uploadera le fichier
+        # via POST multipart sur cet endpoint. file_field_hints contient
+        # les variantes possibles ; le ChatPage gère l'upload côté client.
+        langue_source = (data.get("langue") or "fr").lower()
+        langue_cible_extr = (data.get("parametres_extraits") or {}).get("langue_cible")
+        if not langue_cible_extr:
+            langue_cible_extr = "en" if langue_source == "fr" else "fr"
+        endpoint_cible = "/api/v1/pro/traduire-fichier"
+        payload_pret = {
+            "langue_source": langue_source,
+            "langue_cible": str(langue_cible_extr).lower()[:5],
+        }
+    elif type_sortie == "ocr":
+        # OCR : l'utilisateur a joint une image/PDF scanné. Le ChatPage
+        # uploadera le fichier en multipart. On utilise l'endpoint /bureau/ocr/
+        # scanner qui gère aussi bien images photo, scans, captures écran.
+        endpoint_cible = "/api/v1/bureau/ocr/scanner"
+        payload_pret = {
+            "langue": (data.get("langue") or "fr").lower()[:5],
+        }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
         # Le backend /rapports/generer attend `sujet` + `type_rapport`, pas
@@ -3164,8 +3232,23 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     type_resultat = (
         "pdf"  if type_sortie == "visuel"
         else "pptx" if type_sortie == "slides"
-        else "docx"
+        else "txt"  if type_sortie == "traduction_texte" and (data.get("format_sortie") or "docx") == "texte"
+        else "docx"  # rapport, traduction_*, ocr → DOCX par défaut
     )
+    # Endpoints qui exigent un upload multipart (fichier joint) plutôt
+    # qu'un POST JSON. Le frontend détecte ce flag et reconstruit la
+    # requête en FormData en injectant le fichier joint par l'utilisateur.
+    needs_file_upload = type_sortie in ("traduction_fichier", "ocr")
+    upload_field_name = "fichier"  # nom du champ FormData attendu par les deux endpoints concernés
+
+    # Pattern de téléchargement par type d'endpoint final
+    if endpoint_cible.startswith("/api/v1/pro/"):
+        dl_pattern = "/api/v1/pro/generateurs/fichier/{fichier}"
+    elif endpoint_cible.startswith("/api/v1/bureau/ocr"):
+        dl_pattern = "/api/v1/bureau/ocr/fichier/{fichier}"
+    else:
+        dl_pattern = "/api/v1/bureau/documents/{fichier}"
+
     plan = {
         "label": template_label,
         "explication_user": data.get("raisonnement_court") or "",
@@ -3173,6 +3256,11 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "method": "POST",
         "payload": payload_pret,
         "type_resultat": type_resultat,
+        # Sprint chat-everything : l'endpoint exige un upload multipart
+        # avec le fichier joint par l'utilisateur (traduction_fichier, OCR).
+        # Le frontend regarde ce flag et construit une requête FormData.
+        "needs_file_upload": needs_file_upload,
+        "upload_field_name": upload_field_name,
         # Indices au frontend pour extraire le fichier de la réponse, dans
         # l'ordre de priorité. Le frontend essaye chaque clé jusqu'à hit.
         "file_field_hints": [
@@ -3181,11 +3269,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         ],
         # Construction de l'URL finale pour téléchargement direct (le
         # frontend peut concaténer si besoin).
-        "download_url_pattern": (
-            "/api/v1/pro/generateurs/fichier/{fichier}"
-            if endpoint_cible.startswith("/api/v1/pro/")
-            else "/api/v1/bureau/documents/{fichier}"
-        ),
+        "download_url_pattern": dl_pattern,
     }
 
     return {
