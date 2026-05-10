@@ -40,6 +40,13 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "/index.html",
+        // Force activation immédiate du nouveau SW + prise de contrôle des
+        // onglets ouverts. Sans ça, autoUpdate télécharge le nouveau bundle
+        // mais l'utilisateur continue de voir l'ancien menu jusqu'à ce que
+        // TOUS ses onglets soient fermés. Critique pour propager les
+        // suppressions d'items de menu (Yukpo Studio, /traduction, etc.).
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],

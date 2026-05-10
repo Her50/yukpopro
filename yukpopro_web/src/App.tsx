@@ -67,12 +67,33 @@ export default function App() {
               <Route path="/parametres"     element={<ParametresPage />} />
               <Route path="/organisation"   element={<OrganisationPage />} />
               <Route path="/orgs/invites/:token" element={<InviteAcceptPage />} />
-              {/* Redirections legacy — ces fonctions sont désormais dans le chat */}
-              <Route path="/copilote"    element={<Navigate to="/chat" replace />} />
-              <Route path="/agents"      element={<Navigate to="/chat" replace />} />
-              <Route path="/analyse"     element={<Navigate to="/chat" replace />} />
-              <Route path="/traduction"  element={<Navigate to="/chat" replace />} />
-              <Route path="/generateurs" element={<Navigate to="/chat" replace />} />
+              {/* Redirections legacy — ces fonctions sont désormais dans le chat.
+                  /translate-live est conservé séparément (live conversationnel). */}
+              <Route path="/copilote"               element={<Navigate to="/chat" replace />} />
+              <Route path="/agents"                 element={<Navigate to="/chat" replace />} />
+              <Route path="/analyse"                element={<Navigate to="/chat" replace />} />
+              <Route path="/traduction"             element={<Navigate to="/chat" replace />} />
+              <Route path="/traduire"               element={<Navigate to="/chat" replace />} />
+              <Route path="/translate"              element={<Navigate to="/chat" replace />} />
+              <Route path="/generateurs"            element={<Navigate to="/chat" replace />} />
+              <Route path="/generateurs/redaction"  element={<Navigate to="/chat" replace />} />
+              <Route path="/redaction"              element={<Navigate to="/chat" replace />} />
+              <Route path="/rapports"               element={<Navigate to="/chat" replace />} />
+              <Route path="/slides"                 element={<Navigate to="/chat" replace />} />
+              <Route path="/documents-ia"           element={<Navigate to="/chat" replace />} />
+              <Route path="/studio"                 element={<Navigate to="/chat" replace />} />
+              <Route path="/studio-pro"             element={<Navigate to="/chat" replace />} />
+              <Route path="/designer"               element={<Navigate to="/chat" replace />} />
+              <Route path="/designer-pro"           element={<Navigate to="/chat" replace />} />
+              <Route path="/infographie"            element={<Navigate to="/chat" replace />} />
+              <Route path="/infographie-pro"        element={<Navigate to="/chat" replace />} />
+              <Route path="/visuels"                element={<Navigate to="/chat" replace />} />
+              <Route path="/flyer"                  element={<Navigate to="/chat" replace />} />
+              <Route path="/conversion"             element={<Navigate to="/chat" replace />} />
+              <Route path="/convertir"              element={<Navigate to="/chat" replace />} />
+              <Route path="/convert"                element={<Navigate to="/chat" replace />} />
+              <Route path="/ocr"                    element={<Navigate to="/chat" replace />} />
+              <Route path="/scanner"                element={<Navigate to="/chat" replace />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/chat" replace />} />

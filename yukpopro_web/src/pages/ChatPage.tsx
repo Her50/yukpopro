@@ -159,10 +159,11 @@ export const ChatPage = () => {
       }
 
       // Cas 2 : génération détectée + solde OK → exécuter SILENCIEUSEMENT
+      // Routage strictement basé sur orch.type_sortie / orch.intent_detecte (LLM).
+      // Pas de fallback substring sur endpoint_cible (anti-pattern keyword-matching).
       if (isGeneration && orch.peut_payer === true) {
-        const cible = orch.endpoint_cible || "";
         try {
-          if (orch.type_sortie === "rapport" || cible.includes("rapport")) {
+          if (orch.type_sortie === "rapport") {
             const r: any = await generateurApi.rapport(orch.payload_pret as any);
             updateLastAssistantMessage(
               `✓ ${orch.template_label} généré.\n` +
@@ -181,7 +182,7 @@ export const ChatPage = () => {
             }
             return;
           }
-          if (orch.type_sortie === "slides" || cible.includes("slides")) {
+          if (orch.type_sortie === "slides") {
             const r: any = await generateurApi.slides(orch.payload_pret as any);
             updateLastAssistantMessage(
               `✓ ${orch.template_label} généré.\n` +
@@ -200,7 +201,7 @@ export const ChatPage = () => {
             }
             return;
           }
-          if (orch.type_sortie === "visuel" || orch.intent_detecte === "generation_visuel" || cible.includes("infographie")) {
+          if (orch.type_sortie === "visuel" || orch.intent_detecte === "generation_visuel") {
             // Bascule Designer Pro — auto-orchestrateur visuel (1 prompt → analyse + génération)
             const r: any = await infographieProApi.genererAuto({
               brief: content.trim(),
