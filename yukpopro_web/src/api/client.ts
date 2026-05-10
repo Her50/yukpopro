@@ -1073,6 +1073,16 @@ export const infographieProApi = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => (await http.post("/bureau/infographie-pro/orchestrer", payload, { timeout: 60_000 })).data,
+  // Sprint 1.6 — Brand LoRA (training par organisation)
+  brandLoraList: async () =>
+    (await http.get("/bureau/infographie-pro/brand-lora")).data,
+  brandLoraTrain: async (payload: {
+    label: string; trigger_word: string; description?: string;
+    images_refs: string[]; accepter_cout: boolean;
+  }) => (await http.post("/bureau/infographie-pro/brand-lora/entrainer", payload,
+    { timeout: 60_000 })).data,
+  brandLoraDelete: async (lora_id: string) =>
+    (await http.delete(`/bureau/infographie-pro/brand-lora/${lora_id}`)).data,
 };
 
 // ── Enquêtes & Études ────────────────────────────────────────────────────────

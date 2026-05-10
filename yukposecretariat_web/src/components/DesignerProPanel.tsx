@@ -90,6 +90,16 @@ export default function DesignerProPanel() {
   const [orchestrating, setOrchestrating] = useState(false)
   const [orchestration, setOrchestration] = useState<any | null>(null)
 
+  // Sprint 1.6b — Brand LoRA
+  const [showLoraPanel, setShowLoraPanel] = useState(false)
+  const [showLoraForm, setShowLoraForm] = useState(false)
+  const [loraLabel, setLoraLabel] = useState('')
+  const [loraTrigger, setLoraTrigger] = useState('')
+  const [loraDesc, setLoraDesc] = useState('')
+  const [loraAccept, setLoraAccept] = useState(false)
+  const [loraTraining, setLoraTraining] = useState(false)
+  const [brandLoraId, setBrandLoraId] = useState<string>('')
+
   // Directives visuelles (sliders Phase 3)
   const [creativite, setCreativite] = useState(50)
   const [densite, setDensite] = useState(50)
@@ -129,6 +139,15 @@ export default function DesignerProPanel() {
     ...((mediasSession?.medias as Media[]) || []),
     ...((mediasCompte?.medias as Media[]) || []),
   ]
+
+  // Sprint 1.6b — Brand LoRAs de l'organisation
+  const { data: brandLoras, refetch: refetchLoras } = useQuery<any[]>({
+    queryKey: ['designer-pro-brand-loras'],
+    queryFn: () => infographieProAPI.brandLoraList().then(r => r.data),
+    enabled: !!user && showLoraPanel,
+    refetchInterval: showLoraPanel ? 15_000 : false,
+  })
+  const lorasReady = (brandLoras || []).filter(l => l.statut === 'ready')
 
   useEffect(() => {
     setCategorieUpload(porteeUpload === 'session' ? 'photo' : 'logo')
@@ -192,6 +211,7 @@ export default function DesignerProPanel() {
       if (refStyle) {
         payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
+      if (brandLoraId) payload.brand_lora_id = brandLoraId
       const r = autoMode
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
@@ -260,6 +280,40 @@ export default function DesignerProPanel() {
     if (typeof dv.importance_images === 'number') setImportanceImg(dv.importance_images)
     if (typeof dv.elegance === 'number') setElegance(dv.elegance)
     toast.success(t('designerPro.autoApplied', 'Formulaire pré-rempli'))
+  }
+
+  // Sprint 1.6b — Brand LoRA training (Sec)
+  const lancerTrainingLora = async () => {
+    if (!loraLabel.trim() || !loraTrigger.trim()) {
+      toast.error('Label + trigger word requis'); return
+    }
+    if (refsSelectionnees.length < 10) {
+      toast.error(`≥10 images requises (actuel: ${refsSelectionnees.length})`); return
+    }
+    if (!loraAccept) { toast.error('Coche la confirmation du coût'); return }
+    setLoraTraining(true)
+    try {
+      await infographieProAPI.brandLoraTrain({
+        label: loraLabel, trigger_word: loraTrigger,
+        description: loraDesc || undefined,
+        images_refs: refsSelectionnees, accepter_cout: true,
+      })
+      toast.success('Training lancé (15-30 min)')
+      setShowLoraForm(false); setLoraLabel(''); setLoraTrigger(''); setLoraDesc(''); setLoraAccept(false)
+      refetchLoras()
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || e?.message || 'Échec training')
+    } finally { setLoraTraining(false) }
+  }
+  const supprimerLora = async (loraId: string) => {
+    if (!confirm('Désactiver ce Brand LoRA ?')) return
+    try {
+      await infographieProAPI.brandLoraDelete(loraId)
+      if (brandLoraId === loraId) setBrandLoraId('')
+      toast.success('LoRA désactivé'); refetchLoras()
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || e?.message || 'Échec suppression')
+    }
   }
 
   const cats = porteeUpload === 'session' ? CAT_SESSION : CAT_COMPTE
@@ -433,6 +487,110 @@ export default function DesignerProPanel() {
                 )
               })}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Sprint 1.6 — Brand LoRA (collapsible) ─────────────────────────── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-3">
+        <button onClick={() => setShowLoraPanel(v => !v)} type="button"
+          className="w-full flex items-center justify-between text-left">
+          <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+            <Sparkles size={15} className="text-fuchsia-600" />
+            Brand LoRA — Style de marque entraîné
+          </p>
+          <span className={`text-gray-400 transition-transform ${showLoraPanel ? 'rotate-180' : ''}`}>▾</span>
+        </button>
+        {showLoraPanel && (
+          <div className="space-y-3">
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              Entraîne un LoRA Flux à partir de 10-30 images de ta marque.
+              Réutilisable à vie. <b>Coût : 200 000 FCFA / LoRA (one-shot)</b>.
+            </p>
+            {(brandLoras || []).length > 0 && (
+              <div className="space-y-1.5">
+                {(brandLoras || []).map(l => (
+                  <div key={l.lora_id} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-gray-800 truncate">{l.label}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          l.statut === 'ready' ? 'bg-green-100 text-green-700'
+                          : l.statut === 'training' ? 'bg-blue-100 text-blue-700 animate-pulse'
+                          : l.statut === 'pending' ? 'bg-amber-100 text-amber-700'
+                          : 'bg-red-100 text-red-700'
+                        }`}>{l.statut}</span>
+                        <span className="text-[10px] text-gray-500 font-mono">@{l.trigger_word}</span>
+                      </div>
+                      <div className="text-[10px] text-gray-500">
+                        {l.nb_images_train} images · {l.cout_paye_fcfa} FCFA
+                        {l.erreur && <span className="text-red-600"> · {l.erreur.slice(0,80)}</span>}
+                      </div>
+                    </div>
+                    <button onClick={() => supprimerLora(l.lora_id)}
+                      className="text-red-500 hover:text-red-700 p-1">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {lorasReady.length > 0 && (
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  LoRA à appliquer (mode Premium uniquement)
+                </label>
+                <select value={brandLoraId} onChange={e => setBrandLoraId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                  <option value="">— Aucun —</option>
+                  {lorasReady.map(l => (
+                    <option key={l.lora_id} value={l.lora_id}>{l.label} (@{l.trigger_word})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {!showLoraForm ? (
+              <button onClick={() => setShowLoraForm(true)} type="button"
+                className="w-full bg-fuchsia-100 hover:bg-fuchsia-200 text-fuchsia-800 font-semibold text-xs py-2 rounded-xl">
+                + Entraîner un nouveau Brand LoRA
+              </button>
+            ) : (
+              <div className="space-y-2 bg-fuchsia-50 border border-fuchsia-200 rounded-xl p-3">
+                <p className="text-xs font-bold text-fuchsia-900">Nouveau Brand LoRA</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={loraLabel} onChange={e => setLoraLabel(e.target.value)}
+                    placeholder="Label (ex: ACME hiver 2026)"
+                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm" maxLength={120} />
+                  <input value={loraTrigger}
+                    onChange={e => setLoraTrigger(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}
+                    placeholder="TRIGGERWORD"
+                    className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm font-mono" maxLength={80} />
+                </div>
+                <input value={loraDesc} onChange={e => setLoraDesc(e.target.value)}
+                  placeholder="Description (optionnel)"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm" maxLength={500} />
+                <p className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 text-amber-800">
+                  Sélectionne <b>10-30 images</b> dans la médiathèque ({refsSelectionnees.length} sélectionnée(s)).
+                </p>
+                <label className="flex items-start gap-2 cursor-pointer text-xs">
+                  <input type="checkbox" checked={loraAccept} onChange={e => setLoraAccept(e.target.checked)} className="mt-0.5" />
+                  <span>J'accepte le débit de <b>200 000 FCFA</b> non-remboursable.</span>
+                </label>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowLoraForm(false)} type="button"
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs py-2 rounded-xl">
+                    Annuler
+                  </button>
+                  <button onClick={lancerTrainingLora}
+                    disabled={loraTraining || !loraAccept || refsSelectionnees.length < 10
+                      || !loraLabel.trim() || !loraTrigger.trim()}
+                    className="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:opacity-50 text-white font-semibold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5">
+                    {loraTraining ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    Lancer training
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

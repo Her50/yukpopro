@@ -274,6 +274,14 @@ export const infographieProAPI = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => api.post('/bureau/infographie-pro/orchestrer', data, { timeout: 60_000 }),
+  // Sprint 1.6 — Brand LoRA
+  brandLoraList: () => api.get('/bureau/infographie-pro/brand-lora'),
+  brandLoraTrain: (data: {
+    label: string; trigger_word: string; description?: string;
+    images_refs: string[]; accepter_cout: boolean;
+  }) => api.post('/bureau/infographie-pro/brand-lora/entrainer', data, { timeout: 60_000 }),
+  brandLoraDelete: (lora_id: string) =>
+    api.delete(`/bureau/infographie-pro/brand-lora/${lora_id}`),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────
