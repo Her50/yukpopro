@@ -1328,10 +1328,18 @@ const MessageBubble = ({
                 const nomFichier = f.split(/[/\\]/).pop() || f;
                 const ext = (nomFichier.split(".").pop() || "").toLowerCase();
                 const labelExt = ext === "docx" ? "Word" : ext === "pptx" ? "PowerPoint" : ext === "pdf" ? "PDF" : ext === "xlsx" ? "Excel" : ext.toUpperCase();
+                // Détection automatique du bon endpoint backend selon le préfixe
+                // du filename (les fichiers Bureau Freeform / Designer Pro / OCR /
+                // Audio / Redaction / Slides Sec sont stockés sous /bureau/documents,
+                // les rapports/slides Pro sous /pro/generateurs/fichier).
+                const isBureauFile = /^bureau_/i.test(nomFichier);
+                const downloadUrl = isBureauFile
+                  ? `/api/v1/bureau/documents/${encodeURIComponent(nomFichier)}`
+                  : `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`;
                 return (
                   <a
                     key={i}
-                    href={`/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`}
+                    href={downloadUrl}
                     download={nomFichier}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all"
                   >

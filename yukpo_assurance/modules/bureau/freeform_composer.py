@@ -317,13 +317,16 @@ sans commentaire ni markdown.
 """
 
     try:
+        # max_tokens=4000 : compatible gpt-4-turbo (limite 4096) + Opus 4.7
+        # (limite 32k mais 4000 suffisent largement pour un layout JSON même
+        # dense — ~50-200 elements). Avant : 8000 -> erreur 400 sur gpt-4-turbo.
         rep = await ia_client.appeler(
             prompt=prompt_user,
             systeme=_PROMPT_SYSTEME,
             mode=ModeIA.ANALYSE,
             forcer_modele=ModelePrioritaire.CLAUDE_OPUS,   # tier-traduit en gpt-4-turbo si LLM_PRIMAIRE=gpt
             json_attendu=True,
-            max_tokens_override=8000,
+            max_tokens_override=4000,
             utiliser_cache=False,
         )
         contenu = rep.contenu or "{}"

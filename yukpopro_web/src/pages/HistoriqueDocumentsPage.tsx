@@ -50,9 +50,13 @@ const resolveColor = (type: string): string => {
   return "slate";
 };
 
-// Designer Pro : fichiers servis par /bureau/documents/, pas /pro/generateurs/.
+// Designer Pro / Freeform / OCR / Audio / Redaction / Slides Sec : fichiers
+// servis par /bureau/documents/. Rapports/slides Pro : /pro/generateurs/fichier.
+// Détection : préfixe filename `bureau_*` OU type explicitement bureau.
 const downloadUrlPour = (typeDoc: string, fichier: string): string => {
-  if (typeDoc === "designerpro") {
+  const isBureau = /^bureau_/i.test(fichier) || typeDoc === "designerpro" ||
+                   typeDoc === "visuel" || typeDoc === "freeform";
+  if (isBureau) {
     return `/api/v1/bureau/documents/${encodeURIComponent(fichier)}`;
   }
   return `/api/v1/pro/generateurs/fichier/${encodeURIComponent(fichier)}`;

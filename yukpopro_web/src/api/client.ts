@@ -287,8 +287,16 @@ export const generateurApi = {
     return data;
   },
 
-  telecharger: (nomFichier: string) =>
-    `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`,
+  // Détection auto du bon endpoint selon le préfixe filename :
+  // les fichiers Bureau (designerpro, freeform, ocr, audio, redaction,
+  // slides_sec, video) sont stockés sous /bureau/documents/ ;
+  // les rapports/slides Pro sous /pro/generateurs/fichier/.
+  telecharger: (nomFichier: string) => {
+    const isBureau = /^bureau_/i.test(nomFichier);
+    return isBureau
+      ? `/api/v1/bureau/documents/${encodeURIComponent(nomFichier)}`
+      : `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`;
+  },
 
   analyserEtGenerer: async (params: {
     instruction: string;
