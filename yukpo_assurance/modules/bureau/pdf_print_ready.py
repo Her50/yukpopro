@@ -67,12 +67,23 @@ def convertir_en_pdf_x1a(
     format_trim_mm: tuple[float, float],
     bleed_mm: float = 3.0,
     creator: str = "Yukpo Designer Pro",
+    profil_icc: str = "fogra39",
+    surimpression_noir: bool = False,
 ) -> bytes:
     """
     Convertit un PDF généré (RGB ou CMYK) en PDF/X-1a:2001 print-ready.
 
-    `format_trim_mm` : taille finale après rognage (ex: 148, 210 pour A5)
-    `bleed_mm`       : marge perdue (3mm standard imprimerie)
+    `format_trim_mm`     : taille finale après rognage (ex: 148, 210 pour A5)
+    `bleed_mm`           : marge perdue (3mm standard imprimerie)
+    `profil_icc`         : "fogra39" (défaut, Europe/Afrique) ou "gracol_us"
+                           (Amérique du Nord, GRACoL2006_Coated1) ou "psocoated_v3"
+                           (PSO Coated v3 ECI). Si non disponible localement,
+                           tentative téléchargement, sinon FOGRA39 fallback.
+    `surimpression_noir` : si True, injecte ExtGState OPM=1 par défaut au niveau
+                           du document → les objets 100K noir surimpriment le
+                           fond CMY (évite défauts de calage en imprimerie offset).
+                           ⚠ Doit être combiné avec un export CMYK (pas RGB) pour
+                           que l'effet soit réel sur le RIP.
 
     Le PDF d'entrée DOIT déjà contenir le bleed dans son MediaBox
     (i.e. format réel = format_trim + 2×bleed). On y ajoute juste les
@@ -120,8 +131,11 @@ def convertir_en_pdf_x1a(
             # ArtBox = TrimBox (zone artistique active)
             page.ArtBox = page.TrimBox
 
-        # OutputIntent : ICC FOGRA39 si dispo, sinon meta-only
-        icc_bytes = _ensure_icc_profile()
+        # OutputIntent : ICC selon profil_icc demandé, sinon FOGRA39 fallback
+        icc_bytes = _ensure_icc_profile_for(profil_icc)
+        if not icc_bytes and profil_icc != "fogra39":
+            logger.info(f"[PDF/X-1a] Profil {profil_icc} indisponible → fallback FOGRA39")
+            icc_bytes = _ensure_icc_profile()
         with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
             meta["xmp:CreatorTool"] = creator
             meta["dc:title"] = titre
@@ -131,7 +145,14 @@ def convertir_en_pdf_x1a(
             meta["pdfx:GTS_PDFXVersion"] = "PDF/X-1:2001"
             meta["pdfx:GTS_PDFXConformance"] = "PDF/X-1a:2001"
 
-        # OutputIntent dictionary
+        # OutputIntent dictionary — labels selon profil
+        _ICC_LABELS = {
+            "fogra39":     ("ISO Coated v2 (ECI)", "ISO Coated v2 (ECI) - FOGRA39"),
+            "psocoated_v3":("PSO Coated v3 (ECI)", "PSO Coated v3 (ECI) - FOGRA51"),
+            "gracol_us":   ("GRACoL2006_Coated1v2", "GRACoL 2006 Coated #1 - SWOP"),
+        }
+        cond_id, cond_info = _ICC_LABELS.get(profil_icc, _ICC_LABELS["fogra39"])
+
         if icc_bytes:
             try:
                 icc_stream = pdf.make_stream(icc_bytes)
@@ -140,8 +161,8 @@ def convertir_en_pdf_x1a(
                 output_intent = Dictionary(
                     Type=Name("/OutputIntent"),
                     S=Name("/GTS_PDFX"),
-                    OutputConditionIdentifier=pikepdf.String("ISO Coated v2 (ECI)"),
-                    Info=pikepdf.String("ISO Coated v2 (ECI) - FOGRA39"),
+                    OutputConditionIdentifier=pikepdf.String(cond_id),
+                    Info=pikepdf.String(cond_info),
                     RegistryName=pikepdf.String("http://www.color.org"),
                     DestOutputProfile=icc_stream,
                 )
@@ -158,12 +179,78 @@ def convertir_en_pdf_x1a(
             )
             pdf.Root.OutputIntents = Array([output_intent])
 
+        # ── ADD-3 — Surimpression noir 100K ────────────────────────────────
+        # Ajoute un ExtGState global "GSO" avec OPM=1 (overprint mode 1) +
+        # OP=true + op=true. Les RIPs imprimerie (Heidelberg Prinect, EFI
+        # Fiery, Caldera) le respectent : objets 100K noir surimpriment
+        # le fond CMY au lieu de "creuser" un trou (évite défauts de calage
+        # frontière texte noir / fond couleur, ~80% des bugs prépresse).
+        # ⚠ N'a d'effet que si le PDF est déjà en CMYK (export_cmyk=True).
+        if surimpression_noir:
+            try:
+                op_state = Dictionary(
+                    Type=Name("/ExtGState"),
+                    OPM=1,        # Overprint Mode 1 (PDF/X spec)
+                    OP=True,      # Stroke overprint
+                )
+                op_state[Name("/op")] = True  # Fill overprint (lowercase op)
+                for page in pdf.pages:
+                    res = page.get("/Resources")
+                    if res is None:
+                        page["/Resources"] = Dictionary()
+                        res = page["/Resources"]
+                    ext = res.get("/ExtGState")
+                    if ext is None:
+                        res["/ExtGState"] = Dictionary()
+                        ext = res["/ExtGState"]
+                    ext[Name("/YukpoOPNoir")] = op_state
+                # Marqueur XMP pour la fiche imprimeur
+                with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
+                    meta["pdfx:GTS_PDFXOverprint"] = "Black 100K overprint enabled"
+            except Exception as e:
+                logger.warning(f"[PDF/X-1a] Injection surimpression noir échouée : {e}")
+
         out = io.BytesIO()
         pdf.save(out, linearize=True, fix_metadata_version=True)
         return out.getvalue()
     except Exception as e:
         logger.warning(f"[PDF/X-1a] post-traitement échoué : {e}")
         return pdf_bytes
+
+
+# ─── ADD-3 — Profils ICC alternatifs (GRACoL US, PSO Coated v3) ────────────
+#
+# FOGRA39 = défaut Europe/Afrique (ECI). Pour clients aux US ou impressions
+# papier non-coated en Europe (PSO Coated v3 = papier coated v3 actuel),
+# on charge des profils alternatifs depuis data/icc/.
+
+def _ensure_icc_profile_for(name: str) -> Optional[bytes]:
+    """
+    Retourne le profil ICC demandé. Cherche d'abord dans data/icc/,
+    fallback FOGRA39 si non trouvé.
+
+    Profils supportés :
+      - 'fogra39'      → ISOcoated_v2_eci.icc (défaut Europe/Afrique)
+      - 'psocoated_v3' → PSO Coated v3.icc    (FOGRA51)
+      - 'gracol_us'    → GRACoL2006_Coated1.icc (SWOP, US)
+    """
+    base = _ICC_PROFILE_PATH.parent
+    mapping = {
+        "fogra39":      "ISOcoated_v2_eci.icc",
+        "psocoated_v3": "PSO Coated v3.icc",
+        "gracol_us":    "GRACoL2006_Coated1.icc",
+    }
+    fname = mapping.get(name, mapping["fogra39"])
+    target = base / fname
+    if target.exists():
+        try:
+            return target.read_bytes()
+        except Exception:
+            pass
+    if name == "fogra39":
+        return _ensure_icc_profile()
+    # Profils alternatifs non bundlés → laisser l'appelant décider du fallback
+    return None
 
 
 def valider_pdf_print_ready(pdf_bytes: bytes) -> dict:

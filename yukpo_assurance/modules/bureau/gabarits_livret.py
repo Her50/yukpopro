@@ -536,6 +536,79 @@ PROJETS_INFOGRAPHIE: dict[str, dict] = {
         "prix_fcfa": 95000,
         "polices": {"titre": "Inter", "corps": "Inter"},
     },
+    # ── ADD-3 — Compléments catalogue multi-page (gaps audit) ──────────────
+    "dossier_presse_8p": {
+        "label": "Dossier de presse — 8 pages A4",
+        "description": "Couverture impactante, communiqué, fiche société, faits marquants, "
+                       "interviews, photos HD, contacts presse, dos. Format média/relations publiques.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture", "brochure_propositions", "brochure_propositions",
+                  "brochure_temoignages", "brochure_temoignages", "brochure_temoignages",
+                  "brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 22000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
+    "cahier_charges_16p": {
+        "label": "Cahier des charges technique — 16 pages",
+        "description": "Document de spécification appel d'offres : contexte, périmètre, "
+                       "exigences fonctionnelles/techniques, planning, budget, critères de recette, annexes.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture"]
+                 + (["brochure_propositions"] * 12)
+                 + ["brochure_temoignages", "brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 38000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
+    "memoire_technique_24p": {
+        "label": "Mémoire technique appel d'offres — 24 pages",
+        "description": "Réponse à appel d'offres marché public/privé : approche méthodologique, "
+                       "expertise équipe, références similaires, planning détaillé, prix.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture"]
+                 + (["brochure_propositions", "brochure_propositions",
+                     "brochure_temoignages"] * 7)
+                 + ["brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 65000,
+        "polices": {"titre": "Inter", "corps": "Inter"},
+    },
+    "catalogue_produits_16p": {
+        "label": "Catalogue produits — 16 pages",
+        "description": "Catalogue commercial structuré : couverture, sommaire, 12 pages produits "
+                       "avec photos + caractéristiques + prix, contact distributeur, dos.",
+        "categorie": "commercial",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["brochure_couverture"]
+                 + (["brochure_propositions", "brochure_propositions",
+                     "brochure_propositions"] * 4)
+                 + ["brochure_contact", "brochure_couverture"],
+        "palette": "corporate",
+        "prix_fcfa": 35000,
+        "polices": {"titre": "Playfair Display", "corps": "Lato"},
+    },
+    "book_photographe_24p": {
+        "label": "Book photographe — 24 pages portfolio",
+        "description": "Portfolio photo grand format A4 portrait : couverture impact, 22 pages "
+                       "photos en double-page ou pleine page, contact pro. Pour photographes pro.",
+        "categorie": "corporate",
+        "format_mm": (210, 297),
+        "bleed_mm": 3,
+        "pages": ["livre_photo_couverture"]
+                 + (["livre_photo_grille"] * 22)
+                 + ["livre_photo_couverture"],
+        "palette": "moderne",
+        "prix_fcfa": 60000,
+        "polices": {"titre": "Playfair Display", "corps": "Inter"},
+    },
 }
 
 
