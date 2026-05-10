@@ -95,6 +95,94 @@ class DemandeModifierProjet(BaseModel):
     mode_visuel: str = Field(default="sans")
 
 
+# ─── Sprint 1.4 — WeasyPrint render (HTML/CSS3 → PDF) ────────────────────────
+
+
+class DemandeRenderHTML(BaseModel):
+    """Rend du HTML+CSS via WeasyPrint (Sprint 1.4)."""
+    html: str = Field(..., min_length=20,
+        description="Document HTML complet (peut contenir <style> embedded)")
+    css: Optional[str] = Field(default=None,
+        description="Feuille de styles additionnelle (optionnel)")
+    base_url: Optional[str] = Field(default=None,
+        description="URL de base pour résoudre images/fonts externes")
+
+
+@router.post("/render-html", tags=["Bureau — Designer Pro"])
+async def render_html_weasyprint(
+    demande: DemandeRenderHTML,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Sprint 1.4 — Rendu HTML/CSS3 → PDF via WeasyPrint.
+    Permet au LLM (ou à l'user expert) de générer des compositions modernes
+    (CSS Grid bento, gradients, blend modes) impossibles en ReportLab pur.
+
+    Coût : forfait `designerpro_html_render` ~3 FCFA/page (compute uniquement).
+    """
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+    try:
+        from modules.bureau import infographe_weasyprint as wp
+    except Exception as e:
+        raise HTTPException(503, f"WeasyPrint non disponible : {e}")
+    if not wp.is_available():
+        raise HTTPException(503,
+            "WeasyPrint non installé sur ce déploiement (deps Cairo/Pango). "
+            "Passer en mode ReportLab via /generer.")
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    try:
+        pdf_bytes = wp.rendre_html_to_pdf(
+            html=demande.html, css=demande.css, base_url=demande.base_url,
+        )
+    except Exception as e:
+        logger.error(f"[WeasyPrint render] {e}", exc_info=True)
+        raise HTTPException(500, f"Échec rendu WeasyPrint : {e}")
+
+    try:
+        await debiter_forfait(
+            current_user.user_id, "designerpro_html_render",
+            module="infographie", multiplicateur=1.0,
+        )
+    except Exception:
+        pass
+
+    pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
+    return {
+        "ok": True,
+        "engine": "weasyprint",
+        "pdf_base64": pdf_b64,
+        "size_kb": round(len(pdf_bytes) / 1024, 1),
+    }
+
+
+@router.get("/render-html/demo", tags=["Bureau — Designer Pro"])
+async def render_html_demo(
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Demo WeasyPrint : composition bento A4 (sans LLM)."""
+    try:
+        from modules.bureau import infographe_weasyprint as wp
+    except Exception as e:
+        raise HTTPException(503, f"WeasyPrint non disponible : {e}")
+    if not wp.is_available():
+        raise HTTPException(503, "WeasyPrint non installé")
+    pdf_bytes = wp.render_bento_demo()
+    pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
+    return {
+        "ok": True, "engine": "weasyprint", "demo": "bento",
+        "pdf_base64": pdf_b64, "size_kb": round(len(pdf_bytes) / 1024, 1),
+    }
+
+
 # ─── Sprint 1.6 — Brand LoRA ─────────────────────────────────────────────────
 
 

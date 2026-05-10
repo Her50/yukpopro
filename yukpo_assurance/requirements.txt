@@ -91,8 +91,9 @@ svgwrite>=1.4.3                # Export SVG vectoriel infographies
 pikepdf>=9.0.0                 # Manipulation PDF avancée (assemblage multi-page livrets, métadata PDF/X)
 fonttools>=4.50.0              # Subsetting Google Fonts pour embed dans PDF
 staticmap>=0.5.7               # Plans localisation (cérémonie deuil/mariage)
-# WeasyPrint requis Phase 2 (HTML/CSS → PDF). Désactivé Phase 1 (deps Cairo lourdes Windows)
-# weasyprint>=62.0
+# Sprint 1.4 — WeasyPrint (HTML/CSS3 → PDF). Active sur Linux (Docker prod).
+# Sur Windows local : import gracieux (try/except) — l'app fonctionne sans.
+weasyprint>=62.0
 
 # ─── WhatsApp / Notifications ──────────────────────────────────────────────────
 twilio>=9.0.0
