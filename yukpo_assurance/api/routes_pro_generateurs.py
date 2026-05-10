@@ -3083,20 +3083,73 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "format_sortie": data.get("format_sortie") or "pptx",
         }
     elif type_sortie == "visuel":
-        # FREEFORM LAYOUT — composition LLM directe sans templates rigides.
-        # Le LLM (gpt-4-turbo via LLM_PRIMAIRE) compose un JSON de primitives
-        # géométriques (rectangles, textes positionnés, images, QR, lignes,
-        # ornements) à partir du brief, et le renderer ReportLab rasterise.
-        # Couvre TOUS les visuels imprimables : carte de visite, flyer, BD,
-        # packaging, CV graphique, post social, affiche, dépliant, etc.
-        # Aucun catalogue de templates limitant la créativité.
-        endpoint_cible = "/api/v1/bureau/freeform/generer"
-        payload_pret = {
-            "brief": demande.brief,
-            "pays": "CM",
-            "langue": data.get("langue") or "fr",
-            "export_cmyk": True,
+        # SMART ROUTING — chaque pipeline a son domaine de force :
+        #
+        # Designer Pro CLASSIQUE (Layout AI Opus + variants archétypes +
+        # vision picker Sonnet + Flux Pro Ultra + Brand LoRA + 6 effets typo) :
+        # excellent sur les 19 projets pré-rodés (livret cérémonial, brochure
+        # structurée, livre photo, magazine éditorial, rapport annuel, etc.)
+        # car les PAGE_TEMPLATES ont été pensés par designers + pipeline
+        # d'amélioration itérative.
+        #
+        # FREEFORM (LLM compose primitives géométriques sans template) :
+        # excellent sur tout le reste (carte visite multi-up A4, flyer libre,
+        # BD éducative, packaging dieline, CV graphique, post social, affiche,
+        # dépliant, formats custom).
+        #
+        # Mapping basé sur le template_id détecté par l'orchestrateur Opus.
+        _DESIGNERPRO_CLASSIQUE_TEMPLATES = {
+            "infographie_brochure":      "brochure_corporate_4p",
+            "infographie_livret":        None,        # auto-detect Designer Pro
+            "infographie_menu":          "menu_resto_4p",
+            "infographie_album":         "livre_photo_a4_8p",
+            "infographie_rapport_visuel":"magazine_corporate_12p",
         }
+        _FREEFORM_TEMPLATES = {
+            "infographie_carte_visite", "infographie_flyer",
+            "infographie_cv_graphique", "infographie_invitation",
+            "infographie_packaging",    "infographie_post_social",
+            "infographie_custom",
+        }
+
+        if template_id in _DESIGNERPRO_CLASSIQUE_TEMPLATES:
+            # Route Designer Pro classique — meilleure qualité sur ces cas
+            cle_hint = _DESIGNERPRO_CLASSIQUE_TEMPLATES.get(template_id)
+            mode_visuel_map = {
+                "infographie_brochure":     "premium",
+                "infographie_livret":       "premium",
+                "infographie_menu":         "premium",
+                "infographie_album":        "premium",
+                "infographie_rapport_visuel":"premium",
+            }
+            endpoint_cible = "/api/v1/bureau/infographie-pro/generer-auto"
+            payload_pret = {
+                "brief": demande.brief,
+                "pays": "CM",
+                "langue": data.get("langue") or "fr",
+                "mode_visuel": mode_visuel_map.get(template_id, "premium"),
+                "export_cmyk": True,
+                "cle_projet_hint": cle_hint or "custom_libre",
+            }
+        elif template_id in _FREEFORM_TEMPLATES:
+            # Route Freeform — liberté totale, pas de template rigide
+            endpoint_cible = "/api/v1/bureau/freeform/generer"
+            payload_pret = {
+                "brief": demande.brief,
+                "pays": "CM",
+                "langue": data.get("langue") or "fr",
+                "export_cmyk": True,
+            }
+        else:
+            # Fallback par défaut : Freeform (plus flexible que Designer Pro
+            # classique custom_libre qui force-fit sur PAGE_TEMPLATES).
+            endpoint_cible = "/api/v1/bureau/freeform/generer"
+            payload_pret = {
+                "brief": demande.brief,
+                "pays": "CM",
+                "langue": data.get("langue") or "fr",
+                "export_cmyk": True,
+            }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
         # Le backend /rapports/generer attend `sujet` + `type_rapport`, pas
