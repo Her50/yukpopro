@@ -750,6 +750,85 @@ def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) 
         elif ligne.startswith("- ") or ligne.startswith("* "):
             doc.add_paragraph(ligne[2:], style="List Bullet")
             i += 1
+        elif '|' in ligne and (i + 1 < len(lignes_md)) and '|' in lignes_md[i + 1]:
+            # Tableau markdown : rendu DOCX natif + chart auto si colonnes
+            # numériques. Factorisé via core/docx_charts (partagé avec
+            # report_writer_pro côté Pro — meme moteur, meme rendu).
+            from core.docx_charts import (
+                generer_png_depuis_tableau,
+                detecter_colonnes_numeriques,
+                parser_tableau_markdown,
+            )
+            from docx.shared import Pt as _Pt, RGBColor as _RGB, Inches as _Inches
+            from docx.enum.text import WD_ALIGN_PARAGRAPH as _WDA
+            from docx.oxml.ns import qn as _qn
+            from docx.oxml import OxmlElement as _OxmlElement
+
+            headers_t, data_rows, i_after = parser_tableau_markdown(lignes_md, i)
+            if not headers_t:
+                # ligne avec '|' mais pas un tableau valide → run normal
+                para = doc.add_paragraph()
+                _ajouter_run_gras(para, ligne)
+                i += 1
+                continue
+
+            cols_num = detecter_colonnes_numeriques(headers_t, data_rows)
+            all_rows = [
+                lignes_md[k] for k in range(i, i_after)
+                if not __import__('re').match(
+                    r'^\|[\s\-:|\s]+\|$', lignes_md[k].strip()
+                )
+            ]
+            tbl = doc.add_table(rows=len(all_rows), cols=len(headers_t))
+            tbl.style = 'Table Grid'
+            tbl.autofit = True
+            for ri, row_line in enumerate(all_rows):
+                cells = [c.strip() for c in row_line.split('|') if c.strip()]
+                for ci in range(len(headers_t)):
+                    val = cells[ci].strip('*') if ci < len(cells) else ""
+                    cell = tbl.cell(ri, ci)
+                    cell.text = val
+                    para = cell.paragraphs[0]
+                    if para.runs:
+                        run = para.runs[0]
+                        run.font.size = _Pt(10)
+                        if ri == 0:
+                            run.bold = True
+                            run.font.color.rgb = _RGB(0xFF, 0xFF, 0xFF)
+                    if ri == 0:
+                        para.paragraph_format.alignment = _WDA.CENTER
+                    elif ci in cols_num:
+                        para.paragraph_format.alignment = _WDA.RIGHT
+                    tc = cell._tc
+                    tcPr = tc.get_or_add_tcPr()
+                    shd = _OxmlElement('w:shd')
+                    shd.set(_qn('w:val'), 'clear')
+                    shd.set(_qn('w:color'), 'auto')
+                    if ri == 0:
+                        shd.set(_qn('w:fill'), '0047AB')
+                    elif ri % 2 == 0:
+                        shd.set(_qn('w:fill'), 'F4F7FB')
+                    else:
+                        shd.set(_qn('w:fill'), 'FFFFFF')
+                    tcPr.append(shd)
+            doc.add_paragraph()
+
+            # Chart auto si tableau quantifiable
+            if cols_num and len(data_rows) >= 2:
+                png = generer_png_depuis_tableau(
+                    headers=headers_t, rows=data_rows, colonnes_num=cols_num,
+                )
+                if png:
+                    try:
+                        import io as _io
+                        p_img = doc.add_paragraph()
+                        p_img.alignment = _WDA.CENTER
+                        run_img = p_img.add_run()
+                        run_img.add_picture(_io.BytesIO(png), width=_Inches(5.8))
+                        doc.add_paragraph()
+                    except Exception as _e_img:
+                        logger.debug(f"[Rédacteur] Chart image: {_e_img}")
+            i = i_after
         else:
             para = doc.add_paragraph()
             _ajouter_run_gras(para, ligne)

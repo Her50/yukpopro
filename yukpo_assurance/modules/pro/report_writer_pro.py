@@ -452,11 +452,17 @@ def _generer_png_depuis_tableau(
     rows:    list[str],
     colonnes_num: set,
 ) -> Optional[bytes]:
-    """
-    Génère un PNG (bar chart ou line chart) depuis un tableau markdown.
-    Retourne None si non graphable.
-    `rows` = lignes brutes markdown ("| ... | ... |"). `colonnes_num` = indices.
-    """
+    """Délégué à core.docx_charts (source unique de vérité partagée Pro+Sec)."""
+    from core.docx_charts import generer_png_depuis_tableau as _gen
+    return _gen(headers, rows, colonnes_num)
+
+
+def _generer_png_depuis_tableau_legacy(
+    headers: list[str],
+    rows:    list[str],
+    colonnes_num: set,
+) -> Optional[bytes]:
+    """LEGACY (conservé pour non-régression — non appelé). À supprimer après stabilisation."""
     try:
         import io as _io
         import re as _re
