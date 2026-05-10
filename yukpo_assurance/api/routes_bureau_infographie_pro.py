@@ -62,8 +62,9 @@ class DemandeProjetPro(BaseModel):
         description="Curseurs UI : creativite, densite_texte, importance_images, elegance (0–100)")
     mode_visuel: str = Field(default="auto",
         description="'auto' (défaut UX4 : LLM décide) | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'")
-    utiliser_charte: bool = Field(default=True,
-        description="Sprint UX4 : si False, ignore le BrandKit de l'org (génération hors charte)")
+    # `utiliser_charte` retiré : si l'org a un BrandKit actif, il est TOUJOURS
+    # appliqué (non-négociable). Pour générer hors charte → utiliser un compte
+    # personnel (compagnie_id sans BrandKit).
     # Sprint 1.6 — IP-Adapter + Brand LoRA
     reference_style_ref: Optional[str] = Field(default=None,
         description="Réf. médiathèque ('session:abc' ou 'compte:def') vers une image de style → injectée via Flux IP-Adapter (modes ultra/premium/ultra_plus)")
@@ -1023,14 +1024,15 @@ async def generer_projet(
     profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     session_id = f"chat_{current_user.user_id}"  # session par défaut = par user
 
-    # Sprint 2.4 — Brand Kit auto-héritage (sauf si user a décoché 'utiliser_charte')
+    # Sprint 2.4 — Brand Kit auto-héritage NON-NÉGOCIABLE :
+    # si l'org a un BrandKit actif, il est TOUJOURS appliqué. Pour générer hors
+    # charte, l'utilisateur doit se connecter avec un compte personnel.
     bk = {"brand_kit_active": False}
-    if getattr(demande, "utiliser_charte", True):
-        try:
-            from api.routes_brand_kit import charger_overrides_brand_kit
-            bk = await charger_overrides_brand_kit(getattr(current_user, "compagnie_id", None) or 1)
-        except Exception as e:
-            logger.warning(f"[BrandKit] charger overrides : {e}")
+    try:
+        from api.routes_brand_kit import charger_overrides_brand_kit
+        bk = await charger_overrides_brand_kit(getattr(current_user, "compagnie_id", None) or 1)
+    except Exception as e:
+        logger.warning(f"[BrandKit] charger overrides : {e}")
     if bk.get("brand_kit_active"):
         profil_dict = profil_dict or {}
         for k, v in (bk.get("profil_overrides") or {}).items():

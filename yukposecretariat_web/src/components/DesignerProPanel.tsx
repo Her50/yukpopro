@@ -90,7 +90,7 @@ export default function DesignerProPanel() {
   const [loadingModif, setLoadingModif] = useState(false)
   // Sprint UX4 : default 'auto' = backend résout via orchestrateur
   const [modeVisuel, setModeVisuel] = useState<'auto' | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('auto')
-  const [utiliserCharte, setUtiliserCharte] = useState(true)
+  // Charte d'organisation NON-négociable côté backend si configurée — pas de toggle UI
   // Sprint UX4 — Devis automatique
   const [devis, setDevis] = useState<any | null>(null)
   const [devisLoading, setDevisLoading] = useState(false)
@@ -235,7 +235,6 @@ export default function DesignerProPanel() {
         payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
       if (brandLoraId) payload.brand_lora_id = brandLoraId
-      payload.utiliser_charte = utiliserCharte
       const r = autoMode
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
@@ -841,14 +840,6 @@ export default function DesignerProPanel() {
             )}
           </div>
         )}
-
-        {/* Sprint UX4 — Toggle "Utiliser ma charte" */}
-        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-          <input type="checkbox" checked={utiliserCharte}
-            onChange={e => setUtiliserCharte(e.target.checked)}
-            className="accent-amber-600" />
-          {t('designerPro.utiliserCharte', 'Utiliser ma charte de marque')}
-        </label>
 
         <button onClick={generer} disabled={loading || !brief.trim()}
           className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">

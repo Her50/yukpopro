@@ -76,7 +76,7 @@ export default function DesignerProPanel() {
   const [loadingModif, setLoadingModif] = useState(false)
   // Sprint UX4 : default 'auto' = backend résout via orchestrateur
   const [modeVisuel, setModeVisuel]   = useState<'auto' | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('auto')
-  const [utiliserCharte, setUtiliserCharte] = useState(true)
+  // Charte d'organisation NON-négociable côté backend si configurée — pas de toggle UI
 
   // Sprint UX4 — Devis automatique (debounced)
   const [devis, setDevis] = useState<any | null>(null)
@@ -204,8 +204,7 @@ export default function DesignerProPanel() {
       const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
         && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
       const payload: any = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true,
-        directives_visuelles: directives, mode_visuel: modeVisuel,
-        utiliser_charte: utiliserCharte }
+        directives_visuelles: directives, mode_visuel: modeVisuel }
       if (refStyle) {
         payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
@@ -888,14 +887,6 @@ export default function DesignerProPanel() {
             )}
           </div>
         )}
-
-        {/* Sprint UX4 — Toggle "Utiliser ma charte de marque" (si brand kit défini) */}
-        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-          <input type="checkbox" checked={utiliserCharte}
-            onChange={e => setUtiliserCharte(e.target.checked)}
-            className="accent-amber-600" />
-          {t('designerPro.utiliserCharte', 'Utiliser ma charte de marque (logo + couleurs + ToV)')}
-        </label>
 
         <button onClick={generer} disabled={loading || !brief.trim()} className={BTN_PRIMARY}>
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
