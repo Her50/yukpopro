@@ -507,6 +507,13 @@ class SlideBuilderPro:
             f"  series=[{{name:'CA','values':[120,145,168,192]}},{{'name':'Coûts','values':[80,85,90,95]}}],\n"
             f"  unit='M {devise_locale}'. Si tu peux remplacer un kpi par un chart pour un slide de\n"
             f"  données temporelles, FAIS-LE — un dirigeant lit un graphe en 2 secondes vs 30s pour un tableau.\n"
+            f"• Slides type 'comparison' (NOUVEAU ADD-2) : 2 colonnes side-by-side avec verdict.\n"
+            f"  Champs obligatoires : entete_gauche, entete_droite, items=[{{label, gauche, droite, verdict}}].\n"
+            f"  verdict ∈ 'gauche'|'droite'|'egal'. Idéal pour avant/après, A/B testing, propositions vs concurrence.\n"
+            f"• Slides type 'image_text' (NOUVEAU ADD-2) : visuel illustratif + texte explicatif côte-à-côte.\n"
+            f"  Champs obligatoires : image_url (URL absolue) OU image_b64 (data:image/png;base64,...),\n"
+            f"  image_position ∈ 'gauche'|'droite' (défaut gauche), points (3-5 phrases courtes).\n"
+            f"  Idéal pour présentation produit, méthodologie illustrée, étude de cas terrain.\n"
             f"• Messages clés tirés des données réelles fournies\n"
             f"• Langage professionnel niveau direction générale / investisseurs\n"
             f"• Devise locale OBLIGATOIRE pour tous les montants : {devise_locale}\n"
@@ -670,6 +677,7 @@ class SlideBuilderPro:
                         type_propose = (slide.get("type") or "").strip()
                         type_s = type_propose if type_propose in (
                             "chart", "kpi", "bullets", "two_columns", "action",
+                            "comparison", "image_text",  # ADD-2 nouveaux types
                             "cover", "sommaire", "fin",
                         ) else struct["type"]
 
@@ -700,14 +708,42 @@ class SlideBuilderPro:
                                     "unit": str(slide.get("unit", "") or "")[:20],
                                 }
 
+                        # ADD-2 — comparison & image_text data
+                        comparison_data = None
+                        if type_s == "comparison":
+                            items = slide.get("items") or []
+                            if isinstance(items, list) and items:
+                                comparison_data = {
+                                    "entete_gauche": str(slide.get("entete_gauche", "Option A"))[:80],
+                                    "entete_droite": str(slide.get("entete_droite", "Option B"))[:80],
+                                    "items": [
+                                        {
+                                            "label":   str(it.get("label", ""))[:120],
+                                            "gauche":  str(it.get("gauche", ""))[:240],
+                                            "droite":  str(it.get("droite", ""))[:240],
+                                            "verdict": str(it.get("verdict", "egal")).lower(),
+                                        }
+                                        for it in items if isinstance(it, dict)
+                                    ][:6],
+                                }
+                        image_text_data = None
+                        if type_s == "image_text":
+                            image_text_data = {
+                                "image_url":      str(slide.get("image_url", "") or "")[:1024],
+                                "image_b64":      str(slide.get("image_b64", "") or "")[:200000],
+                                "image_position": str(slide.get("image_position", "gauche") or "gauche").lower(),
+                            }
+
                         result.append({
-                            "titre":          str(slide.get("titre", struct["titre"]) or struct["titre"]),
-                            "type":           type_s,
-                            "points":         _normaliser_points(slide.get("points", []), type_s),
-                            "kpis":           _normaliser_kpis(slide.get("kpis", [])),
-                            "chart_data":     chart_data,
-                            "message_cle":    str(slide.get("message_cle", "") or ""),
-                            "notes_orateur":  str(notes_val or ""),
+                            "titre":             str(slide.get("titre", struct["titre"]) or struct["titre"]),
+                            "type":              type_s,
+                            "points":            _normaliser_points(slide.get("points", []), type_s),
+                            "kpis":              _normaliser_kpis(slide.get("kpis", [])),
+                            "chart_data":        chart_data,
+                            "comparison_data":   comparison_data,
+                            "image_text_data":   image_text_data,
+                            "message_cle":       str(slide.get("message_cle", "") or ""),
+                            "notes_orateur":     str(notes_val or ""),
                         })
                     return result
         except Exception as e:
@@ -854,6 +890,14 @@ class SlideBuilderPro:
         elif type_slide == "two_columns":
             self._slide_header(slide, slide_data["titre"], w, h, num, total)
             self._slide_two_columns(slide, slide_data, w, h)
+        elif type_slide == "comparison":
+            # ADD-2 — comparaison side-by-side avec verdict (✓/✗/0)
+            self._slide_header(slide, slide_data["titre"], w, h, num, total)
+            self._slide_comparison(slide, slide_data, w, h)
+        elif type_slide == "image_text":
+            # ADD-2 — image gauche, texte droite (ou inverse via 'image_position')
+            self._slide_header(slide, slide_data["titre"], w, h, num, total)
+            self._slide_image_text(slide, slide_data, w, h)
         elif type_slide == "action":
             self._slide_header(slide, slide_data["titre"], w, h, num, total)
             self._slide_action(slide, slide_data, w, h)
@@ -1392,6 +1436,174 @@ class SlideBuilderPro:
                 pass
 
         return True
+
+    # ── Slide COMPARISON (ADD-2 — side-by-side avec verdict ✓/✗/=) ───────────
+
+    def _slide_comparison(self, slide, slide_data: dict, w, h):
+        """
+        Comparaison 2 colonnes avec entêtes + verdict par item.
+        Utilisable pour A/B testing, avant/après, propositions concurrentes.
+        """
+        from pptx.util import Inches, Pt
+        from pptx.enum.text import PP_ALIGN
+        T = self._theme
+        cd = slide_data.get("comparison_data") or {}
+        items = cd.get("items") or []
+        if not items:
+            self._slide_bullets(slide, slide_data, w, h)
+            return
+
+        # Headers gauche/droite avec fonds primaire/accent
+        col_w = (w - Inches(1.6)) / 2
+        x_left = Inches(0.6)
+        x_right = x_left + col_w + Inches(0.4)
+        y_hdr = Inches(1.55)
+        hdr_h = Inches(0.5)
+
+        _rect(slide, x_left, y_hdr, col_w, hdr_h, T["primaire"])
+        tb_l = _textbox(slide, x_left + Inches(0.15), y_hdr + Inches(0.05),
+                        col_w - Inches(0.3), hdr_h - Inches(0.1))
+        _para(tb_l, cd.get("entete_gauche", "Option A")[:60], 14, bold=True,
+              color=(255, 255, 255), align="left")
+
+        _rect(slide, x_right, y_hdr, col_w, hdr_h, T["accent"])
+        tb_r = _textbox(slide, x_right + Inches(0.15), y_hdr + Inches(0.05),
+                        col_w - Inches(0.3), hdr_h - Inches(0.1))
+        _para(tb_r, cd.get("entete_droite", "Option B")[:60], 14, bold=True,
+              color=(255, 255, 255), align="left")
+
+        # Lignes d'items
+        y = y_hdr + hdr_h + Inches(0.18)
+        row_h = Inches(0.85)
+        verdict_glyph = {"gauche": "◀", "droite": "▶", "egal": "≈"}
+        verdict_color = {
+            "gauche": T.get("succes", (16, 185, 129)),
+            "droite": T.get("succes", (16, 185, 129)),
+            "egal":   T.get("gris_texte", (120, 120, 120)),
+        }
+        for it in items[:6]:
+            label = it.get("label", "")[:80]
+            verdict = (it.get("verdict") or "egal").lower()
+
+            # Label centré au-dessus
+            tb_lab = _textbox(slide, x_left, y, col_w * 2 + Inches(0.4), Inches(0.25))
+            _para(tb_lab, label, 10, bold=True, color=T.get("gris_texte", (60, 60, 60)),
+                  align="center")
+            y_body = y + Inches(0.28)
+
+            # Texte gauche
+            tb_g = _textbox(slide, x_left, y_body, col_w, row_h - Inches(0.3))
+            wins_left = verdict in ("gauche",)
+            _para(tb_g, it.get("gauche", "")[:240], 11,
+                  bold=wins_left,
+                  color=T.get("texte_principal", (30, 30, 50)),
+                  align="left")
+
+            # Verdict glyph centré
+            tb_v = _textbox(slide, x_left + col_w, y_body,
+                            Inches(0.4), row_h - Inches(0.3))
+            _para(tb_v, verdict_glyph.get(verdict, "≈"), 22, bold=True,
+                  color=verdict_color.get(verdict, (120, 120, 120)),
+                  align="center")
+
+            # Texte droite
+            tb_d = _textbox(slide, x_right, y_body, col_w, row_h - Inches(0.3))
+            wins_right = verdict in ("droite",)
+            _para(tb_d, it.get("droite", "")[:240], 11,
+                  bold=wins_right,
+                  color=T.get("texte_principal", (30, 30, 50)),
+                  align="left")
+
+            y += row_h
+
+        # Message-clé en bas
+        msg = (slide_data.get("message_cle") or "").strip()
+        if msg:
+            tb_msg = _textbox(slide, Inches(0.6), h - Inches(0.85),
+                              w - Inches(1.2), Inches(0.5))
+            _para(tb_msg, msg, 12, italic=True, align="center",
+                  color=T.get("gris_texte", (60, 60, 60)))
+
+    # ── Slide IMAGE_TEXT (ADD-2 — visuel + texte côte-à-côte) ────────────────
+
+    def _slide_image_text(self, slide, slide_data: dict, w, h):
+        """
+        Visuel à gauche/droite + bullets explicatifs de l'autre côté.
+        Idéal présentation produit, méthodologie illustrée, étude de cas.
+        """
+        from pptx.util import Inches, Pt
+        import io as _io, base64 as _b64
+        T = self._theme
+        itd = slide_data.get("image_text_data") or {}
+        position = (itd.get("image_position") or "gauche").lower()
+
+        # Charger l'image (b64 prioritaire si fourni car local — pas de net I/O)
+        img_bytes = None
+        b64 = itd.get("image_b64") or ""
+        if b64:
+            try:
+                # Tolère "data:image/png;base64,...." ou base64 brut
+                payload = b64.split(",", 1)[-1] if "," in b64 else b64
+                img_bytes = _b64.b64decode(payload + "==")
+            except Exception as e:
+                logger.debug(f"[image_text] décodage b64 échoué : {e}")
+
+        url = itd.get("image_url") or ""
+        if not img_bytes and url:
+            try:
+                import urllib.request as _ur
+                req = _ur.Request(url, headers={"User-Agent": "Yukpo/1.0"})
+                with _ur.urlopen(req, timeout=10) as resp:
+                    img_bytes = resp.read()
+            except Exception as e:
+                logger.debug(f"[image_text] download URL échoué : {e}")
+
+        # Layout : 50/50, image dans la moitié choisie
+        margin = Inches(0.6)
+        gap = Inches(0.4)
+        avail_w = (w - margin * 2 - gap) / 2
+        avail_top = Inches(1.55)
+        avail_h = h - avail_top - Inches(0.7)
+
+        if position == "droite":
+            x_text = margin
+            x_img = margin + avail_w + gap
+        else:
+            x_img = margin
+            x_text = margin + avail_w + gap
+
+        # Image (fallback rectangle gris si pas d'image)
+        if img_bytes:
+            try:
+                slide.shapes.add_picture(_io.BytesIO(img_bytes),
+                                          x_img, avail_top, avail_w, avail_h)
+            except Exception as e:
+                logger.debug(f"[image_text] add_picture échoué : {e}")
+                _rect(slide, x_img, avail_top, avail_w, avail_h, T.get("gris_clair", (240, 240, 245)))
+        else:
+            _rect(slide, x_img, avail_top, avail_w, avail_h, T.get("gris_clair", (240, 240, 245)))
+            tb_ph = _textbox(slide, x_img, avail_top + avail_h / 2 - Inches(0.2),
+                             avail_w, Inches(0.4))
+            _para(tb_ph, "[Image manquante]", 11, italic=True, align="center",
+                  color=T.get("gris_texte", (120, 120, 120)))
+
+        # Texte (bullets)
+        points = slide_data.get("points") or []
+        tb_t = _textbox(slide, x_text, avail_top, avail_w, avail_h)
+        for idx, pt in enumerate(points[:6]):
+            txt = str(pt).strip()
+            if not txt:
+                continue
+            _para(tb_t, f"• {txt}", 13, color=T.get("texte_principal", (30, 30, 50)),
+                  align="left")
+
+        # Message-clé sous le tout
+        msg = (slide_data.get("message_cle") or "").strip()
+        if msg:
+            tb_msg = _textbox(slide, margin, h - Inches(0.85),
+                              w - margin * 2, Inches(0.5))
+            _para(tb_msg, msg, 12, italic=True, align="center",
+                  color=T.get("gris_texte", (60, 60, 60)))
 
     # ── Slide BULLETS ─────────────────────────────────────────────────────────
 
