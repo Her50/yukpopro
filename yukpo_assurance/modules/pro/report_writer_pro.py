@@ -1208,9 +1208,129 @@ class ReportWriterPro:
             logger.warning(f"[ReportWriter] Pass révision échoué (non bloquant) : {e}")
             return sections
 
-    async def _convertir_en_pdf(self, docx_path: Path) -> Optional[Path]:
+    # ── PUSH-1 — Footnotes natives Word (insertion via OXML) ──────────────
+    @staticmethod
+    def _ensure_footnotes_part(doc):
+        """
+        Crée la partie /word/footnotes.xml si elle n'existe pas (python-docx
+        ne l'expose pas nativement). Retourne l'élément <w:footnotes>.
+
+        Les footnotes Word standard incluent 2 entries pré-définies :
+        ID -1 (separator) et 0 (continuation separator). On les ajoute si
+        absentes pour respecter le schéma OOXML.
+        """
+        from docx.opc.constants import RELATIONSHIP_TYPE as RT
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+        from docx.parts.story import StoryPart
+        from docx.opc.constants import CONTENT_TYPE as CT
+
+        rels = doc.part.rels
+        # Cherche une relation footnotes existante
+        for rel in rels.values():
+            if rel.reltype == RT.FOOTNOTES:
+                fn_part = rel.target_part
+                fn_root = fn_part.element
+                return fn_part, fn_root
+
+        # Crée la part footnotes
+        from docx.parts.story import StoryPart
+        try:
+            fn_xml = (
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                '<w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:footnote w:type="separator" w:id="-1">'
+                '<w:p><w:r><w:separator/></w:r></w:p></w:footnote>'
+                '<w:footnote w:type="continuationSeparator" w:id="0">'
+                '<w:p><w:r><w:continuationSeparator/></w:r></w:p></w:footnote>'
+                '</w:footnotes>'
+            )
+            from docx.opc.part import PartFactory
+            partname = doc.part.package.next_partname("/word/footnotes%d.xml")
+            fn_part = StoryPart(
+                partname,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml",
+                fn_xml.encode("utf-8"),
+                doc.part.package,
+            )
+            doc.part.package._add_part(fn_part)
+            doc.part.relate_to(fn_part, RT.FOOTNOTES)
+            return fn_part, fn_part.element
+        except Exception as e:
+            logger.debug(f"[ReportWriter] Création footnotes part échouée : {e}")
+            return None, None
+
+    @staticmethod
+    def _add_footnote(doc, run, texte: str):
+        """
+        Ajoute une footnote au run courant. Le numéro est auto-attribué
+        (max(existing_id) + 1). Word affiche un superscript dans le texte
+        et le texte de la note en bas de page.
+        """
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+        try:
+            fn_part, fn_root = ReportWriterPro._ensure_footnotes_part(doc)
+        except Exception as e:
+            logger.debug(f"[ReportWriter] _ensure_footnotes_part exception : {e}")
+            return False
+        if fn_root is None:
+            return False
+        try:
+            # Compute next ID
+            ids_existants = [
+                int(fn.get(qn("w:id")))
+                for fn in fn_root.findall(qn("w:footnote"))
+                if fn.get(qn("w:id")) and fn.get(qn("w:id")).lstrip("-").isdigit()
+            ]
+            next_id = max([0] + ids_existants) + 1
+
+            # Ajoute la footnote dans footnotes.xml
+            fn_elm = OxmlElement("w:footnote")
+            fn_elm.set(qn("w:id"), str(next_id))
+            p = OxmlElement("w:p")
+            r = OxmlElement("w:r")
+            # Référence du marqueur dans la note
+            ref_run = OxmlElement("w:r")
+            ref_rpr = OxmlElement("w:rPr")
+            ref_rstyle = OxmlElement("w:rStyle")
+            ref_rstyle.set(qn("w:val"), "FootnoteReference")
+            ref_rpr.append(ref_rstyle); ref_run.append(ref_rpr)
+            ref_mark = OxmlElement("w:footnoteRef")
+            ref_run.append(ref_mark)
+            p.append(ref_run)
+            # Espace + texte
+            t_sp = OxmlElement("w:r"); t_sp_t = OxmlElement("w:t")
+            t_sp_t.set(qn("xml:space"), "preserve"); t_sp_t.text = " "
+            t_sp.append(t_sp_t); p.append(t_sp)
+            t_txt = OxmlElement("w:r"); t_txt_t = OxmlElement("w:t")
+            t_txt_t.text = texte[:2000]
+            t_txt.append(t_txt_t); p.append(t_txt)
+            fn_elm.append(p)
+            fn_root.append(fn_elm)
+
+            # Ajoute le marqueur footnoteReference dans le run d'origine
+            ref_in_run = OxmlElement("w:footnoteReference")
+            ref_in_run.set(qn("w:id"), str(next_id))
+            sup_rpr = OxmlElement("w:rPr")
+            vert = OxmlElement("w:vertAlign"); vert.set(qn("w:val"), "superscript")
+            sup_rpr.append(vert)
+            run._r.append(sup_rpr)
+            run._r.append(ref_in_run)
+            return True
+        except Exception as e:
+            logger.debug(f"[ReportWriter] _add_footnote échouée : {e}")
+            return False
+
+    async def _convertir_en_pdf(self, docx_path: Path, pdf_a: bool = False) -> Optional[Path]:
         """
         Convertit un DOCX en PDF via LibreOffice headless.
+
+        `pdf_a` : si True, exporte en PDF/A-2b (ISO 19005-2) — requis par les
+        archives publiques, juridictions, banques (conservation 10 ans+).
+        Toutes les polices sont embarquées, transparence aplatie, métadonnées
+        XMP déclarées. Sans ça, un audit "logiciel pro archivage" ne passe pas.
+
         Retourne le chemin du PDF ou None si LibreOffice indisponible/échec.
         """
         import asyncio as _aio
@@ -1219,10 +1339,15 @@ class ReportWriterPro:
             if not docx_path.exists():
                 return None
             out_dir = docx_path.parent
+            # Filter PDF Export pour PDF/A-2b : SelectPdfVersion=2
+            convert_arg = (
+                'pdf:writer_pdf_Export:SelectPdfVersion=2'
+                if pdf_a else 'pdf'
+            )
             for cmd in ("soffice", "libreoffice"):
                 try:
                     proc = await _aio.create_subprocess_exec(
-                        cmd, "--headless", "--convert-to", "pdf",
+                        cmd, "--headless", "--convert-to", convert_arg,
                         "--outdir", str(out_dir), str(docx_path),
                         stdout=_aio.subprocess.PIPE,
                         stderr=_aio.subprocess.PIPE,
@@ -1956,10 +2081,31 @@ class ReportWriterPro:
                 continue
 
         def _ajouter_inline(paragraphe, texte: str, taille=None):
-            """Rendu inline : **gras**, *italique*, texte normal."""
-            parties = _re.split(r'(\*\*(?:[^*]|\*(?!\*))+\*\*|\*[^*]+\*)', texte)
+            """
+            Rendu inline : **gras**, *italique*, [^texte de note] (footnote
+            Word native — PUSH-1 — superscript + texte automatique en bas
+            de page via OxmlElement footnoteReference).
+            """
+            # Pattern : footnotes [^...] PUIS gras/italique. Footnotes en
+            # premier pour éviter de matcher des * dans le texte de note.
+            parties = _re.split(
+                r'(\[\^[^\]]+\]|\*\*(?:[^*]|\*(?!\*))+\*\*|\*[^*]+\*)',
+                texte,
+            )
             for partie in parties:
-                if partie.startswith('**') and partie.endswith('**') and len(partie) > 4:
+                if partie.startswith('[^') and partie.endswith(']') and len(partie) > 3:
+                    # Footnote — ajoute un run vide, marqueur superscript +
+                    # texte injecté dans footnotes.xml par _add_footnote.
+                    fn_text = partie[2:-1].strip()
+                    run = paragraphe.add_run("")
+                    try:
+                        ReportWriterPro._add_footnote(doc, run, fn_text)
+                    except Exception:
+                        # Fallback : rendu inline en parenthèses si OXML KO
+                        run.text = f" ({fn_text})"
+                        run.italic = True
+                        run.font.size = Pt(8)
+                elif partie.startswith('**') and partie.endswith('**') and len(partie) > 4:
                     run = paragraphe.add_run(partie[2:-2])
                     run.bold = True
                 elif partie.startswith('*') and partie.endswith('*') and len(partie) > 2:
@@ -1987,6 +2133,74 @@ class ReportWriterPro:
                 _rendu_contenu(doc, contenu)
 
             doc.add_paragraph()
+
+        # ── PUSH-1 — Glossaire auto-généré (Haiku scan termes techniques) ──
+        # Scanne le contenu de toutes les sections pour identifier les acronymes
+        # et termes techniques métier, puis génère un glossaire via Haiku
+        # (1 appel léger, ~500 tokens out). Si self._glossaire_auto = False
+        # ou si Haiku KO, on saute silencieusement (rétrocompat).
+        if getattr(self, "_glossaire_auto", True):
+            try:
+                contenu_complet = "\n\n".join(
+                    f"{s.get('titre', '')}\n{s.get('contenu', '')}"
+                    for s in sections
+                )[:30000]  # cap pour ne pas exploser le contexte Haiku
+                from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+                glossaire_prompt = (
+                    "Lis ce rapport et extrais les 8 à 15 acronymes et termes "
+                    "techniques métier les plus importants à expliquer pour un "
+                    "lecteur non-spécialiste.\n\n"
+                    f"RAPPORT :\n\"\"\"{contenu_complet}\"\"\"\n\n"
+                    "Réponds UNIQUEMENT en JSON strict :\n"
+                    '{"glossaire": [{"terme": "OHADA", "definition": "Organisation '
+                    "pour l'Harmonisation en Afrique du Droit des Affaires — traité "
+                    'régional adopté en 1993 par 17 États africains."}, ...]}\n\n'
+                    "RÈGLES : pas de termes triviaux (ex: 'rapport', 'analyse'). "
+                    "Privilégier acronymes (OHADA, SYSCOHADA, BEAC, CIMA, FCFA, IFRS), "
+                    "concepts juridiques/financiers/techniques propres au domaine, "
+                    "noms d'institutions citées. Définitions courtes (1 phrase max). "
+                    "Si moins de 8 termes pertinents identifiés, retourner moins."
+                )
+                rep_g = await ia_client.appeler(
+                    prompt=glossaire_prompt,
+                    forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+                    mode=ModeIA.PRECISION,
+                    json_attendu=True,
+                    max_tokens_override=1200,
+                )
+                import json as _json2
+                try:
+                    g_data = _json2.loads(rep_g.contenu or "{}")
+                except Exception:
+                    g_data = {}
+                glossaire_items = (g_data.get("glossaire") or [])[:15]
+                if len(glossaire_items) >= 3:
+                    doc.add_page_break()
+                    h_g = doc.add_heading("Glossaire", level=1)
+                    if h_g.runs:
+                        h_g.runs[0].font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
+                    p_intro = doc.add_paragraph()
+                    r_intro = p_intro.add_run(
+                        "Définitions des acronymes et termes techniques utilisés "
+                        "dans ce rapport."
+                    )
+                    r_intro.italic = True; r_intro.font.size = Pt(10)
+                    r_intro.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+                    doc.add_paragraph()
+                    for item in glossaire_items:
+                        terme = (item.get("terme") or "").strip()
+                        defn = (item.get("definition") or "").strip()
+                        if not terme or not defn:
+                            continue
+                        p_g = doc.add_paragraph()
+                        r_t = p_g.add_run(f"{terme} : ")
+                        r_t.bold = True; r_t.font.size = Pt(11)
+                        r_t.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
+                        r_d = p_g.add_run(defn)
+                        r_d.font.size = Pt(11)
+                        p_g.paragraph_format.space_after = Pt(6)
+            except Exception as _e_g:
+                logger.debug(f"[ReportWriter] Glossaire auto non généré : {_e_g}")
 
         # ── En-tête et pied de page avec pagination ───────────────────────
         from docx.oxml import OxmlElement
