@@ -334,6 +334,9 @@ def detecter_vertical(metier: Optional[str], secteur: Optional[str] = None) -> O
     """
     Devine la vertical à partir des champs profil.metier / profil.secteur.
     Retourne la clé VERTICALES_METIER ou None si aucune correspondance.
+
+    Pour détection plus profonde depuis un brief libre (si profil vide),
+    utiliser `detecter_vertical_depuis_brief()` (LLM Haiku micro-call).
     """
     texte = f"{metier or ''} {secteur or ''}".lower()
     if not texte.strip():
@@ -346,6 +349,47 @@ def detecter_vertical(metier: Optional[str], secteur: Optional[str] = None) -> O
     if not scores:
         return None
     return max(scores, key=scores.get)
+
+
+async def detecter_vertical_depuis_brief(brief: str) -> Optional[str]:
+    """
+    Refinement Phase 3+ : si profil.metier vide, détecte la vertical
+    directement depuis le brief utilisateur via Haiku micro-call (~30 tokens).
+
+    Échec silencieux → None. Cache enabled (utiliser_cache=True).
+    """
+    if not brief or len(brief.strip()) < 15:
+        return None
+    # Heuristique rapide : essai mots-clés direct sur le brief
+    txt_low = brief.lower()
+    scores: dict[str, int] = {}
+    for key, vert in VERTICALES_METIER.items():
+        for mot in vert.get("mots_cles_metier", []):
+            if mot.lower() in txt_low:
+                scores[key] = scores.get(key, 0) + 1
+    if scores and max(scores.values()) >= 2:
+        return max(scores, key=scores.get)
+    # Fallback Haiku si heuristique faible
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        prompt = (
+            f"Classifie le secteur d'activité du brief utilisateur dans une"
+            f" SEULE catégorie parmi : banque_finance, pharma_sante,"
+            f" immobilier, education, rh_paie, autre.\n\n"
+            f"Brief : «{brief[:1500]}»\n\n"
+            f"Réponds UNIQUEMENT par 1 mot (la catégorie). Pas d'explication."
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.PRECISION,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            max_tokens_override=20, utiliser_cache=True,
+        )
+        cat = (rep.contenu or "").strip().lower().split()[0]
+        if cat in VERTICALES_METIER:
+            return cat
+    except Exception:
+        pass
+    return None
 
 
 def descripteur_vertical_pour_llm(vertical_key: str) -> dict:

@@ -262,6 +262,260 @@ async def bulk_lancer(
     }
 
 
+# ─── Phase 4.1 — Bulk ASYNC (>50 lignes, jusqu'à 1000) ───────────────────────
+
+
+class DemandeBulkLancerAsync(BaseModel):
+    """Lance un job bulk en arrière-plan (>50 lignes, jusqu'à 1000)."""
+    rows: list[dict] = Field(..., min_length=51, max_length=1000,
+        description="Lignes complètes — utilisez /bulk/lancer (synchrone) si ≤50")
+    template_brief: str = Field(..., min_length=10)
+    mapping: dict = Field(..., description="{placeholder: nom_colonne_csv}")
+    cle_projet: str
+    mode_visuel: str = Field(default="standard")
+    pays: str = Field(default="CM")
+    langue: str = Field(default="fr")
+    accepter_cout: bool = Field(default=False)
+
+
+@router.post("/bulk/lancer-async", tags=["Bureau — Designer Pro"])
+async def bulk_lancer_async(
+    demande: DemandeBulkLancerAsync,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 4.1 — Génération bulk asynchrone pour grands volumes.
+    Crée un job DB en statut 'pending', lance un task background, retourne
+    job_id. Le client poll via GET /bulk/status/{job_id} et télécharge le ZIP
+    final via GET /bulk/download/{job_id}.
+
+    Limite : 1000 lignes max par job. Au-delà, splitter en plusieurs jobs.
+    """
+    import uuid
+    from datetime import datetime
+    from core.database import async_session_maker, BulkJobDB
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde,
+    )
+    if not demande.accepter_cout:
+        raise HTTPException(400, "Tu dois cocher 'accepter_cout'")
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    job_id = str(uuid.uuid4())
+    cid = getattr(current_user, "compagnie_id", None) or 1
+    async with async_session_maker() as db:
+        job = BulkJobDB(
+            job_id=job_id, user_id=current_user.user_id, compagnie_id=cid,
+            cle_projet=demande.cle_projet, template_brief=demande.template_brief,
+            mapping=demande.mapping, rows_data=demande.rows,
+            mode_visuel=demande.mode_visuel, pays=demande.pays, langue=demande.langue,
+            total=len(demande.rows), statut="pending", results=[],
+        )
+        db.add(job)
+        await db.commit()
+
+    # Lance le task background
+    asyncio.create_task(_executer_bulk_job_background(job_id, str(current_user.user_id)))
+
+    return {
+        "ok": True, "job_id": job_id, "total": len(demande.rows),
+        "statut": "pending",
+        "message": f"Job lancé. Poll /bulk/status/{job_id} pour suivre la progression.",
+    }
+
+
+async def _executer_bulk_job_background(job_id: str, user_id_str: str):
+    """Tâche async : exécute le bulk en arrière-plan, met à jour le statut."""
+    from datetime import datetime
+    from core.database import async_session_maker, BulkJobDB
+    from sqlalchemy import select
+    from modules.bureau import bulk_generation as bg
+    from modules.bureau.infographe_pro import generer_projet
+
+    async def _set(statut: str, **kw):
+        async with async_session_maker() as db:
+            row = (await db.execute(
+                select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+            )).scalar_one_or_none()
+            if not row:
+                return
+            row.statut = statut
+            for k, v in kw.items():
+                setattr(row, k, v)
+            await db.commit()
+
+    async def _append_result(result: dict, nb_done_inc: int = 0, nb_failed_inc: int = 0):
+        async with async_session_maker() as db:
+            row = (await db.execute(
+                select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+            )).scalar_one_or_none()
+            if not row:
+                return
+            existing = list(row.results or [])
+            existing.append(result)
+            row.results = existing
+            row.nb_done = (row.nb_done or 0) + nb_done_inc
+            row.nb_failed = (row.nb_failed or 0) + nb_failed_inc
+            await db.commit()
+
+    await _set("running", demarre_le=datetime.utcnow())
+
+    # Charge le job
+    async with async_session_maker() as db:
+        job = (await db.execute(
+            select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+        )).scalar_one_or_none()
+        if not job:
+            return
+        rows = list(job.rows_data or [])
+        template = job.template_brief
+        mapping = dict(job.mapping or {})
+        cle_projet = job.cle_projet
+        mode_visuel = job.mode_visuel
+        pays = job.pays
+        langue = job.langue
+
+    sem = asyncio.Semaphore(bg.MAX_CONCURRENCE)
+    session_id = f"bulk_async_{job_id[:8]}_{user_id_str}"
+
+    async def _gen_une(i: int, row: dict):
+        async with sem:
+            brief = bg.remplir_template(template, row, mapping)
+            try:
+                res = await generer_projet(
+                    brief=brief, cle_projet=cle_projet,
+                    user_id=user_id_str, session_id=session_id,
+                    pays=pays, langue=langue, export_cmyk=True,
+                    mode_visuel=mode_visuel,
+                )
+                ts = int(time.time()) + i
+                artefacts = _persister_projet_pro(int(user_id_str), cle_projet, ts, res)
+                await _append_result({
+                    "index": i, "statut": "done",
+                    "download_url": artefacts.get("download_url"),
+                    "pdf_id": artefacts.get("pdf_id"),
+                    "brief": brief[:300], "row": row,
+                }, nb_done_inc=1)
+            except Exception as e:
+                logger.warning(f"[bulk async {job_id}] ligne {i} échec : {e}")
+                await _append_result({
+                    "index": i, "statut": "failed",
+                    "erreur": str(e)[:300], "brief": brief[:300], "row": row,
+                }, nb_failed_inc=1)
+
+    # Exécution parallèle (concurrence=4 sémaphore)
+    await asyncio.gather(*(_gen_une(i, r) for i, r in enumerate(rows)))
+
+    # Construction ZIP final
+    zip_path: Optional[str] = None
+    try:
+        import zipfile, io as _io
+        async with async_session_maker() as db:
+            job_final = (await db.execute(
+                select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+            )).scalar_one_or_none()
+            results_done = [r for r in (job_final.results or []) if r.get("statut") == "done"]
+        if results_done:
+            zip_dir = _DATA_DIR / "bulk_zips"
+            zip_dir.mkdir(parents=True, exist_ok=True)
+            zip_path_obj = zip_dir / f"bulk_{job_id}.zip"
+            with zipfile.ZipFile(zip_path_obj, "w", zipfile.ZIP_DEFLATED) as zf:
+                for res in results_done:
+                    pdf_id = res.get("pdf_id")
+                    if not pdf_id:
+                        continue
+                    pdf_file = _DATA_DIR / pdf_id
+                    if pdf_file.exists():
+                        zf.write(pdf_file, arcname=f"visuel_{res['index']:04d}.pdf")
+            zip_path = str(zip_path_obj.relative_to(_DATA_DIR.parent.parent))
+    except Exception as e:
+        logger.warning(f"[bulk async {job_id}] ZIP build échoué : {e}")
+
+    await _set("done", fini_le=datetime.utcnow(), zip_path=zip_path)
+    logger.info(f"[bulk async {job_id}] terminé : {len(rows)} lignes, ZIP={zip_path}")
+
+
+@router.get("/bulk/status/{job_id}", tags=["Bureau — Designer Pro"])
+async def bulk_status(
+    job_id: str, current_user: TokenData = Depends(get_current_user),
+):
+    """Phase 4.1 — Polling status d'un job bulk async."""
+    from core.database import async_session_maker, BulkJobDB
+    from sqlalchemy import select
+    async with async_session_maker() as db:
+        job = (await db.execute(
+            select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+        )).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, "Job introuvable")
+    if job.user_id != current_user.user_id and current_user.role != "admin":
+        raise HTTPException(403, "Accès refusé")
+    pct = round(100 * (job.nb_done + job.nb_failed) / max(1, job.total), 1)
+    return {
+        "job_id": job.job_id, "statut": job.statut, "total": job.total,
+        "nb_done": job.nb_done, "nb_failed": job.nb_failed,
+        "pct_progression": pct,
+        "cree_le": job.cree_le.isoformat() if job.cree_le else None,
+        "demarre_le": job.demarre_le.isoformat() if job.demarre_le else None,
+        "fini_le": job.fini_le.isoformat() if job.fini_le else None,
+        "zip_disponible": bool(job.zip_path),
+        "zip_url": f"/api/v1/bureau/infographie-pro/bulk/download/{job.job_id}" if job.zip_path else None,
+        "results_partiels": (job.results or [])[-5:],   # last 5 pour preview
+    }
+
+
+@router.get("/bulk/download/{job_id}", tags=["Bureau — Designer Pro"])
+async def bulk_download_zip(
+    job_id: str, current_user: TokenData = Depends(get_current_user),
+):
+    """Phase 4.1 — Télécharge le ZIP de tous les PDFs générés (statut='done')."""
+    from core.database import async_session_maker, BulkJobDB
+    from sqlalchemy import select
+    from fastapi.responses import FileResponse
+    async with async_session_maker() as db:
+        job = (await db.execute(
+            select(BulkJobDB).where(BulkJobDB.job_id == job_id)
+        )).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, "Job introuvable")
+    if job.user_id != current_user.user_id and current_user.role != "admin":
+        raise HTTPException(403, "Accès refusé")
+    if not job.zip_path:
+        raise HTTPException(404, "ZIP non disponible (job pas terminé ou aucun succès)")
+    # Reconstruct absolute path
+    zip_full = _DATA_DIR.parent.parent / job.zip_path
+    if not zip_full.exists():
+        raise HTTPException(404, "Fichier ZIP introuvable sur disque")
+    return FileResponse(
+        path=str(zip_full), media_type="application/zip",
+        filename=f"bulk_{job.cle_projet}_{job_id[:8]}.zip",
+    )
+
+
+@router.get("/bulk/jobs", tags=["Bureau — Designer Pro"])
+async def bulk_jobs_list(current_user: TokenData = Depends(get_current_user)):
+    """Phase 4.1 — Liste les jobs bulk de l'utilisateur."""
+    from core.database import async_session_maker, BulkJobDB
+    from sqlalchemy import select
+    async with async_session_maker() as db:
+        rows = (await db.execute(
+            select(BulkJobDB).where(BulkJobDB.user_id == current_user.user_id)
+            .order_by(BulkJobDB.cree_le.desc()).limit(50)
+        )).scalars().all()
+    return [{
+        "job_id": r.job_id, "cle_projet": r.cle_projet, "total": r.total,
+        "nb_done": r.nb_done, "nb_failed": r.nb_failed, "statut": r.statut,
+        "cree_le": r.cree_le.isoformat() if r.cree_le else None,
+        "fini_le": r.fini_le.isoformat() if r.fini_le else None,
+        "zip_disponible": bool(r.zip_path),
+    } for r in rows]
+
+
 # ─── Sprint 1.4 — WeasyPrint render (HTML/CSS3 → PDF) ────────────────────────
 
 

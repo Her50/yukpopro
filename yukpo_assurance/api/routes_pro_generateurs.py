@@ -153,13 +153,16 @@ async def _sauvegarder_doc_genere(
 class GenererRapportRequest(BaseModel):
     sujet:          str  = Field(..., min_length=5, max_length=3000)
     type_rapport:   str  = Field("rapport_analyse",
-                                  description="rapport_analyse | note_de_synthese | note_juridique | "
-                                              "rapport_financier | rapport_rh | plan_action | "
-                                              "compte_rendu | rapport_audit")
-    mode:           str  = Field("standard", description="flash | standard | complet")
+                                  description="Tout type connu OU 'custom' avec structure_externe")
+    mode:           str  = Field("standard", description="flash | standard | complet | expert")
     contexte:       Optional[str]  = Field(None, max_length=2000)
     donnees:        Optional[dict] = None
     format_sortie:  str  = Field("docx", description="docx | markdown")
+    structure_externe: Optional[list[str]] = Field(default=None,
+        description="Sections sur-mesure générées par l'orchestrateur G1 quand "
+                    "aucun template prédéfini ne convient au brief utilisateur. "
+                    "Exemple : ['Préambule', 'Article 1 - Objet', 'Article 2 - "
+                    "Durée', ...]. Override _STRUCTURES si fournie avec ≥ 3 items.")
 
 
 class GenererSlidesRequest(BaseModel):
@@ -260,6 +263,7 @@ async def generer_rapport(
                 donnees=req.donnees,
                 format_sortie=req.format_sortie,
                 instruction_utilisateur=req.sujet,
+                structure_externe=req.structure_externe,
             ),
             timeout=_tmo,
         )
@@ -2708,7 +2712,7 @@ async def orchestrer_generation_doc(
         ctx = demande.contexte_fichiers[:8000]
         contexte_block = f"\n\nCONTEXTE FICHIERS UPLOADÉS :\n{ctx}\n"
 
-    # Phase 3 — Contexte vertical métier depuis profil.metier + pays (silencieux, mondial)
+    # Phase 3 — Contexte vertical métier (profil + fallback brief si vide)
     bloc_vertical_g1 = ""
     try:
         from modules.pro.service_profil import get_or_create as _get_profil
@@ -2719,6 +2723,8 @@ async def orchestrer_generation_doc(
         secteur = getattr(profil_obj, "secteur_activite", None) or ""
         pays_user = getattr(profil_obj, "pays", None) or None
         vk = _vm.detecter_vertical(metier, secteur)
+        if not vk and demande.brief:
+            vk = await _vm.detecter_vertical_depuis_brief(demande.brief)
         if vk:
             bloc_vertical_g1 = _vm.construire_bloc_prompt_vertical(vk, pays=pays_user)
     except Exception:
@@ -2730,8 +2736,30 @@ un JSON STRICT décrivant exactement ce que tu vas produire.
 BRIEF UTILISATEUR :
 \"\"\"{demande.brief}\"\"\"
 {contexte_block}{bloc_vertical_g1}
-CATALOGUE DES TEMPLATES DISPONIBLES :
+CATALOGUE DES TEMPLATES PRÉDÉFINIS (à privilégier si l'un correspond) :
 {catalogue_str}
+
+⚠️ FLEXIBILITÉ TOTALE — si AUCUN template du catalogue ne correspond
+   parfaitement au besoin de l'utilisateur, tu DOIS générer une
+   structure SUR MESURE en mettant template_id="custom" et en remplissant
+   le champ "structure_custom" avec une liste de 5-15 sections adaptées
+   précisément au brief. Cette flexibilité permet à Yukpo de produire
+   N'IMPORTE QUEL type de document : manuel utilisateur, charte éthique,
+   livre blanc, mémoire technique, dossier de candidature, appel d'offres,
+   étude de faisabilité, business plan détaillé, document pédagogique,
+   etc. Tu adaptes le plan, le ton et la structure au besoin réel de l'user.
+
+   Quand utiliser un template du catalogue :
+   - Le label du template décrit EXACTEMENT le document demandé
+   - Les mots-clés du template apparaissent explicitement dans le brief
+   - Le format imposé (rapport, contrat, lettre, slides) correspond à
+     ce que l'user attend
+
+   Quand basculer en custom :
+   - Le brief décrit un document hybride / spécifique non couvert
+   - L'user demande un format particulier (ex: "manuel en 6 chapitres",
+     "dossier de presse 10 pages", "cahier des charges technique")
+   - Aucun mot-clé du catalogue ne se retrouve dans le brief
 
 REGLES :
 1. template_id = EXACTEMENT un id du catalogue ci-dessus (jamais inventer).
@@ -2775,8 +2803,9 @@ FORMAT JSON STRICT :
 {{
   "intent_detecte": "generation_rapport" | "generation_slides" | "ambigu",
   "type_sortie": "rapport" | "slides",
-  "template_id": "id_du_catalogue",
-  "template_label": "Label humain",
+  "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
+  "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
+  "structure_custom": ["Section 1", "Section 2", "..."],  // OBLIGATOIRE si template_id="custom" — 5 à 15 sections concrètes adaptées au brief
   "mode_recommande": "flash" | "standard" | "complet" | "expert",
   "format_sortie": "docx" | "pptx" | "markdown",
   "langue": "fr|en|...",
@@ -2785,6 +2814,18 @@ FORMAT JSON STRICT :
   "duree_estimee_secondes": 300,
   "raisonnement_court": "Pourquoi ce choix (1 phrase max, en français)"
 }}
+
+EXEMPLES de structure_custom (à adapter au brief réel) :
+- Manuel utilisateur ERP : ["Présentation du logiciel", "Installation et configuration",
+  "Module Comptabilité", "Module Facturation", "Module Stock", "Gestion des utilisateurs",
+  "Sauvegarde et restauration", "Dépannage", "Support technique", "Annexes"]
+- Cahier des charges technique : ["Contexte du projet", "Périmètre fonctionnel",
+  "Exigences fonctionnelles", "Exigences non-fonctionnelles", "Architecture cible",
+  "Contraintes techniques", "Planning prévisionnel", "Budget", "Critères de recette",
+  "Annexes"]
+- Charte éthique entreprise : ["Préambule", "Nos valeurs", "Engagement envers les clients",
+  "Respect des collaborateurs", "Lutte contre la corruption", "Protection des données",
+  "Développement durable", "Application et sanctions", "Contacts conformité"]
 
 Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
@@ -2808,11 +2849,28 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
     ids_valides = {tid for (tid, *_) in _CATALOGUE_TEMPLATES_G1}
     template_id = data.get("template_id") or "rapport_analyse"
-    if template_id not in ids_valides:
-        type_s = data.get("type_sortie") or "rapport"
-        candidats = [t for t in _CATALOGUE_TEMPLATES_G1 if t[1] == type_s]
-        template_id = candidats[0][0] if candidats else "rapport_analyse"
-        data["template_id"] = template_id
+    structure_custom = data.get("structure_custom")
+
+    # Cas spécial : template_id = "custom" ⇒ on utilise structure_custom
+    # générée par le LLM (flexibilité totale, document sur-mesure).
+    if template_id == "custom":
+        if not (isinstance(structure_custom, list) and len(structure_custom) >= 3):
+            # LLM a dit "custom" sans fournir de structure → fallback
+            template_id = "rapport_analyse"
+            structure_custom = None
+            data["template_id"] = template_id
+    elif template_id not in ids_valides:
+        # template inconnu hors catalogue : on tente d'inférer depuis le LLM
+        # → si structure_custom existe, on bascule en custom
+        if isinstance(structure_custom, list) and len(structure_custom) >= 3:
+            template_id = "custom"
+            data["template_id"] = "custom"
+        else:
+            type_s = data.get("type_sortie") or "rapport"
+            candidats = [t for t in _CATALOGUE_TEMPLATES_G1 if t[1] == type_s]
+            template_id = candidats[0][0] if candidats else "rapport_analyse"
+            data["template_id"] = template_id
+            structure_custom = None
 
     if demande.type_sortie_force in ("rapport", "slides"):
         data["type_sortie"] = demande.type_sortie_force
@@ -2840,16 +2898,26 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
+        # Le backend /rapports/generer attend `sujet` + `type_rapport`, pas
+        # `instruction`/`type_doc`. On formate le payload conformément.
         payload_pret = {
-            "type_doc": template_id,
-            "instruction": demande.brief,
-            "mode": mode_rec,
-            "langue": data.get("langue") or "fr",
+            "sujet":         demande.brief,
+            "type_rapport":  template_id,
+            "mode":          mode_rec,
             "format_sortie": data.get("format_sortie") or "docx",
         }
+        # Si l'orchestrateur a généré une structure sur-mesure (template
+        # custom), on la transmet via le param structure_externe.
+        if template_id == "custom" and isinstance(structure_custom, list) and structure_custom:
+            payload_pret["structure_externe"] = [str(s)[:120] for s in structure_custom][:20]
+
     params_extraits = data.get("parametres_extraits") or {}
     if isinstance(params_extraits, dict) and params_extraits:
-        payload_pret["meta"] = params_extraits
+        # Sérialiser les paramètres extraits dans le contexte texte (le
+        # backend /rapports/generer accepte un champ contexte multi-line)
+        ctx_lines = [f"{k} : {v}" for k, v in params_extraits.items() if v]
+        if ctx_lines:
+            payload_pret["contexte"] = "\n".join(ctx_lines)[:2000]
 
     try:
         await debiter_forfait_fcfa(

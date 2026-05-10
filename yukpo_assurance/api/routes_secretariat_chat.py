@@ -95,7 +95,7 @@ async def chat_unifie_message(
         # Fallback : redaction (la plupart des plans secrétariat ont accès)
         autorise, plan, _ = await verifier_acces_module(current_user.user_id, "redaction")
 
-    # Phase 3 — Contexte vertical métier + pays (silencieux, mondial)
+    # Phase 3 — Contexte vertical métier (profil + fallback brief si vide)
     bloc_vertical_sec = ""
     try:
         from core.database import async_session_maker as _asm
@@ -107,6 +107,8 @@ async def chat_unifie_message(
         secteur = getattr(profil_obj, "secteur_activite", None) or ""
         pays_user = getattr(profil_obj, "pays", None) or demande.pays or None
         vk = _vm.detecter_vertical(metier, secteur)
+        if not vk and demande.message:
+            vk = await _vm.detecter_vertical_depuis_brief(demande.message)
         if vk:
             bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(vk, pays=pays_user)
     except Exception:

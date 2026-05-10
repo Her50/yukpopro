@@ -1121,6 +1121,44 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Phase 4.1 — Bulk async jobs (CSV/XLSX > 50 lignes) ─────────────────────
+
+
+class BulkJobDB(Base):
+    """
+    Job de génération bulk asynchrone (CSV/XLSX) pour grands volumes
+    (>50 lignes, jusqu'à 1000). Sprint UX3 reste synchrone pour ≤50.
+
+    Workflow :
+      1. POST /bulk/lancer-async → crée row 'pending' + lance task background
+      2. GET /bulk/status/{job_id} → polling pour progression (nb_done, nb_failed)
+      3. GET /bulk/download/{job_id} → ZIP de tous les PDFs générés (statut='done')
+    """
+    __tablename__ = "bulk_jobs"
+
+    job_id            = Column(String(36), primary_key=True, index=True)
+    user_id           = Column(Integer, nullable=False, index=True)
+    compagnie_id      = Column(Integer, nullable=False, index=True)
+    cle_projet        = Column(String(80), nullable=False)
+    template_brief    = Column(Text, nullable=False)
+    mapping           = Column(JSON, nullable=False, default=dict)
+    rows_data         = Column(JSON, nullable=False, default=list)
+    mode_visuel       = Column(String(20), default="standard")
+    pays              = Column(String(3), default="CM")
+    langue            = Column(String(8), default="fr")
+    total             = Column(Integer, nullable=False)
+    nb_done           = Column(Integer, default=0)
+    nb_failed         = Column(Integer, default=0)
+    statut            = Column(String(20), default="pending", index=True)
+    # pending | running | done | failed | cancelled
+    results           = Column(JSON, default=list)   # [{index, statut, download_url, brief, erreur}]
+    zip_path          = Column(String(500), nullable=True)   # chemin ZIP final
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+    demarre_le        = Column(DateTime, nullable=True)
+    fini_le           = Column(DateTime, nullable=True)
+    erreur            = Column(Text, nullable=True)
+
+
 # ─── Sprint C1 — Chat conversationnel Designer Pro (sessions actives) ───────
 
 

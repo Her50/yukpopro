@@ -1767,13 +1767,14 @@ async def generer_projet_depuis_brief(
     importance_images = _pct("importance_images", 50)
     elegance = _pct("elegance", 50)
     # Phase 3 — Contexte vertical métier (mondial, pas de RAG figé)
-    # Détecté silencieusement depuis profil.metier/secteur. Le LLM s'adapte au
-    # pays user (régulateur national + cadre juridique). Pour références
-    # précises, recherche web officielle (helper recherche_officielle_metier).
+    # 1. Profil.metier/secteur d'abord (rapide)
+    # 2. Si profil vide → fallback Haiku depuis brief (refinement Phase 3+)
     bloc_vertical = ""
     try:
         from . import verticales_metier as _vm
         vert_key = _vm.detecter_vertical(metier, profil.get("secteur"))
+        if not vert_key and brief:
+            vert_key = await _vm.detecter_vertical_depuis_brief(brief)
         if vert_key:
             bloc_vertical = _vm.construire_bloc_prompt_vertical(vert_key, pays=pays)
     except Exception:
