@@ -114,20 +114,17 @@ def convertir_en_pdf_x1a(
             mb = page.MediaBox  # [x0, y0, x1, y1] — ReportLab origin bottom-left
             # MediaBox courant
             x0, y0, x1, y1 = float(mb[0]), float(mb[1]), float(mb[2]), float(mb[3])
-            # TrimBox = inset du bleed
+            # TrimBox = inset du bleed. pikepdf 9+ accepte directement les
+            # floats dans Array (autoconversion en pikepdf.Object). Avant on
+            # utilisait pikepdf.Object.parse(str(x)) qui plantait avec
+            # "parse(): incompatible function arguments" car parse() attend
+            # désormais des bytes (changement breaking pikepdf 8 → 9).
             page.TrimBox = Array([
-                pikepdf.Object.parse(str(x0 + bleed_pt)),
-                pikepdf.Object.parse(str(y0 + bleed_pt)),
-                pikepdf.Object.parse(str(x1 - bleed_pt)),
-                pikepdf.Object.parse(str(y1 - bleed_pt)),
+                x0 + bleed_pt, y0 + bleed_pt,
+                x1 - bleed_pt, y1 - bleed_pt,
             ])
             # BleedBox = MediaBox (déjà identique)
-            page.BleedBox = Array([
-                pikepdf.Object.parse(str(x0)),
-                pikepdf.Object.parse(str(y0)),
-                pikepdf.Object.parse(str(x1)),
-                pikepdf.Object.parse(str(y1)),
-            ])
+            page.BleedBox = Array([x0, y0, x1, y1])
             # ArtBox = TrimBox (zone artistique active)
             page.ArtBox = page.TrimBox
 

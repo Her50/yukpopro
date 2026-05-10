@@ -318,9 +318,14 @@ async def pre_generer_images_ia(doc: LayoutDocument) -> None:
                         fmt = "square"
                 else:
                     fmt = "landscape_4_3"
+                # mode "standard" = Flux schnell (~1-3s/image) — choix optimisé
+                # pour rester sous 100s timeout Cloudflare. "premium" (Flux dev
+                # ~10-15s) ferait timeout sur visuels denses avec 3+ images.
+                # Qualité standard suffisante pour image marketing intégrée
+                # dans un layout (l'image n'est pas full bleed isolée).
                 bts = await generer_image(
                     prompt=el.prompt_ia[:500],
-                    mode="premium",      # Flux dev — bon ratio qualité/coût
+                    mode="standard",
                     format_=fmt,
                 )
                 if bts:
