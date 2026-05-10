@@ -287,6 +287,42 @@ export const generateurApi = {
     return data;
   },
 
+  // Variante multipart : envoie les bytes des fichiers joints (images
+  // manuscrites, scans, PDF, DOCX, XLSX…) au backend pour OCR Vision +
+  // extraction texte natif. Le contenu extrait est injecté dans
+  // `payload_pret.contexte` pour que la génération aval (rapport/slides/
+  // visuel) rédige à partir du contenu réel des fichiers.
+  orchestrerMultipart: async (params: {
+    brief: string;
+    fichiers: { nom: string; type: string; bytes: ArrayBuffer | Uint8Array }[];
+    langue_forcee?: string;
+    type_sortie_force?: string;
+    mode_force?: string;
+    ambition?: string;
+  }) => {
+    const fd = new FormData();
+    fd.append("brief", params.brief);
+    if (params.langue_forcee) fd.append("langue_forcee", params.langue_forcee);
+    if (params.type_sortie_force) fd.append("type_sortie_force", params.type_sortie_force);
+    if (params.mode_force) fd.append("mode_force", params.mode_force);
+    if (params.ambition) fd.append("ambition", params.ambition);
+    for (const f of params.fichiers) {
+      // Copie défensive dans un ArrayBuffer dédié (évite l'erreur TS sur
+      // SharedArrayBuffer non assignable à BlobPart).
+      const src = f.bytes instanceof Uint8Array ? f.bytes : new Uint8Array(f.bytes);
+      const buf = new ArrayBuffer(src.byteLength);
+      new Uint8Array(buf).set(src);
+      const blob = new Blob([buf], { type: f.type || "application/octet-stream" });
+      fd.append("fichiers", blob, f.nom);
+    }
+    // Timeout généreux : OCR Vision ~5-15s/image, plusieurs images possibles.
+    const { data } = await http.post("/pro/orchestrer-multipart", fd, {
+      timeout: 180_000,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
   // Détection auto du bon endpoint selon le préfixe filename :
   // les fichiers Bureau (designerpro, freeform, ocr, audio, redaction,
   // slides_sec, video) sont stockés sous /bureau/documents/ ;

@@ -3298,3 +3298,96 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         # NEW : plan exécutable — la source de vérité pour le frontend
         "plan":                   plan,
     }
+
+
+@router.post("/orchestrer-multipart", summary="Sprint G1 — Orchestrateur avec fichiers joints (images, PDF, DOCX, XLSX…)")
+async def orchestrer_avec_fichiers(
+    brief:         str               = Form(..., description="Brief utilisateur (langage naturel)"),
+    langue_forcee: Optional[str]     = Form(default=None),
+    type_sortie_force: Optional[str] = Form(default=None),
+    mode_force:    Optional[str]     = Form(default=None),
+    ambition:      Optional[str]     = Form(default=None),
+    fichiers:      List[UploadFile]  = File(default=[], description="Fichiers source (images manuscrites/scans, PDF, DOCX, XLSX, CSV, TXT, PPTX)"),
+    current_user:  TokenData         = Depends(get_current_user),
+    db:            AsyncSession      = Depends(get_db),
+):
+    """
+    Variante multipart de `/orchestrer` qui accepte des fichiers joints :
+    - images (.jpg/.jpeg/.png/.heic/.webp/…) → OCR Vision GPT-4o/Claude pour
+      extraire texte manuscrit, scans, captures, photos de documents.
+    - documents (.pdf/.docx/.xlsx/.csv/.txt/.pptx) → extraction native.
+
+    Le texte extrait est concaténé dans `contexte_fichiers` avant d'être
+    passé au LLM orchestrateur pour qu'il comprenne la vraie intention. Le
+    payload final (rapport/slides/visuel/traduction…) hérite du contexte
+    dans `payload_pret["contexte"]` afin que la rédaction en aval s'appuie
+    sur le contenu réel des fichiers, pas sur leur nom.
+
+    Permet par exemple : « génère le rapport Word de cette réunion à partir
+    de ces photos manuscrites » → OCR des photos → contexte injecté →
+    rapport rédigé sur le contenu transcrit.
+    """
+    blocs_contexte: list[str] = []
+    for f in fichiers or []:
+        if not f or not f.filename:
+            continue
+        try:
+            contenu = await f.read()
+            if not contenu:
+                continue
+            txt = await _extraire_texte_upload(contenu, f.filename, user_id=current_user.user_id)
+            if txt and not txt.startswith("["):
+                blocs_contexte.append(f"### Fichier : {f.filename}\n{txt.strip()}")
+            elif txt:
+                # message d'erreur extraction — on l'inclut quand même pour traçabilité
+                blocs_contexte.append(f"### Fichier : {f.filename}\n{txt}")
+        except Exception as e:
+            logger.warning(f"[OrchestrerMultipart] Échec extraction {f.filename} : {e}")
+            blocs_contexte.append(f"### Fichier : {f.filename}\n[Erreur extraction : {e}]")
+
+    contexte_fichiers = "\n\n".join(blocs_contexte) if blocs_contexte else None
+    # Cap pour éviter d'exploser le prompt LLM (l'orchestrateur tronque
+    # déjà à 8000 chars mais on garde le texte intégral pour réinjection
+    # dans le payload aval).
+    contexte_complet = contexte_fichiers
+    contexte_pour_orchestre = (contexte_fichiers[:8000] if contexte_fichiers else None)
+
+    demande = DemandeOrchestrer(
+        brief=brief,
+        contexte_fichiers=contexte_pour_orchestre,
+        langue_forcee=langue_forcee,
+        type_sortie_force=type_sortie_force,
+        mode_force=mode_force,
+        ambition=ambition,
+    )
+    resultat = await orchestrer_generation_doc(
+        demande=demande, current_user=current_user, db=db,
+    )
+
+    # Injecter le contexte EXTRAIT (intégral, pas tronqué 8k) dans le
+    # payload final pour que la génération aval (rapport/slides/visuel)
+    # rédige à partir du contenu réel des fichiers. La rédaction lit
+    # `contexte` ou `sources_externes` selon le pipeline.
+    if isinstance(resultat, dict) and contexte_complet:
+        payload = resultat.get("payload_pret") or {}
+        if isinstance(payload, dict):
+            # Concatène avec contexte existant si déjà rempli (params extraits)
+            ctx_existant = payload.get("contexte") or ""
+            cap = 60_000  # ~15k tokens — supporté par GPT-4-turbo / Opus
+            new_ctx = (f"{ctx_existant}\n\n" if ctx_existant else "") + contexte_complet
+            payload["contexte"] = new_ctx[:cap]
+            resultat["payload_pret"] = payload
+            # Met à jour aussi plan.payload si le frontend lit depuis là
+            plan = resultat.get("plan") or {}
+            if isinstance(plan, dict):
+                plan_payload = plan.get("payload") or {}
+                if isinstance(plan_payload, dict):
+                    plan_payload["contexte"] = payload["contexte"]
+                    plan["payload"] = plan_payload
+                    resultat["plan"] = plan
+            resultat["fichiers_extraits"] = [
+                {"nom": f.filename, "taille_extrait": len(b)}
+                for f, b in zip(fichiers or [], blocs_contexte)
+            ]
+
+    return resultat

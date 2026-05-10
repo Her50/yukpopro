@@ -174,11 +174,37 @@ export const ChatPage = () => {
 
       let orch: any = null;
       try {
-        orch = await generateurApi.orchestrer({
-          brief: briefAvecContexte,
-          contexte_fichiers: files.length > 0
-            ? files.map(f => `${f.name} (${f.type})`).join(", ") : undefined,
-        });
+        // Si l'utilisateur a joint des fichiers non-audio (images manuscrites,
+        // scans, photos de documents, PDF, DOCX, XLSX…) → bascule sur l'endpoint
+        // multipart qui OCR-vision les images et extrait le texte natif des
+        // autres formats AVANT l'orchestration LLM. Le contenu extrait est
+        // ensuite injecté dans payload_pret.contexte pour que la rédaction
+        // aval (rapport/slides/visuel/traduction) s'appuie sur le contenu
+        // réel des fichiers, pas juste leur nom.
+        if (files.length > 0) {
+          const filesWithBytes = files.filter(f => !!f.content);
+          if (filesWithBytes.length > 0) {
+            const fichiersPayload = filesWithBytes.map(f => {
+              const b64 = f.content!.includes(",") ? f.content!.split(",")[1] : f.content!;
+              const bytes = atob(b64);
+              const arr = new Uint8Array(bytes.length);
+              for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+              return { nom: f.name, type: f.type || "application/octet-stream", bytes: arr };
+            });
+            orch = await generateurApi.orchestrerMultipart({
+              brief: briefAvecContexte,
+              fichiers: fichiersPayload,
+            });
+          }
+        }
+        // Fallback : pas de fichiers ou bytes absents → orchestrer JSON classique
+        if (!orch) {
+          orch = await generateurApi.orchestrer({
+            brief: briefAvecContexte,
+            contexte_fichiers: files.length > 0
+              ? files.map(f => `${f.name} (${f.type})`).join(", ") : undefined,
+          });
+        }
       } catch { /* fallback silencieux : pas d'orchestration → flow normal */ }
 
       // ── Architecture plan-driven : orchestrateur LLM (Opus 4.7) compose
