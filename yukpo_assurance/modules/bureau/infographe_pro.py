@@ -1964,22 +1964,25 @@ async def generer_projet(
     dpi_pages: int = 150,
     dpi_pages_hd: int = 300,
     directives_visuelles: Optional[dict] = None,
-    mode_visuel: str = "sans",   # "sans" | "standard" | "premium"
+    mode_visuel: str = "sans",   # "sans" | "standard" | "premium" | "ultra" | "ultra_plus"
 ) -> ResultatProjet:
     """
     Pipeline complet : brief + médias → projet IA → (génération images IA si
     `mode_visuel != "sans"`) → PDF + PNG par page.
 
     `mode_visuel` :
-    - "sans"     : aucune image IA générée — placeholder pour les slots image_ia
-    - "standard" : Flux schnell via fal.ai (rapide, ~1s/image)
-    - "premium"  : Flux dev via fal.ai (qualité supérieure, ~5-10s/image)
+    - "sans"       : aucune image IA générée — placeholder pour les slots image_ia
+    - "standard"   : Flux schnell via fal.ai (rapide, ~1s/image)
+    - "premium"    : Flux dev via fal.ai (qualité supérieure, ~5-10s/image)
+    - "ultra"      : Flux 1.1 Pro Ultra (raw cinematic SOTA)
+    - "ultra_plus" : Sprint 1.5 — ensemble Flux Pro Ultra + Recraft v3 + Ideogram 2
+                     en parallèle ; Sonnet vision picker choisit la meilleure des 3
     """
     medias = msm.resoudre_refs(medias_refs or [], user_id, session_id) if medias_refs else {}
 
-    # Sprint 1.1 — Layout AI (Opus 4.7) actif uniquement en premium/ultra
+    # Sprint 1.1 — Layout AI (Opus 4.7) actif uniquement en premium/ultra/ultra_plus
     # (le coût Opus n'est pas justifié sur les modes économiques)
-    layout_ai_active = mode_visuel in ("premium", "ultra")
+    layout_ai_active = mode_visuel in ("premium", "ultra", "ultra_plus")
 
     t0 = time.time()
     projet = await generer_projet_depuis_brief(
@@ -1993,7 +1996,7 @@ async def generer_projet(
     # ── Pipeline images IA (Niveau 3 : Flux + vision check Premium) ────────
     nb_images_generees = 0
     duree_images_ms = 0
-    if mode_visuel in ("standard", "premium", "ultra"):
+    if mode_visuel in ("standard", "premium", "ultra", "ultra_plus"):
         t_img = time.time()
         nb_images_generees = await _generer_images_ia_pour_projet(
             projet=projet,
@@ -2189,9 +2192,9 @@ async def _generer_images_ia_pour_projet(
     if directive:
         logger.info(f"[InfographePro] Directive artistique : {directive[:120]}…")
 
-    # 3. Enrichir chaque prompt en parallèle (Sonnet, modes premium/ultra)
+    # 3. Enrichir chaque prompt en parallèle (Sonnet, modes premium/ultra/ultra_plus)
     enrichis: list[str] = []
-    if mode in ("premium", "ultra"):
+    if mode in ("premium", "ultra", "ultra_plus"):
         import asyncio as _asyncio
         contextes = [f"page {p}, slot {z.slot_id or '?'}" for (z, _p, _f, p) in zones_a_generer]
         enrichis = list(await _asyncio.gather(*(
@@ -2202,9 +2205,13 @@ async def _generer_images_ia_pour_projet(
     else:
         enrichis = [p for (_z, p, _f, _pg) in zones_a_generer]
 
-    # 4. Génération images (1 variante en standard, 2 variantes en premium/ultra)
+    # 4. Génération images (1 variante en standard/ultra_plus*, 2 variantes en
+    #    premium/ultra). *ultra_plus génère déjà 3 modèles différents = 3 variantes
+    #    de fait, donc pas besoin de multiplier par seed.
     mode_typed: ImageMode
-    if mode == "ultra":
+    if mode == "ultra_plus":
+        mode_typed = "ultra_plus"
+    elif mode == "ultra":
         mode_typed = "ultra"
     elif mode == "premium":
         mode_typed = "premium"
@@ -2216,8 +2223,8 @@ async def _generer_images_ia_pour_projet(
         prompts_batch, mode=mode_typed, nb_variantes=nb_variantes,
     )
 
-    # 5. Validation finale (vision check + 1 retry, modes premium/ultra)
-    if mode in ("premium", "ultra"):
+    # 5. Validation finale (vision check + 1 retry, modes premium/ultra/ultra_plus)
+    if mode in ("premium", "ultra", "ultra_plus"):
         nouvelles_images: list[Optional[bytes]] = []
         for ((zone, _p_raw, fmt, _pg), prompt_enrichi, img) in zip(
             zones_a_generer, enrichis, images_bytes,

@@ -60,7 +60,7 @@ class DemandeProjetPro(BaseModel):
     directives_visuelles: Optional[dict] = Field(default=None,
         description="Curseurs UI : creativite, densite_texte, importance_images, elegance (0–100)")
     mode_visuel: str = Field(default="sans",
-        description="'sans' (templates seuls) | 'standard' (Flux schnell rapide) | 'premium' (Flux dev haute qualité)")
+        description="'sans' | 'standard' (Flux schnell) | 'premium' (Flux dev) | 'ultra' (Flux Pro Ultra) | 'ultra_plus' (ensemble Flux+Recraft+Ideogram, vision pick)")
 
 
 class DemandeAutoPro(BaseModel):
@@ -453,7 +453,9 @@ async def generer_projet(
             # débit supplémentaire.
             nb_imgs = int(resultat.meta.get("nb_images_ia") or 0)
             if nb_imgs > 0:
-                if demande.mode_visuel == "ultra":
+                if demande.mode_visuel == "ultra_plus":
+                    forfait_image = "designerpro_image_ultra_plus"
+                elif demande.mode_visuel == "ultra":
                     forfait_image = "designerpro_image_ultra"
                 elif demande.mode_visuel == "premium":
                     forfait_image = "designerpro_image_premium"

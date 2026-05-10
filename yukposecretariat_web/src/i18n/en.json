@@ -965,7 +965,9 @@
     "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
     "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur.",
     "modeUltra": "Ultra",
-    "modeUltraDesc": "Flux Pro Ultra — niveau Midjourney"
+    "modeUltraDesc": "Flux Pro Ultra — niveau Midjourney",
+    "modeUltraPlus": "Ultra+",
+    "modeUltraPlusDesc": "Ensemble 3 modèles SOTA + pick auto"
   },
   "organisation": {
     "createTitle": "Create an organization",

@@ -69,7 +69,7 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive]   = useState(0)
   const [modifInstr, setModifInstr]   = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
-  const [modeVisuel, setModeVisuel]   = useState<'sans' | 'standard' | 'premium' | 'ultra'>('sans')
+  const [modeVisuel, setModeVisuel]   = useState<'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('sans')
 
   const [creativite, setCreativite]     = useState(50)
   const [densite, setDensite]           = useState(50)
@@ -348,12 +348,13 @@ export default function DesignerProPanel() {
 
         <div>
           <label className={LABEL}>{t('designerPro.visualMode', 'Mode visuel IA')}</label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
             {([
-              { v: 'sans',     emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
-              { v: 'standard', emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
-              { v: 'premium',  emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants + vision' },
-              { v: 'ultra',    emoji: '🌟', titleKey: 'designerPro.modeUltra',    fb: 'Ultra',             descKey: 'designerPro.modeUltraDesc',    fbDesc: 'Flux Pro Ultra — niveau Midjourney' },
+              { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
+              { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
+              { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants + vision' },
+              { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',    fb: 'Ultra',             descKey: 'designerPro.modeUltraDesc',    fbDesc: 'Flux Pro Ultra — niveau Midjourney' },
+              { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',fb: 'Ultra+',            descKey: 'designerPro.modeUltraPlusDesc',fbDesc: 'Ensemble 3 modèles IA + pick auto' },
             ] as const).map(opt => (
               <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
                 className={`p-2.5 rounded-lg border-2 text-left transition-all ${

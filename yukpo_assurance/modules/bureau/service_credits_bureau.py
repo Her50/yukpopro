@@ -123,6 +123,12 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
                                           # Couvre : Flux Pro Ultra × 2 (72 FCFA réel)
                                           # + Sonnet enrichment (3) + Vision picker (6)
                                           # = 81 FCFA réel → marge 4.1×
+    "designerpro_image_ultra_plus": 60.0, # 1200 cr/img = 720 FCFA user
+                                          # Sprint 1.5 — Ensemble 3 modèles :
+                                          # Flux Pro Ultra (36) + Recraft v3 (24)
+                                          # + Ideogram 2 (48) = 108 FCFA réel
+                                          # + Sonnet enrichment (3) + Vision picker
+                                          # 3 notes (18) = 129 FCFA réel → marge 4.7×
     # OCR / traitement image
     "ocr_scan":              3.0,   #  60 crédits
     "ocr_manuscrit":         5.0,   # 100 crédits (vision avancée)

@@ -980,6 +980,8 @@
     "modePremiumDesc": "Flux dev + 2 variantes + vision",
     "modeUltra": "Ultra",
     "modeUltraDesc": "Flux Pro Ultra — niveau Midjourney",
+    "modeUltraPlus": "Ultra+",
+    "modeUltraPlusDesc": "Ensemble 3 modèles SOTA + pick auto",
     "permanentLink": "Lien permanent",
     "permanentLinkTitle": "Lien permanent — fichier conservé dans Mes Documents",
     "savedToDocuments": "Sauvegardé dans Mes Documents — accessible depuis le menu pour téléchargement ultérieur.",

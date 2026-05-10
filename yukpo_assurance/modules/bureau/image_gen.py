@@ -1,10 +1,20 @@
 """
-Designer Pro — génération d'images IA via fal.ai (Flux).
+Designer Pro — génération d'images IA via fal.ai.
 
-Trois modes (cf. niveau-3 hybride spec) :
-- "standard"  : Flux schnell        (4-step,  ~1s,    ~$0.003/image)
-- "premium"   : Flux dev            (28-step, ~5-10s, ~$0.025/image)
-- "ultra"     : Flux 1.1 Pro Ultra  (raw cinematic SOTA, ~$0.06/image)
+Quatre modes (Sprint 1.5 ajoute "ultra_plus") :
+- "standard"   : Flux schnell                     (4-step,  ~1s,    ~$0.003/img)
+- "premium"    : Flux dev                         (28-step, ~5-10s, ~$0.025/img)
+- "ultra"      : Flux 1.1 Pro Ultra               (raw cinematic SOTA, ~$0.06/img)
+- "ultra_plus" : Ensemble 3 modèles               (Flux Pro Ultra + Recraft v3 +
+                                                   Ideogram 2 en parallèle ; vision
+                                                   picker Sonnet choisit la meilleure)
+
+Pourquoi ultra_plus :
+  - Flux Pro Ultra : photoréaliste cinématique SOTA
+  - Recraft v3     : illustrations vectorielles SOTA (logos, icônes, motifs)
+  - Ideogram 2     : intégration texte dans visuel SOTA (slogans, baselines)
+  Sonnet vision compare les 3 sorties et choisit la mieux adaptée à l'intention
+  du prompt → couvre 100% des sujets visuels professionnels avec qualité maximale.
 
 Modes "premium" et "ultra" génèrent **2 variantes** par slot puis Claude
 Vision sélectionne la meilleure (composition / qualité / fidélité au prompt).
@@ -29,12 +39,15 @@ logger = logging.getLogger("yukpo_assurance.bureau.image_gen")
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-ImageMode = Literal["sans", "standard", "premium", "ultra"]
+ImageMode = Literal["sans", "standard", "premium", "ultra", "ultra_plus"]
 
 _FAL_BASE_URL = "https://fal.run"
 _FAL_MODEL_SCHNELL = "fal-ai/flux/schnell"
 _FAL_MODEL_DEV = "fal-ai/flux/dev"
 _FAL_MODEL_PRO_ULTRA = "fal-ai/flux-pro/v1.1-ultra"
+# Sprint 1.5 — Multi-model ensemble
+_FAL_MODEL_RECRAFT = "fal-ai/recraft-v3"            # SOTA illustrations vectorielles
+_FAL_MODEL_IDEOGRAM = "fal-ai/ideogram/v2"          # SOTA texte intégré au visuel
 
 # Tailles d'image standard pour les slots de mise en page.
 # fal.ai accepte : square_hd (1024×1024), portrait_4_3, portrait_16_9,
@@ -83,6 +96,10 @@ async def generer_image(
     if not api_key:
         raise ImageGenNotConfigured("FAL_KEY non configuré dans settings")
 
+    # ultra_plus utilise generer_image_ensemble (3 modèles + vision picker)
+    if mode == "ultra_plus":
+        return await generer_image_ensemble(prompt, format_=format_,
+                                             timeout_s=timeout_s, seed=seed)
     if mode == "ultra":
         modele = _FAL_MODEL_PRO_ULTRA
     elif mode == "premium":
@@ -153,6 +170,169 @@ async def generer_image(
             return r_img.content
     except httpx.HTTPError as e:
         raise ImageGenError(f"Téléchargement image échoué : {e}") from e
+
+
+# ── Sprint 1.5 — Ensemble multi-modèles (Flux + Recraft + Ideogram) ──────────
+
+
+async def _appel_fal_modele(
+    modele_path: str,
+    payload: dict,
+    timeout_s: float = 60.0,
+) -> Optional[bytes]:
+    """Appel générique fal.ai → bytes PNG ou None si échec."""
+    api_key = settings.FAL_KEY
+    if not api_key:
+        return None
+    url = f"{_FAL_BASE_URL}/{modele_path}"
+    headers = {"Authorization": f"Key {api_key}", "Content-Type": "application/json"}
+    try:
+        async with httpx.AsyncClient(timeout=timeout_s) as client:
+            r = await client.post(url, json=payload, headers=headers)
+        if r.status_code != 200:
+            logger.warning(f"[image_gen/{modele_path}] HTTP {r.status_code}: {r.text[:120]}")
+            return None
+        data = r.json()
+        images = data.get("images") or []
+        if not images:
+            return None
+        img_url = images[0].get("url")
+        if not img_url:
+            return None
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            r_img = await client.get(img_url)
+            r_img.raise_for_status()
+            return r_img.content
+    except Exception as e:
+        logger.warning(f"[image_gen/{modele_path}] échec : {e}")
+        return None
+
+
+async def _gen_flux_pro_ultra(prompt: str, format_: str, seed: Optional[int]) -> Optional[bytes]:
+    image_size = _TAILLES_PAR_FORMAT.get(format_, "portrait_4_3")
+    ar_map = {
+        "square_hd": "1:1", "portrait_4_3": "3:4", "portrait_16_9": "9:16",
+        "landscape_4_3": "4:3", "landscape_16_9": "16:9",
+    }
+    payload: dict = {
+        "prompt": prompt[:4000], "num_images": 1, "enable_safety_checker": True,
+        "aspect_ratio": ar_map.get(image_size, "3:4"),
+        "output_format": "png", "raw": True,
+    }
+    if seed is not None:
+        payload["seed"] = seed
+    return await _appel_fal_modele(_FAL_MODEL_PRO_ULTRA, payload)
+
+
+async def _gen_recraft(prompt: str, format_: str, seed: Optional[int]) -> Optional[bytes]:
+    """Recraft v3 — SOTA illustrations vectorielles, logos, motifs, icônes.
+    Très bon pour visuels stylisés / non-photoréalistes."""
+    sz_map = {
+        "square_hd": "square_hd", "portrait_4_3": "portrait_4_3",
+        "portrait_16_9": "portrait_16_9", "landscape_4_3": "landscape_4_3",
+        "landscape_16_9": "landscape_16_9",
+    }
+    image_size = _TAILLES_PAR_FORMAT.get(format_, "portrait_4_3")
+    payload: dict = {
+        "prompt": prompt[:1000], "image_size": sz_map.get(image_size, "portrait_4_3"),
+        "style": "any",   # any | digital_illustration | realistic_image | vector_illustration
+    }
+    return await _appel_fal_modele(_FAL_MODEL_RECRAFT, payload)
+
+
+async def _gen_ideogram(prompt: str, format_: str, seed: Optional[int]) -> Optional[bytes]:
+    """Ideogram 2 — SOTA pour visuels avec texte intégré (slogans, baselines,
+    headlines, étiquettes typographiques)."""
+    image_size = _TAILLES_PAR_FORMAT.get(format_, "portrait_4_3")
+    ar_map = {
+        "square_hd": "ASPECT_1_1", "portrait_4_3": "ASPECT_3_4",
+        "portrait_16_9": "ASPECT_9_16", "landscape_4_3": "ASPECT_4_3",
+        "landscape_16_9": "ASPECT_16_9",
+    }
+    payload: dict = {
+        "prompt": prompt[:1000],
+        "aspect_ratio": ar_map.get(image_size, "ASPECT_3_4"),
+        "style": "auto",   # auto | general | realistic | design | render_3d | anime
+        "expand_prompt": False,
+    }
+    if seed is not None:
+        payload["seed"] = seed
+    return await _appel_fal_modele(_FAL_MODEL_IDEOGRAM, payload)
+
+
+async def generer_image_ensemble(
+    prompt: str,
+    format_: str = "portrait_4_3",
+    timeout_s: float = 90.0,
+    seed: Optional[int] = None,
+) -> bytes:
+    """
+    Sprint 1.5 — Ensemble 3 modèles en parallèle :
+      - Flux 1.1 Pro Ultra : photoréaliste cinématique
+      - Recraft v3         : illustrations vectorielles SOTA
+      - Ideogram 2         : intégration texte SOTA
+
+    Sonnet vision picker compare les 3 sorties et choisit la mieux adaptée
+    à l'intention du prompt (photo / illustration / texte+visuel).
+
+    Lève ImageGenError si les 3 échouent. Sinon retourne la meilleure.
+    """
+    api_key = settings.FAL_KEY
+    if not api_key:
+        raise ImageGenNotConfigured("FAL_KEY non configuré")
+
+    flux_t, recraft_t, ideogram_t = await asyncio.gather(
+        _gen_flux_pro_ultra(prompt, format_, seed),
+        _gen_recraft(prompt, format_, seed),
+        _gen_ideogram(prompt, format_, seed),
+        return_exceptions=False,
+    )
+    candidates: list[tuple[str, bytes]] = [
+        (lbl, b) for lbl, b in (
+            ("flux_pro_ultra", flux_t),
+            ("recraft_v3", recraft_t),
+            ("ideogram_v2", ideogram_t),
+        ) if b
+    ]
+    if not candidates:
+        raise ImageGenError("Ensemble : les 3 modèles ont échoué")
+    if len(candidates) == 1:
+        logger.info(f"[image_gen/ensemble] 1 candidat survivant ({candidates[0][0]})")
+        return candidates[0][1]
+
+    # Sonnet vision picker
+    try:
+        from core.ia_client import ia_client
+        scores: dict[str, int] = {}
+        for label, img in candidates:
+            b64 = base64.b64encode(img).decode("ascii")
+            try:
+                rep = await ia_client.analyser_image_vision(
+                    image_base64=b64, mime_type="image/png",
+                    prompt=(
+                        f"Pour le prompt : « {prompt[:300]} »\n\n"
+                        f"Note cette image générée par IA sur 100, en évaluant :\n"
+                        f"  - Qualité technique (résolution, netteté, absence d'artefact)\n"
+                        f"  - Fidélité au prompt (sujet, ambiance, composition demandée)\n"
+                        f"  - Adéquation au type de visuel (photo / illustration / typo)\n"
+                        f"  - Impact pro / niveau Adobe-Canva\n"
+                        f"Réponds par UN SEUL nombre entre 0 et 100. Pas d'explication."
+                    ),
+                )
+                txt = (rep.contenu or "").strip()
+                scores[label] = int("".join(c for c in txt if c.isdigit())[:3] or "0")
+            except Exception as e:
+                logger.debug(f"[image_gen/ensemble] note {label} échouée : {e}")
+                scores[label] = 0
+        best_label = max(scores, key=scores.get)
+        best_img = next(b for lbl, b in candidates if lbl == best_label)
+        logger.info(
+            f"[image_gen/ensemble] picker scores : {scores} → {best_label} sélectionné"
+        )
+        return best_img
+    except Exception as e:
+        logger.debug(f"[image_gen/ensemble] picker fallback (premier) : {e}")
+        return candidates[0][1]
 
 
 async def generer_images_batch(
