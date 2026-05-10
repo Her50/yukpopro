@@ -599,6 +599,7 @@ class ReportWriterPro:
         instruction_utilisateur: Optional[str] = None,
         forcer_recherche_web:  bool = False,
         structure_externe:     Optional[list] = None,
+        tokens_max_output:     Optional[int] = None,
     ) -> dict:
         """
         Génère un rapport professionnel.
@@ -625,6 +626,23 @@ class ReportWriterPro:
         #    template prédéfini → permet une adaptation totale au prompt.
         # 2. _STRUCTURES[type_rapport] : template prédéfini si reconnu.
         # 3. _STRUCTURES["rapport_analyse"] : fallback générique.
+        # Si l'orchestrateur G1 a dimensionné explicitement tokens_max_output,
+        # on adapte le mode pour utiliser le bucket _TOKENS_PAR_MODE le plus
+        # cohérent (la SEULE limite réelle est le solde crédits user, vérifié
+        # plus haut par le pre-check). Permet de servir un livre blanc
+        # 100k tokens même en mode "standard" demandé par défaut.
+        if tokens_max_output and tokens_max_output > 0:
+            if tokens_max_output <= 6000:
+                mode = "flash"
+            elif tokens_max_output <= 16000:
+                mode = "standard"
+            elif tokens_max_output <= 32000:
+                mode = "complet"
+            else:
+                mode = "expert"
+            logger.info(f"[ReportWriter] mode ajusté à '{mode}' pour "
+                        f"tokens_max_output={tokens_max_output}")
+
         if structure_externe and isinstance(structure_externe, list) and len(structure_externe) >= 3:
             structure_brute = [str(s).strip() for s in structure_externe if str(s).strip()]
             # On marque le type comme "custom" pour que le filename / labels reflètent

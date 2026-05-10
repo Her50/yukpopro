@@ -160,9 +160,14 @@ class GenererRapportRequest(BaseModel):
     format_sortie:  str  = Field("docx", description="docx | markdown")
     structure_externe: Optional[list[str]] = Field(default=None,
         description="Sections sur-mesure générées par l'orchestrateur G1 quand "
-                    "aucun template prédéfini ne convient au brief utilisateur. "
-                    "Exemple : ['Préambule', 'Article 1 - Objet', 'Article 2 - "
-                    "Durée', ...]. Override _STRUCTURES si fournie avec ≥ 3 items.")
+                    "aucun template prédéfini ne convient. ≥3 items requis. "
+                    "Pas de plafond arbitraire (jusqu'à 50 sections).")
+    tokens_max_output: Optional[int] = Field(default=None,
+        description="Plafond tokens output dimensionné par l'orchestrateur G1 "
+                    "selon le brief réel (au lieu des valeurs hardcodées des "
+                    "modes flash/standard/complet/expert). 800 = note brève, "
+                    "100000 = mémoire exhaustif. La SEULE vraie limite côté "
+                    "user est son solde crédits.")
 
 
 class GenererSlidesRequest(BaseModel):
@@ -264,6 +269,7 @@ async def generer_rapport(
                 format_sortie=req.format_sortie,
                 instruction_utilisateur=req.sujet,
                 structure_externe=req.structure_externe,
+                tokens_max_output=req.tokens_max_output,
             ),
             timeout=_tmo,
         )
@@ -2669,7 +2675,13 @@ class DemandeOrchestrer(BaseModel):
     type_sortie_force: Optional[str] = Field(default=None,
         description="Force 'rapport' ou 'slides' (sinon auto)")
     mode_force: Optional[str] = Field(default=None,
-        description="Force 'flash' | 'standard' | 'complet' | 'expert'")
+        description="(legacy) Force un mode hardcodé. Préférer 'ambition' libre.")
+    ambition: Optional[str] = Field(default=None,
+        description="Brief libre sur la profondeur attendue. Ex: "
+                    "'court 2 pages', 'exhaustif comme un livre blanc', "
+                    "'détaillé pour conseil d'administration'. Le LLM "
+                    "dimensionne tokens / sections en conséquence — pas de "
+                    "plafond arbitraire de mode (flash/standard/complet/expert).")
 
 
 @router.post("/orchestrer", summary="Sprint G1 — Auto-orchestrateur génération documents")
@@ -2711,6 +2723,13 @@ async def orchestrer_generation_doc(
     if demande.contexte_fichiers:
         ctx = demande.contexte_fichiers[:8000]
         contexte_block = f"\n\nCONTEXTE FICHIERS UPLOADÉS :\n{ctx}\n"
+
+    if demande.ambition:
+        ambition_block = (f"L'utilisateur a précisé : « {demande.ambition} » "
+                          f"— adapte tokens et sections en conséquence.")
+    else:
+        ambition_block = ("Pas d'indication explicite — déduis le "
+                          "dimensionnement du brief lui-même.")
 
     # Phase 3 — Contexte vertical métier (profil + fallback brief si vide)
     bloc_vertical_g1 = ""
@@ -2786,18 +2805,41 @@ REGLES :
    lettres / attestations sortent en type_sortie="rapport" — c'est le
    format DOCX ; le format interne du document est piloté par template_id.)
 
-3. mode ∈ flash (1p, 2min) | standard (5-10p, 5min) | complet (15-40p, 15min) | expert (50-100p, 25min).
-   - flash : urgence ou simplicité explicite
-   - standard : par défaut
-   - complet : "détaillé", "audit", "trimestriel", "annuel", contrats complexes
-   - expert : recherche approfondie, gros volume, statuts complexes multi-associés
-4. format_sortie : "docx" pour rapports/contrats/lettres, "pptx" pour slides,
+3. **dimensionnement libre — tu décides** la profondeur réelle attendue
+   en lisant le brief :
+   - nb_sections_cible : 3 (mémo court) à 30 (livre blanc), selon le besoin réel
+   - tokens_output_estimes : 800 (note rapide) à 100 000 (mémoire exhaustif)
+   - nb_pages_estimees : déduit des tokens (~1 page = ~600 tokens output)
+   Tu N'ES PAS contraint par les anciens modes flash/standard/complet/expert.
+   Tu dimensionnes **librement** selon le brief :
+     • "Note rapide pour réunion"             → 3-5 sections, 800-2000 tokens
+     • "Compte-rendu trimestriel"             → 6-10 sections, 4000-8000 tokens
+     • "Audit comptable annuel détaillé"      → 12-20 sections, 15000-30000 tokens
+     • "Mémoire technique appel d'offres 80p" → 25-30 sections, 50000-90000 tokens
+     • "Convention 2 articles simple"         → 4 sections, 600-1200 tokens
+     • "Statuts SARL OHADA complets"          → 15-25 sections, 8000-20000 tokens
+   La SEULE limite réelle est le solde crédits de l'utilisateur (vérifié plus
+   tard par le backend). Toi tu produis l'estimation honnête.
+4. mode_recommande : déduit-le de tokens_output_estimes :
+   - <= 2000 tokens   → "flash"
+   - <= 8000 tokens   → "standard"
+   - <= 25000 tokens  → "complet"
+   - > 25000 tokens   → "expert"
+   (utilisé uniquement comme alias technique pour le backend, pas comme
+    plafond — la vraie source de vérité = tokens_output_estimes)
+5. format_sortie : "docx" pour rapports/contrats/lettres, "pptx" pour slides,
    "markdown" si demandé explicitement.
-5. langue : ISO court (fr/en/es/pt/ar/de/zh/sw/wo/ha/ln/am/ru/hi/tr) — auto-détection.
-6. parametres_extraits : entités explicites du brief uniquement (parties
+6. langue : ISO court (fr/en/es/pt/ar/de/zh/sw/wo/ha/ln/am/ru/hi/tr) — auto-détection.
+7. parametres_extraits : entités explicites du brief uniquement (parties
    contractantes, dates, montants, lieu, objet, durée, etc.).
-7. credits_estimes : flash=2000, standard=4500, complet=12000, expert=25000.
-8. duree_estimee_secondes : flash=120, standard=300, complet=900, expert=1500.
+8. credits_estimes : calculé à partir des tokens (~1 cr = 5 tokens output) +
+   un overhead sections × 100 cr. Formule simple :
+     credits_estimes = (tokens_output_estimes / 5) + (nb_sections_cible × 100)
+   Ex : 8000 tokens + 8 sections → 1600 + 800 = 2400 cr
+9. duree_estimee_secondes : tokens_output / 100 (Sonnet débite ~100 tok/s)
+   minimum 60s, maximum 1800s.
+
+⚠️ AMBITION UTILISATEUR : {ambition_block}
 
 FORMAT JSON STRICT :
 {{
@@ -2805,14 +2847,16 @@ FORMAT JSON STRICT :
   "type_sortie": "rapport" | "slides",
   "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
   "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
-  "structure_custom": ["Section 1", "Section 2", "..."],  // OBLIGATOIRE si template_id="custom" — 5 à 15 sections concrètes adaptées au brief
-  "mode_recommande": "flash" | "standard" | "complet" | "expert",
+  "structure_custom": ["Section 1", "Section 2", "..."],  // dimensionne LIBREMENT (3 à 30 sections selon le brief), obligatoire si template_id="custom"
+  "tokens_output_estimes": 8000,                          // 800 (note brève) à 100000 (mémoire exhaustif)
+  "nb_pages_estimees": 13,                                // dérivé : tokens_output / 600
+  "mode_recommande": "flash" | "standard" | "complet" | "expert",  // alias backend (≤2000=flash, ≤8000=standard, ≤25000=complet, >25000=expert)
   "format_sortie": "docx" | "pptx" | "markdown",
   "langue": "fr|en|...",
   "parametres_extraits": {{ "nom_entreprise": "...", "periode": "..." }},
-  "credits_estimes": 4500,
-  "duree_estimee_secondes": 300,
-  "raisonnement_court": "Pourquoi ce choix (1 phrase max, en français)"
+  "credits_estimes": 4500,                                // = (tokens_output / 5) + (nb_sections × 100)
+  "duree_estimee_secondes": 80,                           // = max(60, min(1800, tokens_output / 100))
+  "raisonnement_court": "Pourquoi ce dimensionnement (1 phrase max, en français)"
 }}
 
 EXEMPLES de structure_custom (à adapter au brief réel) :
@@ -2879,9 +2923,40 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     if demande.mode_force in _CREDITS_PAR_MODE_G1:
         data["mode_recommande"] = demande.mode_force
 
-    mode_rec = data.get("mode_recommande") or "standard"
-    credits_estimes = max(500, int(data.get("credits_estimes") or _CREDITS_PAR_MODE_G1.get(mode_rec, 4500)))
-    duree_estimee = int(data.get("duree_estimee_secondes") or _DUREE_PAR_MODE_G1.get(mode_rec, 300))
+    # Dimensionnement DYNAMIQUE (le LLM décide) — pas de plafond hardcodé.
+    # On lit en priorité tokens_output_estimes ; on déduit le mode pour
+    # rétrocompatibilité backend, mais c'est tokens qui est la source.
+    tokens_output_est = int(data.get("tokens_output_estimes") or 0)
+    nb_sections_cible = 0
+    sc = data.get("structure_custom")
+    if isinstance(sc, list):
+        nb_sections_cible = len(sc)
+
+    if tokens_output_est <= 0:
+        # Fallback : on utilise mode hardcodé si LLM n'a pas dimensionné.
+        mode_rec_legacy = data.get("mode_recommande") or "standard"
+        tokens_output_est = {
+            "flash": 1500, "standard": 6000, "complet": 18000, "expert": 50000,
+        }.get(mode_rec_legacy, 6000)
+
+    # Déduction du mode_recommande à partir des tokens (alias backend)
+    if tokens_output_est <= 2000:
+        mode_rec = "flash"
+    elif tokens_output_est <= 8000:
+        mode_rec = "standard"
+    elif tokens_output_est <= 25000:
+        mode_rec = "complet"
+    else:
+        mode_rec = "expert"
+
+    # Crédits = formule tokens + sections (jamais de plafond arbitraire)
+    credits_calcules = (tokens_output_est // 5) + (nb_sections_cible * 100)
+    credits_estimes = max(500, int(data.get("credits_estimes") or credits_calcules))
+
+    # Durée estimée = tokens / vitesse Sonnet (~100 tok/s), borné [60, 1800]
+    duree_calculee = max(60, min(1800, tokens_output_est // 100))
+    duree_estimee = int(data.get("duree_estimee_secondes") or duree_calculee)
+
     fcfa_user = int(credits_estimes * 0.6)
     solde_credits = float(restants)
     peut_payer = solde_credits >= credits_estimes
@@ -2905,11 +2980,15 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "type_rapport":  template_id,
             "mode":          mode_rec,
             "format_sortie": data.get("format_sortie") or "docx",
+            # Source de vérité du dimensionnement — sera honoré par
+            # ReportWriterPro plutôt que les valeurs hardcodées des modes.
+            "tokens_max_output": int(tokens_output_est),
         }
         # Si l'orchestrateur a généré une structure sur-mesure (template
-        # custom), on la transmet via le param structure_externe.
+        # custom), on la transmet via le param structure_externe — sans
+        # limite arbitraire de 20 sections (cap technique 50 = safety).
         if template_id == "custom" and isinstance(structure_custom, list) and structure_custom:
-            payload_pret["structure_externe"] = [str(s)[:120] for s in structure_custom][:20]
+            payload_pret["structure_externe"] = [str(s)[:120] for s in structure_custom][:50]
 
     params_extraits = data.get("parametres_extraits") or {}
     if isinstance(params_extraits, dict) and params_extraits:
@@ -2965,4 +3044,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "payload_pret":           payload_pret,
         "raisonnement":           data.get("raisonnement_court") or "",
         "structure_custom":       structure_custom if template_id == "custom" else None,
+        "tokens_output_estimes":  int(tokens_output_est),
+        "nb_pages_estimees":      max(1, int(tokens_output_est) // 600),
+        "nb_sections_cible":      nb_sections_cible or None,
     }
