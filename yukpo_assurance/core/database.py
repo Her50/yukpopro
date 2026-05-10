@@ -1121,6 +1121,37 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 2.1 — Clés API publiques (B2B / intégrations clients) ────────────
+
+
+class ApiKeyDB(Base):
+    """
+    Clés API pour intégration B2B au YukpoPro public API.
+    Chaque clé appartient à une organisation (compagnie_id) et a des scopes
+    + un rate-limit configurable.
+
+    Format clé exposée : `ypro_live_<32 hex chars>` (préfixe identifie env :
+    `live` = prod, `test` = sandbox). On stocke uniquement le HASH SHA-256
+    pour qu'une compromise DB ne révèle aucune clé en clair.
+    """
+    __tablename__ = "api_keys"
+
+    key_id              = Column(String(36), primary_key=True, index=True)
+    compagnie_id        = Column(Integer, nullable=False, index=True)
+    user_id_createur    = Column(Integer, nullable=False)
+    label               = Column(String(120), nullable=False)            # "Site marketing", "ERP integration", ...
+    key_prefix          = Column(String(20), nullable=False, index=True) # "ypro_live_" ou "ypro_test_"
+    key_hash            = Column(String(64), nullable=False, unique=True, index=True)
+    scopes              = Column(JSON, nullable=False, default=list)     # ["designerpro:generate", "designerpro:read", ...]
+    rate_limit_per_hour = Column(Integer, nullable=False, default=100)
+    rate_limit_per_day  = Column(Integer, nullable=False, default=1000)
+    actif               = Column(Boolean, default=True, index=True)
+    cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+    derniere_utilisation = Column(DateTime, nullable=True)
+    revoquee_le         = Column(DateTime, nullable=True)
+    note                = Column(String(500), nullable=True)
+
+
 # ─── Sprint 1.6 — Brand LoRA (Designer Pro) ──────────────────────────────────
 
 
