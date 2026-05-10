@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Optional
 
-from core.ia_client import IAClient, ModeIA, ReponseIA, ia_client
+from core.ia_client import IAClient, ModeIA, ModelePrioritaire, ReponseIA, ia_client
 from config.settings import settings
 
 logger = logging.getLogger("yukpo_assurance.orchestrateur")
@@ -106,6 +106,7 @@ class Orchestrateur:
         # 2. Analyse contextuelle
         complexite = self._detecter_complexite(contexte)
         mode = self._selectionner_mode(contexte.domaine, complexite)
+        modele_force = self._selectionner_modele_force(contexte.domaine, complexite)
 
         # 3. Construction du système prompt métier
         systeme = self._construire_systeme_prompt(contexte.domaine, contexte.role_utilisateur)
@@ -125,6 +126,7 @@ class Orchestrateur:
                 images_b64=images or None,
                 json_attendu=self._json_attendu(contexte.domaine),
                 max_tokens_override=self._max_tokens_domaine(contexte.domaine, contexte.texte),
+                forcer_modele=modele_force,
             )
         except Exception as e:
             self._erreurs += 1
@@ -333,6 +335,26 @@ class Orchestrateur:
         if complexite == NiveauComplexite.SIMPLE:
             return ModeIA.COPILOTE
         return ModeIA.REDACTION
+
+    def _selectionner_modele_force(
+        self, domaine: DomaineMétier, complexite: NiveauComplexite,
+    ) -> Optional[ModelePrioritaire]:
+        """
+        Force la variante LLM selon le domaine + la complexité.
+        Avant : tout passait par le mode → Sonnet par défaut sur tâches REDACTION/ANALYSE.
+        Après : domaines régulateurs (CIMA, FRAUDE) en complexité COMPLEXE forcent Opus 4.7
+        (raisonnement haut de gamme, fallback gpt-4-turbo). OCR reste sur défaut (vision
+        gérée par GPT-4o ailleurs). Domaines simples gardent défaut (économie tokens).
+        """
+        if complexite == NiveauComplexite.COMPLEXE and domaine in (
+            DomaineMétier.CIMA,
+            DomaineMétier.FRAUDE,
+        ):
+            return ModelePrioritaire.CLAUDE_OPUS
+        # Sinistres complexes (multi-pièces, fraude potentielle) : Opus aussi
+        if complexite == NiveauComplexite.COMPLEXE and domaine == DomaineMétier.SINISTRES:
+            return ModelePrioritaire.CLAUDE_OPUS
+        return None
 
     def _enrichir_prompt(self, contexte: ContexteRequete) -> str:
         prompt = contexte.texte
