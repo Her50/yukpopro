@@ -328,6 +328,29 @@ async def render_html_weasyprint(
     }
 
 
+@router.get("/diagnostic", tags=["Bureau — Designer Pro"])
+async def diagnostic_providers(current_user: TokenData = Depends(get_current_user)):
+    """Vérifie quels providers sont configurés en prod."""
+    from config.settings import settings
+    from modules.bureau import replicate_client as rc
+    try:
+        from modules.bureau import infographe_weasyprint as wp
+        weasy_ok = wp.is_available()
+    except Exception:
+        weasy_ok = False
+    try:
+        from core import saml_sso as sso
+        saml_ok = sso.is_available()
+    except Exception:
+        saml_ok = False
+    return {
+        "fal_configured": bool(settings.FAL_KEY),
+        "replicate_configured": rc.is_available(),
+        "weasyprint_available": weasy_ok,
+        "saml_python3_available": saml_ok,
+    }
+
+
 @router.get("/render-html/demo", tags=["Bureau — Designer Pro"])
 async def render_html_demo(
     current_user: TokenData = Depends(get_current_user),

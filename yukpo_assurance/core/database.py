@@ -1121,6 +1121,39 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 2.3 — Approval workflows (Designer Pro) ──────────────────────────
+
+
+class ProjetApprovalDB(Base):
+    """
+    Workflow d'approbation pour un projet Designer Pro généré.
+    États : draft → submitted → approved | rejected → published
+
+    Le projet en lui-même est tracé via DocumentGenereDB (existant). Cette
+    table ajoute la couche workflow pour que les directions marketing puissent
+    valider avant publication client final.
+    """
+    __tablename__ = "projet_approvals"
+
+    approval_id      = Column(String(36), primary_key=True, index=True)
+    compagnie_id     = Column(Integer, nullable=False, index=True)
+    document_id      = Column(Integer, nullable=True, index=True)   # FK soft DocumentGenereDB.id
+    projet_json_id   = Column(String(120), nullable=True, index=True)
+    titre            = Column(String(300), nullable=False)
+    cle_projet       = Column(String(80), nullable=False)
+    user_id_createur = Column(Integer, nullable=False)
+    user_id_approver = Column(Integer, nullable=True)               # qui a approuvé/rejeté
+    statut           = Column(String(30), nullable=False, default="draft", index=True)
+    # draft | submitted | approved | rejected | published | archived
+    note_submission  = Column(Text, nullable=True)                  # message du créateur
+    note_decision    = Column(Text, nullable=True)                  # raison approbation/rejet
+    cree_le          = Column(DateTime, default=datetime.utcnow, nullable=False)
+    soumis_le        = Column(DateTime, nullable=True)
+    decide_le        = Column(DateTime, nullable=True)
+    publie_le        = Column(DateTime, nullable=True)
+    meta             = Column(JSON, nullable=True, default=dict)    # mode_visuel, nb_pages, etc.
+
+
 # ─── Sprint 2.2 — SAML SSO (Identity Provider config par organisation) ───────
 
 
