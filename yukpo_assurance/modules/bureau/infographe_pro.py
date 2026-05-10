@@ -2054,6 +2054,7 @@ async def generer_projet(
     reference_strength: float = 0.65,
     brand_lora_url: Optional[str] = None,        # Sprint 1.6 — URL LoRA fal.ai
     brand_lora_scale: float = 0.85,
+    provider_force: Optional[str] = None,        # "fal" | "replicate" | None (auto)
 ) -> ResultatProjet:
     """
     Pipeline complet : brief + médias → projet IA → (génération images IA si
@@ -2069,9 +2070,13 @@ async def generer_projet(
     """
     medias = msm.resoudre_refs(medias_refs or [], user_id, session_id) if medias_refs else {}
 
-    # Sprint 1.1 — Layout AI (Opus 4.7) actif uniquement en premium/ultra/ultra_plus
-    # (le coût Opus n'est pas justifié sur les modes économiques)
-    layout_ai_active = mode_visuel in ("premium", "ultra", "ultra_plus")
+    # Layout AI (Opus 4.7 / fallback gpt-4-turbo) — composition par page,
+    # variants archétypes, vision picker. Activé sur TOUS les modes visuels
+    # (sauf "sans" — pas de visuel = pas de besoin de directives layout).
+    # Pourquoi : la marge LLM 12× absorbe largement le coût Opus (~50 tokens
+    # output × 0.075$/1M = négligeable vs valeur perçue d'un layout intelligent).
+    # Avant : standard (60% du traffic) ne bénéficiait pas du Layout AI.
+    layout_ai_active = mode_visuel != "sans"
 
     t0 = time.time()
     projet = await generer_projet_depuis_brief(
@@ -2116,6 +2121,7 @@ async def generer_projet(
             reference_strength=reference_strength,
             brand_lora_url=brand_lora_url,
             brand_lora_scale=brand_lora_scale,
+            provider_force=provider_force,
         )
         duree_images_ms = int((time.time() - t_img) * 1000)
 
@@ -2285,6 +2291,7 @@ async def _generer_images_ia_pour_projet(
     reference_strength: float = 0.65,
     brand_lora_url: Optional[str] = None,        # Sprint 1.6 — Brand LoRA
     brand_lora_scale: float = 0.85,
+    provider_force: Optional[str] = None,        # "fal" | "replicate" | None (auto)
 ) -> int:
     """
     Pour chaque zone `image_ia` du projet, génère une image via fal.ai
@@ -2359,6 +2366,7 @@ async def _generer_images_ia_pour_projet(
         reference_strength=reference_strength,
         brand_lora_url=brand_lora_url,
         brand_lora_scale=brand_lora_scale,
+        provider_force=provider_force,
     )
 
     # 5. Validation finale (vision check + 1 retry, modes premium/ultra/ultra_plus)

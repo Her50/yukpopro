@@ -74,6 +74,9 @@ class DemandeProjetPro(BaseModel):
         description="ID d'un Brand LoRA entraîné de l'organisation (mode premium uniquement)")
     brand_lora_scale: float = Field(default=0.85, ge=0.0, le=1.5,
         description="Force d'application du LoRA (0.6=subtil, 1.2=marqué)")
+    provider_force: Optional[str] = Field(default=None,
+        pattern="^(fal|replicate)$",
+        description="Force le provider d'image : 'fal' (rapide) | 'replicate' (≈50× moins cher pour Brand LoRA) | None=auto (fal puis Replicate en fallback)")
 
 
 class DemandeAutoPro(BaseModel):
@@ -88,6 +91,9 @@ class DemandeAutoPro(BaseModel):
     export_cmyk: bool = Field(default=True)
     directives_visuelles: Optional[dict] = None
     mode_visuel: str = Field(default="sans")
+    provider_force: Optional[str] = Field(default=None,
+        pattern="^(fal|replicate)$",
+        description="Force le provider d'image (fal/replicate). None=auto.")
 
 
 class DemandeModifierProjet(BaseModel):
@@ -1732,6 +1738,7 @@ async def generer_projet(
             reference_strength=demande.reference_strength,
             brand_lora_url=lora_url,
             brand_lora_scale=demande.brand_lora_scale,
+            provider_force=demande.provider_force,
         )
     except Exception as e:
         logger.error(f"[Designer Pro] Génération échouée : {e}")
@@ -1873,16 +1880,25 @@ async def generer_projet(
 
 # ── Génération auto (IA choisit le projet) ────────────────────────────────────
 
-DESCRIPTIONS_PROJETS_IA = """\
-- livret_deces_8p : Faire-part décès en livret 8 pages (familles, programme obsèques, plan, souvenirs, hommages)
-- livret_deces_4p : Faire-part décès condensé 4 pages
-- livret_mariage_4p : Faire-part mariage en livret 4 pages plié (invitation, plan, RSVP)
-- carte_mariage_pliee : Carte mariage 4 faces format carte plié 105×148
-- brochure_corporate_4p : Brochure entreprise 4 pages (couverture, services, témoignages, contact)
-- menu_resto_4p : Menu de restaurant 4 pages (couverture, entrées, plats, dos)
-- programme_culte_4p : Programme cérémonie/culte 4 pages (déroulement, chants, lectures)
-- livre_photo_a4_8p : Album photo 8 pages format carré 21×21
-"""
+def _generer_descriptions_projets_ia() -> str:
+    """Construit dynamiquement la liste des projets pour le prompt LLM de routing.
+    Source unique de vérité : `gabarits_livret.PROJETS_INFOGRAPHIE`.
+    Ajouter un projet dans le catalog le rend automatiquement détectable —
+    plus besoin de maintenir une seconde liste hardcodée ici."""
+    from modules.bureau import gabarits_livret as _cat
+    lignes = []
+    for cle, projet in _cat.PROJETS_INFOGRAPHIE.items():
+        label = projet.get("label", cle)
+        desc = projet.get("description", "").strip()
+        nb_pages = len(projet.get("pages", []))
+        suffix = f" ({nb_pages}p)" if nb_pages else ""
+        lignes.append(f"- {cle} : {label}{suffix} — {desc}" if desc else f"- {cle} : {label}{suffix}")
+    return "\n".join(lignes) + "\n"
+
+
+# Conservé comme variable module-level pour compat éventuels imports externes,
+# mais reconstruit à chaque appel d'auto-detect (catalog peut bouger en runtime).
+DESCRIPTIONS_PROJETS_IA = _generer_descriptions_projets_ia()
 
 
 async def _detecter_projet_auto(brief: str, hint: Optional[str] = None,
@@ -1894,7 +1910,7 @@ async def _detecter_projet_auto(brief: str, hint: Optional[str] = None,
 parmi la liste, selon le brief utilisateur.
 
 PROJETS DISPONIBLES :
-{DESCRIPTIONS_PROJETS_IA}
+{_generer_descriptions_projets_ia()}
 
 BRIEF UTILISATEUR :
 \"\"\"{brief[:1500]}\"\"\"
@@ -2555,6 +2571,7 @@ async def generer_auto(
         export_cmyk=demande.export_cmyk,
         directives_visuelles=demande.directives_visuelles,
         mode_visuel=demande.mode_visuel,
+        provider_force=demande.provider_force,
     )
     res = await generer_projet(sub, current_user)
     if isinstance(res, dict):

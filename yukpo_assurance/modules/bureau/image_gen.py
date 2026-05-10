@@ -538,6 +538,7 @@ async def generer_images_batch(
     reference_strength: float = 0.65,
     brand_lora_url: Optional[str] = None,        # Sprint 1.6
     brand_lora_scale: float = 0.85,
+    provider_force: Optional[str] = None,        # "fal" | "replicate" | None
 ) -> list[Optional[bytes]]:
     """
     Génère plusieurs images en parallèle (limit = `concurrence`).
@@ -561,6 +562,7 @@ async def generer_images_batch(
                     reference_strength=reference_strength,
                     brand_lora_url=brand_lora_url,
                     brand_lora_scale=brand_lora_scale,
+                    provider_force=provider_force,
                 )
             except ImageGenNotConfigured:
                 return None
