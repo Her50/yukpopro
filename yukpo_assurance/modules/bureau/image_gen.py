@@ -357,6 +357,93 @@ async def _gen_ideogram(prompt: str, format_: str, seed: Optional[int]) -> Optio
     return await _appel_fal_modele(_FAL_MODEL_IDEOGRAM, payload)
 
 
+# ── ADD-3 — Flux Fill (inpainting + outpainting) ─────────────────────────────
+#
+# Endpoint fal.ai `flux-pro/v1.1-ultra-fill` : remplace une zone masquée d'une
+# image par une nouvelle génération guidée par un prompt textuel. Cas d'usage
+# pro :
+#   - Retoucher un visuel : remplacer un visage, supprimer un objet, changer un
+#     fond, ajouter un élément manquant ("ajoute un logo en haut à droite")
+#   - Outpainting : étendre une image au-delà de ses bords pour passer d'un
+#     format social vers un format print plus large sans recadrer le sujet
+#
+# Coût ~ Flux Pro Ultra. Marge respectée par le pipeline existant (forfait
+# par appel). Paramètres requis :
+#   - image_url   : URL HTTPS publique de l'image source (uploadée préalablement)
+#   - mask_url    : URL HTTPS d'un masque PNG noir/blanc (zones blanches = à
+#                   remplacer ; bords flous tolérés). Si None, full repaint.
+#   - prompt      : description de ce qui doit apparaître dans la zone masquée
+
+_FAL_MODEL_FLUX_FILL = "fal-ai/flux-pro/v1.1-ultra-fill"
+
+
+async def inpaint_flux_fill(
+    image_url: str,
+    prompt: str,
+    mask_url: Optional[str] = None,
+    seed: Optional[int] = None,
+    strength: float = 0.85,
+    timeout_s: float = 90.0,
+) -> Optional[bytes]:
+    """
+    Inpainting / outpainting via Flux Fill Ultra (fal.ai).
+
+    `image_url`  : URL HTTPS de l'image source (PNG/JPEG, ≤ 2K).
+    `mask_url`   : URL HTTPS du masque PNG B/N. Si None, le service tente
+                   une reconstruction "edit-aware" sur tout le visuel.
+    `prompt`     : ce qui doit apparaître dans la zone masquée (langage
+                   naturel ; français OK mais l'anglais donne de meilleurs
+                   résultats avec Flux).
+    `strength`   : 0.0 = ne change rien, 1.0 = remplace complètement.
+
+    Retourne les bytes PNG du résultat ou None si échec.
+    """
+    payload: dict = {
+        "image_url": image_url,
+        "prompt": prompt[:1000],
+        "strength": max(0.0, min(1.0, strength)),
+        "num_inference_steps": 28,
+        "guidance_scale": 3.5,
+    }
+    if mask_url:
+        payload["mask_url"] = mask_url
+    if seed is not None:
+        payload["seed"] = seed
+    return await _appel_fal_modele(_FAL_MODEL_FLUX_FILL, payload, timeout_s=timeout_s)
+
+
+async def outpaint_flux_fill(
+    image_url: str,
+    prompt: str,
+    expand_left: int = 0,
+    expand_right: int = 0,
+    expand_top: int = 0,
+    expand_bottom: int = 0,
+    seed: Optional[int] = None,
+    timeout_s: float = 90.0,
+) -> Optional[bytes]:
+    """
+    Outpainting via Flux Fill : étend l'image dans une ou plusieurs directions
+    en générant le contenu manquant cohérent avec le sujet.
+
+    Cas d'usage : convertir un Insta carré 1080×1080 en bannière LinkedIn
+    1200×627 (étendre gauche+droite, raboter haut+bas via crop).
+    Pixels d'extension >0 (typiquement 256-1024 par direction).
+    """
+    payload: dict = {
+        "image_url": image_url,
+        "prompt": prompt[:1000],
+        "expand_left": int(expand_left),
+        "expand_right": int(expand_right),
+        "expand_top": int(expand_top),
+        "expand_bottom": int(expand_bottom),
+        "num_inference_steps": 28,
+    }
+    if seed is not None:
+        payload["seed"] = seed
+    return await _appel_fal_modele(_FAL_MODEL_FLUX_FILL, payload, timeout_s=timeout_s)
+
+
 async def generer_image_ensemble(
     prompt: str,
     format_: str = "portrait_4_3",
