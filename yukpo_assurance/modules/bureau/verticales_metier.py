@@ -1,24 +1,37 @@
 """
-Phase 3 — Verticales métier.
+Phase 3 — Verticales métier (mondiales, sans RAG figé pour les codes).
 
-Catalogue de connaissances sectorielles injecté dans les prompts orchestrateurs
-(Designer Pro + G1 documents). Le LLM utilise ces données comme **inspiration
-et garde-fous métier**, jamais comme limite stricte.
+Le module définit pour chaque secteur :
+  - mots_cles_metier (détection silencieuse depuis profil.metier/secteur)
+  - sites_officiels_globaux (régulateurs mondiaux + grandes régions —
+    whitelist pour recherche web Serper en temps réel)
+  - templates_inspirations (bibliothèque universelle, PAS une cage)
+  - ton + lexique + couleurs (codes éditoriaux/visuels)
 
-Si le brief user demande quelque chose hors des templates listés → l'IA
-invente un template approprié en se basant sur les conventions du secteur
-(format légal, vocabulaire, références réglementaires).
+⚠️ POLITIQUES NON-NÉGOCIABLES :
 
-Détection vertical = `profil.metier` ou `profil.secteur` (champs existants
-dans ProfilDesigner / ProfilPro). L'utilisateur ne voit JAMAIS de sélecteur
-"choisis une vertical" — c'est dérivé silencieusement de son profil.
+1. **Aucune régionalisation forcée** — l'app sert tout utilisateur au monde.
+   Les sites_officiels listés sont des références GLOBALES (OMS, OIT, BIS,
+   GAFI/FATF, IFRS, ICAO, etc.) ou multi-régionales (OHADA Afrique,
+   EBA/Europe, SEC/USA, MAS/Singapour, FCA/UK…). Le LLM doit AUSSI inférer
+   les régulateurs nationaux selon `profil.pays` (BEAC pour CM, FED pour US,
+   BoE pour UK, RBI pour IN, BCB pour BR, etc.).
 
-5 verticales couvertes :
-  - banque_finance     : banques, micro-crédit, assurance, conseil financier
-  - pharma_sante       : pharmacies, cliniques, hôpitaux, labos
-  - immobilier         : agences immo, promoteurs, syndics
-  - education          : écoles primaires/secondaires, universités, formation
-  - rh_paie            : services RH, cabinets paie, intérim, recrutement
+2. **Aucune réglementation hardcodée** (articles de loi, dates, montants)
+   — ces données évoluent, un RAG figé devient obsolète. Pour citer une
+   référence précise, le LLM doit :
+     a. Lancer une recherche web sur sites officiels (helper
+        `recherche_officielle_metier.chercher_reglementation()`)
+     b. Si rien trouvé → utiliser ses connaissances natives en signalant
+        explicitement "à vérifier sur source officielle"
+     c. Ne JAMAIS inventer un numéro d'article ou une date.
+
+3. **Détection silencieuse** = `profil.metier` + `profil.secteur` + (optionnel)
+   `profil.pays`. L'utilisateur ne voit JAMAIS de sélecteur "choisis une
+   vertical" ou "choisis ton pays".
+
+5 verticales couvertes : banque_finance / pharma_sante / immobilier /
+education / rh_paie. Le LLM s'adapte au contexte pays automatiquement.
 """
 from __future__ import annotations
 
@@ -35,12 +48,28 @@ VERTICALES_METIER: dict[str, dict] = {
             "assurance", "assureur", "courtier", "actuaire", "sinistre", "bilan",
             "audit comptable", "cabinet conseil", "fiduciaire", "expert-comptable",
         ],
-        "regulations": [
-            "CIMA (Conférence Interafricaine des Marchés d'Assurances)",
-            "BEAC / BCEAO (politique monétaire CEMAC/UEMOA)",
-            "OHADA (Acte uniforme comptabilité — SYSCOHADA)",
-            "Bâle III (ratios prudentiels banques)",
-            "GAFI / TRACFIN (lutte blanchiment Afrique)",
+        # Sites officiels GLOBAUX pour recherche web temps réel (Serper).
+        # Le LLM ajoute les régulateurs nationaux selon profil.pays
+        # (FED/SEC US, BoE/FCA UK, ECB/EBA EU, MAS Singapour, BEAC CEMAC,
+        # BCEAO UEMOA, RBI Inde, BCB Brésil, BCRA Argentine, etc.)
+        "sites_officiels_globaux": [
+            "bis.org",          # Bâle, standards prudentiels mondiaux
+            "fatf-gafi.org",    # GAFI lutte blanchiment
+            "imf.org",          # FMI macro
+            "worldbank.org",
+            "ifrs.org",          # standards comptables IFRS
+            "iaisweb.org",       # International Association of Insurance Supervisors
+            "ohada.org",         # Afrique zone OHADA (sous-régional)
+            "cima-afrique.org",  # Assurance CEMAC/UEMOA (sous-régional)
+            "eba.europa.eu",     # European Banking Authority
+            "sec.gov",           # USA
+        ],
+        "domaines_expertise": [
+            "Réglementation prudentielle (Bâle III/IV, ratios capital)",
+            "Comptabilité (IFRS, GAAP US, normes nationales OHADA/SYSCOHADA, etc.)",
+            "Assurance (IAIS mondiale, CIMA Afrique, Solvency II EU, NAIC US)",
+            "Lutte anti-blanchiment (GAFI/FATF, sanctions OFAC/EU)",
+            "Le LLM s'adapte au pays : régulateur national + cadre régional",
         ],
         "templates_inspirations": [
             # Documents internes
@@ -80,12 +109,23 @@ VERTICALES_METIER: dict[str, dict] = {
             "consultation", "patient", "posologie", "principe actif", "DCI",
             "AMM", "OCEAC", "OMS", "OMD",
         ],
-        "regulations": [
-            "OCEAC (Organisation pour la Coordination de la lutte contre les Endémies en Afrique Centrale)",
-            "WHO/OMS guidelines (médicaments essentiels)",
-            "Liste des médicaments essentiels nationale (LME)",
-            "Code de déontologie médicale (Ordre des Médecins)",
-            "Pharmacopée africaine (médicaments traditionnels)",
+        "sites_officiels_globaux": [
+            "who.int", "fda.gov", "ema.europa.eu",
+            "ich.org",            # International Council on Harmonisation
+            "pharmacopeia.cn",    # USP/Pharmacopeia
+            "edqm.eu",            # European Pharmacopoeia
+            "ansm.sante.fr",      # France
+            "mhra.gov.uk",        # UK
+            "pmda.go.jp",         # Japon
+            "afro.who.int",       # OMS Afrique
+            "oceac.org",          # CEMAC
+        ],
+        "domaines_expertise": [
+            "AMM (FDA US, EMA Europe, AFMPS BE, MHRA UK, PMDA JP, ANSM FR, AMA nationale)",
+            "Protocoles cliniques OMS et guidelines régionales",
+            "Pharmacopées (USP, Eur.Ph., JP, BP, pharmacopée nationale)",
+            "Listes médicaments essentiels nationales",
+            "Le LLM identifie le régulateur pertinent selon profil.pays",
         ],
         "templates_inspirations": [
             # Documents médicaux
@@ -124,11 +164,20 @@ VERTICALES_METIER: dict[str, dict] = {
             "location", "vente", "achat", "loyer", "notaire", "cadastre", "titre foncier",
             "OHADA droit foncier", "loi camerounaise immobilier",
         ],
-        "regulations": [
-            "OHADA (Acte uniforme sociétés commerciales — SCI)",
-            "Code foncier national (Cameroun, Sénégal, Côte d'Ivoire selon pays)",
-            "Loi sur les baux à usage d'habitation (durée, dépôt garantie, état des lieux)",
-            "Réglementation copropriété (charges, assemblée générale)",
+        "sites_officiels_globaux": [
+            "ohada.org",        # Afrique zone OHADA
+            "fiabci.org",       # Fédération internationale des professions immobilières
+            "uli.org",          # Urban Land Institute (référence US/global)
+            "rics.org",         # Royal Institution of Chartered Surveyors (UK/global)
+            "fnaim.fr",         # France (best practices francophones)
+            "nar.realtor",      # National Association of Realtors USA
+        ],
+        "domaines_expertise": [
+            "Droit foncier (OHADA Afrique, Code civil français, Common law UK/US, etc.)",
+            "Baux d'habitation/commercial (durée, garanties, charges) — varie par pays",
+            "Copropriété (régimes nationaux différents)",
+            "Mandats et déontologie (RICS, NAR, FNAIM, etc.)",
+            "Le LLM s'adapte au cadre juridique du pays user",
         ],
         "templates_inspirations": [
             # Documents légaux
@@ -165,11 +214,22 @@ VERTICALES_METIER: dict[str, dict] = {
             "BAC", "BEPC", "CEP", "BEP", "BTS", "licence", "master",
             "MINESEC", "MINESUP", "MINEDUB",
         ],
-        "regulations": [
-            "MINEDUB / MINESEC / MINESUP (ministères Cameroun)",
-            "Programmes officiels nationaux",
-            "Système d'évaluation (notation /20 ou /100 selon pays)",
-            "OHADA pour établissements privés (statuts SCI ou GIC)",
+        "sites_officiels_globaux": [
+            "unesco.org",
+            "oecd.org",                    # OCDE éducation, PISA
+            "iau-aiu.net",                 # International Assoc. of Universities
+            "ed.gov",                      # US Dept of Education
+            "education.gouv.fr",           # France
+            "gov.uk/government/organisations/department-for-education",  # UK
+            "minedub.cm",                  # Cameroun (exemple)
+        ],
+        "domaines_expertise": [
+            "Programmes officiels nationaux (variant par pays — Common Core US, "
+            "Programmes EN UK, MINEDUB Cameroun, etc.)",
+            "Systèmes d'évaluation (notation /20 FR, GPA US, A-Level UK, etc.)",
+            "Diplômes officiels (équivalences via NARIC/CAMES/UNESCO)",
+            "Statuts établissements (publics/privés — varie par pays)",
+            "Le LLM identifie le système éducatif selon profil.pays",
         ],
         "templates_inspirations": [
             # Documents scolaires
@@ -211,12 +271,23 @@ VERTICALES_METIER: dict[str, dict] = {
             "prime de transport", "13e mois", "congés payés",
             "OIT", "code du travail",
         ],
-        "regulations": [
-            "Code du travail national (Cameroun loi n°92/007, Sénégal, Côte d'Ivoire selon pays)",
-            "CNPS (Cotisations sociales)",
-            "OIT (Organisation Internationale du Travail) — conventions ratifiées",
-            "OHADA (statuts sociétés employeuses)",
-            "Convention collective sectorielle (banque, BTP, hôtellerie, etc.)",
+        "sites_officiels_globaux": [
+            "ilo.org",                     # OIT (référence mondiale)
+            "shrm.org",                    # Society for Human Resource Mgmt (US/global)
+            "cipd.co.uk",                  # CIPD (UK)
+            "service-public.fr",           # France droit du travail
+            "dol.gov",                     # US Dept of Labor
+            "gov.uk/topic/employing-people",  # UK
+            "ohada.org",                   # OHADA Afrique
+            "cnps.cm",                     # exemple caisse sociale
+        ],
+        "domaines_expertise": [
+            "Code du travail (variant par pays — Code FR, FLSA US, ERA UK, "
+            "loi nationale Afrique CEMAC/UEMOA, etc.)",
+            "Cotisations sociales (régimes nationaux)",
+            "Conventions OIT ratifiées",
+            "Conventions collectives sectorielles (par pays)",
+            "Le LLM identifie le cadre juridique selon profil.pays",
         ],
         "templates_inspirations": [
             # Contrats et avenants
@@ -288,7 +359,8 @@ def descripteur_vertical_pour_llm(vertical_key: str) -> dict:
     return {
         "vertical": vertical_key,
         "label": vert["label"],
-        "regulations_cles": vert.get("regulations", [])[:5],
+        "domaines_expertise": vert.get("domaines_expertise", []),
+        "sites_officiels_globaux": vert.get("sites_officiels_globaux", [])[:10],
         "templates_inspirations": vert.get("templates_inspirations", [])[:25],
         "ton_recommande": vert.get("ton_recommande", ""),
         "lexique_prefere": vert.get("lexique_prefere", []),
@@ -298,35 +370,46 @@ def descripteur_vertical_pour_llm(vertical_key: str) -> dict:
     }
 
 
-def construire_bloc_prompt_vertical(vertical_key: Optional[str]) -> str:
+def construire_bloc_prompt_vertical(
+    vertical_key: Optional[str],
+    pays: Optional[str] = None,
+) -> str:
     """
     Bloc texte à injecter dans les prompts orchestrateurs (Designer Pro + G1).
 
-    PHILOSOPHIE NON-NÉGOCIABLE : ce contexte est une BIBLIOTHÈQUE d'inspirations
-    et de garde-fous métier, PAS une limite. Le LLM doit s'en servir pour gagner
-    en pertinence, mais s'autoriser à inventer un template/format hors catalogue
-    si le besoin user le justifie.
+    PHILOSOPHIE NON-NÉGOCIABLE :
+    1. BIBLIOTHÈQUE d'inspirations + garde-fous, JAMAIS une cage.
+    2. App MONDIALE : le LLM s'adapte au `pays` user (régulateur national,
+       cadre juridique, conventions).
+    3. AUCUN article/date/montant hardcodé : pour citer une référence précise,
+       le LLM lance une recherche web (helper `recherche_officielle_metier`)
+       ou signale "à vérifier sur source officielle".
     """
     if not vertical_key:
         return ""
     desc = descripteur_vertical_pour_llm(vertical_key)
     if not desc:
         return ""
+    pays_ctx = f" (pays user : {pays})" if pays else ""
     return f"""
 ═══════════════════════════════════════════════════
-  CONTEXTE MÉTIER — {desc['label']}
+  CONTEXTE MÉTIER — {desc['label']}{pays_ctx}
 ═══════════════════════════════════════════════════
 Le profil utilisateur indique qu'il travaille dans ce secteur. Utilise ces
 connaissances comme INSPIRATION + GARDE-FOUS — JAMAIS comme limite.
 
 Si l'utilisateur demande un format/document HORS de la liste ci-dessous,
-INVENTE-LE en respectant les conventions du secteur (réglementations,
-vocabulaire, ton). Le catalogue est une bibliothèque, pas une cage.
+INVENTE-LE en respectant les conventions du secteur. Le catalogue est une
+bibliothèque, pas une cage.
 
-⚖️ Réglementations à respecter / mentionner si pertinent :
-{chr(10).join(f"  - {r}" for r in desc['regulations_cles'])}
+🌍 Domaines d'expertise sectoriels (mondiaux, à adapter au pays user) :
+{chr(10).join(f"  - {d}" for d in desc['domaines_expertise'])}
 
-📚 Templates fréquents (inspirations, ne pas s'y limiter) :
+🔗 Sites officiels GLOBAUX pour citer une source (recherche web possible
+   via outil dédié — JAMAIS de citation d'article/date/montant inventée) :
+{chr(10).join(f"  - {s}" for s in desc['sites_officiels_globaux'])}
+
+📚 Templates fréquents (inspirations universelles, à adapter au pays) :
 {chr(10).join(f"  - {t}" for t in desc['templates_inspirations'])}
 
 🗣️ Ton attendu : {desc['ton_recommande']}
@@ -338,8 +421,20 @@ vocabulaire, ton). Le catalogue est une bibliothèque, pas une cage.
    Couleurs : {desc['couleurs_typiques']}
    Polices : {desc['polices_typiques']}
 
-RAPPEL : si l'user demande quelque chose qui n'est PAS dans la liste de
-templates ci-dessus, ne refuse PAS — invente le template approprié sur la
-base des conventions du secteur. Sois créatif dans le respect des règles
-métier.
+═══ RÈGLES NON-NÉGOCIABLES ═══
+
+1. **Pays user** = adapte les références au cadre juridique national :
+   - profil.pays connu → cite régulateur/code/loi du pays + sources officielles
+     nationales en plus des sites globaux ci-dessus
+   - profil.pays inconnu → reste générique mondial, n'invente AUCUNE
+     référence nationale
+
+2. **Aucune fabrication de réference** : si tu cites un article de loi, une
+   date, un montant, un taux → c'est SOIT issu d'une recherche web
+   officielle (signaler la source), SOIT marqué "à vérifier sur source
+   officielle". Tu ne fabriques JAMAIS un numéro d'article ni une date.
+
+3. **Hors catalogue ≠ refus** : si l'user demande quelque chose qui n'est
+   PAS dans la liste de templates, INVENTE-le sur la base des conventions
+   du secteur. Sois créatif dans le respect des règles métier.
 """

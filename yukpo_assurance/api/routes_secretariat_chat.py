@@ -95,7 +95,7 @@ async def chat_unifie_message(
         # Fallback : redaction (la plupart des plans secrétariat ont accès)
         autorise, plan, _ = await verifier_acces_module(current_user.user_id, "redaction")
 
-    # Phase 3 — Contexte vertical métier (lu silencieusement depuis profil)
+    # Phase 3 — Contexte vertical métier + pays (silencieux, mondial)
     bloc_vertical_sec = ""
     try:
         from core.database import async_session_maker as _asm
@@ -105,9 +105,10 @@ async def chat_unifie_message(
             profil_obj, _ = await _get_profil(current_user.user_id, _db)
         metier = getattr(profil_obj, "metier", None) or ""
         secteur = getattr(profil_obj, "secteur_activite", None) or ""
+        pays_user = getattr(profil_obj, "pays", None) or demande.pays or None
         vk = _vm.detecter_vertical(metier, secteur)
         if vk:
-            bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(vk)
+            bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(vk, pays=pays_user)
     except Exception:
         pass
 
@@ -268,6 +269,82 @@ async def chat_unifie_message(
         raison=str(data.get("raison", ""))[:300], routage=routage,
         suggestion_questions=(data.get("suggestion_questions") or [])[:3],
     )
+
+
+# ─── Phase 3 — Recherche officielle temps réel (sites mondiaux) ──────────────
+
+
+class DemandeRechercheOfficielle(BaseModel):
+    question: str = Field(..., min_length=5, max_length=500,
+        description="Question réglementaire/métier (ex: 'délai de préavis CDI', 'AMM antibiotique', 'durée bail commercial')")
+    vertical: Optional[str] = Field(default=None,
+        description="banque_finance | pharma_sante | immobilier | education | rh_paie. Si null, auto-détection profil.")
+    pays: Optional[str] = Field(default=None, max_length=3,
+        description="Code ISO 3166-1 alpha-2 du pays user (CM, FR, US, IN, BR…). Si null, profil utilisé.")
+
+
+@router.post("/recherche-officielle", tags=["Secrétariat — Chat Unifié"])
+async def recherche_officielle_endpoint(
+    demande: DemandeRechercheOfficielle,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 3 — Recherche web officielle temps réel par vertical métier.
+    Pas de RAG figé. Utilise Serper.dev sur sites officiels mondiaux + nationaux
+    selon vertical et pays.
+
+    Retourne {sources_trouvees, extraits, raison_echec}.
+    Si SERPER_API_KEY absent → raison_echec explicite, le LLM bascule sur ses
+    connaissances natives en signalant "à vérifier".
+    """
+    from modules.bureau import (
+        recherche_officielle_metier as _rom,
+        verticales_metier as _vm,
+    )
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, debiter_forfait,
+    )
+
+    # Vertical : explicite ou détecté depuis profil
+    vert_key = demande.vertical
+    pays = demande.pays
+    if not vert_key or not pays:
+        try:
+            from core.database import async_session_maker as _asm
+            from modules.pro.service_profil import get_or_create as _get_profil
+            async with _asm() as _db:
+                profil_obj, _ = await _get_profil(current_user.user_id, _db)
+            if not vert_key:
+                vert_key = _vm.detecter_vertical(
+                    getattr(profil_obj, "metier", "") or "",
+                    getattr(profil_obj, "secteur_activite", "") or "",
+                )
+            if not pays:
+                pays = getattr(profil_obj, "pays", None)
+        except Exception:
+            pass
+
+    autorise, plan, _ = await verifier_acces_module(current_user.user_id, "documents")
+    if not autorise:
+        raise HTTPException(403, "Module documents non autorisé")
+
+    result = await _rom.chercher_reglementation(
+        question=demande.question, vertical=vert_key, pays=pays,
+    )
+
+    # Débit léger (1 FCFA = 20 cr) — couvre 1 appel Serper (~$0.001)
+    try:
+        await debiter_forfait(current_user.user_id, "document_download",
+                              module="documents", multiplicateur=1.0)
+    except Exception:
+        pass
+
+    return {
+        "ok": result.get("raison_echec") is None,
+        "vertical_utilisee": vert_key,
+        "pays_utilise": pays,
+        **result,
+    }
 
 
 # ─── Phase 3 — Diagnostic verticales métier ──────────────────────────────────

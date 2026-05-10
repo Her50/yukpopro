@@ -2684,7 +2684,7 @@ async def orchestrer_generation_doc(
         ctx = demande.contexte_fichiers[:8000]
         contexte_block = f"\n\nCONTEXTE FICHIERS UPLOADÉS :\n{ctx}\n"
 
-    # Phase 3 — Contexte vertical métier depuis profil.metier (silencieux)
+    # Phase 3 — Contexte vertical métier depuis profil.metier + pays (silencieux, mondial)
     bloc_vertical_g1 = ""
     try:
         from modules.pro.service_profil import get_or_create as _get_profil
@@ -2693,9 +2693,10 @@ async def orchestrer_generation_doc(
             profil_obj, _ = await _get_profil(current_user.user_id, _db)
         metier = getattr(profil_obj, "metier", None) or ""
         secteur = getattr(profil_obj, "secteur_activite", None) or ""
+        pays_user = getattr(profil_obj, "pays", None) or None
         vk = _vm.detecter_vertical(metier, secteur)
         if vk:
-            bloc_vertical_g1 = _vm.construire_bloc_prompt_vertical(vk)
+            bloc_vertical_g1 = _vm.construire_bloc_prompt_vertical(vk, pays=pays_user)
     except Exception:
         pass
 

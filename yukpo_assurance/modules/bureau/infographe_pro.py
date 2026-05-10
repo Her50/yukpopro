@@ -1405,13 +1405,13 @@ async def _decider_layout_avec_opus(
 
         profil = profil or {}
         dv = directives_visuelles or {}
-        # Phase 3 — Contexte vertical métier injecté pour Opus
+        # Phase 3 — Contexte vertical métier injecté pour Opus (mondial)
         bloc_vert_opus = ""
         try:
             from . import verticales_metier as _vm
             vk = _vm.detecter_vertical(profil.get("metier"), profil.get("secteur"))
             if vk:
-                bloc_vert_opus = _vm.construire_bloc_prompt_vertical(vk)
+                bloc_vert_opus = _vm.construire_bloc_prompt_vertical(vk, pays=pays)
         except Exception:
             pass
 
@@ -1766,15 +1766,16 @@ async def generer_projet_depuis_brief(
     densite_texte = _pct("densite_texte", 50)
     importance_images = _pct("importance_images", 50)
     elegance = _pct("elegance", 50)
-    # Phase 3 — Contexte vertical métier (banque/pharma/immo/edu/HR)
-    # Détecté silencieusement depuis profil.metier/secteur. Le LLM utilise
-    # ce contexte comme inspiration + garde-fous, JAMAIS comme limite stricte.
+    # Phase 3 — Contexte vertical métier (mondial, pas de RAG figé)
+    # Détecté silencieusement depuis profil.metier/secteur. Le LLM s'adapte au
+    # pays user (régulateur national + cadre juridique). Pour références
+    # précises, recherche web officielle (helper recherche_officielle_metier).
     bloc_vertical = ""
     try:
         from . import verticales_metier as _vm
         vert_key = _vm.detecter_vertical(metier, profil.get("secteur"))
         if vert_key:
-            bloc_vertical = _vm.construire_bloc_prompt_vertical(vert_key)
+            bloc_vertical = _vm.construire_bloc_prompt_vertical(vert_key, pays=pays)
     except Exception:
         pass
 
