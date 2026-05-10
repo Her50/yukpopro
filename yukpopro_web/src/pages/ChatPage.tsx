@@ -230,11 +230,49 @@ export const ChatPage = () => {
             Math.max(120_000, (orch.duree_estimee_secondes || 120) * 1000 + 60_000),
           );
           const reqConf = { timeout: timeoutMs };
-          const r: any = method === "POST"
+          let r: any = method === "POST"
             ? (await http.post(url, payload, reqConf)).data
             : method === "PUT"
               ? (await http.put(url, payload, reqConf)).data
               : (await http.get(url, { params: payload, ...reqConf })).data;
+
+          // ── Mode async (job_id + polling) — ex: Freeform avec Flux Pro Ultra
+          // qui prend 30-90s. Le backend retourne immédiatement {async:true,
+          // job_id, status_url}. On poll toutes les 4s jusqu'à done|failed.
+          if (r && r.async === true && r.job_id && r.status_url) {
+            const startTime = Date.now();
+            const maxWaitMs = 600_000;   // 10 min max
+            const pollIntervalMs = 4_000;
+            const statusUrl = r.status_url.startsWith("/api/v1/")
+              ? r.status_url.slice("/api/v1".length)
+              : r.status_url;
+            // Affichage transitoire dans le chat
+            updateLastAssistantMessage(
+              `⏳ Génération en cours (qualité photoréaliste Flux Pro Ultra) — typiquement 30-90s…`,
+              null, undefined, null, undefined, undefined,
+            );
+            while (Date.now() - startTime < maxWaitMs) {
+              await new Promise(res => setTimeout(res, pollIntervalMs));
+              try {
+                const poll: any = (await http.get(statusUrl, { timeout: 30_000 })).data;
+                const st = poll?.statut;
+                if (st === "done") { r = poll; break; }
+                if (st === "failed") {
+                  throw new Error(poll?.erreur || "Génération échouée");
+                }
+                // running/pending → continue polling
+              } catch (pollErr: any) {
+                // Erreur 404 = job expiré (TTL 1h) ou timeout réseau ponctuel
+                if (pollErr?.response?.status === 404) {
+                  throw new Error("Job introuvable (expiré ?)");
+                }
+                // Sinon on retente au tour suivant
+              }
+            }
+            if (r?.async === true) {
+              throw new Error("Polling timeout 10min — réessaye plus tard");
+            }
+          }
 
           // Extraction générique du fichier depuis la réponse.
           // Essai 1 : réponses multi-pages (Designer Pro projets)
