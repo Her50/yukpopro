@@ -49,6 +49,19 @@ function detecterTypeFichier(file: File): Attachment['type'] {
   return 'autre'
 }
 
+// Téléchargement direct d'un fichier base64 (DOCX, PDF). Utilisé pour les
+// résultats OCR/Audio/Rédaction qui renvoient word_base64 dans la réponse.
+function b64download(b64: string, filename: string, mime: string) {
+  const bytes = atob(b64)
+  const arr = new Uint8Array(bytes.length)
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i)
+  const blob = new Blob([arr], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function ChatUnifieSec() {
   const { t } = useTranslation()
   const [message, setMessage] = useState('')
@@ -110,8 +123,14 @@ export default function ChatUnifieSec() {
 
     switch (intent) {
       case 'redaction': {
+        // Backend /bureau/redaction/generer attend {type_doc, informations,
+        // pays, mode, reformuler_texte}. Pas de "brief" ni "langue". Default
+        // type_doc='lettre' (intent classifier ne sous-classe pas encore).
         const r = await redactionAPI.generer({
-          type_doc: 'auto', brief: msg, pays: 'CM', langue: 'fr',
+          type_doc: 'lettre',
+          informations: { description: msg },
+          pays: 'CM',
+          mode: 'standard',
         })
         return { type: 'document', data: r.data }
       }
@@ -120,15 +139,22 @@ export default function ChatUnifieSec() {
         if (!imageAtt) throw new Error('Image attendue mais absente')
         const fd = new FormData()
         fd.append('fichier', imageAtt.file)
+        // export_word=true → on récupère word_base64 + fichier_id pour
+        // proposer un téléchargement DOCX dans le chat.
+        if (intent === 'ocr_image') fd.append('export_word', 'true')
         const r = intent === 'ocr_manuscrit'
           ? await ocrAPI.manuscrit(fd) : await ocrAPI.scanner(fd)
-        return { type: 'ocr', data: r.data }
+        return { type: 'ocr', data: r.data, sub_intent: intent }
       }
       case 'audio_transcrire': {
         if (!audioAtt) throw new Error('Audio attendu mais absent')
+        // Backend /bureau/audio/transcrire attend "fichier" (UploadFile) et
+        // "type_document_cible" (Form, default "dictee"). Le chat enregistre
+        // une dictée → on garde "dictee" qui produit un document Word formaté.
         const fd = new FormData()
-        fd.append('audio', audioAtt.file)
-        fd.append('type_doc', 'transcription')
+        fd.append('fichier', audioAtt.file)
+        fd.append('type_document_cible', 'dictee')
+        fd.append('pays', 'CM')
         const r = await audioAPI.transcrire(fd)
         return { type: 'audio', data: r.data }
       }
@@ -171,6 +197,9 @@ export default function ChatUnifieSec() {
         if (!pdfAtt) throw new Error('PDF/DOCX attendu mais absent')
         const fd = new FormData()
         fd.append('fichier', pdfAtt.file)
+        fd.append('langue_source', 'auto')
+        // Langue cible par défaut anglais — l'intent classifier ne l'extrait
+        // pas encore. L'utilisateur peut préciser dans un message suivant.
         fd.append('langue_cible', 'en')
         const r = await traductionAPI.traduireFichier(fd)
         return { type: 'traduction_fichier', data: r.data }
@@ -259,40 +288,78 @@ export default function ChatUnifieSec() {
     if (!result) return null
     const t_ = result.type
     if (t_ === 'document' || t_ === 'redaction') {
+      // Backend /bureau/redaction/generer renvoie {titre, contenu_markdown,
+      // type_doc, prix_fcfa, nb_mots, a_fichier_word, fichier_id}.
+      const titre = result.data?.titre || 'Document'
+      const md = result.data?.contenu_markdown || ''
+      const wordB64 = result.data?.word_base64
       return (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2 space-y-1">
-          <p className="text-xs font-bold text-amber-900">📄 Document rédigé</p>
-          {result.data?.texte_genere && (
+          <p className="text-xs font-bold text-amber-900">📄 {titre}</p>
+          {md && (
             <pre className="text-[11px] text-gray-700 whitespace-pre-wrap max-h-64 overflow-auto bg-white rounded p-2 border border-amber-100">
-              {result.data.texte_genere.slice(0, 2000)}
+              {md.slice(0, 2000)}
             </pre>
           )}
-          {result.data?.fichier_id && (
-            <a href={`/api/v1/bureau/redaction/fichier/${result.data.fichier_id}`}
-              className="text-xs text-amber-700 hover:underline inline-flex items-center gap-1">
-              <Download size={12} /> Télécharger
-            </a>
+          {wordB64 && (
+            <button onClick={() => b64download(wordB64, `${titre.replace(/\s+/g, '_')}.docx`,
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document')}
+              className="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+              <Download size={12} /> Télécharger .docx
+            </button>
           )}
         </div>
       )
     }
     if (t_ === 'ocr') {
+      // Backend /bureau/ocr/{scanner|manuscrit} renvoie {texte_brut,
+      // texte_structure, type_document, confiance, fichier_id, word_base64}.
+      const texte = result.data?.texte_structure || result.data?.texte_brut || ''
+      const wordB64 = result.data?.word_base64
+      const conf = result.data?.confiance
       return (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-2 space-y-1">
-          <p className="text-xs font-bold text-blue-900">🔍 Texte extrait (OCR)</p>
+          <p className="text-xs font-bold text-blue-900">
+            🔍 Texte extrait (OCR){typeof conf === 'number' ? ` — ${Math.round(conf * 100)}%` : ''}
+          </p>
           <pre className="text-[11px] text-gray-700 whitespace-pre-wrap max-h-64 overflow-auto bg-white rounded p-2 border border-blue-100">
-            {(result.data?.texte_extrait || result.data?.texte || '').slice(0, 2000)}
+            {texte.slice(0, 2000)}
           </pre>
+          {wordB64 && (
+            <button onClick={() => b64download(wordB64, 'document-ocr.docx',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document')}
+              className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+              <Download size={12} /> Télécharger .docx
+            </button>
+          )}
         </div>
       )
     }
     if (t_ === 'audio') {
+      // Backend /bureau/audio/transcrire renvoie {transcription_brute,
+      // document_formate, type_document, duree_secondes, fichier_id, word_base64}.
+      const docFormate = result.data?.document_formate || ''
+      const brut = result.data?.transcription_brute || ''
+      const wordB64 = result.data?.word_base64
       return (
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 mt-2 space-y-1">
           <p className="text-xs font-bold text-purple-900">🎤 Transcription</p>
           <pre className="text-[11px] text-gray-700 whitespace-pre-wrap max-h-64 overflow-auto bg-white rounded p-2 border border-purple-100">
-            {(result.data?.transcription || result.data?.texte || '').slice(0, 2000)}
+            {(docFormate || brut).slice(0, 2000)}
           </pre>
+          {wordB64 && (
+            <button onClick={() => b64download(wordB64, 'transcription.docx',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document')}
+              className="inline-flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+              <Download size={12} /> Télécharger .docx
+            </button>
+          )}
+          {brut && docFormate && brut !== docFormate && (
+            <details className="text-[10px] text-gray-500 mt-1">
+              <summary className="cursor-pointer">Transcription brute</summary>
+              <pre className="text-[10px] text-gray-600 whitespace-pre-wrap mt-1 p-1 italic">{brut.slice(0, 1500)}</pre>
+            </details>
+          )}
         </div>
       )
     }
@@ -323,29 +390,63 @@ export default function ChatUnifieSec() {
       )
     }
     if (t_ === 'traduction') {
+      // Backend /bureau/traduction/texte renvoie {texte_traduit,
+      // nb_mots_source, nb_mots_cible, langue_source, langue_cible, fichier_id}.
+      const traduit = result.data?.texte_traduit || ''
+      const lc = result.data?.langue_cible || ''
       return (
         <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-3 mt-2 space-y-1">
-          <p className="text-xs font-bold text-cyan-900">🌍 Traduction</p>
+          <p className="text-xs font-bold text-cyan-900">
+            🌍 Traduction{lc ? ` → ${lc.toUpperCase()}` : ''}
+          </p>
           <pre className="text-[11px] text-gray-700 whitespace-pre-wrap max-h-64 overflow-auto bg-white rounded p-2 border border-cyan-100">
-            {(result.data?.traduction || result.data?.texte || '').slice(0, 2000)}
+            {traduit.slice(0, 2000)}
           </pre>
+          {result.data?.fichier_id && (
+            <button onClick={() => telechargerTraductionDocx(result.data.fichier_id)}
+              className="inline-flex items-center gap-1 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+              <Download size={12} /> Télécharger .docx
+            </button>
+          )}
         </div>
       )
     }
     if (t_ === 'traduction_fichier') {
+      const lc = result.data?.langue_cible || ''
       return (
         <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-3 mt-2 space-y-1">
-          <p className="text-xs font-bold text-cyan-900">🌍 Fichier traduit</p>
+          <p className="text-xs font-bold text-cyan-900">
+            🌍 Fichier traduit{lc ? ` → ${lc.toUpperCase()}` : ''}
+          </p>
+          {result.data?.texte_traduit && (
+            <pre className="text-[11px] text-gray-700 whitespace-pre-wrap max-h-48 overflow-auto bg-white rounded p-2 border border-cyan-100">
+              {result.data.texte_traduit.slice(0, 1500)}
+            </pre>
+          )}
           {result.data?.fichier_id && (
-            <a href={`/api/v1/bureau/traduction/fichier/${result.data.fichier_id}`}
-              className="text-xs text-cyan-700 hover:underline inline-flex items-center gap-1">
+            <button onClick={() => telechargerTraductionDocx(result.data.fichier_id)}
+              className="inline-flex items-center gap-1 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
               <Download size={12} /> Télécharger la traduction
-            </a>
+            </button>
           )}
         </div>
       )
     }
     return null
+  }
+
+  // Helper auth-aware : récupère le DOCX traduit via l'API client (qui injecte
+  // le Bearer token) puis déclenche un download depuis le Blob obtenu.
+  const telechargerTraductionDocx = async (fichierId: string) => {
+    try {
+      const r = await traductionAPI.telecharger(fichierId)
+      const url = URL.createObjectURL(r.data as Blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = fichierId.split('/').pop() || 'traduction.docx'
+      a.click(); URL.revokeObjectURL(url)
+    } catch (e: any) {
+      toast.error(e?.message || 'Téléchargement échoué')
+    }
   }
 
   // Re-injecte une suggestion dans le textarea + relance (UX YPro)
