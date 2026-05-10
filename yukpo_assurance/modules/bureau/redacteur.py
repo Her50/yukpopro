@@ -516,6 +516,53 @@ def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) 
     doc = Document()
     meta = meta or {}
 
+    # ── ADD-1 — Styles custom Yukpo Quote / Callout / Caption (Big4) ──────
+    try:
+        from docx.shared import RGBColor as _RGB
+        from docx.enum.style import WD_STYLE_TYPE
+        if "Yukpo Quote" not in doc.styles:
+            qstyle = doc.styles.add_style("Yukpo Quote", WD_STYLE_TYPE.PARAGRAPH)
+            qstyle.font.italic = True
+            qstyle.font.color.rgb = _RGB(0x4a, 0x5a, 0x6a)
+            qstyle.font.size = Pt(11)
+            qstyle.paragraph_format.left_indent = Cm(1)
+            qstyle.paragraph_format.right_indent = Cm(1)
+            qstyle.paragraph_format.space_before = Pt(8)
+            qstyle.paragraph_format.space_after = Pt(8)
+            ppr_q = qstyle.element.get_or_add_pPr()
+            pbdr = OxmlElement("w:pBdr")
+            left_b = OxmlElement("w:left")
+            left_b.set(qn("w:val"), "single"); left_b.set(qn("w:sz"), "12")
+            left_b.set(qn("w:space"), "8"); left_b.set(qn("w:color"), "1d4ed8")
+            pbdr.append(left_b); ppr_q.append(pbdr)
+        if "Yukpo Callout" not in doc.styles:
+            cstyle = doc.styles.add_style("Yukpo Callout", WD_STYLE_TYPE.PARAGRAPH)
+            cstyle.font.size = Pt(10.5)
+            cstyle.font.color.rgb = _RGB(0x14, 0x2a, 0x4a)
+            cstyle.paragraph_format.space_before = Pt(8)
+            cstyle.paragraph_format.space_after = Pt(8)
+            ppr_c = cstyle.element.get_or_add_pPr()
+            shd = OxmlElement("w:shd")
+            shd.set(qn("w:val"), "clear"); shd.set(qn("w:color"), "auto")
+            shd.set(qn("w:fill"), "E8F0FA")
+            ppr_c.append(shd)
+            pbdr2 = OxmlElement("w:pBdr")
+            for side in ("top", "left", "bottom", "right"):
+                b = OxmlElement(f"w:{side}")
+                b.set(qn("w:val"), "single"); b.set(qn("w:sz"), "4")
+                b.set(qn("w:space"), "4"); b.set(qn("w:color"), "B0CDE6")
+                pbdr2.append(b)
+            ppr_c.append(pbdr2)
+        if "Yukpo Caption" not in doc.styles:
+            cap = doc.styles.add_style("Yukpo Caption", WD_STYLE_TYPE.PARAGRAPH)
+            cap.font.italic = True
+            cap.font.size = Pt(9.5)
+            cap.font.color.rgb = _RGB(0x66, 0x77, 0x88)
+            cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cap.paragraph_format.space_after = Pt(8)
+    except Exception:
+        pass
+
     # ── Polices pro (TOP 5) — Calibri / Calibri Light comme Big4. ─────────
     try:
         normal = doc.styles["Normal"]
@@ -652,23 +699,71 @@ def _markdown_vers_docx(markdown: str, titre: str, meta: Optional[dict] = None) 
 
     doc.add_page_break()
 
-    # ── Corps Markdown → DOCX ──────────────────────────────────────────────
-    for ligne in markdown.split("\n"):
-        ligne = ligne.rstrip()
+    # ── Corps Markdown → DOCX (handlers Quote/Callout ADD-1) ──────────────
+    lignes_md = markdown.split("\n")
+    i = 0
+    while i < len(lignes_md):
+        ligne = lignes_md[i].rstrip()
         if not ligne:
             doc.add_paragraph("")
+            i += 1
             continue
         if ligne.startswith("### "):
             doc.add_heading(ligne[4:], level=3)
+            i += 1
         elif ligne.startswith("## "):
             doc.add_heading(ligne[3:], level=2)
+            i += 1
         elif ligne.startswith("# "):
             doc.add_heading(ligne[2:], level=1)
+            i += 1
+        elif ligne.lstrip().startswith("> "):
+            quote_lines = []
+            while i < len(lignes_md) and lignes_md[i].lstrip().startswith("> "):
+                quote_lines.append(lignes_md[i].lstrip()[2:].rstrip())
+                i += 1
+            try:
+                doc.add_paragraph(" ".join(quote_lines), style="Yukpo Quote")
+            except KeyError:
+                p_q = doc.add_paragraph(" ".join(quote_lines))
+                for r_q in p_q.runs:
+                    r_q.italic = True
+        elif ligne.startswith("!!! "):
+            rest = ligne[4:].strip()
+            label, _, body = rest.partition(":")
+            body_lines = [body.strip()] if body else [label.strip()]
+            i += 1
+            while i < len(lignes_md) and lignes_md[i].startswith("    "):
+                body_lines.append(lignes_md[i].strip())
+                i += 1
+            try:
+                doc.add_paragraph(" ".join(body_lines), style="Yukpo Callout")
+            except KeyError:
+                doc.add_paragraph(" ".join(body_lines))
         elif ligne.startswith("- ") or ligne.startswith("* "):
             doc.add_paragraph(ligne[2:], style="List Bullet")
+            i += 1
         else:
             para = doc.add_paragraph()
             _ajouter_run_gras(para, ligne)
+            i += 1
+
+    # ── ADD-1 — Bloc signature en fin (placeholder destinataire/expéditeur) ─
+    # Standard administratif : ligne signature + libellé "Signature et cachet".
+    # Pour une lettre/attestation/certificat, c'est le marqueur de pro qui
+    # manquait. Pas de "Fait le ..." ici (déjà dans la page de garde via date).
+    try:
+        doc.add_paragraph()
+        p_sig = doc.add_paragraph()
+        p_sig.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        r_line = p_sig.add_run("\n_______________________________")
+        r_line.font.size = Pt(10)
+        p_sig_lab = doc.add_paragraph()
+        p_sig_lab.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        r_lab = p_sig_lab.add_run("Signature et cachet")
+        r_lab.italic = True; r_lab.font.size = Pt(9)
+    except Exception:
+        pass
 
     buf = io.BytesIO()
     doc.save(buf)
