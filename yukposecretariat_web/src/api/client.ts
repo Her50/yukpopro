@@ -274,6 +274,16 @@ export const infographieProAPI = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => api.post('/bureau/infographie-pro/orchestrer', data, { timeout: 60_000 }),
+  // Sprint UX3 — Bulk CSV/XLSX
+  bulkAnalyser: (formData: FormData) =>
+    api.post('/bureau/infographie-pro/bulk/analyser', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60_000,
+    }),
+  bulkLancer: (data: {
+    rows: any[]; template_brief: string; mapping: Record<string, string>;
+    cle_projet: string; mode_visuel?: string; pays?: string; langue?: string;
+    accepter_cout: boolean;
+  }) => api.post('/bureau/infographie-pro/bulk/lancer', data, { timeout: 600_000 }),
   // Sprint 1.6 — Brand LoRA
   brandLoraList: () => api.get('/bureau/infographie-pro/brand-lora'),
   brandLoraTrain: (data: {

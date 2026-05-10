@@ -1073,6 +1073,16 @@ export const infographieProApi = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => (await http.post("/bureau/infographie-pro/orchestrer", payload, { timeout: 60_000 })).data,
+  // Sprint UX3 — Bulk CSV/XLSX
+  bulkAnalyser: async (formData: FormData) =>
+    (await http.post("/bureau/infographie-pro/bulk/analyser", formData, {
+      headers: { "Content-Type": "multipart/form-data" }, timeout: 60_000,
+    })).data,
+  bulkLancer: async (payload: {
+    rows: any[]; template_brief: string; mapping: Record<string, string>;
+    cle_projet: string; mode_visuel?: string; pays?: string; langue?: string;
+    accepter_cout: boolean;
+  }) => (await http.post("/bureau/infographie-pro/bulk/lancer", payload, { timeout: 600_000 })).data,
   // Sprint 1.6 — Brand LoRA (training par organisation)
   brandLoraList: async () =>
     (await http.get("/bureau/infographie-pro/brand-lora")).data,

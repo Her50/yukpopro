@@ -14,6 +14,7 @@ Endpoints :
   POST   /api/v1/bureau/infographie-pro/modifier              — Modif projet existant via instructions
   GET    /api/v1/bureau/infographie-pro/projet/{projet_id}    — Récupère JSON projet (pour édition)
 """
+import asyncio
 import base64
 import json
 import logging
@@ -93,6 +94,169 @@ class DemandeModifierProjet(BaseModel):
     pays: str = Field(default="CM")
     directives_visuelles: Optional[dict] = None
     mode_visuel: str = Field(default="sans")
+
+
+# ─── Sprint UX3 — Bulk generation depuis CSV/XLSX ────────────────────────────
+
+
+@router.post("/bulk/analyser", tags=["Bureau — Designer Pro"])
+async def bulk_analyser(
+    fichier: UploadFile = File(...),
+    cle_projet_hint: Optional[str] = Form(default=None),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Sprint UX3 — Analyse un CSV/XLSX uploadé : parse + propose mapping LLM +
+    template_brief + cle_projet recommandée + estimation coût.
+
+    Pas de génération à ce stade — l'utilisateur valide avant de lancer.
+    """
+    from modules.bureau import bulk_generation as bg
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm,
+    )
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    contenu = await fichier.read()
+    if len(contenu) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Fichier trop gros (>10 MB). Splitter en plusieurs fichiers.")
+    fmt = bg.detecter_format(fichier.filename or "", contenu)
+    try:
+        if fmt == "xlsx":
+            rows = bg.parser_xlsx(contenu)
+        else:
+            rows = bg.parser_csv(contenu)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if not rows:
+        raise HTTPException(400, "Aucune ligne valide détectée dans le fichier")
+
+    headers = list(rows[0].keys())
+    mapping_data = await bg.proposer_mapping_llm(headers, rows[:3], cle_projet_hint)
+
+    # Débit LLM mapping (small Haiku call)
+    if mapping_data.get("_tokens_in") or mapping_data.get("_tokens_out"):
+        try:
+            await debiter_llm(
+                current_user.user_id, modele=mapping_data.get("_modele", "default"),
+                tokens_input=int(mapping_data.get("_tokens_in") or 0),
+                tokens_output=int(mapping_data.get("_tokens_out") or 0),
+                module="infographie",
+            )
+        except Exception:
+            pass
+
+    cle_projet = mapping_data.get("cle_projet_recommande", "carte_visite")
+    estimation = await bg.estimer_cout_total(len(rows), "standard", cle_projet)
+
+    return {
+        "ok": True,
+        "format_detecte": fmt,
+        "nb_lignes": len(rows),
+        "headers": headers,
+        "sample_rows": rows[:3],
+        "mapping": mapping_data.get("mapping") or {},
+        "template_brief": mapping_data.get("template_brief") or "",
+        "cle_projet_recommande": cle_projet,
+        "champs_manquants": mapping_data.get("champs_obligatoires_manquants") or [],
+        "raison_ia": mapping_data.get("raison", ""),
+        "estimation_cout": estimation,
+        # Token clé pour ré-utiliser les rows sans re-uploader (cache mémoire ou redis)
+        # Pour shipping minimal : on retourne les rows complètes dans la réponse,
+        # le frontend les renverra au /bulk/lancer.
+        "rows_complete": rows,
+    }
+
+
+class DemandeBulkLancer(BaseModel):
+    rows: list[dict] = Field(..., description="Lignes complètes du CSV (renvoyées par /bulk/analyser)")
+    template_brief: str = Field(..., min_length=10)
+    mapping: dict = Field(..., description="{placeholder: nom_colonne_csv}")
+    cle_projet: str
+    mode_visuel: str = Field(default="standard")
+    pays: str = Field(default="CM")
+    langue: str = Field(default="fr")
+    accepter_cout: bool = Field(default=False)
+
+
+@router.post("/bulk/lancer", tags=["Bureau — Designer Pro"])
+async def bulk_lancer(
+    demande: DemandeBulkLancer,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Lance la génération bulk : pour chaque ligne, remplit le template_brief
+    + appelle generer_projet en parallèle (concurrence=4). Stream les résultats
+    via réponse JSON simple (pas de SSE pour l'instant).
+
+    ⚠️ Bloque si nb_lignes > 50 — au-delà, recommander un job async (futur Sprint UX3b).
+    """
+    from modules.bureau import bulk_generation as bg
+    from modules.bureau.infographe_pro import generer_projet
+    from modules.bureau.service_credits_bureau import verifier_acces_module, verifier_solde
+
+    if not demande.accepter_cout:
+        raise HTTPException(400, "Tu dois cocher 'accepter_cout' (estimation reçue via /bulk/analyser)")
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    if len(demande.rows) > 50:
+        raise HTTPException(400,
+            f"Bulk synchrone limité à 50 lignes (reçu {len(demande.rows)}). "
+            "Pour plus, contactez support pour activation du mode async.")
+
+    sem = asyncio.Semaphore(bg.MAX_CONCURRENCE)
+    session_id = f"bulk_{int(time.time())}_{current_user.user_id}"
+
+    async def _gen_une(i: int, row: dict) -> dict:
+        async with sem:
+            brief_individuel = bg.remplir_template(
+                demande.template_brief, row, demande.mapping,
+            )
+            try:
+                res = await generer_projet(
+                    brief=brief_individuel, cle_projet=demande.cle_projet,
+                    user_id=str(current_user.user_id), session_id=session_id,
+                    pays=demande.pays, langue=demande.langue,
+                    export_cmyk=True, mode_visuel=demande.mode_visuel,
+                )
+                ts = int(time.time())
+                artefacts = _persister_projet_pro(
+                    current_user.user_id, demande.cle_projet, ts + i, res,
+                )
+                return {
+                    "index": i, "statut": "done",
+                    "download_url": artefacts.get("download_url"),
+                    "pdf_id": artefacts.get("pdf_id"),
+                    "brief": brief_individuel[:300],
+                    "row": row,
+                }
+            except Exception as e:
+                return {"index": i, "statut": "failed", "erreur": str(e)[:300],
+                        "brief": brief_individuel[:300], "row": row}
+
+    import asyncio as _asyncio2
+    results = await _asyncio2.gather(*(_gen_une(i, r) for i, r in enumerate(demande.rows)))
+    nb_done = sum(1 for r in results if r["statut"] == "done")
+    nb_failed = sum(1 for r in results if r["statut"] == "failed")
+
+    return {
+        "ok": True,
+        "total": len(results),
+        "nb_done": nb_done,
+        "nb_failed": nb_failed,
+        "session_id": session_id,
+        "results": results,
+    }
 
 
 # ─── Sprint 1.4 — WeasyPrint render (HTML/CSS3 → PDF) ────────────────────────

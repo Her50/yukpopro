@@ -990,7 +990,9 @@
     "catReferenceStyle": "🎨 Référence style",
     "advanced": "Options avancées",
     "advancedHint": "— format, mode visuel, sliders, langue/pays",
-    "briefHint": "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ."
+    "briefHint": "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ.",
+    "bulkTitle": "Génération bulk depuis CSV/XLSX",
+    "bulkSub": "Uploade un CSV/XLSX (≤50 lignes). Yukpo détecte le mapping et génère N visuels personnalisés."
   },
   "organisation": {
     "createTitle": "Organisation erstellen",

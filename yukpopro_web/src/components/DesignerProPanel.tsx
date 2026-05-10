@@ -85,6 +85,15 @@ export default function DesignerProPanel() {
   // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
   const [showAdvanced, setShowAdvanced] = useState(false)
 
+  // Sprint UX3 — Bulk CSV
+  const [showBulk, setShowBulk] = useState(false)
+  const [bulkAnalysing, setBulkAnalysing] = useState(false)
+  const [bulkLaunching, setBulkLaunching] = useState(false)
+  const [bulkAnalysis, setBulkAnalysis] = useState<any | null>(null)
+  const [bulkAccepter, setBulkAccepter] = useState(false)
+  const [bulkResults, setBulkResults] = useState<any | null>(null)
+  const bulkFileRef = useRef<HTMLInputElement>(null)
+
   // Sprint 1.6b — Brand LoRA UI
   const [showLoraPanel, setShowLoraPanel] = useState(false)
   const [showLoraForm, setShowLoraForm] = useState(false)
@@ -259,6 +268,43 @@ export default function DesignerProPanel() {
       const el = document.querySelector('textarea')
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 200)
+  }
+
+  // Sprint UX3 — Bulk CSV : analyse
+  const bulkAnalyser = async () => {
+    const f = bulkFileRef.current?.files?.[0]
+    if (!f) { toast.error('Sélectionne un fichier CSV ou XLSX'); return }
+    setBulkAnalysing(true); setBulkAnalysis(null); setBulkResults(null); setBulkAccepter(false)
+    try {
+      const fd = new FormData()
+      fd.append('fichier', f)
+      const r = await infographieProApi.bulkAnalyser(fd)
+      setBulkAnalysis(r)
+      toast.success(`${r.nb_lignes} ligne(s) analysée(s) — vérifie & lance`)
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || e?.message || 'Analyse échouée')
+    } finally { setBulkAnalysing(false) }
+  }
+
+  const bulkLancer = async () => {
+    if (!bulkAnalysis) return
+    if (!bulkAccepter) { toast.error('Confirme le coût estimé pour lancer'); return }
+    setBulkLaunching(true); setBulkResults(null)
+    try {
+      const r = await infographieProApi.bulkLancer({
+        rows: bulkAnalysis.rows_complete || [],
+        template_brief: bulkAnalysis.template_brief,
+        mapping: bulkAnalysis.mapping,
+        cle_projet: bulkAnalysis.cle_projet_recommande,
+        mode_visuel: 'standard',
+        pays, langue,
+        accepter_cout: true,
+      })
+      setBulkResults(r)
+      toast.success(`Bulk terminé : ${r.nb_done}/${r.total} OK`)
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || e?.message || 'Bulk échoué')
+    } finally { setBulkLaunching(false) }
   }
 
   // Sprint 1.6b — Lance training Brand LoRA
@@ -632,6 +678,119 @@ export default function DesignerProPanel() {
                     {loraTraining ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
                     Lancer l'entraînement
                   </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Sprint UX3 — Bulk CSV (collapsible) ────────────────────────── */}
+      <div className={CARD}>
+        <button onClick={() => setShowBulk(v => !v)} type="button"
+          className="w-full flex items-center justify-between text-left">
+          <p className="text-sm font-bold text-gray-800 flex items-center gap-2">
+            📊 {t('designerPro.bulkTitle', 'Génération bulk depuis CSV/XLSX')}
+            <span className="text-[10px] bg-amber-100 text-amber-700 rounded px-1.5 py-0.5 font-normal">
+              50 visuels max
+            </span>
+          </p>
+          <ChevronDown size={16} className={`text-gray-400 transition-transform ${showBulk ? 'rotate-180' : ''}`} />
+        </button>
+        {showBulk && (
+          <div className="space-y-3">
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              {t('designerPro.bulkSub', "Uploade un CSV/XLSX (≤50 lignes, ≤10 MB). Yukpo détecte le mapping colonnes → visuel et génère N visuels personnalisés en parallèle.")}
+            </p>
+
+            {!bulkAnalysis && (
+              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+                <input ref={bulkFileRef} type="file" accept=".csv,.xlsx,.xlsm,.tsv,.txt"
+                  className="flex-1 min-w-0 text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer" />
+                <button onClick={bulkAnalyser} disabled={bulkAnalysing}
+                  className="shrink-0 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
+                  {bulkAnalysing ? <Loader2 size={13} className="animate-spin" /> : '🔍'}
+                  Analyser
+                </button>
+              </div>
+            )}
+
+            {bulkAnalysis && (
+              <div className="space-y-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <p className="text-xs font-bold text-amber-900">
+                    {bulkAnalysis.nb_lignes} ligne(s) · {bulkAnalysis.format_detecte.toUpperCase()}
+                  </p>
+                  <span className="text-[10px] bg-white border border-amber-200 rounded px-2 py-0.5 font-mono text-amber-700">
+                    {bulkAnalysis.cle_projet_recommande}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800">{bulkAnalysis.raison_ia}</p>
+                <div className="text-[11px] text-gray-700">
+                  <p className="font-semibold">Template brief auto-détecté :</p>
+                  <code className="block bg-white border border-amber-200 rounded px-2 py-1 mt-0.5 text-[10px] break-words">
+                    {bulkAnalysis.template_brief}
+                  </code>
+                </div>
+                <div className="text-[11px] text-gray-700">
+                  <p className="font-semibold">Mapping colonnes → champs :</p>
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {Object.entries(bulkAnalysis.mapping || {}).map(([k, v]) => (
+                      <span key={k} className="text-[10px] bg-white border border-amber-200 rounded px-1.5 py-0.5">
+                        <b>{k}</b> ← {String(v)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {Array.isArray(bulkAnalysis.champs_manquants) && bulkAnalysis.champs_manquants.length > 0 && (
+                  <div className="text-[10px] bg-orange-50 border border-orange-200 rounded px-2 py-1 text-orange-800">
+                    ⚠ Champs manquants : {bulkAnalysis.champs_manquants.join(', ')}
+                  </div>
+                )}
+                <div className="text-[11px] bg-white border border-amber-200 rounded-lg px-2 py-1.5">
+                  <p className="font-semibold">💰 Estimation coût :</p>
+                  <p>≈ <b>{bulkAnalysis.estimation_cout?.credits_total} crédits</b> (~{bulkAnalysis.estimation_cout?.fcfa_total} FCFA),
+                  durée ≈ {bulkAnalysis.estimation_cout?.duree_estimee_sec}s</p>
+                </div>
+                <label className="flex items-start gap-2 cursor-pointer text-xs">
+                  <input type="checkbox" checked={bulkAccepter}
+                    onChange={e => setBulkAccepter(e.target.checked)} className="mt-0.5" />
+                  <span>J'accepte le coût estimé ci-dessus pour générer {bulkAnalysis.nb_lignes} visuels.</span>
+                </label>
+                <div className="flex gap-2">
+                  <button onClick={() => { setBulkAnalysis(null); setBulkAccepter(false) }}
+                    type="button" className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs py-2 rounded-xl">
+                    Annuler
+                  </button>
+                  <button onClick={bulkLancer}
+                    disabled={bulkLaunching || !bulkAccepter}
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-semibold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5">
+                    {bulkLaunching ? <Loader2 size={13} className="animate-spin" /> : '🚀'}
+                    Générer les {bulkAnalysis.nb_lignes} visuels
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {bulkResults && (
+              <div className="space-y-1 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                <p className="text-xs font-bold text-emerald-900">
+                  ✓ Bulk terminé : {bulkResults.nb_done}/{bulkResults.total} OK · {bulkResults.nb_failed} échec(s)
+                </p>
+                <div className="max-h-48 overflow-y-auto space-y-0.5">
+                  {bulkResults.results?.map((r: any) => (
+                    <div key={r.index} className="text-[10px] bg-white border border-emerald-200 rounded px-2 py-1 flex items-center gap-2">
+                      <span className={`text-[9px] font-bold px-1 rounded ${
+                        r.statut === 'done' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>{r.statut}</span>
+                      <span className="font-mono text-gray-600">#{r.index + 1}</span>
+                      <span className="flex-1 truncate text-gray-700">{r.brief?.slice(0, 80)}</span>
+                      {r.download_url && (
+                        <a href={r.download_url} target="_blank" rel="noreferrer"
+                          className="text-amber-600 hover:underline shrink-0">PDF ↗</a>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
