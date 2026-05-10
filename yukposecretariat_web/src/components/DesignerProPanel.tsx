@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Wand2, Upload, Trash2, Image as ImageIcon, Download, MessageSquare, Sparkles } from 'lucide-react'
+import { Loader2, Wand2, Upload, Trash2, Image as ImageIcon, Download, MessageSquare, Sparkles, Brush } from 'lucide-react'
+import InpaintPicker from './InpaintPicker'
 import toast from 'react-hot-toast'
 import { infographieProAPI } from '../api/client'
 import { CountryPicker } from './CountryPicker'
@@ -115,6 +116,9 @@ export default function DesignerProPanel() {
 
   // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
   const [showAdvanced, setShowAdvanced] = useState(false)
+
+  // PUSH-4 — Inpaint picker (Flux Fill)
+  const [showInpaint, setShowInpaint] = useState(false)
 
   // Sprint L1.4 — Multilingual
   const [showMultilingual, setShowMultilingual] = useState(false)
@@ -768,6 +772,22 @@ export default function DesignerProPanel() {
             )}
           </div>
         )}
+      </div>
+
+      {/* ── PUSH-4 — Inpaint picker Flux Fill (retouche par zone masquée) ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-3">
+        <button onClick={() => setShowInpaint(v => !v)} type="button"
+          className="w-full flex items-center justify-between text-left">
+          <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+            <Brush size={15} className="text-fuchsia-600" />
+            Retouche par zone (Flux Fill — inpainting)
+            <span className="text-[10px] bg-fuchsia-100 text-fuchsia-700 rounded px-1.5 py-0.5 font-normal">
+              NEW
+            </span>
+          </p>
+          <span className={`text-gray-400 transition-transform ${showInpaint ? 'rotate-180' : ''}`}>▾</span>
+        </button>
+        {showInpaint && <InpaintPicker />}
       </div>
 
       {/* ── Sprint UX3 — Bulk CSV (Sec) ────────────────────────────────── */}

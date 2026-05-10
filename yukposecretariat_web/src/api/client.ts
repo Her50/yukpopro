@@ -340,6 +340,20 @@ export const infographieProAPI = {
   }) => api.post('/bureau/infographie-pro/brand-lora/entrainer', data, { timeout: 60_000 }),
   brandLoraDelete: (lora_id: string) =>
     api.delete(`/bureau/infographie-pro/brand-lora/${lora_id}`),
+  // PUSH-3 — Flux Fill : inpainting (zone masquée) + outpainting (extension)
+  inpaint: (data: {
+    image_url?: string; image_b64?: string;
+    mask_url?: string;  mask_b64?: string;
+    prompt: string; strength?: number; seed?: number;
+    accepter_cout: boolean;
+  }) => api.post('/bureau/infographie-pro/inpaint', data, { timeout: 120_000 }),
+  outpaint: (data: {
+    image_url?: string; image_b64?: string;
+    prompt: string;
+    expand_left?: number; expand_right?: number;
+    expand_top?: number;  expand_bottom?: number;
+    seed?: number; accepter_cout: boolean;
+  }) => api.post('/bureau/infographie-pro/outpaint', data, { timeout: 120_000 }),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────

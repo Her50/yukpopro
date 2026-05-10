@@ -2738,11 +2738,21 @@ async def lire_projet_json(
 # ("change la couleur du logo en doré", "ajoute une plante en bas à droite",
 # "convertis ce flyer A5 carré en bannière LinkedIn 16:9").
 
+def _to_data_uri(b64: str, mime: str = "image/png") -> str:
+    """Convertit du base64 brut en data URI pour fal.ai (qui accepte les 2)."""
+    payload = b64.split(",", 1)[-1] if "," in b64 else b64
+    return f"data:{mime};base64,{payload}"
+
+
 class DemandeInpaint(BaseModel):
-    image_url: str = Field(..., min_length=10,
-        description="URL HTTPS publique de l'image source (PNG/JPEG, ≤ 2K)")
+    image_url: Optional[str] = Field(default=None,
+        description="URL HTTPS publique de l'image source. Alternative : image_b64.")
+    image_b64: Optional[str] = Field(default=None,
+        description="PNG/JPEG en base64 (avec ou sans préfixe data:). Si fourni, prioritaire sur image_url.")
     mask_url: Optional[str] = Field(default=None,
-        description="URL HTTPS du masque PNG noir/blanc (zones blanches = à remplacer). Si None, full repaint guidé.")
+        description="URL HTTPS du masque PNG (zones blanches = à remplacer). Alternative : mask_b64.")
+    mask_b64: Optional[str] = Field(default=None,
+        description="Masque PNG en base64. Si fourni, prioritaire sur mask_url.")
     prompt: str = Field(..., min_length=3,
         description="Description de ce qui doit apparaître dans la zone masquée")
     strength: float = Field(default=0.85, ge=0.0, le=1.0,
@@ -2753,7 +2763,9 @@ class DemandeInpaint(BaseModel):
 
 
 class DemandeOutpaint(BaseModel):
-    image_url: str = Field(..., min_length=10)
+    image_url: Optional[str] = Field(default=None)
+    image_b64: Optional[str] = Field(default=None,
+        description="PNG/JPEG en base64. Prioritaire sur image_url si fourni.")
     prompt: str = Field(..., min_length=3,
         description="Description de ce qui doit prolonger l'image dans les zones étendues")
     expand_left: int = Field(default=0, ge=0, le=2048)
@@ -2787,9 +2799,14 @@ async def inpaint(
     if not ok_solde:
         raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
 
+    img_src = _to_data_uri(demande.image_b64) if demande.image_b64 else demande.image_url
+    msk_src = _to_data_uri(demande.mask_b64) if demande.mask_b64 else demande.mask_url
+    if not img_src:
+        raise HTTPException(400, "image_url OU image_b64 requis")
+
     png_bytes = await inpaint_flux_fill(
-        image_url=demande.image_url, prompt=demande.prompt,
-        mask_url=demande.mask_url, seed=demande.seed, strength=demande.strength,
+        image_url=img_src, prompt=demande.prompt,
+        mask_url=msk_src, seed=demande.seed, strength=demande.strength,
     )
     if not png_bytes:
         raise HTTPException(502, "Flux Fill indisponible (FAL_KEY absent ou échec API)")
@@ -2838,8 +2855,12 @@ async def outpaint(
         raise HTTPException(400,
             "Au moins une direction d'extension > 0 requise (expand_left/right/top/bottom)")
 
+    img_src = _to_data_uri(demande.image_b64) if demande.image_b64 else demande.image_url
+    if not img_src:
+        raise HTTPException(400, "image_url OU image_b64 requis")
+
     png_bytes = await outpaint_flux_fill(
-        image_url=demande.image_url, prompt=demande.prompt,
+        image_url=img_src, prompt=demande.prompt,
         expand_left=demande.expand_left, expand_right=demande.expand_right,
         expand_top=demande.expand_top, expand_bottom=demande.expand_bottom,
         seed=demande.seed,
