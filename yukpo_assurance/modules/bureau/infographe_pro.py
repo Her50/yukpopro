@@ -1406,12 +1406,20 @@ async def _decider_layout_avec_opus(
         profil = profil or {}
         dv = directives_visuelles or {}
         # Phase 3 — Contexte vertical métier injecté pour Opus (mondial)
+        # Verticalité DYNAMIQUE LLM : couvre TOUS les secteurs du monde,
+        # pas limité aux 5 SEED. Cache Redis 7j.
         bloc_vert_opus = ""
         try:
             from . import verticales_metier as _vm
-            vk = _vm.detecter_vertical(profil.get("metier"), profil.get("secteur"))
-            if vk:
-                bloc_vert_opus = _vm.construire_bloc_prompt_vertical(vk, pays=pays)
+            descripteur_vert = await _vm.detecter_vertical_dynamique_llm(
+                metier=profil.get("metier"),
+                secteur=profil.get("secteur"),
+                pays=pays,
+            )
+            if descripteur_vert:
+                bloc_vert_opus = _vm.construire_bloc_prompt_vertical(
+                    pays=pays, descripteur=descripteur_vert,
+                )
         except Exception:
             pass
 
@@ -1915,17 +1923,21 @@ async def generer_projet_depuis_brief(
     densite_texte = _pct("densite_texte", 50)
     importance_images = _pct("importance_images", 50)
     elegance = _pct("elegance", 50)
-    # Phase 3 — Contexte vertical métier (mondial, pas de RAG figé)
-    # 1. Profil.metier/secteur d'abord (rapide)
-    # 2. Si profil vide → fallback Haiku depuis brief (refinement Phase 3+)
+    # Phase 3 — Contexte vertical métier MONDIAL DYNAMIQUE
+    # detecter_vertical_dynamique_llm couvre TOUS les secteurs (5 SEED +
+    # composition Sonnet pour le reste). Cache Redis 7j par
+    # (metier, secteur, pays). Fallback brief si profil vide.
     bloc_vertical = ""
     try:
         from . import verticales_metier as _vm
-        vert_key = _vm.detecter_vertical(metier, profil.get("secteur"))
-        if not vert_key and brief:
-            vert_key = await _vm.detecter_vertical_depuis_brief(brief)
-        if vert_key:
-            bloc_vertical = _vm.construire_bloc_prompt_vertical(vert_key, pays=pays)
+        descripteur_vert = await _vm.detecter_vertical_dynamique_llm(
+            metier=metier, secteur=profil.get("secteur"),
+            pays=pays, brief=brief,
+        )
+        if descripteur_vert:
+            bloc_vertical = _vm.construire_bloc_prompt_vertical(
+                pays=pays, descripteur=descripteur_vert,
+            )
     except Exception:
         pass
 

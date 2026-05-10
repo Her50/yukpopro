@@ -108,6 +108,7 @@ from api.routes_bureau_slides import router as bureau_slides_router
 from api.routes_bureau_video import router as bureau_video_router
 from api.routes_bureau_gdrive import router as bureau_gdrive_router
 from api.routes_marketplace import router as marketplace_router
+from api.routes_bureau_library import router as bureau_library_router
 from api.routes_bureau_ocr import router as bureau_ocr_router
 from api.routes_bureau_audio import router as bureau_audio_router
 from api.routes_bureau_infographie import router as bureau_infographie_router
@@ -813,6 +814,7 @@ app.include_router(bureau_slides_router,      prefix="/api/v1/bureau/slides",   
 app.include_router(bureau_video_router,       prefix="/api/v1/bureau/video",       tags=["Secrétariat — Vidéo IA"])
 app.include_router(bureau_gdrive_router,      prefix="/api/v1/bureau/gdrive",      tags=["Secrétariat — Google Drive"])
 app.include_router(marketplace_router,        prefix="/api/v1/marketplace",        tags=["Marketplace Templates Communautaire"])
+app.include_router(bureau_library_router,     prefix="/api/v1/bureau/library",     tags=["Secrétariat — Bibliothèque Assets"])
 app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
 app.include_router(bureau_audio_router,      prefix="/api/v1/bureau/audio",       tags=["Secrétariat — Audio → Document"])
 app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie", tags=["Secrétariat — Infographie Print"])

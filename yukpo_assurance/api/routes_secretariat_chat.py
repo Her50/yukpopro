@@ -106,11 +106,14 @@ async def chat_unifie_message(
         metier = getattr(profil_obj, "metier", None) or ""
         secteur = getattr(profil_obj, "secteur_activite", None) or ""
         pays_user = getattr(profil_obj, "pays", None) or demande.pays or None
-        vk = _vm.detecter_vertical(metier, secteur)
-        if not vk and demande.message:
-            vk = await _vm.detecter_vertical_depuis_brief(demande.message)
-        if vk:
-            bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(vk, pays=pays_user)
+        # Verticalité DYNAMIQUE LLM : couvre TOUS secteurs mondiaux
+        descripteur_vert = await _vm.detecter_vertical_dynamique_llm(
+            metier=metier, secteur=secteur, pays=pays_user, brief=demande.message,
+        )
+        if descripteur_vert:
+            bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(
+                pays=pays_user, descripteur=descripteur_vert,
+            )
     except Exception:
         pass
 
