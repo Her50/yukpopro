@@ -1869,11 +1869,17 @@ async def generer_projet(
     except Exception as _e_sug:
         logger.debug(f"[DesignerPro/Suggestions] non bloquant : {_e_sug}")
 
+    # Alias multi-frontend : ChatPage YPro lit fichier_genere ; ChatUnifieSec
+    # lit fichier ; Designer Pro UI lit download_url. On expose les 3.
+    pdf_id = artefacts.get("pdf_id")
     return {
         "projet": _serialiser_projet_pour_reponse(resultat.projet),
         **artefacts,
         "meta": resultat.meta,
         "download_url": download_url,
+        "url_telechargement": download_url,
+        "fichier": pdf_id,
+        "fichier_genere": pdf_id,
         "suggestions": suggestions,
     }
 

@@ -284,6 +284,7 @@ async def generer_rapport(
         if nom_fich:
             resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
             resultat["fichier"] = nom_fich
+            resultat["fichier_genere"] = nom_fich   # alias frontend ChatPage YPro
         if "contenu_markdown" in resultat and "markdown" not in resultat:
             resultat["markdown"] = resultat["contenu_markdown"]
 
@@ -412,6 +413,7 @@ async def generer_slides(
         if nom_fich:
             resultat["url_telechargement"] = f"/api/v1/pro/generateurs/fichier/{nom_fich}"
             resultat["fichier"] = nom_fich
+            resultat["fichier_genere"] = nom_fich   # alias frontend ChatPage YPro
         # alias pour le frontend
         if "contenu_markdown" in resultat and "markdown" not in resultat:
             resultat["markdown"] = resultat["contenu_markdown"]
@@ -2697,6 +2699,23 @@ _CATALOGUE_TEMPLATES_G1 = [
     ("slides_commercial", "slides",  "Présentation commerciale", "commercial", "pitch produit présentation client offre"),
     ("slides_formation",  "slides",  "Présentation formation",   "formateur",  "support formation cours pédagogique"),
     ("slides_projet",     "slides",  "Présentation projet",      "chef projet","présentation projet jalons livrables"),
+    # ── Visuels imprimables / Designer Pro (PDF print-ready CMYK) ────────
+    # Tout ce qui est CARTE DE VISITE, FLYER, AFFICHE, BROCHURE, LIVRET,
+    # MENU, PROGRAMME, CV graphique, INVITATION, FAIRE-PART, packaging,
+    # banderole, kakemono, dépliant, etc. → route vers Designer Pro
+    # (/api/v1/bureau/infographie-pro/generer-auto). PAS un Word/PPTX.
+    ("infographie_carte_visite", "infographie", "Carte de visite",       "tous",   "carte visite business card 8 cartes A4 vCard QR"),
+    ("infographie_flyer",        "infographie", "Flyer / Affiche",       "tous",   "flyer affiche A3 A4 A5 poster banderole campagne pub"),
+    ("infographie_brochure",     "infographie", "Brochure / Plaquette",  "tous",   "brochure plaquette dépliant 3 volets corporate"),
+    ("infographie_livret",       "infographie", "Livret / Programme",    "tous",   "livret faire-part mariage décès programme cérémonie"),
+    ("infographie_menu",         "infographie", "Menu restaurant",       "resto",  "menu carte restaurant entrées plats desserts"),
+    ("infographie_cv_graphique", "infographie", "CV graphique",          "candidat","CV graphique designer portfolio profil"),
+    ("infographie_invitation",   "infographie", "Invitation / Save-the-date", "tous", "invitation save the date événement gala"),
+    ("infographie_packaging",    "infographie", "Packaging produit",     "marque", "packaging emballage étiquette produit"),
+    ("infographie_post_social",  "infographie", "Post réseaux sociaux",  "marketing","post Instagram LinkedIn Facebook story banner"),
+    ("infographie_album",        "infographie", "Album / Livre photo",   "tous",   "album photo livre photo magazine portfolio"),
+    ("infographie_rapport_visuel","infographie","Rapport annuel visuel", "marketing","rapport annuel magazine 24 32 pages corporate visuel"),
+    ("infographie_custom",       "infographie", "Visuel sur mesure",     "tous",   "visuel imprimable autre BD packaging dépliant custom format"),
 ]
 _CREDITS_PAR_MODE_G1 = {"flash": 2000, "standard": 4500, "complet": 12000, "expert": 25000}
 _DUREE_PAR_MODE_G1 = {"flash": 120, "standard": 300, "complet": 900, "expert": 1500}
@@ -2824,7 +2843,45 @@ CATALOGUE DES TEMPLATES PRÉDÉFINIS (à privilégier si l'un correspond) :
 REGLES :
 1. template_id = EXACTEMENT un id du catalogue ci-dessus (jamais inventer).
 
-   ⚠️ CRITIQUE — distinction RAPPORT vs DOCUMENT JURIDIQUE :
+   ⚠️ CRITIQUE — distinction RAPPORT vs SLIDES vs INFOGRAPHIE :
+   Trois grandes familles d'output. La famille décide l'endpoint backend.
+
+   FAMILLE INFOGRAPHIE (visuel imprimable PDF print-ready CMYK) — route
+   vers Designer Pro. Le brief décrit un OBJET VISUEL/IMPRIMABLE :
+   - Cartes de visite (1 ou plusieurs personnes, recto-verso, vCard QR…)
+   - Flyer, affiche, poster, banderole, kakemono, billboard
+   - Brochure, plaquette commerciale, dépliant 2/3 volets
+   - Livret événement (faire-part mariage/décès, programme cérémonie/culte)
+   - Menu de restaurant, carte des vins
+   - CV graphique design, portfolio créatif
+   - Invitation, save-the-date, ticket événement
+   - Packaging produit, étiquette, dosette
+   - Post réseaux sociaux (Instagram, LinkedIn, Facebook story/feed)
+   - Album photo, livre photo, magazine, rapport annuel VISUEL
+   - BD éducative, infographie ludique, mind map, schéma
+
+   Mots-clés déclencheurs (non exhaustifs) : "carte de visite", "flyer",
+   "affiche", "brochure", "plaquette", "dépliant", "livret",
+   "faire-part", "invitation", "menu", "programme", "CV graphique",
+   "packaging", "post Instagram", "story", "album", "magazine",
+   "imprimable", "imprimerie", "CMYK", "print", "bleed", "marges
+   techniques", "à imprimer", "format A3/A4/A5/A6/carré", "8 cartes
+   par feuille", "recto-verso plié", "QR vCard".
+
+   → type_sortie = "infographie", template_id = un id "infographie_*"
+     du catalogue (carte_visite, flyer, brochure, livret, menu,
+     cv_graphique, invitation, packaging, post_social, album,
+     rapport_visuel, OU custom pour briefs atypiques).
+
+   ⚠️ NE JAMAIS confondre :
+   - "5 cartes de visite imprimables" → INFOGRAPHIE (PAS un rapport
+     Word qui *présente* les cartes de visite en texte !)
+   - "flyer A3 anti-tabac" → INFOGRAPHIE (PAS un rapport sur le tabac)
+   - "menu de restaurant" → INFOGRAPHIE (PAS un rapport sur le menu)
+   - "CV graphique designer" → INFOGRAPHIE (PAS un rapport CV)
+   - "brochure produit" → INFOGRAPHIE (PAS un rapport produit)
+
+   ⚠️ DISTINCTION RAPPORT vs DOCUMENT JURIDIQUE :
    - Si le brief mentionne explicitement « convention », « contrat »,
      « bail », « statuts », « règlement », « accord », « MOU » → utilise
      le template juridique structuré correspondant (convention, contrat_bail,
@@ -2842,9 +2899,10 @@ REGLES :
      plan_action / compte_rendu / note_de_synthese : uniquement pour de
      vrais rapports d'analyse, JAMAIS pour des contrats ou conventions.
 
-2. type_sortie ∈ rapport | slides. (Tous les contrats / conventions /
-   lettres / attestations sortent en type_sortie="rapport" — c'est le
-   format DOCX ; le format interne du document est piloté par template_id.)
+2. type_sortie ∈ rapport | slides | infographie.
+   - "rapport" : DOCX (rapports d'analyse, contrats, lettres, attestations)
+   - "slides" : PPTX (présentations direction/commercial/formation/projet)
+   - "infographie" : PDF print-ready CMYK (visuels imprimables Designer Pro)
 
 3. **dimensionnement libre — tu décides** la profondeur réelle attendue
    en lisant le brief :
@@ -2884,8 +2942,8 @@ REGLES :
 
 FORMAT JSON STRICT :
 {{
-  "intent_detecte": "generation_rapport" | "generation_slides" | "ambigu",
-  "type_sortie": "rapport" | "slides",
+  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_infographie" | "ambigu",
+  "type_sortie": "rapport" | "slides" | "infographie",
   "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
   "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
   "structure_custom": ["Section 1", "Section 2", "..."],  // dimensionne LIBREMENT (3 à 30 sections selon le brief), obligatoire si template_id="custom"
@@ -2915,12 +2973,17 @@ EXEMPLES de structure_custom (à adapter au brief réel) :
 Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
     try:
+        # Opus 4.7 — orchestration = "directeur de production documentaire" qui
+        # comprend l'intention métier réelle, distingue carte de visite imprimable
+        # vs rapport texte sur des cartes, slides exécutifs vs DOCX synthèse, etc.
+        # Sonnet hésitait sur les cas atypiques. Opus tranche correctement.
+        # Fallback gpt-4-turbo si Anthropic indispo (même tier raisonnement).
         rep = await ia_client.appeler(
             prompt=prompt,
             mode=ModeIA.PRECISION,
             json_attendu=True,
-            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
-            max_tokens_override=800,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+            max_tokens_override=1500,
         )
         contenu = rep.contenu or "{}"
         try:
@@ -3003,6 +3066,11 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     peut_payer = solde_credits >= credits_estimes
 
     type_sortie = data.get("type_sortie") or "rapport"
+    # Sécurité : si template_id pointe sur infographie_* mais type_sortie="rapport"
+    # (LLM hésitant), corriger automatiquement le type_sortie.
+    if isinstance(template_id, str) and template_id.startswith("infographie_"):
+        type_sortie = "infographie"
+        data["type_sortie"] = "infographie"
     if type_sortie == "slides":
         endpoint_cible = "/api/v1/pro/slides/generer"
         payload_pret = {
@@ -3011,6 +3079,49 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "mode": mode_rec,
             "langue": data.get("langue") or "fr",
             "format_sortie": data.get("format_sortie") or "pptx",
+        }
+    elif type_sortie == "infographie":
+        # Designer Pro — auto-détection du projet imprimable adapté au brief.
+        # Le moteur Designer Pro choisit lui-même le bon gabarit dans
+        # PROJETS_INFOGRAPHIE (incluant custom_libre composition Opus si
+        # aucun ne match, cf. gabarits_livret.py:custom_libre).
+        endpoint_cible = "/api/v1/bureau/infographie-pro/generer-auto"
+        # mode_visuel : "ultra" pour rendu pro imprimable, "standard"
+        # pour preview rapide. Par défaut on prend premium (compromis
+        # qualité/coût pour cartes de visite, flyers, brochures).
+        mode_visuel_map = {
+            "infographie_carte_visite": "premium",
+            "infographie_flyer":        "ultra",   # photo héroïque
+            "infographie_brochure":     "premium",
+            "infographie_livret":       "premium",
+            "infographie_menu":         "premium",
+            "infographie_cv_graphique": "premium",
+            "infographie_invitation":   "ultra",
+            "infographie_packaging":    "ultra",
+            "infographie_post_social":  "premium",
+            "infographie_album":        "premium",
+            "infographie_rapport_visuel":"premium",
+            "infographie_custom":       "premium",
+        }
+        mode_visuel = mode_visuel_map.get(template_id, "premium")
+        # cle_projet_hint : fournir un raccourci optionnel vers le catalog
+        # PROJETS_INFOGRAPHIE existant (livret_deces_8p, brochure_corporate_4p,
+        # etc.). Si template_id="infographie_custom" ou hint inconnu →
+        # custom_libre composition Opus dynamique sur le brief.
+        hint_map = {
+            "infographie_brochure":     "brochure_corporate_4p",
+            "infographie_menu":         "menu_resto_4p",
+            "infographie_album":        "livre_photo_a4_8p",
+            "infographie_rapport_visuel":"magazine_corporate_12p",
+        }
+        cle_projet_hint = hint_map.get(template_id) or "custom_libre"
+        payload_pret = {
+            "brief": demande.brief,
+            "pays": "CM",
+            "langue": data.get("langue") or "fr",
+            "mode_visuel": mode_visuel,
+            "export_cmyk": True,
+            "cle_projet_hint": cle_projet_hint,
         }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
