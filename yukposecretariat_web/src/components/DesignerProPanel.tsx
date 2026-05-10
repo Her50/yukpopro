@@ -114,6 +114,12 @@ export default function DesignerProPanel() {
   // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
   const [showAdvanced, setShowAdvanced] = useState(false)
 
+  // Sprint L1.4 — Multilingual
+  const [showMultilingual, setShowMultilingual] = useState(false)
+  const [multilingualLangues, setMultilingualLangues] = useState<string[]>(['en'])
+  const [multilingualLoading, setMultilingualLoading] = useState(false)
+  const [multilingualResults, setMultilingualResults] = useState<any | null>(null)
+
   // Sprint UX3 — Bulk CSV
   const [showBulk, setShowBulk] = useState(false)
   const [bulkAnalysing, setBulkAnalysing] = useState(false)
@@ -313,6 +319,23 @@ export default function DesignerProPanel() {
       setRefsSelectionnees(orchestration.medias_refs_actifs)
     }
     toast.success(t('designerPro.autoApplied', 'Formulaire pré-rempli'))
+  }
+
+  // Sprint L1.4 — Lance export multilingual
+  const lancerMultilingual = async () => {
+    if (!resultat?.projet_json_id) return
+    if (multilingualLangues.length === 0) { toast.error('Sélectionne au moins 1 langue'); return }
+    setMultilingualLoading(true); setMultilingualResults(null)
+    try {
+      const r = await infographieProAPI.multilingual({
+        projet_id: resultat.projet_json_id,
+        langues_cibles: multilingualLangues,
+      })
+      setMultilingualResults(r.data)
+      toast.success(`${r.data.nb_succes}/${r.data.total_langues} langues OK`)
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || e?.message || 'Export multilingue échoué')
+    } finally { setMultilingualLoading(false) }
   }
 
   // Sprint UX4 — Fetch devis quand brief assez long (debounced 800ms)
@@ -997,6 +1020,60 @@ export default function DesignerProPanel() {
                   className="max-h-[600px] rounded-lg shadow border border-gray-200" />
               </div>
             </>
+          )}
+
+          {/* Sprint L1.4 — Multilingual export (Sec) */}
+          {resultat.projet_json_id && (
+            <div className="border-t border-gray-100 pt-4">
+              <button onClick={() => setShowMultilingual(v => !v)} type="button"
+                className="flex items-center gap-2 text-sm font-semibold text-gray-800 hover:text-amber-700">
+                🌍 {t('designerPro.exportMultilingual', 'Exporter en plusieurs langues')}
+                <span className={`transition-transform ${showMultilingual ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+              {showMultilingual && (
+                <div className="mt-2 space-y-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <p className="text-xs text-blue-800">~24 FCFA/langue (traduction Sonnet).</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                    {[['fr','🇫🇷 FR'],['en','🇬🇧 EN'],['es','🇪🇸 ES'],['pt','🇵🇹 PT'],['ar','🇸🇦 AR'],
+                      ['de','🇩🇪 DE'],['zh','🇨🇳 ZH'],['sw','🇹🇿 SW'],['ha','🇳🇬 HA'],['wo','🇸🇳 WO'],
+                      ['ln','🇨🇩 LN'],['am','🇪🇹 AM'],['ru','🇷🇺 RU'],['hi','🇮🇳 HI'],['tr','🇹🇷 TR'],
+                    ].map(([code, label]) => (
+                      <button key={code} type="button"
+                        onClick={() => setMultilingualLangues(p =>
+                          p.includes(code) ? p.filter(x => x !== code) : [...p, code])}
+                        className={`text-xs px-2 py-1 rounded border ${
+                          multilingualLangues.includes(code)
+                            ? 'bg-blue-600 text-white border-blue-700'
+                            : 'bg-white text-gray-700 border-gray-300'
+                        }`}>{label}</button>
+                    ))}
+                  </div>
+                  <button onClick={lancerMultilingual}
+                    disabled={multilingualLoading || multilingualLangues.length === 0}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-2">
+                    {multilingualLoading ? <Loader2 size={13} className="animate-spin" /> : '🌍'}
+                    Générer {multilingualLangues.length} langue(s) (~{multilingualLangues.length * 24} FCFA)
+                  </button>
+                  {multilingualResults && (
+                    <div className="space-y-1">
+                      {multilingualResults.results?.map((r: any) => (
+                        <div key={r.langue} className="flex items-center gap-2 bg-white border border-blue-200 rounded px-2 py-1 text-[10px]">
+                          <span className={`font-bold px-1 rounded ${r.ok ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {r.langue.toUpperCase()}
+                          </span>
+                          {r.ok ? (
+                            <button onClick={() => b64download(r.pdf_base64, `projet_${r.langue}.pdf`, 'application/pdf')}
+                              className="text-blue-600 hover:underline">PDF ({r.size_kb} KB)</button>
+                          ) : (
+                            <span className="text-red-600">{r.erreur}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Modification chat-driven */}

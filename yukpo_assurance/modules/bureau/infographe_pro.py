@@ -1678,6 +1678,42 @@ async def _picker_variants_sonnet(
         return {}
 
 
+async def detecter_langue_brief(brief: str, langue_defaut: str = "fr") -> str:
+    """
+    Sprint L1.1 — Détecte la langue principale du brief utilisateur (~50 tokens
+    Haiku, ~0.1 FCFA réel). Override silencieusement la langue passée si elle
+    diffère. Codes ISO 639-1 : fr/en/es/pt/ar/de/zh/sw/ha/ru/hi/tr/wo/ln/am.
+
+    Échec silencieux → retourne `langue_defaut`. Pas de coût additionnel
+    facturé (inclus dans le pipeline standard).
+    """
+    if not brief or len(brief.strip()) < 20:
+        return langue_defaut
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        prompt = (
+            f"Détecte la langue PRINCIPALE de ce texte. Réponds UNIQUEMENT par "
+            f"le code ISO 639-1 sur 2 lettres (parmi: fr, en, es, pt, ar, de, "
+            f"zh, sw, ha, ru, hi, tr, wo, ln, am). Pas d'explication, juste 2 lettres.\n\n"
+            f"Texte : «{brief[:1500]}»"
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.PRECISION,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            max_tokens_override=20, utiliser_cache=True,
+        )
+        code = (rep.contenu or "").strip().lower()[:2]
+        valides = {"fr", "en", "es", "pt", "ar", "de", "zh", "sw", "ha",
+                   "ru", "hi", "tr", "wo", "ln", "am"}
+        if code in valides:
+            if code != langue_defaut:
+                logger.info(f"[L1] Langue override : {langue_defaut} → {code} (détecté)")
+            return code
+    except Exception as e:
+        logger.debug(f"[L1] Détection langue échouée : {e}")
+    return langue_defaut
+
+
 async def generer_projet_depuis_brief(
     brief: str,
     cle_projet: str,
@@ -1697,6 +1733,9 @@ async def generer_projet_depuis_brief(
     proj_def = catalog.PROJETS_INFOGRAPHIE.get(cle_projet)
     if not proj_def:
         raise ValueError(f"Projet inconnu : {cle_projet}")
+
+    # Sprint L1.1 — Auto-détection langue : override silencieux si différent
+    langue = await detecter_langue_brief(brief, langue_defaut=langue)
 
     desc_projet = catalog.descripteur_pour_ia(cle_projet)
     desc_medias = [msm.descripteur_pour_ia(m) for m in medias.values()]

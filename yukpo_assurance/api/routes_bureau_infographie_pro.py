@@ -1281,6 +1281,168 @@ Retourne UNIQUEMENT la clé exacte (ex: "livret_deces_8p"), rien d'autre."""
     return hint if hint else "brochure_corporate_4p"
 
 
+# ─── Sprint L1.3 — Export multilingual (N PDFs en parallèle) ────────────────
+
+
+class DemandeMultilingual(BaseModel):
+    projet_id: str = Field(..., description="ID JSON du projet existant")
+    langues_cibles: list[str] = Field(..., min_length=1, max_length=10,
+        description="Codes ISO 639-1 (ex: ['fr','en','wo','ar'])")
+
+
+@router.post("/multilingual", tags=["Bureau — Designer Pro"])
+async def export_multilingual(
+    demande: DemandeMultilingual,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Sprint L1.3 — Exporte le même projet dans N langues en parallèle.
+    Garde layout/médias/palette identiques, traduit tous les contenus textuels.
+
+    Coût : forfait designerpro_multilingual_export × nb_langues + LLM tokens.
+    Cas d'usage B2B : ministère qui doit publier en FR + EN + langue locale.
+    """
+    from modules.bureau.infographe_pro import (
+        ProjetInfographie, Page, Zone, rendre_projet_pdf, _png_par_page,
+    )
+    from modules.bureau import mediatheque_session as msm
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Validation langues
+    valides = {"fr", "en", "es", "pt", "ar", "de", "zh", "sw", "ha",
+               "ru", "hi", "tr", "wo", "ln", "am"}
+    langues = [l.lower() for l in demande.langues_cibles if l.lower() in valides]
+    if not langues:
+        raise HTTPException(400, f"Aucune langue valide. Codes acceptés : {sorted(valides)}")
+
+    # Chargement projet
+    if "/" in demande.projet_id or "\\" in demande.projet_id or ".." in demande.projet_id:
+        raise HTTPException(400, "ID invalide")
+    chemin = _PROJETS_JSON_DIR / demande.projet_id
+    if not chemin.exists():
+        raise HTTPException(404, "Projet introuvable (peut-être expiré)")
+    if f"_{current_user.user_id}_" not in demande.projet_id and current_user.role != "admin":
+        raise HTTPException(403, "Accès refusé")
+    try:
+        ancien_dict = json.loads(chemin.read_text(encoding="utf-8"))
+    except Exception as e:
+        raise HTTPException(500, f"Lecture projet : {e}")
+
+    refs = list(ancien_dict.get("medias_refs", []) or [])
+    session_id = f"chat_{current_user.user_id}"
+    medias = msm.resoudre_refs(refs, str(current_user.user_id), session_id)
+
+    async def _traduire_et_render(langue_cible: str) -> dict:
+        """Traduit le projet dans une langue + render PDF."""
+        prompt_trad = (
+            f"Tu es traducteur professionnel. Traduis TOUS les contenus textuels "
+            f"(titres, listes, programmes, témoignages, remerciements, citations, "
+            f"légendes, etc.) du projet JSON suivant en {langue_cible.upper()} "
+            f"(code ISO 639-1).\n\n"
+            f"RÈGLES :\n"
+            f"1. NE TOUCHE PAS aux structures (templates, refs médias, palettes, coords).\n"
+            f"2. Traduis UNIQUEMENT les valeurs textuelles (champs `texte`, `items`, "
+            f"`citation`, `nom`, `legende`, `prompt` en gardant le sens visuel).\n"
+            f"3. Adapte les noms propres et toponymes selon les conventions de la langue cible.\n"
+            f"4. Pour les langues africaines (wo/ha/sw/ln/am), traduis avec les "
+            f"néologismes courants (vocabulaire commercial moderne).\n"
+            f"5. Mets `langue` = '{langue_cible}' dans le JSON final.\n\n"
+            f"PROJET ORIGINAL (langue {ancien_dict.get('langue', '?')}) :\n"
+            f"{json.dumps(ancien_dict, ensure_ascii=False)[:50000]}\n\n"
+            f"Retourne UNIQUEMENT le JSON traduit, sans markdown ni préambule."
+        )
+        try:
+            rep = await ia_client.appeler(
+                prompt=prompt_trad, mode=ModeIA.REDACTION, json_attendu=True,
+                forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+                max_tokens_override=32000,
+            )
+            try:
+                projet_trad = json.loads(rep.contenu)
+            except Exception:
+                import re
+                m = re.search(r'\{.*\}', rep.contenu, re.DOTALL)
+                projet_trad = json.loads(m.group()) if m else ancien_dict
+            # Débit LLM
+            try:
+                await debiter_llm(
+                    current_user.user_id, modele=rep.modele_utilise,
+                    tokens_input=int(rep.tokens_input or 0),
+                    tokens_output=int(rep.tokens_output or 0),
+                    module="infographie",
+                )
+            except Exception:
+                pass
+            # Reconstruction ProjetInfographie + render PDF
+            pages_obj: list[Page] = []
+            for p_data in projet_trad.get("pages", []) or []:
+                zones_obj = []
+                for z in p_data.get("zones", []) or []:
+                    zones_obj.append(Zone(
+                        slot_id=z.get("slot_id", ""), type=z.get("type", "texte"),
+                        contenu=z.get("contenu") or {}, style=z.get("style") or {},
+                    ))
+                pages_obj.append(Page(
+                    numero=int(p_data.get("numero", len(pages_obj) + 1)),
+                    template_id=p_data.get("template", ""), zones=zones_obj,
+                    palette_override=p_data.get("palette_override"),
+                    notes_ia=p_data.get("notes"),
+                ))
+            projet_obj = ProjetInfographie(
+                cle_projet=projet_trad.get("cle_projet", ancien_dict.get("cle_projet", "")),
+                titre=projet_trad.get("titre", ""),
+                palette=projet_trad.get("palette") or "classique",
+                palette_custom=projet_trad.get("palette_custom"),
+                pages=pages_obj,
+                medias_refs=refs,
+                polices=projet_trad.get("polices") or {},
+                langue=langue_cible,
+                meta={"multilingual_source": demande.projet_id, "langue_cible": langue_cible},
+            )
+            pdf_bytes = rendre_projet_pdf(projet_obj, medias, mode_couleur="rgb")
+            return {
+                "langue": langue_cible, "ok": True,
+                "pdf_base64": base64.b64encode(pdf_bytes).decode("ascii"),
+                "size_kb": round(len(pdf_bytes) / 1024, 1),
+            }
+        except Exception as e:
+            logger.error(f"[Multilingual {langue_cible}] {e}")
+            return {"langue": langue_cible, "ok": False, "erreur": str(e)[:300]}
+
+    # Génération parallèle (concurrence limitée à 3 pour ne pas saturer LLM)
+    sem = asyncio.Semaphore(3)
+    async def _bounded(l):
+        async with sem:
+            return await _traduire_et_render(l)
+    results = await asyncio.gather(*(_bounded(l) for l in langues))
+
+    # Forfait export
+    nb_ok = sum(1 for r in results if r.get("ok"))
+    if nb_ok > 0:
+        try:
+            await debiter_forfait(
+                current_user.user_id, "designerpro_multilingual_export",
+                module="infographie", multiplicateur=float(nb_ok),
+            )
+        except Exception:
+            pass
+
+    return {
+        "ok": True, "total_langues": len(langues), "nb_succes": nb_ok,
+        "nb_echecs": len(langues) - nb_ok, "results": results,
+    }
+
+
 # ─── Sprint UX4 — Devis automatique (dry-run avant génération) ───────────────
 
 
@@ -1766,6 +1928,12 @@ en conservant tout ce qui n'est pas concerné par les instructions et en appliqu
 
 INSTRUCTIONS DE MODIFICATION :
 \"\"\"{demande.instructions}\"\"\"
+
+NOTE : Si l'instruction demande une TRADUCTION (ex: "translate to English",
+"passe en wolof", "version française", "traduis tout en arabe") → traduis
+TOUS les contenus textuels du projet (titres, listes, programmes, témoignages,
+remerciements, etc.) dans la langue cible. Garde la même structure (templates,
+médias, palette). Mets à jour le champ `langue` du projet en conséquence.
 
 DIRECTIVES VISUELLES (curseurs 0–100) : {json.dumps(demande.directives_visuelles or {}, ensure_ascii=False)}
 

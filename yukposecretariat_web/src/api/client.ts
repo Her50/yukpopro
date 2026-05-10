@@ -279,6 +279,10 @@ export const infographieProAPI = {
     brief: string; pays?: string; langue?: string;
     medias_refs?: string[]; cle_projet?: string;
   }) => api.post('/bureau/infographie-pro/devis', data, { timeout: 60_000 }),
+  // Sprint L1.3 — Export multilingual
+  multilingual: (data: {
+    projet_id: string; langues_cibles: string[];
+  }) => api.post('/bureau/infographie-pro/multilingual', data, { timeout: 600_000 }),
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: (formData: FormData) =>
     api.post('/bureau/infographie-pro/bulk/analyser', formData, {

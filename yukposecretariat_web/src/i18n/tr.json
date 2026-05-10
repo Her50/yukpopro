@@ -1018,7 +1018,8 @@
     "devisLoading": "Estimation du coût en cours…",
     "devisEstime": "Coût estimé",
     "creditsInsuffisants": "Solde insuffisant",
-    "utiliserCharte": "Utiliser ma charte de marque"
+    "utiliserCharte": "Utiliser ma charte de marque",
+    "exportMultilingual": "Exporter en plusieurs langues"
   },
   "organisation": {
     "createTitle": "Créer une organisation",

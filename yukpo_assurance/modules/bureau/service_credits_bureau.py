@@ -129,6 +129,11 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # entre coût réel ($200 = ~120 000 FCFA) et prix client (200 000 FCFA = 1.7×).
     "designerpro_brand_lora_training": 1.0,  # multiplicateur = coût en FCFA
     "designerpro_html_render": 3.0,          # 60 cr/page (Sprint 1.4 WeasyPrint compute)
+    # Sprint L1.3 — Export multilingual (N PDFs en parallèle pour N langues)
+    # Multiplicateur = nb_langues. Couvre LLM tokens traduction par langue + render PDF.
+    "designerpro_multilingual_export": 2.0,  # 40 cr/langue = 24 FCFA/langue
+                                             # ~5 FCFA réel (LLM Sonnet ~1500 tok + render)
+                                             # marge ~5×
     # Sprint R1/R2 — Génération via Replicate (provider alternatif/fallback)
     "designerpro_image_replicate": 8.0,      # 160 cr/img = 96 FCFA user
                                              # Flux Pro Ultra Replicate ~$0.04 réel = 24 FCFA
