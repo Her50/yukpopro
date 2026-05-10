@@ -1121,6 +1121,56 @@ class EtudeDB(Base):
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
+# ─── Sprint 2.4 — Brand Kit verrouillé par organisation ──────────────────────
+
+
+class BrandKitDB(Base):
+    """
+    Charte visuelle officielle d'une organisation, héritée AUTOMATIQUEMENT
+    par toutes les générations Designer Pro de l'org. Le LLM (Opus art director
+    + Haiku spec) reçoit ces contraintes en prompt obligatoire.
+
+    Brand compliance checker (Sonnet vision) peut être appelé après génération
+    pour vérifier le respect (palette dominante, logo présent, ToV cohérent).
+    """
+    __tablename__ = "brand_kits"
+
+    kit_id            = Column(String(36), primary_key=True, index=True)
+    compagnie_id      = Column(Integer, nullable=False, unique=True, index=True)
+    label             = Column(String(120), nullable=False, default="Charte officielle")
+    actif             = Column(Boolean, default=True, index=True)
+
+    # Palette
+    couleur_primaire_hex   = Column(String(8), nullable=True)
+    couleur_secondaire_hex = Column(String(8), nullable=True)
+    couleur_accent_hex     = Column(String(8), nullable=True)
+    couleurs_extras_hex    = Column(JSON, default=list)         # ["#aabbcc", ...]
+
+    # Polices (familles Google Fonts ou ReportLab core)
+    font_titre        = Column(String(80), default="Inter")
+    font_corps        = Column(String(80), default="Inter")
+    font_accent       = Column(String(80), nullable=True)
+
+    # Identité
+    logo_media_ref    = Column(String(120), nullable=True)        # 'compte:abc' média catégorie 'logo'
+    nom_organisation  = Column(String(200), nullable=True)
+    baseline          = Column(String(300), nullable=True)        # ex: "L'assurance qui rassure"
+
+    # Tone of voice + lexique
+    tone_of_voice     = Column(Text, nullable=True)               # 1-3 phrases, ex: "professionnel rassurant, vouvoiement, vocabulaire métier"
+    lexique_prefere   = Column(JSON, default=list)                # ["client", "partenaire", ...]
+    mots_interdits    = Column(JSON, default=list)                # ["lol", "easy", ...]
+
+    # Brand LoRA par défaut (auto-injecté en mode premium)
+    brand_lora_id_defaut = Column(String(36), nullable=True)
+
+    # Niveau de strictness 0=permissif, 100=verrouillage strict
+    strictness        = Column(Integer, default=70)
+
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.3 — Approval workflows (Designer Pro) ──────────────────────────
 
 

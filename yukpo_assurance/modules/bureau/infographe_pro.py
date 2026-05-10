@@ -1730,6 +1730,29 @@ async def generer_projet_depuis_brief(
         f"en respectant ces curseurs.\n"
     )
 
+    # Sprint 2.4 — Brand Kit : injection ToV/lexique/mots interdits dans le prompt
+    brand_kit = (dv.get("__brand_kit__") if isinstance(dv, dict) else None) or {}
+    bloc_brand_kit = ""
+    if brand_kit:
+        tov = (brand_kit.get("tone_of_voice") or "").strip()
+        lex_pref = brand_kit.get("lexique_prefere") or []
+        mots_int = brand_kit.get("mots_interdits") or []
+        baseline = brand_kit.get("baseline") or ""
+        strict = int(brand_kit.get("strictness") or 70)
+        if tov or lex_pref or mots_int or baseline:
+            bloc_brand_kit = (
+                f"\n═══════════════════════════════════════════════════\n"
+                f"  BRAND KIT VERROUILLÉ (Sprint 2.4) — strictness={strict}/100\n"
+                f"═══════════════════════════════════════════════════\n"
+                f"- Tone of voice : {tov or '(aucun)'}\n"
+                f"- Baseline officielle : {baseline or '(aucune)'}\n"
+                f"- Vocabulaire préféré : {', '.join(lex_pref) if lex_pref else '(libre)'}\n"
+                f"- Mots INTERDITS (à NE PAS utiliser) : {', '.join(mots_int) if mots_int else '(aucun)'}\n"
+                f"RÈGLE STRICTE : tu DOIS respecter ces consignes brand sur l'ensemble des\n"
+                f"textes générés. Si strictness ≥ 70, c'est un VERROU non-négociable —\n"
+                f"chaque mot interdit présent dans la sortie est un échec.\n"
+            )
+
     # Sprint 1.1 — Layout AI : Opus 4.7 décide composition pré-Haiku
     layout_decisions: Optional[dict] = None
     layout_meta: dict = {}
@@ -1805,7 +1828,7 @@ Couleurs accents : {', '.join(couleurs_acc) if couleurs_acc else "(libres)"}
   MÉDIATHÈQUE UTILISATEUR DISPONIBLE
 ═══════════════════════════════════════════════════
 {json.dumps(desc_medias, ensure_ascii=False, indent=2) if desc_medias else "(aucun média uploadé)"}
-{bloc_directives}{bloc_layout_ai}
+{bloc_directives}{bloc_brand_kit}{bloc_layout_ai}
 ═══════════════════════════════════════════════════
   RÈGLES STRICTES
 ═══════════════════════════════════════════════════

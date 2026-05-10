@@ -1021,6 +1021,30 @@ async def generer_projet(
     profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     session_id = f"chat_{current_user.user_id}"  # session par défaut = par user
 
+    # Sprint 2.4 — Brand Kit auto-héritage : surcharge profil/polices/lora_id
+    # avec la charte officielle de l'org SI elle existe et SI l'user n'a pas
+    # explicitement override (priorité user > brand kit > defaut).
+    try:
+        from api.routes_brand_kit import charger_overrides_brand_kit
+        bk = await charger_overrides_brand_kit(getattr(current_user, "compagnie_id", None) or 1)
+    except Exception as e:
+        logger.warning(f"[BrandKit] charger overrides : {e}")
+        bk = {"brand_kit_active": False}
+    if bk.get("brand_kit_active"):
+        profil_dict = profil_dict or {}
+        for k, v in (bk.get("profil_overrides") or {}).items():
+            if v and not profil_dict.get(k):
+                profil_dict[k] = v
+        # brand_lora_id_defaut auto-injecté si user n'a pas spécifié
+        if (bk.get("brand_lora_id_defaut") and not demande.brand_lora_id):
+            demande.brand_lora_id = bk["brand_lora_id_defaut"]
+        # Logo auto-ajouté aux médias si défini et pas déjà sélectionné
+        if bk.get("logo_media_ref") and bk["logo_media_ref"] not in (demande.medias_refs or []):
+            demande.medias_refs = (demande.medias_refs or []) + [bk["logo_media_ref"]]
+        # Directives brand (ToV/lexique) injectées dans directives_visuelles
+        demande.directives_visuelles = demande.directives_visuelles or {}
+        demande.directives_visuelles["__brand_kit__"] = bk.get("directives_brand")
+
     # Sprint 1.6 — résolution Brand LoRA si demandé
     lora_url: Optional[str] = None
     if demande.brand_lora_id:
