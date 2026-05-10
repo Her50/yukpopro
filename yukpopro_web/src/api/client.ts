@@ -1073,6 +1073,11 @@ export const infographieProApi = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => (await http.post("/bureau/infographie-pro/orchestrer", payload, { timeout: 60_000 })).data,
+  // Sprint UX4 — Devis automatique avant génération
+  devis: async (payload: {
+    brief: string; pays?: string; langue?: string;
+    medias_refs?: string[]; cle_projet?: string;
+  }) => (await http.post("/bureau/infographie-pro/devis", payload, { timeout: 60_000 })).data,
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: async (formData: FormData) =>
     (await http.post("/bureau/infographie-pro/bulk/analyser", formData, {

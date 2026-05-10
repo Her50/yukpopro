@@ -60,8 +60,10 @@ class DemandeProjetPro(BaseModel):
     export_cmyk: bool = Field(default=True)
     directives_visuelles: Optional[dict] = Field(default=None,
         description="Curseurs UI : creativite, densite_texte, importance_images, elegance (0–100)")
-    mode_visuel: str = Field(default="sans",
-        description="'sans' | 'standard' (Flux schnell) | 'premium' (Flux dev) | 'ultra' (Flux Pro Ultra) | 'ultra_plus' (ensemble Flux+Recraft+Ideogram, vision pick)")
+    mode_visuel: str = Field(default="auto",
+        description="'auto' (défaut UX4 : LLM décide) | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'")
+    utiliser_charte: bool = Field(default=True,
+        description="Sprint UX4 : si False, ignore le BrandKit de l'org (génération hors charte)")
     # Sprint 1.6 — IP-Adapter + Brand LoRA
     reference_style_ref: Optional[str] = Field(default=None,
         description="Réf. médiathèque ('session:abc' ou 'compte:def') vers une image de style → injectée via Flux IP-Adapter (modes ultra/premium/ultra_plus)")
@@ -1021,15 +1023,14 @@ async def generer_projet(
     profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
     session_id = f"chat_{current_user.user_id}"  # session par défaut = par user
 
-    # Sprint 2.4 — Brand Kit auto-héritage : surcharge profil/polices/lora_id
-    # avec la charte officielle de l'org SI elle existe et SI l'user n'a pas
-    # explicitement override (priorité user > brand kit > defaut).
-    try:
-        from api.routes_brand_kit import charger_overrides_brand_kit
-        bk = await charger_overrides_brand_kit(getattr(current_user, "compagnie_id", None) or 1)
-    except Exception as e:
-        logger.warning(f"[BrandKit] charger overrides : {e}")
-        bk = {"brand_kit_active": False}
+    # Sprint 2.4 — Brand Kit auto-héritage (sauf si user a décoché 'utiliser_charte')
+    bk = {"brand_kit_active": False}
+    if getattr(demande, "utiliser_charte", True):
+        try:
+            from api.routes_brand_kit import charger_overrides_brand_kit
+            bk = await charger_overrides_brand_kit(getattr(current_user, "compagnie_id", None) or 1)
+        except Exception as e:
+            logger.warning(f"[BrandKit] charger overrides : {e}")
     if bk.get("brand_kit_active"):
         profil_dict = profil_dict or {}
         for k, v in (bk.get("profil_overrides") or {}).items():
@@ -1066,6 +1067,23 @@ async def generer_projet(
         except Exception as e:
             logger.warning(f"[Designer Pro] Brand LoRA résolution échouée : {e}")
 
+    # Sprint UX4 — résolution mode_visuel="auto" via orchestrateur LLM
+    mode_final = demande.mode_visuel
+    if mode_final == "auto":
+        try:
+            orch = await orchestrer(
+                DemandeOrchestrer(
+                    prompt=demande.brief, pays=demande.pays, langue=demande.langue,
+                    medias_refs=demande.medias_refs,
+                ),
+                current_user,
+            )
+            mode_final = orch.mode_visuel_suggere or "premium"
+            logger.info(f"[Designer Pro/auto] mode_visuel résolu = {mode_final}")
+        except Exception as e:
+            logger.warning(f"[Designer Pro/auto] orchestrateur échec, fallback premium : {e}")
+            mode_final = "premium"
+
     try:
         resultat = await _gen(
             brief=demande.brief,
@@ -1078,7 +1096,7 @@ async def generer_projet(
             langue=demande.langue,
             export_cmyk=demande.export_cmyk,
             directives_visuelles=demande.directives_visuelles,
-            mode_visuel=demande.mode_visuel,
+            mode_visuel=mode_final,
             reference_style_ref=demande.reference_style_ref,
             reference_strength=demande.reference_strength,
             brand_lora_url=lora_url,
@@ -1134,11 +1152,12 @@ async def generer_projet(
             # débit supplémentaire.
             nb_imgs = int(resultat.meta.get("nb_images_ia") or 0)
             if nb_imgs > 0:
-                if demande.mode_visuel == "ultra_plus":
+                # Sprint UX4 : utiliser mode_final (résolu depuis "auto") pas demande.mode_visuel
+                if mode_final == "ultra_plus":
                     forfait_image = "designerpro_image_ultra_plus"
-                elif demande.mode_visuel == "ultra":
+                elif mode_final == "ultra":
                     forfait_image = "designerpro_image_ultra"
-                elif demande.mode_visuel == "premium":
+                elif mode_final == "premium":
                     forfait_image = "designerpro_image_premium"
                 else:
                     forfait_image = "designerpro_image_standard"
@@ -1258,6 +1277,109 @@ Retourne UNIQUEMENT la clé exacte (ex: "livret_deces_8p"), rien d'autre."""
     if "album" in msg or "souvenir" in msg or "livre photo" in msg:
         return "livre_photo_a4_8p"
     return hint if hint else "brochure_corporate_4p"
+
+
+# ─── Sprint UX4 — Devis automatique (dry-run avant génération) ───────────────
+
+
+class DemandeDevis(BaseModel):
+    """Sprint UX4 : devis estimé avant génération (dry-run orchestrateur)."""
+    brief: str = Field(..., min_length=10)
+    pays: str = Field(default="CM")
+    langue: str = Field(default="fr")
+    medias_refs: Optional[list[str]] = None
+    cle_projet: Optional[str] = Field(default=None,
+        description="Si fourni : on évite l'orchestrateur (économie)")
+
+
+@router.post("/devis", tags=["Bureau — Designer Pro"])
+async def estimer_devis(
+    demande: DemandeDevis, current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Sprint UX4 — Devis automatique : appelle l'orchestrateur (dry-run) puis
+    calcule un coût estimé + compare au solde de l'user.
+
+    Pas de génération à ce stade. Idempotent. Coût : ~6 cr (1 appel Haiku).
+
+    Response :
+      mode_visuel_recommande, cle_projet_recommande, nombre_pages_estime,
+      credits_estimes, fcfa_user, credits_disponibles, peut_payer,
+      fallback_si_solde_insuffisant ('premium' / 'standard' / 'sans')
+    """
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde_unifie, COUTS_FORFAIT_FCFA,
+        MULTIPLICATEUR_YUKPO,
+    )
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+
+    # Orchestrateur dry-run (réutilise endpoint existant)
+    try:
+        orch = await orchestrer(
+            DemandeOrchestrer(
+                prompt=demande.brief, pays=demande.pays, langue=demande.langue,
+                medias_refs=demande.medias_refs,
+            ),
+            current_user,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Devis] orchestrateur échec : {e}")
+        raise HTTPException(500, f"Devis impossible : {e}")
+
+    mode_recommande = orch.mode_visuel_suggere or "premium"
+    cle_projet = demande.cle_projet or orch.cle_projet
+    nb_pages_estime = max(1, orch.cout_estime_credits // 600 if orch.cout_estime_credits else 4)
+
+    # Estimation coût détaillée (réplique la logique de bulk_generation.estimer_cout_total)
+    cout_par_image = {
+        "sans": 0, "standard": 15, "premium": 240,
+        "ultra": 560, "ultra_plus": 1200,
+    }.get(mode_recommande, 240)
+    nb_imgs_estime = max(1, nb_pages_estime // 2)   # ~1 image toutes les 2 pages
+    cout_llm_haiku = 600
+    cout_layout_opus = 1150 if mode_recommande in ("premium", "ultra", "ultra_plus") else 0
+    cout_picker_sonnet = 250 if mode_recommande in ("premium", "ultra", "ultra_plus") else 0
+    cout_creation_pages = nb_pages_estime * 20
+    credits_estimes = (cout_llm_haiku + cout_layout_opus + cout_picker_sonnet
+                       + cout_creation_pages + (cout_par_image * nb_imgs_estime))
+    fcfa_user = round(credits_estimes / MULTIPLICATEUR_YUKPO * 12)  # 1 cr ≈ 0.6 FCFA × 20 marge
+
+    # Solde
+    ok_solde, restants, source, msg_solde = await verifier_solde_unifie(current_user.user_id)
+    peut_payer = ok_solde and restants >= credits_estimes
+
+    # Fallback si solde insuffisant : trouve le mode dégradé qui rentre
+    fallback = None
+    if not peut_payer:
+        for fb in ("premium", "standard", "sans"):
+            if fb == mode_recommande:
+                continue
+            cout_fb_img = {"sans": 0, "standard": 15, "premium": 240}.get(fb, 0)
+            cout_fb = cout_llm_haiku + cout_creation_pages + (cout_fb_img * nb_imgs_estime)
+            if cout_fb <= restants:
+                fallback = fb
+                break
+
+    return {
+        "ok": True,
+        "mode_visuel_recommande": mode_recommande,
+        "cle_projet_recommande": cle_projet,
+        "label_projet": orch.label_projet,
+        "nombre_pages_estime": nb_pages_estime,
+        "nb_images_estime": nb_imgs_estime,
+        "credits_estimes": int(credits_estimes),
+        "fcfa_user": int(fcfa_user),
+        "credits_disponibles": int(restants),
+        "peut_payer": peut_payer,
+        "fallback_si_solde_insuffisant": fallback,
+        "directives_visuelles_pre": orch.directives_visuelles_pre,
+        "manques": orch.manques,
+        "questions_clarification": orch.questions_clarification,
+    }
 
 
 # ─── Sprint 1.7 — Auto-orchestrateur LLM (analyse pré-génération) ────────────

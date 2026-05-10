@@ -37,6 +37,11 @@ const CAT_LABELS: Record<string, string> = {
   filigrane: 'Filigrane', tampon: 'Tampon', reference_style: '🎨 Référence style',
 }
 
+// Sprint UX4 — emoji par mode visuel (cohérent avec selector options avancées)
+function modeEmoji(mode: string): string {
+  return ({ sans: '📋', standard: '✨', premium: '🎨', ultra: '🌟', ultra_plus: '🚀' } as any)[mode] || '✨'
+}
+
 function b64download(b64: string, filename: string, mime: string) {
   const bytes = atob(b64)
   const arr = new Uint8Array(bytes.length)
@@ -69,7 +74,14 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive]   = useState(0)
   const [modifInstr, setModifInstr]   = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
-  const [modeVisuel, setModeVisuel]   = useState<'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('sans')
+  // Sprint UX4 : default 'auto' = backend résout via orchestrateur
+  const [modeVisuel, setModeVisuel]   = useState<'auto' | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('auto')
+  const [utiliserCharte, setUtiliserCharte] = useState(true)
+
+  // Sprint UX4 — Devis automatique (debounced)
+  const [devis, setDevis] = useState<any | null>(null)
+  const [devisLoading, setDevisLoading] = useState(false)
+  const devisTimerRef = useRef<any>(null)
 
   const [creativite, setCreativite]     = useState(50)
   const [densite, setDensite]           = useState(50)
@@ -84,6 +96,7 @@ export default function DesignerProPanel() {
 
   // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
   const [showAdvanced, setShowAdvanced] = useState(false)
+
 
   // Sprint UX3 — Bulk CSV
   const [showBulk, setShowBulk] = useState(false)
@@ -191,7 +204,8 @@ export default function DesignerProPanel() {
       const refStyle = tousMedias.find(m => m.categorie === 'reference_style'
         && refsSelectionnees.includes(`${m.portee}:${m.media_id}`))
       const payload: any = { brief, pays, langue, medias_refs: refsSelectionnees, export_cmyk: true,
-        directives_visuelles: directives, mode_visuel: modeVisuel }
+        directives_visuelles: directives, mode_visuel: modeVisuel,
+        utiliser_charte: utiliserCharte }
       if (refStyle) {
         payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
@@ -269,6 +283,26 @@ export default function DesignerProPanel() {
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 200)
   }
+
+  // Sprint UX4 — Fetch devis quand brief assez long (debounced 800ms)
+  useEffect(() => {
+    if (devisTimerRef.current) clearTimeout(devisTimerRef.current)
+    if (!brief || brief.trim().length < 30) { setDevis(null); return }
+    devisTimerRef.current = setTimeout(async () => {
+      setDevisLoading(true)
+      try {
+        const r = await infographieProApi.devis({
+          brief, pays, langue, medias_refs: refsSelectionnees,
+          cle_projet: cleHint || undefined,
+        })
+        setDevis(r)
+      } catch {
+        setDevis(null)
+      } finally { setDevisLoading(false) }
+    }, 800)
+    return () => devisTimerRef.current && clearTimeout(devisTimerRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief, pays, langue, refsSelectionnees, cleHint])
 
   // Sprint UX3 — Bulk CSV : analyse
   const bulkAnalyser = async () => {
@@ -807,9 +841,61 @@ export default function DesignerProPanel() {
               "Ex : Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale.")}
             className={INPUT + ' resize-none leading-relaxed'} />
           <p className="text-[10px] text-gray-500 mt-1.5">
-            {t('designerPro.briefHint', "💡 Décris en langage naturel — Yukpo détecte format, mode visuel et directives automatiquement. Si tu as utilisé l'auto-orchestrateur ↑, ce champ est déjà pré-rempli.")}
+            {t('designerPro.briefHint', "💡 Décris en langage naturel — Yukpo détecte format, mode visuel et directives automatiquement.")}
           </p>
         </div>
+
+        {/* Sprint UX4 — Card devis automatique */}
+        {brief.trim().length >= 30 && (
+          <div className="space-y-2">
+            {devisLoading && !devis && (
+              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-600">
+                <Loader2 size={14} className="animate-spin" />
+                {t('designerPro.devisLoading', 'Estimation du coût en cours…')}
+              </div>
+            )}
+            {devis && devis.peut_payer && (
+              <div className="rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50 p-3 space-y-1">
+                <p className="text-xs font-bold text-emerald-900">
+                  {modeEmoji(devis.mode_visuel_recommande)} {t('designerPro.modeAutoDetected', '{{mode}} recommandé', { mode: devis.mode_visuel_recommande })}
+                  <span className="ml-2 text-[11px] text-emerald-700 font-normal">
+                    ({devis.label_projet} · {devis.nombre_pages_estime} page(s))
+                  </span>
+                </p>
+                <p className="text-xs text-emerald-800">
+                  {t('designerPro.devisEstime', 'Coût estimé')} : <b>{devis.fcfa_user.toLocaleString()} FCFA</b>
+                  <span className="text-[11px] opacity-70 ml-1">({devis.credits_estimes.toLocaleString()} crédits)</span>
+                  · Solde : {devis.credits_disponibles.toLocaleString()} crédits ✓
+                </p>
+              </div>
+            )}
+            {devis && !devis.peut_payer && (
+              <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 space-y-2">
+                <p className="text-xs font-bold text-amber-900">
+                  ⚠ {t('designerPro.creditsInsuffisants', 'Solde insuffisant')}
+                </p>
+                <p className="text-xs text-amber-800">
+                  Mode {devis.mode_visuel_recommande} demanderait {devis.fcfa_user.toLocaleString()} FCFA
+                  ({devis.credits_estimes.toLocaleString()} crédits). Tu as {devis.credits_disponibles.toLocaleString()} crédits.
+                </p>
+                {devis.fallback_si_solde_insuffisant && (
+                  <button onClick={() => setModeVisuel(devis.fallback_si_solde_insuffisant)}
+                    className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 rounded-lg">
+                    Utiliser le mode {devis.fallback_si_solde_insuffisant} à la place
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Sprint UX4 — Toggle "Utiliser ma charte de marque" (si brand kit défini) */}
+        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input type="checkbox" checked={utiliserCharte}
+            onChange={e => setUtiliserCharte(e.target.checked)}
+            className="accent-amber-600" />
+          {t('designerPro.utiliserCharte', 'Utiliser ma charte de marque (logo + couleurs + ToV)')}
+        </label>
 
         <button onClick={generer} disabled={loading || !brief.trim()} className={BTN_PRIMARY}>
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
@@ -885,14 +971,18 @@ export default function DesignerProPanel() {
             </div>
 
             <div>
-              <label className={LABEL}>{t('designerPro.visualMode', 'Mode visuel IA')}</label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
+              <label className={LABEL}>{t('designerPro.advancedOverride', 'Forcer un mode visuel (avancé)')}</label>
+              <p className="text-[10px] text-gray-500 mb-1">
+                Par défaut "auto" = Yukpo détecte le mode optimal. Force ici pour bypass.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
                 {([
+                  { v: 'auto',       emoji: '🤖', titleKey: 'designerPro.modeAuto',     fb: 'Auto (recommandé)', descKey: 'designerPro.modeAutoDesc',     fbDesc: 'IA décide selon brief' },
                   { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
                   { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
-                  { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants + vision' },
+                  { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants' },
                   { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',    fb: 'Ultra',             descKey: 'designerPro.modeUltraDesc',    fbDesc: 'Flux Pro Ultra' },
-                  { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',fb: 'Ultra+',            descKey: 'designerPro.modeUltraPlusDesc',fbDesc: 'Ensemble 3 modèles IA' },
+                  { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',fb: 'Ultra+',            descKey: 'designerPro.modeUltraPlusDesc',fbDesc: 'Ensemble 3 modèles' },
                 ] as const).map(opt => (
                   <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
                     className={`p-2.5 rounded-lg border-2 text-left transition-all ${

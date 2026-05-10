@@ -59,6 +59,11 @@ const CAT_LABEL_KEYS: Record<string, string> = {
   reference_style: 'designerPro.catReferenceStyle',
 }
 
+// Sprint UX4 — emoji par mode visuel
+function modeEmoji(mode: string): string {
+  return ({ sans: '📋', standard: '✨', premium: '🎨', ultra: '🌟', ultra_plus: '🚀' } as any)[mode] || '✨'
+}
+
 function b64download(b64: string, filename: string, mime: string) {
   const bytes = atob(b64)
   const arr = new Uint8Array(bytes.length)
@@ -83,7 +88,13 @@ export default function DesignerProPanel() {
   const [pageActive, setPageActive] = useState(0)
   const [modifInstr, setModifInstr] = useState('')
   const [loadingModif, setLoadingModif] = useState(false)
-  const [modeVisuel, setModeVisuel] = useState<'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('sans')
+  // Sprint UX4 : default 'auto' = backend résout via orchestrateur
+  const [modeVisuel, setModeVisuel] = useState<'auto' | 'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('auto')
+  const [utiliserCharte, setUtiliserCharte] = useState(true)
+  // Sprint UX4 — Devis automatique
+  const [devis, setDevis] = useState<any | null>(null)
+  const [devisLoading, setDevisLoading] = useState(false)
+  const devisTimerRef = useRef<any>(null)
 
   // Sprint 1.7 — Auto-orchestrateur LLM
   const [autoPrompt, setAutoPrompt] = useState('')
@@ -224,6 +235,7 @@ export default function DesignerProPanel() {
         payload.reference_style_ref = `${refStyle.portee}:${refStyle.media_id}`
       }
       if (brandLoraId) payload.brand_lora_id = brandLoraId
+      payload.utiliser_charte = utiliserCharte
       const r = autoMode
         ? await infographieProAPI.genererAuto({ ...payload, cle_projet_hint: cleHint || undefined })
         : await infographieProAPI.generer({ ...payload, cle_projet: cleHint || 'livret_deces_4p' })
@@ -303,6 +315,26 @@ export default function DesignerProPanel() {
     }
     toast.success(t('designerPro.autoApplied', 'Formulaire pré-rempli'))
   }
+
+  // Sprint UX4 — Fetch devis quand brief assez long (debounced 800ms)
+  useEffect(() => {
+    if (devisTimerRef.current) clearTimeout(devisTimerRef.current)
+    if (!brief || brief.trim().length < 30) { setDevis(null); return }
+    devisTimerRef.current = setTimeout(async () => {
+      setDevisLoading(true)
+      try {
+        const r = await infographieProAPI.devis({
+          brief, pays, langue, medias_refs: refsSelectionnees,
+          cle_projet: cleHint || undefined,
+        })
+        setDevis(r.data)
+      } catch {
+        setDevis(null)
+      } finally { setDevisLoading(false) }
+    }, 800)
+    return () => devisTimerRef.current && clearTimeout(devisTimerRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief, pays, langue, refsSelectionnees, cleHint])
 
   // Sprint UX3 — Bulk CSV (Sec)
   const bulkAnalyser = async () => {
@@ -763,8 +795,60 @@ export default function DesignerProPanel() {
           placeholder={t('designerPro.briefPlaceholder')}
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
         <p className="text-[10px] text-gray-500 -mt-2">
-          💡 {t('designerPro.briefHint', "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ.")}
+          💡 {t('designerPro.briefHint', "Décris en langage naturel — Yukpo détecte format/mode/directives auto.")}
         </p>
+
+        {/* Sprint UX4 — Card devis automatique */}
+        {brief.trim().length >= 30 && (
+          <div className="space-y-2">
+            {devisLoading && !devis && (
+              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-600">
+                <Loader2 size={14} className="animate-spin" />
+                {t('designerPro.devisLoading', 'Estimation du coût en cours…')}
+              </div>
+            )}
+            {devis && devis.peut_payer && (
+              <div className="rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-green-50 p-3 space-y-1">
+                <p className="text-xs font-bold text-emerald-900">
+                  {modeEmoji(devis.mode_visuel_recommande)} {t('designerPro.modeAutoDetected', '{{mode}} recommandé', { mode: devis.mode_visuel_recommande })}
+                  <span className="ml-2 text-[11px] text-emerald-700 font-normal">
+                    ({devis.label_projet} · {devis.nombre_pages_estime} page(s))
+                  </span>
+                </p>
+                <p className="text-xs text-emerald-800">
+                  {t('designerPro.devisEstime', 'Coût estimé')} : <b>{devis.fcfa_user.toLocaleString()} FCFA</b>
+                  <span className="text-[11px] opacity-70 ml-1">({devis.credits_estimes.toLocaleString()} crédits)</span>
+                  · Solde : {devis.credits_disponibles.toLocaleString()} crédits ✓
+                </p>
+              </div>
+            )}
+            {devis && !devis.peut_payer && (
+              <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 space-y-2">
+                <p className="text-xs font-bold text-amber-900">
+                  ⚠ {t('designerPro.creditsInsuffisants', 'Solde insuffisant')}
+                </p>
+                <p className="text-xs text-amber-800">
+                  Mode {devis.mode_visuel_recommande} demanderait {devis.fcfa_user.toLocaleString()} FCFA
+                  ({devis.credits_estimes.toLocaleString()} crédits). Tu as {devis.credits_disponibles.toLocaleString()} crédits.
+                </p>
+                {devis.fallback_si_solde_insuffisant && (
+                  <button onClick={() => setModeVisuel(devis.fallback_si_solde_insuffisant)}
+                    className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-1.5 rounded-lg">
+                    Utiliser le mode {devis.fallback_si_solde_insuffisant} à la place
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Sprint UX4 — Toggle "Utiliser ma charte" */}
+        <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+          <input type="checkbox" checked={utiliserCharte}
+            onChange={e => setUtiliserCharte(e.target.checked)}
+            className="accent-amber-600" />
+          {t('designerPro.utiliserCharte', 'Utiliser ma charte de marque')}
+        </label>
 
         <button onClick={generer} disabled={loading || !brief.trim()}
           className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
@@ -831,10 +915,14 @@ export default function DesignerProPanel() {
 
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-800">
-                {t('designerPro.visualMode')}
+                {t('designerPro.advancedOverride', 'Forcer un mode visuel (avancé)')}
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <p className="text-[10px] text-gray-500 -mt-1">
+                Par défaut "auto" = Yukpo détecte le mode optimal.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {([
+                  { v: 'auto',       emoji: '🤖', titleKey: 'designerPro.modeAuto',       descKey: 'designerPro.modeAutoDesc' },
                   { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',       descKey: 'designerPro.modeSansDesc' },
                   { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard',   descKey: 'designerPro.modeStandardDesc' },
                   { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',    descKey: 'designerPro.modePremiumDesc' },

@@ -274,6 +274,11 @@ export const infographieProAPI = {
     prompt: string; pays?: string; langue?: string;
     profil?: ProfilInfographie;
   }) => api.post('/bureau/infographie-pro/orchestrer', data, { timeout: 60_000 }),
+  // Sprint UX4 — Devis automatique avant génération
+  devis: (data: {
+    brief: string; pays?: string; langue?: string;
+    medias_refs?: string[]; cle_projet?: string;
+  }) => api.post('/bureau/infographie-pro/devis', data, { timeout: 60_000 }),
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: (formData: FormData) =>
     api.post('/bureau/infographie-pro/bulk/analyser', formData, {

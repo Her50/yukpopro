@@ -1010,7 +1010,15 @@
     "advancedHint": "— format, mode visuel, sliders, langue/pays",
     "briefHint": "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ.",
     "bulkTitle": "Génération bulk depuis CSV/XLSX",
-    "bulkSub": "Uploade un CSV/XLSX (≤50 lignes). Yukpo détecte le mapping et génère N visuels personnalisés."
+    "bulkSub": "Uploade un CSV/XLSX (≤50 lignes). Yukpo détecte le mapping et génère N visuels personnalisés.",
+    "modeAuto": "Auto (recommandé)",
+    "modeAutoDesc": "IA décide selon brief",
+    "modeAutoDetected": "{{mode}} recommandé",
+    "advancedOverride": "Forcer un mode visuel (avancé)",
+    "devisLoading": "Estimation du coût en cours…",
+    "devisEstime": "Coût estimé",
+    "creditsInsuffisants": "Solde insuffisant",
+    "utiliserCharte": "Utiliser ma charte de marque"
   },
   "organisation": {
     "createTitle": "Créer une organisation",
