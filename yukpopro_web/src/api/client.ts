@@ -22,7 +22,10 @@ import type {
 
 // ── Axios instance ────────────────────────────────────────────────────────────
 
-const http: any = axios.create({
+// Instance axios partagée — exposée pour les composants externes
+// (ex: @yukpo/admin-dashboard) qui ont besoin d'hériter de l'auth + baseURL
+// configurés ici (intercepteurs JWT + gestion 401 ci-dessous).
+export const http: any = axios.create({
   baseURL: "/api/v1",
   timeout: 120_000,  // 2 min — agents Yukpo peuvent être lents
   headers: { "Content-Type": "application/json" },

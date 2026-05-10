@@ -17,9 +17,11 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@yukpo/admin-dashboard": ["../packages/admin-dashboard/src/index.ts"],
+      "@yukpo/admin-dashboard/*": ["../packages/admin-dashboard/src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../packages/admin-dashboard/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

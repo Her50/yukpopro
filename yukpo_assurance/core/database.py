@@ -896,6 +896,7 @@ class ConsommationTokenDB(Base):
     credits_debites = Column(Float, default=0.0)            # crédits Yukpo déduits (200× cout_fcfa)
     module = Column(String(100), nullable=True)             # chat | traduction | rapport | slides
     session_id = Column(String(100), nullable=True)
+    app_origine = Column(String(10), nullable=False, default="pro", index=True)  # pro | sec
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
 
 
@@ -987,6 +988,7 @@ class ConsommationBureauDB(Base):
     cout_fcfa = Column(Float, default=0.0)
     credits_debites = Column(Float, default=0.0)
     module = Column(String(100), nullable=True)   # redaction|ocr|audio|traduction|infographie|gestion
+    app_origine = Column(String(10), nullable=False, default="sec", index=True)  # pro | sec
     cree_le = Column(DateTime, default=datetime.utcnow, index=True)
 
 
@@ -1470,6 +1472,10 @@ async def init_db() -> None:
         ("bureau_bons_travail",  "client_whatsapp",            "VARCHAR(30)",  None),
         ("bureau_bons_travail",  "notif_fin_envoyee",          "BOOLEAN",      "FALSE"),
         ("bureau_bons_travail",  "notif_fin_horodatage",       "TIMESTAMP",    None),
+        # Sprint admin-cross — séparation app source pour le dashboard unifié.
+        # Pré-existant : default 'pro' / 'sec' selon la table.
+        ("consommations_tokens", "app_origine",                "VARCHAR(10)",  "'pro'"),
+        ("consommations_bureau", "app_origine",                "VARCHAR(10)",  "'sec'"),
     ]
     async with engine.begin() as conn:
         for table, col, col_type, default in _nouvelles_colonnes:

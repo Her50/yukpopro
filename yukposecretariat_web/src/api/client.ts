@@ -37,15 +37,28 @@ api.interceptors.response.use(
 )
 
 // ─── Auth (partagée avec YukpoPro) ────────────────────────────────────────────
-const authApi = axios.create({
+// Exposé pour les composants externes (ex: @yukpo/admin-dashboard) qui ont
+// besoin d'attaquer /api/v1/* sans le préfixe /bureau (admin cross-app, auth…).
+export const httpRoot = axios.create({
   baseURL: import.meta.env.VITE_API_URL?.replace('/bureau', '') || '/api/v1',
-  timeout: 15_000,
+  timeout: 30_000,
 })
-authApi.interceptors.request.use(cfg => {
+httpRoot.interceptors.request.use(cfg => {
   const token = localStorage.getItem('bureau_token')
   if (token) cfg.headers.Authorization = `Bearer ${token}`
   return cfg
 })
+httpRoot.interceptors.response.use(
+  r => r,
+  err => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('bureau_token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(err)
+  },
+)
+const authApi = httpRoot
 
 export const authAPI = {
   login: (email: string, password: string) =>

@@ -89,6 +89,7 @@ from api.routes_pro_agent import router as pro_agent_router
 from api.routes_pro_generateurs import router as pro_generateurs_router
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
+from api.routes_admin_cross import router as admin_cross_router
 from api.routes_pro_abonnement import router as pro_abonnement_router
 from api.routes_pro_organizations import router as pro_orgs_router
 from api.routes_admin_paiements import router as admin_paiements_router
@@ -721,6 +722,7 @@ app.include_router(pro_agent_router, prefix="/api/v1/pro/agent", tags=["Platefor
 app.include_router(pro_generateurs_router, prefix="/api/v1/pro", tags=["Plateforme Pro — Rapports & Slides"])
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])
+app.include_router(admin_cross_router,    prefix="/api/v1/admin-cross",     tags=["Administration cross-app (Pro + Sec)"])
 app.include_router(pro_abonnement_router, prefix="/api/v1/pro/abonnement",  tags=["Plateforme Pro — Abonnements"])
 app.include_router(pro_orgs_router,       prefix="/api/v1",                 tags=["Plateforme Pro — Organisations"])
 app.include_router(admin_paiements_router, prefix="/api/v1/admin/paiements", tags=["Admin — Paiements MoMo"])
