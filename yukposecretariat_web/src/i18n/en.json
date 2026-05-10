@@ -1088,7 +1088,8 @@
     "startRecord": "Enregistrer une note vocale",
     "stopRecord": "Arrêter l'enregistrement",
     "recordingStarted": "🎤 Enregistrement…",
-    "micRefused": "Micro refusé : "
+    "micRefused": "Micro refusé : ",
+    "suggestionsLabel": "Suggestions"
   },
   "analytics": {
     "title": "Tableau de bord — Analytics",

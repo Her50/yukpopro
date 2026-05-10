@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { redactionAPI, ocrAPI, audioAPI } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
 import { CountryPicker } from '../components/CountryPicker'
+import SuggestionsChips, { type Suggestion } from '../components/SuggestionsChips'
 import { useLongOps, useLongOpField } from '../store/longOpsStore'
 import { acquireWakeLock, releaseWakeLock, wakeLockSupported } from '../utils/wakeLock'
 import { useState } from 'react'
@@ -32,15 +33,15 @@ interface TypeDoc { cle: string; label: string; categorie: string; prix_base_fcf
 
 type RedactionResult = {
   titre: string; contenu_markdown: string; prix_fcfa: number; nb_mots: number;
-  fichier_id?: string; word_base64?: string
+  fichier_id?: string; word_base64?: string; suggestions?: Suggestion[]
 }
 type OcrResult = {
   texte_structure: string; type_document: string; confiance: number;
-  word_base64?: string; titre?: string
+  word_base64?: string; titre?: string; suggestions?: Suggestion[]
 }
 type AudioResult = {
   transcription_brute: string; document_formate: string; duree_secondes?: number;
-  word_base64?: string; type_document: string
+  word_base64?: string; type_document: string; suggestions?: Suggestion[]
 }
 
 type TabKey = 'texte' | 'scan' | 'audio' | 'doc'
@@ -311,6 +312,10 @@ function TabTexte({ reformuler, setReformuler }: { reformuler: string; setReform
           <div className="prose prose-sm max-w-none text-gray-700 border-t border-gray-100 pt-4">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{resultat.contenu_markdown}</ReactMarkdown>
           </div>
+          <SuggestionsChips
+            suggestions={resultat.suggestions}
+            onPick={(p) => { setReformuler(resultat.contenu_markdown + `\n\n[${p}]`); setTimeout(() => generer(), 0) }}
+          />
         </div>
       )}
     </>
@@ -448,6 +453,8 @@ function TabScan({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           downloadName="document-ocr.docx"
           onAmeliorer={() => onAmeliorer(resultat.texte_structure)}
           color="green"
+          suggestions={resultat.suggestions}
+          onPickSuggestion={(p) => onAmeliorer(resultat.texte_structure + `\n\n[${p}]`)}
         />
       )}
     </>
@@ -592,6 +599,8 @@ function TabAudio({ onAmeliorer }: { onAmeliorer: (texte: string) => void }) {
           downloadName="transcription.docx"
           onAmeliorer={() => onAmeliorer(resultat.document_formate)}
           color="purple"
+          suggestions={resultat.suggestions}
+          onPickSuggestion={(p) => onAmeliorer(resultat.document_formate + `\n\n[${p}]`)}
           extra={(
             <details className="border-t border-gray-100 pt-3 mt-3">
               <summary className="text-xs text-gray-400 cursor-pointer">{t('redaction.rawTranscriptLabel')}</summary>
@@ -692,6 +701,8 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
           markdown={resultat.texte_reformule}
           onAmeliorer={() => onAmeliorer(resultat.texte_reformule!)}
           color="amber"
+          suggestions={(resultat as any).suggestions as Suggestion[] | undefined}
+          onPickSuggestion={(p) => onAmeliorer(resultat.texte_reformule! + `\n\n[${p}]`)}
         />
       )}
     </>
@@ -702,12 +713,15 @@ function TabDocExistant({ onAmeliorer }: { onAmeliorer: (texte: string) => void 
 
 function ResultatBlock({
   title, subtitle, markdown, wordB64, downloadName, onAmeliorer, color, extra,
+  suggestions, onPickSuggestion,
 }: {
   title: string; subtitle?: string; markdown: string;
   wordB64?: string; downloadName?: string;
   onAmeliorer: () => void;
   color: 'green' | 'purple' | 'amber';
   extra?: React.ReactNode;
+  suggestions?: Suggestion[];
+  onPickSuggestion?: (prompt: string) => void;
 }) {
   const { t } = useTranslation()
   const colorMap = {
@@ -738,6 +752,9 @@ function ResultatBlock({
       <div className="prose prose-sm max-w-none text-gray-700 border-t border-gray-100 pt-3">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
       </div>
+      {onPickSuggestion && (
+        <SuggestionsChips suggestions={suggestions} onPick={onPickSuggestion} />
+      )}
       {extra}
     </div>
   )

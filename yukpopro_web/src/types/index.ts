@@ -290,6 +290,18 @@ export interface NavigationSuggestion {
   description: string;
 }
 
+/**
+ * Suggestion intelligente post-génération produite par Haiku côté backend.
+ * Affichée comme chip cliquable sous le message assistant — sur clic, le
+ * `prompt_suggere` est injecté dans le textarea et le user peut éditer
+ * avant d'envoyer (ou envoyer tel quel).
+ */
+export interface SuggestionSuite {
+  action: string;          // id snake_case (ex: "convertir_slides")
+  label: string;           // 3-7 mots verbe d'action (chip label)
+  prompt_suggere: string;  // phrase complète prête à coller dans le chat
+}
+
 export interface CopiloteMessage {
   id: string;
   role: "user" | "assistant";
@@ -301,6 +313,7 @@ export interface CopiloteMessage {
   document_ref?: { id: number; titre: string; type: string };
   cout_llm?: CoutLLM | null;
   navigation_suggestions?: NavigationSuggestion[];
+  suggestions_suite?: SuggestionSuite[];  // Sprint G1 — chips post-génération
 }
 
 export interface CopiloteResponse {

@@ -7,6 +7,7 @@ import { infographieProAPI } from '../api/client'
 import { CountryPicker } from './CountryPicker'
 import { LanguagePicker } from './LanguagePicker'
 import { useAuth } from '../context/AuthContext'
+import SuggestionsChips, { type Suggestion } from './SuggestionsChips'
 
 type Portee = 'session' | 'compte'
 
@@ -40,6 +41,7 @@ interface ResultatPro {
   projet_json_id?: string
   cle_projet_detectee?: string
   download_url?: string
+  suggestions?: Suggestion[]
 }
 
 const CAT_SESSION = ['photo', 'illustration', 'scan', 'qr', 'icone', 'reference_style']
@@ -297,14 +299,15 @@ export default function DesignerProPanel() {
     }
   }
 
-  const modifier = async () => {
+  const modifier = async (instructionsOverride?: string) => {
     if (!resultat?.projet_json_id) { toast.error(t('designerPro.errGenerateFirst')); return }
-    if (!modifInstr.trim()) { toast.error(t('designerPro.errDescribeChange')); return }
+    const instr = (instructionsOverride ?? modifInstr).trim()
+    if (!instr) { toast.error(t('designerPro.errDescribeChange')); return }
     setLoadingModif(true)
     try {
       const r = await infographieProAPI.modifier({
         projet_id: resultat.projet_json_id,
-        instructions: modifInstr,
+        instructions: instr,
         medias_refs_supplementaires: refsSelectionnees,
         pays,
         directives_visuelles: directives,
@@ -319,6 +322,11 @@ export default function DesignerProPanel() {
     } finally {
       setLoadingModif(false)
     }
+  }
+
+  const onPickSuggestion = (prompt: string) => {
+    setModifInstr(prompt)
+    if (resultat?.projet_json_id) modifier(prompt)
   }
 
   // Sprint 1.7 — Auto-orchestrateur LLM
@@ -1029,6 +1037,8 @@ export default function DesignerProPanel() {
             </p>
           )}
 
+          <SuggestionsChips suggestions={resultat.suggestions} onPick={onPickSuggestion} />
+
           {resultat.pages_png_base64 && resultat.pages_png_base64.length > 0 && (
             <>
               <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
@@ -1115,7 +1125,7 @@ export default function DesignerProPanel() {
               <textarea value={modifInstr} onChange={e => setModifInstr(e.target.value)} rows={2}
                 placeholder={t('designerPro.modifyPlaceholder')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
-              <button onClick={modifier} disabled={loadingModif || !modifInstr.trim()}
+              <button onClick={() => modifier()} disabled={loadingModif || !modifInstr.trim()}
                 className="mt-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl disabled:opacity-50 flex items-center gap-2 shadow-sm transition-colors">
                 {loadingModif ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                 {loadingModif ? t('designerPro.applying') : t('designerPro.apply')}

@@ -18,10 +18,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, infographieProApi, type UploadedFile } from "@/api/client";
 import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 import { cn } from "@/components/ui";
-import type { CopiloteMessage, NavigationSuggestion } from "@/types";
+import type { CopiloteMessage, NavigationSuggestion, SuggestionSuite } from "@/types";
 import { METIERS, PAYS_AFRIQUE } from "@/types";
 import { METIERS_CONFIG } from "@/data/metiers-config";
 
@@ -147,19 +147,14 @@ export const ChatPage = () => {
         orch.intent_detecte === "generation_visuel"
       );
 
-      // Cas 1 : génération détectée mais SOLDE INSUFFISANT → bloquer avec explication
+      // Cas 1 : génération détectée mais SOLDE INSUFFISANT → toast + lien recharge.
+      // Pas de prix affiché (UX volonté produit : ne JAMAIS exposer les coûts en chat).
       if (isGeneration && orch.peut_payer === false) {
-        const fb = orch.fallback_si_solde_insuffisant;
-        const fbMsg = fb
-          ? `\n\n💡 Mode économique disponible : **${fb.mode}** à ${fb.fcfa_user.toLocaleString()} FCFA (${fb.credits.toLocaleString()} crédits).`
-          : "";
         updateLastAssistantMessage(
-          `⚠️ **Solde insuffisant pour cette génération**\n\n` +
-          `${orch.template_label} demande ${orch.fcfa_user.toLocaleString()} FCFA (${orch.credits_estimes.toLocaleString()} crédits).\n` +
-          `Tu as ${orch.credits_disponibles.toLocaleString()} crédits.${fbMsg}\n\n` +
-          `[→ Recharger mes crédits](/abonnement)`,
+          `⚠️ Crédits insuffisants pour cette tâche.\n\n[→ Recharger mon compte](/abonnement)`,
           null,
         );
+        toast.error("Crédits insuffisants. Rechargez votre compte pour continuer.", { duration: 6000 });
         return;
       }
 
@@ -168,11 +163,13 @@ export const ChatPage = () => {
         const cible = orch.endpoint_cible || "";
         try {
           if (orch.type_sortie === "rapport" || cible.includes("rapport")) {
-            const r = await generateurApi.rapport(orch.payload_pret as any);
+            const r: any = await generateurApi.rapport(orch.payload_pret as any);
             updateLastAssistantMessage(
               `✓ ${orch.template_label} généré.\n` +
               (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
               null, r.fichier_genere ? [r.fichier_genere] : undefined,
+              null, undefined,
+              (r.suggestions as SuggestionSuite[]) ?? undefined,
             );
             if (r.fichier_genere) {
               addDocument({
@@ -185,11 +182,13 @@ export const ChatPage = () => {
             return;
           }
           if (orch.type_sortie === "slides" || cible.includes("slides")) {
-            const r = await generateurApi.slides(orch.payload_pret as any);
+            const r: any = await generateurApi.slides(orch.payload_pret as any);
             updateLastAssistantMessage(
               `✓ ${orch.template_label} généré.\n` +
               (r.fichier_genere ? `[Télécharger](${generateurApi.telecharger(r.fichier_genere)})` : ""),
               null, r.fichier_genere ? [r.fichier_genere] : undefined,
+              null, undefined,
+              (r.suggestions as SuggestionSuite[]) ?? undefined,
             );
             if (r.fichier_genere) {
               addDocument({
@@ -201,7 +200,38 @@ export const ChatPage = () => {
             }
             return;
           }
-          // generation_visuel → bascule Designer Pro (TODO Sprint G1.2)
+          if (orch.type_sortie === "visuel" || orch.intent_detecte === "generation_visuel" || cible.includes("infographie")) {
+            // Bascule Designer Pro — auto-orchestrateur visuel (1 prompt → analyse + génération)
+            const r: any = await infographieProApi.genererAuto({
+              brief: content.trim(),
+              pays: profil?.pays,
+              langue: "fr",
+            });
+            const fichiers: string[] = [];
+            if (Array.isArray(r.pages)) {
+              for (const p of r.pages) {
+                if (p?.fichier_id) fichiers.push(p.fichier_id);
+                else if (p?.url) fichiers.push(p.url);
+              }
+            } else if (r.fichier_id) {
+              fichiers.push(r.fichier_id);
+            }
+            updateLastAssistantMessage(
+              `✓ ${orch.template_label || "Visuel"} généré.`,
+              null, fichiers.length > 0 ? fichiers : undefined,
+              null, undefined,
+              (r.suggestions as SuggestionSuite[]) ?? undefined,
+            );
+            if (fichiers.length > 0) {
+              addDocument({
+                titre: orch.template_label || content.slice(0, 60),
+                type: "visuel", fichier: fichiers[0],
+                contexteConversation: content,
+              });
+              toast.success("Visuel prêt");
+            }
+            return;
+          }
         } catch (genErr: any) {
           // Si l'endpoint cible échoue → fallback chat normal pour ne pas bloquer
           // eslint-disable-next-line no-console
@@ -613,7 +643,14 @@ export const ChatPage = () => {
             // ── Messages ────────────────────────────────────────────────────
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
               {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} />
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  onPickSuggestion={(prompt) => {
+                    setInput(prompt);
+                    inputRef.current?.focus();
+                  }}
+                />
               ))}
               <div ref={messagesEndRef} />
             </div>
@@ -910,6 +947,33 @@ const WelcomeScreen = ({
 
 // ── Bulle de message ──────────────────────────────────────────────────────────
 
+const SuggestionsSuiteChips = ({
+  suggestions, onPick,
+}: {
+  suggestions: SuggestionSuite[];
+  onPick: (prompt: string) => void;
+}) => {
+  if (!suggestions || suggestions.length === 0) return null;
+  return (
+    <div className="mt-3">
+      <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Suggestions de suite</div>
+      <div className="flex flex-wrap gap-2">
+        {suggestions.map((s) => (
+          <button
+            key={s.action}
+            type="button"
+            onClick={() => onPick(s.prompt_suggere)}
+            title={s.prompt_suggere}
+            className="px-3 py-1.5 rounded-full border border-yukpo-500/40 bg-yukpo-500/10 text-yukpo-200 text-xs font-medium hover:bg-yukpo-500/20 hover:border-yukpo-400 transition-colors"
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const NavSuggestionButtons = ({ suggestions }: { suggestions: NavigationSuggestion[] }) => {
   const navigate = useNavigate();
   if (!suggestions || suggestions.length === 0) return null;
@@ -937,7 +1001,12 @@ const NavSuggestionButtons = ({ suggestions }: { suggestions: NavigationSuggesti
   );
 };
 
-const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
+const MessageBubble = ({
+  message, onPickSuggestion,
+}: {
+  message: CopiloteMessage;
+  onPickSuggestion?: (prompt: string) => void;
+}) => {
   const isUser = message.role === "user";
   const proseRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -1093,6 +1162,14 @@ const MessageBubble = ({ message }: { message: CopiloteMessage }) => {
         {/* Boutons de navigation vers les modules */}
         {message.navigation_suggestions && message.navigation_suggestions.length > 0 && !message.loading && (
           <NavSuggestionButtons suggestions={message.navigation_suggestions} />
+        )}
+
+        {/* Sprint G1 — Suggestions intelligentes post-génération (Haiku) */}
+        {message.suggestions_suite && message.suggestions_suite.length > 0 && !message.loading && (
+          <SuggestionsSuiteChips
+            suggestions={message.suggestions_suite}
+            onPick={(prompt) => onPickSuggestion?.(prompt)}
+          />
         )}
 
         {/* Tokens consommés (transparent, discret — pas de montant) */}
