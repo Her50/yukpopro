@@ -27,6 +27,31 @@ _DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "generated"
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _slugifier(texte: str, max_len: int = 50) -> str:
+    """Convertit un texte libre en slug ASCII-safe pour filename.
+
+    Exemples :
+      "Carte de visite Yukpo 5 personnes" -> "carte_de_visite_yukpo_5_personnes"
+      "Flyer A3 anti-tabac MINSANTE Cameroun" -> "flyer_a3_anti_tabac_minsante_cameroun"
+      "Rapport — Annuel 2026 (v2.1)" -> "rapport_annuel_2026_v2_1"
+      "" -> "document"
+    """
+    import re
+    import unicodedata
+    if not texte or not texte.strip():
+        return "document"
+    # Normaliser accents
+    norm = unicodedata.normalize("NFKD", texte)
+    ascii_only = norm.encode("ascii", "ignore").decode("ascii")
+    # Lowercase + remplace tout sauf alphanum par _
+    slug = re.sub(r"[^a-zA-Z0-9]+", "_", ascii_only.lower())
+    # Trim _ multiples + bordure
+    slug = re.sub(r"_+", "_", slug).strip("_")
+    if not slug:
+        return "document"
+    return slug[:max_len].rstrip("_")
+
+
 class DemandeFreeform(BaseModel):
     brief: str = Field(..., min_length=10, max_length=5000)
     pays: str = Field(default="CM")
@@ -135,8 +160,13 @@ async def generer_freeform(
         except Exception as e:
             logger.debug(f"[Freeform] CMYK skip : {e}")
 
-    # 4. Sauvegarde
-    fichier_id = f"bureau_freeform_{current_user.user_id}_{int(time.time())}.pdf"
+    # 4. Sauvegarde — filename parlant : bureau_freeform_<user_id>_<slug_titre>_<ts>.pdf
+    # Le slug est extrait du titre du layout produit par le LLM. Préfixe
+    # `bureau_freeform_` conservé pour le routing /bureau/documents (cf.
+    # ChatPage MessageBubble qui détecte ce préfixe).
+    titre_layout = (layout_json.get("titre") or demande.brief or "document")[:80]
+    slug = _slugifier(titre_layout, max_len=50)
+    fichier_id = f"bureau_freeform_{current_user.user_id}_{slug}_{int(time.time())}.pdf"
     chemin = _DATA_DIR / fichier_id
     chemin.write_bytes(pdf_bytes)
 

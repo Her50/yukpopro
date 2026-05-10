@@ -90,8 +90,15 @@ async def generer_video_endpoint(
         raise HTTPException(502, f"Génération vidéo échouée : {str(e)[:200]}")
     duree_ms = int((time.time() - t0) * 1000)
 
-    # Sauvegarder MP4 sur disque
-    fichier_id = f"video_{current_user.user_id}_{int(time.time())}_{demande.mode}.mp4"
+    # Sauvegarder MP4 — prefix bureau_ pour routing /bureau/documents +
+    # slug du prompt pour filename parlant.
+    import re as _re
+    import unicodedata as _ud
+    _norm = _ud.normalize("NFKD", demande.prompt[:80] or "video")
+    _slug = _re.sub(r"_+", "_",
+        _re.sub(r"[^a-zA-Z0-9]+", "_", _norm.encode("ascii", "ignore").decode().lower())
+    ).strip("_")[:40] or "video"
+    fichier_id = f"bureau_video_{current_user.user_id}_{_slug}_{demande.mode}_{int(time.time())}.mp4"
     chemin = _DATA_DIR / fichier_id
     chemin.write_bytes(mp4_bytes)
 
