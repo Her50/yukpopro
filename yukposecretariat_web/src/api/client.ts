@@ -269,6 +269,11 @@ export const infographieProAPI = {
     medias_refs_supplementaires?: string[]; pays?: string;
     directives_visuelles?: Record<string, number>;
   }) => api.post('/bureau/infographie-pro/modifier', data, { timeout: 360_000 }),
+  // Sprint 1.7 — Auto-orchestrateur LLM : 1 prompt → analyse complète
+  orchestrer: (data: {
+    prompt: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie;
+  }) => api.post('/bureau/infographie-pro/orchestrer', data, { timeout: 60_000 }),
 }
 
 // ─── Traduction ───────────────────────────────────────────────────────────────

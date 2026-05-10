@@ -84,6 +84,11 @@ export default function DesignerProPanel() {
   const [loadingModif, setLoadingModif] = useState(false)
   const [modeVisuel, setModeVisuel] = useState<'sans' | 'standard' | 'premium' | 'ultra' | 'ultra_plus'>('sans')
 
+  // Sprint 1.7 — Auto-orchestrateur LLM
+  const [autoPrompt, setAutoPrompt] = useState('')
+  const [orchestrating, setOrchestrating] = useState(false)
+  const [orchestration, setOrchestration] = useState<any | null>(null)
+
   // Directives visuelles (sliders Phase 3)
   const [creativite, setCreativite] = useState(50)
   const [densite, setDensite] = useState(50)
@@ -217,6 +222,39 @@ export default function DesignerProPanel() {
     }
   }
 
+  // Sprint 1.7 — Auto-orchestrateur LLM
+  const orchestrer = async () => {
+    if (!autoPrompt.trim()) { toast.error(t('designerPro.autoErrEmpty', 'Décris ton besoin')); return }
+    setOrchestrating(true); setOrchestration(null)
+    try {
+      const r = await infographieProAPI.orchestrer({ prompt: autoPrompt, pays, langue })
+      const data = r.data
+      setOrchestration(data)
+      if (data?.confiance >= 0.85) {
+        toast.success(`${t('designerPro.autoDetected', 'Détecté')} : ${data.label_projet} (${Math.round(data.confiance * 100)}%)`)
+      } else {
+        toast(`${Math.round((data?.confiance || 0) * 100)}% — vérifie / précise`)
+      }
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { detail?: string } }; message?: string }
+      toast.error(err.response?.data?.detail || err.message || t('designerPro.autoErr', 'Orchestrateur indisponible'))
+    } finally { setOrchestrating(false) }
+  }
+
+  const appliquerOrchestration = () => {
+    if (!orchestration) return
+    setBrief(orchestration.brief_enrichi || autoPrompt)
+    setCleHint(orchestration.cle_projet || '')
+    setAutoMode(false)
+    if (orchestration.mode_visuel_suggere) setModeVisuel(orchestration.mode_visuel_suggere)
+    const dv = orchestration.directives_visuelles_pre || {}
+    if (typeof dv.creativite === 'number') setCreativite(dv.creativite)
+    if (typeof dv.densite_texte === 'number') setDensite(dv.densite_texte)
+    if (typeof dv.importance_images === 'number') setImportanceImg(dv.importance_images)
+    if (typeof dv.elegance === 'number') setElegance(dv.elegance)
+    toast.success(t('designerPro.autoApplied', 'Formulaire pré-rempli'))
+  }
+
   const cats = porteeUpload === 'session' ? CAT_SESSION : CAT_COMPTE
 
   return (
@@ -228,6 +266,95 @@ export default function DesignerProPanel() {
         <p className="text-xs text-amber-800 mt-1">
           {t('designerPro.subheading')}
         </p>
+      </div>
+
+      {/* ── Sprint 1.7 — Auto-orchestrateur LLM (hero) ───────────────────── */}
+      <div className="rounded-2xl border-2 border-violet-300 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-pink-50 p-5 space-y-3">
+        <div className="flex items-start gap-2">
+          <Wand2 size={18} className="text-violet-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-violet-900">
+              {t('designerPro.autoTitle', 'Décris ton besoin — l\'IA s\'occupe du reste')}
+            </p>
+            <p className="text-[11px] text-violet-700 leading-relaxed mt-0.5">
+              {t('designerPro.autoSub', "Pas besoin de parcourir 30 templates : Yukpo détecte le bon format, suggère le mode visuel, identifie les manques et pré-remplit le formulaire.")}
+            </p>
+          </div>
+        </div>
+        <textarea
+          value={autoPrompt}
+          onChange={e => setAutoPrompt(e.target.value)}
+          rows={3}
+          placeholder={t('designerPro.autoPlaceholder',
+            "Ex : Je veux un flyer A5 pour annoncer la rentrée scolaire de mon école avec les photos des classes ; ou : Faire-part de décès de mon père M. Jean MBARGA, livret 8 pages avec les familles, programme et plan d'accès.")}
+          className="w-full rounded-xl border border-violet-300 bg-white/80 px-3 py-2.5 text-sm text-violet-950 placeholder-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none leading-relaxed"
+        />
+        <button onClick={orchestrer} disabled={orchestrating || !autoPrompt.trim()}
+          className="w-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
+          {orchestrating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+          {orchestrating
+            ? t('designerPro.autoLoading', 'Analyse en cours…')
+            : t('designerPro.autoCta', 'Détecter automatiquement')}
+        </button>
+
+        {orchestration && (
+          <div className="rounded-xl bg-white border border-violet-200 p-3 space-y-2">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <p className="text-xs text-violet-600 font-semibold">
+                  {orchestration.type_projet === 'mono' ? t('designerPro.autoMono', 'Visuel mono-page') : t('designerPro.autoMulti', 'Projet multi-page')}
+                </p>
+                <p className="text-sm font-bold text-gray-900">{orchestration.label_projet}</p>
+                <p className="text-[11px] text-gray-500">{orchestration.description_projet}</p>
+              </div>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                orchestration.confiance >= 0.85
+                  ? 'bg-green-100 text-green-700'
+                  : orchestration.confiance >= 0.65
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {Math.round(orchestration.confiance * 100)}% {t('designerPro.autoConfidence', 'confiance')}
+              </span>
+            </div>
+            {Array.isArray(orchestration.alternatives) && orchestration.alternatives.length > 0 && (
+              <div className="text-[11px] text-gray-600">
+                <span className="font-semibold">{t('designerPro.autoAlts', 'Alternatives')} : </span>
+                {orchestration.alternatives.map((a: any) => a.label).join(' · ')}
+              </div>
+            )}
+            {Array.isArray(orchestration.manques) && orchestration.manques.length > 0 && (
+              <div className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 text-amber-800">
+                <span className="font-semibold">⚠ {t('designerPro.autoMissing', 'Manques')} : </span>{orchestration.manques.join(', ')}
+              </div>
+            )}
+            {Array.isArray(orchestration.questions_clarification) && orchestration.questions_clarification.length > 0 && (
+              <div className="text-[11px] bg-blue-50 border border-blue-200 rounded-lg px-2 py-1.5 text-blue-800 space-y-0.5">
+                <p className="font-semibold">{t('designerPro.autoQuestions', 'Pour affiner')} :</p>
+                {orchestration.questions_clarification.map((q: string, i: number) => (
+                  <p key={i}>• {q}</p>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 text-[11px] text-gray-600">
+              <span className="bg-gray-100 rounded px-2 py-0.5">
+                {t('designerPro.autoMode', 'Mode')} : <b className="text-violet-700">{orchestration.mode_visuel_suggere}</b>
+              </span>
+              {orchestration.archetype_dominant && (
+                <span className="bg-gray-100 rounded px-2 py-0.5">
+                  {t('designerPro.autoArche', 'Archétype')} : <b className="text-violet-700">{orchestration.archetype_dominant}</b>
+                </span>
+              )}
+              <span className="bg-gray-100 rounded px-2 py-0.5">
+                ~{orchestration.cout_estime_credits} {t('designerPro.credits', 'crédits')}
+              </span>
+            </div>
+            <button onClick={appliquerOrchestration}
+              className="w-full bg-violet-100 hover:bg-violet-200 text-violet-800 font-semibold py-2 rounded-xl transition-colors text-xs mt-2">
+              {t('designerPro.autoApply', 'Pré-remplir le formulaire ↓')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Médiathèque */}

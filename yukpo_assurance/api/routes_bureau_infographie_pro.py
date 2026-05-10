@@ -579,6 +579,256 @@ Retourne UNIQUEMENT la clé exacte (ex: "livret_deces_8p"), rien d'autre."""
     return hint if hint else "brochure_corporate_4p"
 
 
+# ─── Sprint 1.7 — Auto-orchestrateur LLM (analyse pré-génération) ────────────
+
+
+class DemandeOrchestrer(BaseModel):
+    """Sprint 1.7 — L'utilisateur saisit un prompt libre. Le LLM détecte tout."""
+    prompt: str = Field(..., min_length=10,
+        description="Description du besoin en langage naturel (ex: 'Je veux un flyer A5 pour la rentrée scolaire de mon école avec photos des classes')")
+    pays: str = Field(default="CM")
+    langue: str = Field(default="fr")
+    profil: Optional[ProfilDesigner] = None
+
+
+class ReponseOrchestrer(BaseModel):
+    """Analyse complète du besoin utilisateur — utilisée pour pré-remplir le formulaire."""
+    type_projet: str = Field(..., description="'mono' (1 page : flyer/banniere/carte_visite) ou 'multi' (livret/brochure)")
+    cle_projet: str = Field(..., description="Clé exacte du gabarit/projet détecté")
+    label_projet: str
+    description_projet: str
+    confiance: float = Field(..., ge=0.0, le=1.0)
+    alternatives: list[dict] = Field(default_factory=list,
+        description="Top 3 alternatives crédibles : [{cle, label, score, raison}]")
+    faisabilite: str = Field(..., description="'ok' | 'partielle' | 'impossible'")
+    manques: list[str] = Field(default_factory=list,
+        description="Éléments manquants pour une génération optimale (ex: 'photo du défunt', 'logo entreprise')")
+    questions_clarification: list[str] = Field(default_factory=list,
+        description="0-3 questions à poser à l'utilisateur si confiance < 0.85")
+    brief_enrichi: str = Field(..., description="Brief reformulé/enrichi prêt à passer au générateur")
+    mode_visuel_suggere: str = Field(default="standard",
+        description="Mode IA visuelle suggéré selon ambition perçue : sans|standard|premium|ultra|ultra_plus")
+    directives_visuelles_pre: dict = Field(default_factory=dict,
+        description="Pré-remplissage des curseurs (creativite, densite_texte, importance_images, elegance)")
+    archetype_dominant: Optional[str] = Field(default=None,
+        description="Archétype de composition principal suggéré (grille_classique|asymetric|bento|fullbleed_cover|timeline_horiz)")
+    cout_estime_credits: int = Field(default=0,
+        description="Estimation des crédits qui seront consommés (LLM + génération + image IA)")
+
+
+@router.post("/orchestrer", response_model=ReponseOrchestrer, tags=["Bureau — Designer Pro"])
+async def orchestrer(
+    demande: DemandeOrchestrer,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Sprint 1.7 — Auto-orchestrateur LLM : un seul prompt utilisateur en
+    langage naturel. Le LLM analyse, détecte le type de projet, propose des
+    alternatives, identifie les manques, suggère un mode visuel et des curseurs.
+
+    L'utilisateur n'a pas à parcourir 30+ gabarits. Il décrit son besoin →
+    l'IA fait la classification + faisabilité + pré-remplissage en 1 appel.
+
+    Coût : ~6 cr (1 appel Haiku ~800/400 tokens).
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    from modules.bureau import gabarits_livret as catalog_multi
+    from modules.bureau.infographe import GABARITS as catalog_mono
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm,
+    )
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Compact catalog payload pour le LLM
+    mono_compact = [
+        {
+            "cle": c, "label": v.get("label"),
+            "categorie": v.get("categorie"),
+            "format_mm": [v.get("width_mm"), v.get("height_mm")],
+            "description": v.get("description", ""),
+        }
+        for c, v in catalog_mono.items()
+    ]
+    multi_compact = [
+        {
+            "cle": c, "label": v.get("label"),
+            "categorie": v.get("categorie"),
+            "format_mm": list(v.get("format_mm") or []),
+            "nombre_pages": len(v.get("pages") or []),
+            "description": v.get("description", ""),
+        }
+        for c, v in catalog_multi.PROJETS_INFOGRAPHIE.items()
+    ]
+
+    profil = demande.profil.model_dump(exclude_none=True) if demande.profil else {}
+
+    prompt = f"""Tu es ASSISTANT D'ORCHESTRATION pour la suite Yukpo Designer Pro.
+Mission : analyser le besoin de l'utilisateur en langage naturel et déterminer
+EXACTEMENT le bon gabarit + paramètres optimaux à pré-remplir dans le formulaire.
+
+L'utilisateur n'a pas envie de parcourir 30+ templates. Tu dois :
+  1. Détecter le type de visuel (mono-page ou multi-page) et la clé exacte
+  2. Évaluer ta confiance + proposer 2 alternatives crédibles
+  3. Identifier les manques (médias/infos qui amélioreraient le résultat)
+  4. Poser 0-3 questions de clarification SEULEMENT si confiance < 85%
+  5. Reformuler le brief en version enrichie prête pour le générateur
+  6. Suggérer mode visuel IA (sans/standard/premium/ultra/ultra_plus) selon ambition
+  7. Pré-remplir les curseurs créativité/densité/images/élégance (0-100)
+  8. Choisir l'archétype de composition dominant
+
+═══════════════════════════════════════════════════
+  PROMPT UTILISATEUR
+═══════════════════════════════════════════════════
+\"\"\"{demande.prompt[:2000]}\"\"\"
+
+Pays : {demande.pays}   Langue : {demande.langue}
+Métier : {profil.get("metier", "(non précisé)")}
+Organisation : {profil.get("nom_organisation", "(non précisée)")}
+
+═══════════════════════════════════════════════════
+  CATALOGUE MONO-PAGE (GABARITS — visuels en 1 seule page)
+═══════════════════════════════════════════════════
+{json.dumps(mono_compact, ensure_ascii=False)[:6000]}
+
+═══════════════════════════════════════════════════
+  CATALOGUE MULTI-PAGE (PROJETS — livrets, brochures, livres photo)
+═══════════════════════════════════════════════════
+{json.dumps(multi_compact, ensure_ascii=False)[:6000]}
+
+═══════════════════════════════════════════════════
+  ARCHÉTYPES DE COMPOSITION (5)
+═══════════════════════════════════════════════════
+- grille_classique : grille régulière, lecture linéaire (rapports, éditorial sobre)
+- asymetric        : ancrage dominant + texte décalé (modernité, impact)
+- bento            : grille modulaire dense (data viz, dashboard, portfolio)
+- fullbleed_cover  : visuel pleine page + texte minimal (impact maximum, hero)
+- timeline_horiz   : progression horizontale (parcours, étapes, story-telling)
+
+═══════════════════════════════════════════════════
+  MODES VISUELS IA
+═══════════════════════════════════════════════════
+- sans       : pas d'image IA (templates seuls)             — gratuit, ~10s
+- standard   : Flux schnell                                 — 9 FCFA/img, ~1s
+- premium    : Flux dev + variants + vision                 — 144 FCFA/img, ~10s
+- ultra      : Flux Pro Ultra (cinéma)                      — 336 FCFA/img, ~15s
+- ultra_plus : ensemble Flux+Recraft+Ideogram + pick auto   — 720 FCFA/img, ~25s
+
+═══════════════════════════════════════════════════
+  RÈGLES
+═══════════════════════════════════════════════════
+1. Choisis EXACTEMENT 1 gabarit du bon catalogue (mono OU multi).
+2. Si le brief est ambigu (ex: "un visuel pour mon entreprise") → confiance basse
+   + 1-3 questions ciblées + alternative la plus probable en main.
+3. faisabilite = 'impossible' SEULEMENT si le brief n'a aucun lien avec un visuel
+   imprimable/digital (ex: "écris-moi un poème"). Sinon 'ok' ou 'partielle'.
+4. brief_enrichi = version reformulée plus structurée que celle de l'user, avec
+   suggestions de champs manquants intégrées comme placeholders à compléter.
+5. Curseurs : déduis du ton du brief (formel/audacieux, dense/aéré, etc.).
+6. mode_visuel_suggere = "ultra_plus" si brief mentionne marque/luxe/identité forte ;
+   "ultra" si visuel type photo cinématique ; "premium" si standard pro ; "standard"
+   si rapide/économique ; "sans" si l'user ne veut pas d'IA visuelle (templates).
+
+═══════════════════════════════════════════════════
+  FORMAT DE SORTIE — JSON STRICT
+═══════════════════════════════════════════════════
+{{
+  "type_projet": "mono | multi",
+  "cle_projet": "cle_exacte_du_catalogue",
+  "label_projet": "label affiché",
+  "description_projet": "description courte",
+  "confiance": 0.92,
+  "alternatives": [
+    {{"cle": "...", "label": "...", "score": 0.78, "raison": "..."}},
+    {{"cle": "...", "label": "...", "score": 0.65, "raison": "..."}}
+  ],
+  "faisabilite": "ok | partielle | impossible",
+  "manques": ["photo du défunt", "logo organisation", ...],
+  "questions_clarification": ["Format A4 ou A5 ?", "..."],
+  "brief_enrichi": "Version reformulée enrichie...",
+  "mode_visuel_suggere": "premium",
+  "directives_visuelles_pre": {{"creativite": 60, "densite_texte": 40,
+                                 "importance_images": 75, "elegance": 80}},
+  "archetype_dominant": "fullbleed_cover",
+  "cout_estime_credits": 850
+}}
+
+Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.ANALYSE,
+            json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+        )
+    except Exception as e:
+        logger.error(f"[Designer Pro/Orchestrer] LLM échoué : {e}")
+        raise HTTPException(500, f"Orchestrateur LLM indisponible : {e}")
+
+    try:
+        data = json.loads(rep.contenu)
+    except json.JSONDecodeError:
+        import re
+        m = re.search(r'\{.*\}', rep.contenu, re.DOTALL)
+        data = json.loads(m.group()) if m else {}
+
+    if not isinstance(data, dict) or not data.get("cle_projet"):
+        raise HTTPException(500, "Orchestrateur : réponse LLM invalide")
+
+    # Validation : la clé proposée doit exister dans le bon catalogue
+    cle = data.get("cle_projet", "")
+    type_proj = data.get("type_projet", "")
+    if type_proj == "mono" and cle not in catalog_mono:
+        # Fallback : on cherche dans multi
+        if cle in catalog_multi.PROJETS_INFOGRAPHIE:
+            data["type_projet"] = "multi"
+        else:
+            data["cle_projet"] = "flyer_a5"
+            data["type_projet"] = "mono"
+            data["confiance"] = min(float(data.get("confiance", 0.5)), 0.5)
+    elif type_proj == "multi" and cle not in catalog_multi.PROJETS_INFOGRAPHIE:
+        if cle in catalog_mono:
+            data["type_projet"] = "mono"
+        else:
+            data["cle_projet"] = "brochure_corporate_4p"
+            data["type_projet"] = "multi"
+            data["confiance"] = min(float(data.get("confiance", 0.5)), 0.5)
+
+    # Débit LLM
+    try:
+        await debiter_llm(
+            current_user.user_id, modele=rep.modele_utilise,
+            tokens_input=int(rep.tokens_input or 0),
+            tokens_output=int(rep.tokens_output or 0),
+            module="infographie",
+        )
+    except Exception:
+        pass
+
+    # Normalisation des champs requis
+    return ReponseOrchestrer(
+        type_projet=data.get("type_projet", "multi"),
+        cle_projet=data.get("cle_projet", ""),
+        label_projet=data.get("label_projet", ""),
+        description_projet=data.get("description_projet", ""),
+        confiance=float(data.get("confiance", 0.5)),
+        alternatives=(data.get("alternatives") or [])[:3],
+        faisabilite=data.get("faisabilite", "ok"),
+        manques=(data.get("manques") or [])[:8],
+        questions_clarification=(data.get("questions_clarification") or [])[:3],
+        brief_enrichi=data.get("brief_enrichi", demande.prompt),
+        mode_visuel_suggere=data.get("mode_visuel_suggere", "standard"),
+        directives_visuelles_pre=data.get("directives_visuelles_pre") or {},
+        archetype_dominant=data.get("archetype_dominant"),
+        cout_estime_credits=int(data.get("cout_estime_credits", 500)),
+    )
+
+
 @router.post("/generer-auto", tags=["Bureau — Designer Pro"])
 async def generer_auto(
     demande: DemandeAutoPro,

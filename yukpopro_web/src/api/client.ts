@@ -1068,6 +1068,11 @@ export const infographieProApi = {
     medias_refs_supplementaires?: string[]; pays?: string;
     directives_visuelles?: Record<string, number>;
   }) => (await http.post("/bureau/infographie-pro/modifier", payload, { timeout: 360_000 })).data,
+  // Sprint 1.7 — Auto-orchestrateur LLM : 1 prompt → analyse complète
+  orchestrer: async (payload: {
+    prompt: string; pays?: string; langue?: string;
+    profil?: ProfilInfographie;
+  }) => (await http.post("/bureau/infographie-pro/orchestrer", payload, { timeout: 60_000 })).data,
 };
 
 // ── Enquêtes & Études ────────────────────────────────────────────────────────
