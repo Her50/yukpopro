@@ -23,13 +23,16 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      # Mode monorepo : on opère depuis la RACINE du repo pour que packages/
-      # admin-dashboard (importé via alias Vite) soit inclus dans le contexte
-      # de build. `vercel pull` lit le rootDirectory configuré côté projet
-      # (yukpopro_web), `vercel build` exécute le buildCommand dans ce
-      # rootDirectory tout en ayant accès à tout le monorepo, et
-      # `vercel deploy --prebuilt` upload le résultat sans rebuild.
+      # Mode monorepo : tout s'execute depuis yukpopro_web/ (qui a le
+      # package.json + le rootDirectory du projet Vercel) MAIS le checkout
+      # GH Actions a clone tout le repo, donc l'alias Vite
+      # ../packages/admin-dashboard/src resout correctement vers le parent.
+      # `vercel deploy --prebuilt` upload .vercel/output/ uniquement (pas
+      # le cwd entier), ce qui contourne la limitation Vercel CLI sur
+      # l'upload limite au cwd.
+
       - name: Pull Vercel project settings
+        working-directory: yukpopro_web
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -37,6 +40,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Build artifacts
+        working-directory: yukpopro_web
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -45,6 +49,7 @@ jobs:
           VITE_API_URL: https://yukpopro-backend.fly.dev
 
       - name: Deploy prebuilt
+        working-directory: yukpopro_web
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
