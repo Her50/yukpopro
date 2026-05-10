@@ -248,6 +248,42 @@ export const generateurApi = {
     return data;
   },
 
+  /**
+   * Sprint G1 — Auto-orchestrateur génération documents.
+   * L'utilisateur tape un brief en langage naturel, le backend détecte
+   * automatiquement le type d'output, le template, le mode et le format.
+   * Retourne un devis estimé + payload prêt-à-l'emploi pour l'endpoint cible.
+   * Utilisé depuis ChatPage pour intégrer les générations directement dans le chat.
+   */
+  orchestrer: async (params: {
+    brief: string;
+    contexte_fichiers?: string;
+    langue_forcee?: string;
+    type_sortie_force?: "rapport" | "slides";
+    mode_force?: "flash" | "standard" | "complet" | "expert";
+  }): Promise<{
+    intent_detecte: string;
+    type_sortie: "rapport" | "slides";
+    template_id: string;
+    template_label: string;
+    mode_recommande: "flash" | "standard" | "complet" | "expert";
+    format_sortie: "docx" | "pptx" | "markdown";
+    langue: string;
+    parametres_extraits: Record<string, string>;
+    credits_estimes: number;
+    fcfa_user: number;
+    duree_estimee_secondes: number;
+    credits_disponibles: number;
+    peut_payer: boolean;
+    fallback_si_solde_insuffisant: { mode: string; credits: number; fcfa_user: number } | null;
+    endpoint_cible: string;
+    payload_pret: Record<string, unknown>;
+    raisonnement: string;
+  }> => {
+    const { data } = await http.post("/pro/orchestrer", params, { timeout: 60_000 });
+    return data;
+  },
+
   telecharger: (nomFichier: string) =>
     `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`,
 
@@ -1082,6 +1118,16 @@ export const infographieProApi = {
   multilingual: async (payload: {
     projet_id: string; langues_cibles: string[];
   }) => (await http.post("/bureau/infographie-pro/multilingual", payload, { timeout: 600_000 })).data,
+  // Sprint C1 — Chat conversationnel multi-tours
+  chatSession: async () =>
+    (await http.get("/bureau/infographie-pro/chat/session")).data,
+  chatMessage: async (payload: {
+    message: string; medias_refs?: string[]; pays?: string; langue?: string;
+  }) => (await http.post("/bureau/infographie-pro/chat/message", payload, { timeout: 60_000 })).data,
+  chatUpdateProjetActif: async (projet_id: string) =>
+    (await http.post("/bureau/infographie-pro/chat/session/projet-actif", { projet_id })).data,
+  chatReset: async () =>
+    (await http.post("/bureau/infographie-pro/chat/reset", {})).data,
   // Sprint UX3 — Bulk CSV/XLSX
   bulkAnalyser: async (formData: FormData) =>
     (await http.post("/bureau/infographie-pro/bulk/analyser", formData, {

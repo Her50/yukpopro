@@ -12,8 +12,11 @@ import { useAuthStore, useProfilStore, useUIStore } from "@/store";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const NAV_KEYS = [
+  // Le chat orchestrera désormais TOUTE la génération de documents (rapports,
+  // slides, conversion) ET les visuels Designer Pro. L'item "/generateurs"
+  // (Yukpo Studio) est retiré du menu — la route reste accessible en
+  // backup/legacy via URL directe (/generateurs).
   { path: "/chat",           icon: MessageSquare,   key: "chat",           badge: "PRO", adminOnly: false },
-  { path: "/generateurs",    icon: FileText,        key: "generateurs",    badge: null,  adminOnly: false },
   { path: "/reunions",       icon: Users,           key: "reunions",       badge: null,  adminOnly: false },
   { path: "/mes-documents",  icon: FolderOpen,      key: "documents",      badge: null,  adminOnly: false },
   { path: "/traduction",     icon: Languages,       key: "traduction",     badge: null,  adminOnly: false },

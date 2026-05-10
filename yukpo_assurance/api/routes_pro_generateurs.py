@@ -2599,3 +2599,237 @@ async def convertir_fichier(
     except Exception as exc:
         logger.error(f"[Conversion] Erreur : {exc}", exc_info=True)
         raise HTTPException(500, f"Erreur lors de la conversion : {str(exc)[:300]}")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Sprint G1 — Auto-orchestrateur génération documents YukpoPro.
+# ═════════════════════════════════════════════════════════════════════════════
+# L'utilisateur tape un brief en langage naturel + (optionnel) uploade des
+# fichiers. Sonnet 4.6 détecte intent + template + mode + format + langue,
+# retourne un devis estimé. Le frontend (ChatPage) affiche la carte de
+# confirmation, puis si l'user confirme, appelle l'endpoint cible avec
+# payload_pret en bypass.
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Catalogue des templates pro (extrait du frontend GenerateursPage.tsx).
+# (id, type_sortie, label, métier dominant, mots-clés indicatifs).
+_CATALOGUE_TEMPLATES_G1 = [
+    ("rapport_audit",     "rapport", "Rapport d'audit",         "auditeur",   "audit interne externe contrôle CIMA OHADA"),
+    ("rapport_financier", "rapport", "Rapport financier",       "DAF",        "états financiers bilan compte résultat trésorerie"),
+    ("note_de_synthese",  "rapport", "Note de synthèse",        "analyste",   "synthèse résumé executif briefing"),
+    ("rapport_analyse",   "rapport", "Rapport d'analyse",       "analyste",   "analyse données performance KPI"),
+    ("plan_action",       "rapport", "Plan d'action",           "consultant", "plan stratégique roadmap mesures"),
+    ("compte_rendu",      "rapport", "Compte-rendu",            "secretaire", "CR réunion compte-rendu PV"),
+    ("note_juridique",    "rapport", "Note juridique",          "juriste",    "note juridique conformité OHADA"),
+    ("rapport_rh",        "rapport", "Rapport RH",              "DRH",        "ressources humaines social bilan"),
+    ("slides_executive",  "slides",  "Présentation direction",  "directeur",  "présentation CA résultats trimestriels conseil"),
+    ("slides_commercial", "slides",  "Présentation commerciale","commercial", "pitch produit présentation client offre"),
+    ("slides_formation",  "slides",  "Présentation formation",  "formateur",  "support formation cours pédagogique"),
+    ("slides_projet",     "slides",  "Présentation projet",     "chef projet","présentation projet jalons livrables"),
+]
+_CREDITS_PAR_MODE_G1 = {"flash": 2000, "standard": 4500, "complet": 12000, "expert": 25000}
+_DUREE_PAR_MODE_G1 = {"flash": 120, "standard": 300, "complet": 900, "expert": 1500}
+
+
+class DemandeOrchestrer(BaseModel):
+    brief: str = Field(..., min_length=10,
+        description="Description en langage naturel du document souhaité")
+    contexte_fichiers: Optional[str] = Field(default=None,
+        description="Texte déjà extrait des fichiers uploadés (côté frontend)")
+    langue_forcee: Optional[str] = Field(default=None,
+        description="Force une langue cible (sinon auto-détection)")
+    type_sortie_force: Optional[str] = Field(default=None,
+        description="Force 'rapport' ou 'slides' (sinon auto)")
+    mode_force: Optional[str] = Field(default=None,
+        description="Force 'flash' | 'standard' | 'complet' | 'expert'")
+
+
+@router.post("/orchestrer", summary="Sprint G1 — Auto-orchestrateur génération documents")
+async def orchestrer_generation_doc(
+    demande: DemandeOrchestrer,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Sprint G1 — Reçoit un brief utilisateur, détecte automatiquement le type
+    d'output (rapport/slides), le template précis dans le catalogue, le mode,
+    le format et la langue, et retourne un devis prêt-à-l'emploi.
+
+    Le ChatPage affiche la carte de confirmation, puis appelle l'endpoint cible
+    (`/rapports/generer` ou `/slides/generer`) avec `payload_pret` (zéro choix
+    manuel pour l'utilisateur).
+
+    Coût LLM : ~2k tokens in + 500 out (Sonnet) = ~$0.013 = 7.8 FCFA réel.
+    Forfait `copilote_orchestrer` ≈ 1 FCFA → 12 FCFA user → marge 1.5×.
+    Loss leader assumé : marge récupérée sur la génération qui suit.
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    from modules.pro.service_credits import (
+        verifier_solde_suffisant, debiter_forfait_fcfa,
+    )
+    import json as _json
+    import re as _re
+
+    ok, restants, _plan, _msg = await verifier_solde_suffisant(current_user.user_id)
+    if not ok:
+        raise HTTPException(402,
+            f"CREDITS_EPUISES|restants={int(restants)}|orchestrer requiert au moins 10 crédits")
+
+    catalogue_str = "\n".join(
+        f"- {tid} ({ttype}) : {tlabel} — métier {tmetier} — mots-clés : {tkw}"
+        for (tid, ttype, tlabel, tmetier, tkw) in _CATALOGUE_TEMPLATES_G1
+    )
+    contexte_block = ""
+    if demande.contexte_fichiers:
+        ctx = demande.contexte_fichiers[:8000]
+        contexte_block = f"\n\nCONTEXTE FICHIERS UPLOADÉS :\n{ctx}\n"
+
+    prompt = f"""Tu es directeur de production documentaire. Analyse ce brief et retourne
+un JSON STRICT décrivant exactement ce que tu vas produire.
+
+BRIEF UTILISATEUR :
+\"\"\"{demande.brief}\"\"\"
+{contexte_block}
+CATALOGUE DES TEMPLATES DISPONIBLES :
+{catalogue_str}
+
+REGLES :
+1. template_id = EXACTEMENT un id du catalogue ci-dessus (jamais inventer).
+2. type_sortie ∈ rapport | slides.
+3. mode ∈ flash (1p, 2min) | standard (5-10p, 5min) | complet (15-40p, 15min) | expert (50-100p, 25min).
+   - flash : urgence ou simplicité explicite
+   - standard : par défaut
+   - complet : "détaillé", "audit", "trimestriel", "annuel"
+   - expert : recherche approfondie, gros volume
+4. format_sortie : "docx" pour rapports, "pptx" pour slides, "markdown" si demandé.
+5. langue : ISO court (fr/en/es/pt/ar/de/zh/sw/wo/ha/ln/am/ru/hi/tr) — auto-détection.
+6. parametres_extraits : entités explicites du brief uniquement.
+7. credits_estimes : flash=2000, standard=4500, complet=12000, expert=25000.
+8. duree_estimee_secondes : flash=120, standard=300, complet=900, expert=1500.
+
+FORMAT JSON STRICT :
+{{
+  "intent_detecte": "generation_rapport" | "generation_slides" | "ambigu",
+  "type_sortie": "rapport" | "slides",
+  "template_id": "id_du_catalogue",
+  "template_label": "Label humain",
+  "mode_recommande": "flash" | "standard" | "complet" | "expert",
+  "format_sortie": "docx" | "pptx" | "markdown",
+  "langue": "fr|en|...",
+  "parametres_extraits": {{ "nom_entreprise": "...", "periode": "..." }},
+  "credits_estimes": 4500,
+  "duree_estimee_secondes": 300,
+  "raisonnement_court": "Pourquoi ce choix (1 phrase max, en français)"
+}}
+
+Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.PRECISION,
+            json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+            max_tokens_override=800,
+        )
+        contenu = rep.contenu or "{}"
+        try:
+            data = _json.loads(contenu)
+        except _json.JSONDecodeError:
+            m = _re.search(r"\{.*\}", contenu, _re.DOTALL)
+            data = _json.loads(m.group()) if m else {}
+    except Exception as e:
+        logger.error(f"[G1/Orchestrer] Échec LLM : {e}")
+        raise HTTPException(500, f"Orchestration échouée : {str(e)[:200]}")
+
+    ids_valides = {tid for (tid, *_) in _CATALOGUE_TEMPLATES_G1}
+    template_id = data.get("template_id") or "rapport_analyse"
+    if template_id not in ids_valides:
+        type_s = data.get("type_sortie") or "rapport"
+        candidats = [t for t in _CATALOGUE_TEMPLATES_G1 if t[1] == type_s]
+        template_id = candidats[0][0] if candidats else "rapport_analyse"
+        data["template_id"] = template_id
+
+    if demande.type_sortie_force in ("rapport", "slides"):
+        data["type_sortie"] = demande.type_sortie_force
+    if demande.langue_forcee:
+        data["langue"] = demande.langue_forcee
+    if demande.mode_force in _CREDITS_PAR_MODE_G1:
+        data["mode_recommande"] = demande.mode_force
+
+    mode_rec = data.get("mode_recommande") or "standard"
+    credits_estimes = max(500, int(data.get("credits_estimes") or _CREDITS_PAR_MODE_G1.get(mode_rec, 4500)))
+    duree_estimee = int(data.get("duree_estimee_secondes") or _DUREE_PAR_MODE_G1.get(mode_rec, 300))
+    fcfa_user = int(credits_estimes * 0.6)
+    solde_credits = float(restants)
+    peut_payer = solde_credits >= credits_estimes
+
+    type_sortie = data.get("type_sortie") or "rapport"
+    if type_sortie == "slides":
+        endpoint_cible = "/api/v1/pro/slides/generer"
+        payload_pret = {
+            "type_doc": template_id.replace("slides_", ""),
+            "instruction": demande.brief,
+            "mode": mode_rec,
+            "langue": data.get("langue") or "fr",
+            "format_sortie": data.get("format_sortie") or "pptx",
+        }
+    else:
+        endpoint_cible = "/api/v1/pro/rapports/generer"
+        payload_pret = {
+            "type_doc": template_id,
+            "instruction": demande.brief,
+            "mode": mode_rec,
+            "langue": data.get("langue") or "fr",
+            "format_sortie": data.get("format_sortie") or "docx",
+        }
+    params_extraits = data.get("parametres_extraits") or {}
+    if isinstance(params_extraits, dict) and params_extraits:
+        payload_pret["meta"] = params_extraits
+
+    try:
+        await debiter_forfait_fcfa(
+            user_id=current_user.user_id,
+            cout_fcfa=1.0,
+            module="copilote_orchestrer",
+        )
+    except Exception as _e:
+        logger.debug(f"[G1/Orchestrer] forfait non bloquant : {_e}")
+
+    fallback = None
+    if not peut_payer:
+        ordre = ["flash", "standard", "complet", "expert"]
+        try:
+            idx = ordre.index(mode_rec)
+            for i in range(idx - 1, -1, -1):
+                cand_mode = ordre[i]
+                cand_credits = _CREDITS_PAR_MODE_G1[cand_mode]
+                if solde_credits >= cand_credits:
+                    fallback = {
+                        "mode": cand_mode,
+                        "credits": cand_credits,
+                        "fcfa_user": int(cand_credits * 0.6),
+                    }
+                    break
+        except ValueError:
+            pass
+
+    return {
+        "intent_detecte":         data.get("intent_detecte") or "generation_rapport",
+        "type_sortie":            type_sortie,
+        "template_id":            template_id,
+        "template_label":         data.get("template_label") or template_id.replace("_", " ").title(),
+        "mode_recommande":        mode_rec,
+        "format_sortie":          data.get("format_sortie") or ("pptx" if type_sortie == "slides" else "docx"),
+        "langue":                 data.get("langue") or "fr",
+        "parametres_extraits":    params_extraits,
+        "credits_estimes":        credits_estimes,
+        "fcfa_user":              fcfa_user,
+        "duree_estimee_secondes": duree_estimee,
+        "credits_disponibles":    int(solde_credits),
+        "peut_payer":             peut_payer,
+        "fallback_si_solde_insuffisant": fallback,
+        "endpoint_cible":         endpoint_cible,
+        "payload_pret":           payload_pret,
+        "raisonnement":           data.get("raisonnement_court") or "",
+    }
