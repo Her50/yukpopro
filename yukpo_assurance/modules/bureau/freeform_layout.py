@@ -670,37 +670,33 @@ def _draw_ornement(c, el: Ornement, off_x: float, off_y: float, fmt_h_pt: float)
 
 
 def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> None:
-    """Télécharge le SVG depuis Iconify + rasterise dans le canvas.
-    Cache local en mémoire pour éviter re-download si l'icône est répétée."""
+    """Télécharge l'icône Iconify en PNG (rendu côté serveur api.iconify.design)
+    et l'embed dans le canvas via drawImage. PNG choisi plutôt que SVG pour
+    éviter la dépendance pycairo/svglib (besoin libcairo système non
+    disponible sur image Docker minimale). À 200 DPI et taille typique
+    8-30mm, le rendu PNG est indistinguable du vectoriel à l'œil.
+    Cache mémoire local pour éviter re-download si icône répétée."""
     x = off_x + mm_to_pt(el.x_mm)
     y = off_y + fmt_h_pt - mm_to_pt(el.y_mm + el.h_mm)
     w = mm_to_pt(el.w_mm)
     h = mm_to_pt(el.h_mm)
     couleur = el.couleur if el.couleur and el.couleur != "currentColor" else "#000000"
 
-    svg_bytes = _telecharger_icone_iconify(el.prefix, el.name, couleur)
-    if not svg_bytes:
+    # Taille PNG demandée à Iconify : 4× la taille pt pour avoir une bonne
+    # résolution même à l'agrandissement (200 DPI équivalent).
+    target_px = max(64, int(max(w, h) * 4))
+    png_bytes = _telecharger_icone_iconify(el.prefix, el.name, couleur, target_px)
+    if not png_bytes:
         # Placeholder cercle si icône introuvable
         c.setFillColorRGB(0.85, 0.85, 0.85)
         c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
         return
 
     try:
-        from reportlab.graphics import renderPDF
-        from svglib.svglib import svg2rlg
+        from reportlab.lib.utils import ImageReader
         import io as _io
-        drawing = svg2rlg(_io.BytesIO(svg_bytes))
-        if not drawing:
-            return
-        # Scale drawing pour matcher w x h pt (svg natif est ~24x24 pour Iconify)
-        sw = drawing.width or 24
-        sh = drawing.height or 24
-        scale_x = w / sw
-        scale_y = h / sh
-        drawing.scale(scale_x, scale_y)
-        drawing.width = w
-        drawing.height = h
-        renderPDF.draw(drawing, c, x, y)
+        ir = ImageReader(_io.BytesIO(png_bytes))
+        c.drawImage(ir, x, y, w, h, mask="auto", preserveAspectRatio=True)
     except Exception as e:
         logger.debug(f"[freeform/icone] Render {el.prefix}:{el.name} : {e}")
         c.setFillColorRGB(0.85, 0.85, 0.85)
@@ -710,23 +706,28 @@ def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> No
 _ICONIFY_CACHE: dict[str, bytes] = {}
 
 
-def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str) -> Optional[bytes]:
-    """Télécharge SVG depuis api.iconify.design avec cache mémoire local
-    (par run de rendu — pas de cache disque pour rester simple)."""
-    cle = f"{prefix}:{name}:{couleur_hex}"
+def _telecharger_icone_iconify(
+    prefix: str, name: str, couleur_hex: str, taille_px: int = 96,
+) -> Optional[bytes]:
+    """Télécharge PNG depuis api.iconify.design avec cache mémoire local.
+    URL pattern : https://api.iconify.design/{prefix}/{name}.png?width=W&color=X
+    Pas de dépendance native (pas svglib/pycairo) — Iconify rend le PNG
+    côté serveur. Cache par (prefix, name, couleur, taille)."""
+    cle = f"{prefix}:{name}:{couleur_hex}:{taille_px}"
     if cle in _ICONIFY_CACHE:
         return _ICONIFY_CACHE[cle]
     try:
         import httpx
-        params = {}
+        params = {"width": str(taille_px), "height": str(taille_px)}
         if couleur_hex and couleur_hex != "#000000":
+            # Iconify accepte couleurs hex SANS le # dans le query string
             params["color"] = couleur_hex.lstrip("#")
-        url = f"https://api.iconify.design/{prefix}/{name}.svg"
+        url = f"https://api.iconify.design/{prefix}/{name}.png"
         r = httpx.get(url, params=params, timeout=8.0)
-        if r.status_code == 200 and r.content and b"<svg" in r.content:
+        if r.status_code == 200 and r.content and r.content[:4] == b"\x89PNG":
             _ICONIFY_CACHE[cle] = r.content
             return r.content
-        logger.debug(f"[Iconify] {url} HTTP {r.status_code}")
+        logger.debug(f"[Iconify] {url} HTTP {r.status_code} size={len(r.content)}")
     except Exception as e:
         logger.debug(f"[Iconify] {prefix}:{name} : {e}")
     return None
