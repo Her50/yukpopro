@@ -5,6 +5,7 @@ import {
   LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
   Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2, Building2,
+  Sparkles,
 } from 'lucide-react'
 import { authAPI } from '../api/client'
 import toast from 'react-hot-toast'
@@ -15,6 +16,8 @@ import { SUPPORTED_LANGUAGES } from '../i18n'
 const ADMIN_ROLES = ['admin', 'super_admin', 'yukpo_owner']
 
 const NAV_KEYS = [
+  // Sprint S1 — Chat Unifié = entrée par défaut (tout au même endroit)
+  { to: '/chat',        key: 'chat',        icon: Sparkles,        adminOnly: false },
   { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
   { to: '/redaction',   key: 'redaction',   icon: FileText,        adminOnly: false },
   { to: '/infographie', key: 'infographie', icon: Image,           adminOnly: false },

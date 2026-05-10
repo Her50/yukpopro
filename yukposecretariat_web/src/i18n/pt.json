@@ -14,7 +14,8 @@
     "abonnement": "Créditos Yukpo",
     "admin": "Administração",
     "logout": "Sair",
-    "organisation": "Organização"
+    "organisation": "Organização",
+    "chat": "💬 Chat Yukpo"
   },
   "common": {
     "loading": "Carregando…",
@@ -1072,5 +1073,20 @@
     "domainVerified": "verificado",
     "domainPending": "por verificar",
     "domainAutoJoinHint": "Qualquer novo utilizador com um e-mail deste domínio adere automaticamente à organização."
+  },
+  "chatUnifie": {
+    "title": "Chat Yukpo Secrétariat",
+    "subtitle": "Tape ton besoin + attache (optionnel) image/PDF/audio. Yukpo détecte automatiquement et fait le reste : rédaction, OCR, transcription, infographie, traduction. Plus besoin d'onglets.",
+    "placeholder": "Décris ton besoin… (Entrée pour envoyer)",
+    "welcome": "👋 Décris ton besoin… Quelques exemples :",
+    "empty": "Tape un message ou attache un fichier",
+    "askClarif": "J'ai besoin d'une précision pour bien faire :",
+    "intentDetected": "Détecté",
+    "actionDone": "Action exécutée",
+    "attachFile": "Attacher fichier (image/PDF/DOCX)",
+    "startRecord": "Enregistrer une note vocale",
+    "stopRecord": "Arrêter l'enregistrement",
+    "recordingStarted": "🎤 Enregistrement…",
+    "micRefused": "Micro refusé : "
   }
 }

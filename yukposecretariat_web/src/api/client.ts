@@ -190,6 +190,14 @@ export const audioAPI = {
     api.get(`/audio/fichier/${fichier_id}`, { responseType: 'blob' }),
 }
 
+// ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
+export const secChatAPI = {
+  message: (data: {
+    message: string; has_image?: boolean; has_pdf?: boolean; has_audio?: boolean;
+    pays?: string; langue?: string;
+  }) => api.post('/bureau/chat/message', data, { timeout: 60_000 }),
+}
+
 // ─── Infographie ──────────────────────────────────────────────────────────────
 export interface ProfilInfographie {
   metier?: string;

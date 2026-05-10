@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import ChatPage from './pages/ChatPage'
 import RedactionPage from './pages/RedactionPage'
 import InfographiePage from './pages/InfographiePage'
 import AdminPage from './pages/AdminPage'
@@ -27,7 +28,9 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        {/* Sprint S1 — Chat Unifié = page d'entrée par défaut (zero-config) */}
+        <Route index element={<Navigate to="/chat" replace />} />
+        <Route path="chat" element={<ChatPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="redaction" element={<RedactionPage />} />
         {/* Anciennes routes redirigées vers le hub Rédaction IA (avec onglet pré-sélectionné) */}

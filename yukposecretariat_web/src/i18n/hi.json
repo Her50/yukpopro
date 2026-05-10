@@ -14,7 +14,8 @@
     "abonnement": "सदस्यता",
     "logout": "लॉगआउट",
     "admin": "Administration",
-    "organisation": "Organisation"
+    "organisation": "Organisation",
+    "chat": "💬 Chat Yukpo"
   },
   "common": {
     "loading": "लोड हो रहा है…",
@@ -1090,5 +1091,20 @@
     "domainVerified": "vérifié",
     "domainPending": "à vérifier",
     "domainAutoJoinHint": "Tout nouvel utilisateur avec un email de ce domaine rejoint l'organisation automatiquement."
+  },
+  "chatUnifie": {
+    "title": "Chat Yukpo Secrétariat",
+    "subtitle": "Tape ton besoin + attache (optionnel) image/PDF/audio. Yukpo détecte automatiquement et fait le reste : rédaction, OCR, transcription, infographie, traduction. Plus besoin d'onglets.",
+    "placeholder": "Décris ton besoin… (Entrée pour envoyer)",
+    "welcome": "👋 Décris ton besoin… Quelques exemples :",
+    "empty": "Tape un message ou attache un fichier",
+    "askClarif": "J'ai besoin d'une précision pour bien faire :",
+    "intentDetected": "Détecté",
+    "actionDone": "Action exécutée",
+    "attachFile": "Attacher fichier (image/PDF/DOCX)",
+    "startRecord": "Enregistrer une note vocale",
+    "stopRecord": "Arrêter l'enregistrement",
+    "recordingStarted": "🎤 Enregistrement…",
+    "micRefused": "Micro refusé : "
   }
 }
