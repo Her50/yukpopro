@@ -57,6 +57,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxmlsec1-openssl \
     # Gap #9 — Ghostscript pour conversion RGB → CMYK (print-ready imprimerie)
     ghostscript \
+    # pikepdf runtime (libqpdf) pour PDF/X-1a strict + manipulation TrimBox/BleedBox
+    libqpdf28 \
+    qpdf \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier les packages Python compilés depuis le builder

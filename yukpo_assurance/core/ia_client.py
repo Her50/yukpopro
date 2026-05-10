@@ -370,6 +370,34 @@ class IAClient:
         temperature = self._temperature_par_mode(mode)
         modele = forcer_modele or self._choisir_modele(mode)
 
+        # ── Politique LLM_PRIMAIRE — respect global ──────────────────────
+        # Quand le code appelle forcer_modele=CLAUDE_X, c'est une demande
+        # de TIER de qualité (haute/moyenne/légère), pas une demande
+        # d'utiliser Claude spécifiquement. Si LLM_PRIMAIRE="gpt", on
+        # traduit automatiquement vers le GPT équivalent — c'est la
+        # source de vérité de la politique. Anthropic devient fallback
+        # naturel via le circuit breaker.
+        # Politique mémoire `feedback_llm_routing.md` :
+        #   CLAUDE_OPUS  → gpt-4-turbo (raisonnement haut de gamme)
+        #   CLAUDE_SONNET → gpt-4o     (rédaction standard)
+        #   CLAUDE_HAIKU → gpt-4o-mini  (léger/rapide/JSON court)
+        if forcer_modele is not None and self._llm_primaire() == "gpt":
+            if modele in (
+                ModelePrioritaire.CLAUDE_OPUS,
+                ModelePrioritaire.CLAUDE_SONNET,
+                ModelePrioritaire.CLAUDE_HAIKU,
+            ):
+                gpt_equiv_value = _CLAUDE_TO_GPT.get(modele.value)
+                if gpt_equiv_value:
+                    try:
+                        modele = ModelePrioritaire(gpt_equiv_value)
+                        logger.debug(
+                            f"[IAClient] LLM_PRIMAIRE=gpt → traduit "
+                            f"{forcer_modele.value} → {modele.value}"
+                        )
+                    except ValueError:
+                        pass
+
         # Résoudre max_tokens effectif avant le cache (la clé en dépend)
         max_tokens = max_tokens_override or settings.IA_MAX_TOKENS
 

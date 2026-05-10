@@ -256,11 +256,28 @@ export const ChatPage = () => {
             }
           }
 
+          // Construction de l'URL de téléchargement : on privilégie
+          // download_url / url_telechargement de la réponse (l'endpoint
+          // sait où il a stocké le fichier). Sinon on applique le
+          // pattern fourni par le plan. Sinon fallback Pro hardcodé.
+          const buildDownloadUrl = (fichier: string): string => {
+            if (typeof r.download_url === "string" && r.download_url) return r.download_url;
+            if (typeof r.url_telechargement === "string" && r.url_telechargement) return r.url_telechargement;
+            const pattern = plan?.download_url_pattern;
+            if (typeof pattern === "string" && pattern.includes("{fichier}")) {
+              return pattern.replace("{fichier}", fichier);
+            }
+            // Fallback : essayer de déduire depuis l'endpoint exécuté
+            if (endpoint.startsWith("/api/v1/bureau/")) {
+              return `/api/v1/bureau/documents/${fichier}`;
+            }
+            return generateurApi.telecharger(fichier);
+          };
+          const downloadUrl = fichiers.length > 0 ? buildDownloadUrl(fichiers[0]) : "";
+
           updateLastAssistantMessage(
             `✓ ${label} généré.` +
-            (fichiers.length > 0
-              ? `\n[Télécharger](${generateurApi.telecharger(fichiers[0])})`
-              : ""),
+            (downloadUrl ? `\n[Télécharger](${downloadUrl})` : ""),
             null,
             fichiers.length > 0 ? fichiers : undefined,
             null, undefined,
