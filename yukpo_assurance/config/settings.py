@@ -87,6 +87,9 @@ class Settings(BaseSettings):
     HUGGINGFACE_TOKEN: str = ""
     # fal.ai — génération d'images via Flux (Designer Pro, modes Standard/Premium)
     FAL_KEY: str = ""
+    # Replicate — Sprint R1/R2/R3 : provider alternatif + fallback fal.ai +
+    # Brand LoRA training par client (~$5 vs $200 chez fal.ai).
+    REPLICATE_API_TOKEN: str = ""
 
     def __init__(self, **data):
         super().__init__(**data)

@@ -196,7 +196,11 @@ class DemandeEntrainerLora(BaseModel):
     images_refs: list[str] = Field(..., min_length=10,
         description="≥10 références médiathèque ('session:abc'/'compte:def') vers les images d'entraînement")
     accepter_cout: bool = Field(default=False,
-        description="Confirmation explicite du coût (~120 000 FCFA)")
+        description="Confirmation explicite du coût")
+    # Sprint R3 — Choix du provider de training. 'replicate' (défaut) = 50× moins
+    # cher que 'fal' grâce à l'écosystème ostris/flux-dev-lora-trainer.
+    provider: str = Field(default="replicate", pattern="^(replicate|fal)$",
+        description="'replicate' (4 000 FCFA, recommandé) ou 'fal' (200 000 FCFA, legacy)")
 
 
 class ReponseLora(BaseModel):
@@ -211,8 +215,15 @@ class ReponseLora(BaseModel):
     erreur: Optional[str] = None
 
 
-# Coût indicatif training (1 LoRA = ~$200 fal.ai = ~120 000 FCFA, marge 1.7×)
-_COUT_LORA_TRAINING_FCFA = 200_000
+# Coûts training selon provider (Sprint R3)
+#   - fal.ai      : ~$200 réel = ~120 000 FCFA → user paie 200 000 FCFA (marge 1.7×)
+#   - Replicate   : ~$5 réel = ~3 000 FCFA → user paie 4 000 FCFA (marge 1.3× loss-leader B2B)
+_COUT_LORA_TRAINING_FCFA_FAL = 200_000
+_COUT_LORA_TRAINING_FCFA_REPLICATE = 4_000
+
+
+def _cout_training_par_provider(provider: str) -> int:
+    return _COUT_LORA_TRAINING_FCFA_REPLICATE if provider == "replicate" else _COUT_LORA_TRAINING_FCFA_FAL
 
 
 @router.get("/brand-lora", response_model=list[ReponseLora], tags=["Bureau — Designer Pro"])
@@ -256,11 +267,12 @@ async def entrainer_brand_lora(
         verifier_acces_module, verifier_solde, debiter_forfait,
     )
 
+    cout_fcfa = _cout_training_par_provider(demande.provider)
     if not demande.accepter_cout:
         raise HTTPException(
             400,
             f"Tu dois cocher 'accepter_cout' pour confirmer le débit de "
-            f"{_COUT_LORA_TRAINING_FCFA} FCFA (training non-remboursable)."
+            f"{cout_fcfa} FCFA (training non-remboursable, provider={demande.provider})."
         )
 
     autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
@@ -289,32 +301,133 @@ async def entrainer_brand_lora(
             user_id_createur=current_user.user_id,
             label=demande.label, trigger_word=demande.trigger_word,
             description=demande.description, statut="pending",
-            nb_images_train=len(medias), cout_paye_fcfa=_COUT_LORA_TRAINING_FCFA,
+            nb_images_train=len(medias), cout_paye_fcfa=cout_fcfa,
             actif=True,
         )
         db.add(row)
         await db.commit()
 
-    # Débit du forfait training (multiplicateur = coût en FCFA / cout_unite)
+    # Débit du forfait training (Sprint R3 — montants spécifiques par provider)
     try:
+        forfait_key = ("designerpro_brand_lora_training_replicate"
+                       if demande.provider == "replicate"
+                       else "designerpro_brand_lora_training")
         await debiter_forfait(
-            current_user.user_id, "designerpro_brand_lora_training",
+            current_user.user_id, forfait_key,
             module="infographie",
-            multiplicateur=float(_COUT_LORA_TRAINING_FCFA),
+            multiplicateur=float(cout_fcfa) if demande.provider == "fal" else 1.0,
+            # Replicate : forfait = 4000 FCFA direct (multiplicateur=1)
+            # fal.ai   : forfait = 1 FCFA × 200_000 = 200_000 FCFA
         )
     except Exception as e:
         logger.warning(f"[Brand LoRA] débit forfait : {e}")
 
-    # Lancement training fal.ai en arrière-plan
+    # Sprint R3 — Lancement training selon provider choisi
     import asyncio as _asyncio
-    _asyncio.create_task(_lancer_training_lora_background(lora_id, list(medias.values()), demande.trigger_word))
+    if demande.provider == "replicate":
+        _asyncio.create_task(_lancer_training_lora_replicate_background(
+            lora_id, list(medias.values()), demande.trigger_word,
+        ))
+    else:
+        _asyncio.create_task(_lancer_training_lora_background(
+            lora_id, list(medias.values()), demande.trigger_word,
+        ))
 
     return ReponseLora(
         lora_id=lora_id, statut="pending", label=demande.label,
         trigger_word=demande.trigger_word, lora_url=None,
-        nb_images_train=len(medias), cout_paye_fcfa=_COUT_LORA_TRAINING_FCFA,
+        nb_images_train=len(medias), cout_paye_fcfa=cout_fcfa,
         cree_le=datetime.utcnow().isoformat(), erreur=None,
     )
+
+
+async def _lancer_training_lora_replicate_background(
+    lora_id: str, medias: list, trigger_word: str,
+):
+    """Sprint R3 — Training Brand LoRA via Replicate (ostris/flux-dev-lora-trainer).
+    50× moins cher que fal.ai. Upload zip → poll → stocke lora_url quand prêt."""
+    import io
+    import zipfile
+    from datetime import datetime
+    from core.database import async_session_maker, BrandLoraDB
+    from sqlalchemy import select
+    from modules.bureau import mediatheque_session as msm
+    from modules.bureau import replicate_client as rc
+
+    async def _set(statut: str, **kwargs):
+        async with async_session_maker() as db:
+            row = (await db.execute(
+                select(BrandLoraDB).where(BrandLoraDB.lora_id == lora_id)
+            )).scalar_one_or_none()
+            if not row:
+                return
+            row.statut = statut
+            for k, v in kwargs.items():
+                setattr(row, k, v)
+            await db.commit()
+
+    if not rc.is_available():
+        await _set("failed", erreur="REPLICATE_API_TOKEN non configuré",
+                   training_fini=datetime.utcnow())
+        return
+
+    try:
+        await _set("training", training_demarre=datetime.utcnow())
+        # Replicate exige un ZIP d'images uploadé sur une URL publique.
+        # Stratégie : on construit le ZIP, on l'upload sur Replicate via leur
+        # files API (POST /v1/files), on récupère l'URL du fichier, puis on
+        # lance le training avec cette URL.
+        zip_buf = io.BytesIO()
+        nb_ok = 0
+        with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for i, m in enumerate(medias[:30]):
+                try:
+                    b = msm.lire_bytes(m)
+                    ext = "png" if (m.mime or "").endswith("png") else "jpg"
+                    zf.writestr(f"img_{i:03d}.{ext}", b)
+                    nb_ok += 1
+                except Exception as e:
+                    logger.warning(f"[Brand LoRA Replicate {lora_id}] img {m.media_id} ignorée : {e}")
+        if nb_ok < 10:
+            await _set("failed", erreur=f"Seulement {nb_ok} images valides (min 10)",
+                       training_fini=datetime.utcnow())
+            return
+        zip_bytes = zip_buf.getvalue()
+
+        # Upload sur Replicate Files API
+        import httpx
+        from config.settings import settings
+        files_url = "https://api.replicate.com/v1/files"
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.post(
+                files_url,
+                files={"content": ("training_set.zip", zip_bytes, "application/zip")},
+                headers={"Authorization": f"Bearer {settings.REPLICATE_API_TOKEN}"},
+            )
+        if r.status_code not in (200, 201):
+            await _set("failed", erreur=f"Replicate upload zip HTTP {r.status_code}: {r.text[:200]}",
+                       training_fini=datetime.utcnow())
+            return
+        zip_url = r.json().get("urls", {}).get("get") or r.json().get("url")
+        if not zip_url:
+            await _set("failed", erreur="Replicate upload : pas d'URL retournée",
+                       training_fini=datetime.utcnow())
+            return
+
+        result = await rc.entrainer_lora(
+            images_zip_url=zip_url, trigger_word=trigger_word,
+            steps=1000, lora_rank=16,
+        )
+        if result["status"] == "succeeded" and result.get("lora_url"):
+            await _set("ready", lora_url=result["lora_url"],
+                       training_fini=datetime.utcnow())
+            logger.info(f"[Brand LoRA Replicate {lora_id}] OK → {result['lora_url']}")
+        else:
+            await _set("failed", erreur=(result.get("error") or "training échoué")[:500],
+                       training_fini=datetime.utcnow())
+    except Exception as e:
+        logger.error(f"[Brand LoRA Replicate {lora_id}] exception : {e}", exc_info=True)
+        await _set("failed", erreur=str(e)[:500], training_fini=datetime.utcnow())
 
 
 async def _lancer_training_lora_background(lora_id: str, medias: list, trigger_word: str):

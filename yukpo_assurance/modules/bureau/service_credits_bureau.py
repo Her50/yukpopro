@@ -129,6 +129,15 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # entre coût réel ($200 = ~120 000 FCFA) et prix client (200 000 FCFA = 1.7×).
     "designerpro_brand_lora_training": 1.0,  # multiplicateur = coût en FCFA
     "designerpro_html_render": 3.0,          # 60 cr/page (Sprint 1.4 WeasyPrint compute)
+    # Sprint R1/R2 — Génération via Replicate (provider alternatif/fallback)
+    "designerpro_image_replicate": 8.0,      # 160 cr/img = 96 FCFA user
+                                             # Flux Pro Ultra Replicate ~$0.04 réel = 24 FCFA
+                                             # + marge 4× = 96 FCFA. Cohérent avec ultra fal.ai (336 FCFA)
+                                             # mais Replicate moins cher → plus de marge plateforme
+    # Sprint R3 — Brand LoRA training Replicate (~$5 vs $200 fal.ai)
+    "designerpro_brand_lora_training_replicate": 4000.0,  # 80 000 cr = 4 000 FCFA user
+                                             # ~$5 réel = 3 000 FCFA → marge 1.3×
+                                             # Loss leader B2B : LTV énorme (LoRA = identité visuelle réutilisée à vie)
     "designerpro_image_ultra_plus": 60.0, # 1200 cr/img = 720 FCFA user
                                           # Sprint 1.5 — Ensemble 3 modèles :
                                           # Flux Pro Ultra (36) + Recraft v3 (24)

@@ -85,6 +85,7 @@ async def generer_image(
     reference_strength: float = 0.65,            # Sprint 1.6 — 0.0-1.0
     brand_lora_url: Optional[str] = None,        # Sprint 1.6 — Brand LoRA path
     brand_lora_scale: float = 0.85,              # Sprint 1.6 — 0.0-1.5
+    provider_force: Optional[str] = None,        # Sprint R2 — "fal"|"replicate"|None(auto)
 ) -> bytes:
     """
     Génère 1 image via fal.ai et retourne les octets PNG.
@@ -96,9 +97,32 @@ async def generer_image(
     if mode == "sans":
         raise ImageGenError("Mode 'sans' — aucune image à générer")
 
+    # Sprint R2 — Routage provider :
+    #   provider_force="replicate" → Replicate direct
+    #   provider_force="fal" → fal.ai direct
+    #   None (défaut) → fal.ai d'abord, fallback Replicate si fal échoue
+    use_replicate_first = (provider_force == "replicate")
+    fallback_replicate = (provider_force is None)
+    fallback_fal = (provider_force is None)
+
+    if use_replicate_first:
+        return await _generer_image_via_replicate(
+            prompt, mode, format_, seed, timeout_s,
+            reference_url, reference_strength, brand_lora_url, brand_lora_scale,
+        )
+
     api_key = settings.FAL_KEY
     if not api_key:
-        raise ImageGenNotConfigured("FAL_KEY non configuré dans settings")
+        # Pas de fal.ai configuré → tente Replicate si disponible
+        if fallback_replicate:
+            try:
+                return await _generer_image_via_replicate(
+                    prompt, mode, format_, seed, timeout_s,
+                    reference_url, reference_strength, brand_lora_url, brand_lora_scale,
+                )
+            except Exception as e:
+                logger.warning(f"[image_gen] FAL_KEY absent + Replicate fallback échoué : {e}")
+        raise ImageGenNotConfigured("FAL_KEY ni REPLICATE_API_TOKEN configurés")
 
     # ultra_plus utilise generer_image_ensemble (3 modèles + vision picker)
     if mode == "ultra_plus":
@@ -168,34 +192,74 @@ async def generer_image(
         "Content-Type": "application/json",
     }
 
+    # Sprint R2 — wrap fal.ai dans try/except → fallback Replicate si échec
+    fal_error: Optional[Exception] = None
     try:
-        async with httpx.AsyncClient(timeout=timeout_s) as client:
-            r = await client.post(url, json=payload, headers=headers)
-    except httpx.TimeoutException as e:
-        raise ImageGenError(f"Timeout fal.ai après {timeout_s}s") from e
-    except httpx.HTTPError as e:
-        raise ImageGenError(f"Erreur réseau fal.ai : {e}") from e
+        try:
+            async with httpx.AsyncClient(timeout=timeout_s) as client:
+                r = await client.post(url, json=payload, headers=headers)
+        except httpx.TimeoutException as e:
+            raise ImageGenError(f"Timeout fal.ai après {timeout_s}s") from e
+        except httpx.HTTPError as e:
+            raise ImageGenError(f"Erreur réseau fal.ai : {e}") from e
 
-    if r.status_code != 200:
-        raise ImageGenError(f"fal.ai HTTP {r.status_code} : {r.text[:200]}")
+        if r.status_code != 200:
+            raise ImageGenError(f"fal.ai HTTP {r.status_code} : {r.text[:200]}")
 
-    data = r.json()
-    images = data.get("images") or []
-    if not images:
-        raise ImageGenError("fal.ai : réponse sans 'images'")
+        data = r.json()
+        images = data.get("images") or []
+        if not images:
+            raise ImageGenError("fal.ai : réponse sans 'images'")
 
-    img_url = images[0].get("url")
-    if not img_url:
-        raise ImageGenError("fal.ai : image sans URL")
+        img_url = images[0].get("url")
+        if not img_url:
+            raise ImageGenError("fal.ai : image sans URL")
 
-    # Téléchargement de l'image générée
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                r_img = await client.get(img_url)
+                r_img.raise_for_status()
+                return r_img.content
+        except httpx.HTTPError as e:
+            raise ImageGenError(f"Téléchargement image échoué : {e}") from e
+    except ImageGenError as e:
+        fal_error = e
+        if not fallback_replicate:
+            raise
+        logger.warning(f"[image_gen] fal.ai échoué, tentative fallback Replicate : {e}")
+        try:
+            return await _generer_image_via_replicate(
+                prompt, mode, format_, seed, timeout_s,
+                reference_url, reference_strength, brand_lora_url, brand_lora_scale,
+            )
+        except Exception as e2:
+            raise ImageGenError(
+                f"fal.ai ET Replicate ont échoué : fal={fal_error} | replicate={e2}"
+            ) from e2
+
+
+async def _generer_image_via_replicate(
+    prompt: str, mode: str, format_: str, seed: Optional[int],
+    timeout_s: float,
+    reference_url: Optional[str], reference_strength: float,
+    brand_lora_url: Optional[str], brand_lora_scale: float,
+) -> bytes:
+    """Sprint R1/R2 — Génère via Replicate (provider direct ou fallback fal.ai)."""
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            r_img = await client.get(img_url)
-            r_img.raise_for_status()
-            return r_img.content
-    except httpx.HTTPError as e:
-        raise ImageGenError(f"Téléchargement image échoué : {e}") from e
+        from . import replicate_client as rc
+    except Exception as e:
+        raise ImageGenError(f"replicate_client non disponible : {e}")
+    try:
+        return await rc.generer_image_replicate(
+            prompt=prompt, mode=mode, format_=format_, seed=seed,
+            timeout_s=timeout_s,
+            reference_url=reference_url, reference_strength=reference_strength,
+            brand_lora_url=brand_lora_url, brand_lora_scale=brand_lora_scale,
+        )
+    except rc.ReplicateNotConfigured as e:
+        raise ImageGenNotConfigured(str(e)) from e
+    except rc.ReplicateError as e:
+        raise ImageGenError(f"Replicate : {e}") from e
 
 
 # ── Sprint 1.5 — Ensemble multi-modèles (Flux + Recraft + Ideogram) ──────────
