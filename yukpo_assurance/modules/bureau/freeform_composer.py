@@ -50,13 +50,16 @@ FORMAT DE SORTIE — JSON STRICT (rendu via ReportLab) :
 
 {
   "titre": "Court titre du document (≤80 chars)",
-  "format_mm": [LARGEUR, HAUTEUR],
+  "format_mm": [LARGEUR, HAUTEUR],   // format par DÉFAUT pour les pages
   "bleed_mm": 3,
   "palette_meta": {"primaire": "#xxx", "accent": "#xxx", "fond": "#xxx"},
   "pages": [
     {
       "numero": 1,
       "fond_couleur": "#FFFFFF",
+      // ── Multi-pièces : override format par page si besoin ──
+      // "format_mm": [105, 148],         // override A6 pour CETTE page
+      // "libelle_piece": "carte_principale",  // libellé interne facultatif
       "elements": [
         { "type": "rectangle", "x_mm": 10, "y_mm": 10, "w_mm": 90, "h_mm": 55,
           "fond": "#003D82", "border_radius_mm": 2, "z_index": 0 },
@@ -398,6 +401,89 @@ RÈGLE DE SÉLECTION :
   A3/A2. Faire-part mariage → A6 plié. Rapport interne → A4. Carte de
   visite → grille N cartes 85×55mm sur A4 imprimerie. Story Instagram →
   91.4×162.6mm. Flyer promo magasin → A5 ou A6.
+
+═══════════════════════════════════════════════════════════════════
+ENSEMBLES MULTI-PIÈCES — UN SEUL PDF, PLUSIEURS FORMATS
+═══════════════════════════════════════════════════════════════════
+
+Énormément de livrables réels ne sont PAS une seule pièce mais un
+ENSEMBLE COHÉRENT de plusieurs pièces de formats différents partageant
+la même identité visuelle (mêmes couleurs, polices, ornements, ton).
+Tu DOIS savoir composer ces ensembles en UN SEUL PDF où CHAQUE page
+peut avoir un `format_mm` propre via override.
+
+Le schema autorise `pages[i].format_mm: [W, H]` qui surcharge le
+`format_mm` document. Si absent, la page hérite. Tu peux donc mixer
+librement A6 + A5 + A4 + carte 85×55 dans le même PDF.
+
+EXEMPLES D'ENSEMBLES MULTI-PIÈCES (liste NON exhaustive — sois capable
+d'inventer la composition adaptée à toute intention) :
+
+- Faire-part de deuil COMPLET :
+  * Page 1 — Carte principale (annonce décès) — 105×148mm (A6)
+  * Page 2 — Livret de messe / programme funérailles — 148×210mm (A5)
+    [peut être plusieurs pages A5 si le programme est long]
+  * Page 3 — Carte de remerciement — 85×55mm (format CB)
+  * Page 4 — Carte mémorial / souvenir avec portrait du défunt —
+    74×105mm (A7) ou 85×55mm
+  * Page 5 — Carton invitation à la veillée — 100×150mm
+
+- Faire-part de mariage COMPLET :
+  * Carte d'invitation principale — A6 ou format carré 130×130mm
+  * Carton réponse RSVP — 100×150mm
+  * Carton plan / itinéraire — 100×150mm
+  * Carton menu — 100×210mm (DL)
+  * Marque-place — 50×85mm
+  * Carte de remerciement — 105×148mm
+
+- Kit identité visuelle entreprise :
+  * Page 1 — Carte de visite (8 cartes 85×55 sur A4 imprimerie)
+  * Page 2 — En-tête papier à lettre — A4
+  * Page 3 — Enveloppe DL — 220×110mm
+  * Page 4 — Carte de compliments — 148×105mm (A6 paysage)
+
+- Kit événement (salon / conférence) :
+  * Page 1 — Affiche A3 — 297×420mm
+  * Page 2 — Flyer A5 — 148×210mm
+  * Page 3 — Billet d'entrée — 75×210mm
+  * Page 4 — Badge nominatif — 100×70mm
+  * Page 5 — Programme A5 plié
+
+- Faire-part naissance / baptême :
+  * Annonce naissance — A6
+  * Carton remerciement — format CB
+  * Marque-place baptême — 50×85mm
+
+- Pack restaurant :
+  * Menu A4
+  * Menu enfant A5
+  * Marque-table 75×210mm
+  * Carte fidélité format CB
+
+- Pack hommage / commémoration / anniversaire de décès :
+  * Affiche A3
+  * Carte souvenir A6
+  * Programme cérémonie A5
+
+RÈGLES MULTI-PIÈCES :
+1. CHAQUE pièce est UNE page du PDF avec son propre `format_mm`.
+2. Toutes les pièces partagent la MÊME identité : palette commune,
+   typographie commune, ornements/icônes cohérents, ton homogène.
+3. Mets `libelle_piece` (snake_case court) sur chaque page pour
+   l'identifier : "carte_principale", "livret_messe", "remerciement",
+   "rsvp", "menu", "badge", "marque_place", "billet", "souvenir"…
+4. Ajoute des `crop_marks` sur les pièces destinées à découpe imprimerie.
+5. Si le brief décrit clairement UNE seule pièce (« une carte de visite »,
+   « un faire-part », « un flyer »), reste sur UN SEUL format — n'invente
+   pas un ensemble si l'utilisateur ne le demande pas. À l'inverse, si
+   le brief évoque un ensemble (« faire-part deuil complet », « kit
+   mariage », « pack identité », « ensemble cérémonie »), génère
+   véritablement l'ensemble multi-pièces.
+6. Si l'utilisateur n'est PAS explicite mais que le livrable nécessite
+   intrinsèquement plusieurs pièces (ex: « faire-part de deuil » sans
+   précision = annonce + remerciement minimum), juge intelligemment et
+   propose l'ensemble minimum cohérent (2-3 pièces) plutôt qu'une seule
+   carte qui paraîtrait incomplète.
 
 ═══════════════════════════════════════════════════════════════════
 EXIGENCES TRANSVERSALES — APPLICABLES À TOUT VISUEL

@@ -170,6 +170,13 @@ class LayoutPage:
     fond_couleur: Optional[str] = "#FFFFFF"
     fond_image_ref: Optional[str] = None
     elements: list[Element] = field(default_factory=list)
+    # Override format / bleed par page — None = hérite du document.
+    # Permet les ensembles multi-pièces (faire-part deuil/mariage avec
+    # carte principale A6 + livret A5 + carte CB, kit événement
+    # affiche A3 + flyer A5 + ticket A7, etc.) dans un seul PDF.
+    format_mm: Optional[tuple[float, float]] = None
+    bleed_mm: Optional[float] = None
+    libelle_piece: Optional[str] = None  # « carte_principale », « livret_messe », « remerciement »…
 
 
 @dataclass
@@ -244,11 +251,28 @@ def parse_layout_json(data: dict) -> LayoutDocument:
             except Exception as e:
                 logger.debug(f"[freeform] Element {etype} skip : {e}")
                 continue
+        # Format par-page optionnel (multi-pièces)
+        p_fmt = p_data.get("format_mm")
+        page_format_mm: Optional[tuple[float, float]] = None
+        if isinstance(p_fmt, list) and len(p_fmt) >= 2:
+            try:
+                page_format_mm = (float(p_fmt[0]), float(p_fmt[1]))
+            except (TypeError, ValueError):
+                page_format_mm = None
+        p_bleed = p_data.get("bleed_mm")
+        try:
+            page_bleed_mm = float(p_bleed) if p_bleed is not None else None
+        except (TypeError, ValueError):
+            page_bleed_mm = None
+
         pages.append(LayoutPage(
             numero=int(p_data.get("numero", idx + 1)),
             fond_couleur=p_data.get("fond_couleur", "#FFFFFF"),
             fond_image_ref=p_data.get("fond_image_ref"),
             elements=elements,
+            format_mm=page_format_mm,
+            bleed_mm=page_bleed_mm,
+            libelle_piece=p_data.get("libelle_piece"),
         ))
 
     if not pages:
@@ -354,15 +378,8 @@ def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> byt
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
-    fmt_w_mm, fmt_h_mm = doc.format_mm
-    bleed = doc.bleed_mm
-    # Page totale = format + 2× bleed (bord à bord pour print)
-    total_w = mm_to_pt(fmt_w_mm + 2 * bleed)
-    total_h = mm_to_pt(fmt_h_mm + 2 * bleed)
-    # Offset pour positionner les coordonnées (0, 0) du LLM en haut-gauche
-    # de la zone TRIM (donc à bleed_mm depuis le bord physique).
-    offset_x = mm_to_pt(bleed)
-    offset_y = mm_to_pt(bleed)
+    doc_fmt_w_mm, doc_fmt_h_mm = doc.format_mm
+    doc_bleed = doc.bleed_mm
 
     # ── Polices : tenter de charger Inter via font_loader ──────────────────
     try:
@@ -378,11 +395,29 @@ def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> byt
         pass
 
     buf = io.BytesIO()
-    c = canvas.Canvas(buf, pagesize=(total_w, total_h))
+    # Canvas initial dimensionné sur la 1re page (override page si présent).
+    first_page = doc.pages[0] if doc.pages else None
+    p0_w_mm = (first_page.format_mm[0] if first_page and first_page.format_mm else doc_fmt_w_mm)
+    p0_h_mm = (first_page.format_mm[1] if first_page and first_page.format_mm else doc_fmt_h_mm)
+    p0_bleed = (first_page.bleed_mm if first_page and first_page.bleed_mm is not None else doc_bleed)
+    init_w = mm_to_pt(p0_w_mm + 2 * p0_bleed)
+    init_h = mm_to_pt(p0_h_mm + 2 * p0_bleed)
+    c = canvas.Canvas(buf, pagesize=(init_w, init_h))
     c.setTitle(doc.titre)
     c.setAuthor("Yukpo")
 
     for page in doc.pages:
+        # Format/bleed effectif de la page (override > document)
+        page_fmt_w_mm = page.format_mm[0] if page.format_mm else doc_fmt_w_mm
+        page_fmt_h_mm = page.format_mm[1] if page.format_mm else doc_fmt_h_mm
+        page_bleed = page.bleed_mm if page.bleed_mm is not None else doc_bleed
+        total_w = mm_to_pt(page_fmt_w_mm + 2 * page_bleed)
+        total_h = mm_to_pt(page_fmt_h_mm + 2 * page_bleed)
+        offset_x = mm_to_pt(page_bleed)
+        offset_y = mm_to_pt(page_bleed)
+        # Redimensionne la page courante (chaque showPage utilise pagesize courant)
+        c.setPageSize((total_w, total_h))
+
         # Fond
         if page.fond_couleur and page.fond_couleur not in ("none", "transparent"):
             col = parse_color(page.fond_couleur, default=(1, 1, 1))
@@ -401,7 +436,7 @@ def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> byt
 
         for el in ordered:
             try:
-                _render_element(c, el, offset_x, offset_y, fmt_w_mm, fmt_h_mm, medias)
+                _render_element(c, el, offset_x, offset_y, page_fmt_w_mm, page_fmt_h_mm, medias)
             except Exception as e:
                 logger.debug(f"[freeform] Element skip ({el.type}) : {e}")
                 continue
