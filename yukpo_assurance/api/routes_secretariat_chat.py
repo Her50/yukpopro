@@ -95,6 +95,22 @@ async def chat_unifie_message(
         # Fallback : redaction (la plupart des plans secrétariat ont accès)
         autorise, plan, _ = await verifier_acces_module(current_user.user_id, "redaction")
 
+    # Phase 3 — Contexte vertical métier (lu silencieusement depuis profil)
+    bloc_vertical_sec = ""
+    try:
+        from core.database import async_session_maker as _asm
+        from modules.pro.service_profil import get_or_create as _get_profil
+        from modules.bureau import verticales_metier as _vm
+        async with _asm() as _db:
+            profil_obj, _ = await _get_profil(current_user.user_id, _db)
+        metier = getattr(profil_obj, "metier", None) or ""
+        secteur = getattr(profil_obj, "secteur_activite", None) or ""
+        vk = _vm.detecter_vertical(metier, secteur)
+        if vk:
+            bloc_vertical_sec = _vm.construire_bloc_prompt_vertical(vk)
+    except Exception:
+        pass
+
     contexte_attachments = []
     if demande.has_image: contexte_attachments.append("image (jpg/png)")
     if demande.has_pdf: contexte_attachments.append("PDF")
@@ -110,7 +126,8 @@ async def chat_unifie_message(
         f"parmi 9 catégories.\n\n"
         f"MESSAGE : «{demande.message[:2000]}»\n"
         f"{ctx_attach}\n"
-        f"Pays : {demande.pays}   Langue : {demande.langue}\n\n"
+        f"Pays : {demande.pays}   Langue : {demande.langue}\n"
+        f"{bloc_vertical_sec}\n"
         f"INTENTIONS POSSIBLES :\n"
         f"  - redaction          : l'user veut RÉDIGER un texte (lettre, courrier, email,\n"
         f"    note, contrat, mémo, CV, motivation, communiqué, rapport, etc.)\n"
@@ -251,3 +268,44 @@ async def chat_unifie_message(
         raison=str(data.get("raison", ""))[:300], routage=routage,
         suggestion_questions=(data.get("suggestion_questions") or [])[:3],
     )
+
+
+# ─── Phase 3 — Diagnostic verticales métier ──────────────────────────────────
+
+
+@router.get("/verticales", tags=["Secrétariat — Chat Unifié"])
+async def diagnostic_verticales(current_user: TokenData = Depends(get_current_user)):
+    """
+    Phase 3 — Retourne la vertical détectée pour cet user (silencieux) +
+    le catalogue complet des secteurs supportés. Endpoint de debug pour vérifier
+    que le contexte vertical s'injecte bien depuis le profil.
+    """
+    from modules.bureau import verticales_metier as _vm
+    try:
+        from core.database import async_session_maker as _asm
+        from modules.pro.service_profil import get_or_create as _get_profil
+        async with _asm() as _db:
+            profil_obj, _ = await _get_profil(current_user.user_id, _db)
+        metier = getattr(profil_obj, "metier", None) or ""
+        secteur = getattr(profil_obj, "secteur_activite", None) or ""
+    except Exception:
+        metier = secteur = ""
+    detected = _vm.detecter_vertical(metier, secteur)
+    return {
+        "user_id": current_user.user_id,
+        "profil_metier": metier,
+        "profil_secteur": secteur,
+        "vertical_detectee": detected,
+        "vertical_label": (_vm.VERTICALES_METIER.get(detected, {}) or {}).get("label") if detected else None,
+        "verticales_supportees": [
+            {"key": k, "label": v.get("label"),
+             "nb_templates": len(v.get("templates_inspirations", [])),
+             "regulations": len(v.get("regulations", []))}
+            for k, v in _vm.VERTICALES_METIER.items()
+        ],
+        "rappel": (
+            "Le LLM utilise ce contexte comme inspiration + garde-fous, JAMAIS "
+            "comme limite. Si l'user demande hors-catalogue, le LLM invente le "
+            "template approprié sur la base des conventions du secteur."
+        ),
+    }

@@ -1405,6 +1405,15 @@ async def _decider_layout_avec_opus(
 
         profil = profil or {}
         dv = directives_visuelles or {}
+        # Phase 3 — Contexte vertical métier injecté pour Opus
+        bloc_vert_opus = ""
+        try:
+            from . import verticales_metier as _vm
+            vk = _vm.detecter_vertical(profil.get("metier"), profil.get("secteur"))
+            if vk:
+                bloc_vert_opus = _vm.construire_bloc_prompt_vertical(vk)
+        except Exception:
+            pass
 
         prompt = f"""Tu es DIRECTEUR ARTISTIQUE PRINCIPAL d'une agence design senior
 (15+ ans, références : Pentagram, Wieden+Kennedy, agences de Lagos/Dakar/Casablanca).
@@ -1422,7 +1431,7 @@ Pays : {pays}   Langue : {langue}
 Métier : {profil.get("metier", "(non précisé)")}
 Organisation : {profil.get("nom_organisation", "(non précisée)")}
 Couleur primaire : {profil.get("couleur_primaire_hex", "(libre)")}
-
+{bloc_vert_opus}
 Curseurs utilisateur (0–100) :
 - Créativité : {dv.get("creativite", 50)}
 - Densité texte : {dv.get("densite_texte", 50)}
@@ -1757,6 +1766,18 @@ async def generer_projet_depuis_brief(
     densite_texte = _pct("densite_texte", 50)
     importance_images = _pct("importance_images", 50)
     elegance = _pct("elegance", 50)
+    # Phase 3 — Contexte vertical métier (banque/pharma/immo/edu/HR)
+    # Détecté silencieusement depuis profil.metier/secteur. Le LLM utilise
+    # ce contexte comme inspiration + garde-fous, JAMAIS comme limite stricte.
+    bloc_vertical = ""
+    try:
+        from . import verticales_metier as _vm
+        vert_key = _vm.detecter_vertical(metier, profil.get("secteur"))
+        if vert_key:
+            bloc_vertical = _vm.construire_bloc_prompt_vertical(vert_key)
+    except Exception:
+        pass
+
     bloc_directives = (
         f"\n═══════════════════════════════════════════════════\n"
         f"  DIRECTIVES VISUELLES (curseurs utilisateur, 0–100)\n"
@@ -1867,7 +1888,7 @@ Couleurs accents : {', '.join(couleurs_acc) if couleurs_acc else "(libres)"}
   MÉDIATHÈQUE UTILISATEUR DISPONIBLE
 ═══════════════════════════════════════════════════
 {json.dumps(desc_medias, ensure_ascii=False, indent=2) if desc_medias else "(aucun média uploadé)"}
-{bloc_directives}{bloc_brand_kit}{bloc_layout_ai}
+{bloc_vertical}{bloc_directives}{bloc_brand_kit}{bloc_layout_ai}
 ═══════════════════════════════════════════════════
   RÈGLES STRICTES
 ═══════════════════════════════════════════════════
