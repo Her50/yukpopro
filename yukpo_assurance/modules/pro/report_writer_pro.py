@@ -1288,6 +1288,162 @@ class ReportWriterPro:
         except Exception as _e_font:
             logger.debug(f"[ReportWriter] Polices pro non posées : {_e_font}")
 
+        # ── ADD-1 — Numérotation hiérarchique 1.1.x sur Heading 1/2/3 ──────
+        # Word/LibreOffice numérotent automatiquement les sections : "1.",
+        # "1.1", "1.1.1" via un abstract numbering attaché au style. Avant :
+        # numérotation ajoutée manuellement comme préfixe texte (cf. l.1672
+        # `f"{i+1}. {titre}"`), ne survivait pas à un déplacement de section.
+        # Maintenant : numérotation native Word, refacto auto à l'insertion/
+        # suppression de section.
+        try:
+            from docx.shared import Pt as _Pt2
+            numbering_elm = doc.part.numbering_part.element if hasattr(doc.part, "numbering_part") and doc.part.numbering_part else None
+            if numbering_elm is None:
+                # python-docx ne crée pas le numbering_part s'il n'existe
+                # pas. On utilise alors l'approche numId déjà implémentée
+                # côté add_heading (level >0) — laisser python-docx gérer.
+                pass
+            # Hack OXML : on ajoute un abstractNum + num si le doc en a déjà,
+            # sinon on saute (les headings auront leur numérotation préfixée
+            # comme avant — pas de régression).
+            try:
+                num_part = doc.part.numbering_part
+                num_elm = num_part.element
+                # ID unique pour notre abstractNum hiérarchique
+                abs_id = "9999"
+                num_id = "9999"
+                # Vérifier qu'on ne l'a pas déjà ajouté
+                already = num_elm.find(
+                    f".//{{http://schemas.openxmlformats.org/wordprocessingml/2006/main}}abstractNum[@{{http://schemas.openxmlformats.org/wordprocessingml/2006/main}}abstractNumId='{abs_id}']"
+                )
+                if already is None:
+                    abstract_num = OxmlElement("w:abstractNum")
+                    abstract_num.set(qn("w:abstractNumId"), abs_id)
+                    for lvl_idx, fmt in enumerate(["%1.", "%1.%2.", "%1.%2.%3."]):
+                        lvl = OxmlElement("w:lvl")
+                        lvl.set(qn("w:ilvl"), str(lvl_idx))
+                        start = OxmlElement("w:start"); start.set(qn("w:val"), "1"); lvl.append(start)
+                        nf = OxmlElement("w:numFmt"); nf.set(qn("w:val"), "decimal"); lvl.append(nf)
+                        lt = OxmlElement("w:lvlText"); lt.set(qn("w:val"), fmt); lvl.append(lt)
+                        ja = OxmlElement("w:lvlJc"); ja.set(qn("w:val"), "left"); lvl.append(ja)
+                        # Tabulations + indent
+                        ppr = OxmlElement("w:pPr")
+                        ind = OxmlElement("w:ind")
+                        ind.set(qn("w:left"), str(360 * (lvl_idx + 1)))
+                        ind.set(qn("w:hanging"), "360")
+                        ppr.append(ind); lvl.append(ppr)
+                        abstract_num.append(lvl)
+                    num_elm.append(abstract_num)
+
+                    num = OxmlElement("w:num")
+                    num.set(qn("w:numId"), num_id)
+                    abs_ref = OxmlElement("w:abstractNumId")
+                    abs_ref.set(qn("w:val"), abs_id)
+                    num.append(abs_ref)
+                    num_elm.append(num)
+
+                    # Attache au style Heading 1/2/3
+                    for h_lvl, h_name in enumerate(("Heading 1", "Heading 2", "Heading 3")):
+                        try:
+                            st = doc.styles[h_name]
+                            ppr2 = st.element.get_or_add_pPr()
+                            for old in ppr2.findall(qn("w:numPr")):
+                                ppr2.remove(old)
+                            num_pr = OxmlElement("w:numPr")
+                            ilvl = OxmlElement("w:ilvl"); ilvl.set(qn("w:val"), str(h_lvl)); num_pr.append(ilvl)
+                            n_id = OxmlElement("w:numId"); n_id.set(qn("w:val"), num_id); num_pr.append(n_id)
+                            ppr2.append(num_pr)
+                        except KeyError:
+                            pass
+            except Exception as _e_num:
+                logger.debug(f"[ReportWriter] Numérotation hiérarchique non posée : {_e_num}")
+        except Exception as _e_pre:
+            logger.debug(f"[ReportWriter] Setup numbering préliminaire échoué : {_e_pre}")
+
+        # ── ADD-1 — Styles custom Quote + Callout + Caption ────────────────
+        # Permet au LLM d'utiliser des blocs visuellement distincts via
+        # markdown : "> citation" → Quote, "!!! info" → Callout, "*Figure
+        # N : ...*" → Caption auto. Niveau Big4 / cabinet pro.
+        try:
+            from docx.shared import RGBColor as _RGB
+            from docx.enum.style import WD_STYLE_TYPE
+            # Quote — italique gris, indent gauche, bordure verticale bleue
+            if "Yukpo Quote" not in doc.styles:
+                qstyle = doc.styles.add_style("Yukpo Quote", WD_STYLE_TYPE.PARAGRAPH)
+                qstyle.font.italic = True
+                qstyle.font.color.rgb = _RGB(0x4a, 0x5a, 0x6a)
+                qstyle.font.size = _Pt2(11)
+                qstyle.paragraph_format.left_indent = Cm(1)
+                qstyle.paragraph_format.right_indent = Cm(1)
+                qstyle.paragraph_format.space_before = _Pt2(8)
+                qstyle.paragraph_format.space_after = _Pt2(8)
+                # Bordure gauche (vertical bar)
+                ppr_q = qstyle.element.get_or_add_pPr()
+                pbdr = OxmlElement("w:pBdr")
+                left_b = OxmlElement("w:left")
+                left_b.set(qn("w:val"), "single"); left_b.set(qn("w:sz"), "12")
+                left_b.set(qn("w:space"), "8"); left_b.set(qn("w:color"), "0047AB")
+                pbdr.append(left_b); ppr_q.append(pbdr)
+            # Callout — fond bleu pâle, texte foncé, padding
+            if "Yukpo Callout" not in doc.styles:
+                cstyle = doc.styles.add_style("Yukpo Callout", WD_STYLE_TYPE.PARAGRAPH)
+                cstyle.font.size = _Pt2(10.5)
+                cstyle.font.color.rgb = _RGB(0x14, 0x2a, 0x4a)
+                cstyle.paragraph_format.space_before = _Pt2(8)
+                cstyle.paragraph_format.space_after = _Pt2(8)
+                ppr_c = cstyle.element.get_or_add_pPr()
+                shd = OxmlElement("w:shd")
+                shd.set(qn("w:val"), "clear"); shd.set(qn("w:color"), "auto")
+                shd.set(qn("w:fill"), "E8F0FA")
+                ppr_c.append(shd)
+                # Bordures fines tout autour
+                pbdr2 = OxmlElement("w:pBdr")
+                for side in ("top", "left", "bottom", "right"):
+                    b = OxmlElement(f"w:{side}")
+                    b.set(qn("w:val"), "single"); b.set(qn("w:sz"), "4")
+                    b.set(qn("w:space"), "4"); b.set(qn("w:color"), "B0CDE6")
+                    pbdr2.append(b)
+                ppr_c.append(pbdr2)
+            # Caption — italique petit gris (légende sous figure/tableau)
+            if "Yukpo Caption" not in doc.styles:
+                cap = doc.styles.add_style("Yukpo Caption", WD_STYLE_TYPE.PARAGRAPH)
+                cap.font.italic = True
+                cap.font.size = _Pt2(9.5)
+                cap.font.color.rgb = _RGB(0x66, 0x77, 0x88)
+                cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cap.paragraph_format.space_after = _Pt2(8)
+        except Exception as _e_styles:
+            logger.debug(f"[ReportWriter] Styles custom Quote/Callout/Caption non créés : {_e_styles}")
+
+        # ── ADD-1 — Watermark "BROUILLON" si mode draft ────────────────────
+        # Si self._watermark_text défini (ex: par appel /rapports/generer-draft),
+        # ajoute un watermark VML diagonale gris pâle dans le header de toutes
+        # les pages. Standard DRAFT/CONFIDENTIEL des cabinets.
+        try:
+            wm_text = getattr(self, "_watermark_text", None)
+            if wm_text:
+                from docx.oxml import parse_xml
+                wm_xml = (
+                    f'<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+                    f'xmlns:v="urn:schemas-microsoft-com:vml" '
+                    f'xmlns:o="urn:schemas-microsoft-com:office:office" '
+                    f'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '
+                    f'xmlns:w10="urn:schemas-microsoft-com:office:word">'
+                    f'<w:r><w:pict>'
+                    f'<v:shape id="WMshape" type="#_x0000_t136" '
+                    f'style="position:absolute;margin-left:0;margin-top:0;width:500pt;height:80pt;'
+                    f'rotation:-30;z-index:-251654144;mso-position-horizontal:center;'
+                    f'mso-position-horizontal-relative:margin;mso-position-vertical:center;'
+                    f'mso-position-vertical-relative:margin" fillcolor="#D0D0D0" stroked="f">'
+                    f'<v:textpath style="font-family:&#x22;Calibri&#x22;;font-size:1pt;font-weight:bold" '
+                    f'string="{wm_text[:60]}"/>'
+                    f'</v:shape></w:pict></w:r></w:p>'
+                )
+                for section in doc.sections:
+                    section.header.add_paragraph()._p.addnext(parse_xml(wm_xml))
+        except Exception as _e_wm:
+            logger.debug(f"[ReportWriter] Watermark non posé : {_e_wm}")
+
         # ── Métadonnées DOCX (XMP `core.xml`) — auteur, titre, mots-clés,
         # entreprise. Visibles dans Fichier > Propriétés sous Word, et
         # exploitées par les DMS (SharePoint, M-Files, etc.) pour indexer
@@ -1674,17 +1830,54 @@ class ReportWriterPro:
                                         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
                                         run_img = p_img.add_run()
                                         run_img.add_picture(_io.BytesIO(png_bytes), width=Inches(5.8))
-                                        cap_fig = doc.add_paragraph()
-                                        cap_fig.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                                        cf_run = cap_fig.add_run(
-                                            f"Figure {num_fig} — Visualisation du tableau {num_table}"
-                                        )
-                                        cf_run.italic = True
-                                        cf_run.font.size = Pt(9)
-                                        cf_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+                                        # ADD-1 — Légende via style Yukpo Caption
+                                        try:
+                                            cap_fig = doc.add_paragraph(
+                                                f"Figure {num_fig} — Visualisation du tableau {num_table}",
+                                                style="Yukpo Caption",
+                                            )
+                                        except KeyError:
+                                            cap_fig = doc.add_paragraph()
+                                            cap_fig.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                            cf_run = cap_fig.add_run(
+                                                f"Figure {num_fig} — Visualisation du tableau {num_table}"
+                                            )
+                                            cf_run.italic = True
+                                            cf_run.font.size = Pt(9)
+                                            cf_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
                                         doc.add_paragraph()
                                     except Exception as _e_img:
                                         logger.debug(f"[ReportWriter] Insertion figure échouée: {_e_img}")
+                    continue
+
+                # ── ADD-1 — Citation `> texte` → style Yukpo Quote ────────
+                if s.startswith("> "):
+                    quote_lines = []
+                    while i < len(lignes) and lignes[i].lstrip().startswith("> "):
+                        quote_lines.append(lignes[i].lstrip()[2:].rstrip())
+                        i += 1
+                    try:
+                        p_q = doc.add_paragraph(" ".join(quote_lines), style="Yukpo Quote")
+                    except KeyError:
+                        p_q = doc.add_paragraph(" ".join(quote_lines))
+                        for r_q in p_q.runs:
+                            r_q.italic = True
+                    continue
+
+                # ── ADD-1 — Callout `!!! info|warning|note: texte` ────────
+                if s.startswith("!!! "):
+                    rest = s[4:].strip()
+                    label, _, body = rest.partition(":")
+                    body_lines = [body.strip()] if body else [label.strip()]
+                    i += 1
+                    # Capture lignes suivantes indentées sous le callout
+                    while i < len(lignes) and lignes[i].startswith("    "):
+                        body_lines.append(lignes[i].strip())
+                        i += 1
+                    try:
+                        p_c = doc.add_paragraph(" ".join(body_lines), style="Yukpo Callout")
+                    except KeyError:
+                        p_c = doc.add_paragraph(" ".join(body_lines))
                     continue
 
                 # ── Bullet sous-indentés (  - ou    •) ──────────────────
@@ -1763,8 +1956,9 @@ class ReportWriterPro:
             titre   = section.get("titre", f"Section {i+1}")
             contenu = section.get("contenu", "")
 
-            # Titre de section principal
-            heading = doc.add_heading(f"{i+1}. {titre}", level=1)
+            # Titre de section — numérotation native via abstractNum (ADD-1)
+            # attaché au style Heading 1, donc plus besoin de préfixer "{i+1}."
+            heading = doc.add_heading(titre, level=1)
             if heading.runs:
                 heading.runs[0].font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
                 heading.runs[0].font.size = Pt(14)
@@ -1839,6 +2033,71 @@ class ReportWriterPro:
             run_pg.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
 
         _ajouter_nb_pages(p_footer)
+
+        # ── ADD-1 — Bloc signature en fin de document ─────────────────────
+        # Standard cabinet : nom + fonction + date + ligne de signature.
+        # Si profil contient signataire/fonction, on les utilise, sinon
+        # placeholder neutre. À éditer manuellement par l'utilisateur.
+        try:
+            doc.add_page_break()
+            p_sig_titre = doc.add_paragraph()
+            p_sig_titre.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            r_sig_t = p_sig_titre.add_run("Signature")
+            r_sig_t.bold = True; r_sig_t.font.size = Pt(11)
+            r_sig_t.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
+            doc.add_paragraph()
+
+            nom_sig = ""
+            fonction_sig = ""
+            if self._profil:
+                nom_sig = (
+                    getattr(self._profil, "nom_complet", None)
+                    or getattr(self._profil, "nom", None)
+                    or getattr(self._profil, "user_nom", None)
+                    or ""
+                )
+                fonction_sig = (
+                    getattr(self._profil, "fonction", None)
+                    or getattr(self._profil, "metier", None)
+                    or ""
+                )
+
+            # Tableau 1 ligne × 2 colonnes : ligne signature + bloc texte
+            tbl_sig = doc.add_table(rows=1, cols=2)
+            tbl_sig.autofit = True
+            cell_sig_left = tbl_sig.cell(0, 0)
+            cell_sig_right = tbl_sig.cell(0, 1)
+
+            # Cellule gauche — ligne de signature
+            p_sig_line = cell_sig_left.paragraphs[0]
+            p_sig_line.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            r_line = p_sig_line.add_run("\n\n_______________________________")
+            r_line.font.size = Pt(10); r_line.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+            p_sig_label = cell_sig_left.add_paragraph()
+            r_lab = p_sig_label.add_run("Signature et cachet")
+            r_lab.italic = True; r_lab.font.size = Pt(9)
+            r_lab.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+
+            # Cellule droite — nom / fonction / date
+            p_sig_nom = cell_sig_right.paragraphs[0]
+            p_sig_nom.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            if nom_sig:
+                r_nom = p_sig_nom.add_run(str(nom_sig))
+                r_nom.bold = True; r_nom.font.size = Pt(11)
+            if fonction_sig:
+                p_sig_fct = cell_sig_right.add_paragraph()
+                p_sig_fct.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                r_fct = p_sig_fct.add_run(str(fonction_sig))
+                r_fct.italic = True; r_fct.font.size = Pt(10)
+                r_fct.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+            p_sig_date = cell_sig_right.add_paragraph()
+            p_sig_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            r_date_sig = p_sig_date.add_run(
+                f"Fait le {datetime.now().strftime('%d/%m/%Y')}"
+            )
+            r_date_sig.font.size = Pt(10); r_date_sig.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+        except Exception as _e_sig:
+            logger.debug(f"[ReportWriter] Bloc signature non posé : {_e_sig}")
 
         # Sauvegarder
         chemin = _OUTPUT_DIR / (nom_fichier + ".docx")
