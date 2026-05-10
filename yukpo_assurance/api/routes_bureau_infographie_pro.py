@@ -262,6 +262,195 @@ async def bulk_lancer(
     }
 
 
+# ─── Phase 4.2 — A/B testing automatique (variantes + Sonnet vision compare) ─
+
+
+class DemandeABTest(BaseModel):
+    """
+    Phase 4.2 — Génère N variantes d'un projet (même brief, angles différents)
+    et utilise Sonnet vision pour les comparer + recommander le meilleur.
+    """
+    brief: str = Field(..., min_length=10)
+    cle_projet: Optional[str] = Field(default=None,
+        description="Forcer un gabarit (sinon auto-detect via orchestrateur)")
+    nb_variantes: int = Field(default=3, ge=2, le=5,
+        description="Nombre de variantes (2-5). Au-delà : coût explose.")
+    mode_visuel: str = Field(default="premium")
+    pays: str = Field(default="CM")
+    langue: str = Field(default="fr")
+    objectif_marketing: Optional[str] = Field(default=None, max_length=500,
+        description="Critère de jugement (ex: 'attire un public premium', 'maximise lisibilité', 'évoque confiance')")
+    accepter_cout: bool = Field(default=False)
+
+
+@router.post("/ab-test", tags=["Bureau — Designer Pro"])
+async def ab_test_variantes(
+    demande: DemandeABTest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Phase 4.2 — A/B testing automatique :
+    1. Génère N variantes du même projet en parallèle (angles visuels différents
+       via instructions distinctes injectées dans le brief de chaque variante)
+    2. Sonnet vision analyse les N PDFs page 1 et compare selon objectif_marketing
+    3. Retourne classement + recommandation winner + raisonnement détaillé
+
+    Cas d'usage : DRH banque qui hésite entre 3 styles pour son rapport annuel,
+    marketing qui A/B teste 5 versions d'un flyer campagne.
+
+    Coût = N × génération_normale + 1 forfait `designerpro_ab_test_rapport`.
+    """
+    from modules.bureau.infographe_pro import generer_projet
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait, debiter_llm,
+    )
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import base64 as _b64
+    import json as _json
+
+    if not demande.accepter_cout:
+        raise HTTPException(400,
+            f"A/B test = {demande.nb_variantes}× génération + analyse comparative. "
+            "Cocher 'accepter_cout' pour confirmer.")
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Détection cle_projet si absent
+    cle_projet = demande.cle_projet
+    if not cle_projet:
+        try:
+            from .routes_bureau_infographie_pro import orchestrer as _orch_internal
+        except Exception:
+            from api.routes_bureau_infographie_pro import orchestrer as _orch_internal
+        try:
+            orch = await _orch_internal(
+                DemandeOrchestrer(prompt=demande.brief, pays=demande.pays, langue=demande.langue),
+                current_user,
+            )
+            cle_projet = orch.cle_projet
+        except Exception as e:
+            raise HTTPException(500, f"Auto-detect cle_projet échoué : {e}")
+
+    # Angles distincts par variante (injection dans brief)
+    angles = [
+        "Style éditorial sobre, classique, hiérarchie typographique nette",
+        "Style audacieux et impactant, compositions asymétriques, accents colorés forts",
+        "Style minimaliste, espaces blancs généreux, élégance discrète",
+        "Style data-driven, riche en infographies/chiffres, layout bento modulaire",
+        "Style storytelling cinématique, fullbleed photo, narration émotionnelle",
+    ]
+    nb = min(demande.nb_variantes, 5)
+    session_id = f"abtest_{int(time.time())}_{current_user.user_id}"
+
+    sem = asyncio.Semaphore(2)
+    async def _gen_variante(i: int):
+        async with sem:
+            angle = angles[i % len(angles)]
+            brief_variante = f"{demande.brief}\n\n[Variante {i+1} : {angle}]"
+            try:
+                res = await generer_projet(
+                    brief=brief_variante, cle_projet=cle_projet,
+                    user_id=str(current_user.user_id), session_id=session_id,
+                    pays=demande.pays, langue=demande.langue, export_cmyk=True,
+                    mode_visuel=demande.mode_visuel,
+                )
+                ts = int(time.time()) + i
+                artefacts = _persister_projet_pro(current_user.user_id, cle_projet, ts, res)
+                page1_b64 = (res.pages_png or [b""])[0]
+                return {
+                    "variante": i + 1, "angle": angle, "ok": True,
+                    "pdf_id": artefacts.get("pdf_id"),
+                    "download_url": artefacts.get("download_url"),
+                    "preview_b64": _b64.b64encode(page1_b64).decode("ascii") if page1_b64 else None,
+                    "projet_titre": res.projet.titre if res.projet else "",
+                }
+            except Exception as e:
+                logger.warning(f"[A/B test variante {i+1}] échec : {e}")
+                return {"variante": i + 1, "angle": angle, "ok": False, "erreur": str(e)[:200]}
+
+    variantes = await asyncio.gather(*(_gen_variante(i) for i in range(nb)))
+    variantes_ok = [v for v in variantes if v.get("ok") and v.get("preview_b64")]
+    if not variantes_ok:
+        raise HTTPException(500, "Aucune variante générée avec succès")
+
+    # Analyse comparative Sonnet vision
+    objectif = demande.objectif_marketing or (
+        "qualité globale, équilibre visuel, hiérarchie de l'information, "
+        "professionnalisme, capacité à capter l'attention"
+    )
+    rapport_ab: dict = {}
+    try:
+        # Sonnet vision peut analyser jusqu'à ~5 images en 1 appel
+        prompt_compare = (
+            f"Tu es DIRECTEUR ARTISTIQUE & STRATÈGE MARKETING. {len(variantes_ok)} "
+            f"variantes d'un visuel sont présentées en image. Compare-les selon ce critère :\n\n"
+            f"OBJECTIF : {objectif}\n\n"
+            f"BRIEF ORIGINAL : «{demande.brief[:500]}»\n\n"
+            f"Pour chaque variante (numérotée 1 à {len(variantes_ok)}), donne :\n"
+            f"  - score global /100\n"
+            f"  - forces (3 max, courtes)\n"
+            f"  - faiblesses (3 max, courtes)\n"
+            f"Puis désigne le WINNER (numéro de variante) avec une raison synthétique.\n\n"
+            f"FORMAT JSON STRICT :\n"
+            f"{{\n"
+            f'  "variantes_analyse": [\n'
+            f'    {{"variante": 1, "score": 85, "forces": [...], "faiblesses": [...]}}\n'
+            f"  ],\n"
+            f'  "winner": 2,\n'
+            f'  "raisonnement_winner": "..."\n'
+            f"}}\n\n"
+            f"Retourne UNIQUEMENT le JSON."
+        )
+        images_b64 = [v["preview_b64"] for v in variantes_ok]
+        rep = await ia_client.appeler(
+            prompt=prompt_compare, mode=ModeIA.ANALYSE, json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+            images_b64=images_b64,
+        )
+        try:
+            rapport_ab = _json.loads(rep.contenu)
+        except _json.JSONDecodeError:
+            import re
+            m = re.search(r'\{.*\}', rep.contenu, re.DOTALL)
+            rapport_ab = _json.loads(m.group()) if m else {}
+        # Débit LLM Sonnet vision
+        try:
+            await debiter_llm(
+                current_user.user_id, modele=rep.modele_utilise,
+                tokens_input=int(rep.tokens_input or 0),
+                tokens_output=int(rep.tokens_output or 0),
+                module="infographie",
+            )
+        except Exception:
+            pass
+    except Exception as e:
+        logger.error(f"[A/B test rapport] {e}")
+        rapport_ab = {"erreur": str(e)[:300]}
+
+    # Forfait analyse comparative
+    try:
+        await debiter_forfait(current_user.user_id,
+                              "designerpro_ab_test_rapport",
+                              module="infographie", multiplicateur=1.0)
+    except Exception:
+        pass
+
+    return {
+        "ok": True,
+        "cle_projet": cle_projet,
+        "nb_variantes": len(variantes),
+        "nb_succes": len(variantes_ok),
+        "objectif_marketing": objectif,
+        "variantes": variantes,
+        "rapport_comparatif": rapport_ab,
+        "winner_variante": rapport_ab.get("winner"),
+    }
+
+
 # ─── Phase 4.1 — Bulk ASYNC (>50 lignes, jusqu'à 1000) ───────────────────────
 
 

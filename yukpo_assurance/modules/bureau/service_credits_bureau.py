@@ -132,6 +132,10 @@ COUTS_FORFAIT_FCFA: dict[str, float] = {
     # Sprint L1.3 — Export multilingual (N PDFs en parallèle pour N langues)
     # Multiplicateur = nb_langues. Couvre LLM tokens traduction par langue + render PDF.
     "designerpro_multilingual_export": 2.0,  # 40 cr/langue = 24 FCFA/langue
+    # Phase 4.2 — A/B testing : génère N variantes d'un projet + Sonnet vision compare
+    # Coût = même que generation × N + 1 appel Sonnet vision pour analyse comparative
+    # Forfait fixe en plus pour le rapport comparatif (analyse marketing)
+    "designerpro_ab_test_rapport": 5.0,      # 100 cr/test = 60 FCFA pour le rapport
                                              # ~5 FCFA réel (LLM Sonnet ~1500 tok + render)
                                              # marge ~5×
     # Sprint R1/R2 — Génération via Replicate (provider alternatif/fallback)
