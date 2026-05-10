@@ -1077,6 +1077,34 @@ class SlideBuilderPro:
         else:
             self._cover_stripe(slide, sujet, w, h, T)
 
+        # Logo entreprise top-right de la couverture (si profil renseigne
+        # logo_b64 / logo_base64). Equivalent du logo cover-page DOCX
+        # report_writer_pro. Coup de pro Big4 : la presentation s'identifie
+        # immediatement comme document organisation, pas template generique.
+        if self._profil:
+            logo_b64 = (
+                getattr(self._profil, "logo_b64", None)
+                or getattr(self._profil, "logo_base64", None)
+            )
+            if logo_b64:
+                try:
+                    import base64 as _b64, tempfile as _tmp, os as _os
+                    _data = _b64.b64decode(
+                        logo_b64.split(",")[-1] if "," in logo_b64 else logo_b64
+                    )
+                    _suf = ".png" if _data[:4] == b"\x89PNG" else ".jpg"
+                    _f = _tmp.NamedTemporaryFile(delete=False, suffix=_suf)
+                    _f.write(_data); _f.close()
+                    slide.shapes.add_picture(
+                        _f.name,
+                        int(w - Inches(1.6)),
+                        int(Inches(0.4)),
+                        width=Inches(1.2),
+                    )
+                    _os.unlink(_f.name)
+                except Exception as _le:
+                    logger.debug(f"[SlideBuilder] Logo cover non insere : {_le}")
+
     def _cover_diagonal(self, slide, sujet: str, w, h, T):
         """Corporate : fond blanc, bande diagonale bleue, accent or."""
         from pptx.util import Inches, Pt
@@ -1914,17 +1942,43 @@ class SlideBuilderPro:
 
         _rect(slide, 0, int(h - Inches(0.32)), w, Inches(0.32), T["primaire"])
 
-        tb = slide.shapes.add_textbox(
+        # Footer Big4 : nom org en bas-gauche, page X/Y en bas-droite
+        # Fallback "YukpoPro" si pas de profil/org renseigné.
+        org_libelle = "YukpoPro"
+        if self._profil:
+            org = (
+                getattr(self._profil, "nom_organisation", None)
+                or getattr(self._profil, "entreprise", None)
+                or ""
+            )
+            if org:
+                org_libelle = str(org)[:60]
+
+        # Côté gauche : org + theme + mois
+        tb_left = slide.shapes.add_textbox(
             int(Inches(0.3)), int(h - Inches(0.30)),
-            int(w - Inches(0.6)), int(Inches(0.28))
+            int(w * 0.5), int(Inches(0.28)),
         )
-        tf = tb.text_frame
-        p  = tf.paragraphs[0]
-        p.alignment = PP_ALIGN.RIGHT
-        run = p.add_run()
-        run.text = f"YukpoPro  •  {self._theme['nom']}  •  {datetime.now().strftime('%m/%Y')}"
-        run.font.size  = Pt(8)
-        run.font.color.rgb = _rgb(T["accent"])
+        tf_l = tb_left.text_frame
+        p_l = tf_l.paragraphs[0]
+        p_l.alignment = PP_ALIGN.LEFT
+        run_l = p_l.add_run()
+        run_l.text = f"{org_libelle}  •  {datetime.now().strftime('%m/%Y')}"
+        run_l.font.size = Pt(8)
+        run_l.font.color.rgb = _rgb(T["accent"])
+
+        # Côté droit : pagination
+        tb_right = slide.shapes.add_textbox(
+            int(w * 0.5), int(h - Inches(0.30)),
+            int(w * 0.5 - Inches(0.3)), int(Inches(0.28)),
+        )
+        tf_r = tb_right.text_frame
+        p_r = tf_r.paragraphs[0]
+        p_r.alignment = PP_ALIGN.RIGHT
+        run_r = p_r.add_run()
+        run_r.text = f"{num} / {total}  •  {self._theme['nom']}"
+        run_r.font.size = Pt(8)
+        run_r.font.color.rgb = _rgb(T["accent"])
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
