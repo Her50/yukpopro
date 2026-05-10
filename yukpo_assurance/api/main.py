@@ -104,6 +104,7 @@ from api.routes_agent_systeme import router as agent_systeme_router
 from api.routes_agent_conv import router as agent_conv_router
 from api.routes_portail import router as portail_router
 from api.routes_bureau_redaction import router as bureau_redaction_router
+from api.routes_bureau_slides import router as bureau_slides_router
 from api.routes_bureau_ocr import router as bureau_ocr_router
 from api.routes_bureau_audio import router as bureau_audio_router
 from api.routes_bureau_infographie import router as bureau_infographie_router
@@ -805,6 +806,7 @@ async def reset_admin_password(
 
 # ─── YukpoSecrétariat ─────────────────────────────────────────────────────────
 app.include_router(bureau_redaction_router,  prefix="/api/v1/bureau/redaction",   tags=["Secrétariat — Rédaction IA"])
+app.include_router(bureau_slides_router,      prefix="/api/v1/bureau/slides",      tags=["Secrétariat — Slides PPTX"])
 app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",         tags=["Secrétariat — OCR & Scan"])
 app.include_router(bureau_audio_router,      prefix="/api/v1/bureau/audio",       tags=["Secrétariat — Audio → Document"])
 app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie", tags=["Secrétariat — Infographie Print"])
