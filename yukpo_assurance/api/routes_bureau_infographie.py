@@ -723,6 +723,201 @@ async def modifier_infographie(
     }
 
 
+# ─── Sprint TOP 4 — Multi-format simultané (1 brief → N visuels parallèles) ──
+#
+# Killer feature attendue vs Canva Pro : "1 brief utilisateur → 3+ formats
+# différents générés en parallèle (Insta 1080×1080 + LinkedIn 1200×627 +
+# A3 print) + ZIP à télécharger". Réutilise le pipeline mono-page existant
+# (generer_infographie) en parallélisant sur N gabarits.
+#
+# UX : un seul brief, l'utilisateur coche les formats voulus, reçoit un
+# ZIP en 30-60s avec tous les visuels + un manifest.json.
+
+class DemandeMultiFormat(BaseModel):
+    brief: str = Field(..., min_length=10,
+        description="Brief unique, décliné automatiquement sur tous les formats demandés")
+    formats: list[str] = Field(..., min_length=2, max_length=8,
+        description="Clés gabarits (ex: ['instagram_post','linkedin_banner','affiche_a3'])")
+    pays: str = Field(default="CM")
+    profil: Optional[ProfilInfographie] = None
+    export_cmyk: bool = Field(default=True)
+    accepter_cout: bool = Field(default=False,
+        description="Doit être true (multi-render = N× coût mono — confirmation explicite)")
+
+
+@router.post("/multi-render", tags=["Bureau — Infographie"])
+async def multi_render(
+    demande: DemandeMultiFormat,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Génère N visuels en parallèle depuis 1 seul brief, retourne un ZIP avec
+    tous les PDFs/PNGs + manifest.json. Killer feature vs Canva Pro.
+
+    Coût = N × (LLM + forfait infographie_creation). Marges respectées par
+    pipeline existant (un débit par format, comme N appels distincts).
+
+    Concurrence limitée à 3 (semaphore) pour ne pas saturer Flux/Recraft API.
+    """
+    from modules.bureau.infographe import generer_infographie, GABARITS
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+    import asyncio as _aio
+    import io as _io
+    import json as _json
+    import time as _time
+    import zipfile as _zip
+
+    if not demande.accepter_cout:
+        raise HTTPException(400,
+            f"Multi-render = {len(demande.formats)}× génération mono. "
+            "Cocher 'accepter_cout' pour confirmer le débit cumulé.")
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    # Validation : tous les gabarits doivent exister + dédoublonnage en gardant l'ordre
+    formats_valides: list[str] = []
+    inconnus: list[str] = []
+    seen: set[str] = set()
+    for g in demande.formats:
+        if g in seen:
+            continue
+        seen.add(g)
+        if g in GABARITS:
+            formats_valides.append(g)
+        else:
+            inconnus.append(g)
+    if inconnus:
+        raise HTTPException(400,
+            f"Gabarits inconnus : {inconnus}. Disponibles : {sorted(GABARITS.keys())}")
+    if len(formats_valides) < 2:
+        raise HTTPException(400, "Au moins 2 formats distincts requis pour /multi-render")
+
+    profil_dict = demande.profil.model_dump(exclude_none=True) if demande.profil else None
+    sem = _aio.Semaphore(3)
+
+    async def _render_one(idx: int, type_gabarit: str) -> dict:
+        async with sem:
+            try:
+                resultat = await generer_infographie(
+                    brief=demande.brief,
+                    type_gabarit=type_gabarit,
+                    pays=demande.pays,
+                    profil=profil_dict,
+                    export_cmyk=demande.export_cmyk,
+                    export_svg=False,  # SVG inutile dans un ZIP multi-format
+                    dpi_preview=300,
+                )
+                meta = resultat.meta or {}
+                # Débit LLM (tokens) + forfait par format
+                if meta.get("tokens_input") or meta.get("tokens_output"):
+                    try:
+                        await debiter_llm(
+                            current_user.user_id,
+                            modele=meta.get("modele", "default"),
+                            tokens_input=int(meta.get("tokens_input", 0) or 0),
+                            tokens_output=int(meta.get("tokens_output", 0) or 0),
+                            module="infographie",
+                        )
+                    except Exception:
+                        pass
+                if resultat.pdf_bytes:
+                    try:
+                        await debiter_forfait(
+                            current_user.user_id, "infographie_creation",
+                            module="infographie", multiplicateur=1.0,
+                        )
+                    except Exception:
+                        pass
+                ts = int(_time.time()) + idx
+                artefacts = _persister_artefacts(
+                    current_user.user_id, type_gabarit, ts, resultat,
+                )
+                gab = GABARITS[type_gabarit]
+                return {
+                    "idx": idx, "format": type_gabarit, "ok": True,
+                    "label": gab.get("label", type_gabarit),
+                    "width_mm": gab.get("width_mm"),
+                    "height_mm": gab.get("height_mm"),
+                    "pdf_bytes": resultat.pdf_bytes,
+                    "pdf_cmyk_bytes": resultat.pdf_cmyk_bytes,
+                    "png_bytes": resultat.png_bytes,
+                    "pdf_id": artefacts.get("pdf_id"),
+                    "pdf_cmyk_id": artefacts.get("pdf_cmyk_id"),
+                    "png_id": artefacts.get("png_id"),
+                }
+            except Exception as e:
+                logger.warning(f"[Multi-render] format {type_gabarit} échoué : {e}")
+                return {"idx": idx, "format": type_gabarit, "ok": False, "erreur": str(e)[:200]}
+
+    results = await _aio.gather(*[_render_one(i, g) for i, g in enumerate(formats_valides)])
+
+    # Construction du ZIP : 1 dossier par format avec PDF + PDF CMJN + PNG.
+    # Manifest.json en racine pour traçabilité (brief, formats, dimensions, IDs).
+    nb_ok = sum(1 for r in results if r.get("ok"))
+    nb_failed = len(results) - nb_ok
+
+    zip_buf = _io.BytesIO()
+    with _zip.ZipFile(zip_buf, "w", _zip.ZIP_DEFLATED) as zf:
+        manifest = {
+            "brief": demande.brief,
+            "pays": demande.pays,
+            "ts": int(_time.time()),
+            "nb_total": len(results),
+            "nb_ok": nb_ok,
+            "nb_failed": nb_failed,
+            "formats": [],
+        }
+        for r in results:
+            entry = {
+                "format": r["format"], "ok": r.get("ok", False),
+                "label": r.get("label", r["format"]),
+                "width_mm": r.get("width_mm"),
+                "height_mm": r.get("height_mm"),
+            }
+            if not r.get("ok"):
+                entry["erreur"] = r.get("erreur", "")
+                manifest["formats"].append(entry)
+                continue
+            base = r["format"]
+            if r.get("pdf_bytes"):
+                zf.writestr(f"{base}/{base}.pdf", r["pdf_bytes"])
+                entry["pdf"] = f"{base}/{base}.pdf"
+            if r.get("pdf_cmyk_bytes"):
+                zf.writestr(f"{base}/{base}_cmyk.pdf", r["pdf_cmyk_bytes"])
+                entry["pdf_cmyk"] = f"{base}/{base}_cmyk.pdf"
+            if r.get("png_bytes"):
+                zf.writestr(f"{base}/{base}.png", r["png_bytes"])
+                entry["png"] = f"{base}/{base}.png"
+            entry["pdf_id"] = r.get("pdf_id")
+            entry["pdf_cmyk_id"] = r.get("pdf_cmyk_id")
+            entry["png_id"] = r.get("png_id")
+            manifest["formats"].append(entry)
+        zf.writestr("manifest.json", _json.dumps(manifest, ensure_ascii=False, indent=2))
+
+    zip_id = f"bureau_pdf_{current_user.user_id}_multi_{int(_time.time())}.zip"
+    (_DATA_DIR / zip_id).write_bytes(zip_buf.getvalue())
+
+    return {
+        "ok": True,
+        "nb_total": len(results),
+        "nb_ok": nb_ok,
+        "nb_failed": nb_failed,
+        "zip_id": zip_id,
+        "zip_base64": base64.b64encode(zip_buf.getvalue()).decode(),
+        "results": [
+            {k: v for k, v in r.items() if k not in ("pdf_bytes", "pdf_cmyk_bytes", "png_bytes")}
+            for r in results
+        ],
+    }
+
+
 @router.get("/fichier/{fichier_id}", tags=["Bureau — Infographie"])
 async def telecharger_infographie(
     fichier_id: str,
@@ -741,9 +936,11 @@ async def telecharger_infographie(
 
     suffix = chemin.suffix.lower()
     media_types = {
-        ".pdf": "application/pdf",
-        ".png": "image/png",
-        ".svg": "image/svg+xml",
+        ".pdf":  "application/pdf",
+        ".png":  "image/png",
+        ".svg":  "image/svg+xml",
+        ".zip":  "application/zip",   # /multi-render output
+        ".json": "application/json",
     }
     media_type = media_types.get(suffix, "application/octet-stream")
 
