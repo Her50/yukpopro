@@ -100,6 +100,9 @@ export default function DesignerProPanel() {
   const [loraTraining, setLoraTraining] = useState(false)
   const [brandLoraId, setBrandLoraId] = useState<string>('')
 
+  // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
+  const [showAdvanced, setShowAdvanced] = useState(false)
+
   // Directives visuelles (sliders Phase 3)
   const [creativite, setCreativite] = useState(50)
   const [densite, setDensite] = useState(50)
@@ -618,88 +621,105 @@ export default function DesignerProPanel() {
         )}
       </div>
 
-      {/* Génération */}
+      {/* Génération zero-config (UX2) */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-gray-800">{t('designerPro.briefAndOptions')}</p>
-          <label className="flex items-center gap-2 text-xs">
-            <input type="checkbox" checked={autoMode} onChange={e => setAutoMode(e.target.checked)} />
-            <span className="text-gray-700">{t('designerPro.autoFormat')}</span>
-          </label>
-        </div>
-
-        {!autoMode && (
-          <select value={cleHint} onChange={e => setCleHint(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm">
-            <option value="">{t('designerPro.selectProject')}</option>
-            {projets.map(p => (
-              <option key={p.cle} value={p.cle}>
-                {p.label} — {t('designerPro.pagesCount', { n: p.pages })} ({p.width_mm}×{p.height_mm}mm)
-              </option>
-            ))}
-          </select>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <CountryPicker label={t('common.country')} value={pays} onChange={setPays} />
-          <LanguagePicker label={t('language.select')} value={langue} onChange={setLangue} />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50 rounded-xl p-3 border border-amber-100">
-          {([
-            ['creativite',    t('designerPro.sliderCreativity'),    creativite,    setCreativite,    t('designerPro.sliderCreativityHint')],
-            ['densite',       t('designerPro.sliderDensity'),       densite,       setDensite,       t('designerPro.sliderDensityHint')],
-            ['importanceImg', t('designerPro.sliderImageImportance'), importanceImg, setImportanceImg, t('designerPro.sliderImageImportanceHint')],
-            ['elegance',      t('designerPro.sliderElegance'),      elegance,      setElegance,      t('designerPro.sliderEleganceHint')],
-          ] as const).map(([key, label, val, setter, hint]) => (
-            <div key={key as string}>
-              <div className="flex justify-between items-center text-xs text-gray-800 font-semibold mb-0.5">
-                <span>{label}</span><span className="tabular-nums text-amber-700">{val}</span>
-              </div>
-              <input type="range" min={0} max={100} value={val}
-                onChange={e => (setter as (n: number) => void)(parseInt(e.target.value))}
-                className="w-full accent-amber-600" />
-              <p className="text-[10px] text-gray-500">{hint}</p>
-            </div>
-          ))}
-        </div>
-
-        <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={6}
+        <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={5}
           placeholder={t('designerPro.briefPlaceholder')}
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none" />
-
-        {/* Mode visuel IA — Niveau 3 hybride avec génération d'images Flux */}
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-800">
-            {t('designerPro.visualMode')}
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            {([
-              { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',       descKey: 'designerPro.modeSansDesc' },
-              { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard',   descKey: 'designerPro.modeStandardDesc' },
-              { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',    descKey: 'designerPro.modePremiumDesc' },
-              { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',      descKey: 'designerPro.modeUltraDesc' },
-              { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',  descKey: 'designerPro.modeUltraPlusDesc' },
-            ] as const).map(opt => (
-              <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
-                className={`p-3 rounded-xl border-2 text-left transition-all ${
-                  modeVisuel === opt.v
-                    ? 'border-amber-500 bg-amber-50 shadow-sm'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}>
-                <div className="text-xl">{opt.emoji}</div>
-                <div className="text-xs font-bold text-gray-900 mt-1">{t(opt.titleKey)}</div>
-                <div className="text-[10px] text-gray-500 leading-tight mt-0.5">{t(opt.descKey)}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <p className="text-[10px] text-gray-500 -mt-2">
+          💡 {t('designerPro.briefHint', "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ.")}
+        </p>
 
         <button onClick={generer} disabled={loading || !brief.trim()}
           className="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
           {loading ? t('designerPro.generating') : t('designerPro.generate')}
         </button>
+
+        {/* ── Sprint UX2 — Options avancées repliables ──────────────────── */}
+        <button type="button" onClick={() => setShowAdvanced(v => !v)}
+          className="w-full flex items-center justify-between text-left text-xs font-semibold text-gray-600 hover:text-gray-900 border-t border-gray-100 pt-3">
+          <span>⚙️ {t('designerPro.advanced', 'Options avancées')}
+            <span className="text-[10px] text-gray-400 font-normal ml-1">
+              {showAdvanced ? '' : t('designerPro.advancedHint', '— format, mode visuel, sliders, langue/pays')}
+            </span>
+          </span>
+          <span className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>▾</span>
+        </button>
+
+        {showAdvanced && (
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-700">{t('designerPro.briefAndOptions')}</p>
+              <label className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={autoMode} onChange={e => setAutoMode(e.target.checked)} />
+                <span className="text-gray-700">{t('designerPro.autoFormat')}</span>
+              </label>
+            </div>
+
+            {!autoMode && (
+              <select value={cleHint} onChange={e => setCleHint(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm">
+                <option value="">{t('designerPro.selectProject')}</option>
+                {projets.map(p => (
+                  <option key={p.cle} value={p.cle}>
+                    {p.label} — {t('designerPro.pagesCount', { n: p.pages })} ({p.width_mm}×{p.height_mm}mm)
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CountryPicker label={t('common.country')} value={pays} onChange={setPays} />
+              <LanguagePicker label={t('language.select')} value={langue} onChange={setLangue} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50 rounded-xl p-3 border border-amber-100">
+              {([
+                ['creativite',    t('designerPro.sliderCreativity'),    creativite,    setCreativite,    t('designerPro.sliderCreativityHint')],
+                ['densite',       t('designerPro.sliderDensity'),       densite,       setDensite,       t('designerPro.sliderDensityHint')],
+                ['importanceImg', t('designerPro.sliderImageImportance'), importanceImg, setImportanceImg, t('designerPro.sliderImageImportanceHint')],
+                ['elegance',      t('designerPro.sliderElegance'),      elegance,      setElegance,      t('designerPro.sliderEleganceHint')],
+              ] as const).map(([key, label, val, setter, hint]) => (
+                <div key={key as string}>
+                  <div className="flex justify-between items-center text-xs text-gray-800 font-semibold mb-0.5">
+                    <span>{label}</span><span className="tabular-nums text-amber-700">{val}</span>
+                  </div>
+                  <input type="range" min={0} max={100} value={val}
+                    onChange={e => (setter as (n: number) => void)(parseInt(e.target.value))}
+                    className="w-full accent-amber-600" />
+                  <p className="text-[10px] text-gray-500">{hint}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-800">
+                {t('designerPro.visualMode')}
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {([
+                  { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',       descKey: 'designerPro.modeSansDesc' },
+                  { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard',   descKey: 'designerPro.modeStandardDesc' },
+                  { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',    descKey: 'designerPro.modePremiumDesc' },
+                  { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',      descKey: 'designerPro.modeUltraDesc' },
+                  { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',  descKey: 'designerPro.modeUltraPlusDesc' },
+                ] as const).map(opt => (
+                  <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      modeVisuel === opt.v
+                        ? 'border-amber-500 bg-amber-50 shadow-sm'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}>
+                    <div className="text-xl">{opt.emoji}</div>
+                    <div className="text-xs font-bold text-gray-900 mt-1">{t(opt.titleKey)}</div>
+                    <div className="text-[10px] text-gray-500 leading-tight mt-0.5">{t(opt.descKey)}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Aperçu multi-page */}

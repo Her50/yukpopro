@@ -1005,7 +1005,10 @@
     "autoMode": "Mode",
     "autoArche": "Archétype",
     "credits": "crédits",
-    "catReferenceStyle": "🎨 Référence style"
+    "catReferenceStyle": "🎨 Référence style",
+    "advanced": "Options avancées",
+    "advancedHint": "— format, mode visuel, sliders, langue/pays",
+    "briefHint": "Décris en langage naturel — Yukpo détecte format/mode/directives auto. L'auto-orchestrateur ↑ pré-remplit ce champ."
   },
   "organisation": {
     "createTitle": "Créer une organisation",

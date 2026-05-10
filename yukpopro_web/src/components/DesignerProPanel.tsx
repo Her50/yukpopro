@@ -82,6 +82,9 @@ export default function DesignerProPanel() {
   const [orchestrating, setOrchestrating] = useState(false)
   const [orchestration, setOrchestration] = useState<any | null>(null)
 
+  // Sprint UX2 — Frontend épuré : options avancées repliées par défaut
+  const [showAdvanced, setShowAdvanced] = useState(false)
+
   // Sprint 1.6b — Brand LoRA UI
   const [showLoraPanel, setShowLoraPanel] = useState(false)
   const [showLoraForm, setShowLoraForm] = useState(false)
@@ -636,90 +639,17 @@ export default function DesignerProPanel() {
         )}
       </div>
 
-      {/* ── Brief & options ────────────────────────────────────────────────── */}
+      {/* ── Brief minimal (zero-config UX2) ─────────────────────────────────── */}
       <div className={CARD}>
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-gray-800">Brief & options</p>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <div className={`relative w-9 h-5 rounded-full transition-colors ${autoMode ? 'bg-amber-600' : 'bg-gray-300'}`}
-              onClick={() => setAutoMode(v => !v)}>
-              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${autoMode ? 'left-4' : 'left-0.5'}`} />
-            </div>
-            <span className="text-xs font-medium text-gray-700">IA choisit le format</span>
-          </label>
-        </div>
-
-        {!autoMode && (
-          <div>
-            <label className={LABEL}>Format de projet</label>
-            <div className="relative">
-              <select value={cleHint} onChange={e => setCleHint(e.target.value)} className={INPUT + ' pr-8 appearance-none'}>
-                <option value="">— Choisis un format —</option>
-                {projets.map(p => (
-                  <option key={p.cle} value={p.cle}>
-                    {p.label} — {p.pages}p · {p.width_mm}×{p.height_mm}mm
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-2.5 top-3 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <CountryPicker label="Pays" value={pays} onChange={setPays} />
-          <LanguagePicker label="Langue" value={langue} onChange={setLangue} />
-        </div>
-
-        {/* Sliders créativité */}
-        <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 space-y-2.5">
-          <p className="text-xs font-bold text-amber-900 mb-1">Directives visuelles</p>
-          {([
-            ['creativite', '🎨 Créativité', creativite, setCreativite, 'sobre ↔ audacieux'],
-            ['densite', '📝 Densité texte', densite, setDensite, 'aéré ↔ dense'],
-            ['img', '🖼️ Place images', importanceImg, setImportanceImg, 'texte ↔ images'],
-            ['elegance', '✨ Élégance', elegance, setElegance, 'fonctionnel ↔ luxe'],
-          ] as const).map(([key, label, val, setter, hint]) => (
-            <div key={key as string} className="flex items-center gap-3">
-              <span className="text-xs text-amber-800 font-medium w-32 shrink-0">{label}</span>
-              <input type="range" min={0} max={100} value={val}
-                onChange={e => (setter as (n: number) => void)(parseInt(e.target.value))}
-                className="flex-1 accent-amber-600 h-1.5" />
-              <span className="text-xs font-bold tabular-nums text-amber-700 w-8 text-right">{val}</span>
-              <span className="text-[10px] text-gray-500 w-28 shrink-0">{hint}</span>
-            </div>
-          ))}
-        </div>
-
         <div>
-          <label className={LABEL}>Brief du projet</label>
-          <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={6}
-            placeholder="Ex : Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale, inhumation à Mbalmayo…"
+          <label className={LABEL}>{t('designerPro.briefLabel', 'Brief du projet')}</label>
+          <textarea value={brief} onChange={e => setBrief(e.target.value)} rows={5}
+            placeholder={t('designerPro.briefPlaceholder',
+              "Ex : Faire-part de décès en livret 8 pages pour M. Jean MBARGA, décédé le 5 mars 2026 à Yaoundé. Famille MBARGA-NGONO. Obsèques le 12 mars à 10h à la cathédrale.")}
             className={INPUT + ' resize-none leading-relaxed'} />
-        </div>
-
-        <div>
-          <label className={LABEL}>{t('designerPro.visualMode', 'Mode visuel IA')}</label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
-            {([
-              { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
-              { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
-              { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants + vision' },
-              { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',    fb: 'Ultra',             descKey: 'designerPro.modeUltraDesc',    fbDesc: 'Flux Pro Ultra — niveau Midjourney' },
-              { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',fb: 'Ultra+',            descKey: 'designerPro.modeUltraPlusDesc',fbDesc: 'Ensemble 3 modèles IA + pick auto' },
-            ] as const).map(opt => (
-              <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
-                className={`p-2.5 rounded-lg border-2 text-left transition-all ${
-                  modeVisuel === opt.v
-                    ? 'border-violet-500 bg-violet-500/10 shadow-sm'
-                    : 'border-slate-700 hover:border-slate-600 bg-slate-900/40'
-                }`}>
-                <div className="text-lg">{opt.emoji}</div>
-                <div className="text-xs font-bold text-slate-100 mt-0.5">{t(opt.titleKey, opt.fb)}</div>
-                <div className="text-[10px] text-slate-400 leading-tight">{t(opt.descKey, opt.fbDesc)}</div>
-              </button>
-            ))}
-          </div>
+          <p className="text-[10px] text-gray-500 mt-1.5">
+            {t('designerPro.briefHint', "💡 Décris en langage naturel — Yukpo détecte format, mode visuel et directives automatiquement. Si tu as utilisé l'auto-orchestrateur ↑, ce champ est déjà pré-rempli.")}
+          </p>
         </div>
 
         <button onClick={generer} disabled={loading || !brief.trim()} className={BTN_PRIMARY}>
@@ -728,6 +658,98 @@ export default function DesignerProPanel() {
             ? t('designerPro.generating', 'Génération en cours (1–2 min)…')
             : t('designerPro.generate', 'Générer le visuel')}
         </button>
+
+        {/* ── Options avancées (repliables par défaut) ──────────────────── */}
+        <button type="button" onClick={() => setShowAdvanced(v => !v)}
+          className="w-full flex items-center justify-between text-left text-xs font-semibold text-gray-600 hover:text-gray-900 border-t border-gray-100 pt-3">
+          <span className="flex items-center gap-1.5">
+            ⚙️ {t('designerPro.advanced', 'Options avancées')}
+            <span className="text-[10px] text-gray-400 font-normal">
+              {showAdvanced ? '' : t('designerPro.advancedHint', '— format, mode visuel, sliders créatifs, langue/pays')}
+            </span>
+          </span>
+          <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showAdvanced && (
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-700">{t('designerPro.formatSection', 'Format')}</p>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <div className={`relative w-9 h-5 rounded-full transition-colors ${autoMode ? 'bg-amber-600' : 'bg-gray-300'}`}
+                  onClick={() => setAutoMode(v => !v)}>
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${autoMode ? 'left-4' : 'left-0.5'}`} />
+                </div>
+                <span className="text-xs font-medium text-gray-700">{t('designerPro.autoFormat', 'IA choisit')}</span>
+              </label>
+            </div>
+
+            {!autoMode && (
+              <div>
+                <label className={LABEL}>{t('designerPro.formatProjet', 'Format de projet')}</label>
+                <div className="relative">
+                  <select value={cleHint} onChange={e => setCleHint(e.target.value)} className={INPUT + ' pr-8 appearance-none'}>
+                    <option value="">— {t('designerPro.chooseFormat', 'Choisis un format')} —</option>
+                    {projets.map(p => (
+                      <option key={p.cle} value={p.cle}>
+                        {p.label} — {p.pages}p · {p.width_mm}×{p.height_mm}mm
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-2.5 top-3 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CountryPicker label="Pays" value={pays} onChange={setPays} />
+              <LanguagePicker label="Langue" value={langue} onChange={setLangue} />
+            </div>
+
+            <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 space-y-2.5">
+              <p className="text-xs font-bold text-amber-900 mb-1">{t('designerPro.directivesTitle', 'Directives visuelles')}</p>
+              {([
+                ['creativite', '🎨 Créativité', creativite, setCreativite, 'sobre ↔ audacieux'],
+                ['densite', '📝 Densité texte', densite, setDensite, 'aéré ↔ dense'],
+                ['img', '🖼️ Place images', importanceImg, setImportanceImg, 'texte ↔ images'],
+                ['elegance', '✨ Élégance', elegance, setElegance, 'fonctionnel ↔ luxe'],
+              ] as const).map(([key, label, val, setter, hint]) => (
+                <div key={key as string} className="flex items-center gap-3">
+                  <span className="text-xs text-amber-800 font-medium w-32 shrink-0">{label}</span>
+                  <input type="range" min={0} max={100} value={val}
+                    onChange={e => (setter as (n: number) => void)(parseInt(e.target.value))}
+                    className="flex-1 accent-amber-600 h-1.5" />
+                  <span className="text-xs font-bold tabular-nums text-amber-700 w-8 text-right">{val}</span>
+                  <span className="text-[10px] text-gray-500 w-28 shrink-0">{hint}</span>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <label className={LABEL}>{t('designerPro.visualMode', 'Mode visuel IA')}</label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
+                {([
+                  { v: 'sans',       emoji: '📋', titleKey: 'designerPro.modeSans',     fb: 'Sans IA visuelle',  descKey: 'designerPro.modeSansDesc',     fbDesc: 'Templates seuls' },
+                  { v: 'standard',   emoji: '✨', titleKey: 'designerPro.modeStandard', fb: 'Standard',          descKey: 'designerPro.modeStandardDesc', fbDesc: 'Flux schnell — rapide' },
+                  { v: 'premium',    emoji: '🎨', titleKey: 'designerPro.modePremium',  fb: 'Premium',           descKey: 'designerPro.modePremiumDesc',  fbDesc: 'Flux dev + variants + vision' },
+                  { v: 'ultra',      emoji: '🌟', titleKey: 'designerPro.modeUltra',    fb: 'Ultra',             descKey: 'designerPro.modeUltraDesc',    fbDesc: 'Flux Pro Ultra' },
+                  { v: 'ultra_plus', emoji: '🚀', titleKey: 'designerPro.modeUltraPlus',fb: 'Ultra+',            descKey: 'designerPro.modeUltraPlusDesc',fbDesc: 'Ensemble 3 modèles IA' },
+                ] as const).map(opt => (
+                  <button key={opt.v} type="button" onClick={() => setModeVisuel(opt.v)}
+                    className={`p-2.5 rounded-lg border-2 text-left transition-all ${
+                      modeVisuel === opt.v
+                        ? 'border-amber-500 bg-amber-50 shadow-sm'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}>
+                    <div className="text-lg">{opt.emoji}</div>
+                    <div className="text-xs font-bold text-gray-900 mt-0.5">{t(opt.titleKey, opt.fb)}</div>
+                    <div className="text-[10px] text-gray-500 leading-tight">{t(opt.descKey, opt.fbDesc)}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Résultat multi-page ────────────────────────────────────────────── */}
