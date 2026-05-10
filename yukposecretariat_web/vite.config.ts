@@ -47,6 +47,14 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
         ],
+        // Force l'activation immédiate du nouveau SW + prise de contrôle
+        // des onglets ouverts. Sans ça, autoUpdate télécharge le nouveau
+        // bundle mais l'utilisateur continue de voir l'ancien menu jusqu'à
+        // ce que TOUS ses onglets soient fermés. Critique pour propager les
+        // suppressions d'items de menu (Yukpo Studio, /traduction, etc.).
+        // Cf. fix identique appliqué côté yukpopro_web (commit 2ea30b6b).
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],
