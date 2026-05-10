@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, Image, KanbanSquare,
   Receipt, Wallet, Users, LogOut, Menu, X, ChevronRight,
   Languages, FolderOpen, CreditCard, Globe, ChevronDown, Shield, Loader2, Building2,
-  Sparkles,
+  Sparkles, TrendingUp,
 } from 'lucide-react'
 import { authAPI } from '../api/client'
 import toast from 'react-hot-toast'
@@ -19,6 +19,7 @@ const NAV_KEYS = [
   // Sprint S1 — Chat Unifié = entrée par défaut (tout au même endroit)
   { to: '/chat',        key: 'chat',        icon: Sparkles,        adminOnly: false },
   { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
+  { to: '/analytics',   key: 'analytics',   icon: TrendingUp,      adminOnly: false },
   { to: '/redaction',   key: 'redaction',   icon: FileText,        adminOnly: false },
   { to: '/infographie', key: 'infographie', icon: Image,           adminOnly: false },
   { to: '/traduction',  key: 'traduction',  icon: Languages,       adminOnly: false },

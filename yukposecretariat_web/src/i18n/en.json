@@ -15,7 +15,8 @@
     "admin": "Administration",
     "logout": "Log out",
     "organisation": "Organization",
-    "chat": "💬 Chat Yukpo"
+    "chat": "💬 Chat Yukpo",
+    "analytics": "📊 Analytics"
   },
   "common": {
     "loading": "Loading…",
@@ -1088,5 +1089,25 @@
     "stopRecord": "Arrêter l'enregistrement",
     "recordingStarted": "🎤 Enregistrement…",
     "micRefused": "Micro refusé : "
+  },
+  "analytics": {
+    "title": "Tableau de bord — Analytics",
+    "subtitle": "Usage, coûts, top templates et utilisateurs de votre organisation",
+    "loading": "Chargement du tableau de bord…",
+    "empty": "Aucune donnée pour cette période",
+    "emptyHint": "Génère quelques visuels ou documents puis reviens ici.",
+    "noData": "Aucune donnée",
+    "kpiCalls": "Appels LLM",
+    "kpiDocs": "Documents générés",
+    "kpiFcfa": "FCFA consommés",
+    "kpiCredits": "Crédits Yukpo",
+    "kpiUsers": "Utilisateurs actifs",
+    "kpiAvgDocs": "Docs / jour",
+    "kpiAvgCost": "Crédits / jour",
+    "kpiPeriod": "Période",
+    "topModules": "Top modules",
+    "topTemplates": "Top documents générés",
+    "topUsers": "Top utilisateurs",
+    "costPerDay": "Coûts par jour (FCFA)"
   }
 }

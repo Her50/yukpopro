@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ChatPage from './pages/ChatPage'
+import AnalyticsPage from './pages/AnalyticsPage'
 import RedactionPage from './pages/RedactionPage'
 import InfographiePage from './pages/InfographiePage'
 import AdminPage from './pages/AdminPage'
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route index element={<Navigate to="/chat" replace />} />
         <Route path="chat" element={<ChatPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="redaction" element={<RedactionPage />} />
         {/* Anciennes routes redirigées vers le hub Rédaction IA (avec onglet pré-sélectionné) */}
         <Route path="ocr"   element={<Navigate to="/redaction?tab=scan"  replace />} />

@@ -190,6 +190,16 @@ export const audioAPI = {
     api.get(`/audio/fichier/${fichier_id}`, { responseType: 'blob' }),
 }
 
+// ─── Phase 5 — Analytics Bureau (KPIs, dashboard exécutif) ─────────────────
+export const bureauAnalyticsAPI = {
+  dashboard: (days = 30) => api.get('/bureau-analytics/dashboard', { params: { days } }),
+  usage:     (days = 30, module?: string) => api.get('/bureau-analytics/usage', { params: { days, module } }),
+  cost:      (days = 30) => api.get('/bureau-analytics/cost', { params: { days } }),
+  templates: (days = 30, limit = 20) => api.get('/bureau-analytics/templates', { params: { days, limit } }),
+  topUsers:  (days = 30, limit = 20) => api.get('/bureau-analytics/users', { params: { days, limit } }),
+  quality:   (last_minutes = 60) => api.get('/bureau-analytics/quality', { params: { last_minutes } }),
+}
+
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
 export const secChatAPI = {
   message: (data: {
