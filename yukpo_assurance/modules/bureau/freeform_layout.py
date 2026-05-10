@@ -145,7 +145,23 @@ class CropMarks(ElementBase):
     decalage_mm: float = 1            # distance entre le trim et le début de la marque
 
 
-Element = Union[Rectangle, Texte, Image, Ligne, QR, Ornement, CropMarks]
+@dataclass
+class Icone(ElementBase):
+    """Icône vectorielle SVG depuis bibliothèque Iconify (200 000+ icônes,
+    100+ collections : Lucide, Tabler, Heroicons, Phosphor, Material Symbols,
+    Carbon, Fluent, etc.). Le renderer télécharge le SVG via API Iconify et
+    l'embed dans le PDF (qualité vectorielle, zoom infini).
+    Exemples :
+      {"type": "icone", "prefix": "tabler", "name": "wifi", "x_mm": 10, "y_mm": 10, "w_mm": 8, "h_mm": 8, "couleur": "#0047AB"}
+      {"type": "icone", "prefix": "lucide", "name": "battery-charging", ...}
+      {"type": "icone", "prefix": "material-symbols", "name": "home-outline", ...}
+    """
+    prefix: str = "tabler"
+    name: str = "circle"
+    couleur: str = "currentColor"     # hex ou "currentColor" (=noir par défaut)
+
+
+Element = Union[Rectangle, Texte, Image, Ligne, QR, Ornement, CropMarks, Icone]
 
 
 @dataclass
@@ -185,6 +201,8 @@ _TYPE_TO_CLASS = {
     "ornament":   Ornement,
     "crop_marks": CropMarks,
     "cropmarks":  CropMarks,
+    "icone":      Icone,
+    "icon":       Icone,
 }
 
 
@@ -248,6 +266,74 @@ def parse_layout_json(data: dict) -> LayoutDocument:
 
 
 # ─── Renderer ReportLab ──────────────────────────────────────────────────────
+
+
+async def pre_generer_images_ia(doc: LayoutDocument) -> None:
+    """Pré-génère les images IA (éléments Image avec prompt_ia non vide et
+    sans ref_media/data_url/url) via fal.ai Flux Pro Ultra et stocke les
+    bytes en data_url base64 sur l'élément. À appeler AVANT rendre_layout_pdf
+    (qui est synchrone).
+
+    Permet au LLM de produire {type:"image", prompt_ia:"Starlink V4 Mini
+    satellite dish on wooden table outdoor view", x_mm, y_mm, w_mm, h_mm}
+    et que le rendu final embarque une vraie image générée Flux.
+
+    Concurrence : génère en parallèle (sémaphore=3) pour limiter les appels
+    fal.ai simultanés. Échec d'une image -> placeholder (pas blocage rendu).
+    """
+    import asyncio
+    import base64 as _b64
+
+    a_generer: list[Image] = []
+    for page in doc.pages:
+        for el in page.elements:
+            if isinstance(el, Image) and el.prompt_ia and not (el.ref_media or el.data_url or el.url):
+                a_generer.append(el)
+    if not a_generer:
+        return
+
+    try:
+        from .image_gen import generer_image, ImageMode, ImageGenError
+    except Exception:
+        logger.info("[freeform/IA] image_gen non disponible — images IA skipées")
+        return
+
+    sem = asyncio.Semaphore(3)
+
+    async def _one(el: Image):
+        async with sem:
+            try:
+                # Détermine format à partir du ratio w/h
+                if el.w_mm and el.h_mm:
+                    ratio = el.w_mm / el.h_mm
+                    if ratio > 1.5:
+                        fmt = "landscape_16_9"
+                    elif ratio > 1.1:
+                        fmt = "landscape_4_3"
+                    elif ratio < 0.7:
+                        fmt = "portrait_16_9"
+                    elif ratio < 0.9:
+                        fmt = "portrait_4_3"
+                    else:
+                        fmt = "square"
+                else:
+                    fmt = "landscape_4_3"
+                bts = await generer_image(
+                    prompt=el.prompt_ia[:500],
+                    mode="premium",      # Flux dev — bon ratio qualité/coût
+                    format_=fmt,
+                )
+                if bts:
+                    # Stocker en data_url base64 (PNG)
+                    el.data_url = (
+                        f"data:image/png;base64,"
+                        f"{_b64.b64encode(bts).decode('ascii')}"
+                    )
+            except Exception as e:
+                logger.debug(f"[freeform/IA] image '{el.prompt_ia[:40]}' KO : {e}")
+
+    await asyncio.gather(*(_one(el) for el in a_generer))
+    logger.info(f"[freeform/IA] {len(a_generer)} image(s) IA pré-générées")
 
 
 def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> bytes:
@@ -449,6 +535,10 @@ def _render_element(
         _draw_crop_marks(c, el, off_x, off_y, fmt_h_pt)
         return
 
+    if isinstance(el, Icone):
+        _draw_icone(c, el, off_x, off_y, fmt_h_pt)
+        return
+
 
 def _wrap_text(c, texte: str, font: str, size: float, max_width_pt: Optional[float]) -> list[str]:
     """Word wrap simple basé sur stringWidth."""
@@ -579,6 +669,69 @@ def _draw_ornement(c, el: Ornement, off_x: float, off_y: float, fmt_h_pt: float)
         c.line(x, y_bottom + h / 2, x + w, y_bottom + h / 2)
 
 
+def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> None:
+    """Télécharge le SVG depuis Iconify + rasterise dans le canvas.
+    Cache local en mémoire pour éviter re-download si l'icône est répétée."""
+    x = off_x + mm_to_pt(el.x_mm)
+    y = off_y + fmt_h_pt - mm_to_pt(el.y_mm + el.h_mm)
+    w = mm_to_pt(el.w_mm)
+    h = mm_to_pt(el.h_mm)
+    couleur = el.couleur if el.couleur and el.couleur != "currentColor" else "#000000"
+
+    svg_bytes = _telecharger_icone_iconify(el.prefix, el.name, couleur)
+    if not svg_bytes:
+        # Placeholder cercle si icône introuvable
+        c.setFillColorRGB(0.85, 0.85, 0.85)
+        c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
+        return
+
+    try:
+        from reportlab.graphics import renderPDF
+        from svglib.svglib import svg2rlg
+        import io as _io
+        drawing = svg2rlg(_io.BytesIO(svg_bytes))
+        if not drawing:
+            return
+        # Scale drawing pour matcher w x h pt (svg natif est ~24x24 pour Iconify)
+        sw = drawing.width or 24
+        sh = drawing.height or 24
+        scale_x = w / sw
+        scale_y = h / sh
+        drawing.scale(scale_x, scale_y)
+        drawing.width = w
+        drawing.height = h
+        renderPDF.draw(drawing, c, x, y)
+    except Exception as e:
+        logger.debug(f"[freeform/icone] Render {el.prefix}:{el.name} : {e}")
+        c.setFillColorRGB(0.85, 0.85, 0.85)
+        c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
+
+
+_ICONIFY_CACHE: dict[str, bytes] = {}
+
+
+def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str) -> Optional[bytes]:
+    """Télécharge SVG depuis api.iconify.design avec cache mémoire local
+    (par run de rendu — pas de cache disque pour rester simple)."""
+    cle = f"{prefix}:{name}:{couleur_hex}"
+    if cle in _ICONIFY_CACHE:
+        return _ICONIFY_CACHE[cle]
+    try:
+        import httpx
+        params = {}
+        if couleur_hex and couleur_hex != "#000000":
+            params["color"] = couleur_hex.lstrip("#")
+        url = f"https://api.iconify.design/{prefix}/{name}.svg"
+        r = httpx.get(url, params=params, timeout=8.0)
+        if r.status_code == 200 and r.content and b"<svg" in r.content:
+            _ICONIFY_CACHE[cle] = r.content
+            return r.content
+        logger.debug(f"[Iconify] {url} HTTP {r.status_code}")
+    except Exception as e:
+        logger.debug(f"[Iconify] {prefix}:{name} : {e}")
+    return None
+
+
 def _draw_crop_marks(c, el: CropMarks, off_x: float, off_y: float, fmt_h_pt: float) -> None:
     """Repères de coupe imprimerie autour de la zone (x, y, w, h)."""
     x = off_x + mm_to_pt(el.x_mm)
@@ -607,11 +760,19 @@ def _draw_crop_marks(c, el: CropMarks, off_x: float, off_y: float, fmt_h_pt: flo
 # ─── Helper public ──────────────────────────────────────────────────────────
 
 
-def rendre_pdf_depuis_json(layout_json: dict, medias: Optional[dict] = None) -> bytes:
-    """API publique : prend un JSON de layout (produit par LLM) et retourne
-    un PDF bytes prêt à servir. Inclut un post-traitement PDF/X-1a si
-    pikepdf installé (TrimBox/BleedBox + ICC FOGRA39)."""
+async def rendre_pdf_depuis_json(
+    layout_json: dict, medias: Optional[dict] = None,
+) -> bytes:
+    """API publique async : prend un JSON de layout (produit par LLM) et
+    retourne un PDF bytes prêt à servir. Étapes :
+    1. Parse JSON → LayoutDocument
+    2. Pré-génère les images IA (Flux Pro Ultra) en parallèle pour les
+       éléments avec prompt_ia non vide
+    3. Rasterise via ReportLab (sync)
+    4. Post-traite PDF/X-1a (pikepdf : TrimBox/BleedBox + ICC FOGRA39)
+    """
     doc = parse_layout_json(layout_json)
+    await pre_generer_images_ia(doc)
     pdf_bytes = rendre_layout_pdf(doc, medias=medias)
     # Post-traitement print-ready (best-effort, non bloquant)
     try:

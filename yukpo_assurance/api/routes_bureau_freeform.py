@@ -141,10 +141,11 @@ async def generer_freeform(
     )
     duree_compose_ms = int((time.time() - t0) * 1000)
 
-    # 2. Rendu PDF
+    # 2. Rendu PDF (async : pre-génération images IA via Flux Pro Ultra +
+    # icônes Iconify embeddées + ReportLab rasterise)
     t0 = time.time()
     try:
-        pdf_bytes = freeform_layout.rendre_pdf_depuis_json(layout_json, medias=medias)
+        pdf_bytes = await freeform_layout.rendre_pdf_depuis_json(layout_json, medias=medias)
     except Exception as e:
         logger.error(f"[Freeform] Render échoué : {e}")
         raise HTTPException(500, f"Rendu PDF échoué : {str(e)[:200]}")

@@ -43,6 +43,7 @@ python-pptx>=1.0.0
 fpdf2>=2.7.0
 reportlab>=4.1.0
 pikepdf>=9.0.0                # PDF/X-1a strict + TrimBox/BleedBox (print-ready imprimerie)
+svglib>=1.5.1                 # SVG → ReportLab Drawing (icônes Iconify embed dans PDF freeform)
 weasyprint>=62.0
 python3-saml>=1.16.0
 svgwrite>=1.4.3

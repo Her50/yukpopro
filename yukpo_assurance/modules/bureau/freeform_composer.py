@@ -87,8 +87,16 @@ TYPES D'ÉLÉMENTS DISPONIBLES :
 2. **texte** — `x_mm, y_mm, w_mm, contenu, police, taille_pt, couleur,
    alignement (left|center|right|justify), interligne, bold, italic, underline`
 3. **image** — `x_mm, y_mm, w_mm, h_mm, ref_media (session:X|compte:X), data_url,
-   url, prompt_ia (génération IA si fourni), mode (cover|contain|stretch),
-   border_radius_mm` — photos uploadées, logo, image générée IA
+   url, prompt_ia, mode (cover|contain|stretch), border_radius_mm`
+   - Si user a uploadé un media (logo, photo) : utilise ref_media
+   - Si tu veux UNE PHOTO PRODUIT/SCÈNE GÉNÉRÉE PAR IA (Flux Pro Ultra) :
+     mets `prompt_ia` avec une description anglaise détaillée 30-60 mots
+     (sujet précis, environnement, éclairage, style, composition).
+     Le renderer va générer la vraie image via fal.ai et l'embedder.
+     Exemples : "Starlink V4 Mini satellite dish on wooden table outdoor
+     view, bright daylight, modern home setting, photorealistic, soft
+     bokeh background", "Smartphone displaying mobile banking app screen,
+     hand holding device, modern office background, professional lighting"
 4. **ligne** — `x1_mm, y1_mm, x2_mm, y2_mm, epaisseur_pt, couleur,
    style (solid|dashed|dotted)` — séparateurs, accents
 5. **qr** — `x_mm, y_mm, w_mm, h_mm, donnees, couleur, fond` — vCard, URL,
@@ -96,8 +104,28 @@ TYPES D'ÉLÉMENTS DISPONIBLES :
 6. **ornement** — `x_mm, y_mm, w_mm, h_mm, motif (ligne|vague|geometrique|
    etoile|feuilles), couleur, epaisseur_pt` — décor vectoriel
 7. **crop_marks** — `x_mm, y_mm, w_mm, h_mm, longueur_mm, epaisseur_pt,
-   couleur, decalage_mm` — repères découpe imprimerie (auto autour des
-   zones à découper : cartes de visite, étiquettes, BD cases)
+   couleur, decalage_mm` — repères découpe imprimerie
+8. **icone** — `prefix, name, x_mm, y_mm, w_mm, h_mm, couleur` — icône
+   vectorielle SVG embeddée depuis Iconify (200 000+ icônes, 100+
+   collections). Le renderer télécharge le SVG via api.iconify.design
+   et l'embed dans le PDF. Recommandé pour features/specs/CTA visuels.
+
+   Collections privilégiées (qualité homogène) :
+   - `tabler` : 4500+ icônes minimalistes outline (recommandée par défaut)
+   - `lucide` : 1500+ icônes outline modernes (alternative à tabler)
+   - `material-symbols` : Material Design (Google) outline/rounded/sharp
+   - `heroicons` : Tailwind UI outline + solid
+   - `ph` (Phosphor) : 7000+ icônes 6 styles
+   - `carbon` : IBM Carbon Design System
+   - `fluent` : Microsoft Fluent UI
+
+   Exemples : `{type:"icone", prefix:"tabler", name:"wifi", x:10, y:10, w:8, h:8, couleur:"#0047AB"}`,
+   `{prefix:"tabler", name:"home"}`, `{prefix:"lucide", name:"battery-charging"}`,
+   `{prefix:"material-symbols", name:"speed"}`, `{prefix:"tabler", name:"truck-delivery"}`,
+   `{prefix:"tabler", name:"shield-check"}`, `{prefix:"ph", name:"signal-high"}`.
+
+   Pour visuels marketing/produits/specs : utilise abondamment les icônes
+   pour illustrer chaque feature, spec, bénéfice (1 icône par bullet point).
 
 POLICES DISPONIBLES (système ou embedded) :
 - "Inter", "Inter-Bold", "Inter-SemiBold" (sans-serif moderne, défaut)
@@ -317,9 +345,10 @@ sans commentaire ni markdown.
 """
 
     try:
-        # max_tokens=4000 : compatible gpt-4-turbo (limite 4096) + Opus 4.7
-        # (limite 32k mais 4000 suffisent largement pour un layout JSON même
-        # dense — ~50-200 elements). Avant : 8000 -> erreur 400 sur gpt-4-turbo.
+        # max_tokens=4000 : compatible gpt-4-turbo (limite 4096) ET Opus 4.7
+        # (limite 32k mais 4000 suffisent pour ~50-150 elements primitives JSON).
+        # Pour visuels denses (publicités produit avec ~30+ elements + icônes
+        # + specs), 4000 reste juste mais évite l'erreur 400 sur gpt-4-turbo.
         rep = await ia_client.appeler(
             prompt=prompt_user,
             systeme=_PROMPT_SYSTEME,
