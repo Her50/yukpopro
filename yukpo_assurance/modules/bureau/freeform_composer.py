@@ -900,8 +900,12 @@ def _reorganiser_grille_a4(
     données simulées (remplacement du texte par les valeurs réelles).
     """
     pages = data.get("pages") or []
-    if len(pages) < 2 or not donnees:
+    if not pages or not donnees:
         return data
+    # NOTE : on N'EXIGE PLUS len(pages)>=2 — le pipeline 2-phases appelle
+    # cette fonction avec un template à UNE seule page (la carte template)
+    # qu'on doit dupliquer N fois en grille. Le check précédent
+    # `len(pages) < 2 → return` empêchait totalement la duplication.
 
     # Détection du format de chaque page
     def _page_is_card_format(p):
