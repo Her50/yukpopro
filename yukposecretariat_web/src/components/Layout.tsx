@@ -19,10 +19,13 @@ const ADMIN_ROLES = ['admin', 'super_admin', 'yukpo_owner']
 // passent désormais par le chat orchestré (POST /pro/orchestrer).
 // Les routes legacy redirigent vers /chat dans App.tsx (compat bookmarks).
 // /documents = hub historique (pas un générateur) → conservé.
+// Ordre du menu : le chat est la page de travail principale (en haut).
+// Les modules métier (kanban / devis / caisse / clients) viennent ensuite.
+// Le hub "Mes documents" reste accessible facilement.
+// Le tableau de bord et les analytics — vues de synthèse moins fréquentes —
+// sont relégués vers le bas, juste avant les paramètres compte/admin.
 const NAV_KEYS = [
   { to: '/chat',        key: 'chat',        icon: Sparkles,        adminOnly: false },
-  { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
-  { to: '/analytics',   key: 'analytics',   icon: TrendingUp,      adminOnly: false },
   { to: '/documents',   key: 'documents',   icon: FolderOpen,      adminOnly: false },
   { to: '/kanban',      key: 'kanban',      icon: KanbanSquare,    adminOnly: false },
   { to: '/devis',       key: 'devis',       icon: Receipt,         adminOnly: false },
@@ -30,6 +33,8 @@ const NAV_KEYS = [
   { to: '/clients',     key: 'clients',     icon: Users,           adminOnly: false },
   { to: '/abonnement',  key: 'abonnement',  icon: CreditCard,      adminOnly: false },
   { to: '/organisation',key: 'organisation',icon: Building2,       adminOnly: false },
+  { to: '/dashboard',   key: 'dashboard',   icon: LayoutDashboard, adminOnly: false },
+  { to: '/analytics',   key: 'analytics',   icon: TrendingUp,      adminOnly: false },
   { to: '/admin',       key: 'admin',       icon: Shield,          adminOnly: true  },
 ]
 

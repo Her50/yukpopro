@@ -35,7 +35,7 @@ export default function LoginPage() {
         await register(email, password, nom.trim())
         toast.success(t('auth.registerOk'))
       }
-      navigate('/dashboard')
+      navigate('/chat')
     } catch (err: any) {
       toast.error(err?.message || (mode === 'login' ? t('auth.loginErr') : t('auth.registerErr')))
     } finally {
