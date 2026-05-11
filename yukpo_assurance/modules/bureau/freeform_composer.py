@@ -788,6 +788,10 @@ async def composer_freeform_layout(
     )
     nb_detecte = int(m_dense.group(1)) if m_dense else 0
     densite_elevee = nb_detecte >= 10
+    logger.info(
+        f"[FreeformComposer] brief={brief[:80]!r} | "
+        f"nb_detecte={nb_detecte} | densite_elevee={densite_elevee}"
+    )
 
     # ── Pré-génération des DONNÉES SIMULÉES via Haiku ──────────────────────
     # Séparation génération données / mise en page. Le composer LLM a un
@@ -797,15 +801,25 @@ async def composer_freeform_layout(
     # badges visiteurs → nom+entreprise, étiquettes produit → nom+volume,
     # marque-places mariage → nom_invite+table, …).
     donnees_block = ""
-    if nb_detecte >= 2 and _re_d.search(
+    trigger_simul = bool(_re_d.search(
         r"\bsimul|\binvent|\bfictif|\bexemple|\bfake|"
         r"\bg[ée]n[èeé]re?\s+(?:les?|des?)\s+(?:infos?|donn[ée]es?|"
         r"noms?|coordonn[ée]es?|champs?|contenus?)",
         (brief or "").lower(),
-    ):
+    ))
+    logger.info(
+        f"[FreeformComposer] trigger_simulation={trigger_simul} "
+        f"(condition : nb>=2 ET regex simul/invent/fictif/genere les infos)"
+    )
+    if nb_detecte >= 2 and trigger_simul:
         donnees_simulees = await _pre_generer_donnees_simulees(
             brief=brief, nb_items=nb_detecte, profil=profil,
             pays=pays, langue=langue,
+        )
+        logger.info(
+            f"[FreeformComposer] Pré-gen Haiku → {len(donnees_simulees)} "
+            f"entrées simulées (cible {nb_detecte}). "
+            f"Aperçu : {str(donnees_simulees[:2])[:200]}"
         )
         if donnees_simulees:
             donnees_block = (
@@ -884,6 +898,10 @@ sans commentaire ni markdown.
         else:
             max_tok = 4000
             _modele_compose = ModelePrioritaire.CLAUDE_OPUS     # → gpt-4-turbo (4096) ou Opus 4.7 pur
+        logger.info(
+            f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
+            f"max_tokens={max_tok} (densite_elevee={densite_elevee})"
+        )
         rep = await ia_client.appeler(
             prompt=prompt_user,
             systeme=_PROMPT_SYSTEME,
@@ -894,9 +912,16 @@ sans commentaire ni markdown.
             utiliser_cache=False,
         )
         contenu = rep.contenu or "{}"
+        logger.info(
+            f"[FreeformComposer] LLM répondu : {len(contenu)} chars, "
+            f"aperçu fin : ...{contenu[-200:]!r}"
+        )
         try:
             data = json.loads(contenu)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as _jde:
+            logger.warning(
+                f"[FreeformComposer] JSON invalide ({_jde}) → extraction regex"
+            )
             import re as _re
             m = _re.search(r"\{[\s\S]*\}", contenu)
             data = json.loads(m.group()) if m else {}
@@ -906,8 +931,20 @@ sans commentaire ni markdown.
 
     # Validation minimale + correction défensive
     if not isinstance(data, dict) or not data.get("pages"):
-        logger.info("[FreeformComposer] Layout LLM invalide → fallback page vide A4")
+        logger.warning(
+            f"[FreeformComposer] Layout LLM invalide → fallback page vide A4. "
+            f"data_keys={list(data.keys()) if isinstance(data, dict) else type(data).__name__}"
+        )
         data = _layout_fallback(brief)
+    else:
+        pages = data.get("pages") or []
+        nb_pages = len(pages)
+        nb_elements_total = sum(len(p.get("elements") or []) for p in pages if isinstance(p, dict))
+        fmt = data.get("format_mm") or [210, 297]
+        logger.info(
+            f"[FreeformComposer] Layout OK : {nb_pages} pages, "
+            f"{nb_elements_total} éléments total, format={fmt}"
+        )
 
     return data
 
