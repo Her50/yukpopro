@@ -3299,10 +3299,32 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         template_effectif = template_id
         if registre_meta["registre"] != "professionnel":
             template_effectif = "custom"
+
+        # ── Titre intelligent dérivé MAINTENANT (avant que le prompt brut
+        # ne devienne sujet du document). On passe le contexte OCR pour
+        # que le LLM puisse formuler un titre fidèle au contenu réel
+        # (ex: « Compte-rendu réunion familiale du 10 mai 2026 ») plutôt
+        # qu'une recopie de la question. Toujours appelé : ~0.5 FCFA
+        # négligeable mais garantit un titre propre sur la page de garde.
+        sujet_propre = demande.brief
+        try:
+            from api.routes_pro_copilote import _generer_titre_document
+            sujet_propre = await _generer_titre_document(
+                message=demande.brief,
+                type_doc=template_effectif,
+                contexte=(demande.contexte_fichiers or "")[:2000],
+                ia_client=ia_client,
+            )
+            if not sujet_propre or len(sujet_propre) < 4:
+                sujet_propre = demande.brief
+        except Exception as _e_titre:
+            logger.debug(f"[Orchestrer] dérivation titre échouée : {_e_titre}")
+            sujet_propre = demande.brief
+
         # Le backend /rapports/generer attend `sujet` + `type_rapport`, pas
         # `instruction`/`type_doc`. On formate le payload conformément.
         payload_pret = {
-            "sujet":         demande.brief,
+            "sujet":         sujet_propre,
             "type_rapport":  template_effectif,
             "mode":          mode_rec,
             "format_sortie": data.get("format_sortie") or "docx",
