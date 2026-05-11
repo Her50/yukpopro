@@ -168,6 +168,20 @@ class GenererRapportRequest(BaseModel):
                     "modes flash/standard/complet/expert). 800 = note brève, "
                     "100000 = mémoire exhaustif. La SEULE vraie limite côté "
                     "user est son solde crédits.")
+    # ── Métadonnées registre — propagées par /orchestrer pour adapter
+    # ton/structure/signature sans dépendre du profil métier user ──────────
+    registre: Optional[str] = Field(default=None,
+        description="Registre détecté : professionnel | familial | associatif | "
+                    "hommage | celebration | religieux | educatif | personnel. "
+                    "Conditionne signature/cachet/ton/structure.")
+    signataire_requis: Optional[bool] = Field(default=None,
+        description="Si False, supprime bloc Signature/cachet final "
+                    "(adapté familial/hommage/célébration/associatif).")
+    ton: Optional[str] = Field(default=None,
+        description="formel | neutre | chaleureux | intime | celebre")
+    structure_hint: Optional[str] = Field(default=None, max_length=300,
+        description="Hint structurel court (ex: 'Ordre du jour + sections "
+                    "fidèles aux feuillets') pour guider le LLM.")
 
 
 class GenererSlidesRequest(BaseModel):
@@ -226,10 +240,21 @@ async def generer_rapport(
     profil, _ = await get_or_create(current_user.user_id, db)
 
     # Le LLM Haiku décide si le sujet doit être nettoyé (titre propre vs phrase
-    # brute). Plus de matching keyword startswith (fragile, multi-langue impossible).
-    # Critères structurels seulement : présence de '?' ou longueur > 90 chars.
+    # brute). Triggers structurels : présence de '?', longueur > 90 chars, OU
+    # verbe d'action en tête (« génère/crée/fais/produis/rédige/donne-moi… »)
+    # qui indique un prompt utilisateur brut plutôt qu'un sujet propre.
+    import re as _re_sujet
     sujet_clean = (req.sujet or "").strip()
-    _trigger_titre_llm = "?" in sujet_clean or len(sujet_clean) > 90
+    _verbe_action_re = _re_sujet.compile(
+        r"^(g[ée]n[èeé]re|cr[ée]e|fais|produis|r[ée]dige|donne[- ]?moi|"
+        r"compose|construis|prépare|monte|écris|aide[- ]?moi|peux[- ]?tu)\b",
+        _re_sujet.IGNORECASE,
+    )
+    _trigger_titre_llm = (
+        "?" in sujet_clean
+        or len(sujet_clean) > 90
+        or bool(_verbe_action_re.search(sujet_clean))
+    )
     if _trigger_titre_llm:
         try:
             from core.ia_client import ia_client
@@ -260,6 +285,10 @@ async def generer_rapport(
                 instruction_utilisateur=req.sujet,
                 structure_externe=req.structure_externe,
                 tokens_max_output=req.tokens_max_output,
+                registre=req.registre,
+                signataire_requis=req.signataire_requis,
+                ton=req.ton,
+                structure_hint=req.structure_hint,
             ),
             timeout=_tmo,
         )
@@ -1237,6 +1266,95 @@ async def _extraire_texte_fichier(fichier: UploadFile, contenu: bytes) -> str:
     raise ValueError(
         f"Format non supporté : '{nom}'. Formats acceptés : PDF, DOCX, PPTX, TXT, CSV, XLSX, PNG, JPG."
     )
+
+
+async def _detecter_registre(brief: str, contexte: str = "") -> dict:
+    """Classe le registre d'un brief en une étape Haiku (~50ms, ~0.5 FCFA).
+
+    Retourne un dict {registre, signataire_requis, ton, structure_hint} :
+    - registre : "professionnel" | "familial" | "associatif" | "hommage" |
+                 "celebration" | "religieux" | "educatif" | "personnel"
+    - signataire_requis : bool — true uniquement si registre=professionnel
+                          + contexte formel (contrat, convention, note interne…)
+    - ton : "formel" | "neutre" | "chaleureux" | "intime" | "celebre"
+    - structure_hint : court hint string pour guider la structure
+
+    Permet à G1/ReportWriter d'adapter automatiquement template, signature,
+    ton et structure sans dépendre du profil métier (qui peut être "Banquier"
+    même quand le doc demandé est un compte-rendu de réunion familiale).
+
+    Fallback gracieux : si Haiku échoue, retourne registre="professionnel"
+    par défaut (comportement actuel — aucune régression).
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        import json as _j
+        prompt = (
+            "Classe ce brief utilisateur en une catégorie de REGISTRE pour "
+            "adapter le ton, la structure et la mise en forme du document "
+            "généré.\n\n"
+            f"BRIEF : « {brief[:800]} »\n"
+            f"CONTEXTE EXTRAIT : « {(contexte or '')[:500]} »\n\n"
+            "CATÉGORIES (choisis UNE valeur) :\n"
+            "- professionnel : rapport entreprise, audit, contrat, note "
+            "interne, convention, analyse business, étude marché.\n"
+            "- familial : réunion famille, conseil familial, compte-rendu "
+            "familial, événements intimes.\n"
+            "- associatif : tontine, AG association, cercle, club, "
+            "communauté, réunion quartier.\n"
+            "- hommage : funérailles, deuil, commémoration, anniversaire "
+            "de décès, hommage posthume.\n"
+            "- celebration : mariage, naissance, baptême, anniversaire, "
+            "fête, cérémonie joyeuse.\n"
+            "- religieux : compte-rendu paroissial, réunion confrérie, "
+            "synaxe, retraite spirituelle.\n"
+            "- educatif : cours, formation, support pédagogique, "
+            "manuel élève.\n"
+            "- personnel : note personnelle, journal, mémo intime.\n\n"
+            "RETOURNE JSON STRICT (sans markdown) :\n"
+            '{"registre": "<categorie>", '
+            '"signataire_requis": <true|false>, '
+            '"ton": "<formel|neutre|chaleureux|intime|celebre>", '
+            '"structure_hint": "<5-15 mots décrivant la structure attendue>"}\n\n'
+            "signataire_requis = true UNIQUEMENT pour contrats, conventions, "
+            "notes officielles, contre-rendus signables ; false pour tout le "
+            "reste (familial, hommage, célébration, associatif, etc.)."
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            json_attendu=True,
+            max_tokens_override=300,
+            utiliser_cache=True,
+        )
+        contenu = (rep.contenu or "{}").strip()
+        try:
+            data = _j.loads(contenu)
+        except _j.JSONDecodeError:
+            import re as _re
+            m = _re.search(r"\{[\s\S]*\}", contenu)
+            data = _j.loads(m.group()) if m else {}
+        registre = str(data.get("registre") or "professionnel").lower().strip()
+        if registre not in (
+            "professionnel", "familial", "associatif", "hommage",
+            "celebration", "religieux", "educatif", "personnel",
+        ):
+            registre = "professionnel"
+        return {
+            "registre": registre,
+            "signataire_requis": bool(data.get("signataire_requis", registre == "professionnel")),
+            "ton": str(data.get("ton") or "neutre").lower()[:20],
+            "structure_hint": str(data.get("structure_hint") or "")[:200],
+        }
+    except Exception as e:
+        logger.debug(f"[DetectRegistre] échec gracieux : {e}")
+        return {
+            "registre": "professionnel",
+            "signataire_requis": True,
+            "ton": "formel",
+            "structure_hint": "",
+        }
 
 
 async def _ocr_via_claude(image_bytes: bytes, mime_type: str) -> str:
@@ -3169,21 +3287,40 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         }
     else:
         endpoint_cible = "/api/v1/pro/rapports/generer"
+        # ── Détection registre (Haiku ~50ms, ~0.5 FCFA absorbé) ─────────────
+        # Évite que l'app force un template "compte-rendu professionnel" pour
+        # une réunion de famille, une cérémonie d'hommage, une AG associative,
+        # etc. Si le registre n'est pas pro, on bascule sur template "custom"
+        # qui laisse le LLM dériver la structure depuis le brief réel.
+        registre_meta = await _detecter_registre(
+            brief=demande.brief,
+            contexte=(demande.contexte_fichiers or "")[:1500],
+        )
+        template_effectif = template_id
+        if registre_meta["registre"] != "professionnel":
+            template_effectif = "custom"
         # Le backend /rapports/generer attend `sujet` + `type_rapport`, pas
         # `instruction`/`type_doc`. On formate le payload conformément.
         payload_pret = {
             "sujet":         demande.brief,
-            "type_rapport":  template_id,
+            "type_rapport":  template_effectif,
             "mode":          mode_rec,
             "format_sortie": data.get("format_sortie") or "docx",
             # Source de vérité du dimensionnement — sera honoré par
             # ReportWriterPro plutôt que les valeurs hardcodées des modes.
             "tokens_max_output": int(tokens_output_est),
+            # Métadonnées registre propagées vers ReportWriterPro pour
+            # adapter ton/structure/signature/cachet sans hardcodage.
+            "registre":           registre_meta["registre"],
+            "signataire_requis":  registre_meta["signataire_requis"],
+            "ton":                registre_meta["ton"],
         }
+        if registre_meta.get("structure_hint"):
+            payload_pret["structure_hint"] = registre_meta["structure_hint"]
         # Si l'orchestrateur a généré une structure sur-mesure (template
         # custom), on la transmet via le param structure_externe — sans
         # limite arbitraire de 20 sections (cap technique 50 = safety).
-        if template_id == "custom" and isinstance(structure_custom, list) and structure_custom:
+        if template_effectif == "custom" and isinstance(structure_custom, list) and structure_custom:
             payload_pret["structure_externe"] = [str(s)[:120] for s in structure_custom][:50]
 
     params_extraits = data.get("parametres_extraits") or {}

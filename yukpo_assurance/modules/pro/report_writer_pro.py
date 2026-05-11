@@ -606,6 +606,14 @@ class ReportWriterPro:
         forcer_recherche_web:  bool = False,
         structure_externe:     Optional[list] = None,
         tokens_max_output:     Optional[int] = None,
+        # ── Registre — propagé par /orchestrer pour adapter ton/structure/
+        # signature sans dépendre du profil métier (un banquier qui demande
+        # un compte-rendu de réunion familiale ne doit pas voir « Signature
+        # et cachet banquier » au bas du document).
+        registre:              Optional[str] = None,
+        signataire_requis:     Optional[bool] = None,
+        ton:                   Optional[str] = None,
+        structure_hint:        Optional[str] = None,
     ) -> dict:
         """
         Génère un rapport professionnel.
@@ -625,6 +633,27 @@ class ReportWriterPro:
         """
         if mode not in ("flash", "standard", "complet", "expert"):
             mode = "standard"
+
+        # Mémoriser le registre sur self pour que _generer_contenu_ia (prompt
+        # LLM) et _construire_docx (signature/cachet/auteur) y accèdent sans
+        # propager 4 params via toutes les signatures internes.
+        _registre_valide = (registre or "professionnel").lower()
+        if _registre_valide not in (
+            "professionnel", "familial", "associatif", "hommage",
+            "celebration", "religieux", "educatif", "personnel",
+        ):
+            _registre_valide = "professionnel"
+        self._registre = _registre_valide
+        # Par défaut : signature requise UNIQUEMENT pour le registre professionnel.
+        # Les autres registres (familial/hommage/célébration/associatif/religieux/
+        # educatif/personnel) n'ont jamais de bloc signature/cachet sauf si
+        # signataire_requis=True explicitement.
+        if signataire_requis is None:
+            self._signataire_requis = (_registre_valide == "professionnel")
+        else:
+            self._signataire_requis = bool(signataire_requis)
+        self._ton = (ton or ("formel" if _registre_valide == "professionnel" else "chaleureux"))
+        self._structure_hint = (structure_hint or "")
 
         # Sources de structure (par ordre de priorité) :
         # 1. structure_externe : structure custom générée à la volée par
@@ -800,15 +829,77 @@ class ReportWriterPro:
         sujet_assurance = any(k in sujet_str for k in ("assurance", "cima", "police", "sinistre", "réassurance", "branche auto", "vie ", "ird", "solvabilité"))
         sujet_juridique_ohada = any(k in sujet_str for k in ("ohada", "acte uniforme", "ccja", "syscohada"))
 
+        # ── Profil rédacteur adapté au REGISTRE ────────────────────────────
+        # Un compte-rendu de réunion familiale ne se rédige pas comme un
+        # rapport d'audit Big4. Le LLM adopte la POSTURE adaptée à l'usage
+        # réel du document (familial, hommage, célébration, associatif,
+        # paroissial, éducatif, personnel, professionnel).
+        _registre_actif = getattr(self, "_registre", "professionnel")
+        _ton_actif = getattr(self, "_ton", "formel")
+        _structure_hint_actif = getattr(self, "_structure_hint", "")
+        _posture_par_registre = {
+            "professionnel": (
+                "Tu es un consultant senior polyvalent (rédacteur de rapports, analyste financier, "
+                "data analyst, juriste d'entreprise, stratège), 25 ans d'expérience en cabinets Big4, "
+                "bailleurs de fonds et conseils d'administration."
+            ),
+            "familial": (
+                "Tu es un secrétaire de séance familiale, méticuleux et chaleureux. Tu rédiges des "
+                "comptes-rendus FIDÈLES de réunions de famille (nouvelles, finances, tontine, "
+                "projets, préparatifs), en restituant fidèlement noms, états de santé, montants, "
+                "décisions. Ton de famille — respectueux, simple, sans jargon corporate."
+            ),
+            "associatif": (
+                "Tu es un secrétaire d'association/tontine/cercle, rigoureux sur les comptes et "
+                "les décisions collectives. Tu listes participants, points à l'ordre du jour, "
+                "interventions, votes, finances, prochaines étapes."
+            ),
+            "hommage": (
+                "Tu rédiges un texte d'hommage / commémoration. Ton respectueux, digne, sincère. "
+                "Tu valorises la mémoire de la personne et fédères la famille / communauté autour."
+            ),
+            "celebration": (
+                "Tu rédiges un document de célébration (mariage, naissance, baptême, anniversaire). "
+                "Ton joyeux, élégant, festif. Tu mets en valeur les protagonistes et l'événement."
+            ),
+            "religieux": (
+                "Tu rédiges un document paroissial / confrérique / spirituel. Ton respectueux, "
+                "édifiant, structuré selon les usages de la communauté concernée."
+            ),
+            "educatif": (
+                "Tu rédiges un support pédagogique clair et progressif, adapté au niveau apprenant. "
+                "Ton bienveillant, structuré, exemples concrets."
+            ),
+            "personnel": (
+                "Tu rédiges une note personnelle (journal, mémo, réflexion intime). Ton intime, "
+                "authentique, à la première personne quand approprié."
+            ),
+        }
+        posture_redacteur = _posture_par_registre.get(_registre_actif, _posture_par_registre["professionnel"])
+        # Les sections « contexte_regional / RÈGLES Big4 » ne s'appliquent
+        # qu'au registre professionnel. Pour les autres registres, on
+        # remplace par des règles adaptées.
+        if _registre_actif == "professionnel":
+            contexte_regional_eff = contexte_regional
+            instructions_regional = ("Tu adaptes tes références (réglementaires, fiscales, comptables) au sujet ET au pays "
+                                     "du demandeur. Si le sujet est hors zone régionale, tu utilises les normes pertinentes "
+                                     "(internationales ou locales). ")
+            metier_pays_eff = f"{metier_info} {pays_info}"
+        else:
+            contexte_regional_eff = ""
+            instructions_regional = ""
+            metier_pays_eff = f"{pays_info}"
+        _hint_block = (
+            f"\nIndice de structure attendue : « {_structure_hint_actif} ». "
+            if _structure_hint_actif else ""
+        )
         system = (
-            "Tu es un consultant senior polyvalent (rédacteur de rapports, analyste financier, "
-            "data analyst, juriste d'entreprise, stratège), 25 ans d'expérience en cabinets Big4, "
-            "bailleurs de fonds et conseils d'administration. "
-            f"{contexte_regional}"
-            "Tu adaptes tes références (réglementaires, fiscales, comptables) au sujet ET au pays "
-            "du demandeur. Si le sujet est hors zone régionale, tu utilises les normes pertinentes "
-            "(internationales ou locales). "
-            f"{metier_info} {pays_info}\n\n"
+            f"{posture_redacteur} "
+            f"{contexte_regional_eff}"
+            f"{instructions_regional}"
+            f"Ton à adopter : {_ton_actif}. "
+            f"{metier_pays_eff}"
+            f"{_hint_block}\n\n"
             "🚫 RÈGLE NUMÉRO 1 — INTERDICTION ABSOLUE D'INVENTER OU DE MOBILISER TA MÉMOIRE :\n"
             "• Tu n'as PAS le droit d'utiliser tes connaissances d'entraînement comme source de chiffres.\n"
             "• Toute donnée chiffrée, tout taux, tout montant, toute citation réglementaire DOIT venir "
@@ -1736,10 +1827,25 @@ class ReportWriterPro:
                 except Exception as _le:
                     logger.debug(f"[ReportWriter] Logo non inséré : {_le}")
 
-        # Bandeau "Rapport professionnel"
+        # Bandeau adapté au registre. "RAPPORT PROFESSIONNEL" est figé et
+        # inapproprié pour un compte-rendu de réunion familiale, un faire-
+        # part, une AG associative, un hommage. On dérive le bandeau du
+        # registre détecté par l'orchestrateur.
+        _bandeau_par_registre = {
+            "professionnel": "RAPPORT PROFESSIONNEL",
+            "familial":      "COMPTE-RENDU FAMILIAL",
+            "associatif":    "COMPTE-RENDU ASSOCIATIF",
+            "hommage":       "HOMMAGE",
+            "celebration":   "CÉLÉBRATION",
+            "religieux":     "DOCUMENT PAROISSIAL",
+            "educatif":      "DOCUMENT PÉDAGOGIQUE",
+            "personnel":     "NOTE PERSONNELLE",
+        }
+        _registre = getattr(self, "_registre", "professionnel")
+        _bandeau = _bandeau_par_registre.get(_registre, "DOCUMENT")
         p_header = doc.add_paragraph()
         p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run = p_header.add_run("RAPPORT PROFESSIONNEL")
+        run = p_header.add_run(_bandeau)
         run.bold  = True
         run.font.size = Pt(10)
         run.font.color.rgb = RGBColor(0x00, 0x47, 0xAB)
@@ -1778,8 +1884,11 @@ class ReportWriterPro:
 
         doc.add_paragraph()
 
-        # Métadonnées profil
-        if self._profil:
+        # Métadonnées profil — affichées UNIQUEMENT pour registre pro.
+        # Pour un compte-rendu familial / hommage / célébration / AG asso /
+        # paroissial, afficher « Rédigé par : Banquier » est totalement
+        # déplacé : on omet le bloc.
+        if self._profil and _registre == "professionnel":
             p_meta = doc.add_paragraph()
             p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
             meta = f"Rédigé par : {self._profil.metier.title()}"
@@ -2276,9 +2385,14 @@ class ReportWriterPro:
 
         # ── ADD-1 — Bloc signature en fin de document ─────────────────────
         # Standard cabinet : nom + fonction + date + ligne de signature.
-        # Si profil contient signataire/fonction, on les utilise, sinon
-        # placeholder neutre. À éditer manuellement par l'utilisateur.
+        # Conditionné par self._signataire_requis : un compte-rendu de
+        # réunion familiale, un hommage, un faire-part de naissance, une
+        # AG associative N'ONT PAS de bloc signature/cachet — c'est une
+        # convention strictement professionnelle/contractuelle. Le profil
+        # métier user (ex: Banquier) ne dicte plus le rendu.
         try:
+            if not getattr(self, "_signataire_requis", True):
+                raise StopIteration  # sauter proprement le bloc signature
             doc.add_page_break()
             p_sig_titre = doc.add_paragraph()
             p_sig_titre.alignment = WD_ALIGN_PARAGRAPH.LEFT
