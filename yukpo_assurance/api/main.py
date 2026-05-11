@@ -640,9 +640,24 @@ if _PROMETHEUS_OK:
         return response
 
 # CORS
+# allow_origin_regex couvre les domaines prod + previews :
+# - yukpopro.yukpomnang.com, secretariat.yukpomnang.com et tout autre
+#   sous-domaine *.yukpomnang.com (front Netlify YPro/YSec, et autres
+#   projets de la suite yukpomnang).
+# - *.netlify.app pour les URLs Netlify directes (preview deploys).
+# - *.vercel.app pour la rétro-compat pendant la migration Vercel→Netlify.
+# - localhost:* / 127.0.0.1:* pour le dev local sur n'importe quel port.
+# `allow_origins` (settings.ALLOWED_ORIGINS) reste actif en parallèle pour
+# autoriser explicitement les origins déjà listés (compat ascendante).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=(
+        r"^https?://"
+        r"(?:[\w-]+\.)*"
+        r"(?:yukpomnang\.com|netlify\.app|vercel\.app|"
+        r"localhost(?::\d+)?|127\.0\.0\.1(?::\d+)?)$"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
