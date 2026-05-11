@@ -669,14 +669,27 @@ sans commentaire ni markdown.
     try:
         # Tokens output : 4000 pour visuels simples (1-8 éléments répétés
         # OU page unique). 8000 pour densités élevées (>=10 items répétés).
-        # Opus 4.7 supporte 32k output, gpt-4-turbo cape à 4096 (hard).
-        # Pour densité élevée on force Opus si LLM_PRIMAIRE=gpt fallback.
-        max_tok = 8000 if densite_elevee else 4000
+        #
+        # CHOIX DE MODÈLE EN FONCTION DE LA DENSITÉ :
+        # - Densité faible : Opus 4.7 (tier-traduit en gpt-4-turbo si
+        #   LLM_PRIMAIRE=gpt). gpt-4-turbo cape à 4096 output → OK pour 4000.
+        # - Densité élevée (>=10 items répétés, ~150 éléments JSON) :
+        #   on prend Sonnet (tier-traduit en gpt-4o) qui supporte 16k
+        #   output. Si on gardait CLAUDE_OPUS avec max_tok=8000 ET
+        #   LLM_PRIMAIRE=gpt, l'appel atterrirait sur gpt-4-turbo (cap
+        #   4096) → erreur 400 ou troncature JSON silencieuse → fallback
+        #   page placeholder (cf bug observé sur le pdf 10 cartes).
+        if densite_elevee:
+            max_tok = 8000
+            _modele_compose = ModelePrioritaire.CLAUDE_SONNET   # → gpt-4o (16k output cap)
+        else:
+            max_tok = 4000
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS     # → gpt-4-turbo (4096) ou Opus 4.7 pur
         rep = await ia_client.appeler(
             prompt=prompt_user,
             systeme=_PROMPT_SYSTEME,
             mode=ModeIA.ANALYSE,
-            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,   # tier-traduit en gpt-4-turbo si LLM_PRIMAIRE=gpt
+            forcer_modele=_modele_compose,
             json_attendu=True,
             max_tokens_override=max_tok,
             utiliser_cache=False,
