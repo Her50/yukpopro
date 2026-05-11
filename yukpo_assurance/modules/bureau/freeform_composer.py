@@ -701,6 +701,168 @@ async def _pre_generer_donnees_simulees(
         return []
 
 
+def _reorganiser_grille_a4(
+    data: dict,
+    donnees: list[dict],
+    card_w_mm: float = 85.0,
+    card_h_mm: float = 55.0,
+) -> dict:
+    """Post-validation déterministe : si le LLM a produit l'anti-pattern
+    « N pages au format CARTE avec 1 carte par page », on RECONSTRUIT un
+    layout en planches A4 avec 8 cartes/page en grille 2×4.
+
+    Robuste : si le LLM a déjà produit une grille A4 correcte, on ne
+    touche pas. Si l'anti-pattern est détecté, on extrait la 1re carte
+    comme template visuel et on la duplique N fois avec injection des
+    données simulées (remplacement du texte par les valeurs réelles).
+    """
+    pages = data.get("pages") or []
+    if len(pages) < 2 or not donnees:
+        return data
+
+    # Détection du format de chaque page
+    def _page_is_card_format(p):
+        fmt = p.get("format_mm")
+        if isinstance(fmt, list) and len(fmt) >= 2:
+            w, h = float(fmt[0]), float(fmt[1])
+        else:
+            # Hérite du format doc
+            fmt_doc = data.get("format_mm") or [210, 297]
+            w, h = float(fmt_doc[0]), float(fmt_doc[1])
+        # Carte de visite ≈ 50-100 × 30-70 mm
+        return 50 <= w <= 110 and 30 <= h <= 75
+
+    is_per_card_pattern = all(_page_is_card_format(p) for p in pages)
+    if not is_per_card_pattern:
+        return data  # déjà en grille A4 ou autre
+
+    logger.warning(
+        f"[FreeformComposer] Anti-pattern détecté ({len(pages)} pages au "
+        f"format carte) → reconstruction grille A4 × 8 cartes"
+    )
+
+    template_elements = pages[0].get("elements") or []
+    template_fond = pages[0].get("fond_couleur") or "#FFFFFF"
+
+    MARGE = 10.0
+    GUTTER_H = 10.0
+    GUTTER_V = 5.0
+    COLS = 2
+    ROWS = 4
+    CAP = COLS * ROWS  # 8 cartes/A4
+
+    nb_total = len(donnees)
+    nb_planches = (nb_total + CAP - 1) // CAP
+
+    def _injecter_donnees(contenu_orig: str, d: dict) -> str:
+        """Remplace les contenus de la carte template par les valeurs
+        de la donnée réelle d. Heuristique sur le contenu d'origine."""
+        if not contenu_orig:
+            return contenu_orig
+        c = str(contenu_orig).strip()
+        c_low = c.lower()
+        # Tel
+        if any(t in c for t in ("+237", "+221", "+225", "+33", "+212")) \
+                or any(t in c_low for t in ("tel:", "tél:", "phone:", "📞")):
+            tel = d.get("tel") or d.get("telephone") or d.get("phone")
+            return str(tel) if tel else c
+        # Email
+        if "@" in c:
+            mail = d.get("email") or d.get("mail")
+            return str(mail) if mail else c
+        # Fonction / titre
+        if any(p in c_low for p in (
+            "fonction", "titre", "manager", "engineer", "directeur",
+            "responsable", "chef", "ingénieur", "assistant", "chargé",
+            "consultant", "expert",
+        )):
+            f = d.get("fonction") or d.get("role") or d.get("titre")
+            return str(f) if f else c
+        # Nom + prénom (1 ou 2 mots majuscules)
+        nb_mots = len(c.split())
+        if nb_mots in (1, 2, 3):
+            prenom = d.get("prenom", "")
+            nom = d.get("nom", "")
+            if prenom or nom:
+                return f"{prenom} {nom}".strip()
+        return c
+
+    new_pages = []
+    for planche_idx in range(nb_planches):
+        new_elements: list[dict] = []
+        for slot in range(CAP):
+            card_idx = planche_idx * CAP + slot
+            if card_idx >= nb_total:
+                break
+            d = donnees[card_idx]
+            col = slot % COLS
+            row = slot // COLS
+            x_off = MARGE + col * (card_w_mm + GUTTER_H)
+            y_off = MARGE + row * (card_h_mm + GUTTER_V)
+
+            for el in template_elements:
+                if not isinstance(el, dict):
+                    continue
+                new_el = dict(el)
+                # Décalage des coordonnées
+                for k in ("x_mm", "x1_mm", "x2_mm"):
+                    if k in new_el and new_el[k] is not None:
+                        try:
+                            new_el[k] = float(new_el[k]) + x_off
+                        except (TypeError, ValueError):
+                            pass
+                for k in ("y_mm", "y1_mm", "y2_mm"):
+                    if k in new_el and new_el[k] is not None:
+                        try:
+                            new_el[k] = float(new_el[k]) + y_off
+                        except (TypeError, ValueError):
+                            pass
+                # Injection données dans les textes
+                if (new_el.get("type") or "").lower() in ("texte", "text"):
+                    new_el["contenu"] = _injecter_donnees(
+                        new_el.get("contenu", ""), d,
+                    )
+                # Injection vCard dans QR
+                elif (new_el.get("type") or "").lower() in ("qr", "qrcode"):
+                    prenom = d.get("prenom", "")
+                    nom = d.get("nom", "")
+                    fonction = d.get("fonction", "")
+                    tel = d.get("tel", "")
+                    email = d.get("email", "")
+                    new_el["donnees"] = (
+                        "BEGIN:VCARD\nVERSION:3.0\n"
+                        f"FN:{prenom} {nom}\n"
+                        f"TITLE:{fonction}\n"
+                        f"TEL:{tel}\nEMAIL:{email}\nEND:VCARD"
+                    )
+                new_elements.append(new_el)
+
+            # Crop marks autour de la carte
+            new_elements.append({
+                "type": "crop_marks",
+                "x_mm": x_off, "y_mm": y_off,
+                "w_mm": card_w_mm, "h_mm": card_h_mm,
+                "longueur_mm": 3, "epaisseur_pt": 0.25,
+                "couleur": "#000000",
+            })
+
+        new_pages.append({
+            "numero": planche_idx + 1,
+            "fond_couleur": "#FFFFFF",
+            "format_mm": [210, 297],
+            "libelle_piece": f"planche_recto_{planche_idx + 1}",
+            "elements": new_elements,
+        })
+
+    data["format_mm"] = [210, 297]
+    data["pages"] = new_pages
+    logger.info(
+        f"[FreeformComposer] Reconstruction grille → {nb_planches} planches A4, "
+        f"{nb_total} cartes, {sum(len(p['elements']) for p in new_pages)} éléments"
+    )
+    return data
+
+
 async def composer_freeform_layout(
     brief: str,
     profil: Optional[dict] = None,
@@ -945,6 +1107,17 @@ sans commentaire ni markdown.
             f"[FreeformComposer] Layout OK : {nb_pages} pages, "
             f"{nb_elements_total} éléments total, format={fmt}"
         )
+        # ── Post-validation déterministe : si le LLM a produit l'anti-
+        # pattern « N pages au format carte = 1 carte/page » alors qu'on
+        # a des données simulées disponibles, on RECONSTRUIT en planches
+        # A4 × 8 cartes en grille. Indispensable car le LLM (gpt-4o)
+        # ignore systématiquement la consigne grille même avec
+        # contrainte forte dans le prompt.
+        if 'donnees_simulees' in locals() and donnees_simulees:
+            data = _reorganiser_grille_a4(
+                data=data, donnees=donnees_simulees,
+                card_w_mm=85.0, card_h_mm=55.0,
+            )
 
     return data
 
