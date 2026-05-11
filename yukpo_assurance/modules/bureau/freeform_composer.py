@@ -574,6 +574,101 @@ Compose le layout PARFAIT pour ce visuel.
 """
 
 
+async def _pre_generer_donnees_simulees(
+    brief: str,
+    nb_items: int,
+    profil: Optional[dict] = None,
+    pays: str = "CM",
+) -> list[dict]:
+    """Pré-génère N entrées simulées (nom prénom + fonction + tel + email)
+    via Haiku quand le brief demande N>=2 cartes/badges/items répétés.
+
+    Sépare la GÉNÉRATION DE DONNÉES de la MISE EN PAGE : le composer LLM
+    a un mauvais taux d'adhésion à « simule les infos » (taux observé ~10%,
+    il produit des placeholders « Nom Prénom / Tel: +237 6XX XXX XXX »).
+    En lui injectant les N entrées toutes prêtes en JSON, on garantit que
+    la simulation est faite, et le composer n'a plus qu'à les disposer
+    sur la grille.
+
+    Retourne [] en cas d'échec (le composer fait alors son travail normal,
+    avec le risque connu de placeholders).
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        import json as _j
+
+        nom_org = (profil or {}).get("nom_organisation") or "l'organisation"
+        metier  = (profil or {}).get("metier") or "(non précisé)"
+        # Détection pays pour adapter format téléphone + style noms
+        prefix_tel = {
+            "CM": "+237 6", "GA": "+241 0", "CG": "+242 06", "CD": "+243 8",
+            "TD": "+235 6", "CF": "+236 7",
+            "SN": "+221 7", "CI": "+225 0", "BF": "+226 7", "ML": "+223 7",
+            "TG": "+228 9", "BJ": "+229 9", "NE": "+227 9",
+            "MA": "+212 6", "TN": "+216 2", "DZ": "+213 5",
+            "FR": "+33 6", "BE": "+32 4", "CH": "+41 7",
+        }.get(pays.upper(), "+237 6")
+
+        prompt = (
+            f"Tu génères des données SIMULÉES réalistes pour {nb_items} fiches "
+            f"de cartes de visite. Contexte : organisation « {nom_org} », "
+            f"métier/secteur « {metier} », pays {pays}.\n\n"
+            f"RÈGLES STRICTES :\n"
+            f"1. Génère EXACTEMENT {nb_items} entrées, ni plus ni moins.\n"
+            f"2. Nom + prénom RÉALISTES adaptés au pays (mélange noms locaux "
+            f"  et internationaux). Évite tout « Nom Prénom », « John Doe », "
+            f"  « Jane Smith » — uniquement des prénoms et noms qui existent.\n"
+            f"3. Fonctions VARIÉES dans l'organisation : Directeur Général, "
+            f"  Directeur Technique, Responsable Commercial, Chef de Projet, "
+            f"  Ingénieur, Responsable RH, Responsable Comptabilité, Chargé "
+            f"  de Communication, Assistant(e) de Direction, etc. — adapté "
+            f"  au secteur « {metier} ».\n"
+            f"4. Téléphones : format « {prefix_tel}XX XX XX XX » (chiffres "
+            f"  VARIÉS et plausibles, pas tous identiques).\n"
+            f"5. Emails au format « prenom.nom@<slug-org>.<tld-pays> » avec "
+            f"  prenom et nom en minuscules sans accents, le slug-org dérivé "
+            f"  du nom d'organisation (ex: solar-energy, greentech, eco-power).\n"
+            f"6. RÉPONDS UNIQUEMENT par un tableau JSON, sans markdown :\n"
+            f'[{{"nom":"NGONO","prenom":"Marie","fonction":"Directrice Générale",'
+            f'"tel":"{prefix_tel}55 12 34 56","email":"marie.ngono@<slug>.cm"}},...]\n\n'
+            f"AUCUN commentaire avant ou après. Que le tableau JSON."
+        )
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.REDACTION,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,    # → gpt-4o-mini si LLM_PRIMAIRE=gpt
+            json_attendu=True,
+            max_tokens_override=3000,    # 20 entrées × ~80 tokens = 1600, + marge
+            utiliser_cache=False,
+        )
+        contenu = (rep.contenu or "").strip()
+        try:
+            data = _j.loads(contenu)
+        except _j.JSONDecodeError:
+            import re as _re
+            m = _re.search(r"\[[\s\S]*\]", contenu)
+            data = _j.loads(m.group()) if m else []
+
+        if not isinstance(data, list):
+            return []
+        # Sanitization + limit
+        out: list[dict] = []
+        for item in data[:nb_items]:
+            if not isinstance(item, dict):
+                continue
+            out.append({
+                "nom":      str(item.get("nom", "")).strip()[:50],
+                "prenom":   str(item.get("prenom", "")).strip()[:50],
+                "fonction": str(item.get("fonction", "")).strip()[:80],
+                "tel":      str(item.get("tel", "")).strip()[:30],
+                "email":    str(item.get("email", "")).strip()[:80],
+            })
+        return out
+    except Exception as e:
+        logger.warning(f"[FreeformComposer] Pré-génération données simulées KO : {e}")
+        return []
+
+
 async def composer_freeform_layout(
     brief: str,
     profil: Optional[dict] = None,
@@ -640,6 +735,60 @@ async def composer_freeform_layout(
             f"{json.dumps(medias_descripteurs, ensure_ascii=False, indent=2)}\n"
         )
 
+    # Détection heuristique de densité — un brief mentionnant un N élevé
+    # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
+    # tokens output.
+    import re as _re_d
+    m_dense = _re_d.search(
+        r"\b(\d{1,3})\s*(cartes?|employ[ée]s?|personnes?|items?|exemplaires?|"
+        r"stickers?|[ée]tiquettes?|vignettes?|badges?|cases?|cartons?)\b",
+        (brief or "").lower(),
+    )
+    nb_detecte = int(m_dense.group(1)) if m_dense else 0
+    densite_elevee = nb_detecte >= 10
+
+    # ── Pré-génération des DONNÉES SIMULÉES via Haiku ──────────────────────
+    # Sépare la génération de données de la mise en page. Le composer LLM a
+    # un mauvais taux d'adhésion à « simule les infos » (taux observé ~10%,
+    # il produit des placeholders « Nom Prénom / Tel: +237 6XX XXX XXX »).
+    # On lui passe les N entrées toutes prêtes en JSON dans le prompt user.
+    donnees_block = ""
+    if nb_detecte >= 2 and _re_d.search(
+        r"\bsimul|\binvent|\bg[ée]n[èeé]re?\s+les?\s+(?:infos?|donn[ée]es?|"
+        r"noms?|coordonn[ée]es?|fictif|exemple)", (brief or "").lower(),
+    ):
+        donnees_simulees = await _pre_generer_donnees_simulees(
+            brief=brief, nb_items=nb_detecte, profil=profil, pays=pays,
+        )
+        if donnees_simulees:
+            donnees_block = (
+                f"\n## DONNÉES SIMULÉES (déjà générées — utilise-les TELLES QUELLES, "
+                f"une entrée par carte/badge/item, dans l'ordre fourni)\n"
+                f"{json.dumps(donnees_simulees, ensure_ascii=False, indent=1)}\n"
+                f"\nIMPORTANT : tu DOIS utiliser CES données EXACTES. Aucune carte "
+                f"ne doit afficher « Nom Prénom », « Fonction », « +237 6XX XXX XXX », "
+                f"« prenom.nom@... », « email@example.com » — chaque carte affiche "
+                f"un nom, prénom, fonction, tél, email RÉELS de la liste ci-dessus.\n"
+            )
+
+    # Consigne forte pour grille multi-cartes A4 quand densité élevée
+    contrainte_grille = ""
+    if densite_elevee:
+        capacite_a4 = 8   # 2 col × 4 lignes pour cartes 85×55 sur A4 portrait
+        nb_pages_calc = (nb_detecte + capacite_a4 - 1) // capacite_a4
+        contrainte_grille = (
+            f"\n## CONTRAINTE TECHNIQUE — IMPÉRATIVE\n"
+            f"Tu DOIS produire {nb_pages_calc} pages au format A4 portrait "
+            f"`\"format_mm\": [210, 297]` (PAS un format par carte). Sur "
+            f"chacune des {nb_pages_calc} pages, dispose {capacite_a4} cartes "
+            f"de visite 85×55mm en grille 2 colonnes × 4 lignes (sauf la "
+            f"dernière page qui peut en contenir moins, au prorata de "
+            f"{nb_detecte} cartes au total). Marges 10mm, gutter horizontal "
+            f"10mm, gutter vertical 5mm. Crop marks autour de CHAQUE carte.\n"
+            f"INTERDICTION ABSOLUE de générer {nb_detecte} pages séparées au "
+            f"format carte (anti-pattern), ou 1 page A4 avec 1 carte centrée.\n"
+        )
+
     prompt_user = f"""\
 ## BRIEF UTILISATEUR
 \"\"\"{brief[:4000]}\"\"\"
@@ -647,24 +796,11 @@ async def composer_freeform_layout(
 ## CONTEXTE
 - Pays : {pays}
 - Langue : {langue}
-{profil_block}{brand_block}{vertical_block}{medias_block}
+{profil_block}{brand_block}{vertical_block}{medias_block}{donnees_block}{contrainte_grille}
 
 Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
 sans commentaire ni markdown.
 """
-
-    # Détection heuristique de densité — un brief mentionnant un N élevé
-    # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
-    # tokens output. gpt-4-turbo cape à 4096 → si LLM_PRIMAIRE=gpt et N élevé,
-    # on bascule sur Opus pur (32k output) pour éviter la troncature JSON
-    # qui produirait une page vide via fallback.
-    import re as _re_d
-    m_dense = _re_d.search(
-        r"\b(\d{2,3})\s*(cartes?|employ[ée]s?|personnes?|items?|exemplaires?|"
-        r"stickers?|[ée]tiquettes?|vignettes?|badges?|cases?|cartons?)\b",
-        (brief or "").lower(),
-    )
-    densite_elevee = bool(m_dense and int(m_dense.group(1)) >= 10)
 
     try:
         # Tokens output : 4000 pour visuels simples (1-8 éléments répétés
