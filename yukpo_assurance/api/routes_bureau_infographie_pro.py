@@ -2564,7 +2564,75 @@ async def generer_auto(
     demande: DemandeAutoPro,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """L'IA détecte automatiquement le type de projet selon le brief, puis génère."""
+    """L'IA détecte automatiquement le type de projet selon le brief, puis génère.
+
+    Si le brief mentionne des items répétés (cartes / badges / étiquettes /
+    marque-places / dossards / médailles / etc.) avec N>=2, on redirige
+    VERS LE PIPELINE FREEFORM qui dispose de la pré-génération données
+    simulées Haiku + pipeline 2-phases + post-validation grille A4. Évite
+    le bug `custom_libre` qui produit des pages vides avec « Adresses »
+    et « partenaire en gestion de patrimoine » par défaut.
+    """
+    import re as _re
+    _m_items_repetes = _re.search(
+        r"\b(\d{1,3})\s*(cartes?|badges?|[ée]tiquettes?|marque[- ]?places?|"
+        r"tickets?|billets?|fiches?|m[ée]dailles?|dipl[oô]mes?|certificats?|"
+        r"dossards?|stickers?|autocollants?|magnets?|vignettes?|"
+        r"plaques?|panneaux?|enseignes?|cas(?:es)?|cartons?|"
+        r"invit[ée]s?|participants?|visiteurs?|membres?|employ[ée]s?|personnes?)\b",
+        (demande.brief or "").lower(),
+    )
+    if _m_items_repetes and int(_m_items_repetes.group(1)) >= 2:
+        # Redirection vers freeform composer (mêmes pré-gen / post-validation)
+        from modules.bureau.freeform_composer import composer_freeform_layout
+        from modules.bureau.freeform_layout import rendre_pdf_depuis_json
+        from modules.bureau.mediatheque_session import medias_session as _ms
+
+        # Profil utilisateur (couleurs, organisation) si dispo
+        profil_dict = {}
+        try:
+            from modules.pro.service_profil import get_or_create as _gop
+            from core.database import async_session_maker as _asm
+            async with _asm() as _db:
+                _profil_obj, _ = await _gop(current_user.user_id, _db)
+            profil_dict = {
+                "nom_organisation": getattr(_profil_obj, "nom_organisation", None) or "",
+                "metier": getattr(_profil_obj, "metier", None) or "",
+                "couleur_primaire_hex": getattr(_profil_obj, "couleur_primaire_hex", None) or "",
+                "couleurs_accents_hex": getattr(_profil_obj, "couleurs_accents_hex", None) or [],
+            }
+        except Exception as _e_profil:
+            logger.debug(f"[GenererAuto] profil non chargé : {_e_profil}")
+
+        layout = await composer_freeform_layout(
+            brief=demande.brief or "",
+            profil=profil_dict,
+            pays=demande.pays or "CM",
+            langue=demande.langue or "fr",
+        )
+        pdf_bytes = await rendre_pdf_depuis_json(layout)
+
+        # Sauvegarder via le même pattern bureau_freeform_*
+        import time as _t
+        ts = int(_t.time())
+        nom_fich = f"bureau_freeform_{current_user.user_id}_freeform_{ts}.pdf"
+        try:
+            from pathlib import Path as _P
+            from api.routes_bureau_freeform import _DATA_DIR as _FFDIR
+            (_FFDIR / nom_fich).write_bytes(pdf_bytes)
+        except Exception:
+            (_DATA_DIR / nom_fich).write_bytes(pdf_bytes)
+
+        return {
+            "cle_projet_detectee": "freeform_items_repetes",
+            "pdf_id": nom_fich,
+            "fichier_genere": nom_fich,
+            "url_telechargement": f"/api/v1/bureau/documents/{nom_fich}",
+            "nb_pages": len(layout.get("pages") or []),
+            "format_mm": layout.get("format_mm") or [210, 297],
+            "redirige_vers_freeform": True,
+        }
+
     cle = await _detecter_projet_auto(demande.brief, demande.cle_projet_hint,
                                        user_id=current_user.user_id)
     sub = DemandeProjetPro(
