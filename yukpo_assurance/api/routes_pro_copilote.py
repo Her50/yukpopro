@@ -154,14 +154,19 @@ async def _generer_titre_document(
     _BAD_PREFIXES = ("génère", "genere", "rédige", "redige", "fais", "crée", "cree",
                      "est-ce", "est ce", "peux-tu", "peux tu", "pourrais",
                      "j'aimerais", "jaimerais", "il me faut", "il faut")
+    # Haiku (gpt-4o-mini via tier-translation) suffit largement : tâche de
+    # 40 tokens, reformulation courte sans raisonnement profond. Opus/Sonnet
+    # serait du gâchis (× 5-30 prix) pour un libellé < 12 mots.
+    from core.ia_client import ModelePrioritaire
     for tentative in (1, 2):
         try:
             reponse = await asyncio.wait_for(
                 ia_client.appeler(
                     prompt=prompt,
                     mode=ModeIA.PRECISION,
+                    forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
                     utiliser_cache=(tentative == 1),
-                    max_tokens_override=40,
+                    max_tokens_override=80,   # 40 → 80 : marge pour titres riches
                 ),
                 timeout=8.0 if tentative == 1 else 12.0,
             )
