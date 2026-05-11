@@ -506,34 +506,48 @@ export default function ChatUnifieSec() {
 
   return (
     <div className="flex flex-col h-full max-h-[85vh]">
-      {/* ── En-tête ─────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 mb-3">
-        <p className="text-sm font-bold text-amber-900 flex items-center gap-2">
-          <Sparkles size={15} className="text-amber-600" />
+      {/* ── En-tête compact ────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 mb-3 px-1">
+        <Sparkles size={16} className="text-amber-600 flex-shrink-0" />
+        <p className="text-sm font-semibold text-amber-900">
           {t('chatUnifie.title', 'Chat Yukpo Secrétariat')}
         </p>
-        <p className="text-[11px] text-amber-800 mt-1">
-          {t('chatUnifie.subtitle',
-            "Tape ton besoin + attache (optionnel) image/PDF/audio. " +
-            "Yukpo détecte automatiquement et fait le reste : rédaction, OCR, transcription, " +
-            "infographie, traduction. Plus besoin d'onglets.")}
-        </p>
+        <span className="text-[11px] text-amber-700/80 hidden sm:inline">
+          · {t('chatUnifie.subtitle',
+            'tape ton besoin, attache image/PDF/audio si nécessaire — Yukpo détecte et exécute')}
+        </span>
       </div>
 
       {/* ── Historique ──────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto space-y-3 mb-3 pr-1">
         {turns.length === 0 && (
-          <div className="text-center text-xs text-gray-400 py-12">
-            {t('chatUnifie.welcome',
-              "👋 Décris ton besoin… Quelques exemples :")}
-            <ul className="mt-3 space-y-1 text-left max-w-md mx-auto text-[11px]">
-              <li>• "Rédige une lettre de relance pour facture impayée à M. NGONO"</li>
-              <li>• 📷 attache une photo + "Extrais le texte de cette ordonnance"</li>
-              <li>• 🎤 enregistre une note vocale → transcription auto</li>
-              <li>• "Carte de visite pour Jean MBARGA, avocat à Yaoundé"</li>
-              <li>• "Livret faire-part de mariage 4 pages, format A5"</li>
-              <li>• "Traduis ce contrat en anglais" + 📎 PDF</li>
-            </ul>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <div className="text-3xl mb-3">👋</div>
+            <p className="text-sm text-gray-600 mb-1 text-center">
+              {t('chatUnifie.welcome', 'Décris ton besoin')}
+            </p>
+            <p className="text-[11px] text-gray-400 mb-6 text-center max-w-md">
+              {t('chatUnifie.welcomeSub',
+                'Quelques choses que Yukpo sait faire à partir d\'un simple message')}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-xl w-full">
+              {([
+                { icon: '✍️', label: t('chatUnifie.ex.redaction',  'Rédiger une lettre, un courrier, une note ou un contrat') },
+                { icon: '📷', label: t('chatUnifie.ex.ocr',        'Extraire le texte d\'une photo ou d\'un document scanné') },
+                { icon: '🎤', label: t('chatUnifie.ex.audio',      'Transcrire automatiquement une note vocale ou un enregistrement') },
+                { icon: '🎨', label: t('chatUnifie.ex.visuel',     'Créer une carte de visite, un flyer, une affiche imprimable') },
+                { icon: '📖', label: t('chatUnifie.ex.livret',     'Concevoir un livret, faire-part ou brochure multi-pages') },
+                { icon: '🌍', label: t('chatUnifie.ex.traduction', 'Traduire un texte ou un document dans une autre langue') },
+              ] as { icon: string; label: string }[]).map((ex, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50/60 border border-amber-100 text-[11px] text-amber-900"
+                >
+                  <span className="text-base leading-none mt-0.5">{ex.icon}</span>
+                  <span className="leading-snug">{ex.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {turns.map((turn, i) => (
