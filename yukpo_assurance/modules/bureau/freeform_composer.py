@@ -701,6 +701,189 @@ async def _pre_generer_donnees_simulees(
         return []
 
 
+async def _composer_carte_template(
+    brief: str,
+    profil: Optional[dict] = None,
+    brand_kit: Optional[dict] = None,
+    descripteur_vertical: Optional[dict] = None,
+    pays: str = "CM",
+    langue: str = "fr",
+    card_w_mm: float = 85.0,
+    card_h_mm: float = 55.0,
+) -> dict:
+    """Demande au LLM de composer UNE SEULE carte de visite template
+    (page unique 85×55mm avec design pro). On utilise ce template comme
+    motif à dupliquer N fois en grille A4 côté Python.
+
+    Beaucoup plus fiable que de demander au LLM de composer 20 cartes :
+    ~500 tokens output, pas de risque de troncature JSON.
+
+    Retourne un dict { format_mm, pages: [{elements: [...]}] } ou {} si
+    échec.
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+
+    couleur_prim = (profil or {}).get("couleur_primaire_hex") or ""
+    accents = (profil or {}).get("couleurs_accents_hex") or []
+    bk_palette_hint = ""
+    if brand_kit:
+        bk_palette_hint = (
+            f"BRAND KIT palette (à respecter strictement) : "
+            f"primaire {couleur_prim or '(libre)'}, "
+            f"accents {', '.join(accents) if accents else '(libre)'}."
+        )
+
+    prompt = f"""\
+Compose UNE SEULE carte de visite professionnelle au format {card_w_mm}×{card_h_mm}mm.
+
+Brief utilisateur original : « {brief[:400]} »
+Pays : {pays} / Langue : {langue}
+{bk_palette_hint}
+
+Tu produis un JSON STRICT avec format_mm = [{card_w_mm}, {card_h_mm}] et UNE
+seule page contenant les éléments d'UNE carte template DENSE et PRO :
+- Rectangle fond couleur primaire (ou navy par défaut), border_radius 2mm
+- Petit bandeau accent (5-8mm) bord gauche ou top
+- Texte « NOM Prénom » placeholder en Bold 11pt blanc (sera remplacé)
+- Texte « Fonction » en italic 8pt couleur accent (sera remplacé)
+- Filet séparateur fin (0.4pt accent, 30-40mm)
+- 3 icônes contact (tabler phone, mail, world) 4×4mm
+- 3 textes contact placeholders « +237 6XX XXX XXX », « email@org.cm »,
+  « www.org.cm » en 7pt blanc à droite des icônes
+- Petit cercle ou forme géométrique d'accent (badge ou bulle)
+- QR placeholder 12×12mm coin bas-droite (couleur sur fond blanc)
+- Crop marks aux 4 coins de la carte
+
+Les TEXTES placeholders seront REMPLACÉS automatiquement par les données
+simulées d'utilisateurs réels. Tu produis donc le DESIGN, pas les data.
+
+Format JSON :
+{{
+  "format_mm": [{card_w_mm}, {card_h_mm}],
+  "bleed_mm": 3,
+  "palette_meta": {{"primaire": "#003D82", "accent": "#FFB800", "fond": "#FFFFFF"}},
+  "pages": [
+    {{"numero": 1, "fond_couleur": "#FFFFFF", "elements": [ ... ]}}
+  ]
+}}
+
+Retourne UNIQUEMENT le JSON, sans markdown.
+"""
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            systeme=_PROMPT_SYSTEME,
+            mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,  # → gpt-4-turbo (4096 OK pour 1 carte)
+            json_attendu=True,
+            max_tokens_override=2500,
+            utiliser_cache=False,
+        )
+        contenu = (rep.contenu or "").strip()
+        logger.info(
+            f"[FreeformComposer/Template] LLM répondu {len(contenu)} chars, "
+            f"aperçu fin : ...{contenu[-150:]!r}"
+        )
+        try:
+            data = json.loads(contenu)
+        except json.JSONDecodeError as _jde:
+            logger.warning(
+                f"[FreeformComposer/Template] JSON invalide ({_jde}) → regex extraction"
+            )
+            import re as _re
+            m = _re.search(r"\{[\s\S]*\}", contenu)
+            data = json.loads(m.group()) if m else {}
+
+        if not isinstance(data, dict) or not data.get("pages"):
+            return {}
+        return data
+    except Exception as e:
+        logger.warning(f"[FreeformComposer/Template] Echec LLM : {e}")
+        return {}
+
+
+def _layout_carte_template_fallback(
+    card_w_mm: float = 85.0, card_h_mm: float = 55.0,
+    couleur_primaire: str = "#003D82",
+    couleur_accent: str = "#FFB800",
+) -> dict:
+    """Layout template de carte de visite hard-coded en cas d'échec LLM.
+    Design sobre mais propre : fond primaire, bandeau accent, nom+fonction
+    + 3 lignes contact + QR placeholder + crop marks."""
+    return {
+        "format_mm": [card_w_mm, card_h_mm],
+        "bleed_mm": 3,
+        "palette_meta": {
+            "primaire": couleur_primaire,
+            "accent": couleur_accent,
+            "fond": "#FFFFFF",
+        },
+        "pages": [{
+            "numero": 1,
+            "fond_couleur": "#FFFFFF",
+            "elements": [
+                # Fond carte
+                {"type": "rectangle", "x_mm": 0, "y_mm": 0,
+                 "w_mm": card_w_mm, "h_mm": card_h_mm,
+                 "fond": couleur_primaire, "border_radius_mm": 2, "z_index": 0},
+                # Bandeau accent à gauche
+                {"type": "rectangle", "x_mm": 0, "y_mm": 0,
+                 "w_mm": 6, "h_mm": card_h_mm,
+                 "fond": couleur_accent, "z_index": 1},
+                # Nom Prénom
+                {"type": "texte", "x_mm": 10, "y_mm": 9,
+                 "w_mm": card_w_mm - 18,
+                 "contenu": "NOM Prénom",
+                 "police": "Inter-Bold", "taille_pt": 11,
+                 "couleur": "#FFFFFF", "z_index": 2},
+                # Fonction
+                {"type": "texte", "x_mm": 10, "y_mm": 16,
+                 "w_mm": card_w_mm - 18,
+                 "contenu": "Fonction",
+                 "police": "Inter", "italic": True, "taille_pt": 8,
+                 "couleur": couleur_accent, "z_index": 2},
+                # Filet
+                {"type": "ligne", "x1_mm": 10, "y1_mm": 22,
+                 "x2_mm": 45, "y2_mm": 22,
+                 "epaisseur_pt": 0.4, "couleur": couleur_accent, "z_index": 2},
+                # Tel
+                {"type": "icone", "prefix": "tabler", "name": "phone",
+                 "x_mm": 10, "y_mm": 28, "w_mm": 4, "h_mm": 4,
+                 "couleur": couleur_accent, "z_index": 2},
+                {"type": "texte", "x_mm": 16, "y_mm": 28.5,
+                 "w_mm": card_w_mm - 24,
+                 "contenu": "+237 6XX XXX XXX",
+                 "police": "Inter", "taille_pt": 7,
+                 "couleur": "#FFFFFF", "z_index": 2},
+                # Mail
+                {"type": "icone", "prefix": "tabler", "name": "mail",
+                 "x_mm": 10, "y_mm": 34, "w_mm": 4, "h_mm": 4,
+                 "couleur": couleur_accent, "z_index": 2},
+                {"type": "texte", "x_mm": 16, "y_mm": 34.5,
+                 "w_mm": card_w_mm - 24,
+                 "contenu": "email@example.com",
+                 "police": "Inter", "taille_pt": 7,
+                 "couleur": "#FFFFFF", "z_index": 2},
+                # World/site
+                {"type": "icone", "prefix": "tabler", "name": "world",
+                 "x_mm": 10, "y_mm": 40, "w_mm": 4, "h_mm": 4,
+                 "couleur": couleur_accent, "z_index": 2},
+                {"type": "texte", "x_mm": 16, "y_mm": 40.5,
+                 "w_mm": card_w_mm - 24,
+                 "contenu": "www.org.cm",
+                 "police": "Inter", "taille_pt": 7,
+                 "couleur": "#FFFFFF", "z_index": 2},
+                # QR
+                {"type": "qr", "x_mm": card_w_mm - 16, "y_mm": card_h_mm - 16,
+                 "w_mm": 12, "h_mm": 12,
+                 "donnees": "BEGIN:VCARD\nVERSION:3.0\nEND:VCARD",
+                 "couleur": couleur_primaire, "fond": "#FFFFFF", "z_index": 3},
+            ],
+        }],
+    }
+
+
 def _reorganiser_grille_a4(
     data: dict,
     donnees: list[dict],
@@ -973,6 +1156,7 @@ async def composer_freeform_layout(
         f"[FreeformComposer] trigger_simulation={trigger_simul} "
         f"(condition : nb>=2 ET regex simul/invent/fictif/genere les infos)"
     )
+    donnees_simulees: list[dict] = []
     if nb_detecte >= 2 and trigger_simul:
         donnees_simulees = await _pre_generer_donnees_simulees(
             brief=brief, nb_items=nb_detecte, profil=profil,
@@ -983,6 +1167,43 @@ async def composer_freeform_layout(
             f"entrées simulées (cible {nb_detecte}). "
             f"Aperçu : {str(donnees_simulees[:2])[:200]}"
         )
+
+    # ── PIPELINE 2-PHASES pour densité élevée + données simulées ──────────
+    # Au lieu de demander au LLM de composer N cartes (~25k chars JSON,
+    # tronqué à 8000 tokens output → fallback page vide), on lui demande
+    # juste UNE carte template (~500 tokens, fiable), puis on duplique en
+    # grille A4 côté Python (déterministe).
+    if densite_elevee and donnees_simulees:
+        logger.info(
+            f"[FreeformComposer] Pipeline 2-phases activé : "
+            f"LLM compose 1 carte template, Python duplique × {len(donnees_simulees)}"
+        )
+        template_data = await _composer_carte_template(
+            brief=brief, profil=profil, brand_kit=brand_kit,
+            descripteur_vertical=descripteur_vertical,
+            pays=pays, langue=langue,
+        )
+        if not template_data.get("pages"):
+            logger.warning(
+                "[FreeformComposer] Template LLM échec → fallback template hardcoded"
+            )
+            couleur_prim = (profil or {}).get("couleur_primaire_hex") or "#003D82"
+            accents = (profil or {}).get("couleurs_accents_hex") or ["#FFB800"]
+            template_data = _layout_carte_template_fallback(
+                couleur_primaire=couleur_prim,
+                couleur_accent=accents[0] if accents else "#FFB800",
+            )
+
+        # Reconstruction grille A4 avec injection données
+        final_data = _reorganiser_grille_a4(
+            data=template_data, donnees=donnees_simulees,
+            card_w_mm=85.0, card_h_mm=55.0,
+        )
+        logger.info(
+            f"[FreeformComposer] Pipeline 2-phases → {len(final_data.get('pages', []))} "
+            f"planches A4 finales"
+        )
+        return final_data
         if donnees_simulees:
             donnees_block = (
                 f"\n## DONNÉES SIMULÉES (déjà générées — utilise-les TELLES QUELLES, "
