@@ -519,6 +519,33 @@ Quel que soit le livrable, tu produis du DESIGN PRO, pas du texte plat :
   cases BD, étiquettes) : UNE page A4/A3 avec N éléments en grille
   calculée (lignes × colonnes), JAMAIS N pages d'un seul élément.
 
+  ALGORITHME OBLIGATOIRE quand brief = « N <items> » (N>=2) :
+  1. Calcule cartes_par_page = floor((H_page - 2*marge) / (h_item + gutter_v))
+     × floor((W_page - 2*marge) / (w_item + gutter_h)).
+     Exemple A4 portrait (210×297) + cartes 85×55 + marge 10 + gutter 5 :
+     colonnes = floor((210-20)/(85+5))=2, lignes=floor((297-20)/(55+5))=4
+     → 8 cartes/A4.
+  2. nb_pages = ceil(N / cartes_par_page). Ex: 20 cartes → 3 pages A4.
+  3. Sur CHAQUE page, dessine TOUTES les positions cartes_par_page de la
+     grille (sauf la dernière page : juste les restants N mod nb_pages).
+  4. Pour CHAQUE carte : compose un BLOC dense complet — fond couleur
+     primaire, accent latéral, nom Bold, fonction italique accent, filet
+     fin, 3 icônes contact (phone/mail/web) avec textes, QR vCard valide,
+     logo top-right si fourni. PAS de carte plate texte-seul.
+  5. crop_marks pour CHAQUE trim de découpe + marges techniques 3mm bleed.
+  6. SIMULATION DE DONNÉES — si le brief dit « simule les infos »,
+     « simule N employés », « génère N personnes » sans liste précise :
+     INVENTE N (nom + prénom + fonction + téléphone + email pro)
+     RÉALISTES adaptés au pays/secteur du profil. Varie titres et
+     fonctions (DG, RH, Compta, Commercial, Tech, Marketing…). Évite
+     « John Doe » génériques.
+
+  CONSÉQUENCE TECHNIQUE : pour 20 cartes, le JSON contiendra environ
+  20 × ~8 éléments primitives = ~160 éléments + ornements + crop_marks.
+  Sois DENSE mais COMPACT (clés JSON courtes, pas de répétition inutile,
+  pas de commentaires). Tu DOIS faire tenir l'ensemble dans la limite
+  de tokens — réduis verbosité plutôt que de tronquer des cartes.
+
 DÉFAUTS À ÉVITER ABSOLUMENT :
 - Texte centré sur fond uni sans aucun élément graphique.
 - Une seule famille de couleur sans accent.
@@ -626,18 +653,32 @@ Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
 sans commentaire ni markdown.
 """
 
+    # Détection heuristique de densité — un brief mentionnant un N élevé
+    # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
+    # tokens output. gpt-4-turbo cape à 4096 → si LLM_PRIMAIRE=gpt et N élevé,
+    # on bascule sur Opus pur (32k output) pour éviter la troncature JSON
+    # qui produirait une page vide via fallback.
+    import re as _re_d
+    m_dense = _re_d.search(
+        r"\b(\d{2,3})\s*(cartes?|employ[ée]s?|personnes?|items?|exemplaires?|"
+        r"stickers?|[ée]tiquettes?|vignettes?|badges?|cases?|cartons?)\b",
+        (brief or "").lower(),
+    )
+    densite_elevee = bool(m_dense and int(m_dense.group(1)) >= 10)
+
     try:
-        # max_tokens=4000 : compatible gpt-4-turbo (limite 4096) ET Opus 4.7
-        # (limite 32k mais 4000 suffisent pour ~50-150 elements primitives JSON).
-        # Pour visuels denses (publicités produit avec ~30+ elements + icônes
-        # + specs), 4000 reste juste mais évite l'erreur 400 sur gpt-4-turbo.
+        # Tokens output : 4000 pour visuels simples (1-8 éléments répétés
+        # OU page unique). 8000 pour densités élevées (>=10 items répétés).
+        # Opus 4.7 supporte 32k output, gpt-4-turbo cape à 4096 (hard).
+        # Pour densité élevée on force Opus si LLM_PRIMAIRE=gpt fallback.
+        max_tok = 8000 if densite_elevee else 4000
         rep = await ia_client.appeler(
             prompt=prompt_user,
             systeme=_PROMPT_SYSTEME,
             mode=ModeIA.ANALYSE,
             forcer_modele=ModelePrioritaire.CLAUDE_OPUS,   # tier-traduit en gpt-4-turbo si LLM_PRIMAIRE=gpt
             json_attendu=True,
-            max_tokens_override=4000,
+            max_tokens_override=max_tok,
             utiliser_cache=False,
         )
         contenu = rep.contenu or "{}"
