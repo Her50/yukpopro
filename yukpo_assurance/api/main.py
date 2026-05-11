@@ -154,6 +154,17 @@ from core.telemetry import (
 )
 
 # ─── Logging structuré ────────────────────────────────────────────────────────
+# IMPORTANT : on configure TOUJOURS le root logger Python à INFO, même quand
+# structlog est dispo. Sans ça, les loggers de modules
+# (`logging.getLogger("yukpo_assurance.bureau.freeform_composer")` etc.)
+# restent au niveau WARNING par défaut → tous les `logger.info(...)`
+# applicatifs sont silencieux en prod, alors qu'ils contiennent les
+# diagnostics critiques.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    force=True,   # override si déjà configuré ailleurs
+)
 try:
     import structlog
     structlog.configure(
@@ -170,10 +181,6 @@ try:
     )
     logger = structlog.get_logger("yukpo_assurance")
 except ImportError:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
-    )
     logger = logging.getLogger("yukpo_assurance")
 
 # ─── Rate Limiter ─────────────────────────────────────────────────────────────

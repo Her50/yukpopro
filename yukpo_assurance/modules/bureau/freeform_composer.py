@@ -781,7 +781,7 @@ Retourne UNIQUEMENT le JSON, sans markdown.
             utiliser_cache=False,
         )
         contenu = (rep.contenu or "").strip()
-        logger.info(
+        logger.warning(
             f"[FreeformComposer/Template] LLM répondu {len(contenu)} chars, "
             f"aperçu fin : ...{contenu[-150:]!r}"
         )
@@ -1039,7 +1039,7 @@ def _reorganiser_grille_a4(
 
     data["format_mm"] = [210, 297]
     data["pages"] = new_pages
-    logger.info(
+    logger.warning(
         f"[FreeformComposer] Reconstruction grille → {nb_planches} planches A4, "
         f"{nb_total} cartes, {sum(len(p['elements']) for p in new_pages)} éléments"
     )
@@ -1133,7 +1133,7 @@ async def composer_freeform_layout(
     )
     nb_detecte = int(m_dense.group(1)) if m_dense else 0
     densite_elevee = nb_detecte >= 10
-    logger.info(
+    logger.warning(
         f"[FreeformComposer] brief={brief[:80]!r} | "
         f"nb_detecte={nb_detecte} | densite_elevee={densite_elevee}"
     )
@@ -1152,7 +1152,7 @@ async def composer_freeform_layout(
         r"noms?|coordonn[ée]es?|champs?|contenus?)",
         (brief or "").lower(),
     ))
-    logger.info(
+    logger.warning(
         f"[FreeformComposer] trigger_simulation={trigger_simul} "
         f"(condition : nb>=2 ET regex simul/invent/fictif/genere les infos)"
     )
@@ -1162,7 +1162,7 @@ async def composer_freeform_layout(
             brief=brief, nb_items=nb_detecte, profil=profil,
             pays=pays, langue=langue,
         )
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] Pré-gen Haiku → {len(donnees_simulees)} "
             f"entrées simulées (cible {nb_detecte}). "
             f"Aperçu : {str(donnees_simulees[:2])[:200]}"
@@ -1174,7 +1174,7 @@ async def composer_freeform_layout(
     # juste UNE carte template (~500 tokens, fiable), puis on duplique en
     # grille A4 côté Python (déterministe).
     if densite_elevee and donnees_simulees:
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] Pipeline 2-phases activé : "
             f"LLM compose 1 carte template, Python duplique × {len(donnees_simulees)}"
         )
@@ -1199,7 +1199,7 @@ async def composer_freeform_layout(
             data=template_data, donnees=donnees_simulees,
             card_w_mm=85.0, card_h_mm=55.0,
         )
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] Pipeline 2-phases → {len(final_data.get('pages', []))} "
             f"planches A4 finales"
         )
@@ -1281,7 +1281,7 @@ sans commentaire ni markdown.
         else:
             max_tok = 4000
             _modele_compose = ModelePrioritaire.CLAUDE_OPUS     # → gpt-4-turbo (4096) ou Opus 4.7 pur
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
             f"max_tokens={max_tok} (densite_elevee={densite_elevee})"
         )
@@ -1295,7 +1295,7 @@ sans commentaire ni markdown.
             utiliser_cache=False,
         )
         contenu = rep.contenu or "{}"
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] LLM répondu : {len(contenu)} chars, "
             f"aperçu fin : ...{contenu[-200:]!r}"
         )
@@ -1324,7 +1324,7 @@ sans commentaire ni markdown.
         nb_pages = len(pages)
         nb_elements_total = sum(len(p.get("elements") or []) for p in pages if isinstance(p, dict))
         fmt = data.get("format_mm") or [210, 297]
-        logger.info(
+        logger.warning(
             f"[FreeformComposer] Layout OK : {nb_pages} pages, "
             f"{nb_elements_total} éléments total, format={fmt}"
         )
