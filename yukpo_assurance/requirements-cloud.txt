@@ -46,7 +46,7 @@ pikepdf>=9.0.0                # PDF/X-1a strict + TrimBox/BleedBox (print-ready 
 # Iconify : SVG -> embed vectoriel dans PDF via svglib + reportlab.
 # Pure Python (lxml + reportlab), pas de lib native runtime requise.
 # Qualite infinie a l'impression (pas de rasterization).
-svglib>=1.5.1
+svglib==1.4.1                 # epingle avant 1.5.0 (1.5.0+ tire rlpycairo->pycairo qui demande libcairo2-dev au build)
 weasyprint>=62.0
 python3-saml>=1.16.0
 svgwrite>=1.4.3
