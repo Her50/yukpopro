@@ -1,0 +1,9 @@
+# Backend Fly.io rewrites (proxy /api/* → backend)
+/api/*    https://yukpopro-backend.fly.dev/api/:splat    200
+/auth/*   https://yukpopro-backend.fly.dev/auth/:splat   200
+/health   https://yukpopro-backend.fly.dev/health        200
+
+# SPA fallback : toutes les routes non statiques renvoient vers index.html
+# pour que React Router gère le routage côté client. Sans ça, Netlify
+# renvoie 404 sur les liens directs (/chat, /documents, /abonnement…).
+/*        /index.html                                    200

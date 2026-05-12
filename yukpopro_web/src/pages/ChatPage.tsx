@@ -295,16 +295,17 @@ export const ChatPage = () => {
           // job_id, status_url}. On poll toutes les 4s jusqu'à done|failed.
           if (r && r.async === true && r.job_id && r.status_url) {
             const startTime = Date.now();
-            const maxWaitMs = 600_000;   // 10 min max
-            const pollIntervalMs = 4_000;
+            const maxWaitMs = 1_200_000;   // 20 min max (cumul de jobs queue sur shared-cpu-1x)
+            const pollIntervalMs = 5_000;
             const statusUrl = r.status_url.startsWith("/api/v1/")
               ? r.status_url.slice("/api/v1".length)
               : r.status_url;
             // Affichage transitoire dans le chat
             updateLastAssistantMessage(
-              `⏳ Génération en cours — composition du visuel puis rendu PDF (recto-verso si applicable). Comptez 1-5 min selon la densité (20 cartes + recto-verso + web search = ~3-5 min). Je vous tiens au courant…`,
+              `⏳ Génération en cours — composition + rendu PDF (recto-verso si applicable). Comptez 2-8 min selon densité et charge serveur. Je vous tiens au courant…`,
               null, undefined, null, undefined, undefined,
             );
+            const jobIdSafe = r.job_id;
             while (Date.now() - startTime < maxWaitMs) {
               await new Promise(res => setTimeout(res, pollIntervalMs));
               try {
@@ -314,17 +315,28 @@ export const ChatPage = () => {
                 if (st === "failed") {
                   throw new Error(poll?.erreur || "Génération échouée");
                 }
-                // running/pending → continue polling
+                // pending/composing/running → continue polling
               } catch (pollErr: any) {
                 // Erreur 404 = job expiré (TTL 1h) ou timeout réseau ponctuel
                 if (pollErr?.response?.status === 404) {
                   throw new Error("Job introuvable (expiré ?)");
                 }
-                // Sinon on retente au tour suivant
+                // Sinon on retente au tour suivant (network blip, etc.)
               }
             }
             if (r?.async === true) {
-              throw new Error("Polling timeout 10min — réessaye plus tard");
+              // Polling 20min épuisé sans 'done' — le job continue en background
+              // côté backend. On affiche un message clair AVEC le job_id +
+              // lien vers Mes Documents, et on NE FALLBACK PAS sur chat
+              // normal (ça créerait une 2e requête lente et confuserait l'user).
+              updateLastAssistantMessage(
+                `⏳ **Génération encore en cours en arrière-plan** (job ${jobIdSafe.slice(0, 8)}…).\n\n` +
+                `Le rendu prend plus longtemps que prévu (forte densité ou charge serveur). ` +
+                `Le PDF apparaîtra automatiquement dans **[Mes Documents](/documents)** dans 1-3 minutes.\n\n` +
+                `Pas besoin de relancer — la tâche est sauvée.`,
+                null, undefined, null, undefined, undefined,
+              );
+              return;  // sort proprement de sendMessage sans fallback chat
             }
           }
 
