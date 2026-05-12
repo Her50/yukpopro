@@ -1626,13 +1626,30 @@ async def composer_freeform_layout(
         "**DEUIL / FUNÉRAILLE** (décès, obsèques, In Memoriam, hommage défunt,\n"
         "veillée funéraire, requiem, condoléances, cimetière)\n"
         "  - Ton : respectueux, digne, sobre, recueilli\n"
-        "  - Palette : navy profond #1A2742 / charcoal #2C2C2C / noir + or\n"
-        "    sobre #B8860B / argent #9CA3AF / bordeaux #722F37 sur ivoire\n"
-        "    #FBF7F0 ou blanc cassé. INTERDIT couleurs flashy (jaune vif,\n"
-        "    fuchsia, vert vif, cyan, orange, rose flashy) — inapproprié.\n"
+        "  - **CHOISIS UNE PALETTE PARMI 5 selon contexte/culture** (pas la\n"
+        "    même pour TOUS les faire-parts — variété entre familles) :\n"
+        "    a) Classique européen : navy #1A2742 + or #B8860B sur ivoire #FBF7F0\n"
+        "    b) Africain traditionnel : noir #000000 + ocre #8B4513 sur blanc\n"
+        "       cassé #F5F5DC (brief mentionne village/Cameroun/terroir)\n"
+        "    c) Chrétien liturgique : violet #4B0082 + or #D4AF37 sur blanc\n"
+        "       (forte connotation messe/religieuse)\n"
+        "    d) Sombre épuré moderne : charcoal #2C2C2C + argent #9CA3AF sur\n"
+        "       blanc #FFFFFF (style minimaliste contemporain)\n"
+        "    e) Bordeaux digne : bordeaux #722F37 + or sombre #B8860B sur\n"
+        "       ivoire #FBF7F0 (élégance classique)\n"
+        "  - INTERDIT couleurs flashy (jaune vif, fuchsia, vert vif, cyan,\n"
+        "    orange, rose flashy) — toujours inapproprié.\n"
+        "  - **CONTRASTE LISIBILITÉ ABSOLU (CRITIQUE)** :\n"
+        "    Tout texte courant (corps, citations italic, listes, légendes)\n"
+        "    sur fond foncé (navy, noir, charcoal, violet, bordeaux) DOIT\n"
+        "    être en BLANC #FFFFFF ou IVOIRE #FBF7F0. JAMAIS en or/argent.\n"
+        "    Le or/argent ne sert QUE pour : grands titres (≥20pt), filets,\n"
+        "    icônes, ornements. Une citation italic 11pt en or sombre sur\n"
+        "    fond navy = ILLISIBLE — interdit.\n"
         "  - Icônes : croix (chrétien), colombe (paix), lys/rose blanche,\n"
         "    cierge, croissant (musulman). 2-4 par page.\n"
-        "  - Citations : versets bibliques, coraniques, poèmes de deuil\n"
+        "  - Citations : versets bibliques, coraniques, poèmes de deuil.\n"
+        "    Couleur = blanc ou ivoire (contraste).\n"
         "\n"
         "**MARIAGE / FIANÇAILLES** (wedding, noces, union, dot, cérémonie\n"
         "nuptiale, mariage coutumier)\n"
@@ -2015,7 +2032,41 @@ positionnées à `(x, y)` avec taille `(w, h)`. Pour ÉVITER les collisions :
    - 4 ornements aux 4 coins, chacun 5-10mm du bord
    - Filet horizontal `(20, 18, 170, 0.5)` séparant titre et corps
 
-## CONTRAINTES IMPRESSION LIVRET (CRITIQUE)
+## CONTRAINTES IMPRESSION LIVRET RECTO-VERSO (CRITIQUE)
+
+### Logique de lecture après pli/agrafage
+
+Un livret est composé de FEUILLES PHYSIQUES pliées en deux puis
+agrafées au pli. Chaque feuille A4 paysage pliée donne 4 pages A5.
+Pour un livret 8 pages = 2 feuilles, 12 pages = 3 feuilles, etc.
+
+**Ordre LOGIQUE des pages** (ce que le lecteur voit en feuilletant) :
+- Page 1 = COUVERTURE recto (impactante, isolée, photo+titre)
+- Page 2 = première page intérieure (à gauche quand on ouvre)
+- Page 3 = page intérieure droite (face à face avec page 2)
+- Page 4 = page intérieure gauche (suivante)
+- Page 5 = page intérieure droite (face à face avec page 4)
+- … et ainsi de suite
+- Dernière page = DOS extérieur (citation isolée, sobre, court)
+
+**Compose les pages dans cet ORDRE DE LECTURE** (pas dans l'ordre
+d'imposition imprimeur — c'est le backend qui réordonne pour duplex).
+
+### Continuité face à face
+
+Quand l'utilisateur ouvre le livret, il voit DEUX pages côte-à-côte :
+(2,3), (4,5), (6,7). Pour une expérience pro, conçois ces paires
+comme un TOUT visuel cohérent :
+- Page 2 = liste des familles annonceuses
+  Page 3 = parcours de vie (continue logique)
+- Page 4 = programme obsèques (gauche)
+  Page 5 = témoignages (droite, complément naturel)
+- Page 6 = souvenirs photos
+  Page 7 = remerciements
+Évite de COUPER un contenu au milieu d'une paire (ex : programme
+sur page 4 ET 5 = casse la cohérence si user ouvre à plat).
+
+### Reliure asymétrique
 
 Si le document est un livret (≥4 pages), respecte les conventions
 imprimeur pour reliure agrafée :
