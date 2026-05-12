@@ -1588,7 +1588,31 @@ async def composer_freeform_layout(
     # le LLM compose intelligemment à partir des principes communs (densité,
     # iconographie pertinente, format livret).
     contexte_block = (
-        "\n## 📖 CONNAISSANCE LIVRET / FAIRE-PART / CÉRÉMONIE\n"
+        "\n## ⚠️ DÉTECTION CONTEXTE PERSONNEL vs CORPORATE (CRITIQUE)\n"
+        "Avant d'appliquer toute palette/branding, identifie si le document\n"
+        "est :\n"
+        "(A) **Personnel / Familial / Privé** : le brief contient « mon papa »,\n"
+        "    « ma maman », « mon mari », « ma femme », « mon frère », « ma\n"
+        "    sœur », « mon fils », « ma fille », « mon ami », « notre famille »,\n"
+        "    « les familles X et Y », etc. Document à usage FAMILIAL/PRIVÉ.\n"
+        "    → IGNORE complètement profil/brand_kit (couleurs corporate de\n"
+        "    l'organisation NE S'APPLIQUENT PAS à un document familial).\n"
+        "    Applique STRICTEMENT la palette appropriée au registre détecté\n"
+        "    (deuil = navy+or+ivoire, mariage = crème+or rosé, naissance =\n"
+        "    pastels…). Ne pas faire un faire-part de décès aux couleurs\n"
+        "    vert+jaune de la société de l'utilisateur — c'est ABSURDE.\n"
+        "\n"
+        "(B) **Corporate / Institutionnel** : le brief mentionne explicitement\n"
+        "    une organisation ou émet le document AU NOM d'une organisation\n"
+        "    (« notre entreprise X organise », « la société X annonce le\n"
+        "    décès de son fondateur Y », « invitation officielle de\n"
+        "    l'association Z »). Là le brand_kit/profil prime — couleurs\n"
+        "    organisation appropriées.\n"
+        "\n"
+        "Dans le doute (brief ambigu), va sur (A) personnel : moins risqué\n"
+        "qu'un faire-part familial avec mauvaises couleurs corporate.\n"
+        "\n"
+        "## 📖 CONNAISSANCE LIVRET / FAIRE-PART / CÉRÉMONIE\n"
         "Si le brief décrit un FAIRE-PART, LIVRET, PROGRAMME, INVITATION ou\n"
         "tout document de cérémonie/événement, tu identifies toi-même le\n"
         "REGISTRE émotionnel approprié à partir du brief et tu appliques les\n"
@@ -1954,6 +1978,67 @@ async def composer_freeform_layout(
 - Pays : {pays}
 - Langue : {langue}
 {profil_block}{brand_block}{vertical_block}{web_search_block}{contexte_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
+
+## RÈGLES PLACEMENT ÉLÉMENTS (anti-collision)
+
+CHAQUE élément a `x_mm, y_mm, w_mm, h_mm`. Les icônes (Icone) sont
+positionnées à `(x, y)` avec taille `(w, h)`. Pour ÉVITER les collisions :
+
+1. **Définis une grille mentale claire** : la page a une zone titre
+   en haut (10-25mm depuis y=10), un corps central (y=25 à y=H-25),
+   un pied (y=H-25 à H). NE PLACE PAS d'icône sur la zone titre/corps
+   texte sauf intention.
+
+2. **Marge minimale 5mm** entre un Texte et une Icone. Si une icône
+   est à `(x=10, y=180, w=8, h=8)`, le bloc Texte le plus proche en
+   x DOIT commencer à `x >= 23` (5mm gap) ou être à `y < 175` ou
+   `y > 195`.
+
+3. **Icônes décoratives** (croix, fleurs, ornements) :
+   - Placer dans les COINS de page (top-left, top-right, bottom-left,
+     bottom-right) entre `5mm` et `25mm` du bord
+   - Taille modeste : 4-8mm
+   - Couleur subtile (accent OU primaire 50% opacité)
+   - JAMAIS au milieu de la zone texte
+   - Si placement à côté d'un Texte, vérifie que le Texte commence
+     APRÈS la fin de l'icône en x : `texte.x >= icone.x + icone.w + 4`
+
+4. **Mauvais exemples (à NE PAS faire)** :
+   - Icone à `(50, 50, 5, 5)` + Texte démarrant à `(48, 50, ...)`
+     → icone se superpose au texte « am » de « Famille »
+   - Croix au milieu d'une page de Programme (centre = espace texte)
+   - 3 icônes en bas-gauche superposées les unes sur les autres
+
+5. **Bons exemples** :
+   - Croix `(95, 8, 6, 6)` en haut-centre, titre Texte `(20, 20, 170,
+     12)` en dessous → pas de collision
+   - 4 ornements aux 4 coins, chacun 5-10mm du bord
+   - Filet horizontal `(20, 18, 170, 0.5)` séparant titre et corps
+
+## CONTRAINTES IMPRESSION LIVRET (CRITIQUE)
+
+Si le document est un livret (≥4 pages), respecte les conventions
+imprimeur pour reliure agrafée :
+
+1. **Format physique** : préfère **A5 (148×210mm)** par défaut pour
+   livret cérémonie. Sinon : A4 (210×297) pour programme étendu,
+   carré 21×21 haut de gamme.
+2. **Pages multiples de 4** (livret agrafé). Si user demande X
+   feuillets, génère 2X pages (un feuillet = recto+verso).
+3. **Marges asymétriques pour reliure** :
+   - Marge intérieure (côté reliure) : 15-18mm
+   - Marge extérieure : 10-12mm
+   - Marges page paire : intérieure à droite, extérieure à gauche
+   - Marges page impaire : intérieure à gauche, extérieure à droite
+   - Ceci évite que le texte disparaisse dans le pli central
+4. **Bleed 3mm** sur les rectangles de fond plein-bord (`x=-3, y=-3,
+   w=W+6, h=H+6` pour les fonds couleur primaire).
+5. **Pagination discrète** bas de page (sauf couverture + dos), 8pt
+   gris sobre.
+6. **Page couverture (1)** : design impactant, titre + dates clés +
+   ornement principal.
+7. **Page dos (dernière)** : sobre, citation + ornement + RIEN d'autre.
+   Pas de marge intérieure (c'est l'extérieur arrière du livret).
 
 ## EXIGENCES TRANSVERSES ABSOLUES (CRITIQUE)
 
