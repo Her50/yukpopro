@@ -726,18 +726,23 @@ def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> No
     h = mm_to_pt(el.h_mm)
     couleur = el.couleur if el.couleur and el.couleur != "currentColor" else "#000000"
 
-    drawing = _telecharger_icone_iconify(el.prefix, el.name, couleur)
-    if drawing is None:
+    svg_bytes = _telecharger_icone_iconify(el.prefix, el.name, couleur)
+    if not svg_bytes:
         c.setFillColorRGB(0.85, 0.85, 0.85)
         c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
         return
 
     try:
         from reportlab.graphics import renderPDF
-        from copy import deepcopy
-        # Copier le Drawing avant scaling : cache partagé entre cartes,
-        # mutation in-place corromprait l'instance cachée.
-        d = deepcopy(drawing)
+        from svglib.svglib import svg2rlg  # type: ignore
+        from io import BytesIO
+        # Parse SVG -> Drawing à chaque appel (5-10ms, OK pour ~120 icônes).
+        # On évite ainsi deepcopy(Drawing) qui peut récursivement boucler sur
+        # des structures complexes (fonts, paths imbriqués), source du
+        # hang prod observé en v327.
+        d = svg2rlg(BytesIO(svg_bytes))
+        if d is None:
+            raise RuntimeError("svg2rlg returned None")
         src_w = d.width or 24.0
         src_h = d.height or 24.0
         d.scale(w / src_w, h / src_h)
@@ -750,33 +755,35 @@ def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> No
         c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
 
 
-# Cache d'objets Drawing svglib (un Drawing = ~quelques Ko, ~200 icônes
-# couramment utilisées → empreinte mémoire négligeable < 5 Mo).
-# Sentinel b"" / None différenciés : None = non testé, b"" = échec négatif-cache.
-_ICONIFY_CACHE: dict[str, Any] = {}
+# Cache d'octets SVG (déjà couleur-substitués, prêts pour svg2rlg).
+# Beaucoup plus simple/sûr que cacher des Drawing reportlab (qui ne se
+# deepcopy pas fiablement). ~300 octets/SVG × N icônes ≈ négligeable.
+_ICONIFY_CACHE: dict[str, bytes] = {}
 
 _ICONIFY_DISABLED = os.environ.get("YUKPO_ICONIFY_DISABLED", "0") == "1"
 
 
-def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str):
-    """Télécharge l'icône SVG depuis api.iconify.design et la parse en
-    Drawing reportlab (vectoriel embed PDF). Cache mémoire par (prefix,
-    name, couleur) — un seul HTTP par triplet, partagé entre toutes les
-    cartes du même rendu.
+def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str) -> Optional[bytes]:
+    """Télécharge l'icône SVG depuis api.iconify.design avec substitution
+    couleur côté Python (currentColor -> #rrggbb). Cache mémoire par
+    (prefix, name, couleur) — un seul HTTP par triplet, partagé entre
+    toutes les cartes du même rendu.
 
-    Négatif-cache (b"") au 1er échec pour court-circuiter les retries.
+    Iconify renvoie color sans # quand on passe ?color=xxx (invalide pour
+    svglib strict), donc on télécharge avec currentColor et on substitue
+    nous-mêmes — robuste.
+
+    Retourne les bytes SVG prêts à parser, ou None si Iconify échoue
+    (caller dessine alors un cercle gris).
     """
     if _ICONIFY_DISABLED:
         return None
     cle = f"{prefix}:{name}:{couleur_hex}"
     cached = _ICONIFY_CACHE.get(cle)
     if cached is not None:
-        return cached if cached != b"" else None
+        return cached or None  # b"" -> None
     try:
         import httpx
-        # On télécharge le SVG brut (avec currentColor) et on injecte la
-        # couleur côté Python : Iconify renvoie 'stroke="ff0000"' (sans #)
-        # quand on passe ?color=ff0000, ce qui est invalide pour svglib.
         url = f"https://api.iconify.design/{prefix}/{name}.svg"
         r = httpx.get(url, timeout=4.0)
         if r.status_code != 200 or not r.content:
@@ -784,18 +791,9 @@ def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str):
             return None
         couleur_css = couleur_hex if couleur_hex.startswith("#") else f"#{couleur_hex}"
         svg_str = r.text.replace("currentColor", couleur_css)
-        try:
-            from svglib.svglib import svg2rlg  # type: ignore
-            from io import BytesIO
-            drawing = svg2rlg(BytesIO(svg_str.encode("utf-8")))
-            if drawing is None:
-                _ICONIFY_CACHE[cle] = b""
-                return None
-            _ICONIFY_CACHE[cle] = drawing
-            return drawing
-        except Exception as e_parse:
-            logger.debug(f"[Iconify] svglib KO ({prefix}:{name}) : {e_parse}")
-            _ICONIFY_CACHE[cle] = b""
+        svg_bytes = svg_str.encode("utf-8")
+        _ICONIFY_CACHE[cle] = svg_bytes
+        return svg_bytes
     except Exception as e:
         logger.debug(f"[Iconify] {prefix}:{name} : {e}")
         _ICONIFY_CACHE[cle] = b""
