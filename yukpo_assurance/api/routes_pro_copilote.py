@@ -2805,16 +2805,12 @@ async def copilote_chat(
             projet_info = res_d.get("projet") or {}
             cle_detectee = res_d.get("cle_projet_detectee") or projet_info.get("cle_projet") or "designer"
             pdf_id = res_d.get("pdf_id") or res_d.get("pdf_cmyk_id")
-            from api.routes_bureau_infographie_pro import _DATA_DIR as _DESIGN_DATA_DIR
-            from api.routes_bureau_freeform import _DATA_DIR as _FREEFORM_DATA_DIR
-            # Le fichier peut être dans le répertoire designerpro OU freeform
-            # selon que le projet est sorti du legacy ou du freeform redirect.
-            if pdf_id:
-                _p_design = _DESIGN_DATA_DIR / pdf_id
-                _p_free = _FREEFORM_DATA_DIR / pdf_id
-                chemin_pdf = str(_p_free if _p_free.exists() else _p_design)
-            else:
-                chemin_pdf = None
+            # fichiers_generes attend juste le NOM de fichier (pas le path
+            # absolu), car le frontend client.ts:telecharger() détecte le
+            # préfixe 'bureau_*' et route vers /bureau/documents/{nom}.
+            # Précédemment on envoyait str(Path) = path absolu Linux,
+            # ce qui faisait 404 sur le téléchargement.
+            nom_fichier = pdf_id if pdf_id else None
             projet_id = res_d.get("projet_json_id")
             n_pages = (
                 projet_info.get("nombre_pages")
@@ -2839,7 +2835,7 @@ async def copilote_chat(
                 db=db, user_id=current_user.user_id,
                 titre=f"Visuel {cle_detectee}"[:100],
                 type_doc=f"designerpro_{cle_detectee}",
-                fichier=chemin_pdf,
+                fichier=nom_fichier,
                 contenu_genere="",
                 session_id=session["session_id"],
                 meta={"source": "chat", "format": "pdf", "projet_id": projet_id,
@@ -2853,7 +2849,7 @@ async def copilote_chat(
                 "resultat_agent":       {"projet_id": projet_id, "cle_projet": cle_detectee, "nb_pages": n_pages},
                 "nb_messages_session":  len(session["messages"]),
                 "profil_metier":        getattr(profil, "metier", None),
-                "fichiers_generes":     [chemin_pdf] if chemin_pdf else None,
+                "fichiers_generes":     [nom_fichier] if nom_fichier else None,
                 "navigation_suggestions": [
                     {"label": "Designer Pro", "route": "/secretariat/infographie",
                      "icon": "image", "description": "Affiner le visuel ou changer le format"},
