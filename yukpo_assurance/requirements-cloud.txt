@@ -43,9 +43,10 @@ python-pptx>=1.0.0
 fpdf2>=2.7.0
 reportlab>=4.1.0
 pikepdf>=9.0.0                # PDF/X-1a strict + TrimBox/BleedBox (print-ready imprimerie)
-# Iconify a deprecie son endpoint PNG (404). On telecharge le SVG et on
-# le convertit via cairosvg (libcairo2 deja present dans le Docker).
-cairosvg>=2.7.0
+# Iconify : SVG -> embed vectoriel dans PDF via svglib + reportlab.
+# Pure Python (lxml + reportlab), pas de lib native runtime requise.
+# Qualite infinie a l'impression (pas de rasterization).
+svglib>=1.5.1
 weasyprint>=62.0
 python3-saml>=1.16.0
 svgwrite>=1.4.3

@@ -711,88 +711,91 @@ def _draw_ornement(c, el: Ornement, off_x: float, off_y: float, fmt_h_pt: float)
 
 
 def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> None:
-    """Télécharge l'icône Iconify en PNG (rendu côté serveur api.iconify.design)
-    et l'embed dans le canvas via drawImage. PNG choisi plutôt que SVG pour
-    éviter la dépendance pycairo/svglib (besoin libcairo système non
-    disponible sur image Docker minimale). À 200 DPI et taille typique
-    8-30mm, le rendu PNG est indistinguable du vectoriel à l'œil.
-    Cache mémoire local pour éviter re-download si icône répétée."""
+    """Embed l'icône Iconify en VECTORIEL dans le PDF via svglib.
+
+    Pipeline : SVG Iconify → svglib.Drawing → renderPDF.draw() — qualité
+    infinie à toute résolution d'impression (300/600/1200 DPI). Pas de
+    rasterization, le SVG est intégré comme path vectoriel dans le PDF.
+
+    Fallback transparent en cercle gris si Iconify échoue ou si svglib
+    n'arrive pas à parser le SVG (rare).
+    """
     x = off_x + mm_to_pt(el.x_mm)
     y = off_y + fmt_h_pt - mm_to_pt(el.y_mm + el.h_mm)
     w = mm_to_pt(el.w_mm)
     h = mm_to_pt(el.h_mm)
     couleur = el.couleur if el.couleur and el.couleur != "currentColor" else "#000000"
 
-    # Taille PNG demandée à Iconify : 4× la taille pt pour avoir une bonne
-    # résolution même à l'agrandissement (200 DPI équivalent).
-    target_px = max(64, int(max(w, h) * 4))
-    png_bytes = _telecharger_icone_iconify(el.prefix, el.name, couleur, target_px)
-    if not png_bytes:
-        # Placeholder cercle si icône introuvable
+    drawing = _telecharger_icone_iconify(el.prefix, el.name, couleur)
+    if drawing is None:
         c.setFillColorRGB(0.85, 0.85, 0.85)
         c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
         return
 
     try:
-        from reportlab.lib.utils import ImageReader
-        import io as _io
-        ir = ImageReader(_io.BytesIO(png_bytes))
-        c.drawImage(ir, x, y, w, h, mask="auto", preserveAspectRatio=True)
+        from reportlab.graphics import renderPDF
+        from copy import deepcopy
+        # Copier le Drawing avant scaling : cache partagé entre cartes,
+        # mutation in-place corromprait l'instance cachée.
+        d = deepcopy(drawing)
+        src_w = d.width or 24.0
+        src_h = d.height or 24.0
+        d.scale(w / src_w, h / src_h)
+        d.width = w
+        d.height = h
+        renderPDF.draw(d, c, x, y, showBoundary=0)
     except Exception as e:
         logger.debug(f"[freeform/icone] Render {el.prefix}:{el.name} : {e}")
         c.setFillColorRGB(0.85, 0.85, 0.85)
         c.circle(x + w / 2, y + h / 2, min(w, h) / 2, stroke=0, fill=1)
 
 
-_ICONIFY_CACHE: dict[str, bytes] = {}
+# Cache d'objets Drawing svglib (un Drawing = ~quelques Ko, ~200 icônes
+# couramment utilisées → empreinte mémoire négligeable < 5 Mo).
+# Sentinel b"" / None différenciés : None = non testé, b"" = échec négatif-cache.
+_ICONIFY_CACHE: dict[str, Any] = {}
+
+_ICONIFY_DISABLED = os.environ.get("YUKPO_ICONIFY_DISABLED", "0") == "1"
 
 
-_ICONIFY_DISABLED = os.environ.get("YUKPO_ICONIFY_DISABLED", "1") == "1"
+def _telecharger_icone_iconify(prefix: str, name: str, couleur_hex: str):
+    """Télécharge l'icône SVG depuis api.iconify.design et la parse en
+    Drawing reportlab (vectoriel embed PDF). Cache mémoire par (prefix,
+    name, couleur) — un seul HTTP par triplet, partagé entre toutes les
+    cartes du même rendu.
 
-
-def _telecharger_icone_iconify(
-    prefix: str, name: str, couleur_hex: str, taille_px: int = 96,
-) -> Optional[bytes]:
-    """Téléchargement d'icône Iconify — actuellement DÉSACTIVÉ par défaut.
-
-    Pourquoi : api.iconify.design a déprécié son endpoint PNG (404
-    systématique). La tentative de bascule SVG→PNG via cairosvg en prod
-    a fait freezer le worker (v325, 2026-05-12) — soit cairosvg manque
-    une lib native runtime, soit il bloque le rendu. Le caller dessine
-    un cercle gris quand on retourne None, donc le PDF se génère vite.
-
-    Réactivation : positionner YUKPO_ICONIFY_DISABLED=0 dans l'env Fly.io
-    une fois la chaîne cairosvg validée localement.
+    Négatif-cache (b"") au 1er échec pour court-circuiter les retries.
     """
     if _ICONIFY_DISABLED:
         return None
-    cle = f"{prefix}:{name}:{couleur_hex}:{taille_px}"
-    if cle in _ICONIFY_CACHE:
-        cached = _ICONIFY_CACHE[cle]
-        return cached if cached else None
+    cle = f"{prefix}:{name}:{couleur_hex}"
+    cached = _ICONIFY_CACHE.get(cle)
+    if cached is not None:
+        return cached if cached != b"" else None
     try:
         import httpx
-        params: dict[str, str] = {}
-        if couleur_hex and couleur_hex != "#000000":
-            params["color"] = couleur_hex.lstrip("#")
+        # On télécharge le SVG brut (avec currentColor) et on injecte la
+        # couleur côté Python : Iconify renvoie 'stroke="ff0000"' (sans #)
+        # quand on passe ?color=ff0000, ce qui est invalide pour svglib.
         url = f"https://api.iconify.design/{prefix}/{name}.svg"
-        r = httpx.get(url, params=params, timeout=4.0)
+        r = httpx.get(url, timeout=4.0)
         if r.status_code != 200 or not r.content:
             _ICONIFY_CACHE[cle] = b""
             return None
+        couleur_css = couleur_hex if couleur_hex.startswith("#") else f"#{couleur_hex}"
+        svg_str = r.text.replace("currentColor", couleur_css)
         try:
-            import cairosvg  # type: ignore
-            png_bytes = cairosvg.svg2png(
-                bytestring=r.content,
-                output_width=taille_px,
-                output_height=taille_px,
-            )
-            if png_bytes and png_bytes[:4] == b"\x89PNG":
-                _ICONIFY_CACHE[cle] = png_bytes
-                return png_bytes
-        except Exception as e_render:
-            logger.debug(f"[Iconify] cairosvg KO ({prefix}:{name}) : {e_render}")
-        _ICONIFY_CACHE[cle] = b""
+            from svglib.svglib import svg2rlg  # type: ignore
+            from io import BytesIO
+            drawing = svg2rlg(BytesIO(svg_str.encode("utf-8")))
+            if drawing is None:
+                _ICONIFY_CACHE[cle] = b""
+                return None
+            _ICONIFY_CACHE[cle] = drawing
+            return drawing
+        except Exception as e_parse:
+            logger.debug(f"[Iconify] svglib KO ({prefix}:{name}) : {e_parse}")
+            _ICONIFY_CACHE[cle] = b""
     except Exception as e:
         logger.debug(f"[Iconify] {prefix}:{name} : {e}")
         _ICONIFY_CACHE[cle] = b""
@@ -838,16 +841,19 @@ async def rendre_pdf_depuis_json(
     3. Rasterise via ReportLab (sync)
     4. Post-traite PDF/X-1a (pikepdf : TrimBox/BleedBox + ICC FOGRA39)
     """
+    import asyncio
     doc = parse_layout_json(layout_json)
     await pre_generer_images_ia(doc)
-    pdf_bytes = rendre_layout_pdf(doc, medias=medias)
+    # Rasterization sync potentiellement longue (3 planches × 280 elem +
+    # téléchargements Iconify) — déléguée à un thread pour ne pas bloquer
+    # l'event loop (sinon health-check Fly.io échoue et le worker est tué).
+    pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
     # Post-traitement print-ready (best-effort, non bloquant)
     try:
         from . import pdf_print_ready as _pp
-        pdf_bytes = _pp.convertir_en_pdf_x1a(
-            pdf_bytes, doc.titre,
-            (doc.format_mm[0], doc.format_mm[1]),
-            doc.bleed_mm,
+        pdf_bytes = await asyncio.to_thread(
+            _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
+            (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
         )
     except Exception as e:
         logger.debug(f"[freeform] PDF/X-1a skip : {e}")
