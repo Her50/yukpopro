@@ -42,6 +42,43 @@ _JOBS_LOCAL: dict[str, dict] = {}
 _JOB_TTL_S = 3600
 
 
+def _detecter_type_visuel(brief: str) -> str:
+    """Détecte le type de visuel depuis le brief pour nommer le fichier
+    de manière lisible et courte. Retourne un slug court (≤20 chars) :
+    carte_visite, faire_part, flyer, brochure, affiche, livret, menu, etc.
+    Si aucun match, retourne 'visuel'. Évite les noms de fichier à rallonge
+    type 'fais_moi_une_simulation_d_un_faire_part_pour_les_o'.
+    """
+    import re as _re_t
+    b = (brief or "").lower()
+    # Ordre = priorité de détection (plus spécifique d'abord)
+    patterns = [
+        (r"\bcarte[s]?\s+(?:de\s+)?visite|business\s+card", "carte_visite"),
+        (r"\bfaire[- ]?part", "faire_part"),
+        (r"\bcarton\s+(?:d['])?invitation|carte\s+invitation", "invitation"),
+        (r"\bmarque[- ]?place|porte[- ]?nom", "marque_place"),
+        (r"\bbadge", "badge"),
+        (r"\bflyer", "flyer"),
+        (r"\bd[ée]pliant|brochure|plaquette", "brochure"),
+        (r"\baffiche|poster|banderole|oriflamme|kakemono", "affiche"),
+        (r"\bmenu\b", "menu"),
+        (r"\blivret\b", "livret"),
+        (r"\bprogramme\b", "programme"),
+        (r"\bcv\s+graphique|cv\s+visuel", "cv_graphique"),
+        (r"\bpackaging|[ée]tiquette\s+produit", "packaging"),
+        (r"\bsticker|autocollant", "sticker"),
+        (r"\bcertificat|dipl[oô]me", "certificat"),
+        (r"\bpost\s+(?:instagram|linkedin|facebook|social)|story|réseau", "post_social"),
+        (r"\bticket|billet", "ticket"),
+        (r"\bcv\b", "cv"),
+        (r"\bcarte\b", "carte"),
+    ]
+    for pat, slug in patterns:
+        if _re_t.search(pat, b):
+            return slug
+    return "visuel"
+
+
 def _slugifier(texte: str, max_len: int = 50) -> str:
     """Convertit un texte libre en slug ASCII-safe pour filename."""
     import re
@@ -185,7 +222,13 @@ async def generer_freeform(
     # Le client poll /status/{job_id} via GET (rapides, pas de timeout).
     job_id = str(uuid.uuid4())
     titre_layout_provisoire = (demande.brief or "document")[:80]
-    slug = _slugifier(titre_layout_provisoire, max_len=50)
+    # Filename court et lisible : on utilise le TYPE de visuel détecté
+    # (carte_visite, faire_part, flyer, …) au lieu du brief tronqué.
+    # Optionnellement on suffixe avec le nom d'organisation si dispo.
+    type_visuel = _detecter_type_visuel(demande.brief or "")
+    org_nom = (demande.profil or {}).get("nom_organisation", "") if isinstance(demande.profil, dict) else ""
+    org_slug = _slugifier(org_nom, max_len=20) if org_nom else ""
+    slug = f"{type_visuel}_{org_slug}" if org_slug else type_visuel
     fichier_id_prevu = (
         f"bureau_freeform_{current_user.user_id}_{slug}_{int(time.time())}.pdf"
     )
