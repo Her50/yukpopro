@@ -156,16 +156,19 @@ export const chatApi = {
    */
   send: async (req: ChatSendRequest): Promise<ChatResponse> => {
     try {
-      // 300 s : le backend peut prendre jusqu'à 240 s pour générer un document
-      // (slides, rapport, CV) ou traduire un gros fichier. Laisse une marge.
-      const { data } = await http.post("/pro/copilote/chat", req, { timeout: 300_000 });
+      // 600 s : aligné avec le backend (designer polling 570s + marge).
+      // Permet aux générations Freeform denses (20 cartes recto-verso +
+      // web search Serper + Haiku 20 entries + render 6 planches) de
+      // remonter leur lien de téléchargement dans le chat plutôt que
+      // de timeout et forcer l'utilisateur à aller dans Mes Documents.
+      const { data } = await http.post("/pro/copilote/chat", req, { timeout: 600_000 });
       return data;
     } catch (err: any) {
       if (err.response?.status === 404 || err.response?.status === 422) {
         const { data } = await http.post("/copilote/chat", {
           question: req.message,
           compagnie_id: 1,
-        }, { timeout: 300_000 });
+        }, { timeout: 600_000 });
         return { reponse: data.reponse || data.message || JSON.stringify(data) };
       }
       throw err;

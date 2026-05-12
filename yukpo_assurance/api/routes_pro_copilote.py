@@ -2803,7 +2803,7 @@ async def copilote_chat(
                     pays=pays_p,
                 )
                 resultat = await asyncio.wait_for(
-                    _designer_modifier(dem, current_user), timeout=320.0
+                    _designer_modifier(dem, current_user), timeout=600.0
                 )
             else:
                 dem = DemandeAutoPro(
@@ -2814,7 +2814,7 @@ async def copilote_chat(
                     medias_refs=medias_refs_chat or None,
                 )
                 resultat = await asyncio.wait_for(
-                    _designer_generer_auto(dem, current_user), timeout=320.0
+                    _designer_generer_auto(dem, current_user), timeout=600.0
                 )
 
             res_d = resultat if isinstance(resultat, dict) else {}
@@ -2822,11 +2822,14 @@ async def copilote_chat(
             # Si le designer a retourné en mode async (job_id), on poll
             # côté serveur jusqu'à done/failed. Statuts intermédiaires :
             # pending → composing → running → done|failed.
+            # Budget 570s (sous le timeout client 600s + marge réseau) pour
+            # absorber les renders longs sur shared-cpu-1x (web search +
+            # Haiku 20 entries + 6 planches = peut atteindre 5 min).
             if res_d.get("async") and res_d.get("job_id"):
                 from api.routes_bureau_freeform import _job_get
                 _jid = res_d["job_id"]
-                _poll_dt = 2.0
-                _max_polls = 150  # 150 × 2s = 300s
+                _poll_dt = 3.0
+                _max_polls = 190  # 190 × 3s = 570s
                 for _ in range(_max_polls):
                     await asyncio.sleep(_poll_dt)
                     job = await _job_get(_jid)
@@ -2847,7 +2850,7 @@ async def copilote_chat(
                         )
                     # pending/composing/running → continue polling
                 else:
-                    raise asyncio.TimeoutError("Job freeform pending > 300s")
+                    raise asyncio.TimeoutError("Job freeform pending > 570s")
 
             projet_info = res_d.get("projet") or {}
             cle_detectee = res_d.get("cle_projet_detectee") or projet_info.get("cle_projet") or "designer"
@@ -2924,9 +2927,14 @@ async def copilote_chat(
                 ],
             }
         except asyncio.TimeoutError:
-            logger.warning("[Copilote-Designer] Timeout génération visuel")
-            _msg_d = ("⚠️ La génération du visuel a pris trop de temps. "
-                      "Reprenez avec un brief plus court ou utilisez **Designer Pro** directement.")
+            logger.warning("[Copilote-Designer] Timeout génération visuel (>600s)")
+            _msg_d = (
+                "⏳ **Génération encore en cours en arrière-plan.**\n\n"
+                "Le rendu prend plus longtemps que d'habitude (densité élevée, "
+                "recherche web active ou charge serveur). Le PDF apparaîtra dans "
+                "**[Mes Documents](/documents)** dans 1-2 minutes — pas besoin de "
+                "relancer."
+            )
             _ajouter_message(session, "user", req.message)
             _ajouter_message(session, "assistant", _msg_d, {"agent_utilise": "designer"})
             return {
