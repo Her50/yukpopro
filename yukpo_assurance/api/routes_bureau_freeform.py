@@ -371,6 +371,35 @@ async def _render_background(
         except Exception:
             pass
 
+        # Persistance DB : sans ça le PDF n'apparaît pas dans 'Mes Documents'
+        # (historique = lecture DB, pas le store Zustand frontend qui est local).
+        try:
+            from core.database import DocumentGenereDB, async_session_maker
+            from datetime import datetime as _dt
+            async with async_session_maker() as _db:
+                doc = DocumentGenereDB(
+                    user_id=user_id,
+                    titre=(titre or brief or "Visuel")[:200],
+                    type_doc="designerpro_freeform",
+                    fichier=fichier_id,
+                    contenu_source="",
+                    contenu_genere="",
+                    session_id=f"chat_{user_id}",
+                    meta={
+                        "source": "freeform_async",
+                        "format": "pdf",
+                        "nb_pages": nb_pages,
+                        "brief": (brief or "")[:300],
+                        "pays": pays, "langue": langue,
+                    },
+                    cree_le=_dt.utcnow(), modifie_le=_dt.utcnow(),
+                )
+                _db.add(doc)
+                await _db.commit()
+                logger.info(f"[Freeform/async] Doc DB sauvegardé : {fichier_id}")
+        except Exception as e_db:
+            logger.warning(f"[Freeform/async] Persistance DB KO (non bloquant) : {e_db}")
+
         # Suggestions (re-créer demande factice pour helper)
         class _D: pass
         d = _D(); d.brief = brief; d.pays = pays; d.langue = langue; d.export_cmyk = export_cmyk  # type: ignore
