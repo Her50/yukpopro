@@ -2609,6 +2609,7 @@ async def generer_auto(
             profil=profil_dict,
             pays=demande.pays or "CM",
             langue=demande.langue or "fr",
+            medias_refs=demande.medias_refs or None,
         )
         res_ff = await generer_freeform(ff_demande, current_user)
         # Si async (layout dense ou IA inline), on remonte tel-quel — le

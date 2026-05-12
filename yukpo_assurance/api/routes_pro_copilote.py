@@ -2732,6 +2732,52 @@ async def copilote_chat(
             )
             from modules.pro.service_profil import get_or_create, incrementer_stat
 
+            # Extraction des médias attachés au chat (logo, bannière) :
+            # le user peut joindre son logo et l'app doit l'exploiter dans
+            # le design. Heuristique sur nom de fichier pour la catégorie.
+            medias_refs_chat: list[str] = []
+            if req.fichiers:
+                from modules.bureau import mediatheque_session as _msm
+                import base64 as _b64
+                for f in req.fichiers:
+                    mime = (f.type or "").lower()
+                    if not mime.startswith("image/"):
+                        continue
+                    nom_low = (f.nom or "").lower()
+                    if any(k in nom_low for k in ("logo", "marque")):
+                        cat = "logo"
+                        portee = "compte"
+                    elif any(k in nom_low for k in ("banner", "banniere", "header", "hero")):
+                        cat = "banniere"
+                        portee = "compte"
+                    else:
+                        cat = "photo"
+                        portee = "session"
+                    try:
+                        # contenu = "data:image/png;base64,XXX"
+                        contenu_str = f.contenu or ""
+                        if "," in contenu_str:
+                            contenu_str = contenu_str.split(",", 1)[1]
+                        contenu_bytes = _b64.b64decode(contenu_str)
+                        owner = (
+                            f"chat_{current_user.user_id}" if portee == "session"
+                            else str(current_user.user_id)
+                        )
+                        m = _msm.ajouter_media(
+                            portee=portee, owner_id=owner,
+                            contenu=contenu_bytes, nom_fichier=f.nom,
+                            mime=mime, categorie=cat, label=f.nom,
+                        )
+                        medias_refs_chat.append(f"{portee}:{m.media_id}")
+                        logger.info(
+                            f"[Copilote-Designer] Média attaché : {f.nom} → "
+                            f"{portee}:{m.media_id} (cat={cat})"
+                        )
+                    except Exception as e_med:
+                        logger.warning(
+                            f"[Copilote-Designer] Échec save média {f.nom} : {e_med}"
+                        )
+
             # Mode édition : si un document_ref pointe vers un projet designer
             ref_projet_id = None
             if req.document_ref is not None:
@@ -2765,6 +2811,7 @@ async def copilote_chat(
                     pays=pays_p,
                     langue=(_lc_orch or "fr"),
                     profil=profil_designer,
+                    medias_refs=medias_refs_chat or None,
                 )
                 resultat = await asyncio.wait_for(
                     _designer_generer_auto(dem, current_user), timeout=320.0

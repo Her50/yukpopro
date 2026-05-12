@@ -706,6 +706,7 @@ async def _composer_carte_template(
     profil: Optional[dict] = None,
     brand_kit: Optional[dict] = None,
     descripteur_vertical: Optional[dict] = None,
+    medias_descripteurs: Optional[list[dict]] = None,
     pays: str = "CM",
     langue: str = "fr",
     card_w_mm: float = 85.0,
@@ -715,8 +716,9 @@ async def _composer_carte_template(
     (page unique 85×55mm avec design pro). On utilise ce template comme
     motif à dupliquer N fois en grille A4 côté Python.
 
-    Beaucoup plus fiable que de demander au LLM de composer 20 cartes :
-    ~500 tokens output, pas de risque de troncature JSON.
+    Le LLM est libre sur le style (palette, layout, typo) en fonction
+    du brief / verticale métier / brand kit / médias uploadés. Pas de
+    design hard-codé pour permettre la variété entre organisations.
 
     Retourne un dict { format_mm, pages: [{elements: [...]}] } ou {} si
     échec.
@@ -725,63 +727,151 @@ async def _composer_carte_template(
 
     couleur_prim = (profil or {}).get("couleur_primaire_hex") or ""
     accents = (profil or {}).get("couleurs_accents_hex") or []
+    nom_org = (profil or {}).get("nom_organisation") or ""
+    metier = (profil or {}).get("metier") or ""
+
+    # Palette : priorité brand_kit > profil > déduction via verticale métier.
     bk_palette_hint = ""
-    if brand_kit:
+    if brand_kit and (brand_kit.get("couleur_primaire_hex") or brand_kit.get("couleurs_accents_hex")):
         bk_palette_hint = (
-            f"BRAND KIT palette (à respecter strictement) : "
-            f"primaire {couleur_prim or '(libre)'}, "
-            f"accents {', '.join(accents) if accents else '(libre)'}."
+            f"\n## PALETTE BRAND KIT (à respecter STRICTEMENT) :\n"
+            f"- Primaire : {brand_kit.get('couleur_primaire_hex') or couleur_prim or '(libre)'}\n"
+            f"- Accents : {brand_kit.get('couleurs_accents_hex') or accents or '(libre)'}\n"
+            f"Tu n'as PAS le droit d'utiliser d'autres couleurs principales.\n"
         )
+    elif couleur_prim or accents:
+        bk_palette_hint = (
+            f"\n## PALETTE PROFIL (à utiliser comme couleur dominante) :\n"
+            f"- Primaire : {couleur_prim or '(à déduire du métier)'}\n"
+            f"- Accents : {accents or '(à déduire du métier)'}\n"
+        )
+
+    # Verticale métier : couleurs/polices/ton typiques pour adapter le style.
+    vertical_hint = ""
+    if descripteur_vertical:
+        couleurs_typ = descripteur_vertical.get("couleurs_typiques") or ""
+        polices_typ = descripteur_vertical.get("polices_typiques") or ""
+        ton = descripteur_vertical.get("ton_recommande") or ""
+        label_vert = descripteur_vertical.get("label") or metier or ""
+        vertical_hint = (
+            f"\n## STYLE MÉTIER ({label_vert}) — à appliquer si pas de brand kit :\n"
+            f"- Couleurs typiques : {couleurs_typ or 'libre selon ton du brief'}\n"
+            f"- Polices recommandées : {polices_typ or 'sans-serif moderne'}\n"
+            f"- Ton visuel : {ton or 'professionnel'}\n"
+            f"Ne te limite PAS à navy/jaune. Le visuel doit évoquer le métier.\n"
+        )
+
+    # Médias uploadés (logo, bannière). Si présents, le LLM les référence
+    # via ref_media dans un élément Image dans la carte.
+    media_hint = ""
+    logos_refs = []
+    bannieres_refs = []
+    if medias_descripteurs:
+        for m in medias_descripteurs:
+            cat = (m.get("categorie") or "").lower()
+            ref = m.get("ref")
+            if not ref:
+                continue
+            if "logo" in cat or m.get("est_logo"):
+                logos_refs.append(ref)
+            elif "banniere" in cat or "banner" in cat or "header" in cat:
+                bannieres_refs.append(ref)
+        if logos_refs or bannieres_refs:
+            media_hint = (
+                f"\n## MÉDIAS UPLOADÉS PAR L'USER (à utiliser via ref_media) :\n"
+            )
+            if logos_refs:
+                media_hint += (
+                    f"- LOGO disponible (ref_media={logos_refs[0]!r}) — "
+                    f"OBLIGATOIRE de l'inclure en Image 12×12mm coin haut-gauche\n"
+                    f"  ou centré sur le verso. Format : {{\"type\":\"image\",\"ref_media\":\"{logos_refs[0]}\",\"x_mm\":...,\"y_mm\":...,\"w_mm\":12,\"h_mm\":12}}\n"
+                )
+            if bannieres_refs:
+                media_hint += (
+                    f"- BANNIÈRE/HEADER disponible (ref_media={bannieres_refs[0]!r}) — "
+                    f"à placer en haut de la carte ou pleine largeur verso.\n"
+                )
+
+    nom_org_hint = (
+        f"Organisation : « {nom_org} »\n" if nom_org else
+        "Organisation : à déduire intelligemment du brief\n"
+    )
+    metier_hint = (
+        f"Métier : {metier}\n" if metier else ""
+    )
 
     prompt = f"""\
 Compose UNE SEULE carte de visite professionnelle au format {card_w_mm}×{card_h_mm}mm.
-Tu vas produire DEUX pages : page 1 = RECTO, page 2 = VERSO de cette même
-carte (impression recto-verso standard).
+Tu produis DEUX pages : page 1 = RECTO, page 2 = VERSO de cette même carte
+(impression recto-verso standard duplex).
 
-Brief utilisateur original : « {brief[:400]} »
-Pays : {pays} / Langue : {langue}
-{bk_palette_hint}
+Brief utilisateur : « {brief[:400] if brief else ''} »
+{nom_org_hint}{metier_hint}Pays : {pays} / Langue : {langue}
+{bk_palette_hint}{vertical_hint}{media_hint}
+═══ LIBERTÉ CRÉATIVE TOTALE SUR LE STYLE ═══
 
-═══ PAGE 1 (RECTO) — éléments OBLIGATOIRES dans cet ordre ═══
+Tu CHOISIS le design en fonction du métier/secteur/brief, sans rester
+prisonnier d'un template "navy + jaune". Inspire-toi de l'identité du
+métier :
+  - Finance/banque : navy/charcoal + or, sobre et institutionnel
+  - Santé/médical : blanc + vert sapin ou bleu cyan, propre et rassurant
+  - Tech/IT : noir/blanc + cyan/turquoise/violet, géométrique et moderne
+  - Restauration/food : terracotta/crème ou noir + or, chaleureux
+  - Juridique : noir + bordeaux ou navy, classique sérigraphié
+  - Mode/créatif : couleurs vives ou pastels, audacieux et asymétrique
+  - Industriel/BTP : gris/anthracite + orange sécurité, robuste
+  - Éducation : vert sapin + crème, lisible et accessible
+  - Conseil/coaching : violet/aubergine + or, premium élégant
+  - Cosmétique/beauté : rose poudré + or rosé, féminin doux
+Pour les autres métiers, déduis intelligemment d'après le contexte.
 
-1. Rectangle fond couleur primaire (navy #003D82 par défaut), border_radius 2mm
-2. Bandeau accent vertical (5-8mm) bord gauche
-3. Texte « NOM Prénom » Bold 11pt blanc — placeholder remplacé auto
-4. Texte « Fonction » italic 8pt couleur accent — placeholder remplacé auto
-5. Filet séparateur fin (0.4pt accent, 30-40mm)
-6. Icone tabler phone 4×4mm + IMMÉDIATEMENT À DROITE Texte
-   « +237 6XX XXX XXX » 7pt blanc — placeholder remplacé auto
-7. Icone tabler mail 4×4mm + IMMÉDIATEMENT À DROITE Texte
-   « email@org.cm » 7pt blanc — placeholder remplacé auto
-8. Icone tabler world 4×4mm + IMMÉDIATEMENT À DROITE Texte
-   « www.org.cm » 7pt blanc — placeholder remplacé auto
-9. QR placeholder 12×12mm coin bas-droite (couleur primaire sur fond blanc)
-10. Crop marks aux 4 coins
+═══ PAGE 1 (RECTO) — éléments OBLIGATOIRES ═══
 
-⚠️ IMPÉRATIF : chaque icône doit avoir SON TEXTE adjacent. Pas d'icône seule.
-   Les 3 textes contact remplacent les valeurs placeholders avec les
-   vraies données utilisateur côté Python — donc DOIVENT exister.
+Tu places dans l'ordre que tu juges esthétique :
+1. Rectangle fond couleur primaire pleine carte avec border_radius
+2. Élément visuel d'accent au choix : bandeau vertical/horizontal, demi-cercle,
+   diagonale, encart, grille géométrique — varie selon le style métier
+3. Texte « NOM Prénom » Bold 11-13pt en couleur lisible — placeholder
+4. Texte « Fonction » italic ou regular 8pt couleur accent — placeholder
+5. Filet/séparateur subtil (0.4pt, 25-50mm) selon style
+6. Icone tabler phone 4×4mm + IMMÉDIATEMENT À DROITE Texte « +237 6XX XXX XXX »
+   7pt couleur lisible — placeholder remplacé auto
+7. Icone tabler mail 4×4mm + IMMÉDIATEMENT À DROITE Texte « email@org.cm »
+   7pt — placeholder remplacé auto
+8. Icone tabler world 4×4mm + IMMÉDIATEMENT À DROITE Texte « www.org.cm »
+   7pt — placeholder remplacé auto
+9. QR 11-14mm coin choisi (avec contraste correct)
+10. Si LOGO uploadé : Image ref_media en coin 10-14mm
+11. Crop marks aux 4 coins
 
-═══ PAGE 2 (VERSO) — design SOBRE/LOGO ═══
+⚠️ IMPÉRATIF : chaque icône (phone/mail/world) DOIT avoir SON TEXTE adjacent.
+   Pas d'icône seule sans texte à côté.
 
-1. Rectangle fond couleur primaire pleine carte
-2. Centré : nom de l'organisation en Bold 14pt blanc
-3. Sous le nom : ligne accent 30mm Bold + slogan/baseline en italic 8pt
-4. Cercle accent décoratif (logo placeholder) 18mm centré ou coin
-5. Crop marks aux 4 coins
+═══ PAGE 2 (VERSO) — branding organisation ═══
+
+Design plus aéré, met en valeur l'identité de l'organisation :
+1. Rectangle fond couleur primaire (ou inverse : fond blanc + accent vif)
+2. Si LOGO uploadé : Image ref_media 25-35mm centrée verticalement
+3. Sinon : Texte nom organisation Bold 14-18pt centré
+4. Sous-titre : slogan/baseline en italic 8-9pt couleur accent
+5. Élément graphique décoratif : forme géométrique ou pattern subtil
+6. Si bannière uploadée : Image ref_media en haut, pleine largeur (avec
+   crop si nécessaire pour respecter format carte)
+7. Crop marks aux 4 coins
 
 Format JSON :
 {{
   "format_mm": [{card_w_mm}, {card_h_mm}],
   "bleed_mm": 3,
-  "palette_meta": {{"primaire": "#003D82", "accent": "#FFB800", "fond": "#FFFFFF"}},
+  "palette_meta": {{"primaire": "...", "accent": "...", "fond": "#FFFFFF"}},
   "pages": [
     {{"numero": 1, "libelle_piece": "recto", "fond_couleur": "#FFFFFF", "elements": [ ... ]}},
     {{"numero": 2, "libelle_piece": "verso", "fond_couleur": "#FFFFFF", "elements": [ ... ]}}
   ]
 }}
 
-Retourne UNIQUEMENT le JSON, sans markdown.
+Renseigne palette_meta avec les couleurs que TU as choisies (sera utilisé
+pour cohérence du brand kit ultérieur). Retourne UNIQUEMENT le JSON, sans markdown.
 """
 
     try:
@@ -1307,6 +1397,7 @@ async def composer_freeform_layout(
         template_data = await _composer_carte_template(
             brief=brief, profil=profil, brand_kit=brand_kit,
             descripteur_vertical=descripteur_vertical,
+            medias_descripteurs=medias_descripteurs,
             pays=pays, langue=langue,
         )
         if not template_data.get("pages"):
