@@ -877,21 +877,41 @@ async def rendre_pdf_depuis_json(
     logger.warning(f"[freeform/render] parse OK — {len(doc.pages)} pages, "
                    f"{sum(len(p.elements) for p in doc.pages)} elements totaux")
     await pre_generer_images_ia(doc)
-    # Render dans un thread pour ne pas bloquer l'event loop FastAPI.
-    # Pas de timeout artificiel : sur shared-cpu-1x, un render dense peut
-    # légitimement prendre 2-3 min. Le handler appelant décide quand abandonner
-    # via son propre timeout (ex: asyncio.wait_for côté route).
-    logger.warning("[freeform/render] début rasterization ReportLab")
-    pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
-    logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
-    # Post-traitement print-ready (best-effort, non bloquant)
-    try:
-        from . import pdf_print_ready as _pp
-        pdf_bytes = await asyncio.to_thread(
-            _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
-            (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
-        )
-        logger.warning("[freeform/render] PDF/X-1a OK")
-    except Exception as e:
-        logger.debug(f"[freeform] PDF/X-1a skip : {e}")
+    # Sérialise les renders sur shared-cpu-1x : 2 renders parallèles sur 1
+    # vCPU → contention massive (logs prod v332 : page passée de 18s solo à
+    # 135s en concurrence). Le lock garde chaque render à pleine vitesse, les
+    # suivants attendent leur tour (le polling job_id côté chat absorbe). Sans
+    # lock, total = N × T_solo × N ; avec lock, total = N × T_solo.
+    lock = _get_render_lock()
+    waiting = lock.locked()
+    if waiting:
+        logger.warning("[freeform/render] en attente du lock (autre render en cours)")
+    async with lock:
+        logger.warning("[freeform/render] début rasterization ReportLab")
+        pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
+        logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
+        # Post-traitement sous le lock aussi : pikepdf/ghostscript sont
+        # CPU-bound, on évite la même contention.
+        try:
+            from . import pdf_print_ready as _pp
+            pdf_bytes = await asyncio.to_thread(
+                _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
+                (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
+            )
+            logger.warning("[freeform/render] PDF/X-1a OK")
+        except Exception as e:
+            logger.debug(f"[freeform] PDF/X-1a skip : {e}")
     return pdf_bytes
+
+
+# Lock asyncio process-wide pour sérialiser les renders ReportLab. Lazy-init
+# car asyncio.Lock() exige une event loop courante (créée par uvicorn).
+_RENDER_LOCK: Optional[Any] = None
+
+
+def _get_render_lock():
+    import asyncio
+    global _RENDER_LOCK
+    if _RENDER_LOCK is None:
+        _RENDER_LOCK = asyncio.Lock()
+    return _RENDER_LOCK
