@@ -323,47 +323,64 @@ async def pre_generer_images_ia(doc: LayoutDocument) -> None:
         logger.info("[freeform/IA] image_gen non disponible — images IA skipées")
         return
 
+    # Dédup par (prompt, format) : pipeline 2-phases duplique le template
+    # × N cartes, donc 20 cartes avec le même logo IA = 1 seule génération
+    # partagée. Évite 20× appels Flux Ultra (~25s chacun = 8+ min).
+    def _fmt_for(el: Image) -> str:
+        if not (el.w_mm and el.h_mm):
+            return "landscape_4_3"
+        ratio = el.w_mm / el.h_mm
+        if ratio > 1.5: return "landscape_16_9"
+        if ratio > 1.1: return "landscape_4_3"
+        if ratio < 0.7: return "portrait_16_9"
+        if ratio < 0.9: return "portrait_4_3"
+        return "square"
+
+    groupes: dict[tuple[str, str], list[Image]] = {}
+    for el in a_generer:
+        cle = (el.prompt_ia[:500], _fmt_for(el))
+        groupes.setdefault(cle, []).append(el)
+
+    logger.info(
+        f"[freeform/IA] {len(a_generer)} éléments image_ia → "
+        f"{len(groupes)} générations uniques (dédup pipeline 2-phases)"
+    )
+
     sem = asyncio.Semaphore(3)
 
-    async def _one(el: Image):
+    async def _one_groupe(prompt: str, fmt: str, els: list[Image]):
         async with sem:
             try:
-                # Détermine format à partir du ratio w/h
-                if el.w_mm and el.h_mm:
-                    ratio = el.w_mm / el.h_mm
-                    if ratio > 1.5:
-                        fmt = "landscape_16_9"
-                    elif ratio > 1.1:
-                        fmt = "landscape_4_3"
-                    elif ratio < 0.7:
-                        fmt = "portrait_16_9"
-                    elif ratio < 0.9:
-                        fmt = "portrait_4_3"
-                    else:
-                        fmt = "square"
-                else:
-                    fmt = "landscape_4_3"
-                # mode "ultra" = Flux 1.1 Pro Ultra raw (~15-30s/image,
-                # qualité photoréaliste cinématique SOTA). On peut se le
-                # permettre car le pipeline Freeform tourne désormais en
-                # background async (job_id + polling), donc plus contraint
-                # par le timeout Cloudflare 100s.
+                # mode "fast" : ~5-8s vs "ultra" ~25s. Pour le chat synchrone
+                # via /pro/copilote/chat, fast est requis pour rester sous le
+                # timeout client. Designer Pro en background peut rester ultra.
                 bts = await generer_image(
-                    prompt=el.prompt_ia[:500],
-                    mode="ultra",
-                    format_=fmt,
+                    prompt=prompt, mode="fast", format_=fmt,
                 )
                 if bts:
-                    # Stocker en data_url base64 (PNG)
-                    el.data_url = (
+                    data_url = (
                         f"data:image/png;base64,"
                         f"{_b64.b64encode(bts).decode('ascii')}"
                     )
+                    for el in els:
+                        el.data_url = data_url
             except Exception as e:
-                logger.debug(f"[freeform/IA] image '{el.prompt_ia[:40]}' KO : {e}")
+                logger.debug(f"[freeform/IA] image '{prompt[:40]}' KO : {e}")
 
-    await asyncio.gather(*(_one(el) for el in a_generer))
-    logger.info(f"[freeform/IA] {len(a_generer)} image(s) IA pré-générées")
+    # Budget total dur : 60s pour TOUTES les générations IA cumulées. Au-delà,
+    # on coupe net et on laisse les placeholders — mieux qu'un timeout client
+    # à 120s+ avec 'Erreur de connexion'.
+    try:
+        await asyncio.wait_for(
+            asyncio.gather(*(_one_groupe(p, f, els) for (p, f), els in groupes.items())),
+            timeout=60.0,
+        )
+        logger.info(f"[freeform/IA] {len(groupes)} génération(s) IA terminée(s)")
+    except asyncio.TimeoutError:
+        logger.warning(
+            f"[freeform/IA] Timeout 60s — {len(groupes)} groupes lancés, "
+            f"images manquantes seront placeholders"
+        )
 
 
 def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> bytes:
