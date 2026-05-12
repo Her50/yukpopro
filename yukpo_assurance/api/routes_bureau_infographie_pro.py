@@ -2583,11 +2583,12 @@ async def generer_auto(
         (demande.brief or "").lower(),
     )
     if _m_items_repetes and int(_m_items_repetes.group(1)) >= 2:
-        # Redirection vers freeform composer (mêmes pré-gen / post-validation)
-        from modules.bureau.freeform_composer import composer_freeform_layout
-        from modules.bureau.freeform_layout import rendre_pdf_depuis_json
+        # Délègue à l'endpoint /bureau/freeform/generer qui gère sync/async
+        # automatiquement (job_id + polling si layout dense). Évite la
+        # duplication de logique et garantit que le chat -> designer profite
+        # du flux async (pas de timeout client à 120s sur petite machine).
+        from api.routes_bureau_freeform import generer_freeform, DemandeFreeform
 
-        # Profil utilisateur (couleurs, organisation) si dispo
         profil_dict = {}
         try:
             from modules.pro.service_profil import get_or_create as _gop
@@ -2603,32 +2604,30 @@ async def generer_auto(
         except Exception as _e_profil:
             logger.debug(f"[GenererAuto] profil non chargé : {_e_profil}")
 
-        layout = await composer_freeform_layout(
+        ff_demande = DemandeFreeform(
             brief=demande.brief or "",
             profil=profil_dict,
             pays=demande.pays or "CM",
             langue=demande.langue or "fr",
         )
-        pdf_bytes = await rendre_pdf_depuis_json(layout)
-
-        # Sauvegarder via le même pattern bureau_freeform_*
-        import time as _t
-        ts = int(_t.time())
-        nom_fich = f"bureau_freeform_{current_user.user_id}_freeform_{ts}.pdf"
-        try:
-            from pathlib import Path as _P
-            from api.routes_bureau_freeform import _DATA_DIR as _FFDIR
-            (_FFDIR / nom_fich).write_bytes(pdf_bytes)
-        except Exception:
-            (_DATA_DIR / nom_fich).write_bytes(pdf_bytes)
-
+        res_ff = await generer_freeform(ff_demande, current_user)
+        # Si async (layout dense ou IA inline), on remonte tel-quel — le
+        # frontend détecte async=True et poll status_url toutes les 4s.
+        if isinstance(res_ff, dict) and res_ff.get("async"):
+            res_ff["cle_projet_detectee"] = "freeform_items_repetes"
+            res_ff["redirige_vers_freeform"] = True
+            return res_ff
+        # Sync : normaliser la forme attendue par le chat handler
+        pdf_id = (
+            res_ff.get("fichier_id") if isinstance(res_ff, dict) else None
+        ) or (res_ff.get("fichier") if isinstance(res_ff, dict) else None)
         return {
             "cle_projet_detectee": "freeform_items_repetes",
-            "pdf_id": nom_fich,
-            "fichier_genere": nom_fich,
-            "url_telechargement": f"/api/v1/bureau/documents/{nom_fich}",
-            "nb_pages": len(layout.get("pages") or []),
-            "format_mm": layout.get("format_mm") or [210, 297],
+            "pdf_id": pdf_id,
+            "fichier_genere": pdf_id,
+            "url_telechargement": f"/api/v1/bureau/documents/{pdf_id}" if pdf_id else None,
+            "nb_pages": res_ff.get("nb_pages") if isinstance(res_ff, dict) else None,
+            "format_mm": [210, 297],
             "redirige_vers_freeform": True,
         }
 

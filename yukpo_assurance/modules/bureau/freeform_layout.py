@@ -877,48 +877,21 @@ async def rendre_pdf_depuis_json(
     logger.warning(f"[freeform/render] parse OK — {len(doc.pages)} pages, "
                    f"{sum(len(p.elements) for p in doc.pages)} elements totaux")
     await pre_generer_images_ia(doc)
-    # Sérialise les renders ReportLab (pas thread-safe) + timeout dur 90s pour
-    # éviter qu'un render bloqué ne hange indéfiniment le client. Au-delà,
-    # on remonte TimeoutError → handler chat répond proprement (pas freeze).
-    async with _get_render_lock():
-        logger.warning("[freeform/render] début rasterization ReportLab")
-        try:
-            pdf_bytes = await asyncio.wait_for(
-                asyncio.to_thread(rendre_layout_pdf, doc, medias=medias),
-                timeout=90.0,
-            )
-            logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
-        except asyncio.TimeoutError:
-            logger.error("[freeform/render] TIMEOUT 90s — annulation rendu PDF")
-            raise
+    # Render dans un thread pour ne pas bloquer l'event loop FastAPI.
+    # Pas de timeout artificiel : sur shared-cpu-1x, un render dense peut
+    # légitimement prendre 2-3 min. Le handler appelant décide quand abandonner
+    # via son propre timeout (ex: asyncio.wait_for côté route).
+    logger.warning("[freeform/render] début rasterization ReportLab")
+    pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
+    logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
     # Post-traitement print-ready (best-effort, non bloquant)
     try:
         from . import pdf_print_ready as _pp
-        pdf_bytes = await asyncio.wait_for(
-            asyncio.to_thread(
-                _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
-                (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
-            ),
-            timeout=20.0,
+        pdf_bytes = await asyncio.to_thread(
+            _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
+            (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
         )
         logger.warning("[freeform/render] PDF/X-1a OK")
-    except asyncio.TimeoutError:
-        logger.warning("[freeform/render] PDF/X-1a timeout 20s — skip")
     except Exception as e:
         logger.debug(f"[freeform] PDF/X-1a skip : {e}")
     return pdf_bytes
-
-
-# Sérialise les renders ReportLab : la lib n'est pas thread-safe et 2+ renders
-# en parallèle (depuis 2 requêtes utilisateur simultanées) peuvent corrompre
-# l'état ou se deadlocker via les caches de polices. Lazy-init pour éviter
-# RuntimeError 'no current event loop' au module-level.
-_RENDER_LOCK: Optional[Any] = None
-
-
-def _get_render_lock():
-    import asyncio
-    global _RENDER_LOCK
-    if _RENDER_LOCK is None:
-        _RENDER_LOCK = asyncio.Lock()
-    return _RENDER_LOCK

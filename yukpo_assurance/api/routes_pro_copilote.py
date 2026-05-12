@@ -2771,13 +2771,54 @@ async def copilote_chat(
                 )
 
             res_d = resultat if isinstance(resultat, dict) else {}
+
+            # Si le designer a retourné en mode async (job_id), on poll
+            # côté serveur jusqu'à done/failed. Tout reste sous le timeout
+            # asyncio.wait_for de 320s.
+            if res_d.get("async") and res_d.get("job_id"):
+                from api.routes_bureau_freeform import _job_get
+                _jid = res_d["job_id"]
+                _poll_dt = 2.0
+                _max_polls = 150  # 150 × 2s = 300s, sous le budget 320s
+                for _ in range(_max_polls):
+                    await asyncio.sleep(_poll_dt)
+                    job = await _job_get(_jid)
+                    if not job:
+                        continue
+                    st = job.get("statut")
+                    if st == "done":
+                        res_d = {
+                            **res_d,
+                            "pdf_id": job.get("fichier_id"),
+                            "nb_pages": job.get("nb_pages"),
+                            "cle_projet_detectee": res_d.get("cle_projet_detectee"),
+                        }
+                        break
+                    if st == "failed":
+                        raise RuntimeError(f"Job freeform échoué: {job.get('error', 'unknown')}")
+                else:
+                    raise asyncio.TimeoutError("Job freeform pending > 300s")
+
             projet_info = res_d.get("projet") or {}
             cle_detectee = res_d.get("cle_projet_detectee") or projet_info.get("cle_projet") or "designer"
             pdf_id = res_d.get("pdf_id") or res_d.get("pdf_cmyk_id")
             from api.routes_bureau_infographie_pro import _DATA_DIR as _DESIGN_DATA_DIR
-            chemin_pdf = str(_DESIGN_DATA_DIR / pdf_id) if pdf_id else None
+            from api.routes_bureau_freeform import _DATA_DIR as _FREEFORM_DATA_DIR
+            # Le fichier peut être dans le répertoire designerpro OU freeform
+            # selon que le projet est sorti du legacy ou du freeform redirect.
+            if pdf_id:
+                _p_design = _DESIGN_DATA_DIR / pdf_id
+                _p_free = _FREEFORM_DATA_DIR / pdf_id
+                chemin_pdf = str(_p_free if _p_free.exists() else _p_design)
+            else:
+                chemin_pdf = None
             projet_id = res_d.get("projet_json_id")
-            n_pages = projet_info.get("nombre_pages") or len(res_d.get("pages_png_ids", []) or [])
+            n_pages = (
+                projet_info.get("nombre_pages")
+                or len(res_d.get("pages_png_ids", []) or [])
+                or res_d.get("nb_pages")
+                or 0
+            )
 
             reponse_design = (
                 f"🎨 **Visuel généré — {cle_detectee} ({n_pages} page{'s' if n_pages > 1 else ''}).**\n\n"
