@@ -3003,13 +3003,52 @@ REGLES :
      cv_graphique, invitation, packaging, post_social, album,
      rapport_visuel, OU custom pour briefs atypiques).
 
-   ⚠️ NE JAMAIS confondre :
-   - "5 cartes de visite imprimables" → INFOGRAPHIE (PAS un rapport
-     Word qui *présente* les cartes de visite en texte !)
-   - "flyer A3 anti-tabac" → INFOGRAPHIE (PAS un rapport sur le tabac)
-   - "menu de restaurant" → INFOGRAPHIE (PAS un rapport sur le menu)
-   - "CV graphique designer" → INFOGRAPHIE (PAS un rapport CV)
-   - "brochure produit" → INFOGRAPHIE (PAS un rapport produit)
+   ⚠️ NE JAMAIS confondre — CARTES/FLYER/BROCHURE = VISUEL même si le brief
+   contient les mots "informations", "données", "recherche", "analyse",
+   "génère", "branding". Ces mots ne signifient PAS "rapport texte" quand
+   ils accompagnent un OBJET imprimable.
+
+   EXEMPLES TYPIQUES (suis ces patterns LITTÉRALEMENT) :
+
+   ❌ MAUVAIS classement (à ne JAMAIS faire) :
+   Brief : "génère 8 cartes de visite pour 20 employés MTN, recherche le
+            branding et infos aléatoirement"
+   → type_sortie='rapport', template='rapport_analyse' ❌ NON !
+   Le mot "informations" ne fait PAS de cette demande un rapport. C'est
+   un BRIEF DE PRODUCTION VISUELLE : produire un PDF imprimable contenant
+   20 cartes avec données simulées. Le résultat attendu est un IMPRIMABLE,
+   pas un texte d'analyse.
+
+   ✅ BON classement :
+   Brief : "génère 8 cartes de visite pour 20 employés MTN, recherche le
+            branding et infos aléatoirement"
+   → type_sortie='visuel', template_id='infographie_carte_visite' ✅
+
+   Autres cas similaires :
+   - "5 cartes de visite imprimables" → VISUEL (infographie_carte_visite)
+   - "flyer A3 anti-tabac avec données OMS" → VISUEL (infographie_flyer)
+     (le mot "données" ne change pas le format de sortie)
+   - "brochure produit avec specs techniques détaillées" → VISUEL
+     (infographie_brochure) — c'est un imprimable commercial
+   - "menu restaurant Le Palais avec descriptions des plats" → VISUEL
+     (infographie_menu)
+   - "CV graphique designer freelance" → VISUEL (infographie_cv)
+   - "affiche événement avec programme complet" → VISUEL (infographie_affiche)
+   - "livret obsèques 8 pages avec hommages familiaux" → VISUEL
+     (infographie_livret) — PAS un rapport sur les obsèques
+   - "post Instagram lancement produit" → VISUEL (infographie_post_social)
+
+   RÈGLE DE DÉCISION rapide :
+   « L'utilisateur veut-il IMPRIMER ce résultat (cartes physiques,
+     prospectus distribué, affiche collée…) ou LIRE un texte analytique
+     (mémo, audit, étude) ? »
+   → IMPRIMABLE = VISUEL. LECTURE TEXTE = RAPPORT.
+
+   En cas de doute sur "rapport vs visuel" : la présence d'un OBJET
+   PHYSIQUE imprimable mentionné dans le brief (carte, flyer, affiche,
+   livret, brochure, badge, sticker, étiquette, packaging, banderole)
+   force VISUEL, peu importe la longueur du brief ou les mots
+   périphériques ("informations", "données", "recherche").
 
    ⚠️ DISTINCTION RAPPORT vs DOCUMENT JURIDIQUE :
    - Si le brief mentionne explicitement « convention », « contrat »,
@@ -3222,10 +3261,14 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     if isinstance(template_id, str) and template_id.startswith("infographie_"):
         type_sortie = "visuel"
         data["type_sortie"] = "visuel"
-    # Garde-fou supplémentaire : keywords visuels EXPLICITES dans le brief
-    # forcent type_sortie="visuel" même si le LLM orchestrer s'est trompé
-    # vers "rapport". Cas observé en prod : "8 cartes de visite MTN" →
-    # orchestrer classait "rapport" → Word .docx au lieu d'un PDF freeform.
+    # FILET DE SÉCURITÉ (PAS le mécanisme principal) :
+    # Le LLM orchestrer (Opus 4.7 / GPT-4-turbo) DOIT en théorie classifier
+    # correctement grâce à son prompt enrichi (cf. règles VISUEL vs RAPPORT
+    # avec exemples few-shot juste au-dessus dans ce fichier).
+    # Mais les LLM sont probabilistes : ~1 cas sur 50 sort de la grille.
+    # Ce garde-fou keyword attrape ces dérapages sans coût ni latence.
+    # Si ce filet se déclenche, c'est un signal pour améliorer le prompt
+    # (log warning émis pour traçabilité).
     import re as _re_kw_v
     _brief_low_kw = (demande.brief or "").lower()
     _kw_visuel_force = _re_kw_v.search(
@@ -3242,9 +3285,11 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     )
     if _kw_visuel_force and type_sortie != "visuel":
         logger.warning(
-            f"[Orchestrer] Garde-fou keyword visuel : "
-            f"type_sortie '{type_sortie}' -> 'visuel' "
-            f"(kw détecté : {_kw_visuel_force.group(0)!r})"
+            f"[Orchestrer] FILET DE SÉCURITÉ déclenché : LLM avait classé "
+            f"type_sortie='{type_sortie}' alors que le brief contient le "
+            f"keyword visuel {_kw_visuel_force.group(0)!r}. Override → 'visuel'. "
+            f"Brief : {(demande.brief or '')[:200]!r}. "
+            f"→ Renforcer le prompt few-shot si récurrent."
         )
         type_sortie = "visuel"
         data["type_sortie"] = "visuel"
