@@ -749,27 +749,49 @@ _ICONIFY_CACHE: dict[str, bytes] = {}
 def _telecharger_icone_iconify(
     prefix: str, name: str, couleur_hex: str, taille_px: int = 96,
 ) -> Optional[bytes]:
-    """Télécharge PNG depuis api.iconify.design avec cache mémoire local.
-    URL pattern : https://api.iconify.design/{prefix}/{name}.png?width=W&color=X
-    Pas de dépendance native (pas svglib/pycairo) — Iconify rend le PNG
-    côté serveur. Cache par (prefix, name, couleur, taille)."""
+    """Télécharge l'icône depuis api.iconify.design (SVG → PNG via cairosvg).
+
+    L'API publique Iconify a déprécié son endpoint PNG (404 systématique
+    depuis ~mai 2026). On télécharge donc le SVG (toujours servi en 200)
+    et on le convertit en PNG via cairosvg (libcairo2 présent dans le
+    Docker de prod). Cache mémoire local par (prefix, name, couleur, taille).
+
+    Négatif-cache (b"") activé dès le 1er échec pour éviter qu'une boucle
+    de 60+ icônes ne sature le rendu PDF par des HTTP successifs lents.
+    Fallback : retourne None → le caller dessine un cercle gris.
+    """
     cle = f"{prefix}:{name}:{couleur_hex}:{taille_px}"
     if cle in _ICONIFY_CACHE:
-        return _ICONIFY_CACHE[cle]
+        cached = _ICONIFY_CACHE[cle]
+        return cached if cached else None
     try:
         import httpx
-        params = {"width": str(taille_px), "height": str(taille_px)}
+        params: dict[str, str] = {}
         if couleur_hex and couleur_hex != "#000000":
-            # Iconify accepte couleurs hex SANS le # dans le query string
             params["color"] = couleur_hex.lstrip("#")
-        url = f"https://api.iconify.design/{prefix}/{name}.png"
-        r = httpx.get(url, params=params, timeout=8.0)
-        if r.status_code == 200 and r.content and r.content[:4] == b"\x89PNG":
-            _ICONIFY_CACHE[cle] = r.content
-            return r.content
-        logger.debug(f"[Iconify] {url} HTTP {r.status_code} size={len(r.content)}")
+        url = f"https://api.iconify.design/{prefix}/{name}.svg"
+        r = httpx.get(url, params=params, timeout=4.0)
+        if r.status_code != 200 or not r.content:
+            logger.debug(f"[Iconify] {url} HTTP {r.status_code}")
+            _ICONIFY_CACHE[cle] = b""
+            return None
+        try:
+            import cairosvg  # type: ignore
+            png_bytes = cairosvg.svg2png(
+                bytestring=r.content,
+                output_width=taille_px,
+                output_height=taille_px,
+            )
+            if png_bytes and png_bytes[:4] == b"\x89PNG":
+                _ICONIFY_CACHE[cle] = png_bytes
+                return png_bytes
+            _ICONIFY_CACHE[cle] = b""
+        except Exception as e_render:
+            logger.debug(f"[Iconify] cairosvg KO ({prefix}:{name}) : {e_render}")
+            _ICONIFY_CACHE[cle] = b""
     except Exception as e:
         logger.debug(f"[Iconify] {prefix}:{name} : {e}")
+        _ICONIFY_CACHE[cle] = b""
     return None
 
 
