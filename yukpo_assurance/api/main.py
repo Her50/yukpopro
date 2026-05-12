@@ -281,6 +281,38 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"  [DB] Init DB non critique: {e}")
 
+    # ── Migration one-shot : nettoie les paths absolus dans documents_generes ─
+    # Avant v335, le chat handler stockait str(Path) (ex: '/app/data/.../x.pdf')
+    # dans la colonne fichier, ce qui faisait 404 au téléchargement. Idempotent :
+    # on extrait juste le basename quand fichier contient '/'.
+    try:
+        from core.database import DocumentGenereDB, async_session_maker as _asm_mig
+        from sqlalchemy import select as _sel_mig, update as _upd_mig
+        import posixpath as _pp
+        async with _asm_mig() as _sess_mig:
+            res = await _sess_mig.execute(
+                _sel_mig(DocumentGenereDB).where(DocumentGenereDB.fichier.contains("/"))
+            )
+            rows = res.scalars().all()
+            fixed = 0
+            for doc in rows:
+                if not doc.fichier:
+                    continue
+                # basename POSIX (les paths Linux Docker)
+                basename = _pp.basename(doc.fichier.replace("\\", "/"))
+                if basename and basename != doc.fichier:
+                    doc.fichier = basename
+                    fixed += 1
+            if fixed:
+                await _sess_mig.commit()
+                logger.warning(
+                    f"  [DB/Migration] {fixed} document(s) nettoyés (path absolu → basename)"
+                )
+            else:
+                logger.info("  [DB/Migration] Aucun path absolu à nettoyer dans documents_generes")
+    except Exception as e_mig:
+        logger.warning(f"  [DB/Migration] Nettoyage paths absolus échoué (non bloquant) : {e_mig}")
+
     # ── Création / reset du compte super_admin au démarrage ────────────────────
     async def _creer_super_admin():
         import os as _os, secrets as _sec, bcrypt as _bcrypt
