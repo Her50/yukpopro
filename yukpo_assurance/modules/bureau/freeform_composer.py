@@ -1581,6 +1581,77 @@ async def composer_freeform_layout(
             "via un Texte discret au verso : « Logo officiel à insérer ».\n"
         )
 
+    # ── Détection contexte CÉRÉMONIE / DEUIL / ÉVÉNEMENT (override style) ─
+    # Pour les faire-parts décès, programmes funérailles, livrets obsèques,
+    # le STYLE est très différent des cartes corporate. Couleurs flashy et
+    # mises en page minimalistes sont INAPPROPRIÉES (manque de respect).
+    import re as _re_cont
+    contexte_block = ""
+    brief_l = (brief or "").lower()
+    if _re_cont.search(
+        r"\bd[ée]c[èe]s|deuil|obs[èe]ques|fun[ée]raill|enterrement|"
+        r"in\s+memoriam|hommage|d[ée]funt|tomb[eé]|cimeti[èe]re|"
+        r"veill[ée]e|messe\s+de\s+requiem|messe\s+du\s+suaire",
+        brief_l,
+    ):
+        contexte_block = (
+            "\n## ⚠️ CONTEXTE FAIRE-PART / FUNÉRAILLE / DEUIL — RÈGLES STRICTES\n"
+            "Ce document est un faire-part de décès / livret d'obsèques.\n"
+            "Le ton DOIT être respectueux, digne, sobre. Conventions OBLIGATOIRES :\n"
+            "\n"
+            "**Palette obligatoire** (pas négociable) :\n"
+            "- Primaire : NAVY profond (#1A2742) OU charcoal (#2C2C2C) OU noir (#000000)\n"
+            "- Accent : OR sobre (#B8860B) OU argent (#C0C0C0) OU bordeaux (#722F37)\n"
+            "- Fond : ivoire (#FBF7F0) OU blanc cassé (#F8F6F2)\n"
+            "- INTERDIT : jaune éclatant, fuchsia, vert vif, orange, rose flashy,\n"
+            "  cyan, turquoise → inappropriés pour le deuil dans la culture africaine\n"
+            "  ET internationale.\n"
+            "\n"
+            "**Iconographie / ornements requis** (au moins 2-3 par page) :\n"
+            "- Croix sobre (tabler:cross OU mdi:cross) — si contexte chrétien\n"
+            "- Colombe (tabler:bird) — symbole de paix/esprit\n"
+            "- Fleur lys/rose blanche (tabler:flower OU mdi:flower)\n"
+            "- Cierge / bougie (tabler:candle)\n"
+            "- Filets décoratifs fins (ornements 'filet' epaisseur 0.4-0.8pt or/argent)\n"
+            "- Cadres / encadrements subtils autour des blocs texte\n"
+            "\n"
+            "**Typographie** :\n"
+            "- Nom du défunt : SERIF élégant (Inter ou Helvetica par défaut),\n"
+            "  Bold 24-32pt, espacé\n"
+            "- Citations / passages bibliques : ITALIC 10-12pt\n"
+            "- Dates : Bold 11pt avec ornement filet de séparation\n"
+            "- Corps : Regular 10pt, interligne aéré (1.4-1.6)\n"
+            "\n"
+            "**Densité visuelle** (CRITIQUE) :\n"
+            "Chaque page DOIT être RICHE en éléments — pas juste 3 lignes\n"
+            "centrées dans 297mm de vide. Compose au moins 8-15 éléments par\n"
+            "page (Rectangle fond + Texte titre + filet + Texte corps + ornements +\n"
+            "icônes + cadres + citations + signatures). Distribue verticalement,\n"
+            "remplis 70%+ de la page utile.\n"
+            "\n"
+            "**Précision des dates** :\n"
+            "Si le brief dit « décédé le X », X est la DATE DE DÉCÈS, PAS de\n"
+            "naissance. Cherche la date de naissance EXPLICITEMENT dans le brief\n"
+            "(« né le », « naissance »). Si absente, utilise un placeholder\n"
+            "« [Date de naissance] ». NE JAMAIS inventer 1947, 1960, etc. en\n"
+            "extrapolant à partir d'autres infos (retraite, etc.) — ce serait\n"
+            "une fabrication de données factuelles sensibles.\n"
+            "\n"
+            "**Structure recommandée 4 feuillets** :\n"
+            "Page 1 : Faire-part principal — In Memoriam, portrait placeholder,\n"
+            "         NOM PRÉNOM Bold grand, dates avec filet ornement,\n"
+            "         citation/passage en italic, invitation\n"
+            "Page 2 : Programme des obsèques — timeline visuelle avec icônes\n"
+            "         lieu (tabler:map-pin), horaires en colonne, ornements\n"
+            "Page 3 : Familles / Annonces — listes hiérarchiques avec\n"
+            "         encadrés famille, accents OR/ARGENT sur les noms-clés\n"
+            "Page 4 : Parcours de vie — biographie dense en sections\n"
+            "         (Académique / Professionnel / Familial / Spirituel)\n"
+            "         avec icônes thématiques (école, travail, foyer, église)\n"
+            "Page 5 (bonus) : Témoignages / Hommages — citations encadrées\n"
+            "Page 6 (bonus) : Remerciements de la famille\n"
+        )
+
     # Catalogue palettes par métier (déduction si profil/brand_kit absents) —
     # appliqué à TOUS les types de visuels (cartes, flyers, brochures, etc.)
     style_catalogue_block = ""
@@ -1826,7 +1897,7 @@ async def composer_freeform_layout(
 ## CONTEXTE
 - Pays : {pays}
 - Langue : {langue}
-{profil_block}{brand_block}{vertical_block}{web_search_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
+{profil_block}{brand_block}{vertical_block}{web_search_block}{contexte_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
 
 Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
 sans commentaire ni markdown.
