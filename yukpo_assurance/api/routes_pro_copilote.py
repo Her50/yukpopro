@@ -2773,13 +2773,13 @@ async def copilote_chat(
             res_d = resultat if isinstance(resultat, dict) else {}
 
             # Si le designer a retourné en mode async (job_id), on poll
-            # côté serveur jusqu'à done/failed. Tout reste sous le timeout
-            # asyncio.wait_for de 320s.
+            # côté serveur jusqu'à done/failed. Statuts intermédiaires :
+            # pending → composing → running → done|failed.
             if res_d.get("async") and res_d.get("job_id"):
                 from api.routes_bureau_freeform import _job_get
                 _jid = res_d["job_id"]
                 _poll_dt = 2.0
-                _max_polls = 150  # 150 × 2s = 300s, sous le budget 320s
+                _max_polls = 150  # 150 × 2s = 300s
                 for _ in range(_max_polls):
                     await asyncio.sleep(_poll_dt)
                     job = await _job_get(_jid)
@@ -2795,7 +2795,10 @@ async def copilote_chat(
                         }
                         break
                     if st == "failed":
-                        raise RuntimeError(f"Job freeform échoué: {job.get('error', 'unknown')}")
+                        raise RuntimeError(
+                            f"Job freeform échoué: {job.get('erreur') or job.get('error', 'unknown')}"
+                        )
+                    # pending/composing/running → continue polling
                 else:
                     raise asyncio.TimeoutError("Job freeform pending > 300s")
 

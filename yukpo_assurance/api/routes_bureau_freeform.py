@@ -179,46 +179,13 @@ async def generer_freeform(
     except Exception:
         pass
 
-    # PHASE 1 (synchrone) — Compose JSON layout via LLM
-    t0 = time.time()
-    layout_json = await freeform_composer.composer_freeform_layout(
-        brief=demande.brief,
-        profil=demande.profil,
-        medias_descripteurs=descripteurs_medias,
-        brand_kit=brand_kit,
-        descripteur_vertical=descripteur_vert,
-        pays=demande.pays,
-        langue=demande.langue,
-    )
-    duree_compose_ms = int((time.time() - t0) * 1000)
-
-    # Détecter si génération IA inline nécessaire (Flux Pro Ultra ~15-30s/img)
-    a_images_ia = _layout_a_images_ia(layout_json)
-
-    titre_layout = (layout_json.get("titre") or demande.brief or "document")[:80]
-    slug = _slugifier(titre_layout, max_len=50)
-
-    # Force async pour layouts denses (multi-pages OU beaucoup d'éléments) :
-    # render sync >60s = timeout adaptive frontend (cf ChatPage.tsx ~120s),
-    # alors que le polling job_id supporte jusqu'à 10 min.
-    pages = layout_json.get("pages") or []
-    nb_pages = len(pages)
-    nb_elements = sum(len(p.get("elements") or []) for p in pages)
-    layout_dense = nb_pages >= 2 or nb_elements >= 80
-
-    if not a_images_ia and not layout_dense:
-        # PHASE 2a (synchrone) — layout léger sans IA → render direct, retour fichier
-        return await _generer_sync(
-            current_user, demande, layout_json, medias, slug, duree_compose_ms,
-        )
-
-    logger.info(
-        f"[Freeform] Mode async — a_images_ia={a_images_ia} "
-        f"nb_pages={nb_pages} nb_elements={nb_elements} (dense={layout_dense})"
-    )
-
-    # PHASE 2b (asynchrone) — IA inline → job_id + background task
+    # ── Mode async COMPLET (composer + render en background) ──
+    # On retourne job_id IMMÉDIATEMENT (<1s) sans attendre le composer LLM
+    # (60-75s) car Netlify free-tier timeout = 26s sur les proxies.
+    # Le client poll /status/{job_id} via GET (rapides, pas de timeout).
     job_id = str(uuid.uuid4())
+    titre_layout_provisoire = (demande.brief or "document")[:80]
+    slug = _slugifier(titre_layout_provisoire, max_len=50)
     fichier_id_prevu = (
         f"bureau_freeform_{current_user.user_id}_{slug}_{int(time.time())}.pdf"
     )
@@ -226,27 +193,28 @@ async def generer_freeform(
         "statut": "pending",
         "user_id": current_user.user_id,
         "fichier_id": fichier_id_prevu,
-        "titre": titre_layout,
-        "nb_pages": len(layout_json.get("pages") or []),
-        "duree_compose_ms": duree_compose_ms,
+        "titre": titre_layout_provisoire,
+        "nb_pages": 0,  # rempli après composition
+        "duree_compose_ms": 0,
     })
-    asyncio.create_task(_render_background(
+    asyncio.create_task(_compose_et_render_background(
         job_id=job_id, fichier_id=fichier_id_prevu,
-        layout_json=layout_json, medias=medias,
+        demande=demande, medias=medias,
+        descripteurs_medias=descripteurs_medias,
+        descripteur_vert=descripteur_vert, brand_kit=brand_kit,
         export_cmyk=demande.export_cmyk,
         user_id=current_user.user_id,
-        brief=demande.brief, pays=demande.pays, langue=demande.langue,
     ))
     return {
         "ok": True,
         "async": True,
         "job_id": job_id,
         "statut": "pending",
-        "titre": titre_layout,
-        "nb_pages": len(layout_json.get("pages") or []),
-        "duree_compose_ms": duree_compose_ms,
+        "titre": titre_layout_provisoire,
+        "nb_pages": 0,
+        "duree_compose_ms": 0,
         "message": (
-            "Génération en cours (Flux Pro Ultra qualité photoréaliste). "
+            "Génération en cours (composer LLM + rendu PDF). "
             "Suivre via GET /api/v1/bureau/freeform/status/{job_id}. "
             "Durée typique : 30-90s selon nombre d'images."
         ),
@@ -314,6 +282,55 @@ async def _generer_sync(
 
 
 # ─── Phase 2b : render background (avec IA inline Flux Pro Ultra) ───────
+
+
+async def _compose_et_render_background(
+    *, job_id: str, fichier_id: str, demande: "DemandeFreeform", medias: dict,
+    descripteurs_medias: list, descripteur_vert, brand_kit,
+    export_cmyk: bool, user_id: int,
+) -> None:
+    """Tâche background COMPLÈTE : composer LLM (60-75s) + render PDF (45-95s).
+
+    Retourne tôt côté handler HTTP (<1s) pour éviter le timeout Netlify
+    (26s sur free-tier). Le frontend poll /status/{job_id} jusqu'à done.
+    """
+    from modules.bureau import freeform_composer
+    try:
+        await _job_set(job_id, {
+            "statut": "composing", "user_id": user_id,
+            "fichier_id": fichier_id,
+            "titre": (demande.brief or "document")[:80], "nb_pages": 0,
+        })
+        t0 = time.time()
+        layout_json = await freeform_composer.composer_freeform_layout(
+            brief=demande.brief,
+            profil=demande.profil,
+            medias_descripteurs=descripteurs_medias,
+            brand_kit=brand_kit,
+            descripteur_vertical=descripteur_vert,
+            pays=demande.pays,
+            langue=demande.langue,
+        )
+        duree_compose_ms = int((time.time() - t0) * 1000)
+        titre_final = (layout_json.get("titre") or demande.brief or "document")[:80]
+        nb_pages_final = len(layout_json.get("pages") or [])
+        await _job_set(job_id, {
+            "statut": "running", "user_id": user_id,
+            "fichier_id": fichier_id, "titre": titre_final,
+            "nb_pages": nb_pages_final, "duree_compose_ms": duree_compose_ms,
+        })
+        await _render_background(
+            job_id=job_id, fichier_id=fichier_id,
+            layout_json=layout_json, medias=medias,
+            export_cmyk=export_cmyk, user_id=user_id,
+            brief=demande.brief, pays=demande.pays, langue=demande.langue,
+        )
+    except Exception as e:
+        logger.error(f"[Freeform/async] Job {job_id[:8]} ECHEC compose : {e}")
+        await _job_set(job_id, {
+            "statut": "failed", "user_id": user_id,
+            "erreur": str(e)[:300], "fichier_id": fichier_id,
+        })
 
 
 async def _render_background(
