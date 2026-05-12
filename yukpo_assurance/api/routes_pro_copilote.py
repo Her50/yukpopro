@@ -2892,16 +2892,23 @@ async def copilote_chat(
                              {"agent_utilise": "designer", "projet_id": projet_id, "cle_projet": cle_detectee})
             await incrementer_stat(current_user.user_id, "nb_documents_generes", db, xp_gain=4)
 
-            await _sauvegarder_doc_db(
-                db=db, user_id=current_user.user_id,
-                titre=f"Visuel {cle_detectee}"[:100],
-                type_doc=f"designerpro_{cle_detectee}",
-                fichier=nom_fichier,
-                contenu_genere="",
-                session_id=session["session_id"],
-                meta={"source": "chat", "format": "pdf", "projet_id": projet_id,
-                      "cle_projet": cle_detectee, "nb_pages": n_pages},
-            )
+            # NOTE : pas de _sauvegarder_doc_db ici pour les fichiers
+            # bureau_freeform_* — _render_background (côté freeform async)
+            # a déjà inséré l'entrée DocumentGenereDB. Saver ici créerait
+            # un doublon dans Mes Documents.
+            # On ne sauve que si le fichier provient d'un autre path designer
+            # (legacy Designer Pro sans async) — détecté par préfixe ≠ bureau_freeform_*.
+            if nom_fichier and not nom_fichier.startswith("bureau_freeform_"):
+                await _sauvegarder_doc_db(
+                    db=db, user_id=current_user.user_id,
+                    titre=f"Visuel {cle_detectee}"[:100],
+                    type_doc=f"designerpro_{cle_detectee}",
+                    fichier=nom_fichier,
+                    contenu_genere="",
+                    session_id=session["session_id"],
+                    meta={"source": "chat", "format": "pdf", "projet_id": projet_id,
+                          "cle_projet": cle_detectee, "nb_pages": n_pages},
+                )
 
             return {
                 "session_id":           session["session_id"],
