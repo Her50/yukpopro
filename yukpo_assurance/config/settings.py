@@ -119,9 +119,9 @@ class Settings(BaseSettings):
     # Modèles par défaut
     CLAUDE_MODEL_PRIMAIRE: str = "claude-sonnet-4-6"    # Chat — bon équilibre vitesse/qualité
     CLAUDE_MODEL_RAPIDE: str = "claude-haiku-4-5-20251001"  # Tâches simples, classification
-    GPT_MODEL_PRIMAIRE: str = "gpt-4o"                  # GPT principal — analyse/rédaction (128k contexte, dense)
-    GPT_MODEL_VISION:   str = "gpt-4o"                  # Vision/OCR
-    GPT_MODEL_FALLBACK: str = "gpt-4o-mini"             # Fallback léger pour tâches simples / COPILOTE
+    GPT_MODEL_PRIMAIRE: str = "gpt-4.1"                 # GPT principal — 1M contexte + 32k output, JSON structuré dense
+    GPT_MODEL_VISION:   str = "gpt-4o"                  # Vision/OCR — gpt-4o suffit, moins cher que 4.1-vision
+    GPT_MODEL_FALLBACK: str = "gpt-4.1-mini"            # Fallback léger pour tâches simples / COPILOTE (même 32k output)
 
     # Paramètres d'orchestration (inspiré de yukpomnang2/orchestration_ia.rs)
     IA_TEMPERATURE_PRECISION: float = 0.1   # États réglementaires, calculs CIMA

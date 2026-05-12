@@ -74,8 +74,9 @@ async def traduire_texte(
             prompt=prompt,
             mode=ModeIA.COPILOTE,
             systeme=_SYSTEME,
-            # GPT-4o-mini : latence minimale + économique pour traduction live phrase par phrase
-            forcer_modele=ModelePrioritaire.GPT4O_MINI,
+            # CLAUDE_HAIKU → mappé vers gpt-4.1-nano (très économique, latence faible)
+            # pour traduction live phrase par phrase. Bumpé depuis gpt-4o-mini.
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
             utiliser_cache=True,
             cache_ttl=86400,  # même phrase traduite plusieurs fois = cache 24h
         )

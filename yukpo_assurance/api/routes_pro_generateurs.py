@@ -1433,7 +1433,7 @@ async def _appeler_llm_traduction(prompt_sys: str, prompt_user: str) -> str:
         import openai as _oa
         client = _oa.AsyncOpenAI(api_key=_s.OPENAI_API_KEY, timeout=_TIMEOUT_TRAD, max_retries=0)
         resp = await client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4.1-mini",  # upgrade : 32k output cap (avant gpt-4o 16k)
             messages=[
                 {"role": "system",  "content": prompt_sys},
                 {"role": "user",    "content": prompt_user},

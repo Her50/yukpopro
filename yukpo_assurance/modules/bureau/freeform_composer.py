@@ -1054,9 +1054,9 @@ pour cohérence du brand kit ultérieur). Retourne UNIQUEMENT le JSON, sans mark
             prompt=prompt,
             systeme=_PROMPT_SYSTEME,
             mode=ModeIA.ANALYSE,
-            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,  # → gpt-4-turbo (4096 OK pour 1 carte)
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,  # → gpt-4.1 (32k output, JSON dense recto+verso)
             json_attendu=True,
-            max_tokens_override=2500,
+            max_tokens_override=4000,  # bumpé 2500→4000 pour recto+verso enrichi
             utiliser_cache=False,
         )
         contenu = (rep.contenu or "").strip()
