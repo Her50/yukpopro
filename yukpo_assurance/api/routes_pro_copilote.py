@@ -2783,6 +2783,7 @@ async def copilote_chat(
                             try:
                                 vision_data = await _msm.analyser_photo_vision(
                                     contenu_bytes=contenu_bytes, mime=mime,
+                                    user_id=current_user.user_id,
                                 )
                                 if vision_data:
                                     # Mute la metadata du media en mémoire

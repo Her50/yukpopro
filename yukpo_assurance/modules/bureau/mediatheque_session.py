@@ -316,9 +316,13 @@ def descripteur_pour_ia(media: Media) -> dict:
 
 async def analyser_photo_vision(
     contenu_bytes: bytes, mime: str = "image/jpeg",
+    user_id: Optional[int] = None,
 ) -> Optional[dict]:
     """Analyse Vision IA d'une photo via GPT-4o vision. Retourne un dict
     sémantique exploitable par le LLM composer pour matcher photo ↔ section.
+
+    Si user_id fourni, débite les crédits utilisateur via debiter_llm (marge
+    × 20 appliquée comme pour tous les autres appels LLM facturés du système).
 
     Retourne :
         {
@@ -334,7 +338,8 @@ async def analyser_photo_vision(
         }
     Si l'analyse échoue (clé API absente, timeout, etc.), retourne None.
 
-    Coût : ~$0.002 par photo (GPT-4o vision ~500 tokens entrée + 200 sortie).
+    Coût réel : ~$0.002 par photo. Facturé user : ~24 FCFA (cost × 600 × 20
+    margin).
     Latence : 2-4 secondes par photo (en parallèle si plusieurs uploads).
     """
     try:
@@ -386,6 +391,21 @@ async def analyser_photo_vision(
         import json as _json
         data = _json.loads(contenu) if contenu else None
         if isinstance(data, dict):
+            # Facturation : débite les crédits user avec marge × 20.
+            # Non-bloquant : même si débit échoue, on retourne l'analyse
+            # (user récupère la valeur ajoutée, comptable détecte le miss).
+            if user_id is not None:
+                try:
+                    from modules.bureau.service_credits_bureau import debiter_llm as _debit
+                    await _debit(
+                        user_id=int(user_id),
+                        modele=rep.modele_utilise or "gpt-4o",
+                        tokens_input=int(rep.tokens_input or 500),
+                        tokens_output=int(rep.tokens_output or 200),
+                        module="vision_media",
+                    )
+                except Exception as _e_bill:
+                    logger.warning(f"[Vision] Facturation KO (non bloquant) : {_e_bill}")
             return data
     except Exception:
         pass

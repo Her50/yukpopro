@@ -609,6 +609,7 @@ async def _detecter_organisation_dans_brief(brief: str) -> Optional[str]:
 
 async def _enrichir_via_web_search(
     brief: str, nom_organisation: Optional[str], pays: str = "CM",
+    user_id: Optional[int] = None,
 ) -> dict:
     """Recherche web Serper pour enrichir le contexte branding d'une
     organisation : couleurs officielles, URL du logo, slogan/baseline.
@@ -660,6 +661,19 @@ async def _enrichir_via_web_search(
     if not resultats:
         logger.info("[Freeform/WebSearch] Aucun résultat — skip enrichissement")
         return {}
+
+    # Facturation Serper : coût réel ~$0.005/recherche × 600 FCFA/USD × 20
+    # marge = ~60 FCFA. Forfait fixe car Serper n'expose pas tokens.
+    if user_id is not None:
+        try:
+            from modules.pro.service_credits import debiter_forfait_fcfa as _serp_bill
+            await _serp_bill(
+                user_id=int(user_id),
+                cout_fcfa=60.0,
+                module="recherche_web_branding",
+            )
+        except Exception as _e_sb:
+            logger.warning(f"[Freeform/WebSearch] Facturation KO (non bloquant) : {_e_sb}")
 
     # Extraction couleurs depuis les snippets
     # Cherche : "yellow and black", "#FFCC00", "yellow & black", "rgb(255,...)"
