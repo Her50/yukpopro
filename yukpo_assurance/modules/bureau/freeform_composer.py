@@ -1321,11 +1321,69 @@ async def composer_freeform_layout(
             f"- Ton recommandé : {ton or '(libre)'}\n"
         )
 
+    # Catalogue palettes par métier (déduction si profil/brand_kit absents) —
+    # appliqué à TOUS les types de visuels (cartes, flyers, brochures, etc.)
+    style_catalogue_block = ""
+    if not brand_kit and not (profil and profil.get("couleur_primaire_hex")):
+        style_catalogue_block = (
+            "\n## CATALOGUE DE STYLES PAR MÉTIER (à utiliser si pas de couleur imposée)\n"
+            "Adapte la palette et l'esthétique au métier détecté dans le brief :\n"
+            "- Finance/banque/assurance : navy/charcoal + or, sobre institutionnel\n"
+            "- Santé/médical/pharmacie : blanc + vert sapin ou bleu cyan, propre rassurant\n"
+            "- Tech/IT/digital : noir/blanc + cyan/turquoise/violet, géométrique moderne\n"
+            "- Restauration/food/café : terracotta/crème ou noir+or, chaleureux gourmand\n"
+            "- Juridique/notariat : noir + bordeaux ou navy, classique sérigraphié\n"
+            "- Mode/créatif/photo : couleurs vives ou pastels, audacieux asymétrique\n"
+            "- Industriel/BTP/manuf : gris/anthracite + orange sécurité, robuste\n"
+            "- Éducation/formation : vert sapin + crème, lisible accessible\n"
+            "- Conseil/coaching/RH : violet/aubergine + or, premium élégant\n"
+            "- Cosmétique/beauté/wellness : rose poudré + or rosé, féminin doux\n"
+            "- Immobilier : beige/sable + bleu nuit, élégant rassurant\n"
+            "- Transport/logistique : bleu marine + jaune, dynamique\n"
+            "- ONG/associatif : couleurs cause-related (vert nature, bleu solidaire…)\n"
+            "Si le métier n'est dans aucune de ces catégories, déduis intelligemment\n"
+            "à partir du brief et du ton attendu. NE TE LIMITE PAS à navy+jaune.\n"
+        )
+
     medias_block = ""
     if medias_descripteurs:
+        # Split par catégorie pour instructions plus précises
+        logos = [m for m in medias_descripteurs
+                 if "logo" in (m.get("categorie") or "").lower() or m.get("est_logo")]
+        bannieres = [m for m in medias_descripteurs
+                     if any(k in (m.get("categorie") or "").lower()
+                            for k in ("banniere", "banner", "header"))]
+        autres_imgs = [m for m in medias_descripteurs
+                       if m not in logos and m not in bannieres]
+        instr_medias = ""
+        if logos:
+            instr_medias += (
+                f"- **LOGO disponible** : ref_media={logos[0].get('ref')!r}.\n"
+                f"  INCLUS-le obligatoirement en élément Image dans le design "
+                f"(taille adaptée au format : 8-15mm pour cartes/badges, "
+                f"25-40mm pour flyer/brochure, 60mm+ pour affiche).\n"
+            )
+        if bannieres:
+            instr_medias += (
+                f"- **BANNIÈRE/HEADER disponible** : "
+                f"ref_media={bannieres[0].get('ref')!r}.\n"
+                f"  À utiliser comme bandeau haut pleine largeur (avec crop si "
+                f"ratio incompatible) ou fond pleine page (mode='cover').\n"
+            )
+        if autres_imgs:
+            instr_medias += (
+                f"- Autres médias (photos, illustrations) : "
+                f"{[m.get('ref') for m in autres_imgs]}\n"
+                f"  À utiliser selon contexte (portrait, témoignage, hero, etc.).\n"
+            )
         medias_block = (
-            f"\n## MÉDIATHÈQUE DISPONIBLE (refs réutilisables)\n"
+            f"\n## MÉDIATHÈQUE DISPONIBLE (à intégrer activement dans le design)\n"
+            f"{instr_medias}\n"
+            f"Descripteurs complets :\n"
             f"{json.dumps(medias_descripteurs, ensure_ascii=False, indent=2)}\n"
+            f"\nFormat élément Image : "
+            f"{{\"type\":\"image\",\"ref_media\":\"<ref>\",\"x_mm\":...,\"y_mm\":...,"
+            f"\"w_mm\":...,\"h_mm\":...,\"mode\":\"contain|cover\"}}\n"
         )
 
     # Détection heuristique de densité — un brief mentionnant un N élevé
@@ -1473,7 +1531,7 @@ async def composer_freeform_layout(
 ## CONTEXTE
 - Pays : {pays}
 - Langue : {langue}
-{profil_block}{brand_block}{vertical_block}{medias_block}{donnees_block}{contrainte_grille}
+{profil_block}{brand_block}{vertical_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
 
 Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
 sans commentaire ni markdown.
