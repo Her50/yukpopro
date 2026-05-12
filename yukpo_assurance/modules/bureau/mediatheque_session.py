@@ -285,8 +285,11 @@ def resoudre_refs(
 
 
 def descripteur_pour_ia(media: Media) -> dict:
-    """Représentation compacte d'un média à fournir au LLM pour décider de son usage."""
-    return {
+    """Représentation compacte d'un média à fournir au LLM pour décider
+    de son usage. Inclut les tags sémantiques produits par Vision IA
+    (cf. analyser_photo_vision) s'ils sont stockés dans media.meta.
+    """
+    out = {
         "ref": f"{media.portee}:{media.media_id}",
         "categorie": media.categorie,
         "label": media.label,
@@ -295,3 +298,95 @@ def descripteur_pour_ia(media: Media) -> dict:
         "ratio": (round(media.largeur_px / media.hauteur_px, 2)
                   if media.hauteur_px else None),
     }
+    # Tags sémantiques Vision IA (générés à l'upload via _analyser_photo_vision)
+    vision = (media.meta or {}).get("vision") if isinstance(media.meta, dict) else None
+    if isinstance(vision, dict):
+        out["vision"] = {
+            "description":      vision.get("description"),
+            "sujet_principal":  vision.get("sujet_principal"),
+            "nb_personnes":     vision.get("nb_personnes"),
+            "ambiance":         vision.get("ambiance"),
+            "lieu":             vision.get("lieu"),
+            "epoque":           vision.get("epoque"),
+            "elements":         vision.get("elements") or [],
+            "section_suggeree": vision.get("section_suggeree"),
+        }
+    return out
+
+
+async def analyser_photo_vision(
+    contenu_bytes: bytes, mime: str = "image/jpeg",
+) -> Optional[dict]:
+    """Analyse Vision IA d'une photo via GPT-4o vision. Retourne un dict
+    sémantique exploitable par le LLM composer pour matcher photo ↔ section.
+
+    Retourne :
+        {
+            "description":       "Couple senior, photo de mariage anciens,...",
+            "sujet_principal":   "couple senior",
+            "nb_personnes":      2,
+            "ambiance":          "joyeuse" | "sobre" | "officielle" | "intime",
+            "lieu":              "intérieur église" | "extérieur jardin" | ...,
+            "epoque":            "années 1970" | "moderne" | "ancien" | ...,
+            "elements":          ["robe blanche", "fleurs", "alliances"],
+            "section_suggeree":  "temoignage_conjoint" | "souvenirs" |
+                                  "couverture" | "famille" | "parcours_pro" | ...
+        }
+    Si l'analyse échoue (clé API absente, timeout, etc.), retourne None.
+
+    Coût : ~$0.002 par photo (GPT-4o vision ~500 tokens entrée + 200 sortie).
+    Latence : 2-4 secondes par photo (en parallèle si plusieurs uploads).
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    except Exception:
+        return None
+    import base64 as _b64
+    b64 = _b64.b64encode(contenu_bytes).decode("ascii")
+    prompt = (
+        "Analyse cette photo qui sera utilisée dans un document éditorial "
+        "(faire-part, livret cérémonie, brochure, album). Retourne UN JSON "
+        "STRICT avec les champs suivants — devine intelligemment si pas "
+        "100% sûr, indique 'inconnu' si vraiment ambigu :\n"
+        "{\n"
+        '  "description": "<phrase 1-2 lignes décrivant la photo>",\n'
+        '  "sujet_principal": "<ex: portrait homme senior, couple, famille, '
+        'paysage, cérémonie, objet>",\n'
+        '  "nb_personnes": <int ou null>,\n'
+        '  "ambiance": "<joyeuse|sobre|officielle|intime|festive|spirituelle>",\n'
+        '  "lieu": "<extérieur jardin|intérieur église|studio photo|domicile|inconnu>",\n'
+        '  "epoque": "<années 1960|années 1980|moderne|ancien|inconnu>",\n'
+        '  "elements": ["<éléments notables>", ...],\n'
+        '  "section_suggeree": "<one of: couverture | temoignage_conjoint | '
+        'temoignage_enfant | groupe_famille | parcours_jeunesse | '
+        'parcours_professionnel | parcours_religieux | souvenirs | '
+        'remerciements | dos>"\n'
+        "}\n"
+        "Pour section_suggeree, base-toi sur le sujet/ambiance. Ex : portrait "
+        "couple → temoignage_conjoint ; groupe famille → groupe_famille ; "
+        "photo ancienne d'enfance → parcours_jeunesse ; portrait individuel "
+        "officiel → couverture. JSON UNIQUEMENT, pas de markdown."
+    )
+    try:
+        import asyncio as _aio_v
+        rep = await _aio_v.wait_for(
+            ia_client.appeler(
+                prompt=prompt,
+                mode=ModeIA.ANALYSE,
+                forcer_modele=ModelePrioritaire.GPT4O,  # vision capability
+                images_b64=[f"data:{mime};base64,{b64}"],
+                json_attendu=True,
+                max_tokens_override=400,
+                utiliser_cache=True,
+                cache_ttl=86400 * 30,  # photo identique → cache 30j
+            ),
+            timeout=10.0,
+        )
+        contenu = (rep.contenu or "").strip()
+        import json as _json
+        data = _json.loads(contenu) if contenu else None
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return None

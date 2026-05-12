@@ -2773,6 +2773,37 @@ async def copilote_chat(
                             f"[Copilote-Designer] Média attaché : {f.nom} → "
                             f"{portee}:{m.media_id} (cat={cat})"
                         )
+                        # Analyse Vision IA en parallèle (best-effort) pour
+                        # enrichir la description sémantique. Permet au
+                        # composer LLM d'associer chaque photo à la bonne
+                        # section (témoignage conjoint, souvenirs, etc.).
+                        # Si l'analyse échoue, le media reste utilisable
+                        # juste sans tags sémantiques fins.
+                        if cat in ("photo", "logo", "banniere"):
+                            try:
+                                vision_data = await _msm.analyser_photo_vision(
+                                    contenu_bytes=contenu_bytes, mime=mime,
+                                )
+                                if vision_data:
+                                    # Mute la metadata du media en mémoire
+                                    if not isinstance(m.meta, dict):
+                                        m.meta = {}
+                                    m.meta["vision"] = vision_data
+                                    # Persiste via re-save de l'index
+                                    try:
+                                        _idx = _msm._charger_index(portee, owner)
+                                        if m.media_id in _idx:
+                                            _idx[m.media_id].meta = m.meta
+                                            _msm._sauver_index(portee, owner, _idx)
+                                    except Exception:
+                                        pass
+                                    logger.info(
+                                        f"[Vision] {f.nom} analysé : "
+                                        f"sujet={vision_data.get('sujet_principal')!r}, "
+                                        f"section={vision_data.get('section_suggeree')!r}"
+                                    )
+                            except Exception as e_vis:
+                                logger.debug(f"[Vision] Analyse {f.nom} KO : {e_vis}")
                     except Exception as e_med:
                         logger.warning(
                             f"[Copilote-Designer] Échec save média {f.nom} : {e_med}"
