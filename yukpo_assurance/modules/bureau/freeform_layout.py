@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import io
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 
@@ -746,20 +747,25 @@ def _draw_icone(c, el: Icone, off_x: float, off_y: float, fmt_h_pt: float) -> No
 _ICONIFY_CACHE: dict[str, bytes] = {}
 
 
+_ICONIFY_DISABLED = os.environ.get("YUKPO_ICONIFY_DISABLED", "1") == "1"
+
+
 def _telecharger_icone_iconify(
     prefix: str, name: str, couleur_hex: str, taille_px: int = 96,
 ) -> Optional[bytes]:
-    """Télécharge l'icône depuis api.iconify.design (SVG → PNG via cairosvg).
+    """Téléchargement d'icône Iconify — actuellement DÉSACTIVÉ par défaut.
 
-    L'API publique Iconify a déprécié son endpoint PNG (404 systématique
-    depuis ~mai 2026). On télécharge donc le SVG (toujours servi en 200)
-    et on le convertit en PNG via cairosvg (libcairo2 présent dans le
-    Docker de prod). Cache mémoire local par (prefix, name, couleur, taille).
+    Pourquoi : api.iconify.design a déprécié son endpoint PNG (404
+    systématique). La tentative de bascule SVG→PNG via cairosvg en prod
+    a fait freezer le worker (v325, 2026-05-12) — soit cairosvg manque
+    une lib native runtime, soit il bloque le rendu. Le caller dessine
+    un cercle gris quand on retourne None, donc le PDF se génère vite.
 
-    Négatif-cache (b"") activé dès le 1er échec pour éviter qu'une boucle
-    de 60+ icônes ne sature le rendu PDF par des HTTP successifs lents.
-    Fallback : retourne None → le caller dessine un cercle gris.
+    Réactivation : positionner YUKPO_ICONIFY_DISABLED=0 dans l'env Fly.io
+    une fois la chaîne cairosvg validée localement.
     """
+    if _ICONIFY_DISABLED:
+        return None
     cle = f"{prefix}:{name}:{couleur_hex}:{taille_px}"
     if cle in _ICONIFY_CACHE:
         cached = _ICONIFY_CACHE[cle]
@@ -772,7 +778,6 @@ def _telecharger_icone_iconify(
         url = f"https://api.iconify.design/{prefix}/{name}.svg"
         r = httpx.get(url, params=params, timeout=4.0)
         if r.status_code != 200 or not r.content:
-            logger.debug(f"[Iconify] {url} HTTP {r.status_code}")
             _ICONIFY_CACHE[cle] = b""
             return None
         try:
@@ -785,10 +790,9 @@ def _telecharger_icone_iconify(
             if png_bytes and png_bytes[:4] == b"\x89PNG":
                 _ICONIFY_CACHE[cle] = png_bytes
                 return png_bytes
-            _ICONIFY_CACHE[cle] = b""
         except Exception as e_render:
             logger.debug(f"[Iconify] cairosvg KO ({prefix}:{name}) : {e_render}")
-            _ICONIFY_CACHE[cle] = b""
+        _ICONIFY_CACHE[cle] = b""
     except Exception as e:
         logger.debug(f"[Iconify] {prefix}:{name} : {e}")
         _ICONIFY_CACHE[cle] = b""
