@@ -2866,11 +2866,25 @@ async def copilote_chat(
                 or 0
             )
 
+            # Lien direct de téléchargement (markdown clickable dans le chat) :
+            # le frontend telecharger() détecte le préfixe 'bureau_*' et
+            # route vers /api/v1/bureau/documents/{filename}.
+            lien_dl = (
+                f"/api/v1/bureau/documents/{nom_fichier}"
+                if nom_fichier else None
+            )
+            verso_info = (
+                "\n\n💡 **Impression recto-verso** : utilise le mode "
+                "*duplex long-edge* (par défaut sur la plupart des imprimantes). "
+                "Les planches sont numérotées RECTO/VERSO en haut de chaque page."
+                if n_pages > 1 else ""
+            )
             reponse_design = (
                 f"🎨 **Visuel généré — {cle_detectee} ({n_pages} page{'s' if n_pages > 1 else ''}).**\n\n"
-                f"Le PDF prêt à imprimer est disponible dans **Mes Documents**. "
-                f"Pour modifier (changer un texte, remplacer une photo, ajuster les couleurs…), "
-                f"décrivez-moi simplement les changements souhaités."
+                + (f"📥 **[Télécharger le PDF]({lien_dl})**\n\n" if lien_dl else "")
+                + f"Également archivé dans **Mes Documents**. "
+                f"Pour modifier (texte, photo, couleurs…), décris-moi simplement les changements souhaités."
+                + verso_info
             )
 
             _ajouter_message(session, "user", req.message)

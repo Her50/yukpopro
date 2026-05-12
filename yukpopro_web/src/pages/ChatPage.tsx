@@ -367,9 +367,17 @@ export const ChatPage = () => {
           };
           const downloadUrl = fichiers.length > 0 ? buildDownloadUrl(fichiers[0]) : "";
 
+          // Construction du message visible dans le chat avec le lien
+          // markdown clickable + indication recto-verso si applicable.
+          const nbPages = Number(r?.nb_pages) || 0;
+          const versoHint =
+            nbPages > 1
+              ? `\n\n💡 *Impression recto-verso* : duplex long-edge (par défaut). Planches numérotées RECTO/VERSO en haut.`
+              : "";
           updateLastAssistantMessage(
-            `✓ ${label} généré.` +
-            (downloadUrl ? `\n[Télécharger](${downloadUrl})` : ""),
+            `🎨 **${label} généré${nbPages > 1 ? ` — ${nbPages} pages` : ""}.**` +
+            (downloadUrl ? `\n\n📥 **[Télécharger le PDF](${downloadUrl})**` : "") +
+            versoHint,
             null,
             fichiers.length > 0 ? fichiers : undefined,
             null, undefined,

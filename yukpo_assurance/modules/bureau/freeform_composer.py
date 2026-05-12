@@ -1172,12 +1172,30 @@ def _reorganiser_grille_a4(
     def _construire_planche(
         planche_idx: int, template_elems: list, est_verso: bool,
     ) -> dict:
-        """Compose une planche A4 = grille de jusqu'à 8 cartes (2×4)
-        en dupliquant le template_elems pour chaque slot et en injectant
-        les données réelles. Verso : on mirror l'ordre horizontal des
-        slots pour que l'impression duplex aligne recto/verso (sinon
-        après retournement, la carte 1 du verso se trouve face à la
-        carte 2 du recto au lieu de la carte 1)."""
+        """Compose une planche A4 = grille de jusqu'à 8 cartes (2×4).
+
+        ── ALIGNEMENT DUPLEX (impression recto-verso) ──
+        Convention : LONG-EDGE BINDING (= reliure par le bord long de la
+        feuille A4 portrait, soit l'axe vertical de 297mm). C'est le mode
+        DUPLEX PAR DÉFAUT de 95% des imprimantes bureau.
+
+        En long-edge binding, la feuille tourne autour de l'axe vertical
+        après l'impression du recto, AVANT l'impression du verso. Du point
+        de vue physique :
+          - Recto carte #1 est imprimée en (col=0, row=0)
+          - La feuille pivote autour de l'axe vertical médian
+          - Le point physique où était col=0 se retrouve maintenant à
+            la position col=COLS-1 (mirror horizontal des colonnes)
+          - Donc le verso de la carte #1 doit être imprimé en
+            (col=COLS-1, row=0) pour que, APRÈS DÉCOUPE, le verso
+            soit derrière son propre recto.
+
+        L'axe vertical mirror : col_verso = (COLS-1) - col_recto.
+        Les rows ne sont PAS mirrorées (long-edge ≠ short-edge).
+
+        Pour SHORT-EDGE binding (rare), il faudrait inverser les rows
+        à la place. Non implémenté car non-standard.
+        """
         new_elements: list[dict] = []
         for slot in range(CAP):
             card_idx = planche_idx * CAP + slot
@@ -1233,6 +1251,22 @@ def _reorganiser_grille_a4(
                 "longueur_mm": 3, "epaisseur_pt": 0.25,
                 "couleur": "#000000",
             })
+        # Label discret en haut de page (hors zone cartes) pour identifier
+        # la planche à l'impression. Indispensable pour ne pas confondre
+        # recto/verso après impression et découpe.
+        label_text = (
+            f"VERSO — planche {planche_idx + 1} (duplex long-edge)"
+            if est_verso else
+            f"RECTO — planche {planche_idx + 1}"
+        )
+        new_elements.append({
+            "type": "texte",
+            "contenu": label_text,
+            "x_mm": MARGE, "y_mm": 4,  # tout en haut, hors zone cartes
+            "w_mm": 100, "h_mm": 4,
+            "taille_pt": 6, "couleur": "#888888", "police": "Helvetica",
+            "alignement": "left",
+        })
         return {
             "numero": 0,  # sera ré-attribué dans la boucle finale
             "fond_couleur": "#FFFFFF",
