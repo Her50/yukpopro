@@ -1955,8 +1955,58 @@ async def composer_freeform_layout(
 - Langue : {langue}
 {profil_block}{brand_block}{vertical_block}{web_search_block}{contexte_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
 
-Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
-sans commentaire ni markdown.
+## EXIGENCES TRANSVERSES ABSOLUES (CRITIQUE)
+
+**1. RESPECT SCRUPULEUX DES SECTIONS DEMANDÉES**
+Si l'utilisateur énumère des sections (« tu vas simuler les témoignages,
+le programme, les familles, le parcours… »), CHACUNE DOIT APPARAÎTRE
+sous forme de page dédiée OU de section nettement séparée et titrée
+dans le document. Compter le nombre exact de sections demandées et
+les inclure TOUTES. Sinon le résultat est inacceptable.
+
+**2. RICHESSE DU CONTENU (anti-paresse)**
+Pour chaque section, PRODUIS un contenu DÉTAILLÉ :
+- Programme des obsèques : minimum 5-8 étapes (levée du corps, veillée,
+  cérémonie religieuse, panégyrique, eulogie, procession, inhumation,
+  réception), chaque étape avec heure + lieu + détail
+- Familles annonceuses : énumère 4-8 lignages/branches familiales avec
+  liste des membres clés (épouse, enfants avec prénoms simulés, frères/
+  sœurs, beaux-parents, alliés). Format hiérarchique avec encadrés.
+- Témoignages : produis 4-6 témoignages SIMULÉS distincts (différents
+  proches : conjoint, enfants, collègue, ami d'enfance, voisin,
+  responsable spirituel). Chaque témoignage = citation italique 2-4
+  lignes + nom du témoin (peut être placeholder « [Prénom Nom] » si
+  user n'a pas fourni).
+- Parcours de vie : segmente en 4 sous-sections (Académique /
+  Professionnel / Social-Familial / Spirituel-Religieux), chacune
+  avec 3-5 lignes de contenu détaillé simulé plausible
+- Remerciements : message chaleureux 4-6 lignes + signature « Les
+  familles X et Y », pas juste 1 phrase générique
+
+**3. SIMULATION vs INVENTION FACTUELLE SENSIBLE**
+- Le user demande EXPLICITEMENT « simuler » témoignages, familles,
+  parcours → TU DOIS produire ce contenu inventé MAIS RÉALISTE.
+- Pour les DATES (naissance, décès, mariage), NE PAS extrapoler :
+  utilise placeholder « [Date de naissance] » si non fourni, mais
+  conserve la date fournie pour l'événement clé.
+- Pour les NOMS d'enfants, de frères, de témoins : invente des
+  prénoms cohérents avec le pays (camerounais, sénégalais, etc.)
+  PUIS le LLM doit indiquer qu'ils sont placeholders à valider.
+
+**4. NOMBRE DE PAGES**
+Si le user demande « N feuillets » → produis EXACTEMENT 2×N pages
+(un feuillet = recto-verso = 2 pages). Brief « 4 feuillets minimum »
+→ 8 pages MINIMUM. PAS 4 pages.
+
+**5. DENSITÉ MINIMALE PAR PAGE**
+Chaque page contient AU MOINS 10 éléments JSON (rectangle fond, titres,
+filets ornements, blocs texte multiples, icônes décoratives 2-4 par
+page, cadres subtils, signatures, ornements de coins). Un page avec
+seulement « titre + 3 lignes + 1 icône » est INACCEPTABLE.
+
+Compose maintenant le layout PARFAIT pour ce brief en respectant
+TOUTES les exigences ci-dessus. JSON STRICT uniquement, sans
+commentaire ni markdown.
 """
 
     try:
@@ -1972,7 +2022,24 @@ sans commentaire ni markdown.
         #   LLM_PRIMAIRE=gpt, l'appel atterrirait sur gpt-4-turbo (cap
         #   4096) → erreur 400 ou troncature JSON silencieuse → fallback
         #   page placeholder (cf bug observé sur le pdf 10 cartes).
-        if densite_elevee:
+        # Critères pour bump max_tokens + Sonnet :
+        # 1. Densité élevée (≥8 items répétés) : 60+ éléments
+        # 2. Livret/faire-part/brochure multi-pages (4-12+ pages × 10-18 elem
+        #    chacune → besoin 6000-12000 tokens). Le composer LLM avec
+        #    max_tok=4000 produisait des pages sparses (3-4 elements/page)
+        #    car il tronquait sa réponse pour rentrer dans le budget.
+        #    On élargit pour permettre la densité demandée par le prompt.
+        # Détection multi-pages : keywords du brief OU contexte_block présent
+        # (qui signifie qu'on a détecté un livret cérémonie).
+        livret_ou_dense = densite_elevee or bool(contexte_block) or bool(
+            _re_d.search(
+                r"\blivret|brochure|d[ée]pliant|plaquette|programme|"
+                r"faire[- ]?part|album|magazine|portfolio|"
+                r"\d+\s*(?:feuillets?|pages?|volets?)",
+                (brief or "").lower(),
+            )
+        )
+        if livret_ou_dense:
             max_tok = 8000
             _modele_compose = ModelePrioritaire.CLAUDE_SONNET   # → gpt-4o (16k output cap)
         else:
@@ -1980,7 +2047,8 @@ sans commentaire ni markdown.
             _modele_compose = ModelePrioritaire.CLAUDE_OPUS     # → gpt-4-turbo (4096) ou Opus 4.7 pur
         logger.warning(
             f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
-            f"max_tokens={max_tok} (densite_elevee={densite_elevee})"
+            f"max_tokens={max_tok} (livret_ou_dense={livret_ou_dense}, "
+            f"densite_elevee={densite_elevee})"
         )
         rep = await ia_client.appeler(
             prompt=prompt_user,
