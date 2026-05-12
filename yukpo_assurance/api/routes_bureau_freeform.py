@@ -198,11 +198,24 @@ async def generer_freeform(
     titre_layout = (layout_json.get("titre") or demande.brief or "document")[:80]
     slug = _slugifier(titre_layout, max_len=50)
 
-    if not a_images_ia:
-        # PHASE 2a (synchrone) — pas d'IA inline → render direct, retour fichier
+    # Force async pour layouts denses (multi-pages OU beaucoup d'éléments) :
+    # render sync >60s = timeout adaptive frontend (cf ChatPage.tsx ~120s),
+    # alors que le polling job_id supporte jusqu'à 10 min.
+    pages = layout_json.get("pages") or []
+    nb_pages = len(pages)
+    nb_elements = sum(len(p.get("elements") or []) for p in pages)
+    layout_dense = nb_pages >= 2 or nb_elements >= 80
+
+    if not a_images_ia and not layout_dense:
+        # PHASE 2a (synchrone) — layout léger sans IA → render direct, retour fichier
         return await _generer_sync(
             current_user, demande, layout_json, medias, slug, duree_compose_ms,
         )
+
+    logger.info(
+        f"[Freeform] Mode async — a_images_ia={a_images_ia} "
+        f"nb_pages={nb_pages} nb_elements={nb_elements} (dense={layout_dense})"
+    )
 
     # PHASE 2b (asynchrone) — IA inline → job_id + background task
     job_id = str(uuid.uuid4())
