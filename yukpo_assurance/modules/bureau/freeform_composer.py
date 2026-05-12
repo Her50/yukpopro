@@ -1489,6 +1489,43 @@ async def composer_freeform_layout(
     """
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
+    # ── Calcul nb_pages_recommande selon densité contenu ─────────────────
+    # Heuristique : analyse longueur brief + nb photos + nb sections
+    # explicitement demandées → recommandation au LLM (qui peut ajuster).
+    # Évite que le LLM produise 4 pages alors que le contenu mérite 12.
+    nb_photos = len(medias_descripteurs or [])
+    brief_long = len(brief or "")
+    # Compte les sections enumerées dans le brief (mots reliés par 'et'/
+    # virgules après un verbe générer)
+    import re as _re_pg
+    sections_demandees = []
+    _m_sections = _re_pg.search(
+        r"(?:tu\s+vas\s+(?:simuler|cr[ée]er)|inclu[se]?|"
+        r"avec|contenant|comprenant|qui\s+contienne?)\s+([^.]{20,300})",
+        (brief or "").lower(),
+    )
+    if _m_sections:
+        # split par virgule/et/puis pour avoir une estim grossière du nb sections
+        bloc = _m_sections.group(1)
+        sections_demandees = [
+            s.strip() for s in _re_pg.split(r",|\bet\b|\bpuis\b|\bavec\b", bloc)
+            if 3 <= len(s.strip()) <= 60
+        ]
+    nb_sections = len(sections_demandees)
+    # Formule empirique pages recommandées (livret cérémonie A5) :
+    pages_brief = max(1, brief_long // 200)       # 1 page par 200 chars brief
+    pages_photos = (nb_photos // 4) * 2 + (1 if nb_photos % 4 else 0)  # 4 photos/page Souvenirs
+    pages_sections = max(0, nb_sections - 2)      # 2 sections fit page de garde + sommaire
+    pages_estimees = 4 + pages_brief + pages_photos + pages_sections  # 4 = base couverture+intro+dos+remerciements
+    # Arrondir au multiple de 4 le plus proche (livret saddle-stitched)
+    pages_recommandees = ((pages_estimees + 3) // 4) * 4
+    pages_recommandees = max(4, min(pages_recommandees, 24))  # garde-fous [4, 24]
+    logger.warning(
+        f"[FreeformComposer] Recommandation pages : brief={brief_long} chars, "
+        f"photos={nb_photos}, sections_demandees={nb_sections} "
+        f"→ {pages_recommandees} pages recommandées"
+    )
+
     # ── Enrichissement web (Serper) AVANT les blocks ─────────────────────
     # Doit s'exécuter d'abord pour que les couleurs détectées soient
     # injectées dans `profil` avant la construction de profil_block.
@@ -2101,6 +2138,94 @@ imprimeur pour reliure agrafée :
    ornement principal.
 7. **Page dos (dernière)** : sobre, citation + ornement + RIEN d'autre.
    Pas de marge intérieure (c'est l'extérieur arrière du livret).
+
+## DIMENSIONNEMENT DYNAMIQUE DU DOCUMENT (CRITIQUE)
+
+Le backend a pré-calculé une **recommandation** : **{pages_recommandees} pages** selon
+la densité de contenu (longueur brief, nombre de photos uploadées,
+sections demandées). C'est un MINIMUM viable, pas un plafond.
+
+Tu PEUX ajuster :
+- Plus que recommandé : si le contenu RÉEL exige plus de respiration
+  (chaque section mérite sa page, double-page panoramique, galerie
+  photos étendue, etc.)
+- Moins que recommandé : SI ET SEULEMENT SI le brief est court et
+  bien servi par moins (rare — la plupart des briefs sous-évaluent
+  leur besoin)
+- TOUJOURS multiple de 4 pour livret saddle-stitched
+
+Critères pour AJOUTER une page :
+- Plus de 3 photos uploadées → page Souvenirs dédiée
+- Plus de 4 témoignages → 2 pages Témoignages
+- Brief explicite « parcours académique/pro/social/spirituel » =
+  4 sous-sections → 2-4 pages dédiées
+- Citations bibliques/poèmes substantiels → page Mot d'introduction
+
+## MISE EN PAGE PHOTO + TEXTE (text-around-image)
+
+Quand une page contient PHOTO + TEXTE, ne place PAS simplement la
+photo en haut et le texte en bas en blocs séparés (mise en page de
+journal d'école). Compose en COLONNES qui simulent un text-wrap pro :
+
+### Pattern A : Photo gauche, texte enrobant à droite (le plus courant)
+```
+┌─────────────┐
+│             │  Titre section bold
+│   PHOTO     │  ────────────────────
+│  60×80mm    │  Bloc texte 1 :
+│             │  paragraphe 1 ligne
+│             │  collé à droite de
+└─────────────┘  la photo, w=85mm
+─────────────────────────────────
+   Bloc texte 2 sous la photo, pleine
+   largeur, w=170mm, paragraphe 2-3.
+```
+- Photo : x=10, y=20, w=60, h=80mm
+- Texte 1 (à droite) : x=75, y=20, w=125, h=80mm (même hauteur)
+- Texte 2 (sous) : x=10, y=110, w=190, h=...
+
+### Pattern B : Photo droite, texte à gauche (symétrique)
+- Texte titre + corps : x=10, y=20, w=125, h=80mm
+- Photo : x=140, y=20, w=60, h=80mm
+
+### Pattern C : Photo centrée, texte en colonnes
+```
+   Colonne G          PHOTO          Colonne D
+   x=10               x=70           x=140
+   w=55, h=200        w=60, h=80     w=55, h=200
+                      (haut centré)
+```
+- 2 textes en colonnes verticales encadrant la photo
+
+### Pattern D : Photo bandeau haut, texte dessous
+- Photo : x=0, y=0, w=210, h=70mm (pleine largeur bord à bord)
+- Texte titre + corps : x=10, y=80, w=190, h=... (texte aéré dessous)
+
+**Choisis le pattern selon le contenu** :
+- Témoignage individuel = Pattern A ou B (photo portrait + citation)
+- Couverture = Pattern D (photo héroïque pleine largeur + titre)
+- Page Souvenirs = grille 2×2 ou 3×3 sans texte enrobant
+- Programme avec carte localisation = Pattern A (carte gauche, étapes droite)
+
+## ASSOCIATION PHOTO ↔ TEXTE (sémantique)
+
+Les photos uploadées (cf bloc MÉDIATHÈQUE) sont décrites par leur
+catégorie + label + dimensions + couleur dominante. Si la description
+mentionne explicitement un sujet (« photo couple », « portrait
+défunt », « groupe famille »), associe-la à la section pertinente :
+
+| Description photo | Section appropriée |
+|---|---|
+| « portrait du défunt » | Couverture page 1 OU page parcours |
+| « photo de couple » | Page témoignage du conjoint |
+| « groupe famille » | Page « Familles annonceuses » ou « Souvenirs » |
+| « photo de jeunesse » | Page « Parcours de vie » sous-section débuts |
+| « cérémonie / événement passé » | Page Souvenirs |
+| « religieux / paroisse / église » | Page « Parcours spirituel » |
+
+Pour les photos sans description claire, distribue-les équitablement
+sur les pages Souvenirs en gardant cohérence chromatique
+(couleur_dominante) avec le fond de page.
 
 ## EXIGENCES TRANSVERSES ABSOLUES (CRITIQUE)
 
