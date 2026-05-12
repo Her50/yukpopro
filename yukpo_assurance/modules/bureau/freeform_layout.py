@@ -424,7 +424,9 @@ def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> byt
     c.setTitle(doc.titre)
     c.setAuthor("Yukpo")
 
-    for page in doc.pages:
+    import time as _t
+    for idx_page, page in enumerate(doc.pages):
+        t0_page = _t.time()
         # Format/bleed effectif de la page (override > document)
         page_fmt_w_mm = page.format_mm[0] if page.format_mm else doc_fmt_w_mm
         page_fmt_h_mm = page.format_mm[1] if page.format_mm else doc_fmt_h_mm
@@ -452,13 +454,24 @@ def rendre_layout_pdf(doc: LayoutDocument, medias: Optional[dict] = None) -> byt
         # Trier par z_index pour ordre de rendu
         ordered = sorted(page.elements, key=lambda el: getattr(el, "z_index", 0) or 0)
 
+        nb_ok = 0
+        nb_skip = 0
+        types_count: dict[str, int] = {}
         for el in ordered:
+            types_count[type(el).__name__] = types_count.get(type(el).__name__, 0) + 1
             try:
                 _render_element(c, el, offset_x, offset_y, page_fmt_w_mm, page_fmt_h_mm, medias)
+                nb_ok += 1
             except Exception as e:
-                logger.debug(f"[freeform] Element skip ({el.type}) : {e}")
+                nb_skip += 1
+                logger.debug(f"[freeform] Element skip ({type(el).__name__}) : {e}")
                 continue
 
+        elapsed = _t.time() - t0_page
+        logger.warning(
+            f"[freeform/render] page {idx_page+1}/{len(doc.pages)} OK en {elapsed:.1f}s — "
+            f"{nb_ok} ok / {nb_skip} skip — types={types_count}"
+        )
         c.showPage()
 
     c.save()
@@ -645,11 +658,14 @@ def _resoudre_image(el: Image, medias: Optional[dict]) -> Optional[bytes]:
     if el.url:
         try:
             import httpx
-            r = httpx.get(el.url, timeout=15.0)
+            # timeout court : si le LLM met une URL invalide/lente, on ne
+            # bloque pas le rendu PDF de tout le doc (1 image manquée =
+            # placeholder, mais 20 images × 15s = freeze 5 min).
+            r = httpx.get(el.url, timeout=3.0)
             r.raise_for_status()
             return r.content
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"[freeform/Image] URL {el.url[:60]} KO : {e}")
     return None
 
 
@@ -858,18 +874,51 @@ async def rendre_pdf_depuis_json(
     """
     import asyncio
     doc = parse_layout_json(layout_json)
+    logger.warning(f"[freeform/render] parse OK — {len(doc.pages)} pages, "
+                   f"{sum(len(p.elements) for p in doc.pages)} elements totaux")
     await pre_generer_images_ia(doc)
-    # Rasterization sync potentiellement longue (3 planches × 280 elem +
-    # téléchargements Iconify) — déléguée à un thread pour ne pas bloquer
-    # l'event loop (sinon health-check Fly.io échoue et le worker est tué).
-    pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
+    # Sérialise les renders ReportLab (pas thread-safe) + timeout dur 90s pour
+    # éviter qu'un render bloqué ne hange indéfiniment le client. Au-delà,
+    # on remonte TimeoutError → handler chat répond proprement (pas freeze).
+    async with _get_render_lock():
+        logger.warning("[freeform/render] début rasterization ReportLab")
+        try:
+            pdf_bytes = await asyncio.wait_for(
+                asyncio.to_thread(rendre_layout_pdf, doc, medias=medias),
+                timeout=90.0,
+            )
+            logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
+        except asyncio.TimeoutError:
+            logger.error("[freeform/render] TIMEOUT 90s — annulation rendu PDF")
+            raise
     # Post-traitement print-ready (best-effort, non bloquant)
     try:
         from . import pdf_print_ready as _pp
-        pdf_bytes = await asyncio.to_thread(
-            _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
-            (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
+        pdf_bytes = await asyncio.wait_for(
+            asyncio.to_thread(
+                _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
+                (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
+            ),
+            timeout=20.0,
         )
+        logger.warning("[freeform/render] PDF/X-1a OK")
+    except asyncio.TimeoutError:
+        logger.warning("[freeform/render] PDF/X-1a timeout 20s — skip")
     except Exception as e:
         logger.debug(f"[freeform] PDF/X-1a skip : {e}")
     return pdf_bytes
+
+
+# Sérialise les renders ReportLab : la lib n'est pas thread-safe et 2+ renders
+# en parallèle (depuis 2 requêtes utilisateur simultanées) peuvent corrompre
+# l'état ou se deadlocker via les caches de polices. Lazy-init pour éviter
+# RuntimeError 'no current event loop' au module-level.
+_RENDER_LOCK: Optional[Any] = None
+
+
+def _get_render_lock():
+    import asyncio
+    global _RENDER_LOCK
+    if _RENDER_LOCK is None:
+        _RENDER_LOCK = asyncio.Lock()
+    return _RENDER_LOCK
