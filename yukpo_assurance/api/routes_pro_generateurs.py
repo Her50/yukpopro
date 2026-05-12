@@ -3222,6 +3222,32 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     if isinstance(template_id, str) and template_id.startswith("infographie_"):
         type_sortie = "visuel"
         data["type_sortie"] = "visuel"
+    # Garde-fou supplémentaire : keywords visuels EXPLICITES dans le brief
+    # forcent type_sortie="visuel" même si le LLM orchestrer s'est trompé
+    # vers "rapport". Cas observé en prod : "8 cartes de visite MTN" →
+    # orchestrer classait "rapport" → Word .docx au lieu d'un PDF freeform.
+    import re as _re_kw_v
+    _brief_low_kw = (demande.brief or "").lower()
+    _kw_visuel_force = _re_kw_v.search(
+        r"\bcarte[s]?\s+(?:de\s+)?visite|business\s+card|name\s+card|"
+        r"\bflyer|d[ée]pliant|brochure|tract|prospectus|"
+        r"\bbadge|marque[- ]?place|porte[- ]?nom|"
+        r"\baffiche|poster|banderole|oriflamme|kakemono|roll[- ]?up|"
+        r"\bsticker|autocollant|magnet|vignette|[ée]tiquette|"
+        r"\bcarton\s+(?:d[''])?invitation|faire[- ]?part|carte\s+invitation|"
+        r"\blivret\s+(?:de|d[''])?(?:mariage|d[ée]c[èe]s|messe|culte|programme)|"
+        r"\bmenu\s+(?:restaurant|mariage|[ée]v[ée]nement)|"
+        r"\bcv\s+graphique|infographie\s+pro",
+        _brief_low_kw,
+    )
+    if _kw_visuel_force and type_sortie != "visuel":
+        logger.warning(
+            f"[Orchestrer] Garde-fou keyword visuel : "
+            f"type_sortie '{type_sortie}' -> 'visuel' "
+            f"(kw détecté : {_kw_visuel_force.group(0)!r})"
+        )
+        type_sortie = "visuel"
+        data["type_sortie"] = "visuel"
     if type_sortie == "slides":
         endpoint_cible = "/api/v1/pro/slides/generer"
         payload_pret = {
