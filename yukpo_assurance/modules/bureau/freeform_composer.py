@@ -1581,228 +1581,132 @@ async def composer_freeform_layout(
             "via un Texte discret au verso : « Logo officiel à insérer ».\n"
         )
 
-    # ── Détection contexte CÉRÉMONIE / ÉVÉNEMENT (override style) ──────────
-    # Faire-parts, livrets, programmes pour TOUS types d'événements :
-    # décès/deuil, mariage, baptême, naissance, communion, fiançailles,
-    # confirmation, anniversaire, fête religieuse, dot, mariage coutumier.
-    # Le style + densité + standards d'impression livret diffèrent radicalement
-    # des visuels corporate. Couleurs et ton à adapter au registre émotionnel.
-    import re as _re_cont
-    contexte_block = ""
-    brief_l = (brief or "").lower()
-
-    contexte_registre = None
-    if _re_cont.search(
-        r"\bd[ée]c[èe]s|deuil|obs[èe]ques|fun[ée]raill|enterrement|"
-        r"in\s+memoriam|hommage(?!\s+(?:au|du)\s+mari[ée])|d[ée]funt|"
-        r"tomb[eé]|cimeti[èe]re|veill[ée]e\s+fun|messe\s+de\s+requiem|"
-        r"messe\s+du\s+suaire|condol[ée]ance",
-        brief_l,
-    ):
-        contexte_registre = "deuil"
-    elif _re_cont.search(
-        r"\bmariage|wedding|noces|union\s+(?:civile|religieuse)|"
-        r"fian[çc]aille|dot\s+(?:du|de la)|c[ée]r[ée]monie\s+nupti",
-        brief_l,
-    ):
-        contexte_registre = "mariage"
-    elif _re_cont.search(
-        r"\bbapt[êe]me|baptism|communion\s+(?:solennelle|priv)|"
-        r"premi[èe]re\s+communion|confirmation",
-        brief_l,
-    ):
-        contexte_registre = "religieux_enfant"
-    elif _re_cont.search(
-        r"\bnaissance|baby\s+shower|f[êe]te\s+(?:pr[ée])?natale|"
-        r"annonce\s+(?:du\s+)?b[ée]b[ée]|gender\s+reveal",
-        brief_l,
-    ):
-        contexte_registre = "naissance"
-    elif _re_cont.search(
-        r"\banniversaire|bornday|f[êe]te\s+(?:des?\s+)?\d+\s+ans|"
-        r"jubil[ée]|noces\s+d['']or|noces\s+de\s+diamant",
-        brief_l,
-    ):
-        contexte_registre = "anniversaire"
-    elif _re_cont.search(
-        r"\bfaire[- ]?part|programme\s+(?:de\s+la\s+)?c[ée]r[ée]monie|"
-        r"invitation\s+(?:officielle|c[ée]r[ée]monie)|livret\s+messe|"
-        r"livret\s+culte",
-        brief_l,
-    ):
-        contexte_registre = "ceremonie_generique"
-
-    if contexte_registre:
-        # Palette + iconographie + ton par registre
-        if contexte_registre == "deuil":
-            palette = (
-                "- Primaire : navy profond (#1A2742) OU charcoal (#2C2C2C) OU noir (#000000)\n"
-                "- Accent : or sobre (#B8860B) OU argent (#9CA3AF) OU bordeaux (#722F37)\n"
-                "- Fond : ivoire (#FBF7F0) OU blanc cassé (#F8F6F2)\n"
-                "- INTERDIT : jaune flashy, fuchsia, vert vif, cyan, rose, orange\n"
-            )
-            icones = (
-                "- Croix sobre (tabler:cross) — contexte chrétien\n"
-                "- Colombe (tabler:bird) — paix\n"
-                "- Lys / rose blanche (tabler:flower)\n"
-                "- Cierge (tabler:candle)\n"
-                "- Crescent (tabler:moon) — contexte musulman\n"
-            )
-            ton = "respectueux, digne, sobre, recueilli"
-            citations = "passages bibliques, coraniques, poèmes de deuil"
-        elif contexte_registre == "mariage":
-            palette = (
-                "- Primaire : crème (#F5E6D3) OU rose poudré (#E8B4B8) OU bleu marine (#1A3A5C)\n"
-                "- Accent : or rosé (#B76E79) OU or champagne (#F7E7CE) OU bordeaux (#722F37)\n"
-                "- Fond : ivoire (#FBF7F0) OU blanc (#FFFFFF)\n"
-                "- Style : élégant romantique. Bohème chic, classique, moderne, traditionnel africain selon brief\n"
-            )
-            icones = (
-                "- Alliances (tabler:circles)\n"
-                "- Cœur (tabler:heart) — discret, pas spammé\n"
-                "- Fleur (rose, pivoine, orchidée — tabler:flower)\n"
-                "- Branche feuille (tabler:leaf) pour bohème\n"
-                "- Étoiles (tabler:stars)\n"
-            )
-            ton = "élégant, joyeux mais raffiné, célébration"
-            citations = "poèmes d'amour, versets mariage, citations d'auteurs"
-        elif contexte_registre == "religieux_enfant":
-            palette = (
-                "- Primaire : bleu ciel (#A4C8E1) OU blanc OU rose poudré (#F5C6CB)\n"
-                "- Accent : or sobre (#D4AF37) OU argent (#C0C0C0)\n"
-                "- Fond : blanc/ivoire/pastel très doux\n"
-            )
-            icones = (
-                "- Croix sobre (tabler:cross)\n"
-                "- Colombe (tabler:bird) — Saint-Esprit\n"
-                "- Étoile / lumière (tabler:star)\n"
-                "- Eau / coquille baptismale (tabler:droplet)\n"
-            )
-            ton = "doux, lumineux, spirituel, innocence"
-            citations = "versets bibliques de baptême/communion"
-        elif contexte_registre == "naissance":
-            palette = (
-                "- Primaire : pastel (bleu poudré #B6D6E8 OU rose poudré #F5C6CB OU jaune doux #FFF4C2 OU vert eau #C8E6C9)\n"
-                "- Accent : doré doux OU argent\n"
-                "- Fond : blanc/crème\n"
-            )
-            icones = (
-                "- Ourson (mdi:teddy-bear) ou animal mignon\n"
-                "- Étoile (tabler:star)\n"
-                "- Empreinte de pied (tabler:footprint)\n"
-                "- Nuage doux (tabler:cloud)\n"
-            )
-            ton = "tendre, joyeux, lumineux, bienvenue"
-            citations = "poèmes/citations naissance, vœux"
-        elif contexte_registre == "anniversaire":
-            palette = (
-                "- Primaire/Accent : libre selon âge et style (jeune=vif coloré, sage=or/marine sobre)\n"
-                "- Jubilé d'or : or+marine. Noces de diamant : argent+blanc.\n"
-            )
-            icones = (
-                "- Bougie (tabler:candle)\n"
-                "- Étoile / sparkle (tabler:sparkles)\n"
-                "- Ballon (tabler:balloon)\n"
-                "- Cadeau (tabler:gift)\n"
-            )
-            ton = "festif, célébration, joyeux"
-            citations = "vœux, anecdotes, hommages affectueux"
-        else:  # ceremonie_generique
-            palette = "- Adapte selon ton du brief : sobre/joyeux/spirituel/familial\n"
-            icones = "- Iconographie événementielle adaptée\n"
-            ton = "approprié au registre détecté dans le brief"
-            citations = "selon contexte"
-
-        contexte_block = (
-            f"\n## 🎨 CONTEXTE LIVRET CÉRÉMONIE — REGISTRE « {contexte_registre.upper()} »\n"
-            f"Document à produire : faire-part / livret / programme dédié à une\n"
-            f"cérémonie. Ton requis : **{ton}**.\n"
-            f"\n"
-            f"### Palette obligatoire (ou très proche)\n"
-            f"{palette}"
-            f"Si l'utilisateur a fourni une palette explicite (profil/brand_kit),\n"
-            f"elle reste prioritaire — adapte la palette ci-dessus pour ne pas\n"
-            f"choquer le registre (pas de jaune flash pour un deuil, pas de noir\n"
-            f"funéraire pour une naissance, etc.).\n"
-            f"\n"
-            f"### Iconographie obligatoire — 2-4 icônes par page\n"
-            f"{icones}"
-            f"Plus : filets décoratifs (ornement type 'filet' épaisseur 0.4-0.8pt\n"
-            f"or/argent), cadres subtils autour des blocs texte, lignes guides.\n"
-            f"\n"
-            f"### Typographie\n"
-            f"- Titre principal : Bold 22-32pt selon importance, peut être espacé\n"
-            f"- Sous-titres : Bold 12-16pt avec filet de séparation\n"
-            f"- Corps : Regular 10pt, interligne aéré 1.4-1.6\n"
-            f"- Citations : italic 10-12pt centré, encadré subtil\n"
-            f"- Sources citations possibles : {citations}\n"
-            f"\n"
-            f"### DENSITÉ VISUELLE — CRITIQUE\n"
-            f"Chaque page DOIT être RICHE — pas 3 lignes flottant dans le vide.\n"
-            f"Minimum **10-18 éléments par page** : fond + titre + filets +\n"
-            f"corps texte + citations + icônes décoratives + ornements de coins +\n"
-            f"cadres + signatures. Remplir au moins 75% de la page utile en\n"
-            f"distribuant verticalement. Si le brief manque de contenu, INVENTE\n"
-            f"des sections plausibles (« Mot du célébrant », « Pour aller plus\n"
-            f"loin », « Plan d'accès », « Remerciements ») plutôt que laisser\n"
-            f"des pages vides.\n"
-            f"\n"
-            f"### Précision factuelle\n"
-            f"Si le brief mentionne « décédé le X », « marié le X », X est la\n"
-            f"date de l'événement décrit, PAS une date de naissance. Cherche\n"
-            f"« né le », « naissance » EXPLICITEMENT. Si absent, utilise\n"
-            f"placeholder « [Date de naissance] » entre crochets. INTERDICTION\n"
-            f"d'inventer des dates de naissance, lieux, prénoms d'enfants en\n"
-            f"extrapolant — c'est de la falsification de données sensibles.\n"
-            f"Témoignages : si le brief en demande mais qu'aucun n'est fourni,\n"
-            f"crée des CITATIONS GÉNÉRIQUES marquées « [Témoignage à compléter\n"
-            f"par la famille] » plutôt qu'inventer des proches.\n"
-            f"\n"
-            f"### Médias uploadés (intégration impérative)\n"
-            f"Si des photos ont été uploadées via medias_descripteurs (cf. bloc\n"
-            f"MÉDIATHÈQUE plus bas), tu DOIS les utiliser :\n"
-            f"- Portrait principal : photo en couverture page 1, format portrait\n"
-            f"  (45×60mm) ou rond (50×50mm) — cadre subtil or/argent\n"
-            f"- Photos secondaires : galerie page « Souvenirs » 3-6 photos en\n"
-            f"  grille avec légendes italic\n"
-            f"- Si aucune photo : placeholder Rectangle gris clair (#EFEFEF) avec\n"
-            f"  contour fin et légende « Portrait » centrée\n"
-            f"\n"
-            f"### Standards d'impression livret\n"
-            f"Le brief peut spécifier N feuillets/pages. Respecte la demande mais :\n"
-            f"- **Format physique** : par défaut A5 (148×210mm) pour livret\n"
-            f"  cérémonie. Alternatives : A6 (105×148) format poche, A4\n"
-            f"  (210×297) programme étendu, carré 14×14 ou 21×21 haut de gamme.\n"
-            f"- **Nombre de pages doit être MULTIPLE DE 4** (livret agrafé) :\n"
-            f"  4, 8, 12, 16, 24 pages. Si user demande 5 ou 6 feuillets, on\n"
-            f"  comprend en pages → 8 pages (couverture + 6 contenu + dos).\n"
-            f"- **Bleed 3mm** obligatoire sur les fonds plein bord.\n"
-            f"- **Marges intérieures** plus larges (15-18mm) pour reliure agrafée.\n"
-            f"  Marges extérieures normales (10-12mm).\n"
-            f"- **Pagination** discrète bas de page (sauf couverture/dos).\n"
-            f"\n"
-            f"### Structure suggérée — adapter selon nb feuillets demandé\n"
-            f"Livret 4 pages (cérémonie simple) :\n"
-            f"  1=Couverture (titre+nom+date+photo)\n"
-            f"  2=Programme/Déroulé\n"
-            f"  3=Texte principal (parcours/biographie/familles)\n"
-            f"  4=Remerciements + dos\n"
-            f"\n"
-            f"Livret 8 pages (cérémonie complète) :\n"
-            f"  1=Couverture\n"
-            f"  2=Mot d'introduction / citation\n"
-            f"  3=Parcours/Biographie\n"
-            f"  4-5=Programme détaillé (double page)\n"
-            f"  6=Familles/Proches\n"
-            f"  7=Témoignages/Hommages/Souvenirs photos\n"
-            f"  8=Remerciements + dos\n"
-            f"\n"
-            f"Livret 12+ pages : ajoute pages Souvenirs photos, Cantiques/Chants,\n"
-            f"Plan d'accès, Hommages étendus, Citations spirituelles.\n"
-            f"\n"
-            f"Tu peux dévier de ces suggestions si le brief impose une autre\n"
-            f"structure, mais reste cohérent avec un livret cérémonie pro.\n"
-        )
+    # ── Connaissance LIVRET / FAIRE-PART / CÉRÉMONIE (toujours fournie) ────
+    # Pas de regex de détection. Le LLM lit le brief, identifie lui-même
+    # le registre approprié dans le catalogue ci-dessous, et applique les
+    # règles correspondantes. Si aucun registre ne correspond exactement,
+    # le LLM compose intelligemment à partir des principes communs (densité,
+    # iconographie pertinente, format livret).
+    contexte_block = (
+        "\n## 📖 CONNAISSANCE LIVRET / FAIRE-PART / CÉRÉMONIE\n"
+        "Si le brief décrit un FAIRE-PART, LIVRET, PROGRAMME, INVITATION ou\n"
+        "tout document de cérémonie/événement, tu identifies toi-même le\n"
+        "REGISTRE émotionnel approprié à partir du brief et tu appliques les\n"
+        "principes ci-dessous. Tu n'es PAS limité à ces 6 registres — si le\n"
+        "brief décrit une cérémonie différente (anniversaire entreprise,\n"
+        "rentrée scolaire solennelle, intronisation chefferie, soirée gala…),\n"
+        "compose par analogie en respectant les PRINCIPES COMMUNS.\n"
+        "\n"
+        "### Catalogue de registres connus (illustratif, pas exhaustif)\n"
+        "\n"
+        "**DEUIL / FUNÉRAILLE** (décès, obsèques, In Memoriam, hommage défunt,\n"
+        "veillée funéraire, requiem, condoléances, cimetière)\n"
+        "  - Ton : respectueux, digne, sobre, recueilli\n"
+        "  - Palette : navy profond #1A2742 / charcoal #2C2C2C / noir + or\n"
+        "    sobre #B8860B / argent #9CA3AF / bordeaux #722F37 sur ivoire\n"
+        "    #FBF7F0 ou blanc cassé. INTERDIT couleurs flashy (jaune vif,\n"
+        "    fuchsia, vert vif, cyan, orange, rose flashy) — inapproprié.\n"
+        "  - Icônes : croix (chrétien), colombe (paix), lys/rose blanche,\n"
+        "    cierge, croissant (musulman). 2-4 par page.\n"
+        "  - Citations : versets bibliques, coraniques, poèmes de deuil\n"
+        "\n"
+        "**MARIAGE / FIANÇAILLES** (wedding, noces, union, dot, cérémonie\n"
+        "nuptiale, mariage coutumier)\n"
+        "  - Ton : élégant, raffiné, joyeux, célébration\n"
+        "  - Palette : crème #F5E6D3 / rose poudré #E8B4B8 / marine #1A3A5C\n"
+        "    + or rosé #B76E79 / champagne #F7E7CE / bordeaux. Style :\n"
+        "    bohème chic, classique, moderne ou traditionnel africain selon brief\n"
+        "  - Icônes : alliances, cœur (discret, pas spammé), fleur (rose/\n"
+        "    pivoine/orchidée), branche feuille (bohème), étoiles\n"
+        "  - Citations : poèmes d'amour, versets mariage, citations d'auteurs\n"
+        "\n"
+        "**RELIGIEUX ENFANT** (baptême, première communion, confirmation)\n"
+        "  - Ton : doux, lumineux, spirituel, innocence\n"
+        "  - Palette : bleu ciel #A4C8E1 / blanc / rose poudré #F5C6CB + or\n"
+        "    sobre #D4AF37 / argent. Fond blanc/ivoire/pastel doux\n"
+        "  - Icônes : croix sobre, colombe (Saint-Esprit), étoile/lumière,\n"
+        "    eau/coquille baptismale\n"
+        "  - Citations : versets bibliques baptême/communion\n"
+        "\n"
+        "**NAISSANCE / BABY SHOWER** (annonce bébé, gender reveal, fête prénatale)\n"
+        "  - Ton : tendre, joyeux, lumineux, bienvenue\n"
+        "  - Palette : pastels (bleu poudré #B6D6E8 / rose poudré #F5C6CB /\n"
+        "    jaune doux #FFF4C2 / vert eau #C8E6C9) + doré doux ou argent\n"
+        "  - Icônes : ourson, étoile, empreinte de pied, nuage doux\n"
+        "  - Citations : poèmes/citations naissance, vœux\n"
+        "\n"
+        "**ANNIVERSAIRE / JUBILÉ** (X ans, noces d'or, noces de diamant)\n"
+        "  - Ton : festif, célébration, joyeux. Adapté à l'âge (jeune=vif\n"
+        "    coloré ; sage=or/marine sobre)\n"
+        "  - Palette : libre selon contexte. Jubilé d'or = or+marine.\n"
+        "    Noces de diamant = argent+blanc.\n"
+        "  - Icônes : bougie, sparkle, ballon, cadeau\n"
+        "  - Citations : vœux, anecdotes, hommages affectueux\n"
+        "\n"
+        "**CÉRÉMONIE GÉNÉRIQUE** (autres : intronisation, gala, remise prix,\n"
+        "rentrée scolaire, fête associative, journée portes ouvertes)\n"
+        "  - Adapte palette + iconographie au ton détecté dans le brief\n"
+        "  - Si profil/brand_kit fourni, prioritaire sur les suggestions ci-dessus\n"
+        "\n"
+        "### PRINCIPES TRANSVERSES (s'appliquent à TOUS les registres)\n"
+        "\n"
+        "**1. Densité visuelle pro** — CRITIQUE\n"
+        "Chaque page DOIT être RICHE — refuse les pages '3 lignes flottant\n"
+        "dans le vide'. Cible : **10-18 éléments par page** (fond, titre,\n"
+        "filets ornement, corps texte, citations, icônes décoratives,\n"
+        "ornements de coins, cadres subtils). Remplir 75%+ de la page utile.\n"
+        "Si contenu brief manque, INVENTE sections plausibles (mot du célébrant,\n"
+        "plan d'accès, remerciements, citations spirituelles) plutôt que laisser\n"
+        "page vide.\n"
+        "\n"
+        "**2. Typographie élégante**\n"
+        "- Titre principal : Bold 22-32pt selon importance, peut être espacé\n"
+        "- Sous-titres : Bold 12-16pt avec filet de séparation\n"
+        "- Corps : Regular 10pt, interligne aéré 1.4-1.6\n"
+        "- Citations : italic 10-12pt centré, encadré subtil\n"
+        "\n"
+        "**3. Précision factuelle (anti-hallucination)**\n"
+        "Si le brief dit « décédé le X », « marié le X », X est la date de\n"
+        "l'événement, PAS une date de naissance. NE PAS extrapoler une date\n"
+        "de naissance depuis « retraite depuis 7 ans » ou autres indices —\n"
+        "c'est de la falsification de données sensibles. Cherche « né le »\n"
+        "EXPLICITEMENT. Si absent, placeholder « [Date de naissance] » entre\n"
+        "crochets. Idem pour témoignages demandés mais non fournis : créer\n"
+        "« [Témoignage à compléter par la famille] » plutôt qu'inventer des\n"
+        "personnes ou paroles inexistantes.\n"
+        "\n"
+        "**4. Médias uploadés — intégration impérative**\n"
+        "Si des photos sont fournies (medias_descripteurs ci-dessous), tu DOIS\n"
+        "les utiliser :\n"
+        "- Portrait principal : couverture page 1, portrait 45×60mm ou rond\n"
+        "  50×50mm, cadre subtil or/argent\n"
+        "- Photos secondaires : galerie page « Souvenirs » 3-6 photos grille\n"
+        "  avec légendes italic\n"
+        "- Si aucune photo : Rectangle placeholder #EFEFEF, contour fin,\n"
+        "  légende « Portrait » centrée\n"
+        "\n"
+        "**5. Standards d'impression livret**\n"
+        "- Format physique : A5 (148×210mm) par défaut pour livret cérémonie.\n"
+        "  Alternatives selon brief : A6 (105×148) format poche, A4\n"
+        "  (210×297) programme étendu, carré 14×14 ou 21×21 haut de gamme,\n"
+        "  DL 99×210 faire-part long.\n"
+        "- Nombre de pages MULTIPLE DE 4 (livret agrafé) : 4, 8, 12, 16, 24.\n"
+        "  Si brief demande 5 ou 6 feuillets, arrondir à 8 pages (couverture\n"
+        "  + 6 contenu + dos) — un feuillet = 2 pages recto-verso.\n"
+        "- Bleed 3mm obligatoire sur fonds plein bord.\n"
+        "- Marges intérieures larges 15-18mm (reliure agrafée), extérieures\n"
+        "  10-12mm. Pagination discrète bas de page (sauf couverture/dos).\n"
+        "\n"
+        "**6. Structures-types par taille de livret** (adapter au brief)\n"
+        "- 4 pages : Couverture + Programme + Texte principal + Remerciements/Dos\n"
+        "- 8 pages : Couverture + Intro/citation + Parcours/Biographie +\n"
+        "  Programme double + Familles/Proches + Témoignages/Souvenirs +\n"
+        "  Remerciements/Dos\n"
+        "- 12+ pages : ajoute Souvenirs photos étendus, Cantiques/Chants,\n"
+        "  Plan d'accès, Hommages étendus, Citations spirituelles, Album photo\n"
+        "Dévier de ces suggestions est OK si le brief justifie une autre\n"
+        "structure — reste cohérent et pro.\n"
+    )
 
     # Catalogue palettes par métier (déduction si profil/brand_kit absents) —
     # appliqué à TOUS les types de visuels (cartes, flyers, brochures, etc.)
