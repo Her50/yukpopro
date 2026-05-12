@@ -1489,6 +1489,33 @@ async def composer_freeform_layout(
     """
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
+    # ── Enrichissement web (Serper) AVANT les blocks ─────────────────────
+    # Doit s'exécuter d'abord pour que les couleurs détectées soient
+    # injectées dans `profil` avant la construction de profil_block.
+    # IMPORTANT : init avant tout `if` pour éviter UnboundLocalError côté
+    # web_search_block plus bas (Python scope analysis lit toute la fonction).
+    nom_org_detecte = await _detecter_organisation_dans_brief(brief)
+    enrichissement_web: dict = {}
+    if nom_org_detecte:
+        enrichissement_web = await _enrichir_via_web_search(
+            brief=brief, nom_organisation=nom_org_detecte, pays=pays,
+        )
+    if enrichissement_web:
+        couleurs_web = enrichissement_web.get("couleurs_detectees") or []
+        if couleurs_web:
+            profil = dict(profil or {})
+            if not profil.get("couleur_primaire_hex"):
+                profil["couleur_primaire_hex"] = couleurs_web[0]
+            if not profil.get("couleurs_accents_hex") and len(couleurs_web) >= 2:
+                profil["couleurs_accents_hex"] = couleurs_web[1:]
+            if nom_org_detecte and not profil.get("nom_organisation"):
+                profil["nom_organisation"] = nom_org_detecte
+            logger.warning(
+                f"[Freeform/WebSearch] Profil enrichi : "
+                f"primaire={profil.get('couleur_primaire_hex')} "
+                f"accents={profil.get('couleurs_accents_hex')}"
+            )
+
     profil_block = ""
     if profil:
         nom_org = profil.get("nom_organisation") or ""
@@ -1622,34 +1649,8 @@ async def composer_freeform_layout(
     # Détection heuristique de densité — un brief mentionnant un N élevé
     # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
     # tokens output.
-    # ── Enrichissement web (Serper) si user demande explicitement ─────────
-    # Patterns déclencheurs : "cherche sur internet", "branding", "logo
-    # officiel", "couleurs officielles", "identité visuelle". On extrait
-    # le nom de l'organisation et on fait une recherche Google pour
-    # récupérer couleurs + slogan + logo URL.
-    nom_org_detecte = await _detecter_organisation_dans_brief(brief)
-    enrichissement_web = {}
-    if nom_org_detecte:
-        enrichissement_web = await _enrichir_via_web_search(
-            brief=brief, nom_organisation=nom_org_detecte, pays=pays,
-        )
-    if enrichissement_web:
-        # Injecte les couleurs détectées dans profil s'il n'a rien de défini.
-        # Le brand_kit du compte (s'il existe) reste prioritaire.
-        couleurs_web = enrichissement_web.get("couleurs_detectees") or []
-        if couleurs_web:
-            profil = dict(profil or {})
-            if not profil.get("couleur_primaire_hex"):
-                profil["couleur_primaire_hex"] = couleurs_web[0]
-            if not profil.get("couleurs_accents_hex") and len(couleurs_web) >= 2:
-                profil["couleurs_accents_hex"] = couleurs_web[1:]
-            if nom_org_detecte and not profil.get("nom_organisation"):
-                profil["nom_organisation"] = nom_org_detecte
-            logger.warning(
-                f"[Freeform/WebSearch] Profil enrichi : "
-                f"primaire={profil.get('couleur_primaire_hex')} "
-                f"accents={profil.get('couleurs_accents_hex')}"
-            )
+    # (l'enrichissement web Serper est désormais exécuté tout en haut
+    # de la fonction, avant la construction des blocks — voir code)
 
     import re as _re_d
     # Regex GÉNÉRIQUE — détecte N items répétés.
