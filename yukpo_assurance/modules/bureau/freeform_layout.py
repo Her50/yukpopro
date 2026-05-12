@@ -863,16 +863,38 @@ def _draw_crop_marks(c, el: CropMarks, off_x: float, off_y: float, fmt_h_pt: flo
 
 async def rendre_pdf_depuis_json(
     layout_json: dict, medias: Optional[dict] = None,
+    imposer_livret: bool = True,
 ) -> bytes:
     """API publique async : prend un JSON de layout (produit par LLM) et
     retourne un PDF bytes prêt à servir. Étapes :
-    1. Parse JSON → LayoutDocument
-    2. Pré-génère les images IA (Flux Pro Ultra) en parallèle pour les
+    1. (NEW) Imposition saddle-stitched si livret (≥4p, format A5/A6/A4/carré)
+    2. Parse JSON → LayoutDocument
+    3. Pré-génère les images IA (Flux Pro Ultra) en parallèle pour les
        éléments avec prompt_ia non vide
-    3. Rasterise via ReportLab (sync)
-    4. Post-traite PDF/X-1a (pikepdf : TrimBox/BleedBox + ICC FOGRA39)
+    4. Rasterise via ReportLab (sync)
+    5. Post-traite PDF/X-1a (pikepdf : TrimBox/BleedBox + ICC FOGRA39)
+
+    Si imposer_livret=False, on ne réordonne pas les pages (utile pour
+    aperçu pur logique, exports « pages séparées »).
     """
     import asyncio
+
+    # ── Étape 1 : Imposition livret saddle-stitched ──────────────────────
+    if imposer_livret:
+        try:
+            from . import imposition_livret as _imp
+            if _imp.doit_imposer(layout_json):
+                nb_pages_avant = len(layout_json.get("pages") or [])
+                layout_json = _imp.imposer_layout_saddle_stitched(layout_json)
+                nb_feuilles_apres = len(layout_json.get("pages") or [])
+                logger.warning(
+                    f"[freeform/imposition] Saddle-stitched appliquée : "
+                    f"{nb_pages_avant} pages logiques → {nb_feuilles_apres} "
+                    f"faces imposées (feuilles physiques duplex)"
+                )
+        except Exception as e_imp:
+            logger.warning(f"[freeform/imposition] Skip (erreur non-fatale) : {e_imp}")
+
     doc = parse_layout_json(layout_json)
     logger.warning(f"[freeform/render] parse OK — {len(doc.pages)} pages, "
                    f"{sum(len(p.elements) for p in doc.pages)} elements totaux")

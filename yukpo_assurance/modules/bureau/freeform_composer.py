@@ -2034,13 +2034,27 @@ positionnées à `(x, y)` avec taille `(w, h)`. Pour ÉVITER les collisions :
 
 ## CONTRAINTES IMPRESSION LIVRET RECTO-VERSO (CRITIQUE)
 
+### Imposition saddle-stitched (gérée AUTOMATIQUEMENT par le backend)
+
+Tu composes les pages dans l'ORDRE LOGIQUE de lecture (page 1 = couverture,
+page 2 = 1ère intérieure, …, dernière = dos). Le backend applique
+ensuite automatiquement l'imposition saddle-stitched : il réordonne et
+groupe les pages par paires sur des feuilles physiques A4 paysage pour
+permettre l'impression duplex puis pli au centre + agrafage.
+
+Exemple pour 8 pages logiques :
+  Feuille 1 recto imprimée : [page 8] | [page 1]
+  Feuille 1 verso imprimée : [page 2] | [page 7]
+  Feuille 2 recto imprimée : [page 6] | [page 3]
+  Feuille 2 verso imprimée : [page 4] | [page 5]
+Après impression duplex + pli + agrafage, le livret se lit dans
+l'ordre logique 1, 2, 3, … 8.
+
+**Tu ne dois PAS te soucier de l'imposition** — backend s'en occupe.
+Compose simplement les pages dans l'ordre de lecture cohérent.
+
 ### Logique de lecture après pli/agrafage
 
-Un livret est composé de FEUILLES PHYSIQUES pliées en deux puis
-agrafées au pli. Chaque feuille A4 paysage pliée donne 4 pages A5.
-Pour un livret 8 pages = 2 feuilles, 12 pages = 3 feuilles, etc.
-
-**Ordre LOGIQUE des pages** (ce que le lecteur voit en feuilletant) :
 - Page 1 = COUVERTURE recto (impactante, isolée, photo+titre)
 - Page 2 = première page intérieure (à gauche quand on ouvre)
 - Page 3 = page intérieure droite (face à face avec page 2)
@@ -2048,9 +2062,6 @@ Pour un livret 8 pages = 2 feuilles, 12 pages = 3 feuilles, etc.
 - Page 5 = page intérieure droite (face à face avec page 4)
 - … et ainsi de suite
 - Dernière page = DOS extérieur (citation isolée, sobre, court)
-
-**Compose les pages dans cet ORDRE DE LECTURE** (pas dans l'ordre
-d'imposition imprimeur — c'est le backend qui réordonne pour duplex).
 
 ### Continuité face à face
 
