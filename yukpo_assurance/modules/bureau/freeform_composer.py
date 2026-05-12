@@ -1424,45 +1424,76 @@ async def composer_freeform_layout(
     # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
     # tokens output.
     import re as _re_d
-    # Regex GÉNÉRIQUE — détecte N items répétés de N'IMPORTE QUEL type :
-    # cartes, badges, étiquettes, marque-places, tickets, fiches, médailles,
-    # diplômes, certificats, dossards, vignettes, autocollants, magnets,
-    # menus, programmes, faire-parts, sigles, autocollants, étiquettes
-    # produit, étiquettes prix, banderoles, oriflammes, posts, etc.
-    m_dense = _re_d.search(
-        r"\b(\d{1,3})\s*(cartes?|employ[ée]s?|personnes?|items?|exemplaires?|"
-        r"stickers?|autocollants?|magnets?|[ée]tiquettes?|vignettes?|"
-        r"badges?|cases?|cartons?|marque[- ]?places?|tickets?|billets?|"
-        r"fiches?|m[ée]dailles?|dipl[oô]mes?|certificats?|dossards?|"
-        r"banderoles?|oriflammes?|posts?|tracts?|invit[ée]s?|participants?|"
-        r"visiteurs?|membres?|clients?|produits?|articles?|r[ée]f[ée]rences?|"
-        r"plaques?|panneaux?|enseignes?|signal[ée]tiques?)\b",
+    # Regex GÉNÉRIQUE — détecte N items répétés.
+    # Items "personnes" (employés, membres, visiteurs, invités) → on infère
+    # automatiquement la nécessité de données simulées. Items "objets"
+    # (cartes, badges, étiquettes) → on peut avoir besoin de mots-clés.
+    REGEX_ITEMS_PERSONNES = (
+        r"employ[ée]s?|personnes?|membres?|visiteurs?|invit[ée]s?|"
+        r"participants?|clients?|salari[ée]s?|collaborateurs?|"
+        r"[ée]quipiers?|joueurs?|agents?|prestataires?|enseignants?|"
+        r"[ée]l[èe]ves?|[ée]tudiants?"
+    )
+    REGEX_ITEMS_OBJETS = (
+        r"cartes?|items?|exemplaires?|stickers?|autocollants?|magnets?|"
+        r"[ée]tiquettes?|vignettes?|badges?|cases?|cartons?|"
+        r"marque[- ]?places?|tickets?|billets?|fiches?|m[ée]dailles?|"
+        r"dipl[oô]mes?|certificats?|dossards?|banderoles?|oriflammes?|"
+        r"posts?|tracts?|produits?|articles?|r[ée]f[ée]rences?|"
+        r"plaques?|panneaux?|enseignes?|signal[ée]tiques?"
+    )
+    REGEX_ITEMS = f"({REGEX_ITEMS_PERSONNES}|{REGEX_ITEMS_OBJETS})"
+    # findall TOUTES les occurrences pour disambiguer "8 cartes pour 20
+    # employés" : on prend le MAX entre objets (cartes) et personnes
+    # (employés). Si personnes > objets, c'est le compte réel de cartes
+    # à produire (8 cartes par page = layout, 20 personnes = quantité).
+    all_matches = _re_d.findall(
+        r"\b(\d{1,3})\s*(" + REGEX_ITEMS + r")\b",
         (brief or "").lower(),
     )
-    nb_detecte = int(m_dense.group(1)) if m_dense else 0
-    densite_elevee = nb_detecte >= 10
+    nb_personnes_max = 0
+    nb_objets_max = 0
+    a_items_personnes = False
+    for nb_str, kind, _ in all_matches:
+        try:
+            nb = int(nb_str)
+        except ValueError:
+            continue
+        if _re_d.fullmatch(REGEX_ITEMS_PERSONNES, kind):
+            nb_personnes_max = max(nb_personnes_max, nb)
+            a_items_personnes = True
+        else:
+            nb_objets_max = max(nb_objets_max, nb)
+    # La quantité à produire = max(personnes, objets). Pour "8 cartes pour
+    # 20 employés" → 20 cartes. Pour "8 cartes" → 8 cartes.
+    nb_detecte = max(nb_personnes_max, nb_objets_max)
+    densite_elevee = nb_detecte >= 8  # 8 cartes = 1 planche A4 pleine
     logger.warning(
         f"[FreeformComposer] brief={brief[:80]!r} | "
-        f"nb_detecte={nb_detecte} | densite_elevee={densite_elevee}"
+        f"nb_personnes_max={nb_personnes_max} nb_objets_max={nb_objets_max} | "
+        f"nb_detecte={nb_detecte} densite_elevee={densite_elevee} "
+        f"a_items_personnes={a_items_personnes}"
     )
 
     # ── Pré-génération des DONNÉES SIMULÉES via Haiku ──────────────────────
-    # Séparation génération données / mise en page. Le composer LLM a un
-    # mauvais taux d'adhésion à « simule les infos » (observé ~10 %, il
-    # insère des placeholders standards). Haiku génère N entrées avec un
-    # schéma INFÉRÉ depuis le brief (cartes visite → nom+fonction+tel,
-    # badges visiteurs → nom+entreprise, étiquettes produit → nom+volume,
-    # marque-places mariage → nom_invite+table, …).
+    # Trigger AUTOMATIQUE si items sont des PERSONNES (employés, membres,
+    # invités, etc.) : c'est impossible d'écrire 20 noms+tel+email dans
+    # le chat, donc évidemment l'utilisateur attend que l'app simule.
+    # Sinon, déclenchement explicite via mots-clés.
     donnees_block = ""
-    trigger_simul = bool(_re_d.search(
-        r"\bsimul|\binvent|\bfictif|\bexemple|\bfake|"
-        r"\bg[ée]n[èeé]re?\s+(?:les?|des?)\s+(?:infos?|donn[ée]es?|"
-        r"noms?|coordonn[ée]es?|champs?|contenus?)",
+    trigger_simul_explicite = bool(_re_d.search(
+        r"\bsimul|\binvent|\bfictif|\bexemple|\bfake|al[ée]a"
+        r"|\bg[ée]n[èeé]re?\s+(?:les?|des?)?\s*(?:infos?|donn[ée]es?|"
+        r"informations?|noms?|coordonn[ée]es?|champs?|contenus?|"
+        r"valeurs?|exemples?)\b",
         (brief or "").lower(),
     ))
+    # Auto-trigger : items personnes >= 2 → on sait qu'il faut simuler
+    trigger_simul_auto = a_items_personnes and nb_personnes_max >= 2
+    trigger_simul = trigger_simul_explicite or trigger_simul_auto
     logger.warning(
-        f"[FreeformComposer] trigger_simulation={trigger_simul} "
-        f"(condition : nb>=2 ET regex simul/invent/fictif/genere les infos)"
+        f"[FreeformComposer] trigger_simul={trigger_simul} "
+        f"(explicite={trigger_simul_explicite}, auto={trigger_simul_auto})"
     )
     donnees_simulees: list[dict] = []
     if nb_detecte >= 2 and trigger_simul:
