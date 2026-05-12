@@ -1739,17 +1739,35 @@ async def _composer_custom_libre(
     directives_visuelles: Optional[dict] = None,
 ) -> dict:
     """Compose dynamiquement un projet sur mesure via Opus 4.7 pour les briefs
-    atypiques hors catalogue figé (BD, packaging, dépliant, CV graphique,
-    carte de visite, flyer A3 standalone, livret 6/12/20p custom, etc.).
+    atypiques hors catalogue figé (BD, packaging, livre photo custom, livret
+    6/12/20p sur mesure, etc.).
 
-    Retourne un proj_def shape-compatible avec PROJETS_INFOGRAPHIE (label,
-    format_mm, bleed_mm, pages, palette, polices).
+    GARDE-FOU : ce path NE DOIT JAMAIS recevoir un brief 'carte de visite',
+    'flyer', 'badge', 'brochure' ou similaire — ces visuels passent par
+    /bureau/freeform/generer (composer freeform LLM-first sans templates
+    rigides). custom_libre choisit aléatoirement parmi PAGE_TEMPLATES qui
+    inclut des templates 'In Memoriam', 'Programme obsèques' etc. → résultat
+    catastrophique (observé en prod : carte visite → livret funéraille).
 
-    Le LLM reçoit le brief + le catalogue PAGE_TEMPLATES + les palettes
-    disponibles, et choisit format/pages/palette adaptés. Pas de cap pages
-    (1 à 60). Format extensible : A3/A4/A5/carré/Instagram/business card/
-    paysage/portrait/personnalisé.
+    Si on détecte un keyword 'cartes de visite' / 'flyer' / 'badge' /
+    'brochure' dans le brief, on raise une RuntimeError explicite qui
+    remontera au caller (generer_auto) qui a déjà un mécanisme de
+    redirection vers freeform.
     """
+    import re as _re_guard
+    _kw_freeform_guard = _re_guard.search(
+        r"\bcarte[s]?\s+(?:de\s+)?visite|business\s+card|"
+        r"\bflyer|d[ée]pliant|brochure|"
+        r"\bbadge|marque[- ]?place|"
+        r"\bsticker|autocollant|magnet|vignette|[ée]tiquette",
+        (brief or "").lower(),
+    )
+    if _kw_freeform_guard:
+        raise RuntimeError(
+            "custom_libre refuse les briefs 'carte de visite / flyer / brochure / "
+            "badge / etc.' → ces visuels doivent passer par /bureau/freeform/generer. "
+            f"Mot-clé détecté : '{_kw_freeform_guard.group(0)}'"
+        )
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire as _MP
     templates_compact = catalog.lister_templates_pour_composition()
     palettes_dispo = list(PALETTES.keys())

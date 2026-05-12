@@ -2574,15 +2574,33 @@ async def generer_auto(
     et « partenaire en gestion de patrimoine » par défaut.
     """
     import re as _re
+    brief_low = (demande.brief or "").lower()
+    # PATTERN 1 : N items répétés (X cartes / Y employés / Z badges…)
     _m_items_repetes = _re.search(
         r"\b(\d{1,3})\s*(cartes?|badges?|[ée]tiquettes?|marque[- ]?places?|"
         r"tickets?|billets?|fiches?|m[ée]dailles?|dipl[oô]mes?|certificats?|"
         r"dossards?|stickers?|autocollants?|magnets?|vignettes?|"
         r"plaques?|panneaux?|enseignes?|cas(?:es)?|cartons?|"
         r"invit[ée]s?|participants?|visiteurs?|membres?|employ[ée]s?|personnes?)\b",
-        (demande.brief or "").lower(),
+        brief_low,
     )
-    if _m_items_repetes and int(_m_items_repetes.group(1)) >= 2:
+    # PATTERN 2 : keywords explicites "carte de visite", "business card",
+    # "flyer", "brochure" etc. — toujours rediriger vers freeform même
+    # sans nombre (1 carte test, demande conceptuelle…). Évite que ces
+    # briefs tombent dans le legacy custom_libre qui pioche un template
+    # aléatoire ("In Memoriam" funéraille observé en prod !).
+    _kw_freeform = _re.search(
+        r"\bcarte[s]?\s+(?:de\s+)?visite|business\s+card|name\s+card|"
+        r"\bflyer|d[ée]pliant|brochure|tract|"
+        r"\bbadge|marque[- ]?place|"
+        r"\baffiche|poster|banderole|oriflamme|"
+        r"\bsticker|autocollant|magnet|vignette|[ée]tiquette",
+        brief_low,
+    )
+    _doit_rediriger = bool(_kw_freeform) or (
+        _m_items_repetes and int(_m_items_repetes.group(1)) >= 2
+    )
+    if _doit_rediriger:
         # Délègue à l'endpoint /bureau/freeform/generer qui gère sync/async
         # automatiquement (job_id + polling si layout dense). Évite la
         # duplication de logique et garantit que le chat -> designer profite
