@@ -66,7 +66,20 @@ TARIFS_INPUT = {
     "claude-opus-4-6":             15.0 / 1_000_000,
     "claude-sonnet-4-6":            3.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   0.25 / 1_000_000,
-    "gpt-4-turbo":                 10.0 / 1_000_000,   # Équivalent Opus (raisonnement haut de gamme)
+    # OpenAI flagship 2025
+    "gpt-5":                       10.0 / 1_000_000,
+    "gpt-5-mini":                   2.5 / 1_000_000,
+    "gpt-5-nano":                   0.50 / 1_000_000,
+    # OpenAI 4.1 family (avril 2025) — 1M ctx + 32k output
+    "gpt-4.1":                      2.0 / 1_000_000,
+    "gpt-4.1-mini":                 0.40 / 1_000_000,
+    "gpt-4.1-nano":                 0.10 / 1_000_000,
+    # OpenAI reasoning models (o-series)
+    "o3":                           2.0 / 1_000_000,
+    "o3-mini":                      1.10 / 1_000_000,
+    "o4-mini":                      1.10 / 1_000_000,
+    # OpenAI legacy (encore supportés pour rétrocompat)
+    "gpt-4-turbo":                 10.0 / 1_000_000,   # cap 4096 output - obsolète
     "gpt-4o":                       2.5 / 1_000_000,
     "gpt-4o-mini":                 0.15 / 1_000_000,
 }
@@ -75,7 +88,16 @@ TARIFS_OUTPUT = {
     "claude-opus-4-6":             75.0 / 1_000_000,
     "claude-sonnet-4-6":           15.0 / 1_000_000,
     "claude-haiku-4-5-20251001":   1.25 / 1_000_000,
-    "gpt-4-turbo":                 30.0 / 1_000_000,   # Équivalent Opus (raisonnement haut de gamme)
+    "gpt-5":                       30.0 / 1_000_000,
+    "gpt-5-mini":                  10.0 / 1_000_000,
+    "gpt-5-nano":                   2.0 / 1_000_000,
+    "gpt-4.1":                      8.0 / 1_000_000,
+    "gpt-4.1-mini":                 1.60 / 1_000_000,
+    "gpt-4.1-nano":                 0.40 / 1_000_000,
+    "o3":                           8.0 / 1_000_000,
+    "o3-mini":                      4.40 / 1_000_000,
+    "o4-mini":                      4.40 / 1_000_000,
+    "gpt-4-turbo":                 30.0 / 1_000_000,
     "gpt-4o":                      10.0 / 1_000_000,
     "gpt-4o-mini":                  0.60 / 1_000_000,
 }
@@ -91,20 +113,34 @@ class ModeIA(str, Enum):
 
 class ModelePrioritaire(str, Enum):
     CLAUDE_OPUS    = "claude-opus-4-7"          # Niveau 5 : layout AI / décisions de composition pro
-    CLAUDE_SONNET  = "claude-sonnet-4-6"       # Optimal pour CIMA/sinistres/rédaction
+    CLAUDE_SONNET  = "claude-sonnet-4-6"        # Optimal pour CIMA/sinistres/rédaction
     CLAUDE_HAIKU   = "claude-haiku-4-5-20251001"
-    GPT4_TURBO     = "gpt-4-turbo"             # Équivalent GPT d'Opus — raisonnement haut de gamme
-    GPT4O          = "gpt-4o"                  # Primaire GPT — analyse/rédaction/vision
-    GPT4O_MINI     = "gpt-4o-mini"             # Léger/économique — équivalent GPT de Haiku
+    # OpenAI flagship (août 2025) — équivalent ou supérieur à Opus
+    GPT5           = "gpt-5"                    # Niveau 5+ : flagship général
+    GPT5_MINI      = "gpt-5-mini"               # Niveau 4 : qualité élevée moins cher
+    GPT5_NANO      = "gpt-5-nano"               # Niveau 3 : éco
+    # OpenAI 4.1 (avril 2025) — 32k OUTPUT, 1M context, JSON structuré long
+    GPT4_1         = "gpt-4.1"                  # Niveau 5 : composer freeform livret multi-pages
+    GPT4_1_MINI    = "gpt-4.1-mini"             # Niveau 4 : structuré rapide pas cher
+    GPT4_1_NANO    = "gpt-4.1-nano"             # Niveau 2 : pré-gen Haiku, simulations massives
+    # OpenAI reasoning (chain-of-thought) — pour orchestrer/classification critique
+    O3             = "o3"                       # Niveau 5 : raisonnement profond
+    O3_MINI        = "o3-mini"                  # Niveau 4 : raisonnement rapide pas cher
+    O4_MINI        = "o4-mini"                  # Niveau 4 : raisonnement updated
+    # Legacy (rétrocompat, à éviter pour nouveaux usages)
+    GPT4_TURBO     = "gpt-4-turbo"              # ❌ cap 4096 output, obsolète
+    GPT4O          = "gpt-4o"                   # 16k output - usage légacy
+    GPT4O_MINI     = "gpt-4o-mini"              # 16k output - usage légacy léger
 
-# Mapping Claude → GPT équivalent (utilisé quand Claude est indisponible)
-# Politique : GPT primaire / Claude fallback. Pour Opus (raisonnement haut de
-# gamme : layout AI, directeur artistique, analyse complexe) → gpt-4-turbo.
-# Pour Sonnet (rédaction, analyse standard) → gpt-4o. Pour Haiku → gpt-4o-mini.
+# Mapping Claude → GPT équivalent (utilisé quand Claude est indisponible OU
+# quand LLM_PRIMAIRE=gpt). Politique 2026 : on bascule sur la famille GPT-4.1
+# pour le composer freeform (32k output cap, indispensable pour livrets riches
+# multi-pages) et GPT-4.1-mini pour les tâches Sonnet/standard.
+# GPT-4-turbo (cap 4096) est BANNI pour les générations structurées denses.
 _CLAUDE_TO_GPT: dict[str, str] = {
-    ModelePrioritaire.CLAUDE_HAIKU.value:  ModelePrioritaire.GPT4O_MINI.value,
-    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT4O.value,
-    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4_TURBO.value,
+    ModelePrioritaire.CLAUDE_HAIKU.value:  ModelePrioritaire.GPT4_1_NANO.value,
+    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT4_1_MINI.value,
+    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4_1.value,
 }
 
 

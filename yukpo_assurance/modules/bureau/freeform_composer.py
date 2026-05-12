@@ -2022,15 +2022,15 @@ commentaire ni markdown.
         #   LLM_PRIMAIRE=gpt, l'appel atterrirait sur gpt-4-turbo (cap
         #   4096) → erreur 400 ou troncature JSON silencieuse → fallback
         #   page placeholder (cf bug observé sur le pdf 10 cartes).
-        # Critères pour bump max_tokens + Sonnet :
-        # 1. Densité élevée (≥8 items répétés) : 60+ éléments
-        # 2. Livret/faire-part/brochure multi-pages (4-12+ pages × 10-18 elem
-        #    chacune → besoin 6000-12000 tokens). Le composer LLM avec
-        #    max_tok=4000 produisait des pages sparses (3-4 elements/page)
-        #    car il tronquait sa réponse pour rentrer dans le budget.
-        #    On élargit pour permettre la densité demandée par le prompt.
-        # Détection multi-pages : keywords du brief OU contexte_block présent
-        # (qui signifie qu'on a détecté un livret cérémonie).
+        # ── Sélection modèle + tokens budget — règles 2026 ─────────────────
+        # Famille GPT-4.1 (avril 2025) : 32k output cap, 1M context — IDÉALE
+        # pour JSON structuré dense multi-pages. Le composer freeform a besoin
+        # de 8-16k tokens de sortie pour un livret riche, ce qui était impossible
+        # avec gpt-4-turbo (cap 4096) et limite avec gpt-4o (16k).
+        # Mapping interne (cf core/ia_client.py:_CLAUDE_TO_GPT) :
+        #   CLAUDE_OPUS   → gpt-4.1       (32k out)
+        #   CLAUDE_SONNET → gpt-4.1-mini  (32k out, économique)
+        #   CLAUDE_HAIKU  → gpt-4.1-nano  (32k out, très économique)
         livret_ou_dense = densite_elevee or bool(contexte_block) or bool(
             _re_d.search(
                 r"\blivret|brochure|d[ée]pliant|plaquette|programme|"
@@ -2039,16 +2039,24 @@ commentaire ni markdown.
                 (brief or "").lower(),
             )
         )
-        if livret_ou_dense:
-            max_tok = 8000
-            _modele_compose = ModelePrioritaire.CLAUDE_SONNET   # → gpt-4o (16k output cap)
+        # 3 tiers de budget output selon complexité :
+        if densite_elevee and contexte_block:
+            # livret cérémonie multi-page (faire-part 8p, programme 12p) +
+            # densité élevée (20 cartes etc.). Très exigeant.
+            max_tok = 16000
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
+        elif livret_ou_dense:
+            # livret 4-8 pages OU N items répétés. Besoin large.
+            max_tok = 12000
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
         else:
-            max_tok = 4000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS     # → gpt-4-turbo (4096) ou Opus 4.7 pur
+            # Visuel simple 1 page (poster, carte standalone, post social).
+            max_tok = 5000
+            _modele_compose = ModelePrioritaire.CLAUDE_SONNET  # → gpt-4.1-mini (économique)
         logger.warning(
             f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
             f"max_tokens={max_tok} (livret_ou_dense={livret_ou_dense}, "
-            f"densite_elevee={densite_elevee})"
+            f"densite_elevee={densite_elevee}, ceremonie={bool(contexte_block)})"
         )
         rep = await ia_client.appeler(
             prompt=prompt_user,
