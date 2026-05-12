@@ -2198,6 +2198,15 @@ commentaire ni markdown.
                 card_w_mm=85.0, card_h_mm=55.0,
             )
 
+        # ── Post-validation déterministe v356 ──────────────────────────
+        # Filets de sécurité indépendants du LLM : même si le modèle
+        # ignore les règles de placement / pagination du prompt, on
+        # corrige côté code. Cf bugs PDF SIAKA Jean (mai 2026) :
+        # icônes superposées au texte + livret A4 plat 8p (OK déjà ×4
+        # ici mais le filet protège pour 5, 6, 7, 9 p…).
+        data = _corriger_collisions_icones(data)
+        data = _forcer_pagination_livret(data, brief)
+
     return data
 
 
@@ -2231,3 +2240,135 @@ def _layout_fallback(brief: str) -> dict:
             ],
         }],
     }
+
+
+def _bbox_overlap(a: tuple, b: tuple) -> bool:
+    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+
+
+def _estimer_bbox_texte(el: dict) -> tuple[float, float, float, float]:
+    """Estime la bbox d'un élément texte. ReportLab fait du word-wrap, donc
+    h_mm n'est pas dans le JSON — on l'approxime depuis taille_pt + len(contenu)
+    + w_mm. Conservateur (surestime un peu) pour éviter les faux négatifs."""
+    x = float(el.get("x_mm") or 0)
+    y = float(el.get("y_mm") or 0)
+    w = float(el.get("w_mm") or 50)
+    taille = float(el.get("taille_pt") or 10)
+    contenu = str(el.get("contenu") or "")
+    interligne = float(el.get("interligne") or 1.4)
+    # 1pt = 0.3528mm. char_width ≈ 0.55 × taille_pt pour Helvetica/Inter.
+    char_w_mm = max(0.5, taille * 0.55 * 0.3528)
+    line_h_mm = taille * interligne * 0.3528
+    chars_per_line = max(1, int(w / char_w_mm))
+    nb_lignes = max(1, (len(contenu) + chars_per_line - 1) // chars_per_line)
+    # Compte les \n explicites du contenu
+    nb_lignes += contenu.count("\n")
+    h_mm = line_h_mm * nb_lignes + 0.5
+    return (x, y, x + w, y + h_mm)
+
+
+def _corriger_collisions_icones(data: dict) -> dict:
+    """Détecte les icônes qui se superposent à un Texte et les repositionne
+    vers un coin de page libre. Bug observé PDF SIAKA Jean : icône 'famille'
+    devant le 'F' de « Famille SIAKA » → texte tronqué visuellement en
+    « amille SIAKA ». Le LLM ignore parfois la consigne placement même avec
+    règles explicites dans le prompt — donc filet déterministe."""
+    pages = data.get("pages") or []
+    fmt_doc = data.get("format_mm") or [210, 297]
+    nb_corrections = 0
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        fmt_page = page.get("format_mm") or fmt_doc
+        W, H = float(fmt_page[0]), float(fmt_page[1])
+        elements = page.get("elements") or []
+        text_bboxes = [
+            _estimer_bbox_texte(el)
+            for el in elements
+            if isinstance(el, dict) and el.get("type") == "texte"
+        ]
+        if not text_bboxes:
+            continue
+        for el in elements:
+            if not isinstance(el, dict) or el.get("type") != "icone":
+                continue
+            try:
+                ix = float(el.get("x_mm") or 0)
+                iy = float(el.get("y_mm") or 0)
+                iw = float(el.get("w_mm") or 8)
+                ih = float(el.get("h_mm") or 8)
+            except (TypeError, ValueError):
+                continue
+            ibox = (ix, iy, ix + iw, iy + ih)
+            if not any(_bbox_overlap(ibox, tb) for tb in text_bboxes):
+                continue
+            # Reposition vers un coin libre (marge 6mm)
+            m = 6.0
+            candidats = [
+                (m, m),                          # haut-gauche
+                (W - iw - m, m),                 # haut-droite
+                (m, H - ih - m),                 # bas-gauche
+                (W - iw - m, H - ih - m),        # bas-droite
+                ((W - iw) / 2, m),               # haut-centre
+                ((W - iw) / 2, H - ih - m),      # bas-centre
+            ]
+            choisi = None
+            for cx, cy in candidats:
+                cbox = (cx, cy, cx + iw, cy + ih)
+                if not any(_bbox_overlap(cbox, tb) for tb in text_bboxes):
+                    choisi = (cx, cy)
+                    break
+            if choisi is None:
+                choisi = (W - iw - m, m)  # fallback haut-droite
+            el["x_mm"] = round(choisi[0], 1)
+            el["y_mm"] = round(choisi[1], 1)
+            nb_corrections += 1
+    if nb_corrections:
+        logger.warning(
+            f"[FreeformComposer] Post-validation : {nb_corrections} icône(s) "
+            f"repositionnée(s) (anti-collision texte)."
+        )
+    return data
+
+
+def _forcer_pagination_livret(data: dict, brief: str) -> dict:
+    """Pour les livrets/faire-part (≥4 pages), force le total à un multiple
+    de 4 (contrainte agrafage imprimeur). Pad avec une page sobre type 'dos'
+    si nécessaire. Bug observé : livret 5p ou 6p → impossible à agrafer."""
+    pages = data.get("pages") or []
+    n = len(pages)
+    if n < 4 or n % 4 == 0:
+        return data
+    import re as _re
+    if not _re.search(
+        r"\blivret|brochure|d[ée]pliant|plaquette|programme|faire[- ]?part|"
+        r"funeraille|obs[èe]ques|c[ée]r[ée]monie|hommage|magazine|portfolio",
+        (brief or "").lower(),
+    ):
+        return data
+    cible = ((n + 3) // 4) * 4
+    diff = cible - n
+    fmt = data.get("format_mm") or [148, 210]
+    primaire = (data.get("palette_meta") or {}).get("primaire") or "#1A2742"
+    for i in range(diff):
+        pages.append({
+            "numero": n + i + 1,
+            "fond_couleur": "#FFFFFF",
+            "elements": [
+                {
+                    "type": "ornement",
+                    "x_mm": float(fmt[0]) / 2 - 6.0,
+                    "y_mm": float(fmt[1]) / 2 - 6.0,
+                    "w_mm": 12.0, "h_mm": 12.0,
+                    "motif": "geometrique",
+                    "couleur": primaire,
+                    "epaisseur_pt": 0.6,
+                },
+            ],
+        })
+    data["pages"] = pages
+    logger.warning(
+        f"[FreeformComposer] Post-validation : pagination {n} → {cible} pages "
+        f"(multiple de 4 pour agrafage livret)."
+    )
+    return data
