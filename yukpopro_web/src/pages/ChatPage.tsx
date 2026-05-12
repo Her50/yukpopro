@@ -1439,6 +1439,44 @@ const MessageBubble = ({
               {message.fichiers.map((f, i) => {
                 const nomFichier = f.split(/[/\\]/).pop() || f;
                 const ext = (nomFichier.split(".").pop() || "").toLowerCase();
+                // Titre humain dérivé du filename technique :
+                //   bureau_freeform_10_faire_part_1778601522.pdf
+                //   → "Faire-part"
+                //   bureau_designerpro_10_custom_libre_<ts>.pdf
+                //   → "Designer Pro"
+                //   rapport_analyse_standard_xxx_yyy_20260512_1140.docx
+                //   → "Rapport — Xxx Yyy"
+                const titreHumain = (() => {
+                  let core = nomFichier.replace(/\.[a-z0-9]+$/i, "");
+                  // strip leading 'bureau_<sous-module>_<userId>_'
+                  core = core.replace(/^bureau_[a-z]+_\d+_/i, "");
+                  // strip trailing '_<unix-ts>' ou '_<date>_<time>'
+                  core = core.replace(/_\d{8,}(_\d{3,4})?$/i, "");
+                  core = core.replace(/_cmyk$/i, "");
+                  if (!core) return nomFichier;
+                  // Smart capitalize : remplace _ par espace, première lettre majuscule
+                  const mots = core.split(/[_-]+/).filter(Boolean);
+                  if (mots.length === 0) return nomFichier;
+                  // Acronymes courts (≤4 lettres) → tout en majuscules (MTN, ACME)
+                  const titrise = mots.map((m, idx) => {
+                    if (idx === 0) {
+                      return m.charAt(0).toUpperCase() + m.slice(1);
+                    }
+                    if (m.length <= 4 && /^[a-z]+$/.test(m)) {
+                      return m.toUpperCase();
+                    }
+                    return m;
+                  }).join(" ");
+                  // Correctifs lisibilité courants
+                  return titrise
+                    .replace(/^Faire Part/i, "Faire-part")
+                    .replace(/^Carte Visite/i, "Carte de visite")
+                    .replace(/^Cv Graphique/i, "CV graphique")
+                    .replace(/^Post Social/i, "Post réseau social")
+                    .replace(/^Marque Place/i, "Marque-place")
+                    .replace(/Standard /i, "")
+                    .replace(/Rapport Analyse/i, "Rapport d'analyse");
+                })();
                 const labelExt = ext === "docx" ? "Word"
                   : ext === "pptx" ? "PowerPoint"
                   : ext === "pdf" ? "PDF"
@@ -1471,8 +1509,8 @@ const MessageBubble = ({
                       {iconeExt}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-emerald-100 truncate">
-                        {nomFichier}
+                      <div className="text-sm font-semibold text-emerald-100 truncate" title={nomFichier}>
+                        {titreHumain}
                       </div>
                       <div className="text-[11px] text-slate-400">
                         Format : {labelExt}
