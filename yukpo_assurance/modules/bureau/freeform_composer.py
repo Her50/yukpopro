@@ -574,6 +574,162 @@ Compose le layout PARFAIT pour ce visuel.
 """
 
 
+async def _detecter_organisation_dans_brief(brief: str) -> Optional[str]:
+    """Extrait le nom de l'organisation depuis le brief utilisateur via
+    plusieurs patterns courants. Retourne None si aucun nom trouvé."""
+    import re as _re_org
+    if not brief:
+        return None
+    # Patterns explicites — l'utilisateur annonce le nom
+    patterns = [
+        r"mon\s+(?:organisation|entreprise|soci[ée]t[ée]|compagnie|structure|"
+        r"association|ONG|cabinet|agence|boutique)\s+(?:s['']appelle\s+|"
+        r"se\s+nomme\s+|est\s+|c['']est\s+)?[«\"']?([A-Z][A-Za-z0-9 &.\-]{1,50}?)[»\"']?"
+        r"(?:[\.,;!\n]|$)",
+        r"(?:c['']est|c'est|il\s+s['']agit\s+de|pour)\s+[«\"']?"
+        r"([A-Z][A-Za-z0-9 &.\-]{1,50}?)[»\"']?\s+(?:cameroun|s[ée]n[ée]gal|"
+        r"c[ôo]te\s+d['']ivoire|congo|togo|b[ée]nin|gabon|mali|"
+        r"burkina|niger|tchad|maroc|tunisie|alg[ée]rie|france)",
+    ]
+    for pat in patterns:
+        m = _re_org.search(pat, brief, _re_org.IGNORECASE)
+        if m:
+            nom = m.group(1).strip().strip(",.;:!\"'«»")
+            if 2 <= len(nom) <= 60:
+                return nom
+    # Fallback : token ALL-CAPS isolé de 2-8 lettres (MTN, ORANGE, BIC, BNP, …)
+    m = _re_org.search(r"\b([A-Z]{2,8})\b", brief)
+    if m:
+        token = m.group(1)
+        # Filtre les sigles communs non-organisations
+        if token not in {"PDF", "QR", "A3", "A4", "A5", "RGB", "CMYK", "URL", "API", "IT", "RH", "HR", "CV"}:
+            return token
+    return None
+
+
+async def _enrichir_via_web_search(
+    brief: str, nom_organisation: Optional[str], pays: str = "CM",
+) -> dict:
+    """Recherche web Serper pour enrichir le contexte branding d'une
+    organisation : couleurs officielles, URL du logo, slogan/baseline.
+
+    Triggered seulement si user demande explicitement (mots-clés
+    'cherche sur internet', 'branding', 'logo officiel', etc.) ET
+    qu'un nom d'organisation a été détecté.
+
+    Retourne : { couleurs_detectees, logo_url, slogan, snippets_brand }.
+    """
+    import re as _re_ws
+    if not nom_organisation or not brief:
+        return {}
+    declenche_ws = bool(_re_ws.search(
+        r"(cherche|recherche|trouve|va\s+chercher|search).*"
+        r"(internet|web|en\s+ligne|google)"
+        r"|branding|charte\s+graphique|couleurs?\s+officielle"
+        r"|logo\s+(?:officiel|de\s+l)|identit[ée]\s+visuelle",
+        brief.lower(),
+    ))
+    if not declenche_ws:
+        return {}
+
+    try:
+        from modules.pro.recherche_web_pro import _serper_search
+    except Exception:
+        logger.info("[Freeform/WebSearch] Serper indisponible — skip")
+        return {}
+
+    requete = (
+        f"{nom_organisation} {pays} brand colors logo identity slogan"
+        if pays else
+        f"{nom_organisation} brand colors logo identity slogan"
+    )
+    logger.warning(f"[Freeform/WebSearch] Requête : {requete!r}")
+    try:
+        import asyncio as _aio_ws
+        resultats = await _aio_ws.wait_for(
+            _serper_search(requete, sites=[], pays_gl=pays, num=8),
+            timeout=10.0,
+        )
+    except _aio_ws.TimeoutError:
+        logger.warning("[Freeform/WebSearch] Serper timeout 10s — skip")
+        return {}
+    except Exception as e_ws:
+        logger.warning(f"[Freeform/WebSearch] Serper erreur : {e_ws} — skip")
+        return {}
+
+    if not resultats:
+        logger.info("[Freeform/WebSearch] Aucun résultat — skip enrichissement")
+        return {}
+
+    # Extraction couleurs depuis les snippets
+    # Cherche : "yellow and black", "#FFCC00", "yellow & black", "rgb(255,...)"
+    couleurs_mots_to_hex = {
+        "yellow": "#FFCC00", "jaune": "#FFCC00",
+        "black": "#000000", "noir": "#000000",
+        "white": "#FFFFFF", "blanc": "#FFFFFF",
+        "red": "#E30613", "rouge": "#E30613",
+        "blue": "#0033A0", "bleu": "#0033A0",
+        "green": "#008C44", "vert": "#008C44",
+        "orange": "#FF7900",
+        "purple": "#660099", "violet": "#660099",
+        "pink": "#E6007E", "rose": "#E6007E",
+        "gray": "#888888", "grey": "#888888", "gris": "#888888",
+        "navy": "#0A1F44",
+        "gold": "#D4AF37", "or": "#D4AF37",
+        "silver": "#C0C0C0", "argent": "#C0C0C0",
+    }
+    couleurs_trouvees: list[str] = []
+    snippets_text = ""
+    for r in resultats:
+        snip = str(r.get("snippet", "")) + " " + str(r.get("title", ""))
+        snippets_text += " " + snip
+        # Hex direct
+        for hex_m in _re_ws.findall(r"#[0-9A-Fa-f]{6}\b", snip):
+            if hex_m.upper() not in [c.upper() for c in couleurs_trouvees]:
+                couleurs_trouvees.append(hex_m)
+        # Mots couleur
+        for mot, hex_v in couleurs_mots_to_hex.items():
+            if _re_ws.search(rf"\b{mot}\b", snip.lower()) and hex_v not in couleurs_trouvees:
+                couleurs_trouvees.append(hex_v)
+    couleurs_trouvees = couleurs_trouvees[:4]
+
+    # Slogan : phrase courte avec « tagline » / « slogan » / « baseline »
+    slogan = ""
+    for r in resultats:
+        snip = str(r.get("snippet", ""))
+        m_slo = _re_ws.search(
+            r"(?:tagline|slogan|baseline|motto)\s*[:\"'«]\s*([^\"'»\.]{5,100})",
+            snip, _re_ws.IGNORECASE,
+        )
+        if m_slo:
+            slogan = m_slo.group(1).strip()
+            break
+
+    # Logo URL — Serper organic peut contenir un imageUrl. À défaut, on
+    # construit une URL Wikipedia logo par défaut si disponible
+    logo_url = ""
+    for r in resultats:
+        if r.get("imageUrl"):
+            logo_url = r["imageUrl"]
+            break
+        if "wikipedia.org" in str(r.get("link", "")):
+            # Wikipedia pages have logos. URL fetch left aside for simplicity.
+            pass
+
+    out = {
+        "couleurs_detectees": couleurs_trouvees,
+        "logo_url": logo_url,
+        "slogan": slogan,
+        "snippets_brand": snippets_text[:1500],
+    }
+    logger.warning(
+        f"[Freeform/WebSearch] Enrichissement OK pour {nom_organisation!r} : "
+        f"{len(couleurs_trouvees)} couleurs, logo={'oui' if logo_url else 'non'}, "
+        f"slogan={'oui' if slogan else 'non'}"
+    )
+    return out
+
+
 async def _pre_generer_donnees_simulees(
     brief: str,
     nb_items: int,
@@ -707,6 +863,7 @@ async def _composer_carte_template(
     brand_kit: Optional[dict] = None,
     descripteur_vertical: Optional[dict] = None,
     medias_descripteurs: Optional[list[dict]] = None,
+    enrichissement_web: Optional[dict] = None,
     pays: str = "CM",
     langue: str = "fr",
     card_w_mm: float = 85.0,
@@ -800,6 +957,24 @@ async def _composer_carte_template(
         f"Métier : {metier}\n" if metier else ""
     )
 
+    # Enrichissement web (Serper) — couleurs/slogan/snippets détectés
+    web_hint = ""
+    if enrichissement_web:
+        slogan = enrichissement_web.get("slogan") or ""
+        snippets = enrichissement_web.get("snippets_brand") or ""
+        web_hint = (
+            f"\n## RECHERCHE WEB BRANDING ({nom_org or 'organisation'})\n"
+            f"Données collectées via Google sur l'identité visuelle de l'organisation :\n"
+        )
+        if slogan:
+            web_hint += f"- Slogan/baseline officiel : « {slogan} »\n  Utilise-le tel-quel au verso.\n"
+        if snippets:
+            web_hint += (
+                f"- Snippets web (extraits) :\n{snippets[:800]}\n"
+                f"  Inspire-toi du ton et des éléments graphiques évoqués.\n"
+            )
+        web_hint += "Reste fidèle à l'identité de la marque évoquée.\n"
+
     prompt = f"""\
 Compose UNE SEULE carte de visite professionnelle au format {card_w_mm}×{card_h_mm}mm.
 Tu produis DEUX pages : page 1 = RECTO, page 2 = VERSO de cette même carte
@@ -807,7 +982,7 @@ Tu produis DEUX pages : page 1 = RECTO, page 2 = VERSO de cette même carte
 
 Brief utilisateur : « {brief[:400] if brief else ''} »
 {nom_org_hint}{metier_hint}Pays : {pays} / Langue : {langue}
-{bk_palette_hint}{vertical_hint}{media_hint}
+{bk_palette_hint}{vertical_hint}{web_hint}{media_hint}
 ═══ LIBERTÉ CRÉATIVE TOTALE SUR LE STYLE ═══
 
 Tu CHOISIS le design en fonction du métier/secteur/brief, sans rester
@@ -1355,6 +1530,30 @@ async def composer_freeform_layout(
             f"- Ton recommandé : {ton or '(libre)'}\n"
         )
 
+    # Enrichissement web (Serper) — brand/slogan/snippets si web search activé
+    web_search_block = ""
+    if enrichissement_web:
+        slo = enrichissement_web.get("slogan") or ""
+        sni = enrichissement_web.get("snippets_brand") or ""
+        cols = enrichissement_web.get("couleurs_detectees") or []
+        web_search_block = (
+            f"\n## RECHERCHE WEB BRANDING ({nom_org_detecte or 'organisation'})\n"
+            f"Données identité visuelle officielle collectées sur Google :\n"
+        )
+        if cols:
+            web_search_block += f"- Couleurs détectées (déjà injectées dans profil) : {cols}\n"
+        if slo:
+            web_search_block += f"- Slogan/baseline : « {slo} » (à utiliser tel-quel si pertinent)\n"
+        if sni:
+            web_search_block += (
+                f"- Extraits snippets web (inspire-toi du ton) :\n{sni[:600]}\n"
+            )
+        web_search_block += (
+            "Respecte l'identité de la marque détectée. Si un logo officiel\n"
+            "n'a pas été uploadé en média, propose à l'utilisateur de le faire\n"
+            "via un Texte discret au verso : « Logo officiel à insérer ».\n"
+        )
+
     # Catalogue palettes par métier (déduction si profil/brand_kit absents) —
     # appliqué à TOUS les types de visuels (cartes, flyers, brochures, etc.)
     style_catalogue_block = ""
@@ -1423,6 +1622,35 @@ async def composer_freeform_layout(
     # Détection heuristique de densité — un brief mentionnant un N élevé
     # (« 20 cartes », « 50 stickers », « 16 badges ») exige beaucoup de
     # tokens output.
+    # ── Enrichissement web (Serper) si user demande explicitement ─────────
+    # Patterns déclencheurs : "cherche sur internet", "branding", "logo
+    # officiel", "couleurs officielles", "identité visuelle". On extrait
+    # le nom de l'organisation et on fait une recherche Google pour
+    # récupérer couleurs + slogan + logo URL.
+    nom_org_detecte = await _detecter_organisation_dans_brief(brief)
+    enrichissement_web = {}
+    if nom_org_detecte:
+        enrichissement_web = await _enrichir_via_web_search(
+            brief=brief, nom_organisation=nom_org_detecte, pays=pays,
+        )
+    if enrichissement_web:
+        # Injecte les couleurs détectées dans profil s'il n'a rien de défini.
+        # Le brand_kit du compte (s'il existe) reste prioritaire.
+        couleurs_web = enrichissement_web.get("couleurs_detectees") or []
+        if couleurs_web:
+            profil = dict(profil or {})
+            if not profil.get("couleur_primaire_hex"):
+                profil["couleur_primaire_hex"] = couleurs_web[0]
+            if not profil.get("couleurs_accents_hex") and len(couleurs_web) >= 2:
+                profil["couleurs_accents_hex"] = couleurs_web[1:]
+            if nom_org_detecte and not profil.get("nom_organisation"):
+                profil["nom_organisation"] = nom_org_detecte
+            logger.warning(
+                f"[Freeform/WebSearch] Profil enrichi : "
+                f"primaire={profil.get('couleur_primaire_hex')} "
+                f"accents={profil.get('couleurs_accents_hex')}"
+            )
+
     import re as _re_d
     # Regex GÉNÉRIQUE — détecte N items répétés.
     # Items "personnes" (employés, membres, visiteurs, invités) → on infère
@@ -1521,6 +1749,7 @@ async def composer_freeform_layout(
             brief=brief, profil=profil, brand_kit=brand_kit,
             descripteur_vertical=descripteur_vertical,
             medias_descripteurs=medias_descripteurs,
+            enrichissement_web=enrichissement_web,
             pays=pays, langue=langue,
         )
         if not template_data.get("pages"):
@@ -1596,7 +1825,7 @@ async def composer_freeform_layout(
 ## CONTEXTE
 - Pays : {pays}
 - Langue : {langue}
-{profil_block}{brand_block}{vertical_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
+{profil_block}{brand_block}{vertical_block}{web_search_block}{style_catalogue_block}{medias_block}{donnees_block}{contrainte_grille}
 
 Compose maintenant le layout PARFAIT pour ce brief. JSON STRICT uniquement,
 sans commentaire ni markdown.
