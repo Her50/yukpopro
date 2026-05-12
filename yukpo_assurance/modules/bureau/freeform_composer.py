@@ -2175,6 +2175,72 @@ Critères pour AJOUTER une page :
   4 sous-sections → 2-4 pages dédiées
 - Citations bibliques/poèmes substantiels → page Mot d'introduction
 
+## NOUVEAU TYPE D'ÉLÉMENT : `texte_fluide` (text-wrap polygone)
+
+En plus de `texte` (boîte rectangulaire fixe), tu disposes d'un type
+`texte_fluide` qui FAIT S'ÉCOULER le texte AUTOUR d'obstacles (images,
+formes). Le texte enveloppe l'obstacle comme dans un magazine pro.
+
+Schéma JSON :
+```json
+{
+  "type": "texte_fluide",
+  "contenu": "Texte long qui va s'écouler...",
+  "x_mm": 10, "y_mm": 30, "w_mm": 190, "h_mm": 150,
+  "taille_pt": 10, "couleur": "#000000", "police": "Helvetica",
+  "interligne": 1.4, "alignement": "justify",
+  "obstacles": [
+    {
+      "type": "rectangle",
+      "x_mm": 130, "y_mm": 40, "w_mm": 60, "h_mm": 80,
+      "padding_mm": 3
+    },
+    {
+      "type": "cercle",
+      "cx_mm": 50, "cy_mm": 100, "r_mm": 25, "padding_mm": 3
+    },
+    {
+      "type": "polygone",
+      "points_mm": [[10,200], [50,180], [90,210], [30,230]],
+      "padding_mm": 2
+    }
+  ]
+}
+```
+
+Le moteur, ligne par ligne, calcule les intervalles X libres autour
+des obstacles et fait couler le texte dans ces intervalles. Si une
+ligne est entièrement obstruée (image grande au centre par ex), le
+texte saute à la ligne suivante.
+
+**Quand utiliser `texte_fluide` vs `texte` standard** :
+- `texte_fluide` : article magazine avec image insérée, témoignage
+  long enveloppant une photo portrait, biographie + photo de jeunesse,
+  texte qui contourne un logo ou ornement décoratif
+- `texte` standard : titres, sous-titres, citations courtes en
+  encadré, listes, signatures, mentions légales
+
+**Pattern A reconçu avec texte_fluide** :
+Au lieu de Texte rectangle à droite + Texte sous, utilise :
+```json
+{
+  "type": "image", "ref_media": "compte:abc",
+  "x_mm": 10, "y_mm": 30, "w_mm": 60, "h_mm": 80, "mode": "cover"
+},
+{
+  "type": "texte_fluide",
+  "contenu": "Long paragraphe de témoignage qui commence à droite\nde la photo, descend, puis continue en pleine largeur sous la photo automatiquement...",
+  "x_mm": 10, "y_mm": 30, "w_mm": 190, "h_mm": 150,
+  "taille_pt": 10, "alignement": "justify",
+  "obstacles": [
+    {"type": "rectangle", "x_mm": 10, "y_mm": 30, "w_mm": 60, "h_mm": 80, "padding_mm": 4}
+  ]
+}
+```
+Résultat : texte naturellement enveloppant la photo, comme dans un
+magazine. Plus jamais de blocs texte rectangulaires juxtaposés à des
+photos — du vrai design éditorial.
+
 ## MISE EN PAGE PHOTO + TEXTE (text-around-image)
 
 Quand une page contient PHOTO + TEXTE, ne place PAS simplement la

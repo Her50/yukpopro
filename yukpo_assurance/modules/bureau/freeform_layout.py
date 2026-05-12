@@ -97,6 +97,34 @@ class Texte(ElementBase):
 
 
 @dataclass
+class TexteFluide(ElementBase):
+    """Texte qui s'écoule AUTOUR d'obstacles (text-wrap polygone).
+
+    Pour chaque ligne, le moteur calcule les intervalles libres de x
+    en évitant les obstacles, puis remplit ces intervalles avec les
+    mots. C'est le mode 'magazine' où le texte enveloppe une image
+    non-rectangulaire ou plusieurs images.
+
+    Obstacles supportés :
+    - 'rectangle' : {type, x_mm, y_mm, w_mm, h_mm, padding_mm}
+    - 'cercle'    : {type, cx_mm, cy_mm, r_mm, padding_mm}
+    - 'polygone'  : {type, points_mm: [[x1,y1], [x2,y2], ...], padding_mm}
+
+    Si obstacles est vide, se comporte comme un Texte rectangulaire
+    classique.
+    """
+    contenu: str = ""
+    police: str = "Helvetica"
+    taille_pt: float = 10
+    couleur: str = "#000000"
+    alignement: str = "left"           # left | right | justify
+    interligne: float = 1.4
+    bold: bool = False
+    italic: bool = False
+    obstacles: list[dict] = field(default_factory=list)
+
+
+@dataclass
 class Image(ElementBase):
     """Image embedded — soit ref_media (résolu depuis mediathèque session),
     soit data_url (data:image/png;base64,...), soit url (https://...).
@@ -195,22 +223,24 @@ class LayoutDocument:
 
 
 _TYPE_TO_CLASS = {
-    "rectangle":  Rectangle,
-    "rect":       Rectangle,
-    "texte":      Texte,
-    "text":       Texte,
-    "image":      Image,
-    "image_ia":   Image,
-    "ligne":      Ligne,
-    "line":       Ligne,
-    "qr":         QR,
-    "qrcode":     QR,
-    "ornement":   Ornement,
-    "ornament":   Ornement,
-    "crop_marks": CropMarks,
-    "cropmarks":  CropMarks,
-    "icone":      Icone,
-    "icon":       Icone,
+    "rectangle":     Rectangle,
+    "rect":          Rectangle,
+    "texte":         Texte,
+    "text":          Texte,
+    "texte_fluide":  TexteFluide,
+    "text_wrap":     TexteFluide,
+    "image":         Image,
+    "image_ia":      Image,
+    "ligne":         Ligne,
+    "line":          Ligne,
+    "qr":            QR,
+    "qrcode":        QR,
+    "ornement":      Ornement,
+    "ornament":      Ornement,
+    "crop_marks":    CropMarks,
+    "cropmarks":     CropMarks,
+    "icone":         Icone,
+    "icon":          Icone,
 }
 
 
@@ -606,9 +636,255 @@ def _render_element(
         _draw_crop_marks(c, el, off_x, off_y, fmt_h_pt)
         return
 
+    if isinstance(el, TexteFluide):
+        _draw_texte_fluide(c, el, off_x, off_y, fmt_h_pt)
+        return
+
     if isinstance(el, Icone):
         _draw_icone(c, el, off_x, off_y, fmt_h_pt)
         return
+
+
+def _intervalles_libres_sur_ligne(
+    box_x_pt: float, box_w_pt: float,
+    ligne_y_pt: float, ligne_h_pt: float,
+    obstacles_pt: list[dict],
+) -> list[tuple[float, float]]:
+    """Calcule les intervalles libres [x1,x2] de x où le texte peut s'écouler
+    sur la bande horizontale [ligne_y, ligne_y+ligne_h].
+
+    Stratégie : commence avec un intervalle complet [box_x, box_x+box_w],
+    puis pour chaque obstacle qui INTERSECTE la bande, on retire l'intervalle
+    occupé par l'obstacle (avec padding). Si l'obstacle scinde un intervalle
+    en deux, on génère deux intervalles.
+
+    Retourne la liste des intervalles libres triés par x croissant. Liste
+    vide = ligne entièrement occupée → sauter cette bande.
+    """
+    free = [(box_x_pt, box_x_pt + box_w_pt)]
+    ligne_y2 = ligne_y_pt + ligne_h_pt
+
+    for obs in obstacles_pt:
+        kind = (obs.get("type") or "rectangle").lower()
+        pad = float(obs.get("padding_mm", 2)) * 2.835
+
+        if kind in ("rectangle", "rect", "image"):
+            ox = float(obs.get("x_pt", 0)) - pad
+            oy = float(obs.get("y_pt", 0)) - pad
+            ow = float(obs.get("w_pt", 0)) + 2 * pad
+            oh = float(obs.get("h_pt", 0)) + 2 * pad
+            # L'obstacle intersecte-t-il la bande de ligne en Y ?
+            if oy >= ligne_y2 or oy + oh <= ligne_y_pt:
+                continue
+            ox1, ox2 = ox, ox + ow
+        elif kind in ("cercle", "circle"):
+            cx = float(obs.get("cx_pt", 0))
+            cy = float(obs.get("cy_pt", 0))
+            r = float(obs.get("r_pt", 0)) + pad
+            # Demi-largeur du cercle au niveau de la bande ligne
+            # Au milieu de la ligne pour simplifier
+            mid_y = (ligne_y_pt + ligne_y2) / 2
+            dy = abs(mid_y - cy)
+            if dy >= r:
+                continue
+            import math as _m
+            half_w = _m.sqrt(r * r - dy * dy)
+            ox1, ox2 = cx - half_w, cx + half_w
+        elif kind in ("polygone", "polygon"):
+            # Bounding box du polygone à la hauteur de la ligne
+            pts = obs.get("points_pt") or []
+            if not pts:
+                continue
+            # Pour chaque arête, trouver intersections avec la ligne médiane
+            mid_y = (ligne_y_pt + ligne_y2) / 2
+            xs_intersect = []
+            for i in range(len(pts)):
+                p1 = pts[i]
+                p2 = pts[(i + 1) % len(pts)]
+                y1, y2 = float(p1[1]), float(p2[1])
+                if (y1 <= mid_y < y2) or (y2 <= mid_y < y1):
+                    x1, x2 = float(p1[0]), float(p2[0])
+                    if y2 != y1:
+                        t = (mid_y - y1) / (y2 - y1)
+                        xs_intersect.append(x1 + t * (x2 - x1))
+            if len(xs_intersect) < 2:
+                continue
+            xs_intersect.sort()
+            ox1 = min(xs_intersect) - pad
+            ox2 = max(xs_intersect) + pad
+        else:
+            continue
+
+        # Soustrait l'intervalle [ox1, ox2] des intervalles libres
+        new_free = []
+        for (fa, fb) in free:
+            if ox2 <= fa or ox1 >= fb:
+                # pas de chevauchement
+                new_free.append((fa, fb))
+                continue
+            if ox1 > fa:
+                new_free.append((fa, ox1))
+            if ox2 < fb:
+                new_free.append((ox2, fb))
+        free = new_free
+
+    # Filtre intervalles trop étroits (< 12pt = inutilisable pour mots)
+    return [(a, b) for (a, b) in free if (b - a) >= 12]
+
+
+def _draw_texte_fluide(
+    c, el: "TexteFluide", off_x: float, off_y: float, fmt_h_pt: float,
+) -> None:
+    """Rend un texte qui s'écoule autour d'obstacles polygonaux.
+
+    Algorithme ligne par ligne :
+      1. Pour chaque ligne y, calcule les intervalles libres de x via
+         _intervalles_libres_sur_ligne (en évitant les obstacles avec padding).
+      2. Pour chaque intervalle libre, remplit avec autant de mots que possible
+         (word-wrap classique sur cet intervalle).
+      3. Si la ligne est entièrement obstruée, saute à la ligne suivante.
+      4. Arrête quand le texte est épuisé ou la bbox du conteneur dépassée.
+
+    Coords mm → pt en interne. ReportLab origine bas-gauche, on flippe Y.
+    """
+    box_x = off_x + mm_to_pt(el.x_mm)
+    box_w_pt = mm_to_pt(el.w_mm) if el.w_mm else 100 * 2.835
+    box_h_pt = mm_to_pt(el.h_mm) if el.h_mm else 100 * 2.835
+    # En coords ReportLab : box_y_bas en bas du conteneur, box_y_haut en haut
+    box_y_haut = off_y + fmt_h_pt - mm_to_pt(el.y_mm)
+    box_y_bas = box_y_haut - box_h_pt
+
+    # Police + style
+    font_name = el.police or "Helvetica"
+    if el.bold and "Bold" not in font_name:
+        font_name = f"{font_name}-Bold" if font_name in ("Helvetica", "Times", "Courier", "Inter") else font_name
+    size = el.taille_pt or 10
+    leading = size * (el.interligne or 1.4)
+    try:
+        c.setFont(font_name, size)
+    except Exception:
+        c.setFont("Helvetica", size)
+        font_name = "Helvetica"
+    c.setFillColor(parse_color(el.couleur, default=(0, 0, 0)))
+
+    # Pré-conversion des obstacles en coords pt (origin bas-gauche)
+    # Obstacles données en mm avec origine haut-gauche → conversion
+    obstacles_pt: list[dict] = []
+    for obs in (el.obstacles or []):
+        if not isinstance(obs, dict):
+            continue
+        kind = (obs.get("type") or "rectangle").lower()
+        if kind in ("rectangle", "rect", "image"):
+            obstacles_pt.append({
+                "type": "rectangle",
+                "x_pt": off_x + mm_to_pt(float(obs.get("x_mm", 0))),
+                # y_mm origine haut → y_pt = top_page - y_mm - h_mm
+                "y_pt": off_y + fmt_h_pt - mm_to_pt(
+                    float(obs.get("y_mm", 0)) + float(obs.get("h_mm", 0))
+                ),
+                "w_pt": mm_to_pt(float(obs.get("w_mm", 0))),
+                "h_pt": mm_to_pt(float(obs.get("h_mm", 0))),
+                "padding_mm": float(obs.get("padding_mm", 2)),
+            })
+        elif kind in ("cercle", "circle"):
+            obstacles_pt.append({
+                "type": "cercle",
+                "cx_pt": off_x + mm_to_pt(float(obs.get("cx_mm", 0))),
+                "cy_pt": off_y + fmt_h_pt - mm_to_pt(float(obs.get("cy_mm", 0))),
+                "r_pt": mm_to_pt(float(obs.get("r_mm", 0))),
+                "padding_mm": float(obs.get("padding_mm", 2)),
+            })
+        elif kind in ("polygone", "polygon"):
+            pts_mm = obs.get("points_mm") or []
+            pts_pt = [
+                [
+                    off_x + mm_to_pt(float(p[0])),
+                    off_y + fmt_h_pt - mm_to_pt(float(p[1])),
+                ]
+                for p in pts_mm if isinstance(p, (list, tuple)) and len(p) >= 2
+            ]
+            obstacles_pt.append({
+                "type": "polygone",
+                "points_pt": pts_pt,
+                "padding_mm": float(obs.get("padding_mm", 2)),
+            })
+
+    # Tokenisation du texte. Préserve les sauts de ligne explicites (\n)
+    # comme « paragraphes ». À l'intérieur, mots séparés par espaces.
+    paragraphes = (el.contenu or "").split("\n")
+
+    cursor_y = box_y_haut - size  # baseline de la 1ère ligne
+    max_iter = 500  # garde-fou
+    iter_count = 0
+
+    for paragraphe in paragraphes:
+        if cursor_y < box_y_bas:
+            break
+        mots = paragraphe.split(" ") if paragraphe else [""]
+        # Index du prochain mot à placer
+        i_mot = 0
+        while i_mot < len(mots) and cursor_y >= box_y_bas and iter_count < max_iter:
+            iter_count += 1
+            ligne_top = cursor_y + size * 0.2  # leeway au-dessus de la baseline
+            ligne_bot = cursor_y - size * 0.1
+            intervalles = _intervalles_libres_sur_ligne(
+                box_x, box_w_pt, ligne_bot, ligne_top - ligne_bot, obstacles_pt,
+            )
+            if not intervalles:
+                # Ligne entièrement obstruée, saute
+                cursor_y -= leading
+                continue
+
+            # Remplit chaque intervalle avec autant de mots que possible
+            placed_words_in_line = False
+            for (xa, xb) in intervalles:
+                avail_w = xb - xa
+                line_mots: list[str] = []
+                cur_w = 0.0
+                # Pré-positionne le 1er mot quitte à déborder si trop long
+                while i_mot < len(mots):
+                    mot = mots[i_mot]
+                    w_with_space = c.stringWidth(
+                        mot + (" " if line_mots else ""), font_name, size,
+                    )
+                    if cur_w + w_with_space > avail_w:
+                        if not line_mots:
+                            # Mot seul plus large que l'intervalle : casse rude
+                            line_mots.append(mot[:max(1, int(avail_w / (size * 0.55)))])
+                            i_mot += 1
+                        break
+                    line_mots.append(mot)
+                    cur_w += w_with_space
+                    i_mot += 1
+                if line_mots:
+                    placed_words_in_line = True
+                    ligne_text = " ".join(line_mots)
+                    if el.alignement == "right":
+                        x_draw = xb - c.stringWidth(ligne_text, font_name, size)
+                    elif el.alignement == "justify" and len(line_mots) > 1 and i_mot < len(mots):
+                        # Justification : étire les espaces pour remplir [xa, xb]
+                        text_w = c.stringWidth(ligne_text, font_name, size)
+                        extra = (avail_w - text_w) / (len(line_mots) - 1)
+                        x_draw = xa
+                        for j, m in enumerate(line_mots):
+                            c.drawString(x_draw, cursor_y, m)
+                            x_draw += c.stringWidth(m, font_name, size) + (
+                                c.stringWidth(" ", font_name, size) + extra
+                            )
+                        continue  # déjà dessiné
+                    else:
+                        x_draw = xa
+                    c.drawString(x_draw, cursor_y, ligne_text)
+
+            if not placed_words_in_line:
+                # Pas de mot placé sur cette ligne mais intervalles libres
+                # (probablement mot trop long pour tous) → on saute pour éviter
+                # boucle infinie
+                break
+            cursor_y -= leading
+
+        # Saut de paragraphe : leading supplémentaire entre paragraphes
+        cursor_y -= leading * 0.3
 
 
 def _wrap_text(c, texte: str, font: str, size: float, max_width_pt: Optional[float]) -> list[str]:
