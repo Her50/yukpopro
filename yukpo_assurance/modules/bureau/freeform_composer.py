@@ -735,27 +735,40 @@ async def _composer_carte_template(
 
     prompt = f"""\
 Compose UNE SEULE carte de visite professionnelle au format {card_w_mm}×{card_h_mm}mm.
+Tu vas produire DEUX pages : page 1 = RECTO, page 2 = VERSO de cette même
+carte (impression recto-verso standard).
 
 Brief utilisateur original : « {brief[:400]} »
 Pays : {pays} / Langue : {langue}
 {bk_palette_hint}
 
-Tu produis un JSON STRICT avec format_mm = [{card_w_mm}, {card_h_mm}] et UNE
-seule page contenant les éléments d'UNE carte template DENSE et PRO :
-- Rectangle fond couleur primaire (ou navy par défaut), border_radius 2mm
-- Petit bandeau accent (5-8mm) bord gauche ou top
-- Texte « NOM Prénom » placeholder en Bold 11pt blanc (sera remplacé)
-- Texte « Fonction » en italic 8pt couleur accent (sera remplacé)
-- Filet séparateur fin (0.4pt accent, 30-40mm)
-- 3 icônes contact (tabler phone, mail, world) 4×4mm
-- 3 textes contact placeholders « +237 6XX XXX XXX », « email@org.cm »,
-  « www.org.cm » en 7pt blanc à droite des icônes
-- Petit cercle ou forme géométrique d'accent (badge ou bulle)
-- QR placeholder 12×12mm coin bas-droite (couleur sur fond blanc)
-- Crop marks aux 4 coins de la carte
+═══ PAGE 1 (RECTO) — éléments OBLIGATOIRES dans cet ordre ═══
 
-Les TEXTES placeholders seront REMPLACÉS automatiquement par les données
-simulées d'utilisateurs réels. Tu produis donc le DESIGN, pas les data.
+1. Rectangle fond couleur primaire (navy #003D82 par défaut), border_radius 2mm
+2. Bandeau accent vertical (5-8mm) bord gauche
+3. Texte « NOM Prénom » Bold 11pt blanc — placeholder remplacé auto
+4. Texte « Fonction » italic 8pt couleur accent — placeholder remplacé auto
+5. Filet séparateur fin (0.4pt accent, 30-40mm)
+6. Icone tabler phone 4×4mm + IMMÉDIATEMENT À DROITE Texte
+   « +237 6XX XXX XXX » 7pt blanc — placeholder remplacé auto
+7. Icone tabler mail 4×4mm + IMMÉDIATEMENT À DROITE Texte
+   « email@org.cm » 7pt blanc — placeholder remplacé auto
+8. Icone tabler world 4×4mm + IMMÉDIATEMENT À DROITE Texte
+   « www.org.cm » 7pt blanc — placeholder remplacé auto
+9. QR placeholder 12×12mm coin bas-droite (couleur primaire sur fond blanc)
+10. Crop marks aux 4 coins
+
+⚠️ IMPÉRATIF : chaque icône doit avoir SON TEXTE adjacent. Pas d'icône seule.
+   Les 3 textes contact remplacent les valeurs placeholders avec les
+   vraies données utilisateur côté Python — donc DOIVENT exister.
+
+═══ PAGE 2 (VERSO) — design SOBRE/LOGO ═══
+
+1. Rectangle fond couleur primaire pleine carte
+2. Centré : nom de l'organisation en Bold 14pt blanc
+3. Sous le nom : ligne accent 30mm Bold + slogan/baseline en italic 8pt
+4. Cercle accent décoratif (logo placeholder) 18mm centré ou coin
+5. Crop marks aux 4 coins
 
 Format JSON :
 {{
@@ -763,7 +776,8 @@ Format JSON :
   "bleed_mm": 3,
   "palette_meta": {{"primaire": "#003D82", "accent": "#FFB800", "fond": "#FFFFFF"}},
   "pages": [
-    {{"numero": 1, "fond_couleur": "#FFFFFF", "elements": [ ... ]}}
+    {{"numero": 1, "libelle_piece": "recto", "fond_couleur": "#FFFFFF", "elements": [ ... ]}},
+    {{"numero": 2, "libelle_piece": "verso", "fond_couleur": "#FFFFFF", "elements": [ ... ]}}
   ]
 }}
 
@@ -928,8 +942,79 @@ def _reorganiser_grille_a4(
         f"format carte) → reconstruction grille A4 × 8 cartes"
     )
 
-    template_elements = pages[0].get("elements") or []
+    # Support recto-verso : page[0] = template recto, page[1] (si présente)
+    # = template verso. On génère 2× planches : recto pour toutes les cartes,
+    # puis verso. Permet impression duplex standard.
+    template_recto = pages[0].get("elements") or []
+    template_verso = pages[1].get("elements") if len(pages) >= 2 else None
+    a_verso = bool(template_verso)
     template_fond = pages[0].get("fond_couleur") or "#FFFFFF"
+
+    # Post-injection : s'assurer que le template recto contient bien des
+    # Texte placeholders pour téléphone, email, website. Le LLM les omet
+    # parfois (icône seule sans texte adjacent) → on injecte par défaut.
+    def _enrichir_template_recto(elems: list) -> list:
+        a_tel = a_email = a_web = False
+        for el in elems:
+            if not isinstance(el, dict):
+                continue
+            if (el.get("type") or "").lower() not in ("texte", "text"):
+                continue
+            c = str(el.get("contenu", "") or "").lower()
+            if "+" in c or "tel" in c or "phone" in c or "📞" in c:
+                a_tel = True
+            if "@" in c:
+                a_email = True
+            if "www" in c or "http" in c or ".com" in c or ".cm" in c or ".sn" in c:
+                a_web = True
+        # Si déjà tout présent, on ne touche pas
+        if a_tel and a_email and a_web:
+            return elems
+        # Sinon, on cherche les icônes phone/mail/world pour placer les
+        # textes IMMÉDIATEMENT à leur droite (4mm offset).
+        enriched = list(elems)
+        for el in elems:
+            if not isinstance(el, dict):
+                continue
+            if (el.get("type") or "").lower() != "icone":
+                continue
+            name = (el.get("name") or "").lower()
+            x = float(el.get("x_mm", 0) or 0)
+            y = float(el.get("y_mm", 0) or 0)
+            w = float(el.get("w_mm", 4) or 4)
+            h = float(el.get("h_mm", 4) or 4)
+            text_x = x + w + 1.0  # 1mm gutter après l'icône
+            text_y = y + 0.2  # micro-baseline align
+            if "phone" in name and not a_tel:
+                enriched.append({
+                    "type": "texte", "contenu": "+237 6XX XXX XXX",
+                    "x_mm": text_x, "y_mm": text_y, "w_mm": 35, "h_mm": h,
+                    "taille_pt": 7, "couleur": "#FFFFFF", "police": "Helvetica",
+                })
+                a_tel = True
+            elif "mail" in name and not a_email:
+                enriched.append({
+                    "type": "texte", "contenu": "email@org.cm",
+                    "x_mm": text_x, "y_mm": text_y, "w_mm": 40, "h_mm": h,
+                    "taille_pt": 7, "couleur": "#FFFFFF", "police": "Helvetica",
+                })
+                a_email = True
+            elif ("world" in name or "globe" in name) and not a_web:
+                enriched.append({
+                    "type": "texte", "contenu": "www.organisation.cm",
+                    "x_mm": text_x, "y_mm": text_y, "w_mm": 40, "h_mm": h,
+                    "taille_pt": 7, "couleur": "#FFFFFF", "police": "Helvetica",
+                })
+                a_web = True
+        if not (a_tel and a_email and a_web):
+            logger.info(
+                f"[FreeformComposer] Post-injection : tel={a_tel} mail={a_email} "
+                f"web={a_web} — au moins une non injectée (icône absente du template)"
+            )
+        return enriched
+
+    template_recto = _enrichir_template_recto(template_recto)
+    template_elements = template_recto
 
     MARGE = 10.0
     GUTTER_H = 10.0
@@ -943,39 +1028,66 @@ def _reorganiser_grille_a4(
 
     def _injecter_donnees(contenu_orig: str, d: dict) -> str:
         """Remplace les contenus de la carte template par les valeurs
-        de la donnée réelle d. Heuristique sur le contenu d'origine."""
+        de la donnée réelle d. Heuristique sur le contenu d'origine.
+        Supporte clefs FR (nom, prenom, fonction, tel) et EN (last_name,
+        first_name, position/job_title, phone) car Haiku alterne."""
         if not contenu_orig:
             return contenu_orig
         c = str(contenu_orig).strip()
         c_low = c.lower()
-        # Tel
-        if any(t in c for t in ("+237", "+221", "+225", "+33", "+212")) \
-                or any(t in c_low for t in ("tel:", "tél:", "phone:", "📞")):
+        # Tel — indicatifs internationaux + mots-clés
+        if any(t in c for t in ("+237", "+221", "+225", "+33", "+212", "+27", "+33")) \
+                or any(t in c_low for t in ("tel:", "tél:", "phone:", "📞", "6xx", "0xx")):
             tel = d.get("tel") or d.get("telephone") or d.get("phone")
             return str(tel) if tel else c
-        # Email
+        # Email — présence de '@'
         if "@" in c:
             mail = d.get("email") or d.get("mail")
             return str(mail) if mail else c
+        # Website / URL — www., http, ou TLD courant
+        if (
+            "www." in c_low or c_low.startswith("http")
+            or any(c_low.endswith(tld) for tld in (".cm", ".sn", ".ci", ".fr", ".com", ".org", ".net"))
+            or any(tld in c_low for tld in (".cm/", ".sn/", ".com/", ".org/"))
+        ):
+            site = (d.get("site") or d.get("website") or d.get("url")
+                    or d.get("site_web"))
+            if site:
+                return str(site)
+            # Fallback : déduire depuis email (prenom.nom@org.tld → www.org.tld)
+            mail = d.get("email") or d.get("mail") or ""
+            if "@" in mail:
+                domaine = mail.split("@", 1)[1]
+                return f"www.{domaine}"
+            return c
         # Fonction / titre
         if any(p in c_low for p in (
             "fonction", "titre", "manager", "engineer", "directeur",
             "responsable", "chef", "ingénieur", "assistant", "chargé",
-            "consultant", "expert",
+            "consultant", "expert", "analyst", "developer", "designer",
+            "writer", "specialist", "executive", "advisor", "rep",
         )):
-            f = d.get("fonction") or d.get("role") or d.get("titre")
+            f = (d.get("fonction") or d.get("role") or d.get("titre")
+                 or d.get("position") or d.get("job_title"))
             return str(f) if f else c
         # Nom + prénom (1 ou 2 mots majuscules)
         nb_mots = len(c.split())
         if nb_mots in (1, 2, 3):
-            prenom = d.get("prenom", "")
-            nom = d.get("nom", "")
+            prenom = d.get("prenom", "") or d.get("first_name", "")
+            nom = d.get("nom", "") or d.get("last_name", "")
             if prenom or nom:
                 return f"{prenom} {nom}".strip()
         return c
 
-    new_pages = []
-    for planche_idx in range(nb_planches):
+    def _construire_planche(
+        planche_idx: int, template_elems: list, est_verso: bool,
+    ) -> dict:
+        """Compose une planche A4 = grille de jusqu'à 8 cartes (2×4)
+        en dupliquant le template_elems pour chaque slot et en injectant
+        les données réelles. Verso : on mirror l'ordre horizontal des
+        slots pour que l'impression duplex aligne recto/verso (sinon
+        après retournement, la carte 1 du verso se trouve face à la
+        carte 2 du recto au lieu de la carte 1)."""
         new_elements: list[dict] = []
         for slot in range(CAP):
             card_idx = planche_idx * CAP + slot
@@ -984,14 +1096,15 @@ def _reorganiser_grille_a4(
             d = donnees[card_idx]
             col = slot % COLS
             row = slot // COLS
+            # Verso : mirror horizontal pour alignement duplex
+            if est_verso:
+                col = (COLS - 1) - col
             x_off = MARGE + col * (card_w_mm + GUTTER_H)
             y_off = MARGE + row * (card_h_mm + GUTTER_V)
-
-            for el in template_elements:
+            for el in template_elems:
                 if not isinstance(el, dict):
                     continue
                 new_el = dict(el)
-                # Décalage des coordonnées
                 for k in ("x_mm", "x1_mm", "x2_mm"):
                     if k in new_el and new_el[k] is not None:
                         try:
@@ -1004,18 +1117,17 @@ def _reorganiser_grille_a4(
                             new_el[k] = float(new_el[k]) + y_off
                         except (TypeError, ValueError):
                             pass
-                # Injection données dans les textes
                 if (new_el.get("type") or "").lower() in ("texte", "text"):
                     new_el["contenu"] = _injecter_donnees(
                         new_el.get("contenu", ""), d,
                     )
-                # Injection vCard dans QR
                 elif (new_el.get("type") or "").lower() in ("qr", "qrcode"):
-                    prenom = d.get("prenom", "")
-                    nom = d.get("nom", "")
-                    fonction = d.get("fonction", "")
-                    tel = d.get("tel", "")
-                    email = d.get("email", "")
+                    prenom = d.get("prenom", "") or d.get("first_name", "")
+                    nom = d.get("nom", "") or d.get("last_name", "")
+                    fonction = (d.get("fonction") or d.get("position")
+                                or d.get("job_title") or "")
+                    tel = d.get("tel") or d.get("phone") or ""
+                    email = d.get("email") or d.get("mail") or ""
                     new_el["donnees"] = (
                         "BEGIN:VCARD\nVERSION:3.0\n"
                         f"FN:{prenom} {nom}\n"
@@ -1023,7 +1135,6 @@ def _reorganiser_grille_a4(
                         f"TEL:{tel}\nEMAIL:{email}\nEND:VCARD"
                     )
                 new_elements.append(new_el)
-
             # Crop marks autour de la carte
             new_elements.append({
                 "type": "crop_marks",
@@ -1032,14 +1143,25 @@ def _reorganiser_grille_a4(
                 "longueur_mm": 3, "epaisseur_pt": 0.25,
                 "couleur": "#000000",
             })
-
-        new_pages.append({
-            "numero": planche_idx + 1,
+        return {
+            "numero": 0,  # sera ré-attribué dans la boucle finale
             "fond_couleur": "#FFFFFF",
             "format_mm": [210, 297],
-            "libelle_piece": f"planche_recto_{planche_idx + 1}",
+            "libelle_piece": f"planche_{'verso' if est_verso else 'recto'}_{planche_idx + 1}",
             "elements": new_elements,
-        })
+        }
+
+    new_pages = []
+    # 1er passage : toutes les planches recto
+    for planche_idx in range(nb_planches):
+        new_pages.append(_construire_planche(planche_idx, template_recto, est_verso=False))
+    # 2e passage : toutes les planches verso (si template recto-verso)
+    if a_verso:
+        for planche_idx in range(nb_planches):
+            new_pages.append(_construire_planche(planche_idx, template_verso, est_verso=True))
+    # Renuméroter les pages séquentiellement
+    for idx, p in enumerate(new_pages):
+        p["numero"] = idx + 1
 
     data["format_mm"] = [210, 297]
     data["pages"] = new_pages

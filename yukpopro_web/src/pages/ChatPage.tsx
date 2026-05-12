@@ -302,7 +302,7 @@ export const ChatPage = () => {
               : r.status_url;
             // Affichage transitoire dans le chat
             updateLastAssistantMessage(
-              `⏳ Génération en cours (qualité photoréaliste Flux Pro Ultra) — typiquement 30-90s…`,
+              `⏳ Génération en cours — composition du visuel puis rendu PDF (recto-verso si applicable). Comptez 1-3 min, je vous tiens au courant…`,
               null, undefined, null, undefined, undefined,
             );
             while (Date.now() - startTime < maxWaitMs) {

@@ -212,8 +212,12 @@ export const useCopiloteStore = create<ChatState>()(
             s.id === state.activeSessionId
               ? {
                   ...s,
+                  // On retire le filtre m.loading : les updates successifs
+                  // (ex: polling job_id qui passe par 'in progress' puis 'done')
+                  // doivent pouvoir réécrire le dernier message assistant
+                  // même s'il n'est plus en state loading.
                   messages: s.messages.map((m, i) =>
-                    i === s.messages.length - 1 && m.role === "assistant" && m.loading
+                    i === s.messages.length - 1 && m.role === "assistant"
                       ? { ...m, content, loading: false, agent_utilise: agentUtilise, fichiers, cout_llm: coutLlm, navigation_suggestions: navSuggestions, suggestions_suite: suggestionsSuite }
                       : m
                   ),
