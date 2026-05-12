@@ -2861,7 +2861,11 @@ async def copilote_chat(
                 from api.routes_bureau_freeform import _job_get
                 _jid = res_d["job_id"]
                 _poll_dt = 3.0
-                _max_polls = 190  # 190 × 3s = 570s
+                # Budget aligné avec frontend ChatPage.tsx (20 min = 1200s)
+                # avec marge réseau ⇒ 1170s côté serveur. Évite le message
+                # trompeur « Génération encore en cours » quand le job aurait
+                # convergé dans le quart d'heure suivant.
+                _max_polls = 390  # 390 × 3s = 1170s
                 for _ in range(_max_polls):
                     await asyncio.sleep(_poll_dt)
                     job = await _job_get(_jid)
@@ -2959,12 +2963,12 @@ async def copilote_chat(
                 ],
             }
         except asyncio.TimeoutError:
-            logger.warning("[Copilote-Designer] Timeout génération visuel (>600s)")
+            logger.warning("[Copilote-Designer] Timeout génération visuel (>1170s)")
             _msg_d = (
                 "⏳ **Génération encore en cours en arrière-plan.**\n\n"
                 "Le rendu prend plus longtemps que d'habitude (densité élevée, "
                 "recherche web active ou charge serveur). Le PDF apparaîtra dans "
-                "**[Mes Documents](/documents)** dans 1-2 minutes — pas besoin de "
+                "**[Mes Documents](/mes-documents)** dans 1-2 minutes — pas besoin de "
                 "relancer."
             )
             _ajouter_message(session, "user", req.message)

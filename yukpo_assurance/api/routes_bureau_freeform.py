@@ -338,12 +338,17 @@ async def _compose_et_render_background(
     (26s sur free-tier). Le frontend poll /status/{job_id} jusqu'à done.
     """
     from modules.bureau import freeform_composer
+    jid8 = job_id[:8]
     try:
         await _job_set(job_id, {
             "statut": "composing", "user_id": user_id,
             "fichier_id": fichier_id,
             "titre": (demande.brief or "document")[:80], "nb_pages": 0,
         })
+        logger.info(
+            f"[Freeform/async] Job {jid8} composer START user={user_id} "
+            f"nb_medias={len(descripteurs_medias or [])} brand_kit={'oui' if brand_kit else 'non'}"
+        )
         t0 = time.time()
         layout_json = await freeform_composer.composer_freeform_layout(
             brief=demande.brief,
@@ -357,6 +362,11 @@ async def _compose_et_render_background(
         duree_compose_ms = int((time.time() - t0) * 1000)
         titre_final = (layout_json.get("titre") or demande.brief or "document")[:80]
         nb_pages_final = len(layout_json.get("pages") or [])
+        nb_elems_final = sum(len(p.get("elements") or []) for p in (layout_json.get("pages") or []))
+        logger.info(
+            f"[Freeform/async] Job {jid8} composer DONE in {duree_compose_ms}ms — "
+            f"{nb_pages_final} pages, {nb_elems_final} elements, fmt={layout_json.get('format_mm')}"
+        )
         await _job_set(job_id, {
             "statut": "running", "user_id": user_id,
             "fichier_id": fichier_id, "titre": titre_final,
@@ -369,7 +379,10 @@ async def _compose_et_render_background(
             brief=demande.brief, pays=demande.pays, langue=demande.langue,
         )
     except Exception as e:
-        logger.error(f"[Freeform/async] Job {job_id[:8]} ECHEC compose : {e}")
+        logger.error(
+            f"[Freeform/async] Job {jid8} ECHEC compose : {e}",
+            exc_info=True,
+        )
         await _job_set(job_id, {
             "statut": "failed", "user_id": user_id,
             "erreur": str(e)[:300], "fichier_id": fichier_id,
@@ -385,15 +398,25 @@ async def _render_background(
     from modules.bureau.service_credits_bureau import debiter_forfait
     nb_pages = len(layout_json.get("pages") or [])
     titre = layout_json.get("titre") or "document"
+    jid8 = job_id[:8]
 
     try:
         await _job_set(job_id, {
             "statut": "running", "user_id": user_id,
             "fichier_id": fichier_id, "titre": titre, "nb_pages": nb_pages,
         })
+        logger.info(
+            f"[Freeform/async] Job {jid8} render START — {nb_pages} pages, "
+            f"export_cmyk={export_cmyk}, fmt={layout_json.get('format_mm')}, "
+            f"imposition={layout_json.get('_imposition_appliquee') or 'aucune'}"
+        )
         t0 = time.time()
         pdf_bytes = await freeform_layout.rendre_pdf_depuis_json(layout_json, medias=medias)
         duree_render_ms = int((time.time() - t0) * 1000)
+        logger.info(
+            f"[Freeform/async] Job {jid8} render DONE in {duree_render_ms}ms — "
+            f"{len(pdf_bytes)} bytes"
+        )
 
         if export_cmyk:
             try:
@@ -401,24 +424,36 @@ async def _render_background(
                 cmyk_bytes = convertir_rgb_to_cmyk(pdf_bytes, icc_name="fogra39")
                 if cmyk_bytes:
                     pdf_bytes = cmyk_bytes
-            except Exception:
-                pass
+                    logger.info(f"[Freeform/async] Job {jid8} CMYK OK — {len(pdf_bytes)} bytes")
+            except Exception as e_cmyk:
+                logger.warning(f"[Freeform/async] Job {jid8} CMYK skip : {e_cmyk}")
 
-        (_DATA_DIR / fichier_id).write_bytes(pdf_bytes)
+        chemin_pdf = _DATA_DIR / fichier_id
+        chemin_pdf.write_bytes(pdf_bytes)
+        logger.info(
+            f"[Freeform/async] Job {jid8} disk write OK — {chemin_pdf} "
+            f"({len(pdf_bytes)} bytes)"
+        )
 
         try:
             await debiter_forfait(
                 user_id, cle_forfait="designerpro_creation",
                 multiplicateur=max(1, nb_pages * 5), module="infographie",
             )
-        except Exception:
-            pass
+            logger.info(
+                f"[Freeform/async] Job {jid8} forfait débité — "
+                f"designerpro_creation × {max(1, nb_pages * 5)}"
+            )
+        except Exception as e_forfait:
+            logger.warning(f"[Freeform/async] Job {jid8} forfait KO : {e_forfait}")
 
         # Persistance DB : sans ça le PDF n'apparaît pas dans 'Mes Documents'
         # (historique = lecture DB, pas le store Zustand frontend qui est local).
+        # En cas d'échec ici on logge ERROR + stacktrace pour diagnostic.
         try:
             from core.database import DocumentGenereDB, async_session_maker
             from datetime import datetime as _dt
+            logger.info(f"[Freeform/async] Job {jid8} DB save START user={user_id}")
             async with async_session_maker() as _db:
                 doc = DocumentGenereDB(
                     user_id=user_id,
@@ -439,9 +474,17 @@ async def _render_background(
                 )
                 _db.add(doc)
                 await _db.commit()
-                logger.info(f"[Freeform/async] Doc DB sauvegardé : {fichier_id}")
+                await _db.refresh(doc)
+                logger.info(
+                    f"[Freeform/async] Job {jid8} DB save DONE — doc_id={doc.id} "
+                    f"fichier={fichier_id}"
+                )
         except Exception as e_db:
-            logger.warning(f"[Freeform/async] Persistance DB KO (non bloquant) : {e_db}")
+            logger.error(
+                f"[Freeform/async] Job {jid8} DB save FAILED (PDF disque OK, "
+                f"mais invisible dans Mes Documents) : {e_db}",
+                exc_info=True,
+            )
 
         # Suggestions (re-créer demande factice pour helper)
         class _D: pass

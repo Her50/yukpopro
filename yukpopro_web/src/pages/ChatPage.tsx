@@ -332,7 +332,7 @@ export const ChatPage = () => {
               updateLastAssistantMessage(
                 `⏳ **Génération encore en cours en arrière-plan** (job ${jobIdSafe.slice(0, 8)}…).\n\n` +
                 `Le rendu prend plus longtemps que prévu (forte densité ou charge serveur). ` +
-                `Le PDF apparaîtra automatiquement dans **[Mes Documents](/documents)** dans 1-3 minutes.\n\n` +
+                `Le PDF apparaîtra automatiquement dans **[Mes Documents](/mes-documents)** dans 1-3 minutes.\n\n` +
                 `Pas besoin de relancer — la tâche est sauvée.`,
                 null, undefined, null, undefined, undefined,
               );
@@ -1432,7 +1432,7 @@ const MessageBubble = ({
                 <div className="text-sm font-semibold text-emerald-100">
                   {message.fichiers.length === 1 ? "Document prêt à télécharger" : `${message.fichiers.length} documents prêts à télécharger`}
                 </div>
-                <div className="text-[11px] text-slate-400">Cliquez pour récupérer votre fichier — également disponible dans <a href="/documents" className="underline hover:text-yukpo-300">Mes documents</a></div>
+                <div className="text-[11px] text-slate-400">Cliquez pour récupérer votre fichier — également disponible dans <a href="/mes-documents" className="underline hover:text-yukpo-300">Mes documents</a></div>
               </div>
             </div>
             <div className="flex flex-col gap-2">
