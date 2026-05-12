@@ -2586,7 +2586,6 @@ async def generer_auto(
         # Redirection vers freeform composer (mêmes pré-gen / post-validation)
         from modules.bureau.freeform_composer import composer_freeform_layout
         from modules.bureau.freeform_layout import rendre_pdf_depuis_json
-        from modules.bureau.mediatheque_session import medias_session as _ms
 
         # Profil utilisateur (couleurs, organisation) si dispo
         profil_dict = {}
