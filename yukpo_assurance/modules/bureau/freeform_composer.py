@@ -271,6 +271,55 @@ détails, **SIMULE des données crédibles** alignées à la marque/pays/
 secteur (c'est exactement le rôle d'un visuel marketing IA-généré).
 
 ═══════════════════════════════════════════════════════════════════════
+EXEMPLE de PROMO BIEN REMPLIE (niveau agence pro) — référence qualité
+═══════════════════════════════════════════════════════════════════════
+Pour un brief minimal type "promo MTN MEGA gain voiture maison terrain
+au Cameroun", tu ne te contentes PAS d'écrire des labels vides
+("À GAGNER :", "Comment participer ?"). Tu PRODUIS tous les contenus :
+
+Exemple de RICHESSE attendue (extraits sortie JSON) :
+  • titre principal :
+      "GAGNEZ GROS AVEC MTN MEGA"
+  • sous-titre :
+      "Plus vous rechargez, plus vous gagnez ! Tirage exceptionnel
+       pour les fêtes."
+  • slogan marque :
+      "Y'ello — Together we are unstoppable"
+  • bloc texte "À GAGNER" rempli :
+      "🏆 1er prix : Maison F4 quartier résidentiel Douala — 32 M XAF
+       🥈 2e prix : SUV Toyota RAV4 2026 — 18 M XAF
+       🥉 3e prix : Terrain 500m² périphérie Yaoundé — 6 M XAF
+       🎁 200 lots de consolation : Smartphone Galaxy A55 + 50 000 XAF crédit"
+  • bloc "Comment participer ?" rempli :
+      "1. Rechargez votre compte MTN d'au moins 1 000 XAF
+       2. Composez *123*MEGA# OU envoyez MEGA au 8484
+       3. Vous recevez automatiquement votre ticket
+       4. 1 recharge = 1 ticket. Cumulable sans limite."
+  • durée :
+      "Du 1er au 31 décembre 2025"
+  • tirage :
+      "Tirage au sort le 7 janvier 2026 à 20h en direct sur
+       facebook.com/MTNCameroon (huissier de justice présent)"
+  • CTA fort :
+      "RECHARGEZ MAINTENANT ET GAGNEZ !"
+  • hashtags :
+      "#MTNMega #PromoCameroun #Y'ello | mtn.cm/mega | 8484"
+  • mentions :
+      "Jeu gratuit sans obligation d'achat. Voir règlement complet sur
+       mtn.cm/mega/regles. © 2025 MTN Cameroon SA."
+
+CHAQUE label ("À GAGNER :", "Comment participer ?", "Durée") DOIT être
+suivi IMMÉDIATEMENT d'un bloc texte rempli (pas un autre label vide).
+Si tu écris "À GAGNER :" suivi de RIEN, c'est un BUG critique — préfère
+ne pas écrire le label plutôt que de l'écrire orphelin.
+
+Le LLM DOIT ANTICIPER ce qui rend un visuel marketing professionnel
+même si l'utilisateur n'a pas tout précisé dans le brief : slogan
+marque, hashtags, mentions légales, URL contact, message d'urgence,
+appel à l'action explicite. C'est ÇA la différence entre un visuel
+"3/10 amateur" et un visuel "9/10 agence pro".
+
+═══════════════════════════════════════════════════════════════════════
 PRÉVENTION CHEVAUCHEMENTS (CRITIQUE — bug observé en prod)
 ═══════════════════════════════════════════════════════════════════════
 RÈGLES STRICTES de placement pour éviter les chevauchements visuels :
@@ -2732,6 +2781,22 @@ commentaire ni markdown.
                 (brief or "").lower(),
             )
         )
+        # Détection marketing/promo dans le brief → upgrade modèle + tokens.
+        # Les visuels marketing exigent un haut niveau de simulation contenu
+        # (lots détaillés avec valeurs, slogan, messages forts, mode de
+        # participation simulé, mentions légales). Sonnet 5000 tok = trop
+        # léger ; on bascule en Opus 8000 tok pour creative writing pro.
+        brief_lower = (brief or "").lower()
+        _marketing_keywords = (
+            "promo", "promotion", "concours", "tirage", "tombola", "gagne",
+            "gagnez", "campagne", "campaign", "marketing", "publicité",
+            "publicite", "affiche", "poster", "flyer", "annonce", "teaser",
+            "lancement", "launch", "événement", "evenement", "event", "soldes",
+            "cashback", "deal", "offre", "win", "concour", "loterie", "loto",
+            "récompense", "recompense", "cadeau", "giveaway", "lucky draw",
+        )
+        marketing_brief = any(kw in brief_lower for kw in _marketing_keywords)
+
         # 3 tiers de budget output selon complexité :
         if densite_elevee and contexte_block:
             # livret cérémonie multi-page (faire-part 8p, programme 12p) +
@@ -2741,6 +2806,13 @@ commentaire ni markdown.
         elif livret_ou_dense:
             # livret 4-8 pages OU N items répétés. Besoin large.
             max_tok = 12000
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
+        elif marketing_brief:
+            # Visuel marketing/promo single-page : exige creative writing pro
+            # (slogans, valeurs simulées, mentions légales). Sonnet 5000 tok
+            # = "case-cocher" superficiel. Opus 8000 tok = vraie densité
+            # marketing agence pro.
+            max_tok = 8000
             _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
         else:
             # Visuel simple 1 page (poster, carte standalone, post social).
