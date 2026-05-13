@@ -276,6 +276,30 @@ export const generateurApi = {
   },
 
   /**
+   * Vidéo IA text-to-video — Kling 1.6 / LTX-Video via fal.ai, Wan2.1
+   * Replicate fallback. Sortie MP4 5-10s.
+   *
+   * Coûts utilisateur (par 5s, ×2 si 10s) :
+   *   • standard (LTX)        : 60 XAF
+   *   • premium  (Kling std)  : 240 XAF
+   *   • ultra    (Kling pro)  : 600 XAF  ← SOTA qualité broadcast/cinema
+   */
+  video: async (req: {
+    prompt: string;
+    duree_s?: number;
+    mode?: "standard" | "premium" | "ultra";
+    aspect_ratio?: "16:9" | "9:16" | "1:1" | "4:3";
+    seed?: number;
+  }): Promise<{
+    ok: boolean; fichier_id: string; url_telechargement: string;
+    duree_s: number; mode: string; aspect_ratio: string;
+    size_kb: number; cout_fcfa: number;
+  }> => {
+    const { data } = await http.post("/bureau/video/generer", req, { timeout: 600_000 });
+    return data;
+  },
+
+  /**
    * Landing Page Web statique — HTML+Tailwind production-ready single-file.
    * Auto-sections (hero, features, stats, pricing, FAQ, etc.) + favicon SVG.
    */

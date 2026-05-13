@@ -292,6 +292,51 @@ export default function ChatUnifieSec() {
       // Détection keyword AVANT orchestrer pour gain de latence + clarté.
       if (atts.length === 0 && msg.trim()) {
         const txt = msg.toLowerCase()
+
+        // ─── Pipeline vidéo IA (text-to-video Kling/LTX) ──────────────
+        // Cf. ChatPage YPro pour la logique de parsing (durée/aspect/mode).
+        const videoMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|veux)[^.]*\bvid[ée]o\b|\bvid[ée]o\s+(promo|tv|pub|reels?|teaser)|\bteaser\b|\breel\b|short\s*video|clip\s*vid[ée]o|spot\s*(pub|tv|publicitaire)|motion\s*ad/i.test(txt)
+        if (videoMatch) {
+          try {
+            const duree_s: 5 | 10 = /\b10\s*s(?:ec(?:ondes?)?)?\b|\bdix\s*secondes?\b/.test(txt) ? 10 : 5
+            const aspect_ratio: '9:16' | '1:1' | '4:3' | '16:9' =
+              /\breel|story|tiktok|insta\s*story|9\s*:\s*16|vertical/.test(txt) ? '9:16'
+              : /\binsta\s*(feed|post)?|carr[ée]|square|1\s*:\s*1/.test(txt) ? '1:1'
+              : /\b4\s*:\s*3|classique\b/.test(txt) ? '4:3'
+              : '16:9'
+            const mode: 'standard' | 'premium' | 'ultra' =
+              /ultra|cin[ée]ma|broadcast|sora|sota|haute\s*qualit[ée]|tv\s*pro|professionnel|qualit[ée]\s*max/.test(txt) ? 'ultra'
+              : /rapide|standard|\b(eco|pas\s*cher|low[-\s]?cost)\b|ltx/.test(txt) ? 'standard'
+              : 'premium'
+            const { videoAPI } = await import('../api/client')
+            const res = await videoAPI.generer({
+              prompt: msg, duree_s, mode, aspect_ratio,
+            })
+            const d = res.data as any
+            const tok = localStorage.getItem('bureau_token') || ''
+            const baseUrl = d.url_telechargement || ''
+            const url = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(tok)
+            const yukpoTurn: ChatTurn = {
+              role: 'yukpo', ts: new Date().toISOString(),
+              content: `✓ Vidéo ${duree_s}s ${aspect_ratio} (${mode}, ${d.size_kb} KB) — ${d.cout_fcfa} XAF\n` +
+                `[▶ Lire / Télécharger MP4](${url})`,
+              intent: 'video',
+              resultat: { type: 'video', data: d },
+            }
+            setTurns(prev => [...prev, yukpoTurn])
+            return
+          } catch (e: any) {
+            const detail = e?.response?.data?.detail || e?.message || 'inconnue'
+            const yukpoTurn: ChatTurn = {
+              role: 'yukpo', ts: new Date().toISOString(),
+              content: `❌ Erreur génération vidéo : ${detail}`,
+              intent: 'erreur',
+            }
+            setTurns(prev => [...prev, yukpoTurn])
+            return
+          }
+        }
+
         const slidesWebMatch = /(slides?\s*web|pr[ée]sentation\s*(web|interactive|reveal|partage|en ligne)|reveal\.?js|html\s*pr[ée]sentation)/i.test(txt)
         const landingMatch = /(landing\s*page|landing|one[-\s]?pager|page\s*(d'?accueil|produit|web\s*unique)|site\s*(web\s*)?une\s*page)/i.test(txt)
         if (slidesWebMatch || landingMatch) {

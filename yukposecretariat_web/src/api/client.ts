@@ -272,6 +272,20 @@ export const landingPageAPI = {
   }) => httpRoot.post('/pro/landing-page/generer', req, { timeout: 600_000 }),
 }
 
+// Vidéo IA text-to-video — Kling 1.6 std/pro + LTX-Video via fal.ai +
+// Wan2.1 Replicate fallback. Sortie MP4 5-10s, 4 aspect ratios.
+// Coûts user (par 5s, ×2 si 10s) : standard 60 XAF | premium 240 | ultra 600.
+// Endpoint sur /api/v1/bureau/video → `api` (baseURL=/api/v1/bureau) suffit.
+export const videoAPI = {
+  generer: (req: {
+    prompt: string;
+    duree_s?: number;
+    mode?: 'standard' | 'premium' | 'ultra';
+    aspect_ratio?: '16:9' | '9:16' | '1:1' | '4:3';
+    seed?: number;
+  }) => api.post('/video/generer', req, { timeout: 600_000 }),
+}
+
 
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
 // `api` a baseURL=/api/v1/bureau (normalisé). On appelle donc /chat/message
