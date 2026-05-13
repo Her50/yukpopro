@@ -99,17 +99,19 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
 [http_service]
   internal_port = 8080
   force_https = true
-  # ⚠ NE PAS REMETTRE auto_stop_machines + min_machines_running = 0 sans
-  # migrer asyncio.create_task → Celery. Le scale-to-zero TUE les jobs
-  # background en mémoire si la machine s'arrête pendant le rendu.
-  # Bug observé en prod : visuels marketing restent à "pending" car le
-  # process Python est tué avant la fin du _compose_et_render_background.
+  # Scale-to-zero RÉACTIVÉ après diagnostic correct (mai 2026) : le vrai
+  # bug qu'on attribuait à scale-to-zero était en réalité une f-string
+  # Python mal échappée dans freeform_composer.py ligne 2517 (commit fix).
+  # Le polling /status toutes les 6s maintient la machine éveillée pendant
+  # un job actif, donc auto_stop ne tue PAS les jobs en pratique. Économie :
+  # $50-65/mois selon usage (vs $71/mois 24/7).
   #
-  # Solution propre : asyncio → Celery (état durable Redis broker), worker
-  # qui survit aux redémarrages. Tant que pas migré, MAINTENIR min=1.
-  auto_stop_machines = "off"   # machine ne s'éteint PAS pendant idle
+  # ⚠ Risque résiduel : un user qui FERME son onglet pile après avoir
+  # lancé un job long (>5 min sans poll) → machine s'éteint, asyncio
+  # task meurt. Migration Celery future éliminera ce résidu.
+  auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 1     # ← 1 machine toujours chaude (jobs survivent)
+  min_machines_running = 0     # ← 0 = scale-to-zero quand vraiment idle
 
   [http_service.concurrency]
     type = "requests"

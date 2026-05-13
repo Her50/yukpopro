@@ -2514,8 +2514,8 @@ et qui doivent apparaître en image (pas seulement en texte) :
 - Tout ce qui rend le visuel plus narratif qu'un simple texte
 
 Pour CHAQUE élément concret identifié, si AUCUN média n'est uploadé
-pour cet élément, tu DOIS générer un `{"type":"image",
-"prompt_ia":"<EN 30-60 mots description précise pour Flux Pro Ultra>"}`
+pour cet élément, tu DOIS générer un `{{"type":"image",
+"prompt_ia":"<EN 30-60 mots description précise pour Flux Pro Ultra>"}}`
 décrivant ce qui doit être montré.
 - Description en ANGLAIS, photo-réaliste sauf intention illustrée
 - Contexte adapté au registre (haut de gamme, lifestyle, corporate…)
