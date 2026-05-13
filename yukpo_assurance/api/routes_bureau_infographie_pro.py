@@ -3008,10 +3008,19 @@ class DemandeGeometricPlacement(BaseModel):
         description="Palette + polices BrandKit organisation")
     inspiration: Optional[str] = Field(default=None,
         description="Brief de style libre (ex: 'minimaliste japonais')")
+    langue: str = Field(default="fr",
+        description="Code ISO langue des textes sur le visuel "
+                    "(fr/en/es/pt/de/it/ar/zh/ja/ru/hi/sw/ha/wo/ln/am/tr)")
     modele: str = Field(default="sonnet",
         description="sonnet (équilibre) | opus (complexité) | haiku (rapide)")
     dpi: int = Field(default=300, ge=72, le=600)
     debug_grid: bool = Field(default=False)
+    revision_visuelle: bool = Field(default=False,
+        description="Si True : boucle auto-critique LLM Vision (audit du rendu + "
+                    "révision du PlacementPlan si défauts détectés, max 2 itérations).")
+    max_iterations_revision: int = Field(default=2, ge=1, le=4)
+    score_seuil_ok: float = Field(default=7.5, ge=5.0, le=10.0,
+        description="Score qualité ≥ ce seuil → arrêt révision (évite gains marginaux coûteux)")
 
 
 @router.post("/geometric-placement", tags=["Bureau — Designer Pro"])
@@ -3058,33 +3067,65 @@ async def geometric_placement(
         except Exception as e:
             logger.warning(f"[GeomPlacement] média {ref} non lu : {e}")
 
-    # Phase 1 : LLM → PlacementPlan
-    try:
-        placement = await generer_placement_plan(
-            brief=demande.brief,
-            page_w_mm=demande.page_w_mm,
-            page_h_mm=demande.page_h_mm,
-            bleed_mm=demande.bleed_mm,
-            medias=manifests,
-            brand_kit=demande.brand_kit,
-            inspiration=demande.inspiration,
-            modele=demande.modele,
-        )
-    except Exception as e:
-        logger.error(f"[GeomPlacement] LLM échec : {e}")
-        raise HTTPException(502, f"LLM placement échoué : {str(e)[:200]}")
-    if placement is None:
-        raise HTTPException(502, "LLM n'a pas produit de PlacementPlan parseable")
-    placement.debug_grid = demande.debug_grid
+    # Phase 1+2 (+ Phase 3 audit si revision_visuelle)
+    journal_revisions: list[dict] = []
+    if demande.revision_visuelle:
+        from modules.bureau.llm_placement import generer_visuel_avec_revision
+        try:
+            placement, png_bytes, journal_revisions = await generer_visuel_avec_revision(
+                brief=demande.brief,
+                page_w_mm=demande.page_w_mm,
+                page_h_mm=demande.page_h_mm,
+                bleed_mm=demande.bleed_mm,
+                medias_bytes=medias_bytes,
+                medias_manifest=manifests,
+                brand_kit=demande.brand_kit,
+                inspiration=demande.inspiration,
+                modele=demande.modele,
+                langue=demande.langue,
+                dpi=demande.dpi,
+                max_iterations=demande.max_iterations_revision,
+                score_seuil_ok=demande.score_seuil_ok,
+            )
+        except Exception as e:
+            logger.error(f"[GeomPlacement] Pipeline avec révision KO : {e}")
+            raise HTTPException(500, f"Pipeline géométrique échoué : {str(e)[:200]}")
+        if placement is None:
+            raise HTTPException(502, "LLM n'a pas produit de PlacementPlan parseable")
+        if demande.debug_grid and placement is not None:
+            # Re-render avec grid si demandé (le pipeline interne ne l'a pas posée)
+            placement.debug_grid = True
+            png_bytes = render_placement_plan(
+                placement, medias_bytes, dpi=demande.dpi, include_bleed=True,
+            )
+    else:
+        # Pipeline simple sans audit
+        try:
+            placement = await generer_placement_plan(
+                brief=demande.brief,
+                page_w_mm=demande.page_w_mm,
+                page_h_mm=demande.page_h_mm,
+                bleed_mm=demande.bleed_mm,
+                medias=manifests,
+                brand_kit=demande.brand_kit,
+                inspiration=demande.inspiration,
+                modele=demande.modele,
+                langue=demande.langue,
+            )
+        except Exception as e:
+            logger.error(f"[GeomPlacement] LLM échec : {e}")
+            raise HTTPException(502, f"LLM placement échoué : {str(e)[:200]}")
+        if placement is None:
+            raise HTTPException(502, "LLM n'a pas produit de PlacementPlan parseable")
+        placement.debug_grid = demande.debug_grid
 
-    # Phase 2 : Python render
-    try:
-        png_bytes = render_placement_plan(
-            placement, medias_bytes, dpi=demande.dpi, include_bleed=True,
-        )
-    except Exception as e:
-        logger.error(f"[GeomPlacement] Render échec : {e}")
-        raise HTTPException(500, f"Rendu géométrique échoué : {str(e)[:200]}")
+        try:
+            png_bytes = render_placement_plan(
+                placement, medias_bytes, dpi=demande.dpi, include_bleed=True,
+            )
+        except Exception as e:
+            logger.error(f"[GeomPlacement] Render échec : {e}")
+            raise HTTPException(500, f"Rendu géométrique échoué : {str(e)[:200]}")
 
     try:
         await debiter_forfait(current_user.user_id, "designerpro_freeform_layout",
@@ -3103,4 +3144,5 @@ async def geometric_placement(
         "placement_plan": placement.model_dump(),
         "nb_items": len(placement.items),
         "medias_utilises": list(medias_bytes.keys()),
+        "revisions_journal": journal_revisions,
     }

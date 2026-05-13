@@ -136,6 +136,27 @@ SORTIE : JSON STRICT conforme au schéma indiqué. Pas de markdown, pas de prose
 """
 
 
+_LANGUE_INFOS = {
+    "fr": {"nom": "français",  "direction": "ltr", "polices_priorisees": ["Inter", "Calibri", "Lato"]},
+    "en": {"nom": "anglais",   "direction": "ltr", "polices_priorisees": ["Inter", "Helvetica", "Arial"]},
+    "es": {"nom": "espagnol",  "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "pt": {"nom": "portugais", "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "de": {"nom": "allemand",  "direction": "ltr", "polices_priorisees": ["Inter", "Calibri"]},
+    "it": {"nom": "italien",   "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "ar": {"nom": "arabe",     "direction": "rtl", "polices_priorisees": ["Noto Sans Arabic", "Amiri", "Cairo"]},
+    "zh": {"nom": "chinois",   "direction": "ltr", "polices_priorisees": ["Noto Sans SC", "PingFang SC"]},
+    "ja": {"nom": "japonais",  "direction": "ltr", "polices_priorisees": ["Noto Sans JP", "Hiragino"]},
+    "ru": {"nom": "russe",     "direction": "ltr", "polices_priorisees": ["Inter", "Liberation Sans"]},
+    "hi": {"nom": "hindi",     "direction": "ltr", "polices_priorisees": ["Noto Sans Devanagari"]},
+    "sw": {"nom": "swahili",   "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "ha": {"nom": "haoussa",   "direction": "ltr", "polices_priorisees": ["Inter", "Noto Sans"]},
+    "wo": {"nom": "wolof",     "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "ln": {"nom": "lingala",   "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+    "am": {"nom": "amharique", "direction": "ltr", "polices_priorisees": ["Noto Sans Ethiopic"]},
+    "tr": {"nom": "turc",      "direction": "ltr", "polices_priorisees": ["Inter", "Lato"]},
+}
+
+
 def construire_prompt_user(
     brief: str,
     page_w_mm: float,
@@ -144,6 +165,7 @@ def construire_prompt_user(
     medias: Optional[list[dict]] = None,
     brand_kit: Optional[dict] = None,
     inspiration: Optional[str] = None,
+    langue: str = "fr",
 ) -> str:
     """
     Compose le prompt user complet.
@@ -151,6 +173,8 @@ def construire_prompt_user(
     `medias`     : liste de manifests produits par manifest_image().
     `brand_kit`  : {couleur_primaire_hex, couleur_accent_hex, polices: {titre, corps}, ...}
     `inspiration`: brief de style libre ("style minimaliste japonais", "deuil classique européen").
+    `langue`     : code ISO de la langue cible pour TOUS les textes du visuel
+                   (fr/en/es/pt/de/ar/zh/ja/ru/hi/sw/ha/wo/ln/am/tr).
     """
     medias_str = ""
     if medias:
@@ -162,6 +186,24 @@ def construire_prompt_user(
     if inspiration:
         inspi_str = f"\n\nINSPIRATION STYLISTIQUE : {inspiration}"
 
+    # Langue cible : injection explicite des contraintes typographiques
+    info_l = _LANGUE_INFOS.get(langue, _LANGUE_INFOS["fr"])
+    polices_pref = ", ".join(info_l["polices_priorisees"])
+    rtl_note = ""
+    if info_l["direction"] == "rtl":
+        rtl_note = (
+            "\n  • Direction RTL (droite→gauche) : align='right' pour les blocs "
+            "de paragraphe, mais align='center' pour titres centrés sur la page. "
+            "Le texte arabe lui-même est rendu correctement par PIL/HarfBuzz."
+        )
+    langue_str = (
+        f"\n\nLANGUE DES TEXTES SUR LE VISUEL : {info_l['nom']} (code ISO : {langue})\n"
+        f"  • TOUS les textes (titres, sous-titres, corps, légendes, mentions) "
+        f"DOIVENT être en {info_l['nom']}. Pas de mélange.\n"
+        f"  • Polices priorisées (par ordre de préférence selon la couverture "
+        f"glyphes) : {polices_pref}. Choisis font_family parmi cette liste.{rtl_note}"
+    )
+
     return f"""BRIEF UTILISATEUR :
 \"\"\"{brief}\"\"\"
 
@@ -169,7 +211,7 @@ PAGE :
   - Largeur  : {page_w_mm} mm (trim, sans bleed)
   - Hauteur  : {page_h_mm} mm
   - Bleed    : {bleed_mm} mm (zone de fond perdu pour découpe imprimeur)
-  - Origine  : top-left, axe Y descendant (comme CSS)
+  - Origine  : top-left, axe Y descendant (comme CSS){langue_str}
 {medias_str}{brand_str}{inspi_str}
 
 SCHÉMA JSON ATTENDU :
@@ -250,6 +292,7 @@ async def generer_placement_plan(
     brand_kit: Optional[dict] = None,
     inspiration: Optional[str] = None,
     modele: str = "sonnet",
+    langue: str = "fr",
 ) -> Optional[PlacementPlan]:
     """
     Appelle le LLM et retourne un PlacementPlan validé.
@@ -257,6 +300,8 @@ async def generer_placement_plan(
     `modele` : 'sonnet' (défaut, équilibre vision/coût), 'opus' (placements
                complexes mémoire/livret), 'haiku' (placements simples
                carte/flyer rapide).
+    `langue` : code ISO de la langue cible des textes sur le visuel
+               (fr/en/es/pt/de/ar/zh/ja/ru/hi/sw/ha/wo/ln/am/tr).
     """
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
@@ -269,6 +314,7 @@ async def generer_placement_plan(
     user_prompt = construire_prompt_user(
         brief, page_w_mm, page_h_mm, bleed_mm,
         medias=medias, brand_kit=brand_kit, inspiration=inspiration,
+        langue=langue,
     )
 
     try:
@@ -314,3 +360,212 @@ async def generer_placement_plan(
             logger.error(f"[LLMPlacement] Auto-fix échoué : {e2}")
             return None
     return plan
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Boucle auto-critique LLM Vision (audit + révision avant rendu final)
+# ═══════════════════════════════════════════════════════════════════════
+
+PROMPT_REVISION_SYSTEM = """Tu es DIRECTEUR ARTISTIQUE SENIOR. Tu reçois UN VISUEL
+DÉJÀ RENDU à auditer en VISION (image PNG attachée) AVEC le PlacementPlan JSON
+qui l'a produit. Ton job : repérer les défauts qu'un humain remarquerait au
+premier coup d'œil et proposer un plan corrigé.
+
+DÉFAUTS À TRAQUER :
+1. Texte tronqué (ne rentre pas dans sa bbox), débordement, chevauchement avec
+   d'autres éléments.
+2. Image mal cadrée (sujet coupé, visage tronqué, focal_point décalé).
+3. Hiérarchie cassée (titre trop petit, sous-titre trop gros, parité visuelle).
+4. Espacement irrégulier (alignements ratés, marges incohérentes).
+5. Couleurs : contraste insuffisant texte/fond (ratio WCAG < 4.5 pour corps),
+   conflit palette charte.
+6. Zones vides disgracieuses ou densité visuelle déséquilibrée.
+7. Forme du masque inadaptée (cercle pour paysage, rect pour portrait carré, etc.).
+8. Police inadaptée au registre (formel/festif/sobre).
+9. Rotation/ombre/effet excessif ou absent là où il manque.
+
+SORTIE JSON STRICT :
+{
+  "verdict": "ok" | "ameliorations_mineures" | "refonte_necessaire",
+  "score_qualite_sur_10": 7.5,
+  "issues": [
+    {"severite": "critique|majeur|mineur", "type": "texte_tronque|...",
+     "item_index": 2, "description": "Le titre déborde de 8mm à droite",
+     "correctif": "Réduire font_size_pt de 32 à 26 OU élargir bbox.w de 60 à 90"}
+  ],
+  "plan_revise": null OU {PlacementPlan complet avec corrections appliquées}
+}
+
+Si verdict='ok' → plan_revise=null (pas de re-render nécessaire).
+Si verdict='ameliorations_mineures' OU 'refonte_necessaire' → fournis le
+PlacementPlan complet revisé conforme au schéma initial.
+"""
+
+
+async def auditer_et_reviser_placement(
+    plan: PlacementPlan,
+    png_bytes: bytes,
+    brief: str,
+    medias_manifest: Optional[list[dict]] = None,
+    modele: str = "sonnet",
+) -> Optional["RevisionResult"]:
+    """
+    Phase 3 (optionnelle) : audit visuel du rendu par Sonnet Vision puis
+    proposition de plan révisé si défauts détectés.
+
+    Retourne un RevisionResult avec verdict + issues + plan_revise (ou None).
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import base64
+
+    forcer_modele = {
+        "sonnet": ModelePrioritaire.CLAUDE_SONNET,
+        "opus":   ModelePrioritaire.CLAUDE_OPUS,
+    }.get(modele, ModelePrioritaire.CLAUDE_SONNET)
+
+    user_prompt = (
+        f"BRIEF UTILISATEUR INITIAL :\n\"\"\"{brief}\"\"\"\n\n"
+        f"PLACEMENT_PLAN qui a produit le visuel ci-joint :\n"
+        f"{json.dumps(plan.model_dump(), ensure_ascii=False)[:6000]}\n\n"
+        f"MÉDIAS UPLOADÉS :\n"
+        f"{json.dumps(medias_manifest or [], ensure_ascii=False)[:2000]}\n\n"
+        f"Audite le visuel attaché et retourne le JSON de révision."
+    )
+
+    # Sonnet supporte les images en input via 'images' param du ia_client.
+    # Si l'implémentation locale ne supporte pas, fallback texte-only avec
+    # description sommaire (mais qualité dégradée).
+    image_b64 = base64.b64encode(png_bytes).decode()
+    try:
+        rep = await ia_client.appeler(
+            prompt=user_prompt,
+            systeme=PROMPT_REVISION_SYSTEM,
+            mode=ModeIA.PRECISION,
+            forcer_modele=forcer_modele,
+            json_attendu=True,
+            max_tokens_override=4500,
+            images=[{"data": image_b64, "mime": "image/png"}],
+        )
+    except TypeError:
+        # ia_client ne supporte pas images= → fallback sans vision
+        logger.info("[Revision] ia_client.appeler ne supporte pas images, audit texte-only")
+        try:
+            rep = await ia_client.appeler(
+                prompt=user_prompt + "\n\n[NOTE: rendu visuel non transmis, audit basé "
+                                       "uniquement sur le PlacementPlan JSON]",
+                systeme=PROMPT_REVISION_SYSTEM,
+                mode=ModeIA.PRECISION,
+                forcer_modele=forcer_modele,
+                json_attendu=True,
+                max_tokens_override=4500,
+            )
+        except Exception as e:
+            logger.warning(f"[Revision] LLM fallback texte échoué : {e}")
+            return None
+    except Exception as e:
+        logger.warning(f"[Revision] LLM échoué : {e}")
+        return None
+
+    raw = (rep.contenu or "").strip()
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            return None
+        try:
+            data = json.loads(m.group())
+        except Exception:
+            return None
+
+    verdict = data.get("verdict", "ok")
+    issues = data.get("issues", [])
+    score = float(data.get("score_qualite_sur_10", 5.0))
+    plan_revise = None
+    raw_revise = data.get("plan_revise")
+    if isinstance(raw_revise, dict):
+        try:
+            plan_revise = PlacementPlan(**raw_revise)
+        except Exception as e:
+            logger.warning(f"[Revision] plan_revise invalide : {e}")
+            plan_revise = None
+
+    return RevisionResult(
+        verdict=verdict, score=score, issues=issues, plan_revise=plan_revise,
+    )
+
+
+class RevisionResult(BaseModel):
+    """Résultat d'un audit Vision LLM."""
+    verdict: str = Field(...,
+        description="ok | ameliorations_mineures | refonte_necessaire")
+    score: float = Field(..., ge=0.0, le=10.0)
+    issues: list[dict] = Field(default_factory=list)
+    plan_revise: Optional[PlacementPlan] = None
+
+
+async def generer_visuel_avec_revision(
+    brief: str,
+    page_w_mm: float, page_h_mm: float, bleed_mm: float,
+    medias_bytes: dict[str, bytes],
+    medias_manifest: list[dict],
+    brand_kit: Optional[dict] = None,
+    inspiration: Optional[str] = None,
+    modele: str = "sonnet",
+    langue: str = "fr",
+    dpi: int = 300,
+    max_iterations: int = 2,
+    score_seuil_ok: float = 7.5,
+) -> tuple[Optional[PlacementPlan], bytes, list[dict]]:
+    """
+    Pipeline complet : placement → rendu → audit → révision → re-rendu.
+
+    Retourne (plan_final, png_final, journal_revisions).
+    `max_iterations` borné à 2 pour limiter coût (chaque iter = 1 appel
+    LLM placement + 1 appel LLM audit + 1 render).
+    `score_seuil_ok` : si score ≥ ce seuil, on arrête même si plan_revise
+    existe (évite révisions infinies pour gains marginaux).
+    """
+    from .geometric_placement import render_placement_plan
+
+    journal: list[dict] = []
+    plan = await generer_placement_plan(
+        brief, page_w_mm, page_h_mm, bleed_mm,
+        medias=medias_manifest, brand_kit=brand_kit,
+        inspiration=inspiration, modele=modele, langue=langue,
+    )
+    if plan is None:
+        return None, b"", [{"iteration": 0, "erreur": "LLM placement initial KO"}]
+
+    png = render_placement_plan(plan, medias_bytes, dpi=dpi, include_bleed=True)
+    journal.append({"iteration": 0, "etape": "render_initial", "size_kb": len(png) // 1024})
+
+    for it in range(1, max_iterations + 1):
+        revision = await auditer_et_reviser_placement(
+            plan, png, brief, medias_manifest=medias_manifest, modele=modele,
+        )
+        if revision is None:
+            journal.append({"iteration": it, "etape": "audit_skip", "raison": "LLM KO"})
+            break
+
+        journal.append({
+            "iteration": it, "etape": "audit",
+            "verdict": revision.verdict,
+            "score": revision.score,
+            "nb_issues": len(revision.issues),
+            "issues_critiques": sum(1 for i in revision.issues
+                                     if i.get("severite") == "critique"),
+        })
+
+        if revision.verdict == "ok" or revision.score >= score_seuil_ok:
+            break
+        if revision.plan_revise is None:
+            journal.append({"iteration": it, "etape": "audit_sans_revise"})
+            break
+
+        plan = revision.plan_revise
+        png = render_placement_plan(plan, medias_bytes, dpi=dpi, include_bleed=True)
+        journal.append({"iteration": it, "etape": "re_render",
+                        "size_kb": len(png) // 1024})
+
+    return plan, png, journal
