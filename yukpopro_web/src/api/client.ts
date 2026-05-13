@@ -384,6 +384,74 @@ export const generateurApi = {
   },
 
   /**
+   * Phase C — Mini-site multi-pages (home + services + équipe + blog + contact).
+   * Génère TOUT le site en un appel LLM Sonnet (10k+ tokens) + N images IA.
+   */
+  genererSite: async (req: {
+    brief: string;
+    types_pages?: string[];
+    langue?: string;
+    cible?: string;
+    ton?: string;
+    brand_kit?: Record<string, any> | null;
+    generer_images?: boolean;
+  }): Promise<{
+    ok: boolean; site_id: number; slug: string; nom: string;
+    statut: string; nb_pages: number; types_pages: string[];
+    url_publier: string;
+  }> => {
+    const { data } = await http.post("/pro/sites/generer", req, { timeout: 900_000 });
+    return data;
+  },
+
+  publierSite: async (slug: string, plan: "free" | "pro" | "business" = "free") => {
+    const { data } = await http.post(
+      `/pro/sites/${encodeURIComponent(slug)}/publier`,
+      { plan }, { timeout: 180_000 },
+    );
+    return data;
+  },
+
+  listerSites: async () => {
+    const { data } = await http.get("/pro/sites");
+    return data as { sites: Array<{
+      id: number; slug: string; nom: string; statut: string;
+      plan: string; url_public: string | null;
+      cree_le: string; publie_le: string | null;
+      derniere_modif: string;
+    }>};
+  },
+
+  detailSite: async (slug: string) => {
+    const { data } = await http.get(`/pro/sites/${encodeURIComponent(slug)}`);
+    return data;
+  },
+
+  modifierPageSite: async (slug: string, type: string, instructions: string) => {
+    const { data } = await http.patch(
+      `/pro/sites/${encodeURIComponent(slug)}/pages/${encodeURIComponent(type)}`,
+      { instructions }, { timeout: 300_000 },
+    );
+    return data;
+  },
+
+  genererArticleBlog: async (slug: string, req: {
+    sujet: string; auteur?: string; langue?: string;
+    publier_immediatement?: boolean; publier_dans_jours?: number;
+  }) => {
+    const { data } = await http.post(
+      `/pro/sites/${encodeURIComponent(slug)}/articles`,
+      req, { timeout: 600_000 },
+    );
+    return data;
+  },
+
+  supprimerSite: async (slug: string) => {
+    const { data } = await http.delete(`/pro/sites/${encodeURIComponent(slug)}`);
+    return data;
+  },
+
+  /**
    * Sprint G1 — Auto-orchestrateur génération documents.
    * L'utilisateur tape un brief en langage naturel, le backend détecte
    * automatiquement le type d'output, le template, le mode et le format.

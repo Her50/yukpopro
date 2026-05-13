@@ -386,6 +386,33 @@ export const ChatPage = () => {
           }
         }
 
+        // Phase C — détection site multi-pages AVANT landing single-page
+        // (l'utilisateur dit "site 5 pages" → on prend site_multi, pas landing)
+        const siteMultiMatch = /(site\s*(web\s*)?(multi[-\s]?pages?|vitrine|complet|\d+\s*pages?)|mini[-\s]?site|site\s*pro|cr[ée][ée]?\s*(un|le)?\s*site|g[ée]n[èe]re\s+un\s+site)/i.test(txt)
+          && !/une\s*page|une\s*seule\s*page|one[-\s]?pager|landing/i.test(txt);
+        if (siteMultiMatch) {
+          try {
+            updateLastAssistantMessage(
+              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_LLM Sonnet compose 5-7 pages + images IA hero._",
+              null,
+            );
+            const result = await generateurApi.genererSite({
+              brief: content, langue: "fr", generer_images: true,
+            });
+            updateLastAssistantMessage(
+              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n` +
+              `[🚀 Publier en ligne](/mes-sites) puis cliquer "Publier" — déploiement Netlify → \`${result.slug}.yukpomnang.com\``,
+              null,
+            );
+            toast.success("Site multi-pages prêt — à publier !");
+            return;
+          } catch (e: any) {
+            const detail = e?.response?.data?.detail || e?.message || "inconnue";
+            updateLastAssistantMessage(`❌ Erreur génération site : ${String(detail).slice(0, 200)}`, null);
+            return;
+          }
+        }
+
         const slidesWebMatch = /(slides?\s*web|pr[ée]sentation\s*(web|interactive|reveal|partage|en ligne)|reveal\.?js|html\s*pr[ée]sentation)/i.test(txt);
         const landingMatch = /(landing\s*page|landing|one[-\s]?pager|page\s*(d'?accueil|produit|web\s*unique)|site\s*(web\s*)?une\s*page)/i.test(txt);
         if (slidesWebMatch || landingMatch) {

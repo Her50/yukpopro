@@ -1215,5 +1215,25 @@
     "annuler": "Annuler",
     "continuer": "Continuer",
     "recharger": "Recharger"
+  },
+  "sites": {
+    "titre": "Mes mini-sites multi-pages",
+    "sous_titre": "Sites vitrines générés par chat. Pour en créer un nouveau, tapez « génère un site 5 pages pour … » dans le chat.",
+    "refresh": "Rafraîchir",
+    "vide": "Aucun site pour l'instant. Tapez dans le chat : « génère un site 5 pages pour mon cabinet d'expertise comptable Douala ».",
+    "aller_chat": "Aller au chat",
+    "cree_le": "Créé le",
+    "publie_le": "Publié le",
+    "publier": "Publier",
+    "publie": "Site publié !",
+    "republier": "Re-publier",
+    "editer": "Éditer",
+    "supprimer": "Supprimer",
+    "supprime": "Site supprimé",
+    "confirm_delete": "Supprimer définitivement ce site ?",
+    "statut": {
+      "publie": "Publié",
+      "brouillon": "Brouillon"
+    }
   }
 }

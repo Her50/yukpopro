@@ -1215,5 +1215,25 @@
     "annuler": "Cancel",
     "continuer": "Continue",
     "recharger": "Top up"
+  },
+  "sites": {
+    "titre": "My multi-page websites",
+    "sous_titre": "Vitrine websites generated via chat. Type « build a 5-page site for … » in chat to create a new one.",
+    "refresh": "Refresh",
+    "vide": "No site yet. Type in chat: « build a 5-page site for my accounting firm in Douala ».",
+    "aller_chat": "Go to chat",
+    "cree_le": "Created",
+    "publie_le": "Published",
+    "publier": "Publish",
+    "publie": "Site published!",
+    "republier": "Re-publish",
+    "editer": "Edit",
+    "supprimer": "Delete",
+    "supprime": "Site deleted",
+    "confirm_delete": "Permanently delete this site?",
+    "statut": {
+      "publie": "Published",
+      "brouillon": "Draft"
+    }
   }
 }

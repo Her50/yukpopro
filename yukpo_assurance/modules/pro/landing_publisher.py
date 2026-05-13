@@ -68,6 +68,30 @@ def _zip_html_unique_file(html_bytes: bytes) -> bytes:
     return buf.getvalue()
 
 
+def _zip_arborescence(files: dict) -> bytes:
+    """Empaquette un dict {chemin_relatif: bytes} en ZIP Netlify.
+
+    Phase C — utilisé pour les mini-sites multi-pages :
+    files = {
+      "index.html":           b"...",
+      "services/index.html":  b"...",
+      "equipe/index.html":    b"...",
+      "blog/article-x/index.html": b"...",
+      "sitemap.xml":          b"...",
+      "robots.txt":           b"...",
+    }
+    """
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for path, content in files.items():
+            # Sécurité : on refuse les chemins absolus ou path traversal
+            if path.startswith("/") or ".." in path or path.startswith("\\"):
+                logger.warning(f"[Netlify/zip] chemin invalide ignoré : {path}")
+                continue
+            zf.writestr(path, content)
+    return buf.getvalue()
+
+
 async def creer_site(slug: str, *, ajouter_alias_custom: bool = True) -> dict:
     """Crée un nouveau site Netlify pour ce slug.
 
@@ -160,6 +184,44 @@ async def republier_landing(site_id: str, html_bytes: bytes) -> dict:
         f"deploy={deploy.get('deploy_id')}"
     )
     return deploy
+
+
+async def publier_site_multipage(
+    files: dict, slug: str,
+    *, site_id_existant: Optional[str] = None,
+) -> dict:
+    """Phase C — Publie un site multi-pages (arborescence de fichiers) sur Netlify.
+
+    Args:
+        files            : dict {chemin: bytes} (incluant index.html + sitemap)
+        slug             : sous-domaine cible (<slug>.yukpomnang.com)
+        site_id_existant : si fourni, re-déploiement sur ce site (sinon création)
+
+    Returns: {site_id, url_public, deploy_id, is_new}
+    """
+    if not slug or not slug.replace("-", "").isalnum():
+        raise ValueError(f"Slug invalide : {slug!r}")
+    zip_bytes = _zip_arborescence(files)
+
+    if site_id_existant:
+        deploy = await deployer_zip(site_id_existant, zip_bytes)
+        return {
+            "site_id": site_id_existant,
+            "url_public": None,  # déjà connu côté caller
+            "deploy_id": deploy.get("deploy_id"),
+            "state": deploy.get("state"),
+            "is_new": False,
+        }
+    site = await creer_site(slug)
+    deploy = await deployer_zip(site["site_id"], zip_bytes)
+    return {
+        "site_id": site["site_id"],
+        "url_public": site["url_public_souhaitee"],
+        "fallback_netlify_url": site["ssl_url"],
+        "deploy_id": deploy.get("deploy_id"),
+        "state": deploy.get("state"),
+        "is_new": True,
+    }
 
 
 async def supprimer_site(site_id: str) -> bool:

@@ -270,6 +270,12 @@ _ESTIMATIONS_DEFAUT: dict[str, float] = {
     "enquete_generer":         300.0,
     "enquete_analyse_simple":  150.0,
     "enquete_analyse_complexe": 800.0,
+    # Phase C — mini-sites multi-pages
+    "site_multi_page":         800.0,   # LLM 12k+ tokens + N images IA hero
+    "site_publish":             80.0,   # build ZIP + deploy Netlify multi-fichiers
+    "site_page_modif":         150.0,   # LLM modif d'1 page (réduit vs régénération)
+    "site_blog_article":       400.0,   # rédaction + image hero
+    "site_traduction_page":    100.0,   # traduction d'1 page (Phase C4)
     # Catch-all
     "default":                 100.0,
 }

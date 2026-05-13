@@ -1359,6 +1359,89 @@ class TrackingSettingsDB(Base):
                                    onupdate=datetime.utcnow, nullable=False)
 
 
+class SiteDB(Base):
+    """Phase C — Mini-site multi-pages (collection de pages liées).
+
+    Un site est généré via chat ("génère un site 5 pages pour mon cabinet"),
+    composé de N pages (home, services, équipe, contact, blog…), puis
+    publié sur Netlify en arborescence multi-fichiers HTML.
+    """
+    __tablename__ = "sites"
+
+    id                    = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id               = Column(Integer, nullable=False, index=True)
+    slug                  = Column(String(60), nullable=False, unique=True, index=True)
+    nom                   = Column(String(120), nullable=False)
+    brief                 = Column(Text, nullable=True,
+        comment="Brief original utilisateur qui a généré le site")
+    theme_json            = Column(JSON, nullable=True,
+        comment="Couleurs + fonts (override BrandKit org)")
+    brand_kit_json        = Column(JSON, nullable=True)
+    langue_principale     = Column(String(8), nullable=False, default="fr")
+    langues_actives_json  = Column(JSON, nullable=True,
+        comment="Liste des codes ISO 639-1 des langues traduites")
+    netlify_site_id       = Column(String(64), nullable=True)
+    url_public            = Column(String(255), nullable=True)
+    plan                  = Column(String(16), nullable=False, default="free")
+    statut                = Column(String(20), nullable=False, default="brouillon",
+        comment="brouillon | publie | suspendu")
+    cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
+    publie_le             = Column(DateTime, nullable=True)
+    derniere_modif        = Column(DateTime, default=datetime.utcnow,
+                                    onupdate=datetime.utcnow, nullable=False)
+
+
+class SitePageDB(Base):
+    """Page structurelle d'un site (home, services, équipe, contact…).
+
+    Le `contenu_json` est la spec JSON produite par Sonnet, rendue en
+    HTML au moment du publish via `site_builder.construire_html_page`.
+    """
+    __tablename__ = "site_pages"
+
+    id              = Column(BigInteger, primary_key=True, autoincrement=True)
+    site_id         = Column(BigInteger,
+                              ForeignKey("sites.id", ondelete="CASCADE"),
+                              nullable=False, index=True)
+    type            = Column(String(32), nullable=False, index=True,
+        comment="home | services | equipe | contact | blog_index | …")
+    slug_page       = Column(String(80), nullable=False,
+        comment="Slug dans l'URL : / pour home, /services, /equipe, …")
+    titre_seo       = Column(String(120), nullable=True)
+    description_seo = Column(String(200), nullable=True)
+    contenu_json    = Column(JSON, nullable=False)
+    ordre           = Column(Integer, nullable=False, default=0)
+    langue          = Column(String(8), nullable=False, default="fr")
+    publiee         = Column(Boolean, nullable=False, default=True)
+    cree_le         = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modifie_le      = Column(DateTime, default=datetime.utcnow,
+                              onupdate=datetime.utcnow, nullable=False)
+
+
+class SiteArticleDB(Base):
+    """Article de blog associé à un site (AI-powered Phase C5)."""
+    __tablename__ = "site_articles"
+
+    id                  = Column(BigInteger, primary_key=True, autoincrement=True)
+    site_id             = Column(BigInteger,
+                                  ForeignKey("sites.id", ondelete="CASCADE"),
+                                  nullable=False, index=True)
+    slug                = Column(String(120), nullable=False)
+    titre               = Column(String(200), nullable=False)
+    resume              = Column(String(400), nullable=True)
+    contenu_md          = Column(Text, nullable=True)
+    hero_image_url      = Column(String(500), nullable=True)
+    auteur              = Column(String(120), nullable=True)
+    langue              = Column(String(8), nullable=False, default="fr")
+    seo_titre           = Column(String(120), nullable=True)
+    seo_desc            = Column(String(200), nullable=True)
+    seo_keywords_json   = Column(JSON, nullable=True)
+    publie              = Column(Boolean, nullable=False, default=False)
+    publie_le           = Column(DateTime, nullable=True,
+        comment="Si dans le futur → publication programmée")
+    cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class LandingFollowupSettingsDB(Base):
     """Templates auto follow-up email post-lead par user (Phase B4).
 
