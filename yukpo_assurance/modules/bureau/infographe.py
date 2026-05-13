@@ -1416,6 +1416,40 @@ async def generer_infographie(
         except Exception as e:
             logger.warning(f"[Infographe] Export CMJN échoué : {e}")
 
+    # ── PDF/X-1a:2001 AUTO si gabarit print (bleed_mm > 0) ─────────────────
+    # Signal automatique : bleed_mm > 0 dans le catalogue = format destiné
+    # à l'impression PRO (carte, flyer, affiche, faire-part, diplôme,
+    # banderole, etc.). bleed_mm == 0 = format web/écran (Instagram,
+    # LinkedIn, YouTube thumbnail) → pas de X-1a.
+    # Ajoute TrimBox + BleedBox + ArtBox + OutputIntent ICC FOGRA39 + XMP
+    # PDF/X identification + surimpression noir 100K. Sans ça, un imprimeur
+    # PRO refusait le fichier (manque déclaratif obligatoire en PDF/X).
+    bleed_gabarit = float(gabarit.get("bleed_mm", 0) or 0)
+    if bleed_gabarit > 0 and (pdf_cmyk_bytes or pdf_bytes):
+        try:
+            from . import pdf_print_ready as _pp
+            format_trim = (float(gabarit["width_mm"]), float(gabarit["height_mm"]))
+            titre_x1a = (spec.titre or gabarit.get("label", "Visuel")) if spec else gabarit.get("label", "Visuel")
+            # Priorité CMYK si dispo (vraiment print-ready) sinon RGB
+            target_bytes = pdf_cmyk_bytes or pdf_bytes
+            x1a_bytes = _pp.convertir_en_pdf_x1a(
+                target_bytes,
+                titre=titre_x1a,
+                format_trim_mm=format_trim,
+                bleed_mm=bleed_gabarit,
+                creator="Yukpo Designer Pro (mono-page)",
+                profil_icc="fogra39",
+                surimpression_noir=True,
+            )
+            if x1a_bytes:
+                if pdf_cmyk_bytes:
+                    pdf_cmyk_bytes = x1a_bytes
+                else:
+                    pdf_bytes = x1a_bytes
+                logger.info(f"[Infographe] PDF/X-1a:2001 appliqué (bleed={bleed_gabarit}mm)")
+        except Exception as e_x1a:
+            logger.warning(f"[Infographe] PDF/X-1a skip : {e_x1a}")
+
     # PNG 300 DPI (print-ready) + 150 DPI (web preview)
     png_bytes = _rendre_png(pdf_bytes, dpi=dpi_preview)
     png_preview_bytes = _rendre_png(pdf_bytes, dpi=dpi_web) if dpi_web != dpi_preview else png_bytes

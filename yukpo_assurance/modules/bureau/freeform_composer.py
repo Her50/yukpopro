@@ -1591,12 +1591,22 @@ def _reorganiser_grille_a4(
         }
 
     new_pages = []
-    # 1er passage : toutes les planches recto
+    # ── ORDRE PAGES = STANDARD IMPRIMERIE PRO (intercalé R/V par planche) ──
+    # Convention universelle (Adobe PDF/X-1a, ISO 16612-2 PDF/VT, Heidelberg
+    # Signa, EFI Fiery, Adobe Reader duplex auto) : alterner RECTO et VERSO
+    # de la MÊME planche AVANT de passer à la planche suivante.
+    #   Page 1 = planche 1 RECTO    Page 3 = planche 2 RECTO    Page 5 = ...
+    #   Page 2 = planche 1 VERSO    Page 4 = planche 2 VERSO    Page 6 = ...
+    # Sans ça, le RIP imprimerie doit re-ordonner les pages avant d'imprimer
+    # (workflow manuel risqué). Les imprimeurs PRO refusent souvent le
+    # format "groupé" (tous recto puis tous verso) car il nécessite manual
+    # feed et risque erreur d'ordre.
+    #
+    # Pour les visuels SANS verso (template_verso absent), on garde l'ordre
+    # séquentiel naturel (page 1, 2, 3...).
     for planche_idx in range(nb_planches):
         new_pages.append(_construire_planche(planche_idx, template_recto, est_verso=False))
-    # 2e passage : toutes les planches verso (si template recto-verso)
-    if a_verso:
-        for planche_idx in range(nb_planches):
+        if a_verso:
             new_pages.append(_construire_planche(planche_idx, template_verso, est_verso=True))
     # Renuméroter les pages séquentiellement
     for idx, p in enumerate(new_pages):
