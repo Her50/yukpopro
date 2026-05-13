@@ -626,11 +626,23 @@ async def _render_background(
                 if audit_qualite_freeform:
                     score = audit_qualite_freeform.get("score_qualite_sur_10", 0)
                     verdict = audit_qualite_freeform.get("verdict", "?")
-                    nb_faibles = len(audit_qualite_freeform.get("points_faibles", []))
-                    logger.info(
+                    points_faibles = audit_qualite_freeform.get("points_faibles", []) or []
+                    nb_faibles = len(points_faibles)
+                    # Log niveau adapté à la sévérité — WARN si score < 6
+                    # pour visibilité prod (filtre fly logs --level warn).
+                    log_level = "warning" if float(score) < 6.0 else "info"
+                    getattr(logger, log_level)(
                         f"[Freeform/audit] Job {jid8} qualité : score={score}/10 "
                         f"verdict={verdict} faibles={nb_faibles}"
                     )
+                    # Détail des points faibles critiques en log séparé
+                    # (utile pour traquer les bugs récurrents type "images
+                    # manquantes" ou "brand identity non appliquée").
+                    if float(score) < 6.0 and points_faibles:
+                        for pf in points_faibles[:5]:
+                            axe = pf.get("axe", "?") if isinstance(pf, dict) else "?"
+                            desc = (pf.get("description", "") if isinstance(pf, dict) else str(pf))[:200]
+                            logger.warning(f"[Freeform/audit] Job {jid8} faible/{axe} : {desc}")
         except Exception as e_audit:
             logger.warning(f"[Freeform/audit] Job {jid8} audit skip : {e_audit}")
 

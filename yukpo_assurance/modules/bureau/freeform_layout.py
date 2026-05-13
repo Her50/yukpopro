@@ -378,14 +378,41 @@ async def pre_generer_images_ia(doc: LayoutDocument) -> None:
 
     sem = asyncio.Semaphore(3)
 
+    # ── Détection automatique du registre visuel ────────────────────────
+    # Pour un visuel MARKETING (promo/affiche/campagne/landing/teaser),
+    # on bascule en mode "premium" (Flux dev 28 steps, ~10-15s, qualité ×3
+    # vs fast). Pour un document texte simple (carte visite, facture, mémo),
+    # "fast" suffit. Détection par mots-clés dans le titre + nb d'images
+    # demandées. Configurable via env FREEFORM_IMAGE_MODE_DEFAULT.
+    import os as _os
+    titre_lower = (getattr(doc, "titre", "") or "").lower()
+    keywords_marketing = (
+        "promo", "promotion", "concours", "tirage", "tombola", "campagne",
+        "campaign", "marketing", "publicité", "publicite", "ad ", "affiche",
+        "poster", "flyer", "annonce", "teaser", "lancement", "launch",
+        "événement", "evenement", "event", "soldes", "cashback", "deal",
+        "offre", "gagne", "gagnez", "win", "concour", "loterie",
+    )
+    marketing_detecte = any(kw in titre_lower for kw in keywords_marketing)
+    mode_image = _os.getenv("FREEFORM_IMAGE_MODE_DEFAULT") or (
+        "premium" if marketing_detecte or len(groupes) <= 3 else "fast"
+    )
+    # Budget timeout adapté au mode :
+    #   fast (Flux schnell)  : 5-8s/image  → 60s budget global suffisant
+    #   premium (Flux dev)   : 10-15s/img  → 180s budget pour ne pas perdre
+    #   ultra (Flux Pro)     : 25-30s/img  → 300s budget
+    _BUDGET_PAR_MODE = {"fast": 60.0, "premium": 180.0, "ultra": 300.0}
+    budget_total_s = _BUDGET_PAR_MODE.get(mode_image, 60.0)
+    logger.info(
+        f"[freeform/IA] {len(groupes)} groupes IA — mode={mode_image} "
+        f"(marketing={marketing_detecte}, budget={budget_total_s}s)"
+    )
+
     async def _one_groupe(prompt: str, fmt: str, els: list[Image]):
         async with sem:
             try:
-                # mode "fast" : ~5-8s vs "ultra" ~25s. Pour le chat synchrone
-                # via /pro/copilote/chat, fast est requis pour rester sous le
-                # timeout client. Designer Pro en background peut rester ultra.
                 bts = await generer_image(
-                    prompt=prompt, mode="fast", format_=fmt,
+                    prompt=prompt, mode=mode_image, format_=fmt,
                 )
                 if bts:
                     data_url = (
@@ -394,22 +421,31 @@ async def pre_generer_images_ia(doc: LayoutDocument) -> None:
                     )
                     for el in els:
                         el.data_url = data_url
+                else:
+                    logger.warning(
+                        f"[freeform/IA] image '{prompt[:40]}' bytes vides "
+                        f"({mode_image}) → placeholder gris"
+                    )
             except Exception as e:
-                logger.debug(f"[freeform/IA] image '{prompt[:40]}' KO : {e}")
+                logger.warning(
+                    f"[freeform/IA] image '{prompt[:40]}' KO ({mode_image}) : {e}"
+                )
 
-    # Budget total dur : 60s pour TOUTES les générations IA cumulées. Au-delà,
-    # on coupe net et on laisse les placeholders — mieux qu'un timeout client
-    # à 120s+ avec 'Erreur de connexion'.
+    # Budget total dur : timeout adapté au mode (60/180/300s). Au-delà, on
+    # coupe net et on laisse les placeholders — mieux qu'un timeout client.
     try:
         await asyncio.wait_for(
             asyncio.gather(*(_one_groupe(p, f, els) for (p, f), els in groupes.items())),
-            timeout=60.0,
+            timeout=budget_total_s,
         )
-        logger.info(f"[freeform/IA] {len(groupes)} génération(s) IA terminée(s)")
+        logger.info(
+            f"[freeform/IA] {len(groupes)} génération(s) IA terminée(s) "
+            f"en mode {mode_image}"
+        )
     except asyncio.TimeoutError:
         logger.warning(
-            f"[freeform/IA] Timeout 60s — {len(groupes)} groupes lancés, "
-            f"images manquantes seront placeholders"
+            f"[freeform/IA] Timeout {budget_total_s}s mode={mode_image} — "
+            f"{len(groupes)} groupes lancés, images manquantes = placeholders"
         )
 
 

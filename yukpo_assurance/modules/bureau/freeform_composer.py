@@ -121,6 +121,156 @@ la palette du SECTEUR (telecom = bleu/violet vif, banque = bleu marine,
 JAMAIS de palette aléatoire qui ignore l'identité de marque.
 
 ═══════════════════════════════════════════════════════════════════════
+RÈGLES BRAND-RECOGNITION — MÉTA-PROCÉDURE GÉNÉRIQUE (CRITIQUE)
+═══════════════════════════════════════════════════════════════════════
+Quand UNE MARQUE QUELCONQUE est mentionnée dans le brief (n'importe
+laquelle, pas seulement celles listées en exemples — il y a des millions
+de marques dans le monde), tu APPLIQUES CETTE PROCÉDURE STRICTE :
+
+  R1. **INVOQUER TA CONNAISSANCE LATENTE** : tu possèdes une connaissance
+      vaste de marques mondiales et locales. À partir du nom de la marque,
+      retrouve dans ta mémoire :
+        • couleur(s) primaire(s) officielle(s) — hex précis ou nom CSS
+        • couleur(s) accent / secondaire
+        • style du logo (wordmark, monogram, pictogramme, badge…)
+        • slogan/tagline célèbre s'il existe
+        • secteur d'activité (telecom, banque, FMCG, luxe, tech, ONG…)
+        • pays d'origine + marchés principaux
+      Pour les marques très connues du catalogue ci-dessus, prends les
+      hex listés au pixel près. Pour TOUTES LES AUTRES (PME locale,
+      marque émergente, startup, association, etc.) → reconstitue depuis
+      ta connaissance OU déduis du secteur (cf. règle suivante).
+
+  R2. **HEX EXACTS, PAS APPROXIMATIFS**. Si tu connais la couleur exacte
+      d'une marque, applique-la AU PIXEL (pas "presque jaune" mais le
+      hex précis). Approximation = échec audit.
+
+  R3. **PME / MARQUE INCONNUE / FICTIVE** (brief libre, pas de marque
+      connue mondiale) → tu DÉDUIS du SECTEUR :
+        • telecom / digital / fintech → bleu vif #1E40AF + violet #7C3AED
+          ou rouge #DC2626 selon registre
+        • banque / assurance → bleu marine #002A5C + or #D4AF37
+        • énergie / pétrole → rouge #DC2626 + jaune #FCB900 ou vert
+        • luxe / haut de gamme → noir #0A0A0A + or #C9A961 + crème #FAF7F0
+        • tech / startup → bleu profond + accent vif (cyan/magenta)
+        • médical / santé → vert apaisant #059669 + bleu clair + blanc
+        • alimentaire / restaurant → rouge appétit #DC2626 + jaune
+        • mode / cosmétique → rose pastel + or rose
+        • éducation / ONG → bleu confiance + accent chaleureux
+        • agro / immobilier → vert nature + terre #92400E
+
+  R4. **LOGO RÉSERVÉ EN ZONE FIXE** : pour TOUTE marque mentionnée,
+      réserve une zone rectangle 30-50mm × 12-20mm en HAUT-GAUCHE ou
+      HAUT-CENTRE de la page principale. Cette zone DOIT contenir :
+        a) un élément `image` avec `prompt_ia` décrivant le logo officiel
+           si tu le connais précisément (style visuel + couleur)
+        b) OU un élément texte stylisé reproduisant le wordmark
+           (typographie bold uppercase, taille 32-48pt, couleur primaire
+           de la marque, optionnellement sur fond coloré contrasté)
+      → JAMAIS de zone vide gris-clair ni "logo manquant".
+
+  R5. **SLOGAN/TAGLINE** si tu en connais un (catalogue + connaissance
+      latente). Si tu n'en connais pas pour une PME locale, COMPOSE
+      un slogan crédible et cohérent au secteur (5-12 mots, ton aligné
+      avec l'identité). Slogan = texte petit (8-10pt) sous le logo ou
+      en footer.
+
+  R6. **MENTIONS LÉGALES MINI** en pied de page (font 6-7pt, opacité 60%) :
+      "© {Année courante} {Nom marque} — Tous droits réservés"
+      Adapte le suffixe juridique au pays :
+        • Cameroun/CI/SN/BF/Mali (CIMA) → SA / SARL / SUARL
+        • France → SAS / SA / SARL
+        • Maroc → SA / SARL
+
+═══════════════════════════════════════════════════════════════════════
+RÈGLES PROMOTIONS / CONCOURS / TOMBOLA — MÉTA-PROCÉDURE GÉNÉRIQUE
+═══════════════════════════════════════════════════════════════════════
+Quand le brief contient des mots-clés (français, anglais, ou intention
+détectable) : "promotion / promo / concours / tirage / jeu / tombola /
+gagne / gagnez / cadeau / récompense / loterie / lot / cashback /
+campaign / contest / win / giveaway / lucky draw / sweepstake" →
+tu construis un visuel PROMO COMPLET avec TOUTES ces sections (pas
+optionnelles) :
+
+  P1. **TITRE PROMO PUNCH** (36-60pt, couleur primaire marque/secteur).
+      Adapte le ton au contexte : ludique pour FMCG, sobre pour banque,
+      énergique pour telecom, prestigieux pour luxe.
+
+  P2. **SOUS-TITRE D'ACCROCHE** (16-22pt) — explicite ce qu'on doit
+      faire pour gagner (consommer / acheter / s'inscrire / parrainer).
+
+  P3. **LISTE DES LOTS AVEC VALEUR ESTIMÉE** — OBLIGATOIRE. Jamais
+      un "À GAGNER :" suivi de rien. Pour CHAQUE lot mentionné dans
+      le brief, tu estimes une valeur RÉALISTE pour le pays cible
+      (utilise ta connaissance du pouvoir d'achat local).
+      Format suggéré :
+        🏆 1er prix : <lot> — valeur ~<montant> {devise pays}
+        🥈 2e prix  : <lot> — valeur ~<montant>
+        🥉 3e prix  : <lot> — valeur ~<montant>
+        🎁 Lots de consolation : N × <petit lot>
+      Si pays = Afrique francophone → devise XAF (CM/TD/CG/GA/CF/GQ)
+      ou XOF (CI/SN/BF/ML/NE/TG/BJ). France/Belgique → EUR. Maroc/
+      Algérie/Tunisie → MAD/DZD/TND. Etc. Pour les valeurs, base-toi
+      sur les prix de marché RÉELS observables :
+        • Sache utiliser ta connaissance des marchés africains pour
+          des estimations crédibles. Si tu hésites, donne une fourchette.
+
+  P4. **IMAGE IA PAR LOT MAJEUR** : pour CHAQUE lot principal du brief,
+      tu ajoutes un élément `image` avec `prompt_ia` photo-réaliste
+      adapté au pays/contexte mentionné (max 3 par page). La description
+      doit refléter le PAYS du brief (ex: maison style camerounais pour
+      brief CM, voiture sahel pour Mali, etc.) — pas une image générique.
+
+  P5. **DURÉE PROMO** : "Du JJ/MM/AAAA au JJ/MM/AAAA". Si brief ne
+      précise pas, propose une fenêtre crédible (3-6 semaines après
+      date courante).
+
+  P6. **CONDITIONS PARTICIPATION** (1-3 lignes, 9-11pt) — décris la
+      mécanique de tirage adaptée au secteur :
+        • Telecom : "1 recharge ≥ X XAF = 1 ticket. Cumulable."
+        • Banque : "1 dépôt mensuel ≥ X = 1 ticket. Limite N tickets/client."
+        • FMCG : "1 produit acheté avec code unique = 1 participation"
+        • Loterie nationale : "1 ticket = 1 chance, achat libre"
+
+  P7. **MODE PARTICIPATION + CANAL** — Adapte au secteur et au pays :
+        • Si MARQUE = télécom (MTN, Orange, Airtel, etc.) → utilise un
+          court code SMS/USSD. Si tu connais le code RÉEL de l'opérateur
+          dans le pays cible, donne-le. Sinon utilise format générique
+          "Envoyez PROMO au 4XXX" ou "Composez *XXX*PROMO#".
+        • Si MARQUE = banque → "Via l'app mobile {nom_banque}" ou
+          "À l'accueil de votre agence" ou "USSD *XXX#".
+        • Si MARQUE = FMCG/distribution → "Saisissez le code unique
+          sous le bouchon/emballage sur {url_marque}/concours".
+        • Si MARQUE = restaurant/retail → "Présentez votre ticket de
+          caisse en magasin avec QR code".
+        • Si MARQUE = ONG/association → "Inscription en ligne sur
+          {site}/participer".
+      → JAMAIS d'invention de court code spécifique si tu n'es pas SÛR.
+        Préfère un format générique fiable.
+
+  P8. **TIRAGE AU SORT** : date + lieu + modalité de transparence.
+        Ex : "Tirage au sort le {date_après_durée_promo} en direct sur
+        la page Facebook officielle. Sous huissier de justice."
+
+  P9. **CTA VISUEL PUISSANT** (bouton ou bandeau coloré) — texte action
+      clair et URGENT ("PARTICIPEZ MAINTENANT", "GAGNEZ DÈS AUJOURD'HUI").
+
+  P10. **HASHTAGS + URL CONTACT** en footer — UTILISE le domaine OFFICIEL
+       de la marque si tu le connais, sinon format prédictible
+       "{nom_marque_lower}.{tld_pays}" (ex: mtn.cm, orange.ci, sg.cm).
+
+  P11. **MENTIONS LÉGALES** (5-7pt, opacité 60%) :
+       "Jeu sans obligation d'achat. Voir règlement complet sur
+        {url_marque}/regles. Tirage certifié par huissier. © {année}
+        {nom_marque}, {forme_juridique_pays}."
+
+→ Une page promotion sans P3 (lots détaillés avec valeurs estimées) ET
+P5 (dates) ET P7 (mode participation) ET P8 (tirage) est INACCEPTABLE
+et sera rejetée par l'audit qualité. Si le brief ne donne pas tous les
+détails, **SIMULE des données crédibles** alignées à la marque/pays/
+secteur (c'est exactement le rôle d'un visuel marketing IA-généré).
+
+═══════════════════════════════════════════════════════════════════════
 PRÉVENTION CHEVAUCHEMENTS (CRITIQUE — bug observé en prod)
 ═══════════════════════════════════════════════════════════════════════
 RÈGLES STRICTES de placement pour éviter les chevauchements visuels :

@@ -969,6 +969,32 @@ au brief (intention/contenu/format), couleurs (cohérence + pertinence + contras
 WCAG), disposition (hiérarchie + alignement + équilibre), complexité géométrique
 (adaptation au registre demandé : minimaliste/festif/corporate/luxe/artistique).
 
+POINTS NOIRS À DÉTECTER (= défauts critiques, score ≤ 5 si présents) :
+
+  N1. **Placeholders gris vides** = rectangles uniformes gris clair sans
+      contenu. Signe d'image IA non générée (échec fal.ai/Replicate). Si
+      le visuel marketing montre 1+ rectangles gris à la place d'images
+      attendues (voiture/maison/produit/portrait/photo), c'est CRITIQUE
+      → score conformité brief ≤ 4, point_faible "images_manquantes".
+
+  N2. **Marque mentionnée mais identité non respectée** : si le brief
+      cite une marque (MTN, Orange, Coca-Cola, etc.) mais le visuel
+      n'applique PAS les couleurs officielles + n'a PAS de logo
+      identifiable de la marque, c'est CRITIQUE → score couleurs ≤ 4,
+      point_faible "brand_identity_manquante".
+
+  N3. **Promo sans détails** : si le brief est une promotion/concours/
+      tirage mais le visuel n'a PAS la liste détaillée des lots avec
+      valeurs, PAS de date, PAS de mode de participation, PAS de tirage
+      → score conformité brief ≤ 3, point_faible "promo_incomplete".
+
+  N4. **Densité visuelle anémique** : moins de 8 éléments distincts sur
+      la page, beaucoup d'espace vide injustifié, hiérarchie pauvre →
+      score disposition ≤ 5, point_faible "densite_faible".
+
+  N5. **Texte vide ou tronqué** : labels "À gagner :" suivis de rien,
+      ou titres "[TODO]" ou "Lorem ipsum" → score conformité ≤ 2.
+
 EN PLUS, propose 2-4 questions précises d'amélioration que l'application
 peut poser à l'utilisateur pour itérer. Chaque question doit :
 - Cibler UN point faible CONCRET observé sur le visuel (pas générique)
