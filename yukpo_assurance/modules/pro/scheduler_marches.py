@@ -314,19 +314,31 @@ async def _serper_post(query: str, info: dict, num: int = 10, restrict_month: bo
     """Appel HTTP Serper /search. Retourne organic results bruts."""
     api_key = _serper_api_key()
     if not api_key or api_key.startswith("VOTRE"):
+        logger.warning("[SchedulerMarches] SERPER_API_KEY absente ou placeholder — abort")
         return []
     import httpx
-    body = {"q": query, "gl": info["gl"], "hl": info["hl"], "num": num}
+    gl = (info.get("gl") or "us").lower()
+    hl = (info.get("hl") or "fr").lower()
+    body: dict = {"q": query, "gl": gl, "hl": hl, "num": num}
     if restrict_month:
         body["tbs"] = "qdr:m"
-    async with httpx.AsyncClient(timeout=20) as client:
-        resp = await client.post(
-            "https://google.serper.dev/search",
-            json=body,
-            headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
-        )
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            resp = await client.post(
+                "https://google.serper.dev/search",
+                json=body,
+                headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+            )
+    except Exception as e:
+        logger.warning(f"[SchedulerMarches] Serper network error q={query!r}: {e}")
+        return []
     if resp.status_code != 200:
-        logger.warning(f"[SchedulerMarches] Serper HTTP {resp.status_code} q={query!r}")
+        # Body utile au diagnostic : Serper renvoie {"message": "..."} JSON sur erreur
+        body_text = (resp.text or "")[:300]
+        logger.warning(
+            f"[SchedulerMarches] Serper HTTP {resp.status_code} q={query!r} "
+            f"gl={gl} hl={hl} body={body_text}"
+        )
         return []
     return (resp.json() or {}).get("organic", []) or []
 
