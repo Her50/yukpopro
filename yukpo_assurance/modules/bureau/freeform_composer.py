@@ -2373,10 +2373,91 @@ async def composer_freeform_layout(
             f"doivent porter des données VARIÉES de la liste simulée).\n"
         )
 
+    # ── Directive transverse : qualité agence pro (LLM-first, pas template) ─
+    # Applique à TOUT brief (faire-part, programme, carte visite, flyer,
+    # brochure, affiche promo, badge, étiquette produit, menu restaurant,
+    # CV, plaquette commerciale, etc.). Le LLM interprète trop souvent les
+    # exemples du prompt système comme pédagogiques au lieu d'exécutables
+    # → labels orphelins, placeholders ("#", "Lorem", "TODO"), titres qui
+    # débordent. Cette directive renforce les invariants *transverses*
+    # sans imposer un domaine (cf memory feedback_no_limiting_templates).
+    qualite_directive_block = (
+        "\n## RÈGLES TRANSVERSES NON NÉGOCIABLES — qualité agence pro\n"
+        "\n"
+        "Ces règles s'appliquent à TOUT visuel généré (peu importe son\n"
+        "domaine : cérémonie, marketing, commercial, événementiel,\n"
+        "administratif, éducatif, médical, immobilier, gastronomie, etc.) :\n"
+        "\n"
+        "### R1 — SIMULATION OBLIGATOIRE DES DONNÉES ABSENTES\n"
+        "Si le brief ne fournit pas tous les détails attendus pour le type\n"
+        "de document demandé, tu DOIS les INVENTER de façon crédible et\n"
+        "cohérente avec le pays, la marque/famille/organisation, le secteur\n"
+        "et la date du document. Tu te comportes comme une agence pro qui\n"
+        "livre un livrable *fini*, pas une maquette à trous.\n"
+        "\n"
+        "Exemples de données à simuler systématiquement quand absentes :\n"
+        "  • Noms/prénoms cohérents avec le pays/contexte\n"
+        "  • Dates absolues (« Le 15 juin 2026 à 14h ») jamais « date à venir »\n"
+        "  • Numéros téléphone au bon format pays (+237 6XX XX XX XX au CM)\n"
+        "  • Adresses postales/quartiers réels du pays\n"
+        "  • Codes USSD/shortcodes/références produits réalistes\n"
+        "  • URL marque cohérentes (« mtn.cm », « orange.ci », « total.cd »)\n"
+        "  • Valeurs/prix en devise locale (XAF/XOF/CDF selon pays)\n"
+        "  • Hashtags réseaux sociaux inventés mais crédibles\n"
+        "  • Mentions légales (règlement, copyright, forme juridique)\n"
+        "  • Slogan, signature, accroche, call-to-action explicite\n"
+        "\n"
+        "### R2 — ZÉRO LABEL ORPHELIN, ZÉRO PLACEHOLDER VISIBLE\n"
+        "Si tu écris un label de section (n'importe quel intitulé court qui\n"
+        "annonce un contenu : « Programme », « À GAGNER », « Témoignages »,\n"
+        "« Contact », « Comment participer ? », « Durée », « Tarifs »,\n"
+        "« Horaires », « Menu », « Services », « Équipe », « Tirage », etc.),\n"
+        "alors un autre élément Texte sur la même page DOIT contenir le\n"
+        "contenu réel de cette section (≥ 40 caractères de contenu concret).\n"
+        "\n"
+        "Sont INTERDITS dans le contenu final :\n"
+        "  • Un Texte dont le contenu est juste « # », « ### », « — », « ... »\n"
+        "  • « Lorem ipsum », « TODO », « à compléter », « TBD », « XXX »\n"
+        "  • « Nom Prénom », « Fonction », « Email », « +237 6XX XXX XXX »\n"
+        "  • « exemple@example.com », « www.site.com », « 01 23 45 67 89 »\n"
+        "  • Un emoji seul sans texte qui l'accompagne\n"
+        "  • Un label suivi d'aucun bloc Texte rempli sur la même page\n"
+        "\n"
+        "Si tu ne peux PAS remplir une section, SUPPRIME le label plutôt que\n"
+        "de le laisser orphelin. Mais sur un visuel pro bien composé, toutes\n"
+        "les sections présentes sont remplies.\n"
+        "\n"
+        "### R3 — ANTI-OVERFLOW (titres, sous-titres, blocs texte)\n"
+        "Chaque Texte DOIT tenir dans sa boîte `(w_mm, h_mm)` à la `taille_pt`\n"
+        "choisie. Règle de pouce avant d'émettre un Texte :\n"
+        "  • largeur nécessaire ≈ nb_caractères × taille_pt × 0.20 (mm)\n"
+        "    → si > w_mm : prévoir wrap multi-lignes, donc h_mm assez haute\n"
+        "  • hauteur nécessaire ≈ nb_lignes × taille_pt × 0.42 (mm)\n"
+        "    → si > h_mm : RÉDUIS taille_pt OU ÉLARGIS w_mm/h_mm\n"
+        "\n"
+        "Un titre qui déborde sur le bloc suivant (titre + sous-titre écrits\n"
+        "l'un sur l'autre) est un BUG visuel inacceptable. Bug typique :\n"
+        "titre 36pt « PHRASE DE 25 LETTRES » dans une boîte w=120 h=20mm\n"
+        "→ wrap sur 3 lignes mais h ne couvre qu'1 ligne → débordement.\n"
+        "Solution : taille_pt=24 OU h_mm=50, au choix.\n"
+        "\n"
+        "### R4 — UN VISUEL PRO N'A PAS DE TROUS\n"
+        "Un visuel professionnel a TOUJOURS :\n"
+        "  • Un titre net, dimensionné pour tenir dans sa boîte\n"
+        "  • Un sous-titre/accroche/baseline (1-2 lignes max, sous le titre)\n"
+        "  • Un corps avec contenu CONCRET (texte rempli, listes numérotées,\n"
+        "    données chiffrées, dates explicites, valeurs réelles)\n"
+        "  • Au moins UN call-to-action OU information de contact concrète\n"
+        "    (téléphone, URL, code USSD, adresse, RDV) — JAMAIS placeholder\n"
+        "  • Une hiérarchie visuelle claire (titre > sous-titre > corps)\n"
+        "  • Pas de zones vides béantes ni de zones blanches non assumées\n"
+        "    par le design\n"
+    )
+
     prompt_user = f"""\
 ## BRIEF UTILISATEUR
 \"\"\"{brief[:4000]}\"\"\"
-
+{qualite_directive_block}
 ## CONTEXTE
 - Pays : {pays}
 - Langue : {langue}
@@ -2781,43 +2862,27 @@ commentaire ni markdown.
                 (brief or "").lower(),
             )
         )
-        # Détection marketing/promo dans le brief → upgrade modèle + tokens.
-        # Les visuels marketing exigent un haut niveau de simulation contenu
-        # (lots détaillés avec valeurs, slogan, messages forts, mode de
-        # participation simulé, mentions légales). Sonnet 5000 tok = trop
-        # léger ; on bascule en Opus 8000 tok pour creative writing pro.
-        brief_lower = (brief or "").lower()
-        _marketing_keywords = (
-            "promo", "promotion", "concours", "tirage", "tombola", "gagne",
-            "gagnez", "campagne", "campaign", "marketing", "publicité",
-            "publicite", "affiche", "poster", "flyer", "annonce", "teaser",
-            "lancement", "launch", "événement", "evenement", "event", "soldes",
-            "cashback", "deal", "offre", "win", "concour", "loterie", "loto",
-            "récompense", "recompense", "cadeau", "giveaway", "lucky draw",
-        )
-        marketing_brief = any(kw in brief_lower for kw in _marketing_keywords)
-
-        # 3 tiers de budget output selon complexité :
+        # 3 tiers de budget output selon complexité — universels, indépendants
+        # du domaine (cérémonie, marketing, commercial, immobilier, médical,
+        # gastronomie, etc.). Le budget single-page est relevé à 10k (vs 5k
+        # ancien) car même un visuel simple peut nécessiter beaucoup de
+        # contenu simulé concret (slogan, infos contact, hashtags, mentions,
+        # données chiffrées, témoignages, etc.) — bug observé "promo MTN"
+        # avec labels orphelins venait notamment de 5-8k tokens insuffisants.
         if densite_elevee and contexte_block:
-            # livret cérémonie multi-page (faire-part 8p, programme 12p) +
-            # densité élevée (20 cartes etc.). Très exigeant.
+            # Livret multi-page très exigeant (faire-part 8p + 20 cartes).
             max_tok = 16000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (32k out)
         elif livret_ou_dense:
-            # livret 4-8 pages OU N items répétés. Besoin large.
+            # Livret 4-8 pages OU N items répétés.
             max_tok = 12000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
-        elif marketing_brief:
-            # Visuel marketing/promo single-page : exige creative writing pro
-            # (slogans, valeurs simulées, mentions légales). Sonnet 5000 tok
-            # = "case-cocher" superficiel. Opus 8000 tok = vraie densité
-            # marketing agence pro.
-            max_tok = 8000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (32k out)
         else:
-            # Visuel simple 1 page (poster, carte standalone, post social).
-            max_tok = 5000
-            _modele_compose = ModelePrioritaire.CLAUDE_SONNET  # → gpt-4.1-mini (économique)
+            # Visuel single-page (affiche, flyer, faire-part 1 page, carte,
+            # menu, programme court, etc.). Tous bénéficient d'un budget
+            # large pour simuler tout le contenu sans troncature JSON.
+            max_tok = 10000
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (qualité creative writing)
         logger.warning(
             f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
             f"max_tokens={max_tok} (livret_ou_dense={livret_ou_dense}, "
@@ -2888,6 +2953,10 @@ commentaire ni markdown.
         data = _normaliser_pagination_livret(data, brief)
         data = _capper_images_ia_par_page(data, max_par_page=3)
         data = _garantir_crop_marks_print_ready(data)
+        # Filet transverse : labels orphelins (n'importe quel intitulé court
+        # type "Programme", "Contact", "Témoignages", "À GAGNER", "Menu",
+        # "Tarifs"… suivi de rien ou d'un "#") → autofill via Haiku économique.
+        data = await _remplir_sections_vides(data, brief or "", pays or "CM")
 
     return data
 
@@ -3236,4 +3305,229 @@ def _capper_images_ia_par_page(data: dict, max_par_page: int = 3) -> dict:
             f"[FreeformComposer] Post-validation : {nb_total_supprime} image(s) IA "
             f"supprimée(s) (cap {max_par_page}/page, évite explosion temps rendu)."
         )
+    return data
+
+
+_PLACEHOLDERS_INTERDITS = {
+    "#", "##", "###", "####", "—", "-", "•", "...", "***",
+    "lorem", "lorem ipsum", "todo", "tbd", "xxx", "à compléter",
+    "a completer", "à venir", "a venir", "to be defined",
+    "nom prénom", "nom prenom", "fonction", "email", "téléphone",
+    "telephone", "adresse", "site web", "www.site.com",
+    "exemple@example.com", "test@test.com", "name@email.com",
+    "+237 6xx xxx xxx", "+237 6xx xx xx xx", "01 23 45 67 89",
+}
+
+
+def _texte_quasi_vide(contenu: str) -> bool:
+    """Détecte un contenu placeholder/vide/emoji-seul.
+
+    Heuristique générale (pas spécifique à un domaine) :
+      • Vide ou ≤ 2 caractères
+      • Match exact d'un placeholder connu (#, lorem, TODO, etc.)
+      • Aucune lettre alphabétique (ponctuation/emoji seuls)
+    """
+    if not contenu:
+        return True
+    c = contenu.strip()
+    if len(c) <= 2:
+        return True
+    c_lower = c.lower()
+    if c_lower in _PLACEHOLDERS_INTERDITS:
+        return True
+    if not any(ch.isalpha() for ch in c):
+        return True
+    return False
+
+
+def _est_label_section(contenu: str) -> bool:
+    """Heuristique générale (sans whitelist métier) : un label de section
+    annonce un contenu et nécessite un voisin rempli en dessous.
+
+    Caractéristiques typiques d'un label :
+      • Court (≤ 40 caractères)
+      • Pas une phrase complète (peu de mots, pas de verbe conjugué évident)
+      • Souvent terminé par ":" ou "?" ou en majuscules
+      • Contient au moins une lettre (sinon c'est juste de la déco)
+    """
+    if not contenu:
+        return False
+    c = contenu.strip()
+    if len(c) > 40 or len(c) < 2:
+        return False
+    if not any(ch.isalpha() for ch in c):
+        return False
+    # Une phrase complète a typiquement plusieurs mots ET un point final
+    mots = [m for m in c.split() if m]
+    if len(mots) > 8:
+        return False
+    # Indices d'un label : termine par ":" ou "?", ou tout en majuscules,
+    # ou court (≤ 5 mots) et pas de point final.
+    fini_par_label = c.endswith((":", " :", "?", " ?"))
+    tout_caps = c == c.upper() and any(ch.isalpha() for ch in c)
+    pas_phrase = not c.rstrip().endswith((".", "!", ";"))
+    return fini_par_label or tout_caps or (len(mots) <= 5 and pas_phrase)
+
+
+async def _remplir_sections_vides(
+    data: dict, brief: str, pays: str
+) -> dict:
+    """Filet de sécurité post-LLM transverse : détecte les labels de
+    section orphelins (n'importe quel intitulé court — "Programme",
+    "Contact", "À GAGNER", "Menu", "Tarifs", "Témoignages", etc. — suivi
+    d'aucun contenu OU d'un placeholder type "#"/"Lorem") et génère le
+    contenu manquant via Haiku économique en 1 appel batch.
+
+    Pas de whitelist de mots-clés : heuristique structurelle (label court
+    + pas de voisin Texte rempli en dessous) qui s'applique uniformément
+    à tous les domaines (cérémonie, marketing, commercial, immobilier,
+    gastronomie, médical, éducatif, etc.).
+
+    Cf memory feedback_no_limiting_templates + bug observé "promo MTN
+    MEGA" : labels orphelins malgré prompt système exemplaire (le LLM
+    laisse des trous quand le brief ne détaille pas, malgré l'instruction
+    explicite de simuler).
+    """
+    pages = data.get("pages") or []
+    if not pages:
+        return data
+
+    labels_a_remplir: list[tuple[int, dict, dict]] = []  # (page_idx, label_el, page_dict)
+    for p_idx, page in enumerate(pages):
+        if not isinstance(page, dict):
+            continue
+        elements = page.get("elements") or []
+        for el in elements:
+            if not isinstance(el, dict) or el.get("type") != "texte":
+                continue
+            contenu = (el.get("contenu") or "").strip()
+            if not _est_label_section(contenu):
+                continue
+            # Voisin rempli ? (même page, y entre label.y et label.y+35mm,
+            # x recouvrant au moins partiellement, contenu rempli ≥ 40 chars)
+            el_y = el.get("y_mm") or 0
+            el_x = el.get("x_mm") or 0
+            el_w = el.get("w_mm") or 0
+            voisin_rempli = False
+            for el2 in elements:
+                if el2 is el or not isinstance(el2, dict):
+                    continue
+                if el2.get("type") != "texte":
+                    continue
+                contenu2 = (el2.get("contenu") or "").strip()
+                if _texte_quasi_vide(contenu2) or len(contenu2) < 40:
+                    continue
+                y2 = el2.get("y_mm") or 0
+                x2 = el2.get("x_mm") or 0
+                w2 = el2.get("w_mm") or 0
+                # Voisin sous le label, x recouvrant
+                if (
+                    el_y < y2 < el_y + 35
+                    and not (x2 + w2 < el_x or x2 > el_x + el_w)
+                ):
+                    voisin_rempli = True
+                    break
+            if voisin_rempli:
+                continue
+            labels_a_remplir.append((p_idx, el, page))
+
+    if not labels_a_remplir:
+        return data
+
+    logger.warning(
+        f"[FreeformComposer] {len(labels_a_remplir)} label(s) orphelin(s) "
+        f"détecté(s) (toutes pages) → autofill Haiku transverse."
+    )
+
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    except Exception as _e:
+        logger.warning(f"[FreeformComposer] Import ia_client échec : {_e}")
+        return data
+
+    labels_summary = "\n".join(
+        f"  - section #{i+1} : « {el.get('contenu')} »"
+        for i, (_, el, _) in enumerate(labels_a_remplir)
+    )
+    prompt_simu = (
+        f"Tu es directeur artistique d'agence pro. Un visuel a été composé\n"
+        f"avec des labels de section présents mais SANS contenu (trous).\n"
+        f"Tu dois INVENTER le contenu manquant en cohérence avec le brief.\n\n"
+        f"BRIEF DU VISUEL : {brief[:1500]}\n"
+        f"PAYS : {pays}\n\n"
+        f"LABELS SANS CONTENU (chaque label annonce une section dont le\n"
+        f"contenu manque — tu inventes un contenu concret crédible) :\n"
+        f"{labels_summary}\n\n"
+        f"RÈGLES UNIVERSELLES :\n"
+        f"  • Contenu CONCRET (chiffres, noms, dates, codes, valeurs)\n"
+        f"  • Adapté au type de section déduit du libellé du label\n"
+        f"    (« Programme » → étapes horaires, « Contact » → tel+email\n"
+        f"    +adresse, « Tarifs » → prix en devise locale, « Menu » →\n"
+        f"    plats+prix, « À GAGNER » → lots+valeurs, « Témoignages » →\n"
+        f"    citations+auteurs, etc.)\n"
+        f"  • 1 à 4 lignes max par section (les blocs sont petits)\n"
+        f"  • Cohérence pays : téléphones, devise, format date, noms propres\n"
+        f"  • PAS de placeholders (#, Lorem, TODO, exemple@example.com,\n"
+        f"    +237 6XX XXX XXX, nom prénom, etc.)\n"
+        f"  • Émojis OK avec parcimonie (1-2 par section max)\n\n"
+        f"RÉPONDS EN JSON STRICT :\n"
+        f"{{\n"
+        f"  \"sections\": [\n"
+        f"    {{\"index\": 1, \"contenu\": \"...\"}},\n"
+        f"    {{\"index\": 2, \"contenu\": \"...\"}}\n"
+        f"  ]\n"
+        f"}}"
+    )
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt_simu,
+            mode=ModeIA.REDACTION,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            json_attendu=True,
+            max_tokens_override=2500,
+            utiliser_cache=False,
+        )
+        import json as _json
+        simu = _json.loads(rep.contenu or "{}")
+        sections = simu.get("sections") or []
+    except Exception as _e:
+        logger.warning(f"[FreeformComposer] Autofill Haiku échec : {_e}")
+        return data
+
+    contenu_par_idx = {}
+    for s in sections:
+        if isinstance(s, dict):
+            i = s.get("index")
+            c = s.get("contenu")
+            if isinstance(i, int) and isinstance(c, str) and c.strip():
+                contenu_par_idx[i] = c.strip()
+
+    for ordre, (_p_idx, el, page) in enumerate(labels_a_remplir):
+        contenu_genere = contenu_par_idx.get(ordre + 1)
+        if not contenu_genere or _texte_quasi_vide(contenu_genere):
+            continue
+        el_y = el.get("y_mm") or 10
+        el_x = el.get("x_mm") or 10
+        el_w = el.get("w_mm") or 80
+        taille_label = el.get("taille_pt") or 12
+        nouvel_el = {
+            "type": "texte",
+            "x_mm": el_x,
+            "y_mm": el_y + max(8, taille_label * 0.5),
+            "w_mm": max(el_w, 80),
+            "h_mm": 30,
+            "contenu": contenu_genere,
+            "taille_pt": max(9, min(11, taille_label - 2)),
+            "couleur": el.get("couleur") or "#1a1a2e",
+            "police": el.get("police") or "Helvetica",
+            "alignement": el.get("alignement") or "left",
+            "interligne": 1.3,
+            "z_index": (el.get("z_index") or 3),
+        }
+        page.setdefault("elements", []).append(nouvel_el)
+
+    logger.warning(
+        f"[FreeformComposer] Autofill transverse : {len(contenu_par_idx)} "
+        f"section(s) remplie(s) (sur {len(labels_a_remplir)} orpheline(s))."
+    )
     return data

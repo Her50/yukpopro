@@ -386,6 +386,39 @@ export const ChatPage = () => {
           }
         }
 
+        // Modification incrémentale site multi-pages (placée AVANT toutes
+        // les détections de génération — sinon "modifie la page services"
+        // serait capté par siteMultiMatch).
+        const modifSiteMatch = /\b(modif|change|mets?\s*à\s*jour|adapte|corrige|remplace|ajoute|enlève|supprime)\b[^.]*\b(mon\s*site|ma\s*page|le\s*site|la\s*page|sur\s*(?:le|mon|notre)\s*site|home|accueil|services?|équipe|equipe|contact|tarifs?|mentions|blog)\b/i.test(txt);
+        if (modifSiteMatch) {
+          try {
+            updateLastAssistantMessage(
+              "🔧 Modification incrémentale en cours… (LLM Opus identifie la page concernée + applique)",
+              null,
+            );
+            const res = await generateurApi.modifierSiteParChat(content);
+            const repub = res.url_publique && res.site_publie === false
+              ? `\n\n⚠️ Site publié précédemment : [republie-le depuis /mes-sites](/mes-sites) pour propager les changements en ligne.`
+              : "";
+            updateLastAssistantMessage(
+              `✓ Page **${res.type_page_modifiee}** du site \`${res.site_slug}\` modifiée.${repub}`,
+              null,
+            );
+            toast.success("Modification appliquée");
+            return;
+          } catch (e: any) {
+            const detail = e?.response?.data?.detail || e?.message || "inconnue";
+            // 404 = pas de site → fallback flow normal
+            if (e?.response?.status === 404) {
+              // Continue avec les autres détections (le user n'a peut-être pas
+              // encore généré de site — fallback chat normal)
+            } else {
+              updateLastAssistantMessage(`❌ Erreur modification : ${String(detail).slice(0, 200)}`, null);
+              return;
+            }
+          }
+        }
+
         // Phase D — détection intent boutique e-commerce AVANT site multi-pages
         const boutiqueMatch = /\b(g[ée]n[èe]re|cr[ée]e|fais|monte|ouvre|d[ée]marre)[^.]*\b(boutique|shop|magasin|e-?commerce|vendre\s+en\s+ligne)\b|\b(boutique\s+en\s+ligne|magasin\s+en\s+ligne|yukpo\s*shop)\b|\bimport\s+(?:ia|magique)\s+(?:de\s+)?(?:produits?|articles?)\b/i.test(txt);
         if (boutiqueMatch) {

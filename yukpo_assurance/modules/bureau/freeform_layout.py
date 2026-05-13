@@ -582,19 +582,50 @@ def _render_element(
         font_name = el.police or "Helvetica"
         if el.bold and "Bold" not in font_name:
             font_name = f"{font_name}-Bold" if font_name in ("Helvetica", "Times", "Courier", "Inter") else font_name
+        base_size = el.taille_pt or 10
+        # ── Auto-scale anti-overflow ─────────────────────────────────────
+        # Bug observé : titre "GAGNEZ GROS AVEC MTN MEGA" en 36pt dans une
+        # boîte w=80mm h=20mm → word-wrap génère 3 lignes × 43pt leading =
+        # 129pt mais h dispo = 56pt → les 2 dernières lignes débordent et
+        # écrasent le sous-titre "À GAGNER :" placé juste en dessous.
+        # Stratégie : si débordement détecté, réduit progressivement taille_pt
+        # jusqu'à ce que l'ensemble tienne dans h_mm (min 7pt pour mentions
+        # légales).
+        max_w_pt = mm_to_pt(el.w_mm) if el.w_mm else None
+        max_h_pt = mm_to_pt(el.h_mm) if el.h_mm else None
+        effective_size = float(base_size)
+        if max_w_pt and max_h_pt:
+            for _attempt in range(8):
+                try:
+                    c.setFont(font_name, effective_size)
+                except Exception:
+                    c.setFont("Helvetica", effective_size)
+                lignes_test = _wrap_text(
+                    c, el.contenu or "", font_name, effective_size, max_w_pt
+                )
+                interligne = el.interligne or 1.2
+                hauteur_totale = (
+                    effective_size + (len(lignes_test) - 1) * effective_size * interligne
+                )
+                # Tolérance 5% pour absorber le baseline shift
+                if hauteur_totale <= max_h_pt * 1.05:
+                    break
+                if effective_size <= 7:
+                    break
+                # Réduire 15% → converge en 3-4 itérations sur cas extrêmes
+                effective_size *= 0.85
         try:
-            c.setFont(font_name, el.taille_pt or 10)
+            c.setFont(font_name, effective_size)
         except Exception:
-            c.setFont("Helvetica", el.taille_pt or 10)
+            c.setFont("Helvetica", effective_size)
         c.setFillColor(parse_color(el.couleur, default=(0, 0, 0)))
 
-        # Word-wrap simple si w_mm fourni
-        max_w_pt = mm_to_pt(el.w_mm) if el.w_mm else None
-        leading = (el.taille_pt or 10) * (el.interligne or 1.2)
-        lignes = _wrap_text(c, el.contenu or "", font_name, el.taille_pt or 10, max_w_pt)
-        cur_y = y_top - (el.taille_pt or 10)   # baseline première ligne
+        # Word-wrap final avec la taille calculée
+        leading = effective_size * (el.interligne or 1.2)
+        lignes = _wrap_text(c, el.contenu or "", font_name, effective_size, max_w_pt)
+        cur_y = y_top - effective_size   # baseline première ligne
         for ligne in lignes:
-            tw = c.stringWidth(ligne, font_name, el.taille_pt or 10)
+            tw = c.stringWidth(ligne, font_name, effective_size)
             if el.alignement == "center":
                 draw_x = x + ((max_w_pt or tw) - tw) / 2
             elif el.alignement == "right":

@@ -632,6 +632,197 @@ async def generer_article(
     }
 
 
+class ModifierParChatRequest(BaseModel):
+    """Helper : modification par instruction libre depuis le chat YukpoPro.
+
+    Le user dit "modifie le titre de ma page services en …" — backend :
+    1. Trouve son dernier site (ou le seul) en DB
+    2. LLM détermine quel TYPE de page est concerné par l'instruction
+    3. Route vers le PATCH /pages/{type}/modifier classique
+    """
+    instructions: str = Field(..., min_length=5, max_length=2000)
+    slug: Optional[str] = Field(None,
+        description="Si fourni, cible ce slug. Sinon prend le dernier site du user.")
+    type_page_force: Optional[str] = Field(None,
+        description="Si fourni, contourne la détection LLM du type")
+    confirmer_cout: bool = Field(default=False)
+
+
+@router.post(
+    "/sites/modifier-par-chat",
+    summary="Helper chat — modifie une page du dernier site du user (LLM dispatcher)",
+)
+async def modifier_site_par_chat(
+    req: ModifierParChatRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Pipeline :
+       1. Trouve le site (slug fourni OU dernier modif du user)
+       2. Si type_page non forcé, LLM rapide détecte le type concerné
+       3. Patch la page via le pipeline /modifier existant
+    """
+    from api.routes_pro_generateurs import _pre_check_credits
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    if not req.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        cout = estimer_cout_module("site_page_modif")
+        v = await advisor.evaluer(current_user.user_id, cout, module="site_page_modif")
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
+    # 1. Trouve le site cible
+    if req.slug:
+        site = await _verifier_site_ownership(req.slug, current_user.user_id, db)
+    else:
+        site = (await db.execute(
+            select(SiteDB)
+            .where(SiteDB.user_id == current_user.user_id)
+            .order_by(desc(SiteDB.derniere_modif))
+            .limit(1)
+        )).scalar_one_or_none()
+        if not site:
+            raise HTTPException(404,
+                "Aucun site trouvé pour cet utilisateur. Générez-en un d'abord.")
+
+    # 2. Quels types de pages existent sur ce site ?
+    pages_db = (await db.execute(
+        select(SitePageDB.type, SitePageDB.titre_seo)
+        .where(SitePageDB.site_id == site.id)
+        .where(SitePageDB.langue == site.langue_principale)
+    )).all()
+    types_dispo = [(t, ts) for t, ts in pages_db]
+
+    # 3. Détecte le type page (sauf si forcé)
+    type_page = req.type_page_force
+    if not type_page:
+        # Heuristique rapide regex sur l'instruction
+        import re as _re
+        instr_lower = req.instructions.lower()
+        hints = {
+            "home":             [r"\b(accueil|home|page principale)\b"],
+            "services":         [r"\b(services?|prestations?|offres?)\b"],
+            "equipe":           [r"\b(équipe|equipe|team|membres?|collabor)\b"],
+            "blog_index":       [r"\b(blog|articles?)\b"],
+            "contact":          [r"\b(contact|coordon|adresse|horaires?|téléphone)\b"],
+            "tarifs":           [r"\b(tarifs?|prix|pricing)\b"],
+            "a_propos":         [r"\b(à\s*propos|about|histoire|qui\s*sommes)\b"],
+            "portfolio":        [r"\b(portfolio|réalisations|réussites|cases?)\b"],
+            "faq":              [r"\b(faq|questions?\s*fréquentes?)\b"],
+            "mentions_legales": [r"\b(mentions?\s*légales?|legal)\b"],
+            "cgv":              [r"\b(cgv|conditions?\s*(générales?|de\s*vente))\b"],
+            "confidentialite":  [r"\b(confidentialité|privacy|rgpd|données\s*personnelles)\b"],
+        }
+        types_existant_set = {t for t, _ in types_dispo}
+        for cand, patterns in hints.items():
+            if cand not in types_existant_set:
+                continue
+            for p in patterns:
+                if _re.search(p, instr_lower):
+                    type_page = cand
+                    break
+            if type_page:
+                break
+
+        # Fallback LLM si pas trouvé par regex
+        if not type_page and types_existant_set:
+            from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+            choix = ", ".join(sorted(types_existant_set))
+            rep = await ia_client.appeler(
+                prompt=(
+                    f"Instruction du user : « {req.instructions} »\n"
+                    f"Types de pages disponibles : {choix}\n\n"
+                    f"Réponds UNIQUEMENT par UN SEUL type parmi la liste, "
+                    f"celui qui correspond le mieux à l'instruction. Pas d'explication."
+                ),
+                systeme="Tu détermines quelle page d'un site web l'utilisateur "
+                        "veut modifier d'après son instruction. Réponse en 1 mot.",
+                mode=ModeIA.PRECISION,
+                max_tokens_override=20,
+                utiliser_cache=False,
+                forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            )
+            type_candidate = (rep.contenu or "").strip().lower().split()[0] if rep.contenu else ""
+            if type_candidate in types_existant_set:
+                type_page = type_candidate
+
+        if not type_page:
+            # Dernier recours : 'home' si dispo, sinon 1re page
+            type_page = "home" if "home" in types_existant_set else (
+                list(types_existant_set)[0] if types_existant_set else None
+            )
+        if not type_page:
+            raise HTTPException(400,
+                "Impossible de déterminer la page à modifier. Précisez (ex. 'page services').")
+
+    # 4. Récupère la page + applique modif via LLM Sonnet (reuse pattern existant)
+    page = (await db.execute(
+        select(SitePageDB).where(SitePageDB.site_id == site.id)
+                           .where(SitePageDB.type == type_page)
+                           .where(SitePageDB.langue == site.langue_principale)
+    )).scalar_one_or_none()
+    if not page:
+        raise HTTPException(404, f"Page {type_page} introuvable sur le site")
+
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    prompt_systeme = (
+        "Tu reçois une SPEC JSON d'une page web + des instructions de "
+        "modification. Tu renvoies la SPEC JSON modifiée (même structure, "
+        "même clés, seules les valeurs concernées par les instructions "
+        "changent). Préserve les URLs, image_url, _image_url, slugs. "
+        "Pas de texte avant/après — JSON strict uniquement."
+    )
+    prompt_user = (
+        f"SPEC ACTUELLE :\n{json.dumps(page.contenu_json, ensure_ascii=False)}\n\n"
+        f"INSTRUCTIONS DE MODIFICATION :\n{req.instructions}\n\n"
+        f"Produis la SPEC JSON modifiée."
+    )
+    rep = await ia_client.appeler(
+        prompt=prompt_user, systeme=prompt_systeme,
+        mode=ModeIA.REDACTION, max_tokens_override=10000,
+        json_attendu=True, utiliser_cache=False,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+    )
+    import re as _re2
+    texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
+    m = _re2.search(r"\{[\s\S]*\}", texte)
+    if not m:
+        raise HTTPException(500, "LLM n'a pas produit de JSON parseable")
+    nouvelle_spec = json.loads(m.group(0))
+
+    page.contenu_json = nouvelle_spec
+    page.titre_seo = (nouvelle_spec.get("titre_seo") or page.titre_seo or "")[:120] if nouvelle_spec.get("titre_seo") else page.titre_seo
+    page.modifie_le = datetime.utcnow()
+    site.derniere_modif = datetime.utcnow()
+    site.statut = "brouillon" if site.statut == "publie" else site.statut
+    await db.commit()
+
+    try:
+        from modules.bureau.service_credits_bureau import debiter_llm_unifie
+        await debiter_llm_unifie(
+            user_id=current_user.user_id,
+            modele=getattr(rep, "modele_utilise", "claude-opus-4-7"),
+            tokens_input=int(getattr(rep, "tokens_input", 0) or 0),
+            tokens_output=int(getattr(rep, "tokens_output", 0) or 0),
+            module="sites_modifier_chat",
+        )
+    except Exception:
+        pass
+
+    return {
+        "ok": True,
+        "site_slug": site.slug,
+        "type_page_modifiee": type_page,
+        "site_publie": site.statut == "publie",
+        "url_publique": site.url_public,
+        "message": (
+            f"Page «{type_page}» modifiée. " +
+            ("Republie le site pour propager les changements en ligne." if site.url_public else "")
+        ),
+    }
+
+
 class TraduirePageRequest(BaseModel):
     langues: list[str] = Field(
         ..., min_length=1, max_length=10,

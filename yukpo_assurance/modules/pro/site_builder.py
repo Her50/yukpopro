@@ -71,8 +71,23 @@ _LABELS_PAGE = {
 
 # ─── Prompt LLM pour la composition d'un site multi-pages ────────────────────
 
-_PROMPT_SYSTEME_SITE = """Tu es un copywriter & directeur artistique web expert qui crée \
-des mini-sites professionnels persuasifs, modernes, alignés avec la marque.
+_PROMPT_SYSTEME_SITE = """Tu es un copywriter SENIOR & directeur artistique web \
+expert qui crée des mini-sites professionnels DENSES, PERSUASIFS, MODERNES, \
+alignés avec la marque. Tu ne fais JAMAIS de versions light/superficielles : \
+chaque page doit avoir 5-9 sections riches, des paragraphes narratifs longs \
+(120-250 mots/section), des exemples concrets, et un copywriting CTA-driven.
+
+OBJECTIF DE DENSITÉ par page :
+  • Home               : 7-9 sections (hero + features + comment_ca_marche + \
+                         stats + temoignages + pricing/avantages + cta_final + FAQ)
+  • Services           : 6-8 sections (hero + liste détaillée 4-8 services \
+                         avec paragraphes 100-150 mots/service + process + cta)
+  • Équipe             : 4-6 sections (hero + intro narrative + 3-8 membres \
+                         avec bio 80-120 mots/membre + valeurs + cta)
+  • Blog index         : 3-4 sections (hero + intro + manifeste éditorial + cta)
+  • Contact            : 4-5 sections (hero + coordonnées + carte/horaires + \
+                         form + FAQ rapide 3-4 questions)
+  • Mentions/Conf/CGV  : contenu_md complet 800-1500 mots conformes OHADA/RGPD
 
 Tu reçois un brief utilisateur + (optionnellement) BrandKit + types de pages
 à composer. Tu RENVOIES UN JSON strict (pas de texte avant/après) :
@@ -100,69 +115,136 @@ Tu reçois un brief utilisateur + (optionnellement) BrandKit + types de pages
       "titre_seo": "Titre SEO 60 chars max",
       "description_seo": "Description SEO 160 chars max",
       "hero": {
-        "h1": "Promesse principale (max 70 chars)",
-        "subtitle": "Bénéfice clé (max 160 chars)",
-        "cta_primaire_label": "Démarrer",
-        "cta_primaire_url": "/contact",
-        "cta_secondaire_label": "En savoir plus",
-        "cta_secondaire_url": "/services",
-        "image_prompt": "Description EN 40-80 mots pour hero image"
+        "h1": "Promesse PUISSANTE et SPÉCIFIQUE (max 70 chars) — pas générique",
+        "subtitle": "Bénéfice clé qui clarifie le h1 + différenciateur (max 200 chars)",
+        "cta_primaire_label": "...", "cta_primaire_url": "/contact",
+        "cta_secondaire_label": "...", "cta_secondaire_url": "/services",
+        "image_prompt": "Description EN 40-80 mots"
       },
-      "features": {"titre_section": "Pourquoi nous choisir", "items": [
-        {"icone": "🚀", "titre": "Bénéfice 1", "description": "..."},
-        ...3-6 items
-      ]},
-      "stats": {"titre_section": "...", "items": [{"valeur": "...", "label": "..."}]},
-      "temoignages": {"titre_section": "...", "items": [...]},
-      "cta_final": {"titre": "...", "sous_titre": "...", "cta_label": "...", "cta_url": "/contact"}
+      "features": {
+        "titre_section": "Pourquoi nous choisir / Nos forces",
+        "intro_narrative": "Paragraphe 80-120 mots qui contextualise les 4-6 bénéfices",
+        "items": [
+          {
+            "icone": "🚀",
+            "titre": "Bénéfice CLIENT (pas feature technique)",
+            "description": "Paragraphe 80-130 mots — pas une phrase. Détaille COMMENT et POURQUOI ce bénéfice est réel pour le client, avec un exemple ou métrique."
+          }, ... 4-6 items
+        ]
+      },
+      "comment_ca_marche": {
+        "titre_section": "Comment ça marche",
+        "intro": "1-2 phrases courtes",
+        "etapes": [
+          {"numero": "1", "titre": "Étape 1", "description": "60-100 mots décrivant l'étape, ce que fait le client, ce que tu fais"},
+          ... 3-5 étapes
+        ]
+      },
+      "stats": {
+        "titre_section": "Notre impact en chiffres",
+        "intro": "Paragraphe 50-80 mots qui contextualise (depuis quand, dans quelle zone)",
+        "items": [{"valeur": "+ 240%", "label": "ROI moyen client", "icone": "📈"}, ... 4 stats]
+      },
+      "temoignages": {
+        "titre_section": "Ils nous font confiance",
+        "intro": "Paragraphe 50 mots qui contextualise",
+        "items": [
+          {"nom": "Marie K.", "fonction": "Directrice marketing, NomEntreprise Douala",
+           "avatar_initiales": "MK",
+           "citation": "Citation 60-120 mots, spécifique et crédible — pas générique"}
+          , ... 3 témoignages
+        ]
+      },
+      "cta_final": {
+        "titre": "Prêt à transformer X ?",
+        "sous_titre": "Argument-bénéfice 80-150 mots qui clôture",
+        "cta_label": "...", "cta_url": "/contact"
+      },
+      "faq": {
+        "titre_section": "Questions fréquentes",
+        "items": [
+          {"question": "Question concrète", "reponse": "Réponse 100-180 mots, précise et utile"},
+          ... 4-6 FAQ
+        ]
+      }
     },
     "services": {
       "titre_seo": "...", "description_seo": "...",
       "hero": {...},
+      "intro_narrative": "Paragraphe 120-180 mots qui pose le contexte global des services",
       "liste_services": [
-        {"icone": "...", "titre": "...", "description": "...", "image_prompt": "..."}
-        ...4-8 items
+        {
+          "icone": "...", "titre": "Nom du service précis",
+          "description": "Paragraphe DENSE 120-180 mots détaillant le service, public cible, méthode, durée, livrables, prix indicatif si possible",
+          "bullets_inclus": ["3-5 livrables ou points clés"],
+          "image_prompt": "EN 40-80 mots"
+        }, ... 4-8 items
       ],
+      "process": {
+        "titre_section": "Notre méthode",
+        "etapes": [{"numero":"1","titre":"...","description":"60-100 mots"}, ... 3-5 étapes]
+      },
       "cta_final": {...}
     },
     "equipe": {
       "titre_seo": "...", "description_seo": "...",
       "hero": {...},
+      "intro_narrative": "Paragraphe 100-180 mots qui présente l'équipe, ses valeurs, son ADN",
       "membres": [
-        {"nom": "...", "fonction": "...", "bio": "...", "avatar_initiales": "MK"}
-        ...3-8 membres simulés crédibles
-      ]
+        {
+          "nom": "Prénom Nom", "fonction": "Poste précis",
+          "bio": "Paragraphe 80-150 mots : parcours, expertise, ce qu'il apporte au client, anecdote crédible",
+          "avatar_initiales": "PN"
+        }, ... 3-8 membres simulés ANCRÉS LOCALEMENT
+      ],
+      "valeurs": {
+        "titre_section": "Nos valeurs",
+        "items": [{"icone": "...", "titre": "...", "description": "60-100 mots"}, ... 3-5 valeurs]
+      }
     },
     "blog_index": {
       "titre_seo": "...", "description_seo": "...",
-      "intro": "Phrase d'intro vers les articles"
+      "intro_narrative": "Paragraphe 150-250 mots — manifeste éditorial : ligne éditoriale, à qui s'adresse le blog, fréquence, types d'articles, valeur pour le lecteur"
     },
     "contact": {
       "titre_seo": "...", "description_seo": "...",
-      "hero": {"h1": "...", "subtitle": "..."},
+      "hero": {"h1": "...", "subtitle": "Sous-titre rassurant 120-180 chars"},
       "email": "contact@...", "telephone": "+237 ...",
-      "adresse": "Adresse physique",
-      "horaires": "Lun-Ven 9h-18h"
+      "adresse": "Adresse physique précise",
+      "horaires": "Détaillés ex: 'Lun-Ven 8h-18h, Sam 9h-13h, fermé dimanche'",
+      "carte_zone": "Description géographique 50 mots si pas de carte",
+      "faq_rapide": {
+        "items": [{"question":"...","reponse":"60-100 mots"}, ... 3-4 FAQ ciblées contact]
+      }
     },
     "mentions_legales": {
       "titre_seo": "Mentions légales",
-      "contenu_md": "Texte markdown des mentions complètes"
+      "contenu_md": "Markdown 800-1500 mots complet : éditeur, hébergeur, directeur publication, propriété intellectuelle, conditions d'usage, lien CGV, etc. Cohérent avec le pays/cadre légal du brief (OHADA, RGPD si EU, etc.)"
     },
     "confidentialite": {
       "titre_seo": "Politique de confidentialité",
-      "contenu_md": "Texte markdown RGPD/OHADA conforme"
+      "contenu_md": "Markdown 1000-1800 mots RGPD/OHADA : qui collecte, quelles données, finalités, base légale, durée, droits utilisateur, cookies, sous-traitants, transferts internationaux, contact DPO. NE PAS générique — adapté au secteur du brief."
     }
   }
 }
 
-Règles :
+Règles ABSOLUES (densité + crédibilité) :
 1. CHAQUE page demandée dans `types_pages` doit être présente dans `pages`.
 2. NE PAS inventer de pages non demandées.
-3. Hero image_prompt EN, 40-80 mots, photoréaliste sauf si BrandKit demande illustration.
-4. Crédibilité Afrique francophone : noms de membres, adresses, téléphones, exemples doivent sonner locaux selon le brief.
-5. Mentions légales + Confidentialité : conformité OHADA/RGPD générique mais réelle.
-6. CTAs internes : URLs commencent par / et matchent les slugs (/contact, /services, /tarifs).
-7. Langue : utilise la langue du brief (FR par défaut).
+3. PAS de version light ou superficielle. Chaque section riche, paragraphes longs.
+4. INTERDIT : phrases creuses type "nous offrons des services de qualité",
+   "leader sur le marché", "100% satisfait". Sois CONCRET avec exemples,
+   métriques crédibles, méthodes nommées, livrables précis.
+5. Hero image_prompt EN, 40-80 mots, photoréaliste sauf si BrandKit demande illustration.
+6. Crédibilité géographique selon le brief : si Cameroun/CI/Sénégal mentionnés,
+   adapte noms, villes, téléphones, monnaies, vocabulaire commercial.
+7. Mentions légales + Confidentialité : 800-1800 mots de markdown structuré
+   adapté au pays/cadre légal du brief.
+8. CTAs internes : URLs commencent par / et matchent les slugs (/contact, /services, /tarifs).
+9. Langue : utilise la langue du brief (FR par défaut).
+10. UTILISE PARAGRAPHES NARRATIFS (80-180 mots) plus que des bullets seuls.
+11. Chaque témoignage = citation 60-120 mots, nom complet crédible, entreprise précisée.
+12. Chaque membre équipe = bio 80-150 mots avec parcours pro, expertise, anecdote.
 """
 
 
@@ -440,44 +522,153 @@ def _section_hero_simple(hero: dict) -> str:
 
 
 def _section_features_page(spec_page: dict) -> str:
-    """Section features (réutilisé sur home + services + à propos)."""
+    """Section features avec intro narrative + descriptions longues."""
     f = spec_page.get("features") or {}
     items = f.get("items") or []
     if not items:
         return ""
+    intro = escape(f.get("intro_narrative", ""))
+    intro_html = (
+        f'<p class="text-base md:text-lg text-center max-w-3xl mx-auto mb-10 leading-relaxed" '
+        f'style="color:var(--muted)">{intro}</p>'
+    ) if intro else ""
     cards = "".join(
         f'<div class="p-6 rounded-xl bg-white shadow-md hover:shadow-xl transition-all">'
         f'<div class="text-4xl mb-4">{escape(it.get("icone", "✨"))}</div>'
-        f'<h3 class="text-xl font-bold mb-2" style="color:var(--primary)">{escape(it.get("titre", ""))}</h3>'
-        f'<p class="opacity-80" style="color:var(--muted)">{escape(it.get("description", ""))}</p>'
+        f'<h3 class="text-xl font-bold mb-3" style="color:var(--primary)">{escape(it.get("titre", ""))}</h3>'
+        f'<p class="leading-relaxed text-sm md:text-base opacity-90" style="color:var(--text)">{escape(it.get("description", ""))}</p>'
         f'</div>' for it in items
     )
     return (
         f'<section class="py-20" style="background:var(--bg-alt)">'
         f'<div class="max-w-6xl mx-auto px-6">'
-        f'<h2 class="text-3xl md:text-4xl font-bold text-center mb-12" style="color:var(--primary)">'
+        f'<h2 class="text-3xl md:text-4xl font-bold text-center mb-6" style="color:var(--primary)">'
         f'{escape(f.get("titre_section", "Caractéristiques"))}</h2>'
+        f'{intro_html}'
         f'<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{cards}</div>'
         f'</div></section>'
     )
 
 
-def _section_services_liste(spec_page: dict) -> str:
-    """Liste de services détaillés (page Services)."""
-    items = spec_page.get("liste_services") or []
+def _section_comment_ca_marche(spec_page: dict) -> str:
+    """Section comment ça marche (numérotée 1-2-3-4-5)."""
+    c = spec_page.get("comment_ca_marche") or {}
+    etapes = c.get("etapes") or []
+    if not etapes:
+        return ""
+    intro = escape(c.get("intro", ""))
+    cards = "".join(
+        f'<div class="relative">'
+        f'<div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white mb-4" '
+        f'style="background:var(--accent)">{escape(e.get("numero", str(i+1)))}</div>'
+        f'<h3 class="text-lg font-bold mb-2" style="color:var(--primary)">{escape(e.get("titre", ""))}</h3>'
+        f'<p class="text-sm leading-relaxed opacity-90" style="color:var(--text)">{escape(e.get("description", ""))}</p>'
+        f'</div>'
+        for i, e in enumerate(etapes)
+    )
+    n = max(1, min(4, len(etapes)))
+    return (
+        f'<section class="py-20" style="background:var(--bg)">'
+        f'<div class="max-w-6xl mx-auto px-6">'
+        f'<h2 class="text-3xl md:text-4xl font-bold text-center mb-4" style="color:var(--primary)">'
+        f'{escape(c.get("titre_section", "Comment ça marche"))}</h2>'
+        + (f'<p class="text-center max-w-3xl mx-auto mb-12 opacity-80" style="color:var(--muted)">{intro}</p>' if intro else '<div class="mb-8"></div>')
+        + f'<div class="grid grid-cols-1 md:grid-cols-{n} gap-8">{cards}</div>'
+        f'</div></section>'
+    )
+
+
+def _section_faq(spec_page: dict, key: str = "faq") -> str:
+    """Section FAQ accordéon."""
+    f = spec_page.get(key) or {}
+    items = f.get("items") or []
     if not items:
         return ""
     cards = "".join(
-        f'<div class="p-6 rounded-xl bg-white shadow-md">'
-        f'<div class="text-4xl mb-4">{escape(it.get("icone", "🔧"))}</div>'
-        f'<h3 class="text-2xl font-bold mb-3" style="color:var(--primary)">{escape(it.get("titre", ""))}</h3>'
-        f'<p class="text-base opacity-80" style="color:var(--text)">'
-        f'{escape(it.get("description", ""))}</p></div>' for it in items
+        f'<details class="bg-white rounded-lg shadow-sm p-5 cursor-pointer">'
+        f'<summary class="font-semibold text-lg" style="color:var(--primary)">{escape(it.get("question", ""))}</summary>'
+        f'<p class="mt-4 leading-relaxed opacity-90" style="color:var(--text)">{escape(it.get("reponse", ""))}</p>'
+        f'</details>'
+        for it in items
+    )
+    return (
+        f'<section class="py-20" style="background:var(--bg-alt)">'
+        f'<div class="max-w-3xl mx-auto px-6">'
+        f'<h2 class="text-3xl md:text-4xl font-bold text-center mb-12" style="color:var(--primary)">'
+        f'{escape(f.get("titre_section", "Questions fréquentes"))}</h2>'
+        f'<div class="space-y-3">{cards}</div>'
+        f'</div></section>'
+    )
+
+
+def _section_valeurs(spec_page: dict) -> str:
+    """Section valeurs (page équipe)."""
+    v = spec_page.get("valeurs") or {}
+    items = v.get("items") or []
+    if not items:
+        return ""
+    cards = "".join(
+        f'<div class="p-5 rounded-xl bg-white shadow-md">'
+        f'<div class="text-3xl mb-3">{escape(it.get("icone", "💎"))}</div>'
+        f'<h3 class="text-lg font-bold mb-2" style="color:var(--primary)">{escape(it.get("titre", ""))}</h3>'
+        f'<p class="text-sm opacity-90 leading-relaxed" style="color:var(--text)">{escape(it.get("description", ""))}</p>'
+        f'</div>' for it in items
     )
     return (
         f'<section class="py-20" style="background:var(--bg)">'
         f'<div class="max-w-6xl mx-auto px-6">'
-        f'<div class="grid grid-cols-1 md:grid-cols-2 gap-6">{cards}</div>'
+        f'<h2 class="text-3xl md:text-4xl font-bold text-center mb-12" style="color:var(--primary)">'
+        f'{escape(v.get("titre_section", "Nos valeurs"))}</h2>'
+        f'<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{cards}</div>'
+        f'</div></section>'
+    )
+
+
+def _section_intro_narrative(spec_page: dict) -> str:
+    """Intro narrative longue (placée juste après le hero)."""
+    intro = spec_page.get("intro_narrative")
+    if not intro:
+        return ""
+    return (
+        f'<section class="py-12" style="background:var(--bg)">'
+        f'<div class="max-w-3xl mx-auto px-6">'
+        f'<p class="text-lg md:text-xl leading-relaxed text-center" style="color:var(--text)">'
+        f'{escape(intro)}</p>'
+        f'</div></section>'
+    )
+
+
+def _section_services_liste(spec_page: dict) -> str:
+    """Liste de services détaillés (page Services) — paragraphes longs + bullets."""
+    items = spec_page.get("liste_services") or []
+    if not items:
+        return ""
+    cards = []
+    for it in items:
+        bullets = it.get("bullets_inclus") or []
+        bullets_html = ""
+        if bullets:
+            bullets_html = (
+                '<ul class="mt-4 space-y-1.5">' +
+                "".join(
+                    f'<li class="text-sm flex items-start gap-2" style="color:var(--text)">'
+                    f'<span style="color:var(--accent)">✓</span><span>{escape(b)}</span></li>'
+                    for b in bullets
+                ) + '</ul>'
+            )
+        cards.append(
+            f'<div class="p-6 rounded-xl bg-white shadow-md">'
+            f'<div class="text-4xl mb-4">{escape(it.get("icone", "🔧"))}</div>'
+            f'<h3 class="text-2xl font-bold mb-3" style="color:var(--primary)">{escape(it.get("titre", ""))}</h3>'
+            f'<p class="text-base leading-relaxed opacity-90" style="color:var(--text)">'
+            f'{escape(it.get("description", ""))}</p>'
+            f'{bullets_html}'
+            f'</div>'
+        )
+    return (
+        f'<section class="py-20" style="background:var(--bg)">'
+        f'<div class="max-w-6xl mx-auto px-6">'
+        f'<div class="grid grid-cols-1 md:grid-cols-2 gap-6">{"".join(cards)}</div>'
         f'</div></section>'
     )
 
@@ -620,6 +811,7 @@ def construire_html_page(
     if type_page == "home":
         sections.append(_section_hero_simple(page_spec.get("hero") or {}))
         sections.append(_section_features_page(page_spec))
+        sections.append(_section_comment_ca_marche(page_spec))
         # Stats + témoignages réutilisent les helpers landing existants
         from modules.pro.landing_page_builder import (
             _section_stats, _section_temoignages, _section_cta_final,
@@ -627,18 +819,24 @@ def construire_html_page(
         sections.append(_section_stats({"stats": page_spec.get("stats", {})}))
         sections.append(_section_temoignages({"temoignages": page_spec.get("temoignages", {})}))
         sections.append(_section_cta_final({"cta_final": page_spec.get("cta_final", {})}))
+        sections.append(_section_faq(page_spec, "faq"))
     elif type_page == "services":
         sections.append(_section_hero_simple(page_spec.get("hero") or {}))
+        sections.append(_section_intro_narrative(page_spec))
         sections.append(_section_services_liste(page_spec))
+        sections.append(_section_comment_ca_marche({"comment_ca_marche": page_spec.get("process") or {}}))
         from modules.pro.landing_page_builder import _section_cta_final
         sections.append(_section_cta_final({"cta_final": page_spec.get("cta_final", {})}))
     elif type_page == "equipe":
         sections.append(_section_hero_simple(page_spec.get("hero") or {}))
+        sections.append(_section_intro_narrative(page_spec))
         sections.append(_section_equipe(page_spec))
+        sections.append(_section_valeurs(page_spec))
     elif type_page == "blog_index":
         sections.append(_section_blog_index(page_spec, articles or []))
     elif type_page == "contact":
         sections.append(_section_contact_page(page_spec, slug_site))
+        sections.append(_section_faq(page_spec, "faq_rapide"))
     elif type_page in ("mentions_legales", "confidentialite", "cgv"):
         sections.append(_section_markdown(page_spec.get("contenu_md", "")))
     else:

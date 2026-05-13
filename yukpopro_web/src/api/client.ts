@@ -455,6 +455,19 @@ export const generateurApi = {
     return data;
   },
 
+  /**
+   * Helper pour modification depuis chat : trouve auto le bon site +
+   * la page concernée par l'instruction (regex + LLM Haiku dispatcher).
+   */
+  modifierSiteParChat: async (instructions: string, opts: { slug?: string; type_page_force?: string } = {}) => {
+    const { data } = await http.post(
+      "/pro/sites/modifier-par-chat",
+      { instructions, ...opts },
+      { timeout: 300_000 },
+    );
+    return data;
+  },
+
   genererArticleBlog: async (slug: string, req: {
     sujet: string; auteur?: string; langue?: string;
     publier_immediatement?: boolean; publier_dans_jours?: number;
