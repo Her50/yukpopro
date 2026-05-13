@@ -11,11 +11,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  ArrowLeft, ExternalLink, Image as ImageIcon, Loader2, Package,
-  RefreshCw, Send, ShoppingCart, Sparkles, Trash2, Upload, Wand2,
+  ArrowLeft, BarChart3, ExternalLink, Facebook, Image as ImageIcon,
+  Loader2, Package, RefreshCw, Send, ShoppingCart, Sparkles, Trash2,
+  Truck, Upload, Users, Wand2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { generateurApi } from "@/api/client";
+import {
+  OngletCRM, OngletLivraison, OngletROAS, OngletSocial,
+} from "./maboutique/OngletsAvances";
 
 type Produit = {
   id: number; titre: string; slug: string;
@@ -36,7 +40,7 @@ export const MaBoutiquePage = () => {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"produits" | "commandes">("produits");
+  const [tab, setTab] = useState<"produits" | "commandes" | "social" | "roas" | "crm" | "livraison">("produits");
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importBrief, setImportBrief] = useState("");
@@ -258,15 +262,19 @@ export const MaBoutiquePage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-4 border-b border-slate-200">
-        <button onClick={() => setTab("produits")}
-                className={`px-4 py-2 text-sm font-medium ${tab === "produits" ? "border-b-2 border-violet-600 text-violet-700" : "text-slate-600"}`}>
-          {t("shop.tab_produits", "Produits")} ({produits.length})
-        </button>
-        <button onClick={() => setTab("commandes")}
-                className={`px-4 py-2 text-sm font-medium ${tab === "commandes" ? "border-b-2 border-violet-600 text-violet-700" : "text-slate-600"}`}>
-          {t("shop.tab_commandes", "Commandes")} ({commandes.length})
-        </button>
+      <div className="flex gap-1 mb-4 border-b border-slate-200 overflow-x-auto">
+        <TabBtn icon={<Package className="w-4 h-4" />} label={`${t("shop.tab_produits", "Produits")} (${produits.length})`}
+                active={tab === "produits"} onClick={() => setTab("produits")} />
+        <TabBtn icon={<ShoppingCart className="w-4 h-4" />} label={`${t("shop.tab_commandes", "Commandes")} (${commandes.length})`}
+                active={tab === "commandes"} onClick={() => setTab("commandes")} />
+        <TabBtn icon={<Facebook className="w-4 h-4" />} label={t("shop.tab_social", "Social")}
+                active={tab === "social"} onClick={() => setTab("social")} />
+        <TabBtn icon={<BarChart3 className="w-4 h-4" />} label={t("shop.tab_roas", "Pubs & ROI")}
+                active={tab === "roas"} onClick={() => setTab("roas")} />
+        <TabBtn icon={<Users className="w-4 h-4" />} label={t("shop.tab_crm", "CRM")}
+                active={tab === "crm"} onClick={() => setTab("crm")} />
+        <TabBtn icon={<Truck className="w-4 h-4" />} label={t("shop.tab_livraison", "Livraison")}
+                active={tab === "livraison"} onClick={() => setTab("livraison")} />
       </div>
 
       {tab === "produits" && (
@@ -357,6 +365,30 @@ export const MaBoutiquePage = () => {
           ))}
         </div>
       )}
+
+      {/* Phase D6 — Social */}
+      {tab === "social" && <OngletSocial />}
+
+      {/* Phase D7 — ROAS Pubs */}
+      {tab === "roas" && <OngletROAS />}
+
+      {/* Phase D8 — CRM clients */}
+      {tab === "crm" && <OngletCRM />}
+
+      {/* Phase D9 — Livraison */}
+      {tab === "livraison" && <OngletLivraison />}
     </div>
   );
 };
+
+// Composant helper barre d'onglets responsive (icône + label)
+const TabBtn = ({ icon, label, active, onClick }: {
+  icon: React.ReactNode; label: string; active: boolean; onClick: () => void;
+}) => (
+  <button onClick={onClick}
+          className={`inline-flex items-center gap-1.5 px-3 md:px-4 py-2 text-xs md:text-sm font-medium whitespace-nowrap ${
+            active ? "border-b-2 border-violet-600 text-violet-700" : "text-slate-600 hover:text-slate-900"
+          }`}>
+    {icon}<span>{label}</span>
+  </button>
+);
