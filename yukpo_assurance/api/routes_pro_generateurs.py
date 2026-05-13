@@ -21,6 +21,7 @@ import base64
 import logging
 import mimetypes
 import os
+import time
 from pathlib import Path
 from typing import Optional, List
 from datetime import datetime
@@ -193,6 +194,38 @@ class GenererSlidesRequest(BaseModel):
     contexte:       Optional[str]  = Field(None, max_length=2000)
     donnees:        Optional[dict] = None
     format_sortie:  str  = Field("pptx", description="pptx | markdown")
+
+
+class GenererSlidesWebRequest(BaseModel):
+    """Variante WEB INTERACTIVE (Reveal.js HTML autonome partageable URL)."""
+    sujet:        str  = Field(..., min_length=5, max_length=3000)
+    type_pres:    str  = Field("rapport_direction")
+    mode:         str  = Field("executive")
+    contexte:     Optional[str]  = Field(None, max_length=2000)
+    donnees:      Optional[dict] = None
+    langue:       str  = Field("fr", max_length=8)
+    generer_images_hero: bool = Field(default=True,
+        description="Si True, génère des images IA pour les slides avec image_prompt")
+    brand_kit:    Optional[dict] = Field(default=None,
+        description="Si None, auto-load du BrandKit org")
+
+
+class GenererLandingRequest(BaseModel):
+    """Landing page web statique HTML+Tailwind (single file production-ready)."""
+    sujet:     str  = Field(..., min_length=5, max_length=3000,
+        description="Produit/service/événement/projet à promouvoir")
+    objectif:  str  = Field("conversion",
+        description="conversion | inscription | demo | leads | vente | recrutement")
+    cible:     Optional[str] = Field(None, max_length=600,
+        description="Profil cible (B2B PME, étudiants, etc.)")
+    ton:       Optional[str] = Field(None, max_length=200,
+        description="professionnel | startup | luxe | tech | bienveillant | dynamique")
+    contexte:  Optional[str] = Field(None, max_length=3000)
+    langue:    str  = Field("fr", max_length=8)
+    generer_images: bool = Field(default=True,
+        description="Si True, génère hero image + OG image + favicon vectoriel")
+    brand_kit: Optional[dict] = Field(default=None,
+        description="Si None, auto-load du BrandKit org")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -513,6 +546,220 @@ async def generer_slides(
     except Exception as e:
         logger.error(f"[GenSlides] Erreur user={current_user.user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur génération : {str(e)[:200]}")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Slides Web Interactives (Reveal.js HTML autonome partageable URL)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router.post("/slides-web/generer", summary="Présentation Reveal.js HTML autonome")
+async def generer_slides_web_endpoint(
+    req: GenererSlidesWebRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Génère une présentation HTML interactive Reveal.js (single-file).
+
+    Avantages vs PPTX :
+      • Partageable par URL (pas d'envoi de fichier 50MB)
+      • Animations fluides + transitions + fragments
+      • Speaker notes (touche S), plein écran (F), overview (Esc)
+      • Export PDF natif (?print-pdf)
+      • Lecture sur tous écrans + mobile
+      • SEO + accessibilité
+
+    Retourne {ok, url_telechargement, html_id, nb_slides, theme_used, spec}.
+    """
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+    from modules.pro.slides_web_builder import generer_slides_web
+
+    # Auto-load BrandKit org si pas fourni (cohérent avec geometric_placement)
+    brand_kit_effectif = req.brand_kit
+    if not brand_kit_effectif:
+        try:
+            from api.routes_brand_kit import charger_overrides_brand_kit
+            cid = getattr(current_user, "compagnie_id", None) or 1
+            bk = await charger_overrides_brand_kit(int(cid))
+            if isinstance(bk, dict) and bk.get("brand_kit_active"):
+                brand_kit_effectif = bk
+                logger.info(f"[SlidesWeb] BrandKit org auto-chargé pour user={current_user.user_id}")
+        except Exception as _e_bk:
+            logger.debug(f"[SlidesWeb] auto-load BrandKit skip : {_e_bk}")
+
+    try:
+        html_bytes, spec, usages = await asyncio.wait_for(
+            generer_slides_web(
+                sujet=req.sujet,
+                type_pres=req.type_pres,
+                mode=req.mode,
+                contexte=req.contexte,
+                donnees=req.donnees,
+                brand_kit=brand_kit_effectif,
+                langue=req.langue,
+                generer_images_hero=req.generer_images_hero,
+            ),
+            timeout=600.0,
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(504, "Génération slides web : dépassement 10min")
+    except Exception as e:
+        logger.error(f"[SlidesWeb] Erreur user={current_user.user_id}: {e}")
+        raise HTTPException(500, f"Erreur slides web : {str(e)[:200]}")
+
+    # Sauvegarde HTML
+    fid = f"bureau_slides_web_{current_user.user_id}_{int(time.time())}.html"
+    (_DATA_DIR / fid).write_bytes(html_bytes)
+
+    # Débit LLM
+    for u in usages:
+        try:
+            await _debiter_credits_generation(
+                user_id=current_user.user_id, db=db, module="slides_web",
+                tokens_input=int(u.get("tokens_in", 0)),
+                tokens_output=int(u.get("tokens_out", 0)),
+                role=current_user.role,
+            )
+        except Exception:
+            pass
+
+    # Session R4
+    try:
+        from modules.bureau import bureau_session as _bs
+        await _bs.update_session_apres_generation(
+            user_id=current_user.user_id, pipeline="slides_web",
+            fichier_id=fid, brief=req.sujet,
+            layout_json={
+                "type_pres": req.type_pres, "mode": req.mode,
+                "langue": req.langue, "spec_slides": spec,
+                "brand_kit": brand_kit_effectif,
+            },
+        )
+    except Exception as _e_sess:
+        logger.debug(f"[SlidesWeb/Session] : {_e_sess}")
+
+    return {
+        "ok": True,
+        "html_id": fid,
+        "fichier_genere": fid,
+        "url_telechargement": f"/api/v1/pro/generateurs/fichier/{fid}",
+        "size_kb": round(len(html_bytes) / 1024, 1),
+        "nb_slides": len(spec.get("slides", [])),
+        "theme_used": spec.get("theme_pref", "corporate"),
+        "titre": spec.get("titre"),
+        "format": "html_revealjs",
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Landing Page Web (HTML + Tailwind statique, production-ready)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router.post("/landing-page/generer", summary="Landing page web statique HTML+Tailwind")
+async def generer_landing_page_endpoint(
+    req: GenererLandingRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Génère une landing page web autonome (single-file HTML production-ready).
+
+    Sortie : HTML statique avec Tailwind CDN + JS vanilla, déployable n'importe où
+    (Netlify, Vercel, S3, GitHub Pages, Cloudflare Pages).
+
+    Sections auto-générées par IA selon pertinence du brief :
+      • Nav sticky + Hero (avec hero image IA optionnelle)
+      • Features, Stats animées, Étapes, Témoignages, Pricing, FAQ
+      • CTA finale + Contact + Footer
+      • Meta SEO + Open Graph + Twitter Card + favicon SVG vectoriel
+      • Animations scroll + dark mode auto + accessibilité a11y + print
+
+    Retourne {ok, url_telechargement, html_id, nb_sections, spec_resumee}.
+    """
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+    from modules.pro.landing_page_builder import generer_landing_page
+
+    # Auto-load BrandKit org si pas fourni
+    brand_kit_effectif = req.brand_kit
+    if not brand_kit_effectif:
+        try:
+            from api.routes_brand_kit import charger_overrides_brand_kit
+            cid = getattr(current_user, "compagnie_id", None) or 1
+            bk = await charger_overrides_brand_kit(int(cid))
+            if isinstance(bk, dict) and bk.get("brand_kit_active"):
+                brand_kit_effectif = bk
+                logger.info(f"[Landing] BrandKit org auto-chargé pour user={current_user.user_id}")
+        except Exception as _e_bk:
+            logger.debug(f"[Landing] auto-load BrandKit skip : {_e_bk}")
+
+    try:
+        html_bytes, spec, usages = await asyncio.wait_for(
+            generer_landing_page(
+                sujet=req.sujet, objectif=req.objectif,
+                cible=req.cible, ton=req.ton,
+                contexte=req.contexte, brand_kit=brand_kit_effectif,
+                langue=req.langue, generer_images=req.generer_images,
+            ),
+            timeout=600.0,
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(504, "Génération landing : dépassement 10min")
+    except Exception as e:
+        logger.error(f"[Landing] Erreur user={current_user.user_id}: {e}")
+        raise HTTPException(500, f"Erreur landing : {str(e)[:200]}")
+
+    fid = f"bureau_landing_{current_user.user_id}_{int(time.time())}.html"
+    (_DATA_DIR / fid).write_bytes(html_bytes)
+
+    for u in usages:
+        try:
+            await _debiter_credits_generation(
+                user_id=current_user.user_id, db=db, module="landing_page",
+                tokens_input=int(u.get("tokens_in", 0)),
+                tokens_output=int(u.get("tokens_out", 0)),
+                role=current_user.role,
+            )
+        except Exception:
+            pass
+
+    # Session R4 pour modification incrémentale
+    try:
+        from modules.bureau import bureau_session as _bs
+        spec_light = {k: v for k, v in spec.items() if not k.startswith("_")}
+        await _bs.update_session_apres_generation(
+            user_id=current_user.user_id, pipeline="landing_page",
+            fichier_id=fid, brief=req.sujet,
+            layout_json={
+                "objectif": req.objectif, "langue": req.langue,
+                "spec": spec_light, "brand_kit": brand_kit_effectif,
+            },
+        )
+    except Exception as _e_sess:
+        logger.debug(f"[Landing/Session] : {_e_sess}")
+
+    # Calcule sections non vides
+    sections_actives = []
+    for key in ("hero", "features", "stats", "comment_ca_marche", "temoignages",
+                "pricing", "faq", "cta_final", "contact"):
+        v = spec.get(key)
+        if not v:
+            continue
+        if isinstance(v, dict):
+            items = v.get("items") or v.get("etapes") or v.get("plans") or v.get("h1")
+            if items:
+                sections_actives.append(key)
+
+    return {
+        "ok": True,
+        "html_id": fid,
+        "fichier_genere": fid,
+        "url_telechargement": f"/api/v1/pro/generateurs/fichier/{fid}",
+        "size_kb": round(len(html_bytes) / 1024, 1),
+        "nb_sections": len(sections_actives),
+        "sections_actives": sections_actives,
+        "titre": (spec.get("meta") or {}).get("titre_seo"),
+        "format": "html_landing_tailwind",
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════

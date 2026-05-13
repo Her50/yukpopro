@@ -238,6 +238,63 @@ async def generer_image(
             ) from e2
 
 
+# ── SVG natif (Recraft v3 SVG via Replicate) ─────────────────────────────────
+
+# Mots-clés qui indiquent un brief vectoriel (logo/icône/illustration plate)
+# pour lequel un SVG natif (scalable infini, fichier léger, éditable) est plus
+# adapté qu'un PNG raster. Le LLM peut aussi forcer en explicit en passant
+# `force_svg=True` dans son ImagePlacement.prompt_ia.
+_VECTOR_HINTS = (
+    "logo", "icon", "icône", "icone", "pictogram", "pictogramme",
+    "illustration plate", "flat illustration", "flat design",
+    "vector", "vectoriel", "svg", "symbole", "emblem", "emblème",
+    "monogram", "monogramme", "badge", "sigle", "wordmark", "marque",
+    "infographic icon", "line art", "outline", "isometric icon",
+    "minimalist illustration", "geometric pattern", "motif géométrique",
+)
+
+
+def is_vector_brief(prompt: str) -> bool:
+    """Détecte si un prompt décrit un visuel vectoriel (logo/icône/illustration
+    plate). Permet le routage automatique vers Recraft v3 SVG."""
+    p = prompt.lower()
+    return any(h in p for h in _VECTOR_HINTS)
+
+
+async def generer_svg_natif(
+    prompt: str,
+    format_: str = "square_hd",
+    style: str = "vector_illustration",
+    timeout_s: float = 90.0,
+) -> bytes:
+    """
+    Génère un SVG vectoriel pur via Recraft v3 SVG (Replicate).
+
+    Retourne les bytes UTF-8 du document SVG. À utiliser pour :
+      • Logos (scalables, éditables après génération)
+      • Icônes / pictogrammes (assets retina-friendly)
+      • Illustrations plates (charte web/print uniforme)
+      • Motifs / patterns vectoriels (background grand format)
+      • Wordmarks et badges
+
+    Lève ImageGenError si Replicate indisponible (pas de fallback raster ici :
+    si l'appelant veut du SVG, lui rendre du PNG serait incorrect).
+    """
+    try:
+        from . import replicate_client as rc
+    except Exception as e:
+        raise ImageGenError(f"replicate_client non disponible : {e}")
+    try:
+        return await rc.generer_recraft_replicate(
+            prompt=prompt, format_=format_, style=style, svg_pur=True,
+            timeout_s=timeout_s,
+        )
+    except rc.ReplicateNotConfigured as e:
+        raise ImageGenNotConfigured(str(e)) from e
+    except rc.ReplicateError as e:
+        raise ImageGenError(f"Replicate SVG : {e}") from e
+
+
 async def _generer_image_via_replicate(
     prompt: str, mode: str, format_: str, seed: Optional[int],
     timeout_s: float,

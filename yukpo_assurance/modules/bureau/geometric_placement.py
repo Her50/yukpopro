@@ -668,6 +668,39 @@ def _coerce_item(raw):
     return None
 
 
+def _svg_to_png(svg_bytes: bytes, target_w_px: int, target_h_px: int) -> Optional[bytes]:
+    """Rasterise un SVG en PNG aux dimensions cibles via cairosvg (préféré)
+    avec fallback svglib + reportlab. Retourne None si aucun convertisseur
+    disponible (rare en prod, dépendances installées)."""
+    try:
+        import cairosvg
+        return cairosvg.svg2png(
+            bytestring=svg_bytes,
+            output_width=int(max(64, target_w_px)),
+            output_height=int(max(64, target_h_px)),
+        )
+    except Exception as e1:
+        logger.debug(f"[SVG→PNG] cairosvg indispo ({e1}), tentative svglib")
+        try:
+            from io import BytesIO
+            from svglib.svglib import svg2rlg
+            from reportlab.graphics import renderPM
+            drawing = svg2rlg(BytesIO(svg_bytes))
+            if drawing is None:
+                return None
+            scale_x = target_w_px / max(1, drawing.width)
+            scale_y = target_h_px / max(1, drawing.height)
+            drawing.scale(scale_x, scale_y)
+            drawing.width = target_w_px
+            drawing.height = target_h_px
+            buf = BytesIO()
+            renderPM.drawToFile(drawing, buf, fmt="PNG")
+            return buf.getvalue()
+        except Exception as e2:
+            logger.warning(f"[SVG→PNG] svglib échec aussi : {e2}")
+            return None
+
+
 def _load_image(data: bytes) -> "Image.Image":
     from PIL import Image
     img = Image.open(io.BytesIO(data))
@@ -687,24 +720,45 @@ def _render_image(canvas, item: ImagePlacement, medias: dict, bleed_px: int, dpi
         # GÉNÉRATION AUTO IA — Flux/Recraft/Ideogram à la volée.
         # Synchrone via asyncio.run dans un thread séparé pour rester
         # dans la signature render_placement_plan() qui est sync.
+        # AUTO-ROUTAGE : si le prompt décrit un visuel vectoriel
+        # (logo/icône/illustration plate/wordmark), on appelle Recraft v3
+        # SVG pour obtenir un SVG natif qu'on rasterise à la résolution
+        # cible (qualité parfaite sans pixelisation). Sinon Flux/Ideogram
+        # raster classique. Le bytes SVG est conservé en parallèle pour
+        # export ultérieur (placement_to_svg.py) — c'est le différenciateur
+        # vectoriel end-to-end.
         try:
             import asyncio as _aio
             from . import image_gen as _ig
-            # Détermine le format approximatif depuis target_zone
             ratio = item.target_zone.w / max(0.01, item.target_zone.h)
             fmt = "square_hd" if 0.9 < ratio < 1.1 else (
                 "portrait_4_3" if ratio < 0.9 else "landscape_4_3"
             )
-            png_ia = _aio.run(_ig.generer_image(
-                prompt=item.prompt_ia,
-                mode=item.mode_ia or "premium",
-                format_=fmt,
-                timeout_s=120.0,
-            ))
+            cache_key = f"ia_gen:{hash(item.prompt_ia) & 0xFFFFFFFF:08x}"
+            png_ia = None
+            if _ig.is_vector_brief(item.prompt_ia):
+                # Routage Recraft v3 SVG (Replicate) → SVG natif → rasterise PNG
+                try:
+                    svg_bytes = _aio.run(_ig.generer_svg_natif(
+                        prompt=item.prompt_ia, format_=fmt, timeout_s=120.0,
+                    ))
+                    if svg_bytes:
+                        medias[cache_key + "_svg"] = svg_bytes
+                        png_ia = _svg_to_png(svg_bytes,
+                                             mm_to_px(item.target_zone.w, dpi),
+                                             mm_to_px(item.target_zone.h, dpi))
+                        logger.info(f"[GeomPlacement] SVG natif Recraft v3 généré ({len(svg_bytes)} bytes) + rasterisé PNG")
+                except Exception as _e_svg:
+                    logger.warning(f"[GeomPlacement] SVG natif échec ({_e_svg}), fallback Flux raster")
+            if png_ia is None:
+                png_ia = _aio.run(_ig.generer_image(
+                    prompt=item.prompt_ia,
+                    mode=item.mode_ia or "premium",
+                    format_=fmt,
+                    timeout_s=120.0,
+                ))
             if png_ia:
                 src = _load_image(png_ia)
-                # Cache dans medias pour éviter re-génération si re-render
-                cache_key = f"ia_gen:{hash(item.prompt_ia) & 0xFFFFFFFF:08x}"
                 medias[cache_key] = png_ia
                 logger.info(f"[GeomPlacement] Image IA générée ({item.mode_ia}) : {len(png_ia)} bytes")
         except Exception as e:

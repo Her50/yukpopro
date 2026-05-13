@@ -3055,6 +3055,15 @@ class DemandeGeometricPlacement(BaseModel):
                     "toujours retourné pour preview écran.")
     profil_icc: str = Field(default="fogra39",
         description="fogra39 (Europe/Afrique) | psocoated_v3 | gracol_us (Amérique N.)")
+    export_svg: bool = Field(default=False,
+        description="Si True, exporte AUSSI en SVG natif vectoriel scalable "
+                    "infini (édition Illustrator/Inkscape/Figma, impression "
+                    "grand format sans pixelisation, web retina-friendly). "
+                    "Textes restent <text>, formes en <path/circle/rect>, "
+                    "images bitmap embed en base64, charts en primitives "
+                    "natives. Recraft v3 SVG est utilisé pour ImagePlacement "
+                    "avec prompt_ia vectoriel (logo, icône, illustration "
+                    "plate) — détection automatique.")
 
 
 @router.post("/geometric-placement", tags=["Bureau — Designer Pro"])
@@ -3229,6 +3238,33 @@ async def geometric_placement(
     fid = f"bureau_pdf_{current_user.user_id}_geometric_{int(time.time())}.png"
     (_DATA_DIR / fid).write_bytes(png_bytes)
 
+    # ── Export SVG natif vectoriel optionnel ───────────────────────────────
+    # Le PlacementPlan est traduit en SVG 1.1 autonome (texts, shapes, charts
+    # en primitives natives ; images bitmap en base64 ; Recraft v3 SVG inliné
+    # quand l'ImagePlacement.prompt_ia décrit un visuel vectoriel détecté).
+    # Avantages : édition Illustrator/Inkscape/Figma post-gen, impression
+    # grand format sans pixelisation, web retina-friendly.
+    svg_id: Optional[str] = None
+    svg_size_kb: Optional[float] = None
+    if demande.export_svg:
+        try:
+            from modules.bureau.placement_to_svg import placement_plan_to_svg
+            # On collecte les SVG inline depuis les caches du render
+            # (cache_key + "_svg" stocké dans medias_bytes par geometric_placement)
+            svg_inline = {
+                k.replace("_svg", ""): v
+                for k, v in medias_bytes.items() if k.endswith("_svg")
+            }
+            svg_bytes = placement_plan_to_svg(
+                placement, medias=medias_bytes, svg_inline_assets=svg_inline,
+            )
+            svg_id = fid.replace(".png", ".svg")
+            (_DATA_DIR / svg_id).write_bytes(svg_bytes)
+            svg_size_kb = round(len(svg_bytes) / 1024, 1)
+            logger.info(f"[GeomPlacement] SVG natif généré : {svg_id} ({svg_size_kb} KB)")
+        except Exception as e:
+            logger.warning(f"[GeomPlacement] Export SVG échec : {e}")
+
     # ── Export PDF/X-1a print-ready optionnel ──────────────────────────────
     # Pour impression pro grande échelle chez un imprimeur. PNG reste retourné
     # pour preview écran ; le PDF/X-1a est un second fichier (pdf_id).
@@ -3309,9 +3345,11 @@ async def geometric_placement(
         "size_kb": round(len(png_bytes) / 1024, 1),
         "pdf_id": pdf_id,
         "pdf_size_kb": pdf_size_kb,
+        "svg_id": svg_id,
+        "svg_size_kb": svg_size_kb,
         "placement_plan": placement.model_dump(),
         "nb_items": len(placement.items),
-        "medias_utilises": list(medias_bytes.keys()),
+        "medias_utilises": [k for k in medias_bytes.keys() if not k.endswith("_svg")],
         "revisions_journal": journal_revisions,
     }
 
