@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import AsyncGenerator
 
 from sqlalchemy import (
-    BigInteger, Boolean, Column, DateTime, Float, ForeignKey,
+    BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
     Integer, JSON, Numeric, String, Text, text,
 )
 from sqlalchemy.ext.asyncio import (
