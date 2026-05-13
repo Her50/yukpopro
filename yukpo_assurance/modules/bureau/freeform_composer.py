@@ -2269,11 +2269,24 @@ sur page 4 ET 5 = casse la cohérence si user ouvre à plat).
 Si le document est un livret (≥4 pages), respecte les conventions
 imprimeur pour reliure agrafée :
 
+0. **CAPS DURS — ANTI-EMBALLEMENT** (NON NÉGOCIABLES) :
+   - **MAXIMUM ABSOLU 16 pages** quelle que soit la richesse du brief.
+     Au-delà → expérience de rendu cassée (>30min). Si le brief énumère
+     7 sections et tu penses faire 1 page/section, REGROUPE-les
+     intelligemment (parcours pro+social en 1 page, témoignages en 2 pages,
+     etc.). Le cap 16 est non-négociable et tronqué côté code.
+   - **MAXIMUM 3 images IA par page** (`type:image` avec `prompt_ia`).
+     Chaque image IA = 10-20s de rendu fal.ai. 8 images IA/page →
+     2min/page → 30+ min de rendu. Privilégie les `ref_media` (uploads
+     user) et les éléments vectoriels (icones, ornements). Le cap est
+     appliqué côté code, donc même si tu en mets 8 seules les 3
+     premières seront rendues.
 1. **Format physique** : préfère **A5 (148×210mm)** par défaut pour
    livret cérémonie. Sinon : A4 (210×297) pour programme étendu,
    carré 21×21 haut de gamme.
 2. **Pages multiples de 4** (livret agrafé). Si user demande X
-   feuillets, génère 2X pages (un feuillet = recto+verso).
+   feuillets, génère 2X pages (un feuillet = recto+verso). Si user
+   demande « 4 feuillets minimum » → 8 pages, PAS 12, PAS 16, PAS 26.
 3. **Marges asymétriques pour reliure** :
    - Marge intérieure (côté reliure) : 15-18mm
    - Marge extérieure : 10-12mm
@@ -2601,14 +2614,15 @@ commentaire ni markdown.
                 card_w_mm=85.0, card_h_mm=55.0,
             )
 
-        # ── Post-validation déterministe v356 ──────────────────────────
+        # ── Post-validation déterministe v356/v379 ────────────────────
         # Filets de sécurité indépendants du LLM : même si le modèle
         # ignore les règles de placement / pagination du prompt, on
         # corrige côté code. Cf bugs PDF SIAKA Jean (mai 2026) :
-        # icônes superposées au texte + livret A4 plat 8p (OK déjà ×4
-        # ici mais le filet protège pour 5, 6, 7, 9 p…).
+        # icônes superposées au texte + livret 26 pages avec 8 images
+        # IA/page → 53min de rendu impossible à attendre côté chat.
         data = _corriger_collisions_icones(data)
-        data = _forcer_pagination_livret(data, brief)
+        data = _normaliser_pagination_livret(data, brief)
+        data = _capper_images_ia_par_page(data, max_par_page=3)
 
     return data
 
@@ -2734,13 +2748,23 @@ def _corriger_collisions_icones(data: dict) -> dict:
     return data
 
 
-def _forcer_pagination_livret(data: dict, brief: str) -> dict:
-    """Pour les livrets/faire-part (≥4 pages), force le total à un multiple
-    de 4 (contrainte agrafage imprimeur). Pad avec une page sobre type 'dos'
-    si nécessaire. Bug observé : livret 5p ou 6p → impossible à agrafer."""
+_MAX_PAGES_LIVRET = 16  # = 8 feuillets max (1 feuillet = 2 pages recto-verso).
+# Au-delà, risques cumulés :
+#  - Tokens output LLM (>32k = cap gpt-4.1 → troncature silencieuse JSON)
+#  - Temps rendu >15 min (frontend timeout)
+#  - Pic mémoire ReportLab sur machine 2Gi
+# Si l'utilisateur veut plus, splitter en 2 documents.
+
+
+def _normaliser_pagination_livret(data: dict, brief: str) -> dict:
+    """Pour livrets/faire-part (≥4 pages) :
+    1. Cap dur à _MAX_PAGES_LIVRET (16) — tronque les pages excédentaires.
+       Bug v378 : LLM a généré 26 pages au lieu de 8 → ~53min de rendu.
+    2. Force le total à un multiple de 4 (contrainte agrafage imprimeur).
+       Pad avec page sobre 'dos' si nécessaire."""
     pages = data.get("pages") or []
     n = len(pages)
-    if n < 4 or n % 4 == 0:
+    if n < 4:
         return data
     import re as _re
     if not _re.search(
@@ -2749,7 +2773,42 @@ def _forcer_pagination_livret(data: dict, brief: str) -> dict:
         (brief or "").lower(),
     ):
         return data
+
+    # 1. Cap dur : tronque mais GARDE la dernière page (= dos sobre)
+    if n > _MAX_PAGES_LIVRET:
+        derniere = pages[-1]
+        pages = pages[: _MAX_PAGES_LIVRET - 1] + [derniere]
+        # Renuméroter
+        for i, p in enumerate(pages):
+            if isinstance(p, dict):
+                p["numero"] = i + 1
+        logger.warning(
+            f"[FreeformComposer] Post-validation : pagination tronquée "
+            f"{n} → {len(pages)} pages (cap dur _MAX_PAGES_LIVRET={_MAX_PAGES_LIVRET}, "
+            f"livret type)."
+        )
+        n = len(pages)
+
+    # 2. Multiple de 4
+    if n % 4 == 0:
+        data["pages"] = pages
+        return data
     cible = ((n + 3) // 4) * 4
+    if cible > _MAX_PAGES_LIVRET:
+        # Si on dépasse le cap après arrondi, on RABAT à n_inferieur multiple4
+        cible = (n // 4) * 4
+        if cible < 4:
+            cible = 4
+        pages = pages[:cible]
+        for i, p in enumerate(pages):
+            if isinstance(p, dict):
+                p["numero"] = i + 1
+        data["pages"] = pages
+        logger.warning(
+            f"[FreeformComposer] Post-validation : pagination rabattue à "
+            f"{cible} pages (multiple de 4 ≤ cap)."
+        )
+        return data
     diff = cible - n
     fmt = data.get("format_mm") or [148, 210]
     primaire = (data.get("palette_meta") or {}).get("primaire") or "#1A2742"
@@ -2774,4 +2833,45 @@ def _forcer_pagination_livret(data: dict, brief: str) -> dict:
         f"[FreeformComposer] Post-validation : pagination {n} → {cible} pages "
         f"(multiple de 4 pour agrafage livret)."
     )
+    return data
+
+
+def _capper_images_ia_par_page(data: dict, max_par_page: int = 3) -> dict:
+    """Limite le nombre d'images générées par IA (champ `prompt_ia`) à
+    `max_par_page` par page. Chaque génération fal.ai/Flux prend 10-20s ;
+    8 images IA/page → 120s+ de rendu/page → impraticable.
+
+    Stratégie : on garde les `max_par_page` PREMIÈRES images IA (ordre
+    LLM = priorité décroissante). Les suivantes sont SUPPRIMÉES de la
+    liste d'éléments (ne pas les downgrader en placeholder pour ne pas
+    casser le rendu). Les images avec ref_media / url / data_url
+    (rapides) ne sont PAS comptées."""
+    pages = data.get("pages") or []
+    nb_total_supprime = 0
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        elements = page.get("elements") or []
+        kept: list = []
+        count_ia = 0
+        for el in elements:
+            if (
+                isinstance(el, dict)
+                and el.get("type") == "image"
+                and el.get("prompt_ia")
+                and not el.get("ref_media")
+                and not el.get("url")
+                and not el.get("data_url")
+            ):
+                count_ia += 1
+                if count_ia > max_par_page:
+                    nb_total_supprime += 1
+                    continue
+            kept.append(el)
+        page["elements"] = kept
+    if nb_total_supprime:
+        logger.warning(
+            f"[FreeformComposer] Post-validation : {nb_total_supprime} image(s) IA "
+            f"supprimée(s) (cap {max_par_page}/page, évite explosion temps rendu)."
+        )
     return data
