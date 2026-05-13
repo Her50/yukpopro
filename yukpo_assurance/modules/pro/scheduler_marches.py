@@ -1,16 +1,25 @@
 """
 SchedulerMarches — Veille marchés publics par secteur d'activité.
 
-Sources actives (ordre de priorité) :
-  1. Serper.dev Google Search — "appel d'offres {secteur} {pays}" + plateformes ARMP locales
-     → Variable : SERPER_API_KEY (header X-API-KEY, POST google.serper.dev/search)
-  2. dgMarket RSS           — World Bank / UN procurement, couvre Afrique + international
-     → Gratuit, aucune clé
-  3. UNGM                   — UN Global Marketplace, secteurs ONU/ONG
-     → Gratuit, aucune clé
-  4. Plateformes ARMP locales ciblées via SerpAPI (ARMP-CM, ARMP-CI, DGMP-SN…)
+Source UNIQUE désormais : **Serper.dev (Google Search)** avec 3 queries
+enrichies — l'expérience prod a montré que dgMarket (404 depuis 2017),
+UNGM legacy /Public/Notice/Search (302), et DevBusiness UN (page "Phase
+Down" depuis 2024) sont tous morts. Au lieu de scraper 5 sources mortes,
+on tape Google Search via Serper avec 3 stratégies complémentaires :
 
-Cycle : toutes les 6 heures par défaut (marchés publics = données qui changent vite).
+  Q1 — Recherche libre par mots-clés (last month)         → terrain large
+  Q2 — Site-locked sur les plateformes ARMP locales pays  → précision pays
+  Q3 — Recherche anglophone "tender procurement"          → international
+
+Les **mots-clés** sont extraits via LLM (gpt-4.1-nano) à partir du profil
+(metier + specialite + secteur_activite + entreprise + contexte_metier),
+au lieu du dict statique de 30 métiers qui ratait tous les profils
+spécifiques (notaire, agro-alimentaire, ingénieur en énergies renouvelables…).
+Fallback sur des termes hard-codés si LLM indisponible.
+
+Variables : SERPER_API_KEY (header X-API-KEY, POST google.serper.dev/search)
+
+Cycle : toutes les 6 heures par défaut.
 Stockage : ProfilProfessionnelDB.marches_publics_recents (JSON, max 15 avis).
 """
 from __future__ import annotations
@@ -19,7 +28,6 @@ import asyncio
 import logging
 import os
 import re
-import urllib.parse
 from datetime import datetime, timedelta
 
 logger = logging.getLogger("yukpo_assurance.pro.scheduler_marches")
@@ -31,11 +39,12 @@ _MAX_MARCHES        = 15
 _running = False
 
 # ── Plateformes d'appel d'offres par pays ─────────────────────────────────────
+# Servent à site-locker la 2e query Serper pour des résultats hyper-locaux.
 
 _PLATEFORMES_PAYS: dict[str, list[str]] = {
     "CM": ["armp.cm", "minmap.cm", "marchespublics.cm", "spm.cm"],
-    "CI": ["marchespublics.ci", "armp-ci.org"],
-    "SN": ["marchespublics.sn", "dgcmp.sn", "onas.sn"],
+    "CI": ["marchespublics.ci", "armp-ci.org", "anrmp.ci"],
+    "SN": ["marchespublics.sn", "dgcmp.sn", "armp.sn"],
     "GA": ["anrmp.ga", "marchespublics.ga"],
     "BF": ["arcop.bf", "marchespublics.bf"],
     "ML": ["armds.ml", "marchespublics.gov.ml"],
@@ -43,76 +52,132 @@ _PLATEFORMES_PAYS: dict[str, list[str]] = {
     "BJ": ["armp.bj", "marchespublics.bj"],
     "CD": ["armp.cd", "marchespublics.gouv.cd"],
     "MG": ["armp.mg"],
-    "MA": ["marchespublics.gov.ma", "mtpnet.gov.ma"],
+    "MA": ["marchespublics.gov.ma", "mtpnet.gov.ma", "marchespublics.ma"],
     "TN": ["marchespublics.gov.tn"],
     "DZ": ["mfdgi.gov.dz"],
-    "FR": ["boamp.fr", "marches-publics.info"],
-    "BE": ["publicprocurement.be"],
+    "FR": ["boamp.fr", "marches-publics.info", "ted.europa.eu"],
+    "BE": ["publicprocurement.be", "ted.europa.eu"],
     "CA": ["canadabuys.canada.ca", "seao.ca"],
+    "NG": ["nigeriaprocurement.gov.ng", "bpp.gov.ng"],
+    "GH": ["ppa.gov.gh"],
+    "KE": ["tenders.go.ke"],
+    "RW": ["rppa.gov.rw"],
 }
 
-# ── Mots-clés sectoriels pour les appels d'offres ─────────────────────────────
+# ── Mots-clés sectoriels de SECOURS si LLM indisponible ───────────────────────
+# Conservés en filet de sécurité mais le chemin nominal passe par LLM.
 
-_SECTEURS_MARCHES: dict[str, list[str]] = {
-    # Métiers financiers
-    "comptable":          ["audit", "expertise comptable", "commissariat aux comptes", "contrôle financier"],
-    "auditeur":           ["audit externe", "audit interne", "commissariat", "contrôle"],
-    "financier":          ["services financiers", "trésorerie", "gestion budgétaire"],
-    "fiscaliste":         ["conseil fiscal", "optimisation fiscale"],
-    "actuaire":           ["actuariat", "assurance", "prévoyance"],
-    # Juridique
-    "juriste":            ["conseil juridique", "assistance juridique", "contentieux", "notariat"],
-    "avocat":             ["représentation juridique", "conseil légal"],
-    # BTP / Ingénierie
-    "ingenieur":          ["génie civil", "travaux", "construction", "infrastructure", "bâtiment"],
-    "architecte":         ["architecture", "maîtrise d'œuvre", "conception"],
-    "topographe":         ["topographie", "géomètre", "cadastre"],
-    "electrique":         ["électricité", "énergie", "installation électrique"],
-    # Informatique / Numérique
-    "informaticien":      ["systèmes d'information", "développement logiciel", "infogérance", "cybersécurité"],
-    "developpeur":        ["développement web", "application mobile", "ERP", "CRM"],
-    "data":               ["data science", "analyse de données", "intelligence artificielle"],
-    "telecom":            ["télécommunications", "réseaux", "fibre optique"],
-    # Santé
-    "medecin":            ["équipements médicaux", "santé publique", "médicaments", "hôpital"],
-    "pharmacien":         ["médicaments", "produits pharmaceutiques"],
-    "infirmier":          ["soins infirmiers", "services de santé"],
-    # Éducation / Formation
-    "enseignant":         ["formation professionnelle", "e-learning", "édition scolaire"],
-    "formateur":          ["formation", "renforcement de capacités", "séminaires"],
-    # Logistique / Transport
-    "logisticien":        ["logistique", "transport", "fret", "supply chain"],
-    "transporteur":       ["transport", "fret routier", "livraison"],
-    # Agro / Environnement
-    "agronome":           ["agriculture", "semences", "irrigation", "équipements agricoles"],
-    "environnement":      ["études environnementales", "impact environnemental", "eau"],
-    # Communication / Marketing
-    "communicant":        ["communication institutionnelle", "relations publiques", "événementiel"],
-    "graphiste":          ["conception graphique", "identité visuelle", "imprimerie"],
-    # RH
-    "drh":                ["recrutement", "conseil RH", "gestion des ressources humaines"],
-    # Gestion de projet
-    "projectmanager":     ["gestion de projet", "maîtrise d'ouvrage", "AMO"],
-    # Default
-    "professionnel":      ["services", "conseil", "études"],
+_SECTEURS_FALLBACK: dict[str, list[str]] = {
+    "comptable":     ["audit", "expertise comptable", "commissariat aux comptes"],
+    "auditeur":      ["audit externe", "audit interne", "commissariat"],
+    "financier":     ["services financiers", "trésorerie", "gestion budgétaire"],
+    "fiscaliste":    ["conseil fiscal", "optimisation fiscale"],
+    "actuaire":      ["actuariat", "assurance", "prévoyance"],
+    "juriste":       ["conseil juridique", "assistance juridique", "contentieux"],
+    "avocat":        ["représentation juridique", "conseil légal"],
+    "notaire":       ["actes notariés", "authentification"],
+    "ingenieur":     ["génie civil", "travaux", "construction", "infrastructure"],
+    "architecte":    ["architecture", "maîtrise d'œuvre", "conception"],
+    "topographe":    ["topographie", "géomètre", "cadastre"],
+    "informaticien": ["systèmes d'information", "développement logiciel", "infogérance"],
+    "developpeur":   ["développement web", "application mobile", "ERP", "CRM"],
+    "telecom":       ["télécommunications", "réseaux", "fibre optique"],
+    "medecin":       ["équipements médicaux", "santé publique", "médicaments"],
+    "pharmacien":    ["médicaments", "produits pharmaceutiques"],
+    "enseignant":    ["formation professionnelle", "e-learning", "édition scolaire"],
+    "formateur":     ["formation", "renforcement de capacités", "séminaires"],
+    "logisticien":   ["logistique", "transport", "fret", "supply chain"],
+    "agronome":      ["agriculture", "semences", "irrigation"],
+    "environnement": ["études environnementales", "impact environnemental", "eau"],
+    "communicant":   ["communication institutionnelle", "événementiel"],
+    "graphiste":     ["conception graphique", "identité visuelle", "imprimerie"],
+    "drh":           ["recrutement", "conseil RH"],
+    "professionnel": ["services", "conseil", "études"],
 }
 
-def _mots_cles_marches(profil) -> list[str]:
-    """Retourne 2-3 termes de recherche pour les marchés publics selon le profil."""
+
+# ── Extraction mots-clés LLM-first ────────────────────────────────────────────
+
+async def _extraire_mots_cles_marches_llm(profil) -> tuple[list[str], str]:
+    """Génère 3-5 termes de recherche pertinents pour les appels d'offres
+    à partir du profil professionnel, via LLM. Retourne (termes_fr, terme_en).
+
+    Le LLM peut produire des termes adaptés à des métiers que le dict
+    statique ne couvre pas (ex. ingénieur en énergies renouvelables,
+    consultant IFRS, agro-alimentaire bio…).
+    """
+    metier      = (getattr(profil, "metier", "") or "").strip()
+    specialite  = (getattr(profil, "specialite", "") or "").strip()
+    secteur_act = (getattr(profil, "secteur_activite", "") or "").strip()
+    entreprise  = (getattr(profil, "entreprise", "") or "").strip()
+    ctx         = getattr(profil, "contexte_metier", None) or {}
+
+    if not any([metier, specialite, secteur_act]):
+        # Profil trop vide pour LLM, fallback direct
+        return _mots_cles_fallback(profil), ""
+
+    profil_desc = (
+        f"Métier : {metier or '—'}\n"
+        f"Spécialité : {specialite or '—'}\n"
+        f"Secteur d'activité : {secteur_act or '—'}\n"
+        f"Employeur : {entreprise or '—'}\n"
+        f"Contexte : {', '.join(f'{k}={v}' for k, v in ctx.items() if v)[:200] or '—'}"
+    )
+
+    prompt = (
+        "Tu es expert en marchés publics francophones (Afrique de l'Ouest + "
+        "Maghreb + Europe). À partir du profil professionnel ci-dessous, "
+        "génère 4 termes de recherche d'appels d'offres ET 1 terme équivalent "
+        "en anglais (procurement / tender).\n\n"
+        f"PROFIL :\n{profil_desc}\n\n"
+        "Réponds STRICTEMENT en JSON (sans markdown, sans commentaire) :\n"
+        '{"termes_fr": ["terme1", "terme2", "terme3", "terme4"], '
+        '"terme_en": "english tender keyword"}\n\n'
+        "Règles :\n"
+        "- Termes spécifiques au secteur réel du profil (pas génériques).\n"
+        "- Inclure 1 terme large (ex. 'audit') + 2 spécifiques + 1 produit/service.\n"
+        "- 2-5 mots max par terme. Pas de stop-words.\n"
+        "- Si métier flou, retomber sur le secteur d'activité ou employeur."
+    )
+
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        reponse_obj = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,  # → gpt-4.1-nano (cf feedback_llm_routing)
+            json_attendu=True,
+        )
+        # ia_client.appeler renvoie un ReponseIA — récupère le contenu textuel
+        txt = (
+            getattr(reponse_obj, "texte", None)
+            or getattr(reponse_obj, "contenu", None)
+            or getattr(reponse_obj, "content", None)
+            or str(reponse_obj)
+        ).strip()
+        import json as _json
+        if txt.startswith("```"):
+            txt = re.sub(r"^```\w*\s*|\s*```$", "", txt).strip()
+        data = _json.loads(txt)
+        termes_fr = [t.strip() for t in (data.get("termes_fr") or []) if isinstance(t, str) and t.strip()]
+        terme_en  = (data.get("terme_en") or "").strip()
+        if termes_fr:
+            logger.info(f"[SchedulerMarches] Termes LLM user={getattr(profil, 'user_id', '?')}: {termes_fr} | EN: {terme_en}")
+            return termes_fr[:4], terme_en
+    except Exception as e:
+        logger.warning(f"[SchedulerMarches] LLM keywords KO ({e}) → fallback dict")
+
+    return _mots_cles_fallback(profil), ""
+
+
+def _mots_cles_fallback(profil) -> list[str]:
+    """Filet de sécurité hard-codé si LLM indisponible."""
     metier = (getattr(profil, "metier", "") or "professionnel").lower().replace("_", " ")
-    secteur_activite = (getattr(profil, "secteur_activite", "") or "").lower()
-
-    # Chercher la correspondance la plus proche dans le dictionnaire
-    termes: list[str] = []
-    for cle, mots in _SECTEURS_MARCHES.items():
+    secteur_act = (getattr(profil, "secteur_activite", "") or "").lower()
+    for cle, mots in _SECTEURS_FALLBACK.items():
         if cle in metier or metier in cle:
-            termes = mots[:2]
-            break
-
-    if not termes:
-        termes = [secteur_activite or metier, "services"]
-
-    return termes
+            return mots[:3]
+    return [secteur_act or metier or "services", "conseil"]
 
 
 # ── Point d'entrée public ──────────────────────────────────────────────────────
@@ -122,7 +187,7 @@ async def demarrer_scheduler_marches():
     if _running:
         return
     _running = True
-    logger.info("[SchedulerMarches] Démarrage veille marchés publics")
+    logger.info("[SchedulerMarches] Démarrage veille marchés publics (Serper-only, 3 queries enrichies)")
     asyncio.create_task(_boucle_veille_marches(), name="scheduler_marches")
 
 
@@ -173,12 +238,20 @@ async def _cycle_marches_tous_users():
 # ── Recherche principale ───────────────────────────────────────────────────────
 
 async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
+    """Pipeline complet recherche marchés pour un utilisateur :
+    1. Extraction mots-clés via LLM (fallback dict si LLM KO)
+    2. 3 queries Serper complémentaires
+    3. Dédoublonnage + scoring + sauvegarde
+    """
     pays = (getattr(profil, "pays", None) or "CM").upper()
     from modules.pro.scheduler_emploi import _info_pays
     info = _info_pays(pays)
 
-    termes = _mots_cles_marches(profil)
-    logger.info(f"[SchedulerMarches] user {user_id} · {info['nom']} · {termes}")
+    termes_fr, terme_en = await _extraire_mots_cles_marches_llm(profil)
+    logger.info(
+        f"[SchedulerMarches] user={user_id} pays={pays} ({info['nom']}) "
+        f"termes_fr={termes_fr} terme_en={terme_en or '(none)'}"
+    )
 
     # ── Débit crédits (forfait recherche marchés : 2 FCFA × 20 = 40 crédits) ──
     try:
@@ -190,23 +263,29 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
     except Exception as e:
         logger.debug(f"[SchedulerMarches] Débit crédits ignoré: {e}")
 
+    # 3 queries Serper en parallèle (toutes facultatives, on prend tout ce qui rentre)
     resultats = await asyncio.gather(
-        _fetch_serper_marches(termes, pays, info),
-        _fetch_dgmarket(pays),
-        _fetch_ungm(termes),
+        _serper_query_libre(termes_fr, pays, info),
+        _serper_query_site_locked(termes_fr, pays, info),
+        _serper_query_anglophone(terme_en or termes_fr[0] if termes_fr else "services", pays, info),
         return_exceptions=True,
     )
 
     marches_bruts: list[dict] = []
-    noms = ["Serper", "dgMarket", "UNGM"]
+    noms = ["Serper-libre", "Serper-site-locked", "Serper-EN"]
     for nom, res in zip(noms, resultats):
         if isinstance(res, list):
-            logger.info(f"[SchedulerMarches] {nom}: {len(res)} avis")
+            logger.info(f"[SchedulerMarches] {nom} user={user_id}: {len(res)} avis")
             marches_bruts.extend(res)
         elif isinstance(res, Exception):
-            logger.debug(f"[SchedulerMarches] {nom} erreur: {res}")
+            logger.warning(f"[SchedulerMarches] {nom} user={user_id} ERREUR: {res}")
 
-    # Dédoublonnage
+    if not marches_bruts:
+        logger.info(f"[SchedulerMarches] user={user_id}: 0 avis sur les 3 queries — sauvegarde liste vide")
+        await _sauvegarder_marches(user_id, [])
+        return 0
+
+    # Dédoublonnage par URL (clé canonique) puis titre
     seen: set[str] = set()
     uniques: list[dict] = []
     for m in marches_bruts:
@@ -215,174 +294,138 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
             seen.add(key)
             uniques.append(m)
 
-    if not uniques:
-        logger.info(f"[SchedulerMarches] 0 avis trouvés pour user {user_id}")
-        await _sauvegarder_marches(user_id, [])
-        return 0
-
-    # Trier par date desc (les plus récents en premier), limiter
+    # Scoring pertinence simple : présence des termes profil dans titre/résumé
+    uniques = _scorer_marches(uniques, termes_fr)
+    uniques.sort(key=lambda m: m.get("score", 0), reverse=True)
     uniques = uniques[:_MAX_MARCHES]
+
     await _sauvegarder_marches(user_id, uniques)
+    logger.info(f"[SchedulerMarches] user={user_id}: {len(uniques)} avis sauvegardés (scoring + dedup)")
     return len(uniques)
 
 
-# ── Source 1 : Serper.dev ─────────────────────────────────────────────────────
+# ── Source unique : Serper.dev avec 3 stratégies ──────────────────────────────
 
-async def _fetch_serper_marches(termes: list[str], pays: str, info: dict) -> list[dict]:
-    api_key = os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
+def _serper_api_key() -> str:
+    return os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
+
+
+async def _serper_post(query: str, info: dict, num: int = 10, restrict_month: bool = True) -> list[dict]:
+    """Appel HTTP Serper /search. Retourne organic results bruts."""
+    api_key = _serper_api_key()
     if not api_key or api_key.startswith("VOTRE"):
         return []
+    import httpx
+    body = {"q": query, "gl": info["gl"], "hl": info["hl"], "num": num}
+    if restrict_month:
+        body["tbs"] = "qdr:m"
+    async with httpx.AsyncClient(timeout=20) as client:
+        resp = await client.post(
+            "https://google.serper.dev/search",
+            json=body,
+            headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+        )
+    if resp.status_code != 200:
+        logger.warning(f"[SchedulerMarches] Serper HTTP {resp.status_code} q={query!r}")
+        return []
+    return (resp.json() or {}).get("organic", []) or []
 
-    try:
-        import httpx
-        marches: list[dict] = []
+
+async def _serper_query_libre(termes: list[str], pays: str, info: dict) -> list[dict]:
+    """Query 1 : recherche libre, 'appel d'offres {terme} {pays}', last month."""
+    if not termes:
+        return []
+    terme = termes[0]
+    q = f"appel d'offres {terme} {info['nom']}"
+    organic = await _serper_post(q, info, num=10, restrict_month=True)
+    if not organic:
+        # Fallback : retire le filtre temporel si rien sur le dernier mois
+        organic = await _serper_post(q, info, num=10, restrict_month=False)
+    return _organic_to_marches(organic, pays, info, source_label="Google", secteur=terme)
+
+
+async def _serper_query_site_locked(termes: list[str], pays: str, info: dict) -> list[dict]:
+    """Query 2 : 'appel d'offres {terme} (site:armp.X OR site:...)' — précision pays."""
+    if not termes:
+        return []
+    plateformes = _PLATEFORMES_PAYS.get(pays, [])
+    if not plateformes:
+        return []
+    terme = termes[0]
+    site_q = " OR ".join(f"site:{s}" for s in plateformes[:5])
+    q = f"appel d'offres {terme} ({site_q})"
+    organic = await _serper_post(q, info, num=10, restrict_month=True)
+    if not organic:
+        organic = await _serper_post(q, info, num=10, restrict_month=False)
+    return _organic_to_marches(organic, pays, info, source_label="ARMP local", secteur=terme)
+
+
+async def _serper_query_anglophone(terme_en: str, pays: str, info: dict) -> list[dict]:
+    """Query 3 : 'tender procurement {EN} {pays}' — couvre ONU/UN/WorldBank/etc."""
+    if not terme_en:
+        return []
+    q = f"tender procurement {terme_en} {info['nom']}"
+    organic = await _serper_post(q, info, num=8, restrict_month=True)
+    if not organic:
+        organic = await _serper_post(q, info, num=8, restrict_month=False)
+    return _organic_to_marches(organic, pays, info, source_label="International", secteur=terme_en)
+
+
+def _organic_to_marches(
+    organic: list[dict], pays: str, info: dict,
+    source_label: str, secteur: str,
+) -> list[dict]:
+    """Convertit la liste organic Serper en marches au format DB."""
+    out: list[dict] = []
+    for r in organic:
+        titre = (r.get("title") or "").strip()
+        if not titre or len(titre) < 8:
+            continue
+        url = r.get("link", "")
+        # Skip réseaux sociaux et homepages génériques
+        if any(d in url for d in ("facebook.com", "linkedin.com/in/", "twitter.com", "youtube.com")):
+            continue
         plateformes = _PLATEFORMES_PAYS.get(pays, [])
+        source = next((p for p in plateformes if p in url), source_label)
+        out.append({
+            "titre":     titre[:200],
+            "organisme": _extraire_organisme(r.get("displayedLink") or r.get("displayed_link", ""), r.get("snippet", "")),
+            "lieu":      info["nom"],
+            "resume":    (r.get("snippet") or "")[:500],
+            "url":       url,
+            "source":    source,
+            "date_pub":  r.get("date", "Récent"),
+            "secteur":   secteur,
+            "score":     0,
+        })
+    return out
 
-        q1 = f"appel d'offres {' '.join(termes[:1])} {info['nom']}"
-        if plateformes:
-            site_q = " OR ".join(f"site:{s}" for s in plateformes[:4])
-            q2 = f"appel d'offres {termes[0]} ({site_q})"
-        else:
-            q2 = None
 
-        queries = [q for q in [q1, q2] if q]
-        headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
+# ── Scoring pertinence ────────────────────────────────────────────────────────
 
-        async with httpx.AsyncClient(timeout=20) as client:
-            for q in queries:
-                resp = await client.post(
-                    "https://google.serper.dev/search",
-                    json={
-                        "q":   q,
-                        "gl":  info["gl"],
-                        "hl":  info["hl"],
-                        "num": 10,
-                        "tbs": "qdr:m",   # résultats du dernier mois
-                    },
-                    headers=headers,
-                )
-                if resp.status_code != 200:
-                    continue
-                data = resp.json()
-                for r in data.get("organic", []):
-                    url = r.get("link", "")
-                    titre = (r.get("title") or "").strip()
-                    if not titre or len(titre) < 8:
-                        continue
-                    source = next(
-                        (p for p in plateformes if p in url),
-                        "Appel d'offres"
-                    )
-                    marches.append({
-                        "titre":     titre[:200],
-                        "organisme": _extraire_organisme(r.get("displayedLink") or r.get("displayed_link", ""), r.get("snippet", "")),
-                        "lieu":      info["nom"],
-                        "resume":    (r.get("snippet") or "")[:500],
-                        "url":       url,
-                        "source":    source,
-                        "date_pub":  r.get("date", "Récent"),
-                        "secteur":   termes[0] if termes else "",
-                    })
+def _scorer_marches(marches: list[dict], termes: list[str]) -> list[dict]:
+    """Score 0-99 = base 40 + overlap mots-clés (titre/résumé) + bonus URL."""
+    if not marches or not termes:
+        for m in marches:
+            m["score"] = 50
         return marches
-
-    except Exception as e:
-        logger.debug(f"[SchedulerMarches] Serper erreur: {e}")
-        return []
-
-
-# ── Source 2 : dgMarket RSS ───────────────────────────────────────────────────
-# World Bank / Banque africaine de développement procurement aggregator.
-# URL RSS : https://www.dgmarket.com/rss-{ISO3}.xml
-
-_ISO2_TO_ISO3 = {
-    "CM": "CMR", "CI": "CIV", "SN": "SEN", "GA": "GAB", "BF": "BFA",
-    "ML": "MLI", "TG": "TGO", "BJ": "BEN", "CD": "COD", "MG": "MDG",
-    "RW": "RWA", "KE": "KEN", "NG": "NGA", "GH": "GHA", "ZA": "ZAF",
-    "MA": "MAR", "TN": "TUN", "DZ": "DZA", "NE": "NER", "TD": "TCD",
-    "FR": "FRA", "BE": "BEL", "CA": "CAN", "CH": "CHE",
-}
-
-async def _fetch_dgmarket(pays: str) -> list[dict]:
-    iso3 = _ISO2_TO_ISO3.get(pays.upper(), "")
-    if not iso3:
-        return []
-    try:
-        import httpx
-        import xml.etree.ElementTree as ET
-
-        url = f"https://www.dgmarket.com/rss-{iso3}.xml"
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
-            resp = await client.get(url, headers={"User-Agent": "YukpoBot/2.0"})
-        if resp.status_code != 200:
-            return []
-
-        root = ET.fromstring(resp.text)
-        items = root.findall(".//item")
-        marches = []
-        for item in items[:10]:
-            def g(tag):
-                el = item.find(tag)
-                return (el.text or "").strip() if el is not None else ""
-
-            titre = g("title")
-            if not titre:
-                continue
-            marches.append({
-                "titre":     titre[:200],
-                "organisme": g("author") or "Procurement notice",
-                "lieu":      pays,
-                "resume":    re.sub(r"<[^>]+>", " ", g("description"))[:500],
-                "url":       g("link"),
-                "source":    "dgMarket (Banque Mondiale)",
-                "date_pub":  g("pubDate")[:20],
-                "secteur":   "",
-            })
-        return marches
-    except Exception as e:
-        logger.debug(f"[SchedulerMarches] dgMarket erreur: {e}")
-        return []
-
-
-# ── Source 3 : UNGM ───────────────────────────────────────────────────────────
-# UN Global Marketplace — appels d'offres ONU/agences onusiennes.
-
-async def _fetch_ungm(termes: list[str]) -> list[dict]:
-    try:
-        import httpx
-        q = urllib.parse.quote(" ".join(termes[:2]))
-        url = f"https://www.ungm.org/Public/Notice?filter=%7B%22Keywords%22%3A%22{q}%22%7D"
-        # UNGM expose une API JSON pour les notices
-        api_url = f"https://www.ungm.org/Public/Notice/Search?keywords={q}&pageSize=10&pageIndex=0"
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
-            resp = await client.get(api_url, headers={
-                "Accept": "application/json",
-                "User-Agent": "YukpoBot/2.0",
-            })
-        if resp.status_code != 200:
-            return []
-
-        data = resp.json()
-        notices = data.get("noticeList", data if isinstance(data, list) else [])
-        marches = []
-        for n in notices[:8]:
-            titre = n.get("Title", n.get("title", "")).strip()
-            if not titre:
-                continue
-            notice_id = n.get("NoticeId", n.get("id", ""))
-            marches.append({
-                "titre":     titre[:200],
-                "organisme": n.get("AgencyName", n.get("agency", "Agence ONU")),
-                "lieu":      n.get("CountryName", "International"),
-                "resume":    (n.get("Description", n.get("description", "")) or "")[:500],
-                "url":       f"https://www.ungm.org/Public/Notice/{notice_id}" if notice_id else "",
-                "source":    "UNGM (Nations Unies)",
-                "date_pub":  str(n.get("DeadlineDate", n.get("deadline", "Récent")))[:20],
-                "secteur":   n.get("UNSPSCDescription", ""),
-            })
-        return marches
-    except Exception as e:
-        logger.debug(f"[SchedulerMarches] UNGM erreur: {e}")
-        return []
+    mots = set()
+    for t in termes:
+        for w in re.split(r"\s+", t.lower()):
+            if len(w) >= 4:
+                mots.add(w)
+    for m in marches:
+        texte = (m.get("titre", "") + " " + m.get("resume", "")).lower()
+        overlap = sum(1 for w in mots if w in texte) if mots else 0
+        score = 40 + min(45, round((overlap / max(1, len(mots))) * 45))
+        # Bonus URL plateforme officielle
+        if "armp" in m.get("url", "") or "marchespublics" in m.get("url", ""):
+            score += 8
+        # Bonus si "appel d'offres" / "tender" dans le titre
+        if any(k in texte for k in ("appel d'offres", "tender", "procurement", "marché public")):
+            score += 5
+        m["score"] = min(99, max(1, score))
+    return marches
 
 
 # ── Sauvegarde DB ─────────────────────────────────────────────────────────────
@@ -417,4 +460,3 @@ def _extraire_organisme(displayed_link: str, snippet: str) -> str:
         return m.group(0).strip()[:80]
     m2 = re.search(r"([a-z0-9\-]+\.[a-z]{2,4})", displayed_link)
     return m2.group(1) if m2 else "Organisme public"
-

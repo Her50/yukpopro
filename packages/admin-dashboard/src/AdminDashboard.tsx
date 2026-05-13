@@ -10,13 +10,14 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle, BarChart3, Bell, Cpu, DollarSign, Layers, RefreshCw,
-  TrendingUp, Users as UsersIcon, Zap,
+  AlertTriangle, BarChart3, Bell, Cpu, DollarSign, Gift, Layers, Lock,
+  Plus, RefreshCw, Search, TrendingUp, Unlock, Users as UsersIcon, X, Zap,
 } from "lucide-react";
 import {
   adminCrossApi, type AppScope, type HttpClient,
   type DashboardKPIs, type UsageDay, type FeatureRow,
   type ProviderRow, type UserRow, type AlerteRow,
+  type UtilisateurAdminRow, type CiblePromotion, type PromotionRequest,
 } from "./api";
 
 export type { AppScope };
@@ -34,14 +35,16 @@ export interface AdminDashboardProps {
   storageKey?: string;
 }
 
-type Onglet = "overview" | "consommation" | "providers" | "users" | "alerts";
+type Onglet = "overview" | "consommation" | "providers" | "users" | "gestion" | "promotions" | "alerts";
 
 const TABS: { id: Onglet; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "overview",     label: "Vue d'ensemble",  icon: BarChart3 },
+  { id: "overview",     label: "Vue d'ensemble",   icon: BarChart3 },
   { id: "consommation", label: "Consommation API", icon: Cpu },
-  { id: "providers",    label: "Fournisseurs",    icon: Layers },
-  { id: "users",        label: "Top utilisateurs", icon: UsersIcon },
-  { id: "alerts",       label: "Alertes",         icon: Bell },
+  { id: "providers",    label: "Fournisseurs",     icon: Layers },
+  { id: "users",        label: "Top consommateurs",icon: UsersIcon },
+  { id: "gestion",      label: "Utilisateurs",     icon: UsersIcon },
+  { id: "promotions",   label: "Bonus & promo",    icon: Gift },
+  { id: "alerts",       label: "Alertes",          icon: Bell },
 ];
 
 const PERIODES = [
@@ -123,7 +126,11 @@ export const AdminDashboard = ({
   }, [api, scope, jours, refreshTick]);
 
   return (
-    <div className="space-y-6">
+    // Panneau sombre : garantit la lisibilité quel que soit le thème de
+    // la page hôte (canvas slate-100 en clair → texte blanc invisible
+    // sans ce wrapper). Tout le contenu utilise text-white / slate-300/
+    // 400 → contraste WCAG AA sur bg-slate-900.
+    <div className="rounded-2xl bg-slate-900 ring-1 ring-slate-700/50 shadow-2xl p-5 sm:p-6 space-y-6 text-slate-100">
 
       {/* ── Header : titre + scope + période + refresh ──────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -219,6 +226,8 @@ export const AdminDashboard = ({
       {tab === "consommation" && <ConsommationTab features={features} usage={usage} />}
       {tab === "providers"    && <ProvidersTab providers={providers} />}
       {tab === "users"        && <UsersTab users={users} />}
+      {tab === "gestion"      && <GestionUsersTab api={api} scope={scope} />}
+      {tab === "promotions"   && <PromotionsTab api={api} scope={scope} />}
       {tab === "alerts"       && <AlertsTab alertes={alertes} resume={alertesResume} />}
     </div>
   );
@@ -701,3 +710,648 @@ function formatTokens(n: number): string {
   if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}k`;
   return n.toLocaleString("fr-FR");
 }
+
+function formatDate(iso?: string | null): string {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  } catch { return "—"; }
+}
+
+function formatDateRelative(iso?: string | null): string {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1)   return "à l'instant";
+    if (min < 60)  return `il y a ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24)    return `il y a ${h} h`;
+    const j = Math.floor(h / 24);
+    if (j < 30)    return `il y a ${j} j`;
+    return formatDate(iso);
+  } catch { return "—"; }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GESTION UTILISATEURS — liste détaillée + actions (crédits bonus, blocage)
+// ══════════════════════════════════════════════════════════════════════════════
+
+type CrossApi = ReturnType<typeof adminCrossApi>;
+
+const GestionUsersTab = ({ api, scope }: { api: CrossApi; scope: AppScope }) => {
+  const [users, setUsers] = useState<UtilisateurAdminRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const par_page = 50;
+  const [recherche, setRecherche] = useState("");
+  const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+  const refresh = () => setTick(t => t + 1);
+
+  // Modale bonus
+  const [bonusTarget, setBonusTarget] = useState<UtilisateurAdminRow | null>(null);
+  const [bonusMontant, setBonusMontant] = useState<string>("100");
+  const [bonusMotif, setBonusMotif] = useState<string>("");
+  const [bonusEnvoi, setBonusEnvoi] = useState(false);
+
+  useEffect(() => {
+    let annule = false;
+    setChargement(true);
+    setErreur(null);
+    api.listerUtilisateurs(scope, page, par_page, recherche || undefined)
+      .then(r => { if (!annule) { setUsers(r.utilisateurs); setTotal(r.total); } })
+      .catch((e: any) => {
+        if (annule) return;
+        const msg = e?.response?.data?.detail || e?.message || "Erreur de chargement";
+        setErreur(typeof msg === "string" ? msg : "Erreur de chargement");
+      })
+      .finally(() => { if (!annule) setChargement(false); });
+    return () => { annule = true; };
+  }, [api, scope, page, tick]);
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    refresh();
+  };
+
+  const ouvrirBonus = (u: UtilisateurAdminRow) => {
+    setBonusTarget(u);
+    setBonusMontant("100");
+    setBonusMotif("");
+  };
+
+  const envoyerBonus = async () => {
+    if (!bonusTarget) return;
+    const montant = parseInt(bonusMontant, 10);
+    if (!Number.isFinite(montant) || montant <= 0) {
+      setErreur("Montant invalide");
+      return;
+    }
+    setBonusEnvoi(true);
+    try {
+      await api.ajouterCreditsBonus(bonusTarget.app, bonusTarget.id, {
+        montant, motif: bonusMotif || undefined,
+      });
+      setBonusTarget(null);
+      refresh();
+    } catch (e: any) {
+      setErreur(e?.response?.data?.detail || e?.message || "Échec de l'ajout");
+    } finally {
+      setBonusEnvoi(false);
+    }
+  };
+
+  const toggleBlocage = async (u: UtilisateurAdminRow) => {
+    try {
+      if (u.bloque) {
+        await api.debloquer(u.app, u.id);
+      } else {
+        const j = prompt("Bloquer pendant combien de jours ? (laisser vide = permanent)") ?? "";
+        const jours = j.trim() ? parseInt(j, 10) : undefined;
+        await api.bloquer(u.app, u.id, {
+          duree_heures: jours ? jours * 24 : undefined,
+        });
+      }
+      refresh();
+    } catch (e: any) {
+      setErreur(e?.response?.data?.detail || e?.message || "Échec");
+    }
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / par_page));
+
+  return (
+    <div className="space-y-4">
+      {/* Barre filtre + recherche */}
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-3">
+        <form onSubmit={onSearch} className="relative flex-1 min-w-[260px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            value={recherche}
+            onChange={e => setRecherche(e.target.value)}
+            placeholder="Rechercher email, nom, username…"
+            className="w-full pl-10 pr-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-yukpo-500"
+          />
+        </form>
+        <div className="text-xs text-slate-400">
+          {chargement ? "Chargement…" : `${users.length}/${total} utilisateur${total > 1 ? "s" : ""}`}
+        </div>
+        <button
+          onClick={refresh}
+          disabled={chargement}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs text-white hover:bg-slate-700 disabled:opacity-50"
+        >
+          <RefreshCw className={"w-3.5 h-3.5 " + (chargement ? "animate-spin" : "")} />
+          Actualiser
+        </button>
+      </div>
+
+      {erreur && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm text-red-200">
+          ⚠ {erreur}
+        </div>
+      )}
+
+      {/* Tableau utilisateurs */}
+      <div className="rounded-xl border border-slate-700 bg-slate-800/50 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-wider text-slate-500 bg-slate-800/80 border-b border-slate-700">
+                <th className="text-left py-2 px-3">App</th>
+                <th className="text-left py-2 px-3">Utilisateur</th>
+                <th className="text-left py-2 px-3">Plan</th>
+                <th className="text-left py-2 px-3">Inscrit</th>
+                <th className="text-left py-2 px-3">Dernière connexion</th>
+                <th className="text-right py-2 px-3">Crédits</th>
+                <th className="text-right py-2 px-3">Conso</th>
+                <th className="text-right py-2 px-3 pr-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 && !chargement && (
+                <tr><td colSpan={8} className="py-10 text-center text-sm text-slate-500">
+                  Aucun utilisateur trouvé.
+                </td></tr>
+              )}
+              {users.map((u, i) => {
+                const conso = u.conso_total || 0;
+                const restants = u.credits_restants || 0;
+                const restantsColor =
+                  restants < 50 ? "text-red-300" :
+                  restants < 200 ? "text-amber-300" :
+                  "text-emerald-300";
+                return (
+                  <tr key={`${u.app}-${u.id}-${i}`} className={
+                    "border-b border-slate-800/60 text-slate-200 " +
+                    (u.bloque ? "bg-red-900/10" : "")
+                  }>
+                    <td className="py-2 px-3">
+                      <span className={
+                        "px-1.5 py-0.5 rounded text-[10px] font-bold " +
+                        (u.app === "pro" ? "bg-blue-500/20 text-blue-300" : "bg-violet-500/20 text-violet-300")
+                      }>{u.app === "pro" ? "PRO" : "SEC"}</span>
+                    </td>
+                    <td className="py-2 px-3 max-w-[220px]">
+                      <div className="font-medium text-white truncate" title={u.email || ""}>
+                        {u.email || u.username || `User #${u.id}`}
+                      </div>
+                      <div className="text-[10px] text-slate-500">
+                        #{u.id}{u.role && u.role !== "user" ? ` · ${u.role}` : ""}
+                        {u.bloque && <span className="ml-2 text-red-300">BLOQUÉ</span>}
+                      </div>
+                    </td>
+                    <td className="py-2 px-3 text-slate-300 capitalize">{u.plan || "—"}</td>
+                    <td className="py-2 px-3 text-slate-400 text-xs">{formatDate(u.cree_le)}</td>
+                    <td className="py-2 px-3 text-slate-300 text-xs">
+                      {formatDateRelative(u.derniere_connexion)}
+                      {u.nb_connexions > 0 && (
+                        <span className="text-[10px] text-slate-500 ml-1">({u.nb_connexions}×)</span>
+                      )}
+                    </td>
+                    <td className={`py-2 px-3 text-right tabular-nums font-semibold ${restantsColor}`}>
+                      {formatCredits(restants)}
+                    </td>
+                    <td className="py-2 px-3 text-right tabular-nums text-slate-400">
+                      {formatCredits(conso)}
+                    </td>
+                    <td className="py-2 px-3 pr-4 text-right">
+                      <div className="inline-flex gap-1.5">
+                        <button
+                          onClick={() => ouvrirBonus(u)}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30"
+                          title="Ajouter des crédits bonus"
+                        >
+                          <Plus className="w-3 h-3" /> Crédits
+                        </button>
+                        <button
+                          onClick={() => toggleBlocage(u)}
+                          className={
+                            "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border " +
+                            (u.bloque
+                              ? "bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30"
+                              : "bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-700")
+                          }
+                          title={u.bloque ? "Débloquer" : "Bloquer"}
+                        >
+                          {u.bloque
+                            ? <><Unlock className="w-3 h-3" /> Débloquer</>
+                            : <><Lock className="w-3 h-3" /> Bloquer</>}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-xs text-slate-400">
+          <span>Page {page} / {totalPages}</span>
+          <div className="inline-flex gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 rounded-md border border-slate-600 bg-slate-800 text-white disabled:opacity-50"
+            >Précédent</button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-1.5 rounded-md border border-slate-600 bg-slate-800 text-white disabled:opacity-50"
+            >Suivant</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modale Ajout crédits bonus */}
+      {bonusTarget && (
+        <ModalBonus
+          target={bonusTarget}
+          montant={bonusMontant} onMontant={setBonusMontant}
+          motif={bonusMotif}     onMotif={setBonusMotif}
+          envoi={bonusEnvoi}
+          onClose={() => setBonusTarget(null)}
+          onSubmit={envoyerBonus}
+        />
+      )}
+    </div>
+  );
+};
+
+const ModalBonus = ({
+  target, montant, onMontant, motif, onMotif, envoi, onClose, onSubmit,
+}: {
+  target: UtilisateurAdminRow;
+  montant: string; onMontant: (v: string) => void;
+  motif: string;   onMotif: (v: string) => void;
+  envoi: boolean;
+  onClose: () => void; onSubmit: () => void;
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+        <div className="flex items-center gap-2">
+          <Gift className="w-5 h-5 text-emerald-400" />
+          <h3 className="text-white font-semibold">Ajouter des crédits bonus</h3>
+        </div>
+        <button onClick={onClose} className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="px-5 py-4 space-y-3">
+        <div className="text-sm text-slate-300">
+          Bénéficiaire :
+          <span className="ml-2 font-semibold text-white">{target.email || `User #${target.id}`}</span>
+          <span className={
+            "ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold " +
+            (target.app === "pro" ? "bg-blue-500/20 text-blue-300" : "bg-violet-500/20 text-violet-300")
+          }>{target.app === "pro" ? "PRO" : "SEC"}</span>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1">Montant (crédits)</label>
+          <input
+            type="number" min={1} value={montant}
+            onChange={e => onMontant(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-yukpo-500"
+          />
+          <div className="text-[10px] text-slate-500 mt-1">
+            Équivalent ≈ {Math.round((parseInt(montant, 10) || 0) * 0.6).toLocaleString("fr-FR")} FCFA d'utilisation
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1">Motif (audit)</label>
+          <input
+            type="text" value={motif} onChange={e => onMotif(e.target.value)}
+            placeholder="Ex. compensation incident, parrainage, geste commercial…"
+            className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-yukpo-500"
+          />
+        </div>
+      </div>
+      <div className="px-5 py-3 border-t border-slate-700 flex justify-end gap-2">
+        <button onClick={onClose} className="px-3 py-1.5 rounded-md border border-slate-600 bg-slate-800 text-sm text-slate-300 hover:bg-slate-700">
+          Annuler
+        </button>
+        <button
+          onClick={onSubmit} disabled={envoi}
+          className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {envoi ? "Envoi…" : "Créditer"}
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PROMOTIONS — distribution masse / ciblée
+// ══════════════════════════════════════════════════════════════════════════════
+
+const PromotionsTab = ({ api, scope }: { api: CrossApi; scope: AppScope }) => {
+  // Une promotion s'applique à UN app à la fois (chaque app a son propre
+  // pot de crédits). Si scope="both", on demande à l'admin de choisir.
+  const [app, setApp] = useState<"pro" | "sec">(scope === "sec" ? "sec" : "pro");
+  useEffect(() => {
+    if (scope === "pro") setApp("pro");
+    else if (scope === "sec") setApp("sec");
+  }, [scope]);
+
+  const [montant, setMontant] = useState<string>("50");
+  const [cible, setCible] = useState<CiblePromotion>("tous");
+  const [planFilter, setPlanFilter] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
+  const [userIdsInput, setUserIdsInput] = useState<string>("");
+  const [motif, setMotif] = useState<string>("");
+  const [seuilCreditsMin, setSeuilCreditsMin] = useState<string>("");
+  const [seuilCreditsMax, setSeuilCreditsMax] = useState<string>("");
+  const [seuilAppelsMin, setSeuilAppelsMin] = useState<string>("");
+  const [periodeJours, setPeriodeJours] = useState<string>("30");
+  const [pays, setPays] = useState<string>("");
+  const [continent, setContinent] = useState<string>("");
+
+  const [envoi, setEnvoi] = useState(false);
+  const [resultat, setResultat] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  const CIBLES: { id: CiblePromotion; label: string; aide: string; pro: boolean; sec: boolean }[] = [
+    { id: "tous",         label: "Tous les utilisateurs actifs",          aide: "Distribution globale.", pro: true, sec: true },
+    { id: "plan",         label: "Plan spécifique",                       aide: "Pour récompenser des plans payants. Pro uniquement.", pro: true, sec: false },
+    { id: "role",         label: "Rôle spécifique",                       aide: "Ex. tous les admins, super_admin. Sec uniquement.", pro: false, sec: true },
+    { id: "ids",          label: "Liste d'IDs (ciblé)",                   aide: "Une liste explicite d'identifiants.", pro: true, sec: true },
+    { id: "consommation", label: "Consommation (forte / faible / appels)", aide: "Filtres seuils crédits/appels sur les N derniers jours.", pro: true, sec: true },
+  ];
+  const ciblesDisponibles = CIBLES.filter(c => (app === "pro" ? c.pro : c.sec));
+
+  // Si la cible courante n'est plus dispo, on retombe sur "tous"
+  useEffect(() => {
+    if (!ciblesDisponibles.find(c => c.id === cible)) setCible("tous");
+  }, [app]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const submit = async () => {
+    setErreur(null); setResultat(null);
+
+    const n = parseInt(montant, 10);
+    if (!Number.isFinite(n) || n <= 0) {
+      setErreur("Montant invalide"); return;
+    }
+    const req: PromotionRequest = { montant: n, cible, motif: motif || undefined };
+    if (cible === "plan") req.plan = planFilter || undefined;
+    if (cible === "role") req.role = roleFilter || undefined;
+    if (cible === "ids") {
+      const ids = userIdsInput.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean).map(Number).filter(Number.isFinite);
+      if (ids.length === 0) { setErreur("Liste d'IDs vide"); return; }
+      req.user_ids = ids;
+    }
+    if (cible === "consommation") {
+      const sMin = parseFloat(seuilCreditsMin);
+      const sMax = parseFloat(seuilCreditsMax);
+      const aMin = parseInt(seuilAppelsMin, 10);
+      const pj   = parseInt(periodeJours, 10);
+      if (Number.isFinite(sMin)) req.seuil_credits_min = sMin;
+      if (Number.isFinite(sMax)) req.seuil_credits_max = sMax;
+      if (Number.isFinite(aMin)) req.seuil_appels_min = aMin;
+      if (Number.isFinite(pj))   req.periode_jours = pj;
+      if (req.seuil_credits_min === undefined && req.seuil_credits_max === undefined && req.seuil_appels_min === undefined) {
+        setErreur("Au moins un seuil requis pour la cible consommation"); return;
+      }
+    }
+    if (app === "pro") {
+      if (pays.trim())      req.pays = pays.trim().toUpperCase();
+      if (continent.trim()) req.continent = continent.trim().toUpperCase();
+    }
+
+    if (!confirm(
+      `Confirmer la distribution de ${n} crédits ${cible === "tous" ? "à TOUS" : `(cible : ${cible})`} ` +
+      `sur ${app === "pro" ? "YukpoPro" : "Secrétariat"} ?`,
+    )) return;
+
+    setEnvoi(true);
+    try {
+      const r = await api.lancerPromotion(app, req);
+      const benef = r.beneficiaires ?? r.beneficiaires_count ?? 0;
+      setResultat(
+        `✓ ${benef.toLocaleString("fr-FR")} bénéficiaires crédités de ${n} crédits chacun ` +
+        `(total ${(benef * n).toLocaleString("fr-FR")} crédits)${r.message ? " — " + r.message : ""}.`,
+      );
+    } catch (e: any) {
+      setErreur(e?.response?.data?.detail || e?.message || "Échec de la promotion");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  const cibleDesc = ciblesDisponibles.find(c => c.id === cible)?.aide || "";
+
+  return (
+    <div className="space-y-4">
+      {/* Pavé bandeau d'info */}
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-sm text-emerald-100/90">
+        <div className="font-semibold text-emerald-200 mb-1">Distribution de crédits bonus en masse</div>
+        Choisissez l'application cible (Pro ou Sec — les pots de crédits sont distincts) puis
+        la stratégie de distribution. Les crédits sont <strong>ajoutés au plan existant</strong> de
+        chaque bénéficiaire (n'écrasent pas).
+      </div>
+
+      <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-5 space-y-4">
+
+        {/* App ciblée */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Application
+          </label>
+          <div className="inline-flex rounded-lg border border-slate-600 bg-slate-900 p-0.5 text-sm">
+            <button
+              type="button"
+              onClick={() => setApp("pro")}
+              className={"px-4 py-1.5 rounded-md font-semibold " + (app === "pro" ? "bg-blue-500 text-white" : "text-slate-300 hover:bg-slate-700")}
+            >YukpoPro</button>
+            <button
+              type="button"
+              onClick={() => setApp("sec")}
+              className={"px-4 py-1.5 rounded-md font-semibold " + (app === "sec" ? "bg-violet-500 text-white" : "text-slate-300 hover:bg-slate-700")}
+            >Secrétariat</button>
+          </div>
+        </div>
+
+        {/* Montant */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Montant par bénéficiaire (crédits)
+          </label>
+          <input
+            type="number" min={1} value={montant}
+            onChange={e => setMontant(e.target.value)}
+            className="w-40 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-yukpo-500"
+          />
+          <span className="ml-3 text-xs text-slate-500">
+            ≈ {Math.round((parseInt(montant, 10) || 0) * 0.6).toLocaleString("fr-FR")} FCFA d'utilisation par bénéficiaire
+          </span>
+        </div>
+
+        {/* Cible */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Stratégie de distribution
+          </label>
+          <select
+            value={cible}
+            onChange={e => setCible(e.target.value as CiblePromotion)}
+            className="w-full sm:w-auto min-w-[260px] px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-yukpo-500"
+          >
+            {ciblesDisponibles.map(c => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </select>
+          {cibleDesc && <p className="text-[11px] text-slate-500 mt-1">{cibleDesc}</p>}
+        </div>
+
+        {/* Filtres conditionnels */}
+        {cible === "plan" && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Plan (Pro)
+            </label>
+            <select
+              value={planFilter} onChange={e => setPlanFilter(e.target.value)}
+              className="w-48 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white"
+            >
+              <option value="">— sélectionner —</option>
+              <option value="gratuit">Gratuit</option>
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="business">Business</option>
+            </select>
+          </div>
+        )}
+
+        {cible === "role" && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Rôle (Sec)
+            </label>
+            <select
+              value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
+              className="w-48 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white"
+            >
+              <option value="">— sélectionner —</option>
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+              <option value="super_admin">super_admin</option>
+              <option value="yukpo_owner">yukpo_owner</option>
+            </select>
+          </div>
+        )}
+
+        {cible === "ids" && (
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              IDs utilisateurs (séparés par virgule, espace ou retour ligne)
+            </label>
+            <textarea
+              value={userIdsInput} onChange={e => setUserIdsInput(e.target.value)}
+              placeholder="123, 456, 789"
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-yukpo-500"
+            />
+          </div>
+        )}
+
+        {cible === "consommation" && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Période (jours)</label>
+              <input type="number" min={1} max={365} value={periodeJours} onChange={e => setPeriodeJours(e.target.value)}
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Crédits min</label>
+              <input type="number" min={0} value={seuilCreditsMin} onChange={e => setSeuilCreditsMin(e.target.value)}
+                placeholder="ex. 500"
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm placeholder:text-slate-500" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Crédits max</label>
+              <input type="number" min={0} value={seuilCreditsMax} onChange={e => setSeuilCreditsMax(e.target.value)}
+                placeholder="ex. 100"
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm placeholder:text-slate-500" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Appels min</label>
+              <input type="number" min={0} value={seuilAppelsMin} onChange={e => setSeuilAppelsMin(e.target.value)}
+                placeholder="ex. 20"
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm placeholder:text-slate-500" />
+            </div>
+          </div>
+        )}
+
+        {/* Filtres géo (Pro seulement) */}
+        {app === "pro" && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Pays (ISO-2) — optionnel</label>
+              <input type="text" value={pays} onChange={e => setPays(e.target.value)}
+                placeholder="CM, CI, TG, FR, …" maxLength={2}
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm placeholder:text-slate-500" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Continent — optionnel</label>
+              <select value={continent} onChange={e => setContinent(e.target.value)}
+                className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm">
+                <option value="">—</option>
+                <option value="AF">Afrique</option>
+                <option value="EU">Europe</option>
+                <option value="NA">Amérique du Nord</option>
+                <option value="SA">Amérique du Sud</option>
+                <option value="AS">Asie</option>
+                <option value="OC">Océanie</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Motif */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            Motif (audit, optionnel)
+          </label>
+          <input type="text" value={motif} onChange={e => setMotif(e.target.value)}
+            placeholder="Ex. campagne fin d'année, lancement YukpoPro, etc."
+            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-yukpo-500" />
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end pt-2 border-t border-slate-700">
+          <button
+            onClick={submit} disabled={envoi}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            <Gift className="w-4 h-4" />
+            {envoi ? "Distribution en cours…" : "Lancer la distribution"}
+          </button>
+        </div>
+      </div>
+
+      {resultat && (
+        <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          {resultat}
+        </div>
+      )}
+      {erreur && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          ⚠ {erreur}
+        </div>
+      )}
+    </div>
+  );
+};
