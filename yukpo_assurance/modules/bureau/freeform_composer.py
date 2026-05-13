@@ -2505,6 +2505,25 @@ filets ornements, blocs texte multiples, icônes décoratives 2-4 par
 page, cadres subtils, signatures, ornements de coins). Un page avec
 seulement « titre + 3 lignes + 1 icône » est INACCEPTABLE.
 
+**6. OBJETS CONCRETS VISUALISABLES → `prompt_ia` OBLIGATOIRE**
+Si le brief mentionne des OBJETS CONCRETS visualisables (lots de
+tombola/concours : voiture/maison/terrain/smartphone/moto ; produits :
+boissons/aliments/cosmétiques/électronique ; scènes : restaurant/
+boutique/atelier ; véhicules/biens immobiliers/paysages), et qu'AUCUN
+média n'est uploadé pour ces éléments :
+- Tu DOIS générer un élément `{"type":"image", "prompt_ia":"<EN 30-60 mots
+  description précise pour Flux Pro Ultra>"}` pour CHAQUE objet/scène.
+- Description en ANGLAIS, photo-réaliste, contexte adapté
+  (« Brand new sedan car parked outdoors, sunny day, professional product
+  shot, photorealistic, soft natural lighting »).
+- INACCEPTABLE : rectangle gris #EFEFEF avec juste un label texte sous-
+  jacent (anti-pattern PDF MTN MEGA mai 2026).
+- Max 3 prompt_ia par page (cap appliqué côté code pour temps de rendu).
+- Pour les LOGOS d'entreprises connues (MTN, Orange, Coca-Cola, etc.) sans
+  média uploadé : préfère composer le logo en élément graphique (texte
+  bold dans la couleur officielle de la marque) plutôt que prompt_ia (les
+  IA hallucinent les logos).
+
 Compose maintenant le layout PARFAIT pour ce brief en respectant
 TOUTES les exigences ci-dessus. JSON STRICT uniquement, sans
 commentaire ni markdown.
@@ -2623,6 +2642,7 @@ commentaire ni markdown.
         data = _corriger_collisions_icones(data)
         data = _normaliser_pagination_livret(data, brief)
         data = _capper_images_ia_par_page(data, max_par_page=3)
+        data = _garantir_crop_marks_si_impression(data, brief)
 
     return data
 
@@ -2685,14 +2705,21 @@ def _estimer_bbox_texte(el: dict) -> tuple[float, float, float, float]:
 
 
 def _corriger_collisions_icones(data: dict) -> dict:
-    """Détecte les icônes qui se superposent à un Texte et les repositionne
-    vers un coin de page libre. Bug observé PDF SIAKA Jean : icône 'famille'
-    devant le 'F' de « Famille SIAKA » → texte tronqué visuellement en
-    « amille SIAKA ». Le LLM ignore parfois la consigne placement même avec
-    règles explicites dans le prompt — donc filet déterministe."""
+    """Détecte les éléments décoratifs (icone, ornement) qui se superposent
+    à un Texte et les repositionne vers un coin de page libre.
+
+    Bugs observés en prod :
+    - SIAKA Jean : icône 'famille' devant le 'F' de « Famille SIAKA »
+    - MTN MEGA : 3 cercles ornement traversant le visuel central
+
+    Le LLM ignore parfois la consigne placement même avec règles explicites
+    → filet déterministe côté code."""
     pages = data.get("pages") or []
     fmt_doc = data.get("format_mm") or [210, 297]
     nb_corrections = 0
+    # Types décoratifs candidats à repositionnement (NE PAS toucher rectangles
+    # ni images : ce sont des éléments porteurs de contenu/structure).
+    types_decoratifs = {"icone", "ornement"}
     for page in pages:
         if not isinstance(page, dict):
             continue
@@ -2707,7 +2734,7 @@ def _corriger_collisions_icones(data: dict) -> dict:
         if not text_bboxes:
             continue
         for el in elements:
-            if not isinstance(el, dict) or el.get("type") != "icone":
+            if not isinstance(el, dict) or el.get("type") not in types_decoratifs:
                 continue
             try:
                 ix = float(el.get("x_mm") or 0)
@@ -2716,6 +2743,15 @@ def _corriger_collisions_icones(data: dict) -> dict:
                 ih = float(el.get("h_mm") or 8)
             except (TypeError, ValueError):
                 continue
+            # Pour ornements trop grands (>40% page), on les SHRINK avant
+            # repositionnement — un ornement décoratif qui couvre la moitié
+            # de la page est forcément un bug d'intention LLM.
+            if iw > W * 0.4 or ih > H * 0.4:
+                ratio = min(W * 0.18 / max(iw, 0.1), H * 0.18 / max(ih, 0.1), 1.0)
+                iw = max(6.0, iw * ratio)
+                ih = max(6.0, ih * ratio)
+                el["w_mm"] = round(iw, 1)
+                el["h_mm"] = round(ih, 1)
             ibox = (ix, iy, ix + iw, iy + ih)
             if not any(_bbox_overlap(ibox, tb) for tb in text_bboxes):
                 continue
@@ -2742,8 +2778,8 @@ def _corriger_collisions_icones(data: dict) -> dict:
             nb_corrections += 1
     if nb_corrections:
         logger.warning(
-            f"[FreeformComposer] Post-validation : {nb_corrections} icône(s) "
-            f"repositionnée(s) (anti-collision texte)."
+            f"[FreeformComposer] Post-validation : {nb_corrections} élément(s) "
+            f"décoratif(s) repositionné(s)/redimensionné(s) (anti-collision texte)."
         )
     return data
 
@@ -2833,6 +2869,57 @@ def _normaliser_pagination_livret(data: dict, brief: str) -> dict:
         f"[FreeformComposer] Post-validation : pagination {n} → {cible} pages "
         f"(multiple de 4 pour agrafage livret)."
     )
+    return data
+
+
+def _garantir_crop_marks_si_impression(data: dict, brief: str) -> dict:
+    """Ajoute automatiquement des crop_marks (4 coins) à chaque page si le
+    brief mentionne un usage d'impression et qu'aucun crop_marks n'est déjà
+    présent. Le renderer dessine les 4 coins, mais c'est le LLM qui décide
+    de mettre l'élément dans le JSON — il l'oublie souvent (cf PDF MTN MEGA
+    mai 2026 : 1 seul crop mark visible).
+
+    Mots-clés impression : flyer, affiche, brochure, livret, faire-part,
+    carte, ticket, badge, dépliant, plaquette, imprimer, impression."""
+    import re as _re
+    if not _re.search(
+        r"\bimpress(?:ion|er)|imprimer|flyer|affiche|brochure|livret|"
+        r"faire[- ]?part|dipl[oô]me|carte\s+(?:de\s+)?visite|ticket|"
+        r"billet|badge|d[ée]pliant|plaquette|tract|invitation|magazine|"
+        r"poster|enseigne|marque[- ]?place|programme|m[ée]daille|"
+        r"diplome|certificat|sticker|autocollant|[ée]tiquette",
+        (brief or "").lower(),
+    ):
+        return data
+    pages = data.get("pages") or []
+    fmt_doc = data.get("format_mm") or [210, 297]
+    nb_ajoutes = 0
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        elements = page.get("elements") or []
+        deja = any(
+            isinstance(el, dict) and el.get("type") == "crop_marks"
+            for el in elements
+        )
+        if deja:
+            continue
+        fmt_page = page.get("format_mm") or fmt_doc
+        W, H = float(fmt_page[0]), float(fmt_page[1])
+        # crop_marks couvrant tout le trim de la page
+        elements.append({
+            "type": "crop_marks",
+            "x_mm": 0.0, "y_mm": 0.0, "w_mm": W, "h_mm": H,
+            "longueur_mm": 3.0, "epaisseur_pt": 0.25,
+            "couleur": "#000000", "decalage_mm": 1.0,
+        })
+        page["elements"] = elements
+        nb_ajoutes += 1
+    if nb_ajoutes:
+        logger.warning(
+            f"[FreeformComposer] Post-validation : crop_marks ajoutés à "
+            f"{nb_ajoutes} page(s) (brief impression sans crop_marks LLM)."
+        )
     return data
 
 

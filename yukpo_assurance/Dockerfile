@@ -57,6 +57,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxmlsec1-openssl \
     # Gap #9 — Ghostscript pour conversion RGB → CMYK (print-ready imprimerie)
     ghostscript \
+    # Audit visuel Sonnet — pdf2image a besoin de poppler-utils pour la
+    # commande `pdftoppm`. Sans ça, l'audit du pipeline freeform skippe
+    # silencieusement et aucun feedback qualité n'est généré.
+    poppler-utils \
     # pikepdf : la lib libqpdf est bundled statiquement dans le wheel
     # x86_64-linux du package pip ; aucun paquet apt requis.
     && rm -rf /var/lib/apt/lists/*

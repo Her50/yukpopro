@@ -47,11 +47,22 @@ pikepdf>=9.0.0                # PDF/X-1a strict + TrimBox/BleedBox (print-ready 
 # Pure Python (lxml + reportlab), pas de lib native runtime requise.
 # Qualite infinie a l'impression (pas de rasterization).
 svglib==1.4.1                 # epingle avant 1.5.0 (1.5.0+ tire rlpycairo->pycairo qui demande libcairo2-dev au build)
+# cairosvg : SVG → PNG rasterisation haute fidélité (textes natifs, gradients,
+# masques, filtres). Utilisé par geometric_placement._svg_to_png() quand
+# Recraft v3 SVG génère un logo/icône qu'on doit embed dans le PNG final.
+# Mode ABI cairocffi : dlopen libcairo2 runtime (déjà installé via WeasyPrint
+# dans le Dockerfile), pas de libcairo2-dev requis au build.
+cairosvg>=2.7.0
 weasyprint>=62.0
 python3-saml>=1.16.0
 svgwrite>=1.4.3
 openpyxl>=3.1.0
 pypdf2>=3.0.0
+# pdf2image : requis pour audit visuel Sonnet du pipeline freeform.
+# Dépend de poppler-utils côté système (installé dans Dockerfile).
+# Sans ça → [Freeform/audit] audit skip : No module named 'pdf2image'
+# et aucun feedback qualité automatique sur les PDFs générés.
+pdf2image>=1.17.0
 aiosmtplib>=3.0.0
 sendgrid>=6.11.0
 twilio>=9.0.0
