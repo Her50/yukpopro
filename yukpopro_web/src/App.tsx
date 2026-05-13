@@ -1,27 +1,33 @@
-import { lazy, Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { lazyWithRetry, clearChunkReloadMarker } from "@/utils/lazyWithRetry";
 
-const LoginPage = lazy(() => import("@/pages/LoginPage").then(m => ({ default: m.LoginPage })));
-const ChatPage = lazy(() => import("@/pages/ChatPage").then(m => ({ default: m.ChatPage })));
-const DashboardPage = lazy(() => import("@/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
-const ProfilPage = lazy(() => import("@/pages/ProfilPage").then(m => ({ default: m.ProfilPage })));
-const AdminPage = lazy(() => import("@/pages/AdminPage").then(m => ({ default: m.AdminPage })));
-const AdminPaiementsPage = lazy(() => import("@/pages/AdminPaiementsPage").then(m => ({ default: m.AdminPaiementsPage })));
-const AbonnementPage = lazy(() => import("@/pages/AbonnementPage").then(m => ({ default: m.AbonnementPage })));
-const WalletPage = lazy(() => import("@/pages/WalletPage").then(m => ({ default: m.WalletPage })));
-const ReunionsPage = lazy(() => import("@/pages/ReunionsPage").then(m => ({ default: m.ReunionsPage })));
-const TranslateLivePage = lazy(() => import("@/pages/TranslateLivePage").then(m => ({ default: m.TranslateLivePage })));
-const HistoriqueDocumentsPage = lazy(() => import("@/pages/HistoriqueDocumentsPage").then(m => ({ default: m.HistoriqueDocumentsPage })));
-const EmploiPage = lazy(() => import("@/pages/EmploiPage").then(m => ({ default: m.EmploiPage })));
-const MarchesPage = lazy(() => import("@/pages/MarchesPage").then(m => ({ default: m.MarchesPage })));
-const EnquetesPage = lazy(() => import("@/pages/EnquetesPage").then(m => ({ default: m.EnquetesPage })));
-const PublicFormPage = lazy(() => import("@/pages/PublicFormPage").then(m => ({ default: m.PublicFormPage })));
-const ParametresPage = lazy(() => import("@/pages/ParametresPage").then(m => ({ default: m.ParametresPage })));
-const OrganisationPage = lazy(() => import("@/pages/OrganisationPage").then(m => ({ default: m.OrganisationPage })));
-const InviteAcceptPage = lazy(() => import("@/pages/InviteAcceptPage").then(m => ({ default: m.InviteAcceptPage })));
+// lazyWithRetry : si un chunk JS échoue à charger (cas typique après un
+// déploiement où le SW PWA a précaché un index.html référençant des hash
+// de chunks qui ont disparu du CDN), on force window.location.reload() pour
+// récupérer le nouveau manifest. Évite le symptôme « page sombre au clic,
+// résolu par F5 » (Suspense reste sur fallback bg-slate-950 sinon).
+const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const ChatPage = lazyWithRetry(() => import("@/pages/ChatPage").then(m => ({ default: m.ChatPage })));
+const DashboardPage = lazyWithRetry(() => import("@/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const ProfilPage = lazyWithRetry(() => import("@/pages/ProfilPage").then(m => ({ default: m.ProfilPage })));
+const AdminPage = lazyWithRetry(() => import("@/pages/AdminPage").then(m => ({ default: m.AdminPage })));
+const AdminPaiementsPage = lazyWithRetry(() => import("@/pages/AdminPaiementsPage").then(m => ({ default: m.AdminPaiementsPage })));
+const AbonnementPage = lazyWithRetry(() => import("@/pages/AbonnementPage").then(m => ({ default: m.AbonnementPage })));
+const WalletPage = lazyWithRetry(() => import("@/pages/WalletPage").then(m => ({ default: m.WalletPage })));
+const ReunionsPage = lazyWithRetry(() => import("@/pages/ReunionsPage").then(m => ({ default: m.ReunionsPage })));
+const TranslateLivePage = lazyWithRetry(() => import("@/pages/TranslateLivePage").then(m => ({ default: m.TranslateLivePage })));
+const HistoriqueDocumentsPage = lazyWithRetry(() => import("@/pages/HistoriqueDocumentsPage").then(m => ({ default: m.HistoriqueDocumentsPage })));
+const EmploiPage = lazyWithRetry(() => import("@/pages/EmploiPage").then(m => ({ default: m.EmploiPage })));
+const MarchesPage = lazyWithRetry(() => import("@/pages/MarchesPage").then(m => ({ default: m.MarchesPage })));
+const EnquetesPage = lazyWithRetry(() => import("@/pages/EnquetesPage").then(m => ({ default: m.EnquetesPage })));
+const PublicFormPage = lazyWithRetry(() => import("@/pages/PublicFormPage").then(m => ({ default: m.PublicFormPage })));
+const ParametresPage = lazyWithRetry(() => import("@/pages/ParametresPage").then(m => ({ default: m.ParametresPage })));
+const OrganisationPage = lazyWithRetry(() => import("@/pages/OrganisationPage").then(m => ({ default: m.OrganisationPage })));
+const InviteAcceptPage = lazyWithRetry(() => import("@/pages/InviteAcceptPage").then(m => ({ default: m.InviteAcceptPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +42,10 @@ const PageFallback = () => (
 );
 
 export default function App() {
+  // Si on est arrivé ici, l'app a démarré correctement → clear le marker
+  // anti-boucle de lazyWithRetry pour ne pas bloquer un futur retry légitime.
+  useEffect(() => { clearChunkReloadMarker(); }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <PWAInstallBanner />
