@@ -35,7 +35,7 @@ export interface AdminDashboardProps {
   storageKey?: string;
 }
 
-type Onglet = "overview" | "consommation" | "providers" | "users" | "gestion" | "promotions" | "alerts";
+type Onglet = "overview" | "consommation" | "providers" | "users" | "gestion" | "promotions" | "alerts" | "forecast";
 
 const TABS: { id: Onglet; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "overview",     label: "Vue d'ensemble",   icon: BarChart3 },
@@ -44,6 +44,7 @@ const TABS: { id: Onglet; label: string; icon: React.ComponentType<{ className?:
   { id: "users",        label: "Top consommateurs",icon: UsersIcon },
   { id: "gestion",      label: "Utilisateurs",     icon: UsersIcon },
   { id: "promotions",   label: "Bonus & promo",    icon: Gift },
+  { id: "forecast",     label: "Coûts prévisionnels", icon: TrendingUp },
   { id: "alerts",       label: "Alertes",          icon: Bell },
 ];
 
@@ -228,6 +229,7 @@ export const AdminDashboard = ({
       {tab === "users"        && <UsersTab users={users} />}
       {tab === "gestion"      && <GestionUsersTab api={api} scope={scope} />}
       {tab === "promotions"   && <PromotionsTab api={api} scope={scope} />}
+      {tab === "forecast"     && <ForecastTab providers={providers} features={features} usage={usage} kpis={kpis} jours={jours} />}
       {tab === "alerts"       && <AlertsTab alertes={alertes} resume={alertesResume} />}
     </div>
   );
@@ -1352,6 +1354,393 @@ const PromotionsTab = ({ api, scope }: { api: CrossApi; scope: AppScope }) => {
           ⚠ {erreur}
         </div>
       )}
+    </div>
+  );
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FORECAST — Projections coûts mensuels basées sur consommation observée
+// ══════════════════════════════════════════════════════════════════════════════
+//
+// Logique :
+//   1. Aggrégation USD réel observé sur la période (sum providers.usd)
+//   2. Extrapolation linéaire → projection 30j
+//   3. Décomposition par provider (fal, Replicate, Anthropic, OpenAI…)
+//   4. Décomposition par module/feature (visuels, vidéos, slides, chat…)
+//   5. Scénarios "Et si nous avions N users ?" — multiplie proportionnellement
+//      au ratio (N / utilisateurs_actifs_actuels).
+//   6. Coûts infrastructure fixes (Fly, Postgres, Redis, Netlify) ajoutés
+//      car ils n'apparaissent pas dans les providers (pas tracés par
+//      service_credits_bureau).
+//
+// Tout est calculé en frontend depuis les données déjà fetchées par les
+// autres onglets → 0 nouvel appel API.
+
+interface ForecastTabProps {
+  providers: ProviderRow[];
+  features: FeatureRow[];
+  usage: UsageDay[];
+  kpis: DashboardKPIs | null;
+  jours: number;
+}
+
+// Estimations infra Fly + outils (USD/mois) — révisable si la prod évolue
+const _INFRA_FIXE_USD: { nom: string; usd: number; details: string }[] = [
+  { nom: "Fly web (gunicorn ×2)",      usd: 72,  details: "performance-2x autoscale" },
+  { nom: "Fly worker Celery",          usd: 71,  details: "performance-4x dédié vidéo/render" },
+  { nom: "Fly worker burst",           usd: 9,   details: "scale-up à la demande 6h/jour" },
+  { nom: "Postgres Fly managed",       usd: 35,  details: "db-shared-2x + 10 GB" },
+  { nom: "Redis Upstash Pro",          usd: 10,  details: "256 MB broker Celery + cache" },
+  { nom: "Volumes Fly (PDFs/MP4s)",    usd: 8,   details: "50 GB" },
+  { nom: "Egress (downloads users)",   usd: 10,  details: "~500 GB/mois" },
+  { nom: "Netlify Pro × 2 fronts",     usd: 38,  details: "YukpoPro + Secrétariat" },
+  { nom: "Sentry + PostHog",           usd: 56,  details: "Erreurs + analytics" },
+  { nom: "Backup Postgres + Domain",   usd: 12,  details: "Snapshots + DNS" },
+];
+const _INFRA_TOTAL_USD = _INFRA_FIXE_USD.reduce((s, x) => s + x.usd, 0);
+
+const ForecastTab = ({ providers, features, usage, kpis, jours }: ForecastTabProps) => {
+  // Calculs dérivés mémoïsés
+  const stats = useMemo(() => {
+    // 1. Coût brut providers observé sur la période
+    const totalProvidersUsd = providers.reduce((s, p) => s + (p.usd || 0), 0);
+    const totalProvidersFcfa = providers.reduce((s, p) => s + (p.fcfa || 0), 0);
+
+    // 2. Conversion en USD/jour puis projection 30j
+    const usdParJour = jours > 0 ? totalProvidersUsd / jours : 0;
+    const fcfaParJour = jours > 0 ? totalProvidersFcfa / jours : 0;
+    const projectionUsd30j = usdParJour * 30;
+    const projectionFcfa30j = fcfaParJour * 30;
+
+    // 3. Users actifs (sert de base de scale)
+    const usersActifs = kpis?.utilisateurs.actifs || 0;
+    const usdParUserMois = usersActifs > 0 ? projectionUsd30j / usersActifs : 0;
+
+    // 4. Coût total mensuel projeté (providers + infra fixe)
+    const totalProjMensuelUsd = projectionUsd30j + _INFRA_TOTAL_USD;
+    const totalProjMensuelFcfa = totalProjMensuelUsd * 600; // 1 USD ≈ 600 XAF
+
+    // 5. Coût facturé aux users (marge ×12 sur providers, infra absorbée)
+    //    Approximation : revenue théorique = projectionUsd30j × 12
+    const revenuTheoriqueUsd = projectionUsd30j * 12;
+    const margeBruteUsd = revenuTheoriqueUsd - totalProjMensuelUsd;
+    const margePct = revenuTheoriqueUsd > 0
+      ? (margeBruteUsd / revenuTheoriqueUsd) * 100 : 0;
+
+    // 6. Décomposition par provider triée
+    const parProvider = providers
+      .filter(p => p.usd > 0)
+      .map(p => ({
+        ...p,
+        proj_30j_usd: jours > 0 ? (p.usd / jours) * 30 : 0,
+        proj_30j_fcfa: jours > 0 ? (p.fcfa / jours) * 30 : 0,
+      }))
+      .sort((a, b) => b.proj_30j_usd - a.proj_30j_usd);
+
+    // 7. Top features (modules) — utilise fcfa qui inclut tous les coûts
+    const parFeature = features
+      .filter(f => f.fcfa > 0)
+      .map(f => ({
+        ...f,
+        proj_30j_fcfa: jours > 0 ? (f.fcfa / jours) * 30 : 0,
+      }))
+      .sort((a, b) => b.proj_30j_fcfa - a.proj_30j_fcfa)
+      .slice(0, 8);
+
+    return {
+      jours, totalProvidersUsd, totalProvidersFcfa,
+      usdParJour, fcfaParJour, projectionUsd30j, projectionFcfa30j,
+      usersActifs, usdParUserMois,
+      totalProjMensuelUsd, totalProjMensuelFcfa,
+      revenuTheoriqueUsd, margeBruteUsd, margePct,
+      parProvider, parFeature,
+    };
+  }, [providers, features, kpis, jours]);
+
+  // Scénarios users (1k, 5k, 10k) — extrapolation proportionnelle
+  const scenarios = useMemo(() => {
+    if (stats.usersActifs === 0) {
+      // Fallback : applique le forecast nominal sans scale
+      return [
+        { users: stats.usersActifs, totalUsd: stats.totalProjMensuelUsd, label: "Actuel" },
+      ];
+    }
+    return [1000, 2500, 5000, 10000].map(n => {
+      const ratio = n / stats.usersActifs;
+      const apiUsd = stats.projectionUsd30j * ratio;
+      // Infra scale partiellement avec users (autoscale Fly) — modèle simple
+      // sub-linéaire : infra(N) = infra_base × (N / users_actifs)^0.5
+      const infraScale = _INFRA_TOTAL_USD * Math.pow(ratio, 0.5);
+      return {
+        users: n,
+        apiUsd, infraUsd: infraScale,
+        totalUsd: apiUsd + infraScale,
+        label: `${n.toLocaleString("fr-FR")} users`,
+      };
+    });
+  }, [stats]);
+
+  return (
+    <div className="space-y-6">
+      {/* ── Bandeau d'avertissement transparence ──────────────────────── */}
+      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+        💡 <strong>Méthode</strong> : projection linéaire des {stats.jours} derniers jours
+        × 30. Inclut le coût brut providers (fal.ai, Replicate, Anthropic, OpenAI…)
+        + infra fixe estimée ({fmtUsd(_INFRA_TOTAL_USD)}/mois). Marge théorique calculée
+        sur facturation user ×12 sur les appels providers (l'infra fixe est absorbée
+        par le margin pool).
+      </div>
+
+      {/* ── KPIs synthèse ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <ForecastKpi
+          label="Coût mensuel projeté"
+          value={fmtUsd(stats.totalProjMensuelUsd)}
+          sub={fmtFcfa(stats.totalProjMensuelFcfa)}
+          tone="amber"
+        />
+        <ForecastKpi
+          label="dont APIs providers"
+          value={fmtUsd(stats.projectionUsd30j)}
+          sub={`${stats.projectionUsd30j > 0 ? Math.round((stats.projectionUsd30j / stats.totalProjMensuelUsd) * 100) : 0}% du total`}
+        />
+        <ForecastKpi
+          label="dont Infra fixe (Fly, etc.)"
+          value={fmtUsd(_INFRA_TOTAL_USD)}
+          sub={`${_INFRA_TOTAL_USD > 0 ? Math.round((_INFRA_TOTAL_USD / stats.totalProjMensuelUsd) * 100) : 0}% du total`}
+        />
+        <ForecastKpi
+          label={`Coût / user actif (${stats.usersActifs})`}
+          value={fmtUsd(stats.usdParUserMois)}
+          sub={`Revenu théorique ×12 = ${fmtUsd(stats.usdParUserMois * 12)}/user`}
+          tone="emerald"
+        />
+      </div>
+
+      {/* ── Marge brute estimée ─────────────────────────────────────── */}
+      {stats.projectionUsd30j > 0 && (
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            Marge brute estimée à facturation actuelle (×12 sur providers)
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div>
+              <div className="text-xs text-slate-400">Revenu théorique</div>
+              <div className="text-white font-bold">{fmtUsd(stats.revenuTheoriqueUsd)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Coûts (API + infra)</div>
+              <div className="text-white font-bold">{fmtUsd(stats.totalProjMensuelUsd)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Marge brute</div>
+              <div className={
+                "font-bold " + (stats.margeBruteUsd > 0 ? "text-emerald-300" : "text-red-300")
+              }>{fmtUsd(stats.margeBruteUsd)}</div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Taux marge</div>
+              <div className={
+                "font-bold " + (stats.margePct > 50 ? "text-emerald-300"
+                              : stats.margePct > 20 ? "text-amber-300"
+                              : "text-red-300")
+              }>{stats.margePct.toFixed(1)}%</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Scénarios mise à l'échelle ──────────────────────────────── */}
+      <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+        <h3 className="text-sm font-semibold text-white mb-3">
+          📈 Projections selon nombre d'utilisateurs (extrapolation depuis votre mix actuel)
+        </h3>
+        <table className="w-full text-xs">
+          <thead className="text-slate-400">
+            <tr>
+              <th className="text-left px-3 py-2">Échelle</th>
+              <th className="text-right px-3 py-2">APIs providers</th>
+              <th className="text-right px-3 py-2">Infra (sub-linéaire)</th>
+              <th className="text-right px-3 py-2">Total /mois</th>
+              <th className="text-right px-3 py-2">XAF /mois</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scenarios.map(s => (
+              <tr key={s.label} className="border-t border-slate-700">
+                <td className="px-3 py-2 text-white font-medium">{s.label}</td>
+                <td className="px-3 py-2 text-right text-slate-300">{fmtUsd(s.apiUsd)}</td>
+                <td className="px-3 py-2 text-right text-slate-300">{fmtUsd(s.infraUsd || _INFRA_TOTAL_USD)}</td>
+                <td className="px-3 py-2 text-right text-white font-bold">{fmtUsd(s.totalUsd)}</td>
+                <td className="px-3 py-2 text-right text-slate-400">{fmtFcfa(s.totalUsd * 600)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {stats.usersActifs === 0 && (
+          <p className="mt-3 text-xs text-amber-300">
+            ⚠ Aucun utilisateur actif sur la période — scénarios non calculables.
+            Ils s'affineront dès que les premières conso commenceront.
+          </p>
+        )}
+      </div>
+
+      {/* ── Décomposition par provider ──────────────────────────────── */}
+      {stats.parProvider.length > 0 && (
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            🔧 Décomposition par fournisseur (projection 30 jours)
+          </h3>
+          <table className="w-full text-xs">
+            <thead className="text-slate-400">
+              <tr>
+                <th className="text-left px-3 py-2">Provider</th>
+                <th className="text-right px-3 py-2">Appels</th>
+                <th className="text-right px-3 py-2">USD observé ({stats.jours}j)</th>
+                <th className="text-right px-3 py-2">Projeté 30j</th>
+                <th className="text-right px-3 py-2">% total</th>
+                <th className="text-left px-3 py-2 pl-4">Modèles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.parProvider.map(p => {
+                const pct = stats.projectionUsd30j > 0
+                  ? (p.proj_30j_usd / stats.projectionUsd30j) * 100 : 0;
+                return (
+                  <tr key={p.provider} className="border-t border-slate-700">
+                    <td className="px-3 py-2 text-white font-medium">{p.provider}</td>
+                    <td className="px-3 py-2 text-right text-slate-300">{p.nb_appels.toLocaleString("fr-FR")}</td>
+                    <td className="px-3 py-2 text-right text-slate-300">{fmtUsd(p.usd)}</td>
+                    <td className="px-3 py-2 text-right text-white font-bold">{fmtUsd(p.proj_30j_usd)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <span className={
+                        "px-2 py-0.5 rounded text-[10px] font-semibold " +
+                        (pct > 50 ? "bg-red-500/20 text-red-300"
+                          : pct > 25 ? "bg-amber-500/20 text-amber-300"
+                          : "bg-slate-500/20 text-slate-300")
+                      }>{pct.toFixed(1)}%</span>
+                    </td>
+                    <td className="px-3 py-2 pl-4 text-slate-400 text-[10px]">
+                      {(p.modeles || []).slice(0, 4).join(", ")}
+                      {p.modeles && p.modeles.length > 4 ? "…" : ""}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Décomposition par feature/module ───────────────────────── */}
+      {stats.parFeature.length > 0 && (
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            📊 Top 8 modules par coût projeté (30 jours)
+          </h3>
+          <table className="w-full text-xs">
+            <thead className="text-slate-400">
+              <tr>
+                <th className="text-left px-3 py-2">Module</th>
+                <th className="text-center px-3 py-2">App</th>
+                <th className="text-right px-3 py-2">Appels ({stats.jours}j)</th>
+                <th className="text-right px-3 py-2">Projeté 30j (XAF)</th>
+                <th className="text-right px-3 py-2">Projeté 30j (USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.parFeature.map(f => (
+                <tr key={`${f.app}-${f.module}`} className="border-t border-slate-700">
+                  <td className="px-3 py-2 text-white font-medium">{f.module}</td>
+                  <td className="px-3 py-2 text-center">
+                    <span className={
+                      "px-2 py-0.5 rounded text-[10px] font-semibold " +
+                      (f.app === "pro"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : "bg-purple-500/20 text-purple-300")
+                    }>{f.app === "pro" ? "Pro" : "Sec"}</span>
+                  </td>
+                  <td className="px-3 py-2 text-right text-slate-300">{f.nb_appels.toLocaleString("fr-FR")}</td>
+                  <td className="px-3 py-2 text-right text-white font-bold">{fmtFcfa(f.proj_30j_fcfa)}</td>
+                  <td className="px-3 py-2 text-right text-slate-400">{fmtUsd(f.proj_30j_fcfa / 600)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Détail infra fixe ────────────────────────────────────── */}
+      <details className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+        <summary className="text-sm font-semibold text-white cursor-pointer hover:text-emerald-300">
+          🏗️ Décomposition infrastructure fixe ({fmtUsd(_INFRA_TOTAL_USD)}/mois)
+        </summary>
+        <table className="w-full text-xs mt-3">
+          <thead className="text-slate-400">
+            <tr>
+              <th className="text-left px-3 py-2">Poste</th>
+              <th className="text-right px-3 py-2">USD/mois</th>
+              <th className="text-left px-3 py-2">Détails</th>
+            </tr>
+          </thead>
+          <tbody>
+            {_INFRA_FIXE_USD.map(i => (
+              <tr key={i.nom} className="border-t border-slate-700">
+                <td className="px-3 py-2 text-white">{i.nom}</td>
+                <td className="px-3 py-2 text-right text-slate-300">{fmtUsd(i.usd)}</td>
+                <td className="px-3 py-2 text-slate-400 text-[11px]">{i.details}</td>
+              </tr>
+            ))}
+            <tr className="border-t-2 border-slate-600">
+              <td className="px-3 py-2 text-white font-bold">Total infra</td>
+              <td className="px-3 py-2 text-right text-white font-bold">{fmtUsd(_INFRA_TOTAL_USD)}</td>
+              <td className="px-3 py-2 text-slate-400 text-[11px]">Indépendant du volume users (jusqu'à ~5000 MAU)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="mt-3 text-xs text-slate-500">
+          Ces estimations restent indicatives — révise les valeurs dans le code
+          si tu changes la taille des VM Fly, ajoutes un Datadog, etc.
+        </p>
+      </details>
+    </div>
+  );
+};
+
+
+// Helpers de formatage
+function fmtUsd(usd: number): string {
+  if (!Number.isFinite(usd)) return "—";
+  if (Math.abs(usd) >= 1000) return "$" + usd.toLocaleString("fr-FR", { maximumFractionDigits: 0 });
+  if (Math.abs(usd) >= 10) return "$" + usd.toFixed(0);
+  if (Math.abs(usd) >= 1) return "$" + usd.toFixed(2);
+  return "$" + usd.toFixed(3);
+}
+
+function fmtFcfa(fcfa: number): string {
+  if (!Number.isFinite(fcfa)) return "—";
+  if (Math.abs(fcfa) >= 1_000_000) return (fcfa / 1_000_000).toFixed(1) + " M XAF";
+  if (Math.abs(fcfa) >= 1_000) return (fcfa / 1_000).toFixed(0) + " k XAF";
+  return Math.round(fcfa).toLocaleString("fr-FR") + " XAF";
+}
+
+// ForecastKpi : carte synthèse spécifique au tab Forecast (le KpiCard de
+// l'OverviewTab a une signature avec icônes Lucide — on garde celui-ci minimal
+// pour éviter une régression sur l'overview).
+const ForecastKpi = ({ label, value, sub, tone = "default" }: {
+  label: string; value: string; sub?: string;
+  tone?: "default" | "amber" | "emerald" | "red";
+}) => {
+  const toneClass = tone === "amber" ? "border-amber-500/40 bg-amber-500/5"
+    : tone === "emerald" ? "border-emerald-500/40 bg-emerald-500/5"
+    : tone === "red" ? "border-red-500/40 bg-red-500/5"
+    : "border-slate-700 bg-slate-800/50";
+  return (
+    <div className={"rounded-xl border p-4 " + toneClass}>
+      <div className="text-xs text-slate-400">{label}</div>
+      <div className="text-2xl font-bold text-white mt-1">{value}</div>
+      {sub && <div className="text-[11px] text-slate-500 mt-1">{sub}</div>}
     </div>
   );
 };
