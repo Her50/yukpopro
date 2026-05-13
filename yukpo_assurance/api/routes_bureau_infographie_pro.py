@@ -2461,10 +2461,15 @@ Organisation : {profil.get("nom_organisation", "(non précisée)")}
 Retourne UNIQUEMENT le JSON, sans markdown ni préambule."""
 
     try:
+        # Sonnet : orchestrer = analyser brief + médias + sélectionner gabarit
+        # optimal + curseurs + raisonnement design. Haiku échouait sur cas
+        # ambigus (brief vague, médias multiples) en choisissant un gabarit
+        # générique. Coût ~3× supérieur acceptable pour orchestrer Phase 1
+        # qui détermine TOUT le rendu en aval.
         rep = await ia_client.appeler(
             prompt=prompt, mode=ModeIA.ANALYSE,
             json_attendu=True,
-            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
         )
     except Exception as e:
         logger.error(f"[Designer Pro/Orchestrer] LLM échoué : {e}")
@@ -3110,6 +3115,8 @@ async def geometric_placement(
         from modules.bureau.llm_placement import analyser_design_tokens
         tokens_obj = None
         try:
+            # Sonnet pour DesignTokens — Haiku trop limité pour raisonnement
+            # design (harmonie palette + font pair sémantique + registre).
             tokens_obj, usage_tokens = await analyser_design_tokens(
                 brief=demande.brief,
                 page_w_mm=demande.page_w_mm,
@@ -3118,7 +3125,7 @@ async def geometric_placement(
                 brand_kit=demande.brand_kit,
                 langue=demande.langue,
                 inspiration=demande.inspiration,
-                modele="haiku",
+                modele="sonnet",
             )
             if usage_tokens.get("tokens_in") or usage_tokens.get("tokens_out"):
                 usages_llm.append({**usage_tokens, "etape": "design_tokens"})

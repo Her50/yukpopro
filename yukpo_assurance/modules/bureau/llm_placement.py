@@ -494,14 +494,27 @@ async def analyser_design_tokens(
     brand_kit: Optional[dict] = None,
     langue: str = "fr",
     inspiration: Optional[str] = None,
-    modele: str = "haiku",
+    modele: str = "sonnet",
 ) -> tuple[Optional[DesignTokens], dict]:
     """
     Phase 0 — Analyse préalable qui produit le DesignTokens à injecter dans
     la phase de placement.
 
     Retourne (tokens, usage_llm) — le caller débite usage via debiter_llm.
-    Modèle par défaut : Haiku (analyse rapide ~600 tokens out, marge respectée).
+
+    Choix modèle (par ordre de qualité, attention au coût) :
+      - 'opus'   : projets très haut de gamme (faire-part luxe sur-mesure,
+                   livret 16p+ mémoire technique, branding institutionnel).
+                   Raisonnement design poussé. Fallback GPT-4.1.
+      - 'sonnet' (DÉFAUT) : équilibre coût/qualité. Couvre 95% des cas
+                   (cartes, flyers, brochures, faire-parts standard, affiches).
+                   Décisions design fiables (palette harmonique, font pair
+                   sémantique, registre approprié). Fallback GPT-4.1-mini.
+      - 'haiku'  : cas simples uniquement (post réseau social mono-couleur,
+                   visuel utilitaire interne). Raisonnement design limité —
+                   risque de palette banale ou font pair inadapté. Fallback
+                   GPT-4.1-nano. À utiliser pour économie sur volume élevé
+                   de visuels triviaux.
     """
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
@@ -509,7 +522,7 @@ async def analyser_design_tokens(
         "sonnet": ModelePrioritaire.CLAUDE_SONNET,
         "opus":   ModelePrioritaire.CLAUDE_OPUS,
         "haiku":  ModelePrioritaire.CLAUDE_HAIKU,
-    }.get(modele, ModelePrioritaire.CLAUDE_HAIKU)
+    }.get(modele, ModelePrioritaire.CLAUDE_SONNET)
 
     info_l = _LANGUE_INFOS.get(langue, _LANGUE_INFOS["fr"])
     medias_str = json.dumps(medias or [], ensure_ascii=False)[:2000]
@@ -1030,7 +1043,7 @@ async def generer_visuel_avec_revision(
     max_iterations: int = 2,
     score_seuil_ok: float = 7.5,
     avec_design_tokens: bool = True,
-    modele_tokens: str = "haiku",
+    modele_tokens: str = "sonnet",
 ) -> tuple[Optional[PlacementPlan], bytes, list[dict], list[dict]]:
     """
     Pipeline complet : (Phase 0 tokens) → Phase 1 placement → Phase 2 rendu

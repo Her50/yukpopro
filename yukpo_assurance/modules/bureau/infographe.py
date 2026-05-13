@@ -586,13 +586,16 @@ Catégorie : {gabarit_info.get('categorie', 'print')}{hint_ligne}
 
 Retourne UNIQUEMENT le JSON, sans commentaire ni markdown."""
 
-    # Forcer Haiku 4.5 — la spec est du JSON structuré, Haiku est ~12× moins
-    # cher que Sonnet/GPT-4o sans perte de qualité perceptible sur ce format.
+    # Sonnet : la spec visuelle (titre, palette, layout, prompts d'images,
+    # composition) demande RAISONNEMENT DESIGN, pas juste du JSON formatting.
+    # Haiku produit des palettes banales et des layouts génériques. Le surcoût
+    # ~3× vs Haiku (~$0.005/visuel) est négligeable vs la valeur perçue
+    # (palette harmonique + composition pertinente vs brief).
     reponse = await ia_client.appeler(
         prompt=prompt,
         mode=ModeIA.REDACTION,  # temp 0.4 — équilibre créativité / JSON fiable
         json_attendu=True,
-        forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+        forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
     )
 
     try:

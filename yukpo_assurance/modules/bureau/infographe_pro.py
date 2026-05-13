@@ -2150,15 +2150,17 @@ Note pour les slots image :
 
 Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
 
-    # On force Haiku 4.5 pour cette étape : la sortie est du JSON structuré
-    # avec contenus prédéfinis (titres, listes, prompts d'images), pas du
-    # raisonnement complexe → Haiku suffit largement et est ~12× moins cher
-    # que Sonnet/GPT-4o sans perte de qualité perceptible.
+    # Sonnet : spec multi-page livret (titres, structure, prompts images
+    # cohérents entre pages) demande raisonnement design + cohérence
+    # éditoriale. Haiku produit des contenus génériques répétitifs et des
+    # palettes/typo banales sur livret de 8+ pages. Surcoût ~3× acceptable
+    # pour la qualité éditoriale (un livret = produit haut de gamme par
+    # nature → l'économie LLM ne se voit pas, la médiocrité visuelle si).
     reponse = await ia_client.appeler(
         prompt=prompt,
         mode=ModeIA.REDACTION,
         json_attendu=True,
-        forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+        forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
     )
     try:
         data = json.loads(reponse.contenu)
