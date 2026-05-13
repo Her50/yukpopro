@@ -163,10 +163,11 @@ async def generer_site_endpoint(
         logger.error(f"[Sites/generer] LLM spec échec user={current_user.user_id}: {e}")
         raise HTTPException(500, f"Erreur LLM : {str(e)[:200]}")
 
-    # 2. Images IA (best-effort)
+    # 2. Images IA + auto-pickup Brand LoRA org (Phase C.5) — best-effort
     if req.generer_images:
         try:
-            spec = await enrichir_images_site(spec)
+            compagnie_id = getattr(current_user, "compagnie_id", None)
+            spec = await enrichir_images_site(spec, compagnie_id=compagnie_id)
         except Exception as e:
             logger.warning(f"[Sites/generer] images échec : {e}")
 
@@ -295,7 +296,8 @@ async def publier_site_endpoint(
             503, "NETLIFY_API_TOKEN non configuré côté serveur.",
         )
 
-    # Reconstitue la SiteSpec à partir des SitePageDB
+    # Reconstitue la SiteSpec à partir des SitePageDB (langue principale)
+    # + récupère les pages traduites (Phase C4) groupées par langue.
     pages_db = (await db.execute(
         select(SitePageDB).where(SitePageDB.site_id == site.id)
                           .order_by(SitePageDB.ordre)
@@ -303,7 +305,13 @@ async def publier_site_endpoint(
     if not pages_db:
         raise HTTPException(400, "Site sans pages — relancer la génération")
 
-    pages_dict = {p.type: p.contenu_json for p in pages_db}
+    pages_dict = {}
+    pages_par_langue: dict[str, dict] = {}
+    for p in pages_db:
+        if p.langue == site.langue_principale:
+            pages_dict[p.type] = p.contenu_json
+        else:
+            pages_par_langue.setdefault(p.langue, {})[p.type] = p.contenu_json
     articles_db = (await db.execute(
         select(SiteArticleDB).where(SiteArticleDB.site_id == site.id)
                               .where(SiteArticleDB.publie.is_(True))
@@ -344,6 +352,7 @@ async def publier_site_endpoint(
         brand_kit=site.brand_kit_json,
         url_public=url_public_pressenti,
         articles=articles_data,
+        pages_par_langue=pages_par_langue or None,
     )
 
     # Deploy
@@ -620,6 +629,141 @@ async def generer_article(
         "slug_article": article.slug, "titre": article.titre,
         "publie": article.publie,
         "publie_le": article.publie_le.isoformat() if article.publie_le else None,
+    }
+
+
+class TraduirePageRequest(BaseModel):
+    langues: list[str] = Field(
+        ..., min_length=1, max_length=10,
+        description="Codes ISO 639-1 cibles : ['en', 'ar', 'wo', 'douala']",
+    )
+    confirmer_cout: bool = Field(default=False)
+
+
+@router.post(
+    "/sites/{slug}/pages/{type}/traduire",
+    summary="Phase C4 — Traduit une page vers N langues (crée des entrées SitePageDB par langue)",
+)
+async def traduire_page(
+    req: TraduirePageRequest,
+    slug: str = Path(..., min_length=3, max_length=60),
+    type: str = Path(..., max_length=32),
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Pour chaque langue cible : LLM Sonnet traduit le contenu_json de la
+    page (en préservant la structure JSON + les image_url déjà générées)
+    et crée une nouvelle entrée SitePageDB avec `langue=<cible>`.
+
+    Les URLs sur le site publié deviennent : /en/services, /ar/الخدمات, etc.
+    """
+    from api.routes_pro_generateurs import _pre_check_credits
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    if not req.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        cout = estimer_cout_module("site_traduction_page",
+                                    multiplicateur=len(req.langues))
+        v = await advisor.evaluer(current_user.user_id, cout,
+                                   module="site_traduction_page")
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
+    site = await _verifier_site_ownership(slug, current_user.user_id, db)
+    page_source = (await db.execute(
+        select(SitePageDB)
+        .where(SitePageDB.site_id == site.id)
+        .where(SitePageDB.type == type)
+        .where(SitePageDB.langue == site.langue_principale)
+    )).scalar_one_or_none()
+    if not page_source:
+        raise HTTPException(404, f"Page {type} introuvable (langue principale)")
+
+    from core.ia_client import ia_client, ModeIA
+    import re as _re
+
+    traductions = {}
+    erreurs = []
+    for langue in req.langues:
+        langue = langue.lower().strip()
+        if langue == site.langue_principale:
+            continue
+        # Sauter si déjà traduite
+        existante = (await db.execute(
+            select(SitePageDB)
+            .where(SitePageDB.site_id == site.id)
+            .where(SitePageDB.type == type)
+            .where(SitePageDB.langue == langue)
+        )).scalar_one_or_none()
+        if existante:
+            traductions[langue] = "existante"
+            continue
+
+        prompt_systeme = (
+            f"Tu reçois une SPEC JSON d'une page web (texte FR) + une langue "
+            f"cible (code ISO {langue}). Tu renvoies la même SPEC JSON avec "
+            f"TOUS les textes traduits dans la langue cible. Préserve : "
+            f"  • toutes les clés JSON (ne pas renommer)\n"
+            f"  • toutes les URLs (cta_url, image_url, _image_url, slugs)\n"
+            f"  • tous les codes/IDs/icônes émoji\n"
+            f"Traduis UNIQUEMENT les valeurs texte humaines (titres, "
+            f"descriptions, labels, bios, contenu_md). Pas de texte avant/après. "
+            f"JSON strict uniquement."
+        )
+        prompt_user = (
+            f"SPEC FR :\n{json.dumps(page_source.contenu_json, ensure_ascii=False)}\n\n"
+            f"Traduis vers : {langue}"
+        )
+        try:
+            rep = await ia_client.appeler(
+                prompt=prompt_user, systeme=prompt_systeme,
+                mode=ModeIA.REDACTION, max_tokens_override=8000,
+                json_attendu=True, utiliser_cache=False,
+            )
+            texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
+            m = _re.search(r"\{[\s\S]*\}", texte)
+            if not m:
+                raise ValueError("LLM n'a pas produit de JSON parseable")
+            spec_traduite = json.loads(m.group(0))
+
+            nouvelle_page = SitePageDB(
+                site_id=site.id, type=type,
+                slug_page=page_source.slug_page,
+                titre_seo=(spec_traduite.get("titre_seo") or "")[:120],
+                description_seo=(spec_traduite.get("description_seo") or "")[:200],
+                contenu_json=spec_traduite,
+                ordre=page_source.ordre,
+                langue=langue, publiee=True,
+            )
+            db.add(nouvelle_page)
+            traductions[langue] = "ok"
+
+            try:
+                from modules.bureau.service_credits_bureau import debiter_llm_unifie
+                await debiter_llm_unifie(
+                    user_id=current_user.user_id,
+                    modele=getattr(rep, "modele_utilise", "claude-sonnet-4-6"),
+                    tokens_input=int(getattr(rep, "tokens_input", 0) or 0),
+                    tokens_output=int(getattr(rep, "tokens_output", 0) or 0),
+                    module="sites_traduction",
+                )
+            except Exception:
+                pass
+        except Exception as e:
+            logger.warning(f"[Sites/traduire] {type} → {langue} échec : {e}")
+            erreurs.append({"langue": langue, "erreur": str(e)[:200]})
+
+    # Maj langues_actives_json du site
+    langues_actuelles = set(site.langues_actives_json or [site.langue_principale])
+    langues_actuelles.update(k for k, v in traductions.items() if v == "ok")
+    site.langues_actives_json = sorted(langues_actuelles)
+    site.derniere_modif = datetime.utcnow()
+    await db.commit()
+
+    return {
+        "ok": True, "type": type,
+        "traductions": traductions, "erreurs": erreurs,
+        "langues_actives_site": site.langues_actives_json,
     }
 
 

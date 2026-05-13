@@ -229,14 +229,54 @@ async def generer_specification_site(
 
 # ─── Génération des hero images IA (par page) ────────────────────────────────
 
-async def enrichir_images_site(spec: dict) -> dict:
+async def _resolve_brand_lora(compagnie_id: Optional[int]) -> tuple[Optional[str], Optional[str]]:
+    """Phase C.5 — Retourne (lora_url, trigger_word) du LoRA actif de la compagnie.
+
+    Si plusieurs LoRA sont actifs `statut=ready` pour la même compagnie,
+    on prend le plus récent. Retourne (None, None) si aucun ou erreur.
+    """
+    if not compagnie_id:
+        return None, None
+    try:
+        from sqlalchemy import desc as _desc, select as _select
+        from core.database import BrandLoraDB, async_session_maker
+        async with async_session_maker() as db:
+            row = (await db.execute(
+                _select(BrandLoraDB)
+                .where(BrandLoraDB.compagnie_id == int(compagnie_id))
+                .where(BrandLoraDB.statut == "ready")
+                .where(BrandLoraDB.actif.is_(True))
+                .order_by(_desc(BrandLoraDB.training_fini))
+            )).scalars().first()
+            if row and row.lora_url:
+                return row.lora_url, row.trigger_word
+    except Exception as e:
+        logger.debug(f"[Site/brand-lora] resolve échec : {e}")
+    return None, None
+
+
+async def enrichir_images_site(
+    spec: dict, *, compagnie_id: Optional[int] = None,
+) -> dict:
     """Pour chaque page avec un `image_prompt`, génère une hero image
     photoréaliste via fal.ai et stocke l'URL data-uri dans `_image_url`.
 
-    Modifie `spec` in-place et retourne le même dict. Non bloquant : si
-    une génération échoue, on log warning et on continue.
+    Phase C.5 — auto-pickup du Brand LoRA actif de la compagnie : si la
+    compagnie a un `BrandLoraDB.statut=ready`, son LoRA est injecté
+    automatiquement dans toutes les générations d'images du site →
+    cohérence brand parfaite sur tout le mini-site.
+
+    Modifie `spec` in-place et retourne le même dict. Non bloquant.
     """
     from modules.bureau import image_gen as _ig
+
+    # Phase C.5 — résolution Brand LoRA org
+    brand_lora_url, trigger_word = await _resolve_brand_lora(compagnie_id)
+    if brand_lora_url:
+        logger.info(
+            f"[Site/brand-lora] LoRA actif pour compagnie={compagnie_id}, "
+            f"trigger='{trigger_word}' — injecté dans toutes les hero images"
+        )
 
     pages = spec.get("pages") or {}
     for type_page, page_spec in pages.items():
@@ -245,10 +285,16 @@ async def enrichir_images_site(spec: dict) -> dict:
         hero = page_spec.get("hero") or {}
         prompt = hero.get("image_prompt")
         if prompt and not hero.get("_image_url"):
+            # Préfixe trigger_word au prompt pour activer le LoRA brand
+            prompt_final = (
+                f"{trigger_word} {prompt}" if trigger_word else prompt
+            )
             try:
                 png = await _ig.generer_image(
-                    prompt=prompt, mode="premium",
+                    prompt=prompt_final, mode="premium",
                     format_="landscape_16_9", timeout_s=120.0,
+                    brand_lora_url=brand_lora_url,
+                    brand_lora_scale=0.85 if brand_lora_url else 0.0,
                 )
                 if png:
                     hero["_image_url"] = (
@@ -662,14 +708,23 @@ def construire_arborescence_zip(
     brand_kit: Optional[dict],
     url_public: str,
     articles: Optional[list[dict]] = None,
+    pages_par_langue: Optional[dict[str, dict]] = None,
 ) -> dict[str, bytes]:
     """Retourne {path_dans_zip: bytes} pour TOUTES les pages du site +
     sitemap.xml + robots.txt. Pivot pour publish multi-fichiers Netlify.
+
+    Args:
+        spec              : SiteSpec en langue principale (legacy compat)
+        pages_par_langue  : {langue_code: {type_page: contenu_json}} —
+                            Phase C4 multi-langue. Si fourni, les pages
+                            traduites sont déployées sous /<langue>/...
+                            ex. /en/services/index.html
     """
     files: dict[str, bytes] = {}
     pages = (spec.get("pages") or {})
     articles = articles or []
 
+    # 1. Pages en langue principale (racine /, /services, /equipe…)
     for type_page in pages.keys():
         html = construire_html_page(
             spec, type_page,
@@ -683,7 +738,26 @@ def construire_arborescence_zip(
         else:
             files[f"{path_url}/index.html"] = html.encode("utf-8")
 
-    # Articles de blog publiés
+    # 2. Pages traduites (Phase C4) — sous /<langue>/<slug>
+    if pages_par_langue:
+        for langue, pages_lang in pages_par_langue.items():
+            if not pages_lang or langue == spec.get("langue_principale"):
+                continue
+            spec_lang = {**spec, "pages": pages_lang}
+            for type_page in pages_lang.keys():
+                html = construire_html_page(
+                    spec_lang, type_page,
+                    brand_kit=brand_kit, slug_site=slug_site, articles=articles,
+                )
+                if not html:
+                    continue
+                path_url = _SLUGS_DEFAUT.get(type_page, type_page)
+                if type_page == "home":
+                    files[f"{langue}/index.html"] = html.encode("utf-8")
+                else:
+                    files[f"{langue}/{path_url}/index.html"] = html.encode("utf-8")
+
+    # 3. Articles de blog publiés
     for a in articles:
         if a.get("publie"):
             article_html = construire_html_article(spec, a,

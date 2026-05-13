@@ -129,6 +129,151 @@ class MajFormulaireRequest(BaseModel):
     questions: list[QuestionFormulaireIn]
 
 
+# ─── Phase E1 — Génération étude + formulaire par PROMPT ────────────────────
+
+
+class GenererParPromptRequest(BaseModel):
+    """Phase E1 — Body pour /enquetes/generer-par-prompt."""
+    brief: str
+    nb_questions_cible: Optional[int] = None
+    profil_cible: Optional[str] = None
+    langue: str = "fr"
+    confirmer_cout: bool = False
+
+
+@router.post(
+    "/generer-par-prompt",
+    summary="Phase E1 — Génère une étude+formulaire complet depuis un brief en langage naturel",
+)
+async def generer_par_prompt(
+    payload: GenererParPromptRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Pipeline : Sonnet compose étude + formulaire XLSForm-class complet
+    (10-40 questions structurées avec relevant/constraint) en un seul appel.
+
+    Retourne {etude_id, formulaire_id, lien_public, lien_xlsform_download,
+    analyses_suggerees}.
+    """
+    await fact.precheck(current_user.user_id)
+    await charger_etudes_user(current_user.user_id)
+
+    # CostAdvisor préventif (analyse coûteuse : LLM 12k+ tokens)
+    if not payload.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        cout = estimer_cout_module(
+            "enquete_generer",
+            multiplicateur=(payload.nb_questions_cible or 20) / 20.0,
+        )
+        v = await advisor.evaluer(
+            current_user.user_id, cout, module="enquete_generer",
+        )
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
+    from modules.enquetes.enquete_ai import generer_etude_et_formulaire_par_prompt
+    try:
+        etude, formulaire, usages = await generer_etude_et_formulaire_par_prompt(
+            brief=payload.brief,
+            nb_questions_cible=payload.nb_questions_cible,
+            profil_cible=payload.profil_cible,
+            langue=payload.langue,
+        )
+    except Exception as e:
+        logger.error(f"[Enquetes/prompt] LLM échec user={current_user.user_id}: {e}")
+        raise HTTPException(500, f"Erreur génération : {str(e)[:200]}")
+
+    # Persistance + débit LLM
+    try:
+        await sauvegarder_etude(current_user.user_id, etude)
+    except Exception as e:
+        logger.warning(f"[Enquetes/prompt] sauvegarde non bloquante : {e}")
+
+    try:
+        from modules.bureau.service_credits_bureau import debiter_llm_unifie
+        for u in usages:
+            await debiter_llm_unifie(
+                user_id=current_user.user_id,
+                modele=u.get("modele", "claude-sonnet-4-6"),
+                tokens_input=int(u.get("tokens_in", 0)),
+                tokens_output=int(u.get("tokens_out", 0)),
+                module="enquetes_prompt",
+            )
+    except Exception as _e:
+        logger.debug(f"[Enquetes/prompt] débit LLM non bloquant : {_e}")
+
+    return {
+        "ok": True,
+        "etude_id": etude.etude_id,
+        "formulaire_id": formulaire.formulaire_id,
+        "titre": etude.titre,
+        "nb_questions": len(formulaire.questions),
+        "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}",
+        "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/xlsform.xlsx",
+        "analyses_suggerees": getattr(etude, "analyses_suggerees", []),
+    }
+
+
+# ─── Phase E4 — Analyse à la demande par PROMPT ──────────────────────────────
+
+
+class AnalyserParPromptRequest(BaseModel):
+    prompt: str
+    confirmer_cout: bool = False
+
+
+@router.post(
+    "/{etude_id}/analyser-prompt",
+    summary="Phase E4 — Analyse conversationnelle (LLM plan + pandas + charts + synthèse)",
+)
+async def analyser_par_prompt_endpoint(
+    etude_id: str,
+    payload: AnalyserParPromptRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Pipeline : Sonnet compose un plan JSON d'opérations pandas
+    (filter/groupby/agg/chart/llm_synthese), backend exécute en sandbox,
+    génère graphiques PNG + synthèse Sonnet finale.
+
+    Retourne {titre_analyse, tableaux, graphiques, synthese_md, plan_execute}.
+    """
+    await fact.precheck(current_user.user_id)
+    await charger_etudes_user(current_user.user_id)
+
+    # CostAdvisor — coût varie selon complexité (simple vs complexe)
+    if not payload.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        # Estimation par défaut "complexe" (sécurité — on préfère que le
+        # user confirme une analyse cher plutôt que d'être surpris)
+        cout = estimer_cout_module("enquete_analyse_complexe")
+        v = await advisor.evaluer(
+            current_user.user_id, cout, module="enquete_analyse_complexe",
+        )
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
+    from modules.enquetes.enquete_ai import analyser_par_prompt
+    try:
+        resultat = await analyser_par_prompt(etude_id, payload.prompt)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    except Exception as e:
+        logger.error(f"[Enquetes/analyse-prompt] échec user={current_user.user_id}: {e}")
+        raise HTTPException(500, f"Erreur analyse : {str(e)[:200]}")
+
+    # Débit forfait existant `pdf_generation` (sémantique : artefact analytique)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "pdf_generation",
+            module="enquetes_analyse_prompt",
+        )
+    except Exception:
+        pass
+
+    return {"ok": True, **resultat}
+
+
 # ─── Études — CRUD ────────────────────────────────────────────────────────────
 
 @router.post("/", summary="Créer une nouvelle étude")

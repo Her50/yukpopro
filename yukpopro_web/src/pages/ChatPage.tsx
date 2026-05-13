@@ -386,6 +386,42 @@ export const ChatPage = () => {
           }
         }
 
+        // Phase E1 — détection génération de formulaire/enquête AVANT site multi-pages
+        // (un brief "génère un questionnaire/sondage/formulaire" ne doit pas
+        // capter dans site_multi).
+        const enqueteMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|monte)[^.]*\b(formulaire|questionnaire|sondage|enqu[êe]te|étude|sondage|kobo|xlsform|collecte\s*de\s*donn[ée]es)\b|\b(formulaire|questionnaire|sondage|enqu[êe]te)\s*(de\s*)?(satisfaction|client|audit|conformit[ée]|terrain|sant[ée]|march[ée]|opinion)\b/i.test(txt);
+        if (enqueteMatch) {
+          try {
+            updateLastAssistantMessage(
+              "📋 Génération de votre formulaire / étude en cours… (~20-40s)\n_LLM Sonnet compose 15-40 questions XLSForm + dictionnaire variables._",
+              null,
+            );
+            const { data } = await http.post(
+              "/enquetes/generer-par-prompt",
+              { brief: content, langue: "fr" },
+              { timeout: 180_000 },
+            );
+            updateLastAssistantMessage(
+              `✓ **${data.titre}** — ${data.nb_questions} questions générées.\n\n` +
+              `🔗 **Lien public de collecte** : copie/colle ce lien pour récolter des réponses :\n` +
+              `\`${window.location.origin}${data.lien_public}\`\n\n` +
+              `📊 [Voir l'étude et analyser les réponses](/enquetes/${data.etude_id})\n` +
+              `📥 [Télécharger XLSForm](${data.lien_xlsform_download})\n\n` +
+              (data.analyses_suggerees?.length
+                ? `_Analyses suggérées une fois les réponses collectées :_\n` +
+                  data.analyses_suggerees.map((a: string) => `- ${a}`).join("\n")
+                : ""),
+              null,
+            );
+            toast.success("Formulaire prêt — partagez le lien public");
+            return;
+          } catch (e: any) {
+            const detail = e?.response?.data?.detail || e?.message || "inconnue";
+            updateLastAssistantMessage(`❌ Erreur génération formulaire : ${String(detail).slice(0, 200)}`, null);
+            return;
+          }
+        }
+
         // Phase C — détection site multi-pages AVANT landing single-page
         // (l'utilisateur dit "site 5 pages" → on prend site_multi, pas landing)
         const siteMultiMatch = /(site\s*(web\s*)?(multi[-\s]?pages?|vitrine|complet|\d+\s*pages?)|mini[-\s]?site|site\s*pro|cr[ée][ée]?\s*(un|le)?\s*site|g[ée]n[èe]re\s+un\s+site)/i.test(txt)
