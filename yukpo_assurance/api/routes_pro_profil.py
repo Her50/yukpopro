@@ -539,24 +539,21 @@ async def diagnostic_marches(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Test à blanc des 3 sources d'appels d'offres + état crédits.
-    Aucun débit, aucune persistance — utile pour comprendre pourquoi
-    la liste est vide ou erratique.
+    Test à blanc Serper avec une query simple + état crédits + termes LLM.
+    Aucun débit, aucune persistance — utile pour diagnostiquer pourquoi
+    la liste de marchés est vide en prod. Expose le body brut Serper si
+    erreur HTTP (pour révéler le motif exact : auth, quota, paramètres…).
     """
-    import os, asyncio as _asyncio
+    import os, httpx
     from modules.pro.service_profil import get_or_create
-    from modules.pro.scheduler_marches import (
-        _fetch_serper_marches, _fetch_dgmarket, _fetch_ungm,
-        _mots_cles_marches,
-    )
+    from modules.pro.scheduler_marches import _extraire_mots_cles_marches_llm
     from modules.pro.scheduler_emploi import _info_pays
 
     profil, _ = await get_or_create(current_user.user_id, db)
     pays = (getattr(profil, "pays", None) or "CM").upper()
     info = _info_pays(pays)
-    termes = _mots_cles_marches(profil)
 
-    # Solde crédits suffisant ?
+    # Solde crédits Yukpo
     credits_ok = True
     credits_solde = None
     credits_restants_yukpo = None
@@ -564,46 +561,65 @@ async def diagnostic_marches(
         from modules.pro.service_credits import solde_utilisateur, MULTIPLICATEUR_YUKPO
         s = await solde_utilisateur(current_user.user_id, db)
         credits_restants_yukpo = s.get("credits_restants", 0)
-        # Forfait recherche = 2 FCFA × multiplicateur
         cout_credits = 2.0 * MULTIPLICATEUR_YUKPO
         credits_ok = credits_restants_yukpo >= cout_credits
         credits_solde = s.get("credits_en_fcfa_equiv", 0)
     except Exception as e:
         logger.debug(f"[Diagnostic marchés] solde indisponible : {e}")
 
-    # Test des 3 sources en parallèle (try/except chacun)
-    serper_key = bool(os.getenv("SERPER_API_KEY") or os.getenv("SERPAPI_KEY"))
-    serper_res, dgm_res, ungm_res = await _asyncio.gather(
-        _fetch_serper_marches(termes, pays, info) if serper_key else _vide(),
-        _fetch_dgmarket(pays),
-        _fetch_ungm(termes),
-        return_exceptions=True,
-    )
+    # Termes LLM-derived (sans appel Serper)
+    termes_fr, terme_en = await _extraire_mots_cles_marches_llm(profil)
 
-    def _stat(name: str, res) -> dict:
-        if isinstance(res, Exception):
-            return {"source": name, "ok": False, "nb": 0, "erreur": str(res)[:200]}
-        return {"source": name, "ok": True, "nb": len(res),
-                "exemples": [r.get("titre", "")[:80] for r in res[:3]]}
+    # Test Serper DIRECT (1 seul appel court) + body exposé si erreur
+    api_key = os.getenv("SERPER_API_KEY", "") or os.getenv("SERPAPI_KEY", "")
+    key_digest = (api_key[:4] + "…" + api_key[-4:]) if len(api_key) >= 8 else "(absente)"
+    test_query = f"appel d'offres {termes_fr[0] if termes_fr else 'audit'} {info['nom']}"
+    gl = (info.get("gl") or "us").lower()
+    hl = (info.get("hl") or "fr").lower()
+
+    serper_diag: dict = {
+        "query":   test_query,
+        "gl":      gl,
+        "hl":      hl,
+        "api_key": key_digest,
+    }
+    if not api_key or api_key.startswith("VOTRE"):
+        serper_diag["status"] = "missing-key"
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                resp = await client.post(
+                    "https://google.serper.dev/search",
+                    json={"q": test_query, "gl": gl, "hl": hl, "num": 5},
+                    headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+                )
+            serper_diag["http_status"] = resp.status_code
+            if resp.status_code == 200:
+                data = resp.json() or {}
+                organic = data.get("organic", []) or []
+                serper_diag["nb_organic"] = len(organic)
+                serper_diag["exemples"] = [r.get("title", "")[:80] for r in organic[:3]]
+                # Echantillons de bruit pour vérifier qualité
+                serper_diag["sample_first"] = organic[0] if organic else None
+            else:
+                serper_diag["body"] = (resp.text or "")[:800]
+        except Exception as e:
+            serper_diag["network_error"] = str(e)[:300]
 
     return {
         "user_id": current_user.user_id,
         "pays":    pays,
-        "termes":  termes,
-        "credits_ok":   credits_ok,
+        "profil_metier": getattr(profil, "metier", None),
+        "profil_specialite": getattr(profil, "specialite", None),
+        "profil_secteur_activite": getattr(profil, "secteur_activite", None),
+        "termes_llm_fr":  termes_fr,
+        "termes_llm_en":  terme_en,
+        "credits_ok":     credits_ok,
         "credits_solde_fcfa_equivalent": credits_solde,
-        "credits_yukpo_restants": credits_restants_yukpo,
-        "cout_recherche_fcfa": 2.0,
-        "serper_api_key_configuree": serper_key,
-        "sources": [
-            _stat("Serper", serper_res),
-            _stat("dgMarket", dgm_res),
-            _stat("UNGM", ungm_res),
-        ],
-        "total_avis_potentiels": sum(
-            (s.get("nb", 0) for s in [_stat("S", serper_res), _stat("D", dgm_res), _stat("U", ungm_res)])
-        ),
-        "marches_actuellement_en_db": len(profil.marches_publics_recents or []),
+        "credits_yukpo_restants":        credits_restants_yukpo,
+        "cout_recherche_fcfa":           2.0,
+        "serper_diag":     serper_diag,
+        "marches_actuellement_en_db":    len(profil.marches_publics_recents or []),
         "derniere_recherche": (
             profil.derniere_recherche_marches.isoformat()
             if profil.derniere_recherche_marches else None
