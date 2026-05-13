@@ -500,14 +500,50 @@ export const ChatPage = () => {
             nbPages > 1
               ? `\n\n💡 *Impression recto-verso* : duplex long-edge (par défaut). Planches numérotées RECTO/VERSO en haut.`
               : "";
+
+          // Questions d'amélioration ciblées (audit Sonnet Vision côté backend).
+          // Chaque question = 2-4 propositions actionnables. On les mappe en
+          // chips SuggestionSuite cliquables — clic = proposition pré-remplie
+          // dans le textarea, l'user peut éditer ou envoyer tel quel.
+          const questionsAmel = Array.isArray(r?.questions_amelioration)
+            ? r.questions_amelioration : [];
+          const ameliorationChips: SuggestionSuite[] = [];
+          for (const q of questionsAmel) {
+            if (!q || !Array.isArray(q.propositions)) continue;
+            q.propositions.forEach((prop: string, i: number) => {
+              if (typeof prop !== "string" || !prop.trim()) return;
+              ameliorationChips.push({
+                action: `amelioration_${q.axe || "libre"}_${i}`,
+                label: prop.length > 60 ? prop.slice(0, 57) + "…" : prop,
+                prompt_suggere: prop,
+              });
+            });
+          }
+          let questionsHint = "";
+          if (questionsAmel.length > 0) {
+            const score = r?.audit_qualite?.score_qualite_sur_10;
+            const scoreStr = typeof score === "number"
+              ? ` *(audit : ${score}/10)*` : "";
+            questionsHint = `\n\n💬 **Pistes d'amélioration**${scoreStr} — clique un chip ci-dessous pour itérer :`;
+            for (const q of questionsAmel) {
+              if (q?.question) questionsHint += `\n• ${q.question}`;
+            }
+          }
+
+          const allSuggestions: SuggestionSuite[] = [
+            ...ameliorationChips,
+            ...((r.suggestions as SuggestionSuite[]) ?? []),
+          ];
+
           updateLastAssistantMessage(
             `🎨 **${label} généré${nbPages > 1 ? ` — ${nbPages} pages` : ""}.**` +
             (downloadUrl ? `\n\n📥 **[Télécharger le PDF](${downloadUrl})**` : "") +
-            versoHint,
+            versoHint +
+            questionsHint,
             null,
             fichiers.length > 0 ? fichiers : undefined,
             null, undefined,
-            (r.suggestions as SuggestionSuite[]) ?? undefined,
+            allSuggestions.length > 0 ? allSuggestions : undefined,
           );
           if (fichiers.length > 0) {
             addDocument({
