@@ -260,10 +260,18 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = ""
 
-    # ─── WhatsApp / Notifications (legacy Twilio) ─────────────────
+    # ─── WhatsApp / SMS / Notifications (Twilio) ──────────────────
+    # Stratégie : WA prioritaire pour les notifs (gratuit côté visiteur,
+    # data-light en Afrique). SMS fallback automatique si WA échoue ou
+    # numéro pas opt-in WA Business.
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
     TWILIO_WHATSAPP_NUMBER: Optional[str] = None
+    TWILIO_SMS_NUMBER: Optional[str] = None
+    # Messaging Service SID — recommandé, gère plusieurs senders + auto-
+    # failover + sender alphanumérique (Cameroun/CI/Sénégal). Si défini,
+    # prend priorité sur TWILIO_SMS_NUMBER pour les envois SMS.
+    TWILIO_MESSAGING_SERVICE_SID: Optional[str] = None
 
     # ─── Sécurité ─────────────────────────────────────────────────
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]

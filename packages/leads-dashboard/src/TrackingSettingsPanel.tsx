@@ -226,11 +226,15 @@ export const TrackingSettingsPanel = ({ http, t = _tf }: TrackingSettingsPanelPr
       <section className="bg-white rounded-xl border border-slate-200 p-5">
         <h2 className="font-semibold mb-3 flex items-center gap-2">
           <BellRing className="w-5 h-5 text-violet-600" />
-          {t("tracking.section_followup", "Auto-replies & relances email")}
+          {t("tracking.section_followup",
+             "Auto-replies & relances (WhatsApp / SMS / Email)")}
         </h2>
         <p className="text-xs text-slate-600 mb-4">
           {t("tracking.aide_followup",
-             "Variables disponibles : {nom}, {email}, {message}, {slug}.")}
+             "Variables disponibles : {nom}, {email}, {message}, {slug}. "
+             + "Envoyé en priorité par WhatsApp / SMS si le visiteur a fourni "
+             + "un téléphone — sinon par email. Sur SMS, seul le corps est "
+             + "envoyé (le sujet est ignoré, prépendé au corps).")}
         </p>
         {(["j0", "j3", "j7"] as const).map(j => (
           <FollowupBlock

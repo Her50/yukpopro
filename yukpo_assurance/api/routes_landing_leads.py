@@ -18,8 +18,14 @@ Endpoints :
 Facturation (sur le MARCHAND propriétaire du slug, JAMAIS le visiteur).
 Mapping vers forfaits EXISTANTS uniquement (pas de nouveau type) :
   • lead capturé en DB              → `client_action` (10 crédits)
-  • notif WhatsApp marchand          → `whatsapp_message` (10 crédits)
+  • notif WhatsApp/SMS marchand      → `whatsapp_message` (10 crédits)
   • notif email marchand SendGrid    → `whatsapp_message` (équiv. "envoi message")
+
+Stratégie notification (contexte africain — habitudes utilisateurs) :
+  WhatsApp (prioritaire) → SMS (fallback auto si WA échoue ou si pas de
+  fenêtre 24h Business) → Email (bonus si SendGrid configuré).
+  Le marchand ET le visiteur reçoivent prioritairement via WA/SMS quand
+  un téléphone est disponible — l'email reste un canal secondaire.
 """
 from __future__ import annotations
 
@@ -235,7 +241,13 @@ async def capturer_lead_public(
 async def _notifier_marchand(
     marchand_user_id: int, slug: str, lead: LandingLeadDB, db: AsyncSession,
 ) -> None:
-    """Envoie notif WhatsApp + email au marchand. Débit forfait par canal."""
+    """Notifie le marchand WA prioritaire + SMS fallback + email bonus.
+
+    Stratégie contexte africain : WhatsApp essayé en premier (gratuit
+    côté marchand), SMS automatique si WA échoue (numéros sans WA,
+    feature phones). Email envoyé en plus si configuré côté marchand —
+    canal secondaire pour archivage / desktop.
+    """
     res = await db.execute(
         select(UtilisateurDB).where(UtilisateurDB.id == marchand_user_id)
     )
@@ -246,7 +258,7 @@ async def _notifier_marchand(
     from modules.bureau.service_credits_bureau import debiter_forfait_unifie
 
     apercu = (lead.message or "")[:160]
-    contenu_wa = (
+    contenu_court = (
         f"🔔 Nouveau lead sur {slug}.yukpomnang.com\n\n"
         f"Nom : {lead.nom or '—'}\n"
         f"Email : {lead.email or '—'}\n"
@@ -255,27 +267,35 @@ async def _notifier_marchand(
         + f"\n\nGérer : https://yukpopro.yukpomnang.com/mes-leads"
     )
 
-    # WhatsApp si tél marchand (forfait `whatsapp_message` existant débité)
+    # 1. WA prioritaire + SMS auto-fallback (1 seul forfait débité quel que
+    #    soit le canal effectif — sémantique "envoi message marchand")
     tel = getattr(marchand, "telephone", None)
     if tel:
         try:
-            from core.notifications import envoyer_whatsapp
-            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
-            await envoyer_whatsapp(tel, contenu_wa,
-                                   metadata={"type": "landing_lead", "slug": slug})
-            await debiter_forfait_unifie(
-                marchand_user_id, "whatsapp_message", module="landing_leads",
+            from core.notifications import notifier_telephone
+            res_notif = await notifier_telephone(
+                tel, contenu_court,
+                metadata={"type": "landing_lead", "slug": slug},
+                prefer="whatsapp",
             )
+            if res_notif["canal_final"] != "none":
+                await debiter_forfait_unifie(
+                    marchand_user_id, "whatsapp_message", module="landing_leads",
+                )
+                logger.info(
+                    f"[Leads/notif] marchand={marchand_user_id} canal={res_notif['canal_final']}"
+                )
         except Exception as e:
-            logger.warning(f"[Leads/notif] WA échec user={marchand_user_id}: {e}")
+            logger.warning(f"[Leads/notif] tel échec user={marchand_user_id}: {e}")
 
-    # Email si email marchand — mapping vers `whatsapp_message` (sémantique
-    # "envoi message", évite création d'un nouveau type "email").
+    # 2. Email — BONUS uniquement (canal secondaire desktop/archivage).
+    #    Si SENDGRID_API_KEY non configuré, l'envoi est silencieusement
+    #    simulé (log only) sans erreur ni débit.
     mail = getattr(marchand, "email", None)
     if mail:
         try:
             from core.notifications import _envoyer_email  # type: ignore
-            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            from config.settings import settings as _s
             sujet = f"Nouveau lead — {slug}"
             corps = (
                 f"<h2>Nouveau lead</h2>"
@@ -289,10 +309,12 @@ async def _notifier_marchand(
                 + f'<p><a href="https://yukpopro.yukpomnang.com/mes-leads">'
                   f"Gérer dans YukpoPro</a></p>"
             )
-            await _envoyer_email(mail, corps, sujet=sujet)  # type: ignore[call-arg]
-            await debiter_forfait_unifie(
-                marchand_user_id, "whatsapp_message", module="landing_leads",
-            )
+            envoye = await _envoyer_email(mail, corps, sujet=sujet)  # type: ignore[call-arg]
+            # Débit uniquement si SendGrid actif ET envoi réel — pas en mode sim
+            if envoye and _s.SENDGRID_API_KEY:
+                await debiter_forfait_unifie(
+                    marchand_user_id, "whatsapp_message", module="landing_leads",
+                )
         except Exception as e:
             logger.warning(f"[Leads/notif] email échec user={marchand_user_id}: {e}")
 

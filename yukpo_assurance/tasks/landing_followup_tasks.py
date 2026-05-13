@@ -56,7 +56,10 @@ async def _envoyer_un_followup(
     marchand: UtilisateurDB,
     quand: str,
 ) -> bool:
-    """Envoie 1 follow-up. Retourne True si envoyé OK."""
+    """Envoie 1 follow-up. WA prioritaire si tél fourni, email sinon.
+
+    Retourne True si envoyé OK sur au moins un canal.
+    """
     if quand == "j3":
         if not settings.j3_actif or not settings.j3_sujet:
             return False
@@ -72,15 +75,45 @@ async def _envoyer_un_followup(
     else:
         return False
 
-    if not lead.email:
+    # Si ni email ni téléphone → impossible de joindre
+    if not lead.email and not lead.telephone:
         return False
 
-    from core.notifications import _envoyer_email
     from modules.bureau.service_credits_bureau import debiter_forfait_unifie
 
-    ok = await _envoyer_email(lead.email, corps, sujet=sujet)
-    if not ok:
+    envoye = False
+    # 1. WhatsApp / SMS prioritaire si téléphone fourni
+    if lead.telephone:
+        try:
+            from core.notifications import notifier_telephone
+            # SMS = pas de sujet → on prépend juste le sujet en titre
+            contenu = (f"{sujet}\n\n{corps}" if sujet else corps)[:1500]
+            res = await notifier_telephone(
+                lead.telephone, contenu,
+                metadata={"type": "followup", "quand": quand, "slug": lead.slug},
+                prefer="whatsapp",
+            )
+            if res["canal_final"] != "none":
+                envoye = True
+                logger.info(
+                    f"[Followup/{quand}] lead={lead.id} canal={res['canal_final']}"
+                )
+        except Exception as e:
+            logger.warning(f"[Followup/{quand}] tel échec lead={lead.id}: {e}")
+
+    # 2. Email — fallback si pas de tél, ou bonus si tél a marché
+    if lead.email:
+        try:
+            from core.notifications import _envoyer_email
+            ok = await _envoyer_email(lead.email, corps, sujet=sujet)
+            if ok:
+                envoye = True
+        except Exception as e:
+            logger.warning(f"[Followup/{quand}] email échec lead={lead.id}: {e}")
+
+    if not envoye:
         return False
+
     try:
         await debiter_forfait_unifie(
             marchand.id, "whatsapp_message", module="landing_followup",
@@ -195,15 +228,41 @@ async def envoyer_auto_reply_j0(
 ) -> bool:
     """Auto-reply visiteur J+0 — appelé synchrone depuis route capture.
 
-    Si settings.j0_actif, envoie le template. Le débit forfait est porté
-    par le MARCHAND propriétaire du slug (forfait whatsapp_message).
+    Priorité WhatsApp/SMS si visiteur a fourni un téléphone (contexte
+    africain). Fallback email si seulement email fourni.
     """
-    if not settings or not settings.j0_actif or not lead.email:
+    if not settings or not settings.j0_actif:
         return False
+    if not lead.email and not lead.telephone:
+        return False
+
     sujet = _interpoler(settings.j0_sujet, lead) or "Merci pour votre message"
     corps = _interpoler(settings.j0_corps, lead) or (
         "Bonjour,\n\nMerci pour votre message — nous revenons vers vous "
         "très vite.\n\nCordialement."
     )
-    from core.notifications import _envoyer_email
-    return await _envoyer_email(lead.email, corps, sujet=sujet)
+
+    envoye = False
+    # WhatsApp / SMS prioritaire
+    if lead.telephone:
+        try:
+            from core.notifications import notifier_telephone
+            contenu = (f"{sujet}\n\n{corps}" if sujet else corps)[:1500]
+            res = await notifier_telephone(
+                lead.telephone, contenu,
+                metadata={"type": "auto_reply_j0", "slug": lead.slug},
+                prefer="whatsapp",
+            )
+            if res["canal_final"] != "none":
+                envoye = True
+        except Exception as e:
+            logger.warning(f"[AutoReply/J0] tel échec lead={lead.id}: {e}")
+
+    if lead.email and not envoye:
+        try:
+            from core.notifications import _envoyer_email
+            envoye = await _envoyer_email(lead.email, corps, sujet=sujet)
+        except Exception as e:
+            logger.warning(f"[AutoReply/J0] email échec lead={lead.id}: {e}")
+
+    return envoye

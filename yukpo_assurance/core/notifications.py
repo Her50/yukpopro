@@ -219,20 +219,106 @@ class _NotificationService:
 
 
 async def _envoyer_sms(destinataire: str, contenu: str) -> bool:
-    """Envoi SMS via Twilio."""
+    """Envoi SMS via Twilio.
+
+    Préfère `TWILIO_MESSAGING_SERVICE_SID` si défini (gère plusieurs
+    senders + auto-failover + sender ID alphanumérique sur Afrique
+    francophone). Sinon utilise `TWILIO_SMS_NUMBER` (numéro unique).
+    Si aucun n'est défini → simulation log.
+    """
     from config.settings import settings
     if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
         logger.info(f"[Notif/SIM] SMS → {destinataire}: {contenu[:60]}...")
         return True
+
+    messaging_sid = getattr(settings, "TWILIO_MESSAGING_SERVICE_SID", None) or ""
+    sms_from = getattr(settings, "TWILIO_SMS_NUMBER", None) or ""
+
+    if not messaging_sid and not sms_from:
+        logger.info(f"[Notif/SIM] SMS (no sender configuré) → {destinataire}: {contenu[:60]}...")
+        return True
+
     try:
         from twilio.rest import Client
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-        sms_from = getattr(settings, "TWILIO_SMS_NUMBER", None) or "+15005550006"
-        client.messages.create(body=contenu, from_=sms_from, to=destinataire)
+        if messaging_sid:
+            msg = client.messages.create(
+                body=contenu,
+                messaging_service_sid=messaging_sid,
+                to=destinataire,
+            )
+        else:
+            msg = client.messages.create(
+                body=contenu, from_=sms_from, to=destinataire,
+            )
+        logger.info(f"[Notif] SMS envoyé SID={msg.sid} → {destinataire}")
         return True
     except Exception as e:
         logger.error(f"[Notif] Échec SMS → {destinataire}: {e}")
         return False
+
+
+async def notifier_telephone(
+    destinataire: str,
+    contenu: str,
+    *,
+    metadata: Optional[dict] = None,
+    prefer: str = "whatsapp",
+) -> dict:
+    """Envoi téléphone intelligent : WhatsApp d'abord, fallback SMS auto.
+
+    Stratégie contexte africain : WA est gratuit/data-light pour le
+    destinataire, mais peut échouer si le numéro n'a pas WhatsApp ou si
+    on est hors fenêtre 24h Business sans template approved. Le SMS
+    fallback couvre tous les feature phones et numéros sans WA.
+
+    Args:
+        destinataire : numéro E.164 (ex. "+237 6 12 34 56 78") ou
+                       déjà préfixé "whatsapp:".
+        contenu      : texte (max 1600 chars utile, sera split SMS si plus
+                       long). Pas de HTML.
+        prefer       : "whatsapp" (défaut) | "sms" | "both".
+
+    Returns:
+        dict {wa_ok, sms_ok, canal_final} — canal_final = "whatsapp" si
+        WA OK, sinon "sms" si SMS OK, sinon "none".
+    """
+    metadata = metadata or {}
+    # Normalisation : strip espaces, accepter format avec/sans "whatsapp:"
+    num_brut = destinataire.replace("whatsapp:", "").strip()
+    if not num_brut:
+        return {"wa_ok": False, "sms_ok": False, "canal_final": "none"}
+
+    wa_ok = False
+    sms_ok = False
+
+    if prefer in ("whatsapp", "both"):
+        try:
+            wa_ok = await envoyer_whatsapp(num_brut, contenu, metadata=metadata)
+        except Exception as e:
+            logger.warning(f"[Notif] WA exception → {num_brut}: {e}")
+            wa_ok = False
+
+    # SMS si WA a échoué OU si on veut both/sms-only
+    if not wa_ok and prefer != "whatsapp" or prefer == "both":
+        try:
+            sms_ok = await _envoyer_sms(num_brut, contenu)
+        except Exception as e:
+            logger.warning(f"[Notif] SMS exception → {num_brut}: {e}")
+            sms_ok = False
+    elif not wa_ok and prefer == "whatsapp":
+        # Fallback auto SMS si WA a échoué (pas de message livré au user)
+        try:
+            sms_ok = await _envoyer_sms(num_brut, contenu)
+        except Exception as e:
+            logger.warning(f"[Notif] SMS fallback exception → {num_brut}: {e}")
+            sms_ok = False
+
+    canal_final = (
+        "whatsapp" if wa_ok
+        else ("sms" if sms_ok else "none")
+    )
+    return {"wa_ok": wa_ok, "sms_ok": sms_ok, "canal_final": canal_final}
 
 
 async def _envoyer_email(

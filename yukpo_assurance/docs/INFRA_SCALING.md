@@ -253,17 +253,44 @@ Tant que tu n'as pas fait l'étape 2, le code R2 reste inactif mais ne casse rie
 
 ---
 
-## 5. Landing publication Netlify + SendGrid (Phase A Sprint 1)
+## 5. Landing publication Netlify + Notifications WA/SMS/Email (Phase A Sprint 1)
 
 ### Pourquoi
 
 - Module `modules/pro/landing_publisher.py` déploie les landings HTML
   générées par YukpoPro/YukpoSec vers Netlify via leur API officielle,
   sous-domaine `<slug>.yukpomnang.com`.
-- Module SendGrid intégré (`core/notifications._envoyer_email`) pour
-  notifier les marchands à chaque lead capturé via le formulaire public.
-- Sans ces secrets, l'endpoint `/api/v1/pro/landing-page/publier` renvoie
-  503 et les notifications email tombent en mode simulé (log only).
+- **Stratégie notification (contexte africain) : WhatsApp prioritaire,
+  SMS Twilio en fallback automatique, email SendGrid en bonus optionnel.**
+  Le helper `core/notifications.notifier_telephone()` tente WA d'abord
+  et bascule sur SMS si le destinataire n'a pas WhatsApp ou si la
+  fenêtre 24h Business n'est pas ouverte.
+- Sans `NETLIFY_API_TOKEN`, l'endpoint `/api/v1/pro/landing-page/publier`
+  renvoie 503. Sans `SENDGRID_API_KEY`, les emails sont simulés (log) —
+  pas bloquant car WhatsApp/SMS couvrent les notifs marchand + visiteur.
+
+### Configuration Twilio recommandée pour SMS (en plus du WA existant)
+
+Twilio WA est déjà configuré (`TWILIO_WHATSAPP_NUMBER`). Pour activer
+le fallback SMS automatique :
+
+**Option A — Messaging Service (recommandée)** :
+1. Console Twilio → Messaging → Services → Create Messaging Service
+2. Friendly name : `YukpoPro Notifications`
+3. Use case : "Notify my users"
+4. Add Senders :
+   - Alphanumeric Sender ID `YukpoPro` (gratuit, supporté Cameroun /
+     CI / Sénégal / Burkina / Mali — SMS one-way, parfait pour notifs)
+   - OU acheter un numéro Twilio SMS-enabled (~$1-3/mois)
+5. Copier le Messaging Service SID (commence par `MG…`)
+6. `fly secrets set -a yukpopro-backend TWILIO_MESSAGING_SERVICE_SID=MG…`
+
+**Option B — Numéro Twilio simple** :
+1. Console → Phone Numbers → Buy → cocher capability SMS
+2. `fly secrets set -a yukpopro-backend TWILIO_SMS_NUMBER=+14155551234`
+
+Sans `TWILIO_MESSAGING_SERVICE_SID` ni `TWILIO_SMS_NUMBER` posés, le SMS
+fallback tombe en simulation (log). WhatsApp continue de fonctionner.
 
 ### Étape 1 — Compte Netlify + API token
 
