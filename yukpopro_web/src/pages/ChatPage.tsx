@@ -796,7 +796,7 @@ export const ChatPage = () => {
           const _suffixToken = (url: string): string => {
             if (!url) return url;
             // Ne pas suffixer si déjà présent ou si URL externe (http*://)
-            if (url.includes("token=") || /^https?:\/\//.test(url)) return url;
+            if (url.includes("token=") || /^https?:\/\//.test(url)) return url; // EXAMPLE param JWT, pas un secret
             // Suffixer seulement les URLs auth-protégées du backend Yukpo
             const needsAuth = url.startsWith("/api/v1/bureau/documents/")
               || url.startsWith("/api/v1/pro/generateurs/fichier/")
