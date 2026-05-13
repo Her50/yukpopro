@@ -241,6 +241,50 @@ class PageBackground(BaseModel):
     image_opacity: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
+class TypographyToken(BaseModel):
+    """Définition d'un niveau typographique (Display, H1, H2, …)."""
+    nom: str = Field(..., description="display | h1 | h2 | h3 | body | caption | overline")
+    font_size_pt: float = Field(..., gt=0)
+    font_weight: int = Field(..., ge=100, le=900)
+    line_height: float = Field(default=1.3, ge=0.8, le=3.0)
+    letter_spacing_em: float = Field(default=0.0, ge=-0.15, le=0.5)
+    uppercase: bool = Field(default=False)
+
+
+class DesignTokens(BaseModel):
+    """
+    Système de design pré-calculé pour UN visuel.
+
+    Produit par une phase LLM PRÉLIMINAIRE qui analyse le brief, la page,
+    les médias et la marque AVANT le placement des éléments. Ces tokens
+    sont ensuite injectés en INPUT du LLM de placement → cohérence garantie
+    + pas de recomputation à chaque texte.
+
+    Architecture : Phase 0 (tokens) → Phase 1 (placement) → Phase 2 (render).
+    """
+    # Palette
+    palette: list[Color] = Field(..., min_length=2, max_length=6,
+        description="2-6 couleurs cohérentes pour le visuel (ordre : "
+                    "primaire, accent, fond, texte_principal, texte_secondaire…)")
+    couleur_fond: Color
+    couleur_texte_principal: Color
+    couleur_accent: Color
+    # Typographie
+    font_family_titre: str = Field(..., description="Famille pour titres/sous-titres")
+    font_family_corps: str = Field(..., description="Famille pour corps de texte")
+    typo_scale: list[TypographyToken] = Field(..., min_length=3,
+        description="Échelle typo calculée selon la diagonale de la page (display, h1, h2, h3, body, caption, overline). Tu décides quels niveaux sont utiles selon le format de page : carte de visite n'a pas de display, affiche A0 a un display géant.")
+    # Style global
+    registre: str = Field(...,
+        description="sobre_corporate | luxe_elegant | deuil_classique | festif_jeune | artistique | tech_startup | institutionnel | minimaliste | dense_informatif")
+    densite_visuelle: str = Field(...,
+        description="minimaliste | aere | equilibre | dense | sature")
+    formes_decoratives_autorisees: list[str] = Field(default_factory=list,
+        description="Liste des MaskShape adaptées au registre : ex sobre_corporate→['rect','rounded_rect'], festif→['blob','star','polygon']")
+    raisonnement: str = Field(default="", max_length=600,
+        description="1-3 phrases expliquant les choix (palette, polices, registre)")
+
+
 class PlacementPlan(BaseModel):
     """
     Plan de placement complet pour UNE page de visuel.

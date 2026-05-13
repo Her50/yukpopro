@@ -267,7 +267,7 @@ async def generer_depuis_brief(
     except Exception as _e_sug:
         logger.debug(f"[Infographie/Suggestions] non bloquant : {_e_sug}")
 
-    # ── Audit qualité LLM Vision (opt-in, défaut True) ────────────────────
+    # ── Audit qualité LLM Vision (défaut True) — facturé via debiter_llm ─
     audit_qualite: Optional[dict] = None
     if demande.auditer_qualite and (resultat.png_bytes or resultat.png_preview_bytes):
         try:
@@ -278,13 +278,25 @@ async def generer_depuis_brief(
                  "couleurs_accents_hex": profil_dict.get("couleurs_accents_hex")}
                 if profil_dict else None
             )
-            audit_qualite = await auditer_visuel_generique(
+            audit_qualite, usage_audit = await auditer_visuel_generique(
                 png_bytes=png_pour_audit,
                 brief=demande.brief,
                 langue=demande.langue,
                 brand_kit=brand_kit_audit,
                 contexte=f"Gabarit utilisé : {demande.type_gabarit}",
             )
+            # Facturation : marge x12 sur tokens via debiter_llm
+            if usage_audit.get("tokens_in") or usage_audit.get("tokens_out"):
+                try:
+                    await debiter_llm(
+                        current_user.user_id,
+                        modele=usage_audit.get("modele", "claude"),
+                        tokens_input=int(usage_audit.get("tokens_in", 0)),
+                        tokens_output=int(usage_audit.get("tokens_out", 0)),
+                        module="infographie",
+                    )
+                except Exception as _e_dl:
+                    logger.warning(f"[Infographie/AuditDébit] non bloquant : {_e_dl}")
         except Exception as _e_audit:
             logger.debug(f"[Infographie/Audit] non bloquant : {_e_audit}")
 

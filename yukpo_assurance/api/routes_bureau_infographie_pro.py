@@ -3039,7 +3039,7 @@ async def geometric_placement(
     from modules.bureau.llm_placement import generer_placement_plan, manifest_image
     from modules.bureau.geometric_placement import render_placement_plan
     from modules.bureau.service_credits_bureau import (
-        verifier_acces_module, verifier_solde, debiter_forfait,
+        verifier_acces_module, verifier_solde, debiter_forfait, debiter_llm,
     )
 
     autorise, plan_acces, msg = await verifier_acces_module(current_user.user_id, "infographie")
@@ -3070,12 +3070,17 @@ async def geometric_placement(
         except Exception as e:
             logger.warning(f"[GeomPlacement] média {ref} non lu : {e}")
 
-    # Phase 1+2 (+ Phase 3 audit si revision_visuelle)
+    # Phase 0 tokens (+1 LLM Haiku) → Phase 1 placement (+1 LLM Sonnet) →
+    # Phase 2 render Python → Phase 3 audit (+1 LLM Sonnet Vision) +
+    # éventuel re-render (1 LLM placement supplémentaire par révision).
+    # Toutes les fonctions LLM retournent (resultat, usage) pour facturation
+    # aval. La marge x12 est appliquée par debiter_llm via pricing interne.
     journal_revisions: list[dict] = []
+    usages_llm: list[dict] = []
     if demande.revision_visuelle:
         from modules.bureau.llm_placement import generer_visuel_avec_revision
         try:
-            placement, png_bytes, journal_revisions = await generer_visuel_avec_revision(
+            placement, png_bytes, journal_revisions, usages_llm = await generer_visuel_avec_revision(
                 brief=demande.brief,
                 page_w_mm=demande.page_w_mm,
                 page_h_mm=demande.page_h_mm,
@@ -3096,15 +3101,32 @@ async def geometric_placement(
         if placement is None:
             raise HTTPException(502, "LLM n'a pas produit de PlacementPlan parseable")
         if demande.debug_grid and placement is not None:
-            # Re-render avec grid si demandé (le pipeline interne ne l'a pas posée)
             placement.debug_grid = True
             png_bytes = render_placement_plan(
                 placement, medias_bytes, dpi=demande.dpi, include_bleed=True,
             )
     else:
-        # Pipeline simple sans audit
+        # Pipeline simple sans audit (mais avec DesignTokens si possible)
+        from modules.bureau.llm_placement import analyser_design_tokens
+        tokens_obj = None
         try:
-            placement = await generer_placement_plan(
+            tokens_obj, usage_tokens = await analyser_design_tokens(
+                brief=demande.brief,
+                page_w_mm=demande.page_w_mm,
+                page_h_mm=demande.page_h_mm,
+                medias=manifests,
+                brand_kit=demande.brand_kit,
+                langue=demande.langue,
+                inspiration=demande.inspiration,
+                modele="haiku",
+            )
+            if usage_tokens.get("tokens_in") or usage_tokens.get("tokens_out"):
+                usages_llm.append({**usage_tokens, "etape": "design_tokens"})
+        except Exception as _e_t:
+            logger.debug(f"[GeomPlacement] DesignTokens skip : {_e_t}")
+
+        try:
+            placement, usage_placement = await generer_placement_plan(
                 brief=demande.brief,
                 page_w_mm=demande.page_w_mm,
                 page_h_mm=demande.page_h_mm,
@@ -3114,7 +3136,10 @@ async def geometric_placement(
                 inspiration=demande.inspiration,
                 modele=demande.modele,
                 langue=demande.langue,
+                tokens=tokens_obj,
             )
+            if usage_placement.get("tokens_in") or usage_placement.get("tokens_out"):
+                usages_llm.append({**usage_placement, "etape": "placement"})
         except Exception as e:
             logger.error(f"[GeomPlacement] LLM échec : {e}")
             raise HTTPException(502, f"LLM placement échoué : {str(e)[:200]}")
@@ -3129,6 +3154,19 @@ async def geometric_placement(
         except Exception as e:
             logger.error(f"[GeomPlacement] Render échec : {e}")
             raise HTTPException(500, f"Rendu géométrique échoué : {str(e)[:200]}")
+
+    # ── Facturation LLM : 1 débit par appel (marge x12 dans debiter_llm) ──
+    for u in usages_llm:
+        try:
+            await debiter_llm(
+                current_user.user_id,
+                modele=u.get("modele", "claude"),
+                tokens_input=int(u.get("tokens_in", 0)),
+                tokens_output=int(u.get("tokens_out", 0)),
+                module="infographie",
+            )
+        except Exception as _e_dl:
+            logger.warning(f"[GeomPlacement] Débit LLM {u.get('etape')} non bloquant : {_e_dl}")
 
     try:
         await debiter_forfait(current_user.user_id, "designerpro_freeform_layout",
