@@ -578,16 +578,45 @@ def _render_element(
         y = off_y + fmt_h_pt - mm_to_pt(el.y_mm + el.h_mm)
         w = mm_to_pt(el.w_mm)
         h = mm_to_pt(el.h_mm)
-        img_data = _resoudre_image(el, medias)
-        if not img_data:
-            # Placeholder rectangle gris clair
-            c.setFillColorRGB(0.92, 0.92, 0.92)
-            c.rect(x, y, w, h, stroke=0, fill=1)
-            return
-        from reportlab.lib.utils import ImageReader
+        # ── Cache ImageReader scope render ─────────────────────────────────
+        # Sur impression bulk (100 cartes × 8 cartes/planche = 100+ usages du
+        # même logo Orange/identité), l'ancien code refaisait `_resoudre_image`
+        # + `ImageReader(BytesIO(bytes))` à chaque occurrence : 100× base64
+        # decode + 100× PIL JPEG/PNG decode = ~5-15s perdues par planche dense.
+        # Le cache est attaché au canvas (GC quand le render finit, pas de
+        # leak cross-render). Clé : data_url|ref_media|url (cheap hash si
+        # data_url > 200 chars).
+        cache: dict = getattr(c, "_yukpo_img_cache", None)
+        if cache is None:
+            cache = {}
+            c._yukpo_img_cache = cache
+        # Construit la clé sans dupliquer les payloads volumineux
+        if el.data_url:
+            key = f"d:{hash(el.data_url) & 0xFFFFFFFF:08x}"
+        elif el.ref_media:
+            key = f"r:{el.ref_media}"
+        elif el.url:
+            key = f"u:{el.url}"
+        else:
+            key = None
+        ir = cache.get(key) if key else None
+        if ir is None:
+            img_data = _resoudre_image(el, medias)
+            if not img_data:
+                c.setFillColorRGB(0.92, 0.92, 0.92)
+                c.rect(x, y, w, h, stroke=0, fill=1)
+                return
+            from reportlab.lib.utils import ImageReader
+            try:
+                ir = ImageReader(io.BytesIO(img_data))
+                if key:
+                    cache[key] = ir
+            except Exception as e:
+                logger.debug(f"[freeform] Image decode skip : {e}")
+                return
         try:
-            ir = ImageReader(io.BytesIO(img_data))
-            c.drawImage(ir, x, y, w, h, mask="auto", preserveAspectRatio=(el.mode == "contain"))
+            c.drawImage(ir, x, y, w, h, mask="auto",
+                        preserveAspectRatio=(el.mode == "contain"))
         except Exception as e:
             logger.debug(f"[freeform] Image render skip : {e}")
         return
@@ -1175,21 +1204,37 @@ async def rendre_pdf_depuis_json(
     logger.warning(f"[freeform/render] parse OK — {len(doc.pages)} pages, "
                    f"{sum(len(p.elements) for p in doc.pages)} elements totaux")
     await pre_generer_images_ia(doc)
-    # Sérialise les renders sur shared-cpu-1x : 2 renders parallèles sur 1
-    # vCPU → contention massive (logs prod v332 : page passée de 18s solo à
-    # 135s en concurrence). Le lock garde chaque render à pleine vitesse, les
-    # suivants attendent leur tour (le polling job_id côté chat absorbe). Sans
-    # lock, total = N × T_solo × N ; avec lock, total = N × T_solo.
-    lock = _get_render_lock()
-    waiting = lock.locked()
+
+    # ── Pipeline async chunked pour livrets très volumineux ────────────────
+    # Au-delà du seuil (32 pages par défaut), le timeout 600s Fly devient un
+    # risque réel. On découpe en sous-renders de N pages, rendues chacune en
+    # PDF indépendant, puis on fusionne via pikepdf. Chaque sous-render passe
+    # par le semaphore donc l'ordre serial reste garanti — la seule différence
+    # est qu'entre 2 chunks, le canvas est réinitialisé (GC mémoire) ce qui
+    # évite le pic OOM observé sur 64+ pages denses.
+    _CHUNK_THRESHOLD = int(os.getenv("FREEFORM_CHUNK_THRESHOLD", "32"))
+    _CHUNK_SIZE = int(os.getenv("FREEFORM_CHUNK_SIZE", "16"))
+    if len(doc.pages) > _CHUNK_THRESHOLD:
+        logger.warning(
+            f"[freeform/render] {len(doc.pages)} pages > {_CHUNK_THRESHOLD} → "
+            f"mode chunked ({_CHUNK_SIZE} pages/chunk)"
+        )
+        return await _rendre_layout_pdf_chunked(doc, medias, _CHUNK_SIZE)
+
+    # ── Semaphore configurable au lieu de Lock fixe ────────────────────────
+    # `FREEFORM_RENDER_CONCURRENCY` env (1 par défaut sur shared-cpu-1x, à
+    # passer à 2-3 sur performance-2x/4x). Sur shared-cpu-1x → 1 = comportement
+    # historique (sérialisation totale). Sur performance-4x → 3 = throughput
+    # ×3 quand plusieurs users génèrent en parallèle, sans contention puisque
+    # 4 vCPU dédiés absorbent.
+    sem = _get_render_sem()
+    waiting = sem._value <= 0 if hasattr(sem, "_value") else False
     if waiting:
-        logger.warning("[freeform/render] en attente du lock (autre render en cours)")
-    async with lock:
+        logger.warning("[freeform/render] en attente du semaphore (autres renders en cours)")
+    async with sem:
         logger.warning("[freeform/render] début rasterization ReportLab")
         pdf_bytes = await asyncio.to_thread(rendre_layout_pdf, doc, medias=medias)
         logger.warning(f"[freeform/render] rasterization OK — {len(pdf_bytes)} bytes")
-        # Post-traitement sous le lock aussi : pikepdf/ghostscript sont
-        # CPU-bound, on évite la même contention.
         try:
             from . import pdf_print_ready as _pp
             pdf_bytes = await asyncio.to_thread(
@@ -1202,14 +1247,79 @@ async def rendre_pdf_depuis_json(
     return pdf_bytes
 
 
-# Lock asyncio process-wide pour sérialiser les renders ReportLab. Lazy-init
-# car asyncio.Lock() exige une event loop courante (créée par uvicorn).
-_RENDER_LOCK: Optional[Any] = None
+async def _rendre_layout_pdf_chunked(
+    doc: "LayoutDocument", medias: Optional[dict], chunk_size: int,
+) -> bytes:
+    """Découpe un LayoutDocument en chunks de N pages, rend chacun
+    indépendamment puis fusionne en un PDF unique via pikepdf.
+
+    Avantages :
+      - Chaque chunk a son propre Canvas ReportLab → mémoire bornée (pas de
+        balloning à 64+ pages denses)
+      - Si timeout pendant un chunk, on a déjà sauvegardé les précédents
+        (extension future : reprise sur échec)
+      - PDF/X-1a est appliqué SUR LE PDF FINAL fusionné, pas sur chaque chunk
+        (économise N×pikepdf, gain ~5s × N)
+    """
+    import copy
+    chunks: list[bytes] = []
+    sem = _get_render_sem()
+    pages_total = len(doc.pages)
+    for i in range(0, pages_total, chunk_size):
+        sub_doc = copy.copy(doc)
+        sub_doc.pages = doc.pages[i:i + chunk_size]
+        idx_end = min(i + chunk_size, pages_total)
+        logger.warning(f"[freeform/chunked] chunk {i + 1}-{idx_end}/{pages_total}")
+        async with sem:
+            chunk_pdf = await asyncio.to_thread(
+                rendre_layout_pdf, sub_doc, medias=medias,
+            )
+            chunks.append(chunk_pdf)
+
+    # Fusion pikepdf
+    try:
+        import pikepdf
+        from io import BytesIO as _BIO
+        merged = pikepdf.Pdf.new()
+        for c_pdf in chunks:
+            with pikepdf.Pdf.open(_BIO(c_pdf)) as p:
+                merged.pages.extend(p.pages)
+        out_buf = _BIO()
+        merged.save(out_buf)
+        pdf_bytes = out_buf.getvalue()
+        logger.warning(f"[freeform/chunked] fusion OK : {len(chunks)} chunks → {len(pdf_bytes)} bytes")
+    except Exception as e:
+        logger.error(f"[freeform/chunked] fusion KO ({e}) → renvoi 1er chunk seulement")
+        pdf_bytes = chunks[0] if chunks else b""
+
+    # PDF/X-1a sur le PDF final fusionné
+    try:
+        from . import pdf_print_ready as _pp
+        pdf_bytes = await asyncio.to_thread(
+            _pp.convertir_en_pdf_x1a, pdf_bytes, doc.titre,
+            (doc.format_mm[0], doc.format_mm[1]), doc.bleed_mm,
+        )
+    except Exception as e:
+        logger.debug(f"[freeform/chunked] PDF/X-1a skip : {e}")
+    return pdf_bytes
 
 
-def _get_render_lock():
+# Sémaphore asyncio process-wide configurable via FREEFORM_RENDER_CONCURRENCY.
+# Lazy-init car asyncio.Semaphore() exige une event loop courante.
+_RENDER_SEM: Optional[Any] = None
+
+
+def _get_render_sem():
     import asyncio
-    global _RENDER_LOCK
-    if _RENDER_LOCK is None:
-        _RENDER_LOCK = asyncio.Lock()
-    return _RENDER_LOCK
+    global _RENDER_SEM
+    if _RENDER_SEM is None:
+        n = max(1, int(os.getenv("FREEFORM_RENDER_CONCURRENCY", "1")))
+        _RENDER_SEM = asyncio.Semaphore(n)
+        logger.info(f"[freeform] Render semaphore initialisé à N={n}")
+    return _RENDER_SEM
+
+
+# Backward-compat : si du code externe importe _get_render_lock, on lui rend
+# le semaphore qui se comporte comme un Lock quand N=1.
+def _get_render_lock():
+    return _get_render_sem()
