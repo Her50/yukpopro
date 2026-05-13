@@ -825,14 +825,29 @@ async def _pre_generer_donnees_simulees(
             f"  ]\n"
             f"}}"
         )
+        # BUG FIX : max_tokens HARDCODÉ 4000 tronquait dès nb_items > 50.
+        # Calcul réaliste : header ~200 tokens + chaque item ~80 tokens JSON
+        # (5-7 champs nom/prenom/fonction/email/tel × valeurs camerounaises).
+        # Pour 100 cartes : 200 + 100×80 = 8200. Pour 200 cartes : 16200.
+        # Cap à 32000 (limite raisonnable Haiku/Sonnet pour ce type de JSON).
+        max_tok = min(32000, 400 + nb_items * 90)
+
+        # MODÈLE : Sonnet d'office. C'est PAS de l'extraction (où Haiku excelle)
+        # mais de la CRÉATION CONTEXTUELLE CULTURELLE — noms régionaux
+        # camerounais/sénégalais/maliens authentiques, fonctions structurées
+        # par secteur (banque/telecom/admin), variété sans répétition, formats
+        # locaux (emails domaine entreprise, téléphones +237/+221/+223…).
+        # Haiku produit des listes plates et répétitives même sur 20 items.
+        # Surcoût ~3× est négligeable absolu (~$0.01 pour 100 items) vs la
+        # qualité critique des données (l'utilisateur imprime 100 cartes
+        # avec ces noms → la médiocrité se voit immédiatement).
+        modele_simu = ModelePrioritaire.CLAUDE_SONNET
         rep = await ia_client.appeler(
             prompt=prompt,
             mode=ModeIA.REDACTION,
-            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,    # → gpt-4o-mini si LLM_PRIMAIRE=gpt
+            forcer_modele=modele_simu,
             json_attendu=True,
-            # 20 items × ~120 tokens (schémas larges types étiquettes) = 2400,
-            # marge pour 50+ items courts → 4000.
-            max_tokens_override=4000,
+            max_tokens_override=max_tok,
             utiliser_cache=False,
         )
         contenu = (rep.contenu or "").strip()
