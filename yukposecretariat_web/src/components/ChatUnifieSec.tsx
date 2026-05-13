@@ -12,11 +12,11 @@
  * L'utilisateur tape juste son besoin + (optionnel) attache image/PDF/audio.
  * Yukpo détecte l'intention via /bureau/chat/message puis route auto.
  */
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Loader2, Sparkles, Paperclip, Mic, Image as ImageIcon,
-  FileText, Send, X, Download, Camera,
+  FileText, Send, X, Download, Camera, ListPlus,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
@@ -258,14 +258,31 @@ export default function ChatUnifieSec() {
     }
   }
 
-  const envoyer = async () => {
-    if (!message.trim() && attachments.length === 0) {
-      toast.error(t('chatUnifie.empty', 'Tape un message ou attache un fichier'))
-      return
+  // ── Queue multi-input pendant génération (BATCH-4) ────────────────────
+  // L'utilisateur peut continuer à taper, joindre, dicter pendant que Yukpo
+  // répond. Les inputs additionnels sont stockés dans `pendingQueue` et
+  // envoyés automatiquement à la fin de la réponse en cours (FIFO).
+  type PendingItem = { message: string; attachments: Attachment[] }
+  const [pendingQueue, setPendingQueue] = useState<PendingItem[]>([])
+
+  // Flush queue dès que loading passe à false ET qu'il y a des items en attente.
+  useEffect(() => {
+    if (!loading && pendingQueue.length > 0) {
+      const next = pendingQueue[0]
+      setPendingQueue(prev => prev.slice(1))
+      // Petit delay pour laisser le DOM mettre à jour l'historique
+      setTimeout(() => executerEnvoi(next.message, next.attachments), 80)
     }
+  }, [loading, pendingQueue.length])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const retirerDeLaQueue = (idx: number) =>
+    setPendingQueue(prev => prev.filter((_, i) => i !== idx))
+
+  // Helper interne : exécute réellement l'envoi (utilisé par envoyer + queue flush)
+  const executerEnvoi = async (msg: string, atts: Attachment[]) => {
     const userTurn: ChatTurn = {
       role: 'user', ts: new Date().toISOString(),
-      content: message, attachments: [...attachments],
+      content: msg, attachments: [...atts],
     }
     setTurns(prev => [...prev, userTurn])
     setLoading(true)
@@ -273,10 +290,10 @@ export default function ChatUnifieSec() {
     try {
       // 1. Détection d'intention
       const orch = await secChatAPI.message({
-        message: message || `[${attachments.map(a => a.type).join(', ')} attaché(s)]`,
-        has_image: attachments.some(a => a.type === 'image'),
-        has_pdf: attachments.some(a => a.type === 'pdf'),
-        has_audio: attachments.some(a => a.type === 'audio'),
+        message: msg || `[${atts.map(a => a.type).join(', ')} attaché(s)]`,
+        has_image: atts.some(a => a.type === 'image'),
+        has_pdf: atts.some(a => a.type === 'pdf'),
+        has_audio: atts.some(a => a.type === 'audio'),
         pays: 'CM', langue: 'fr',
       })
       const intent = orch.data?.intent || 'inconnu'
@@ -290,20 +307,18 @@ export default function ChatUnifieSec() {
           intent,
         }
         setTurns(prev => [...prev, yukpoTurn])
-        setMessage(''); setAttachments([])
         return
       }
 
       // Pattern boîte noire (aligné YPro) : pas de toast intent/confiance, pas
       // de "Action exécutée: X" — l'utilisateur voit juste le résultat.
-      const result = await executerSelonIntent(intent, message, attachments)
+      const result = await executerSelonIntent(intent, msg, atts)
 
       const yukpoTurn: ChatTurn = {
         role: 'yukpo', ts: new Date().toISOString(),
         content: '', intent, resultat: result,
       }
       setTurns(prev => [...prev, yukpoTurn])
-      setMessage(''); setAttachments([])
     } catch (e: any) {
       const detail = e?.response?.data?.detail
       // Solde insuffisant (backend renvoie 402 ou code CREDITS_EPUISES) → toast
@@ -330,6 +345,30 @@ export default function ChatUnifieSec() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Wrapper public : clic Envoyer / Entrée. Si génération en cours →
+  // push dans la queue ; sinon → executerEnvoi immédiat.
+  const envoyer = () => {
+    if (!message.trim() && attachments.length === 0) {
+      toast.error(t('chatUnifie.empty', 'Tape un message ou attache un fichier'))
+      return
+    }
+    if (loading) {
+      // Génération en cours → mise en file d'attente
+      setPendingQueue(prev => [...prev, {
+        message, attachments: [...attachments],
+      }])
+      toast.success(
+        t('chatUnifie.queued',
+          'Mis en file d\'attente — sera envoyé après la réponse en cours'),
+        { duration: 3000 },
+      )
+    } else {
+      executerEnvoi(message, attachments)
+    }
+    // Dans les 2 cas, on libère le textarea + attachments pour le prochain input
+    setMessage(''); setAttachments([])
   }
 
   // ─── Rendu visuel d'un résultat selon son type ────────────────────────
@@ -589,6 +628,38 @@ export default function ChatUnifieSec() {
         )}
       </div>
 
+      {/* ── Queue file d'attente (BATCH-4) ──────────────────────────── */}
+      {pendingQueue.length > 0 && (
+        <div className="mb-2 px-2 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+          <p className="text-blue-900 font-medium flex items-center gap-1.5">
+            <ListPlus size={13} />
+            {pendingQueue.length} {pendingQueue.length === 1 ? 'message en attente' : 'messages en attente'}
+            <span className="text-blue-700 font-normal ml-1">
+              — sera envoyé{pendingQueue.length > 1 ? 's' : ''} dès la fin de la réponse en cours
+            </span>
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {pendingQueue.map((p, i) => (
+              <li key={i} className="flex items-center gap-2 text-blue-800">
+                <span className="text-blue-500 font-mono">#{i + 1}</span>
+                <span className="flex-1 truncate">
+                  {p.message || `[${p.attachments.map(a => a.type).join(', ')}]`}
+                  {p.attachments.length > 0 && p.message && (
+                    <span className="text-blue-600 ml-1">
+                      (+{p.attachments.length} fichier{p.attachments.length > 1 ? 's' : ''})
+                    </span>
+                  )}
+                </span>
+                <button onClick={() => retirerDeLaQueue(i)}
+                  className="text-red-500 hover:text-red-700" title="Retirer de la file">
+                  <X size={11} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* ── Attachments preview ─────────────────────────────────────── */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2 px-1">
@@ -645,9 +716,19 @@ export default function ChatUnifieSec() {
           placeholder={t('chatUnifie.placeholder', 'Décris ton besoin… (Entrée pour envoyer)')}
           rows={1}
           className="flex-1 resize-none text-sm py-2 px-2 outline-none max-h-32" />
-        <button onClick={envoyer} disabled={loading || (!message.trim() && attachments.length === 0)}
-          className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white p-2 rounded-lg transition-colors">
-          {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+        {/* BATCH-4 — bouton Envoyer SAUF disabled si génération en cours :
+            on permet d'envoyer (= mettre en queue). Disabled UNIQUEMENT si
+            rien à envoyer (message vide ET pas d'attachment). Visuel adapté :
+            icône Send normale OU ListPlus si génération en cours. */}
+        <button onClick={envoyer}
+          disabled={!message.trim() && attachments.length === 0}
+          title={loading
+            ? t('chatUnifie.queueAdd', 'Mettre en file (envoi après la réponse en cours)')
+            : t('chatUnifie.send', 'Envoyer')}
+          className={`disabled:opacity-50 text-white p-2 rounded-lg transition-colors ${
+            loading ? 'bg-amber-500 hover:bg-amber-600' : 'bg-amber-600 hover:bg-amber-700'
+          }`}>
+          {loading ? <ListPlus size={18} /> : <Send size={18} />}
         </button>
       </div>
 

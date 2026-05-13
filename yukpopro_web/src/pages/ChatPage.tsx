@@ -51,6 +51,10 @@ export const ChatPage = () => {
 
   const [input, setInput] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  // BATCH-4 — queue multi-input pendant génération (push pendant isLoading,
+  // flush automatique dès que la réponse en cours termine).
+  type PendingItem = { content: string; files: AttachedFile[] };
+  const [pendingQueue, setPendingQueue] = useState<PendingItem[]>([]);
   const [historySidebarOpen, setHistorySidebarOpen] = useState(() => window.innerWidth >= 768);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -97,11 +101,34 @@ export const ChatPage = () => {
     inputRef.current?.focus();
   }, [activeSessionId]);
 
+  // BATCH-4 — Flush queue dès que isLoading repasse à false et qu'il y a
+  // des items en attente. Déclenche sendMessage avec le 1er item de la file.
+  useEffect(() => {
+    if (!isLoading && pendingQueue.length > 0) {
+      const next = pendingQueue[0];
+      setPendingQueue(prev => prev.slice(1));
+      // Petit delay pour laisser le DOM/store se stabiliser
+      setTimeout(() => sendMessage(next.content, next.files), 80);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, pendingQueue.length]);
+
+  const retirerDeLaQueue = (idx: number) =>
+    setPendingQueue(prev => prev.filter((_, i) => i !== idx));
+
   // ── Envoi de message ───────────────────────────────────────────────────────
 
   const sendMessage = useCallback(async (content: string, files: AttachedFile[] = []) => {
     if (!content.trim() && files.length === 0) return;
-    if (isLoading) return;
+    // BATCH-4 : pendant génération en cours → mise en file d'attente au lieu
+    // de bloquer. L'envoi réel sera déclenché par le useEffect de flush dès
+    // que isLoading repasse à false.
+    if (isLoading) {
+      setPendingQueue(prev => [...prev, { content, files }]);
+      toast(t("chat.queued", "Mis en file d'attente — sera envoyé après la réponse en cours"),
+            { icon: "📥", duration: 3000 });
+      return;
+    }
 
     const userMsg: CopiloteMessage = {
       id: crypto.randomUUID(),
@@ -908,6 +935,38 @@ export const ChatPage = () => {
               </div>
             )}
 
+            {/* BATCH-4 — File d'attente messages pendant génération */}
+            {pendingQueue.length > 0 && (
+              <div className="mb-3 px-3 py-2 bg-yukpo-900/40 border border-yukpo-700/50 rounded-xl text-xs">
+                <p className="text-yukpo-200 font-medium flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5" />
+                  {pendingQueue.length} {pendingQueue.length === 1 ? "message en attente" : "messages en attente"}
+                  <span className="text-slate-400 font-normal ml-1">
+                    — envoi{pendingQueue.length > 1 ? "s" : ""} après la réponse en cours
+                  </span>
+                </p>
+                <ul className="mt-1 space-y-0.5">
+                  {pendingQueue.map((p, i) => (
+                    <li key={i} className="flex items-center gap-2 text-slate-300">
+                      <span className="text-slate-500 font-mono">#{i + 1}</span>
+                      <span className="flex-1 truncate">
+                        {p.content || `[${p.files.length} fichier${p.files.length > 1 ? "s" : ""}]`}
+                        {p.files.length > 0 && p.content && (
+                          <span className="text-slate-500 ml-1">
+                            (+{p.files.length} fichier{p.files.length > 1 ? "s" : ""})
+                          </span>
+                        )}
+                      </span>
+                      <button onClick={() => retirerDeLaQueue(i)}
+                        className="text-red-400 hover:text-red-300" title="Retirer de la file">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Fichiers attachés */}
             {attachedFiles.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
@@ -933,7 +992,7 @@ export const ChatPage = () => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading || uploadingFile}
+                  disabled={uploadingFile}
                   className="flex-shrink-0 p-3 text-slate-400 hover:text-yukpo-400 transition-colors disabled:opacity-40"
                   title={t("chat.attachFileTitle")}
                 >
@@ -947,7 +1006,6 @@ export const ChatPage = () => {
                 <button
                   type="button"
                   onClick={toggleRecording}
-                  disabled={isLoading}
                   className={cn(
                     "flex-shrink-0 p-3 transition-colors disabled:opacity-40",
                     isRecording
@@ -963,7 +1021,7 @@ export const ChatPage = () => {
                 <button
                   type="button"
                   onClick={handleCameraClick}
-                  disabled={isLoading || uploadingFile}
+                  disabled={uploadingFile}
                   className="flex-shrink-0 p-3 text-slate-400 hover:text-yukpo-400 transition-colors disabled:opacity-40"
                   title={t("chat.cameraCapture", "Scanner un document avec la caméra")}
                 >
@@ -990,14 +1048,24 @@ export const ChatPage = () => {
                   style={{ height: "48px" }}
                 />
 
-                {/* Bouton envoyer */}
+                {/* Bouton envoyer — pendant génération, le bouton reste actif
+                    pour mettre en file d'attente (BATCH-4). Disabled uniquement
+                    si rien à envoyer. */}
                 <button
                   type="submit"
-                  disabled={(!input.trim() && attachedFiles.length === 0) || isLoading}
-                  className="flex-shrink-0 m-2 p-2 rounded-xl bg-yukpo-600 hover:bg-yukpo-500 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={!input.trim() && attachedFiles.length === 0}
+                  title={isLoading
+                    ? t("chat.queueAdd", "Mettre en file (envoi après la réponse en cours)")
+                    : t("chat.send", "Envoyer")}
+                  className={cn(
+                    "flex-shrink-0 m-2 p-2 rounded-xl text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed",
+                    isLoading
+                      ? "bg-yukpo-500 hover:bg-yukpo-400"
+                      : "bg-yukpo-600 hover:bg-yukpo-500"
+                  )}
                 >
                   {isLoading
-                    ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ? <Plus className="w-4 h-4" />
                     : <Send className="w-4 h-4" />
                   }
                 </button>
