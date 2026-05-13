@@ -235,10 +235,47 @@ async def _envoyer_sms(destinataire: str, contenu: str) -> bool:
         return False
 
 
-async def _envoyer_email(destinataire: str, contenu: str) -> bool:
-    """Envoi email (stub — intégrer SendGrid/SMTP si nécessaire)."""
-    logger.info(f"[Notif/SIM] Email → {destinataire}: {contenu[:60]}...")
-    return True
+async def _envoyer_email(
+    destinataire: str,
+    contenu: str,
+    sujet: str = "Notification YukpoPro",
+    contenu_html: Optional[str] = None,
+) -> bool:
+    """Envoi email via SendGrid si configuré, sinon log simulé.
+
+    `contenu` est utilisé comme plain-text. Si `contenu_html` est fourni
+    OU si `contenu` ressemble à du HTML (<...>), envoi en text/html.
+    """
+    if not settings.SENDGRID_API_KEY:
+        logger.info(f"[Notif/SIM] Email → {destinataire} | {sujet} | {contenu[:60]}...")
+        return True
+
+    try:
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail, From
+
+        looks_html = bool(contenu_html) or contenu.lstrip().startswith("<")
+        from_email = From(
+            settings.SENDGRID_FROM_EMAIL or "no-reply@yukpomnang.com",
+            settings.SENDGRID_FROM_NAME or "YukpoPro",
+        )
+        mail = Mail(
+            from_email=from_email,
+            to_emails=destinataire,
+            subject=sujet,
+            html_content=(contenu_html or contenu) if looks_html else None,
+            plain_text_content=contenu if not looks_html else None,
+        )
+        client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        rep = client.send(mail)
+        if rep.status_code >= 300:
+            logger.warning(f"[Notif] SendGrid {rep.status_code} → {destinataire}")
+            return False
+        logger.info(f"[Notif] Email SendGrid envoyé → {destinataire} | {sujet}")
+        return True
+    except Exception as e:
+        logger.error(f"[Notif] SendGrid échec → {destinataire}: {e}")
+        return False
 
 
 # Singleton service notifications

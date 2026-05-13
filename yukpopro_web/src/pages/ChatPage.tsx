@@ -317,10 +317,15 @@ export const ChatPage = () => {
             // sans re-auth.
             const tok = localStorage.getItem("yukpopro_token") || "";
             const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
+            // Sprint A1 — Si landing, ajouter lien "Publier en ligne"
+            // (page dédiée /publier-landing/:fichierId → modale Netlify).
+            const lienPublier = (!slidesWebMatch && fid)
+              ? `\n\n[🚀 Publier en ligne (sous-domaine yukpomnang.com)](/publier-landing/${encodeURIComponent(fid)})`
+              : "";
             updateLastAssistantMessage(
               (slidesWebMatch ? "✓ Présentation web Reveal.js générée"
                               : "✓ Landing page web générée") +
-              ` — ${result.size_kb} KB.\n[Ouvrir dans le navigateur](${url})`,
+              ` — ${result.size_kb} KB.\n[Ouvrir dans le navigateur](${url})${lienPublier}`,
               null,
               fid ? [fid] : undefined,
             );

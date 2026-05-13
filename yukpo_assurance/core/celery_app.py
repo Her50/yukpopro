@@ -67,6 +67,8 @@ celery_app = Celery(
         # Module(s) exposant les @celery_app.task. Auto-discovery au démarrage
         # du worker.
         "tasks.freeform_tasks",
+        # Phase B4 — follow-up emails J+3/J+7 (scheduled daily via beat)
+        "tasks.landing_followup_tasks",
     ],
 )
 
@@ -125,7 +127,18 @@ celery_app.conf.update(
 
 @celery_app.on_after_configure.connect
 def _setup_periodic_tasks(sender, **kwargs):
-    """Hook pour ajouter des tâches périodiques (heartbeat, cleanup) plus tard."""
+    """Hook pour ajouter des tâches périodiques (heartbeat, cleanup, follow-ups)."""
+    # Phase B4 — scan quotidien J+3/J+7 follow-up emails (06:00 UTC)
+    try:
+        from celery.schedules import crontab
+        sender.add_periodic_task(
+            crontab(hour=6, minute=0),
+            sender.signature("landing.followup.daily_scan"),
+            name="landing-followup-daily",
+        )
+    except Exception as e:
+        logger.warning(f"[celery/beat] schedule follow-up échec : {e}")
+
     logger.info(
         f"[celery] App configurée — broker={_broker_url().split('@')[-1]}, "
         f"concurrency={celery_app.conf.worker_concurrency}, "

@@ -652,8 +652,6 @@
     "operatorMoovMoney": "Moov Money",
     "operatorAirtelMoney": "Airtel Money",
     "operatorExpressUnion": "Express Union",
-    "presetDecouverte": "Découverte",
-    "presetPetit": "Petit usage",
     "presetRegulier": "Usage régulier",
     "presetIntensif": "Travail intensif",
     "presetVolume": "Volume élevé",
@@ -862,8 +860,8 @@
     "modeleAnalyseShort": "L'IA analysera le style, la palette et la composition de votre modèle",
     "labelCountryContext": "Contexte pays",
     "labelBriefModeleShort": "Brief client (contexte)",
-    "briefPlaceholderModele": "Ex: Flyer pour conférence 'Leadership Africain' à Yaoundé le 15 mars…",
-    "briefPlaceholder": "Ex: Flyer pour l'ouverture de ma boutique 'Mode Chic' à Akwa. 30% réduction. Tél: 699 00 11 22.",
+    "briefPlaceholderModele": "Ex : \"Flyer pour la conférence 'Leadership Africain' à Yaoundé le 15 mars. Logo CMEF. Speakers : Dr Mbarga, Prof Diallo. Inscription gratuite via WhatsApp.\"",
+    "briefPlaceholder": "Ex : \"Flyer pour l'ouverture de ma boutique 'Mode Chic' à Akwa. 30% de réduction le 1er jour. Tél : 699 00 11 22. Couleurs vertes et dorées.\"",
     "oneVisualShort": "✨ 1 visuel",
     "fourVariantsShort": "🎨 4 variantes IA",
     "variantsTitleShort": "directions créatives",
@@ -891,8 +889,6 @@
     "catOfficiel": "📜 Officiel / Diplômes",
     "catCustom": "✏️ Format personnalisé",
     "creditsSuffix": "crédits",
-    "briefPlaceholderModele": "Ex : \"Flyer pour la conférence 'Leadership Africain' à Yaoundé le 15 mars. Logo CMEF. Speakers : Dr Mbarga, Prof Diallo. Inscription gratuite via WhatsApp.\"",
-    "briefPlaceholder": "Ex : \"Flyer pour l'ouverture de ma boutique 'Mode Chic' à Akwa. 30% de réduction le 1er jour. Tél : 699 00 11 22. Couleurs vertes et dorées.\"",
     "variantAlt": "Variante {{n}}",
     "variantNumber": "N°{{n}}",
     "previewAlt": "Aperçu infographie",
@@ -1114,5 +1110,110 @@
     "topTemplates": "Top documents générés",
     "topUsers": "Top utilisateurs",
     "costPerDay": "Coûts par jour (FCFA)"
+  },
+  "landing": {
+    "publier": {
+      "bouton": "Publier en ligne",
+      "page_titre": "Publier votre landing",
+      "page_sous_titre": "Choisissez un sous-domaine custom et déployez en un clic sur Netlify.",
+      "titre_modale": "Publier la landing",
+      "slug_label": "Sous-domaine souhaité",
+      "slug_hint": "Lettres, chiffres, tirets (3-40 caractères)",
+      "footer_label": "Footer perso (optionnel)",
+      "footer_placeholder": "Mentions légales, copyright, etc.",
+      "confirmer": "Publier maintenant",
+      "annuler": "Annuler",
+      "en_cours": "Déploiement Netlify…",
+      "erreur_slug": "Slug invalide : 3-40 caractères, a-z 0-9 -",
+      "succes": "Landing publiée !",
+      "copier": "Copier",
+      "copie": "Copié",
+      "voir_qr": "Voir le QR code",
+      "telecharger_qr": "Télécharger le QR",
+      "suite": "Les leads capturés apparaîtront dans",
+      "mes_leads": "Mes Leads"
+    }
+  },
+  "leads": {
+    "titre": "Mes leads",
+    "sous_titre": "Contacts capturés via vos landings publiées",
+    "refresh": "Rafraîchir",
+    "anonyme": "Anonyme",
+    "vide": "Aucun lead pour ces filtres.",
+    "export_csv": "CSV",
+    "recherche": "Recherche nom, email, message…",
+    "erreur_maj": "Erreur mise à jour : ",
+    "filtre": {
+      "toutes_landings": "Toutes les landings",
+      "tous_statuts": "Tous statuts"
+    },
+    "periode": {
+      "7j": "7j",
+      "30j": "30j",
+      "90j": "90j",
+      "1an": "1 an"
+    },
+    "kpi": {
+      "total": "Total leads",
+      "non_lu": "Non lus",
+      "converti": "Convertis",
+      "taux": "Taux conversion"
+    },
+    "statut": {
+      "non_lu": "Non lu",
+      "lu": "Lu",
+      "contacte": "Contacté",
+      "converti": "Converti",
+      "perdu": "Perdu"
+    },
+    "action": {
+      "contacte": "Contacté",
+      "marquer_contacte": "Marquer comme contacté"
+    }
+  },
+  "commun": {
+    "retour_chat": "Retour au chat"
+  },
+  "tracking": {
+    "titre": "Tracking & Email automation",
+    "section_pixels": "Analytics & Pixels publicitaires",
+    "aide_pixels": "Ces IDs sont injectés dans le <head> de toutes vos landings publiées.",
+    "plausible": "Activer Plausible Analytics (gratuit, RGPD)",
+    "section_newsletter": "Inscription newsletter",
+    "aide_newsletter": "Si configuré, vos landings affichent un champ d'inscription qui pousse les emails vers votre Brevo / Mailchimp.",
+    "section_followup": "Auto-replies & relances email",
+    "aide_followup": "Variables disponibles : {nom}, {email}, {message}, {slug}.",
+    "j0_titre": "J+0 — Auto-reply visiteur",
+    "j0_aide": "Envoyé dès qu'un lead est capturé.",
+    "j3_titre": "J+3 — Relance lead non lu",
+    "j3_aide": "Envoyé si le marchand n'a pas traité le lead.",
+    "j7_titre": "J+7 — Dernière relance",
+    "j7_aide": "Envoyé si le lead reste non contacté.",
+    "sauve": "Enregistré",
+    "sauver": "Sauvegarder"
+  },
+  "stats": {
+    "titre": "Statistiques",
+    "chargement": "Chargement statistiques…",
+    "plausible_off": "Plausible Analytics non activé (clé API manquante).",
+    "visiteurs": "Visiteurs",
+    "pageviews": "Pages vues",
+    "bounce": "Rebond",
+    "duree": "Durée moy.",
+    "sources": "Top sources",
+    "pays": "Top pays"
+  },
+  "cost": {
+    "titre_block": "Crédits insuffisants",
+    "titre_confirm": "Cette opération va consommer beaucoup de crédits",
+    "plan_label": "Plan",
+    "cout": "Coût estimé",
+    "solde": "Solde actuel",
+    "apres": "Solde après",
+    "pct": "Du solde",
+    "fermer": "Fermer",
+    "annuler": "Annuler",
+    "continuer": "Continuer",
+    "recharger": "Recharger"
   }
 }

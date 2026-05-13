@@ -250,3 +250,178 @@ Indicateurs déclencheurs :
 5. (Plus tard) Migration Postgres dédié
 
 Tant que tu n'as pas fait l'étape 2, le code R2 reste inactif mais ne casse rien (fallback local automatique).
+
+---
+
+## 5. Landing publication Netlify + SendGrid (Phase A Sprint 1)
+
+### Pourquoi
+
+- Module `modules/pro/landing_publisher.py` déploie les landings HTML
+  générées par YukpoPro/YukpoSec vers Netlify via leur API officielle,
+  sous-domaine `<slug>.yukpomnang.com`.
+- Module SendGrid intégré (`core/notifications._envoyer_email`) pour
+  notifier les marchands à chaque lead capturé via le formulaire public.
+- Sans ces secrets, l'endpoint `/api/v1/pro/landing-page/publier` renvoie
+  503 et les notifications email tombent en mode simulé (log only).
+
+### Étape 1 — Compte Netlify + API token
+
+1. Créer un compte sur https://app.netlify.com (gratuit, plan free
+   suffisant pour 100 sites + 100 GB bandwidth/mois).
+2. **User settings → Applications → New access token** → nom "Yukpo
+   prod publisher". Copie le token (visible une seule fois).
+3. (Optionnel) Si tu utilises une team Netlify dédiée, note son
+   `team_slug` (visible dans l'URL `app.netlify.com/teams/<team_slug>`).
+
+### Étape 2 — Wildcard DNS Cloudflare
+
+Pour que les sites créés soient accessibles sur `<slug>.yukpomnang.com` :
+
+1. Cloudflare Dashboard → zone `yukpomnang.com` → DNS → Add record :
+   ```
+   Type   : CNAME
+   Name   : *               (= wildcard)
+   Target : apex-loadbalancer.netlify.com
+   Proxy  : DNS only         (orange cloud OFF — Netlify gère son TLS)
+   TTL    : Auto
+   ```
+2. Si Netlify demande une vérification du custom_domain, suis l'assistant
+   (TXT record temporaire). En général : pas nécessaire avec wildcard.
+
+### Étape 3 — Compte SendGrid + API key
+
+1. Créer un compte SendGrid (https://app.sendgrid.com — plan free =
+   100 emails/jour, suffisant pour MVP).
+2. Settings → API Keys → Create API Key → permissions "Mail Send"
+   uniquement (sécurité min privilege). Copie la clé.
+3. Settings → Sender Authentication → Single Sender Verification :
+   vérifier `no-reply@yukpomnang.com` (ou domaine déjà vérifié si
+   disponible). Sans verification, SendGrid rejette les envois.
+
+### Étape 4 — Fly secrets
+
+```bash
+fly secrets set \
+  NETLIFY_API_TOKEN=netlify_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+  LANDING_DOMAIN_BASE=yukpomnang.com \
+  SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+  SENDGRID_FROM_EMAIL=no-reply@yukpomnang.com \
+  SENDGRID_FROM_NAME="YukpoPro" \
+  YUKPO_PUBLIC_API_BASE=https://yukpopro-backend.fly.dev
+
+# (Optionnel team Netlify)
+fly secrets set NETLIFY_TEAM_SLUG=ma-team-yukpo
+```
+
+`YUKPO_PUBLIC_API_BASE` = URL absolue du backend, utilisée par le helper
+`injecter_publication` pour reconstruire le `<form action>` du formulaire
+de contact qui ira vers `/api/v1/landing-leads/{slug}`. Si non défini,
+URL relative — fonctionne uniquement si Netlify rewrite vers le backend.
+
+### Étape 5 — Migration DB
+
+La migration Alembic `0009_landing_publications` ajoute les tables
+`landing_publications` et `landing_leads`. Au démarrage Fly :
+
+```bash
+fly ssh console -C "alembic upgrade head"
+```
+
+(ou laisser `core.database.init_db()` créer les tables au boot — il
+détecte les classes `LandingPublicationDB` / `LandingLeadDB` via
+SQLAlchemy `Base.metadata.create_all`).
+
+### Étape 6 — Vérification
+
+1. Génère une landing depuis le chat YukpoPro ("génère une landing pour
+   ma boutique cuir Douala").
+2. Clique le lien "🚀 Publier en ligne" → page `/publier-landing/...`.
+3. Choisis un slug (ex. `test-landing-001`) → "Publier maintenant".
+4. Vérifie l'URL `https://test-landing-001.yukpomnang.com` (TLS Netlify
+   auto-provisionné en 1-2 min).
+5. Sur la landing publiée, remplis le formulaire de contact.
+6. Vérifie que le lead apparaît dans `/mes-leads` ET que tu reçois la
+   notification WhatsApp + email.
+
+### Coûts récurrents
+
+| Composant | Tarif | Note |
+|---|---|---|
+| Netlify free tier | $0 | 100 sites + 100 GB/mois suffisants pour MVP |
+| Netlify Pro (si > 100 sites) | $19/mois/membre | À déclencher à ~50 marchands payants |
+| SendGrid free tier | $0 | 100 emails/jour (~3000/mois) |
+| SendGrid Essentials | $19.95/mois | 50k emails/mois — déclencher à ~30 marchands actifs |
+| Cloudflare DNS wildcard | $0 | inclus dans le plan gratuit |
+
+### Désactivation rapide
+
+```bash
+fly secrets unset NETLIFY_API_TOKEN
+# → endpoint /pro/landing-page/publier renvoie 503,
+# notifications email retombent en mode simulé.
+# Les leads continuent d'être enregistrés en DB + WhatsApp Twilio.
+```
+
+---
+
+## 6. Phase B — Plausible Analytics + pixels + newsletter
+
+### 6.1 Plausible Analytics
+
+**Option cloud (rapide, recommandée pour démarrer)** :
+
+1. Crée un compte sur https://plausible.io (trial 30j gratuit, puis $9/mois
+   < 10k pageviews, $19/mois < 100k).
+2. Settings → API Keys → Generate new key (permissions read uniquement).
+3. ⚠️ Plausible cloud requiert d'ajouter CHAQUE domaine dans le dashboard
+   (Settings → Sites → Add site). Pour automatiser : utilise l'API Sites
+   ou ajoute manuellement chaque `<slug>.yukpomnang.com` au moment de la
+   publication (TODO Sprint B5 : auto-add site via API au publish).
+4. `fly secrets set PLAUSIBLE_API_KEY=… PLAUSIBLE_API_BASE=https://plausible.io/api/v1 \
+       PLAUSIBLE_SCRIPT_URL=https://plausible.io/js/script.js`
+
+**Option self-hosted (~$10/mois, RGPD-friendly, illimité)** :
+
+1. Déploie Plausible CE sur une app Fly séparée :
+   ```bash
+   fly app create yukpo-plausible
+   # Suivre la doc Docker Compose de Plausible :
+   # https://github.com/plausible/community-edition
+   # Configurer Postgres + Clickhouse via fly volumes.
+   ```
+2. `fly secrets set PLAUSIBLE_API_BASE=https://yukpo-plausible.fly.dev/api/v1 \
+       PLAUSIBLE_SCRIPT_URL=https://yukpo-plausible.fly.dev/js/script.js`
+
+### 6.2 Pixels publicitaires
+
+Aucune action serveur — les pixels Facebook/GA4/TikTok/Snap/Clarity sont
+juste des IDs publics que le marchand colle dans
+`/tracking-settings` côté YukpoPro. Le backend les injecte automatiquement
+dans `<head>` de la landing lors du publish.
+
+### 6.3 Newsletter (Brevo / Mailchimp)
+
+Le marchand colle SA clé API perso dans `/tracking-settings`. La clé est
+stockée chiffrée côté Yukpo (MVP : clair en DB → chiffrer avec
+`cryptography.Fernet` + `SECRET_KEY` plus tard si compliance le requiert).
+
+Aucune clé Yukpo-globale n'est requise.
+
+### 6.4 Email automation J+0 / J+3 / J+7
+
+Réutilise SendGrid (cf. section 5.3). Le scheduler Celery beat envoie
+les follow-ups quotidiennement (06:00 UTC) — assure-toi qu'un worker
+Celery + beat tournent côté Fly :
+
+```bash
+# Si tu n'utilises pas encore Celery beat :
+fly secrets set CELERY_BEAT_ENABLED=true
+# Et dans entrypoint.sh : conditionner le lancement de
+#   celery -A core.celery_app beat --loglevel=info
+# en parallèle du worker.
+```
+
+Tant que beat n'est pas lancé, l'auto-reply J+0 fonctionne quand même
+(appelé en synchro depuis la route `/landing-leads/{slug}`), seuls J+3
+et J+7 nécessitent beat.

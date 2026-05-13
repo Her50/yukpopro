@@ -1,0 +1,14 @@
+{
+  "name": "@yukpo/leads-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Composant React partagé Mes Leads (landings publiées) YukpoPro + YukpoSecrétariat",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "lucide-react": "^0.300.0",
+    "zustand": "^5.0.0"
+  }
+}

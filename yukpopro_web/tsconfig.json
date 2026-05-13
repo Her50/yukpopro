@@ -18,9 +18,15 @@
     "paths": {
       "@/*": ["./src/*"],
       "@yukpo/admin-dashboard": ["../packages/admin-dashboard/src/index.ts"],
-      "@yukpo/admin-dashboard/*": ["../packages/admin-dashboard/src/*"]
+      "@yukpo/admin-dashboard/*": ["../packages/admin-dashboard/src/*"],
+      "@yukpo/leads-dashboard": ["../packages/leads-dashboard/src/index.ts"],
+      "@yukpo/leads-dashboard/*": ["../packages/leads-dashboard/src/*"]
     }
   },
-  "include": ["src", "../packages/admin-dashboard/src"],
+  "include": [
+    "src",
+    "../packages/admin-dashboard/src",
+    "../packages/leads-dashboard/src"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

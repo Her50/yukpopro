@@ -270,6 +270,11 @@ export const landingPageAPI = {
     contexte?: string; langue?: string;
     generer_images?: boolean; brand_kit?: any;
   }) => httpRoot.post('/pro/landing-page/generer', req, { timeout: 600_000 }),
+  publier: (req: {
+    fichier_id: string; slug: string;
+    plan?: 'free' | 'pro' | 'business';
+    footer_custom?: string;
+  }) => httpRoot.post('/pro/landing-page/publier', req, { timeout: 120_000 }),
 }
 
 // Vidéo IA text-to-video — Kling 1.6 std/pro + LTX-Video via fal.ai +

@@ -1372,5 +1372,110 @@
       "countries": "countries covered",
       "uptime": "uptime"
     }
+  },
+  "landing": {
+    "publier": {
+      "bouton": "Publish online",
+      "page_titre": "Publish your landing",
+      "page_sous_titre": "Pick a custom subdomain and deploy on Netlify in one click.",
+      "titre_modale": "Publish the landing",
+      "slug_label": "Desired subdomain",
+      "slug_hint": "Letters, digits, dashes (3-40 characters)",
+      "footer_label": "Custom footer (optional)",
+      "footer_placeholder": "Legal mentions, copyright, etc.",
+      "confirmer": "Publish now",
+      "annuler": "Cancel",
+      "en_cours": "Deploying to Netlify…",
+      "erreur_slug": "Invalid slug: 3-40 chars, a-z 0-9 -",
+      "succes": "Landing published!",
+      "copier": "Copy",
+      "copie": "Copied",
+      "voir_qr": "View QR code",
+      "telecharger_qr": "Download QR",
+      "suite": "Captured leads will appear in",
+      "mes_leads": "My Leads"
+    }
+  },
+  "leads": {
+    "titre": "My leads",
+    "sous_titre": "Contacts captured by your published landings",
+    "refresh": "Refresh",
+    "anonyme": "Anonymous",
+    "vide": "No lead for these filters.",
+    "export_csv": "CSV",
+    "recherche": "Search name, email, message…",
+    "erreur_maj": "Update error: ",
+    "filtre": {
+      "toutes_landings": "All landings",
+      "tous_statuts": "All statuses"
+    },
+    "periode": {
+      "7j": "7d",
+      "30j": "30d",
+      "90j": "90d",
+      "1an": "1y"
+    },
+    "kpi": {
+      "total": "Total leads",
+      "non_lu": "Unread",
+      "converti": "Converted",
+      "taux": "Conversion rate"
+    },
+    "statut": {
+      "non_lu": "Unread",
+      "lu": "Read",
+      "contacte": "Contacted",
+      "converti": "Converted",
+      "perdu": "Lost"
+    },
+    "action": {
+      "contacte": "Contacted",
+      "marquer_contacte": "Mark as contacted"
+    }
+  },
+  "commun": {
+    "retour_chat": "Back to chat"
+  },
+  "tracking": {
+    "titre": "Tracking & Email automation",
+    "section_pixels": "Analytics & Ad Pixels",
+    "aide_pixels": "These IDs are injected into <head> of all your published landings.",
+    "plausible": "Enable Plausible Analytics (free, GDPR)",
+    "section_newsletter": "Newsletter signup",
+    "aide_newsletter": "If configured, your landings show a signup field that pushes emails to Brevo / Mailchimp.",
+    "section_followup": "Auto-replies & email follow-ups",
+    "aide_followup": "Variables: {nom}, {email}, {message}, {slug}.",
+    "j0_titre": "Day 0 — Visitor auto-reply",
+    "j0_aide": "Sent as soon as a lead is captured.",
+    "j3_titre": "Day 3 — Unread lead reminder",
+    "j3_aide": "Sent if the merchant has not handled the lead.",
+    "j7_titre": "Day 7 — Final reminder",
+    "j7_aide": "Sent if the lead is still not contacted.",
+    "sauve": "Saved",
+    "sauver": "Save"
+  },
+  "stats": {
+    "titre": "Statistics",
+    "chargement": "Loading statistics…",
+    "plausible_off": "Plausible Analytics not enabled (API key missing).",
+    "visiteurs": "Visitors",
+    "pageviews": "Pageviews",
+    "bounce": "Bounce",
+    "duree": "Avg duration",
+    "sources": "Top sources",
+    "pays": "Top countries"
+  },
+  "cost": {
+    "titre_block": "Insufficient credits",
+    "titre_confirm": "This operation will consume many credits",
+    "plan_label": "Plan",
+    "cout": "Estimated cost",
+    "solde": "Current balance",
+    "apres": "Balance after",
+    "pct": "Of balance",
+    "fermer": "Close",
+    "annuler": "Cancel",
+    "continuer": "Continue",
+    "recharger": "Top up"
   }
 }

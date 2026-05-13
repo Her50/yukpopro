@@ -322,6 +322,24 @@ export const generateurApi = {
   },
 
   /**
+   * Publie une landing déjà générée sur Netlify (sous-domaine custom).
+   * Phase A Sprint 1 — partage URL public + QR code.
+   */
+  publierLanding: async (req: {
+    fichier_id: string;
+    slug: string;
+    plan?: "free" | "pro" | "business";
+    footer_custom?: string;
+  }): Promise<{
+    ok: boolean; site_id: string; slug: string;
+    url_public: string; qr_png_b64: string;
+    plan: string; is_new: boolean;
+  }> => {
+    const { data } = await http.post("/pro/landing-page/publier", req, { timeout: 120_000 });
+    return data;
+  },
+
+  /**
    * Sprint G1 — Auto-orchestrateur génération documents.
    * L'utilisateur tape un brief en langage naturel, le backend détecte
    * automatiquement le type d'output, le template, le mode et le format.

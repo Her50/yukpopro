@@ -109,6 +109,66 @@ E. Pas de breaking changes
    • Toute modification de table existante = migration Alembic ascendante
      uniquement, pas de drop column.
 
+F. Facturation systématique sur crédits user — marge Yukpo intégrée
+   Modèle EXISTANT à réutiliser (PAS recoder) :
+   `modules/bureau/service_credits_bureau.py` :
+     • `debiter_llm(user_id, modele, tokens_in, tokens_out, module)`
+       → tarif TARIFS_MODELES[modele] × tokens × MULTIPLICATEUR_YUKPO (20×)
+     • `debiter_forfait(user_id, type_forfait, module, multiplicateur)`
+       → COUTS_FORFAIT_FCFA[type] × multiplicateur × MULTIPLICATEUR_YUKPO
+     • `debiter_llm_unifie` / `debiter_forfait_unifie` : délégation auto
+       vers `modules/pro/service_credits.py` si user a plan Pro actif,
+       sinon retombe sur solde Bureau.
+   • CHAQUE nouvel endpoint qui consomme une ressource (LLM, image IA,
+     vidéo, OCR, traduction, scraping, Netlify deploy, Plausible event,
+     SendGrid email, WhatsApp Twilio, R2 storage, fal/Replicate inference,
+     SMS, OAuth refresh, scraping Jumia, Meta Graph push…) DOIT débiter
+     les crédits user via une de ces fonctions AVANT (pré-check) ET APRÈS
+     (débit réel basé sur usage observé). Aucune feature "gratuite".
+   • Si type_forfait n'existe pas encore dans `COUTS_FORFAIT_FCFA`, on
+     l'AJOUTE dans le dict avec son tarif FCFA = coût provider réel
+     (Netlify deploy ≈ 5, Twilio WA ≈ 30, SendGrid email ≈ 1, Replicate
+     LoRA train ≈ 3000, Recraft SVG ≈ 20, etc.). MULTIPLICATEUR_YUKPO=20
+     applique la marge automatiquement.
+   • Pré-check via `await _pre_check_credits(user_id, role=current_user.role)`
+     (pattern actuel dans `routes_pro_generateurs.py`). Retourner 402
+     `CREDITS_EPUISES` avec usage actuel/quota si insuffisant.
+   • Logs auto via `ConsommationBureauDB` (déjà branchés au dashboard
+     admin cross-app — pas de code supplémentaire à écrire).
+   • Endpoints PUBLICS sans auth (ex : POST landing-leads/{slug} en A3,
+     storefront client en D3) : débit sur le compte du MARCHAND propriétaire
+     du slug, pas sur le visiteur. Anti-abuse : rate-limit IP avant débit.
+   • Une feature livrée sans facturation = bug bloquant à corriger AVANT
+     merge.
+
+G. CostAdvisor — alerte préventive avant opérations coûteuses
+   Module : `core/cost_advisor.py` (livré 2026-05-13).
+   Principe : si une opération va consommer ≥ X % du solde restant
+   (seuil dépendant du PLAN), retourner 402 type='cost_confirm_required'
+   avec breakdown user-friendly. Le frontend affiche une modale + lien
+   "Recharger". L'user confirme → re-soumet la requête avec
+   `confirmer_cout=true` → exécution. Si solde insuffisant → 402
+   type='credits_insuffisants' (action=BLOCK) → redirection /abonnement.
+
+   Seuils par plan (% solde) :
+     gratuit=20, secretariat/infographie=25, complet=35,
+     pro_starter=25, pro_business=40, pro_enterprise=60.
+   Plancher absolu : pas de modale sous 50 crédits.
+
+   À appliquer sur CHAQUE endpoint dont l'estimation max dépasse 150
+   crédits. Pattern court :
+
+       if not req.confirmer_cout:
+           from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+           cout = estimer_cout_module("<key>", multiplicateur=<n>)
+           v = await advisor.evaluer(user_id, cout, module="<key>")
+           if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+               raise HTTPException(402, v.detail_pour_402())
+
+   Aucun travail UI supplémentaire requis — l'intercepteur axios global
+   et `<CostConfirmModalRoot/>` (montés dans App.tsx YPro + Sec) gèrent
+   automatiquement la modale et le retry.
+
 ROADMAP — 4 PHASES SÉQUENTIELLES
 ═════════════════════════════════
 
@@ -272,12 +332,45 @@ CRITÈRES DE SUCCÈS PHASE C
 ESTIMATION : 2-3 semaines dev.
 
 ═══════════════════════════════════════════════════════════════════════════════
+PHASE C.5 — Brand AI Training (LoRA Flux dev fine-tuned)
+═══════════════════════════════════════════════════════════════════════════════
+
+3 jours dev. Insérée entre Phase C et Phase D.
+
+OBJECTIF : Chaque org peut entraîner son LoRA brand custom une fois pour
+toutes (5$ Replicate, 15-30 min), puis TOUS ses visuels futurs (Yukpo
+image_gen, freeform, slides web, landing, vidéos) injectent ce LoRA
+automatiquement → cohérence brand parfaite sans redécrire le style à chaque
+prompt.
+
+LIVRABLES :
+  • Endpoint /api/v1/brand-ai/entrainer (upload 10-30 photos ZIP → Replicate)
+  • Table brand_loras (org_id, trigger_word, replicate_url, statut, cree_le)
+  • UI YukpoPro "Mon Brand IA" : upload + preview + bouton train + statut
+  • Auto-pickup : image_gen.generer_image() détecte LoRA actif pour user.org_id
+  • Système preview A/B (même prompt avec vs sans LoRA)
+  • Multi-LoRA par org (saison/gamme/B2B vs B2C)
+
+DIFFÉRENCIATEUR :
+  Adobe Firefly Custom Models = Enterprise ~$2000/mois (Yukpo = 4000 XAF/training)
+  Canva = pas dispo
+  MidJourney = pas de fine-tune brand
+  → Aucun concurrent grand public Afrique francophone
+
+PRICING :
+  Plan Business    : 1 LoRA inclus + génération illimitée
+  Plan Enterprise  : multi-LoRA
+
+ESTIMATION : 3 jours dev.
+
+═══════════════════════════════════════════════════════════════════════════════
 PHASE D — YukpoShop : e-commerce avec connexion sociale + import IA
 ═══════════════════════════════════════════════════════════════════════════════
 
-⚠ PRÉ-REQUIS : Phases A, B, C OPÉRATIONNELLES en prod et TESTÉES par de vrais
-   marchands. Ne PAS attaquer la Phase D avant d'avoir validé que les phases
-   précédentes apportent une vraie valeur à au moins 20-50 marchands payants.
+⚠ PRÉ-REQUIS : Phases A, B, C, C.5 OPÉRATIONNELLES en prod et TESTÉES par de
+   vrais marchands. Ne PAS attaquer la Phase D avant d'avoir validé que les
+   phases précédentes apportent une vraie valeur à au moins 20-50 marchands
+   payants.
 
 OBJECTIF : Boutique e-commerce complète, mais avec 4 DIFFÉRENCIATEURS MAJEURS
 qui n'existent NULLE PART ailleurs en 2026 sur le marché africain francophone :
@@ -474,21 +567,213 @@ CRITÈRES DE SUCCÈS PHASE D
 ESTIMATION : 12-16 semaines dev focus (3-4 mois).
 
 ═══════════════════════════════════════════════════════════════════════════════
+PHASE E — Collecte de données XLSForm + Analytics IA conversationnel
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJECTIF : Transformer YukpoPro en plateforme de collecte de données
+KoboCollect-class — formulaires XLSForm complexes (logique conditionnelle,
+contraintes, calculs, médias) générés depuis un simple prompt chat,
+collecte web/mobile/offline-first, et analyses IA puissantes "à la demande"
+sans data scientist : "analyse la satisfaction par tranche d'âge et trace
+un graphique" → rapport généré en 30s.
+
+PRINCIPE : Réutiliser au MAXIMUM l'existant déjà en place dans
+`modules/enquetes/` (gestionnaire_enquetes.py, persistence.py,
+helpers_dictionnaire_plan.py, facturation.py) et `routes_enquetes.py`.
+Modèles déjà présents : Etude, Formulaire, QuestionFormulaire,
+ThemeQualitatif, TranscriptionAudio. Endpoints déjà exposés : créer
+étude, créer/modifier formulaire, soumettre réponse, XLSForm export,
+analyse qualitative+quantitative, rapport DOCX/PDF.
+
+CE QUI MANQUE (à livrer en Phase E) :
+
+E1. Génération de formulaire par chat IA (3-4 jours)
+
+   • Côté backend, nouvel endpoint :
+       POST /api/v1/enquetes/generer-par-prompt
+       Body : {brief, langue, canal_diffusion, nb_questions_cible?, profil_cible?}
+   • Pipeline :
+       a. Sonnet compose un Formulaire XLSForm complet à partir du brief :
+          - 10-40 questions structurées (select_one, select_multiple, integer,
+            decimal, text, date, time, geopoint, image, audio, barcode)
+          - Logique conditionnelle (relevant=, constraint=, calculation=)
+          - Choices listes multi-langues
+          - Groupes + répétitions (begin_group / begin_repeat)
+          - Validation contraintes (regex, ranges, required)
+          - Hints, default values
+       b. Le formulaire est sauvegardé via gestionnaire_enquetes.creer_formulaire()
+       c. Retourne {formulaire_id, lien_public, lien_qr, lien_xlsform_download}
+
+   • Côté chat YukpoPro / YukpoSec, détection intent dans ChatPage.tsx +
+     ChatUnifieSec.tsx (regex FR+EN +  prompt LLM si ambigu) :
+       "génère un questionnaire de satisfaction client garage Douala"
+       "crée un formulaire d'enquête santé maternelle Yaoundé en français + douala"
+       "fais-moi un audit conformité OHADA pour mes franchisés"
+
+E2. Lien public + collecte web/mobile responsive (2-3 jours)
+
+   • Frontend public PWA `enquetes.yukpomnang.com/{formulaire_id}`
+     OU sous-domaine custom du marchand `<slug>.yukpomnang.com/q`
+   • Composant React qui :
+       - Charge le Formulaire JSON depuis /enquetes/public/{id}
+       - Render UI mobile-first responsive (boutons radio gros, swipe,
+         géoloc auto, capture photo via appareil natif)
+       - Gère branching XLSForm côté client (eval calculations + relevant)
+       - PWA installable + offline-first (IndexedDB queue de réponses)
+       - Resync auto quand re-connecté
+       - Multi-langue selon Formulaire.langues_actives (FR/EN/AR/WO/DOUALA/SW)
+   • Lien QR généré automatiquement (réutilise modules/pro/qr_generator.py)
+   • Endpoint public d'ingestion : POST /enquetes/public/{id}/reponses
+     (déjà existant : ge.soumettre_reponse — à étendre avec rate-limit
+     IP + honeypot + débit forfait sur owner)
+
+E3. Suivi temps réel de la collecte (1-2 jours)
+
+   • Onglet "Mes enquêtes" dans YukpoPro :
+       - Liste des études actives avec : nb_réponses, taux de complétion,
+         temps moyen, dernier répondant, sparkline 7 derniers jours
+       - Carte géographique (Leaflet + tuiles OSM) si geopoint dans formulaire
+       - Sondages sur réponses par question en quasi-temps-réel (polling 30s)
+   • Notifications push/WA/email au marchand sur seuils :
+       - "Tu as dépassé 100 réponses → lance l'analyse maintenant ?"
+       - "Aucune réponse depuis 7 jours → relance ton public ?"
+   • Export CSV + XLSX en un clic (réutilise le pattern leads-dashboard)
+
+E4. Analytics IA conversationnel "à la demande" (5-7 jours) — DIFFÉRENCIATEUR
+
+   • Endpoint POST /api/v1/enquetes/{id}/analyser-prompt
+     Body : {prompt_analyse}
+     Ex prompts user :
+       "compare la satisfaction par tranche d'âge et par genre"
+       "calcule le NPS, segmente par ville, et identifie les 3 raisons
+        principales d'insatisfaction"
+       "fais une analyse de sentiment des verbatims libres"
+       "trace l'évolution des réponses jour par jour"
+
+   • Pipeline :
+       a. Sonnet (avec accès au DataFrame pandas en lecture seule via
+          un sandbox restreint) compose un PLAN d'analyse en JSON :
+             {operations: [
+               {type: "filter", colonne, predicat},
+               {type: "groupby", colonnes},
+               {type: "agg", agg: "mean|sum|count|nps|...", colonne},
+               {type: "chart", chart_type: "bar|line|pie|heatmap|map",
+                config: {...}},
+               {type: "llm_synthese", instruction: "..."},
+             ]}
+       b. Backend exécute le plan via pandas (déjà branché modules/bureau/
+          data_analyzer ou modules/pro/data_analyse — à vérifier/réutiliser)
+       c. Génère graphiques Vega-Lite spec OU PNG matplotlib (existant
+          déjà : `_graphique_barres`, `_graphique_camembert`,
+          `_graphique_histogramme`, `_fig_to_b64` dans gestionnaire_enquetes)
+       d. Sonnet rédige la synthèse en FR : insights clés, recommandations
+          actionnables, alertes, segments à fort/faible niveau
+       e. Retourne {plan_executed, charts: [...], synthese_md, donnees_brutes}
+
+   • Cache : analyses identiques sur même dataset → réponse instantanée
+     (clé = hash(prompt + dataset_version)).
+   • Garde-fous sandbox : pas d'exec Python arbitraire, uniquement les
+     opérations validées du PLAN JSON (dataframe.groupby/agg/filter/merge),
+     limite de RAM/CPU.
+
+E5. Rapport complet exportable (2-3 jours)
+
+   • Réutilise `ge.generer_rapport(etude_id, format='docx'|'pdf')` existant
+   • Étend avec sections :
+       - Méthodologie (auto-décrite par Sonnet à partir du Formulaire)
+       - Résultats clés (3-5 insights majeurs choisis par Sonnet)
+       - Visualisations (les charts générés en E4, embarqués)
+       - Verbatims représentatifs (qual + auto-classification thématique
+         déjà présent dans ThemeQualitatif)
+       - Recommandations actionnables segmentées par profil
+       - Annexes : tableau croisé complet, données brutes
+   • Branding : applique le BrandKit du user (déjà disponible côté Pro)
+   • Multi-format : DOCX, PDF, HTML interactif (Plotly + Reveal.js), PPTX
+
+E6. Templates pré-faits + onboarding (1-2 jours)
+
+   • Catalogue de templates métier (clone-en-1-clic) :
+       - Satisfaction client (CSAT, NPS, CES)
+       - Audit conformité OHADA / CIMA
+       - Enquête santé maternelle (UN OMS adapté Afrique)
+       - Audit fournisseurs (RSE, qualité, délais)
+       - Étude de marché (qual + quanti combinée)
+       - Recensement bénéficiaires ONG
+       - Sondage politique / opinion publique
+       - 360° collaborateur (RH)
+   • Chaque template : Formulaire XLSForm complet + analyse_prompts
+     suggérés pour orienter l'analyse aval.
+
+FACTURATION (modèle existant `modules/enquetes/facturation.py` à étendre,
+appliquer MULTIPLICATEUR_YUKPO=20 via debiter_forfait) :
+
+  • enquete_generation_prompt        : LLM Sonnet + render → 8 FCFA / form
+  • enquete_xlsform_export           : 1 FCFA / export
+  • enquete_reponse_capturee         : 0.3 FCFA / réponse (débit MARCHAND)
+  • enquete_analyse_prompt_simple    : 5 FCFA / analyse (≤3 ops)
+  • enquete_analyse_prompt_complexe  : 25 FCFA / analyse (≥4 ops ou +LLM)
+  • enquete_rapport_complet_docx     : 15 FCFA / rapport
+  • enquete_rapport_complet_pdf      : 20 FCFA / rapport
+  • enquete_carte_geopoint           : 3 FCFA / rendu carte
+  • enquete_offline_sync             : 0.1 FCFA / batch synchronisation
+
+INFRA :
+
+  • Réponses stockées en Postgres (existant) ; vidéos/photos→R2 (existant)
+  • Cache analyses dans Redis (clé hash, TTL 24h)
+  • Worker Celery `enquete_heavy` pour analyses prompt-complexes
+    (réutilise le routing infra existant `core/celery_app.py`)
+
+DIFFÉRENCIATEURS vs concurrents :
+
+  • KoboCollect / ODK Central        : XLSForm pro mais NUL analytics
+  • SurveyMonkey / Typeform          : UI ok mais pas XLSForm avancé,
+                                       analytics basiques, pas africain
+  • Google Forms                     : très basique, pas multi-canal
+  • Yukpo                            : XLSForm + offline + analyses IA
+                                       conversationnelles + branding +
+                                       distribution WA/SMS + multi-langue
+                                       africaine, tout via PROMPT chat.
+
+CRITÈRES DE SUCCÈS PHASE E
+──────────────────────────
+✓ Un marchand tape "génère un questionnaire de satisfaction garage Douala
+   en français et douala" → reçoit un lien public en 30s
+✓ Un client mobile (Android low-end, 3G capricieux) remplit le formulaire
+   offline puis se reconnecte → réponse syncée auto
+✓ Le marchand demande "analyse par tranche d'âge et fais-moi un graphique
+   du NPS par ville" → reçoit graphiques + synthèse en 30-60s
+✓ Rapport DOCX/PDF complet, brandé, exportable en 1 clic
+✓ Au moins 5 templates pré-faits utilisables tels quels
+✓ PWA collecte installable, fonctionne offline (file d'attente IndexedDB)
+✓ Multi-langue FR/EN/AR/WO/DOUALA/SW opérationnel sur formulaire ET rapport
+✓ Toutes les opérations débitent via debiter_forfait_unifie (contrainte F)
+
+ESTIMATION : 3-4 semaines dev focus.
+
+═══════════════════════════════════════════════════════════════════════════════
 PRIORISATION SÉQUENTIELLE STRICTE
 ═══════════════════════════════════════════════════════════════════════════════
 
-NE PAS commencer la Phase D avant que A, B, C soient :
+NE PAS commencer la Phase D avant que A, B, C, C.5, E (ou un sous-ensemble
+validé en marché) soient :
   • Déployées en production
   • Validées par au moins 20 utilisateurs réels payants
   • Sans bug bloquant remonté pendant 2 semaines consécutives
 
 Ordre :
 
-  Sprint 1-2  : Phase A (publication + leads + footer)        [3-5 jours]
-  Sprint 3-4  : Phase B (analytics + pixel + newsletter)      [4-6 jours]
-  Sprint 5-7  : Phase C (multi-pages + multi-langue + blog)   [2-3 semaines]
-  PAUSE     : Validation marché 4-8 semaines avec early adopters
-  Sprint 8+ : Phase D (YukpoShop complet)                     [3-4 mois]
+  Sprint 1-2   : Phase A   (publication + leads + footer)        [3-5 jours]
+  Sprint 3-4   : Phase B   (analytics + pixel + newsletter)      [4-6 jours]
+  Sprint 5-7   : Phase C   (multi-pages + multi-langue + blog)   [2-3 semaines]
+  Sprint 8     : Phase C.5 (Brand AI Training — LoRA Flux dev)   [3 jours]
+  PAUSE        : Validation marché 4-8 semaines avec early adopters
+  Sprint 9-12  : Phase E   (XLSForm + Analytics IA prompt)       [3-4 semaines]
+                 ↳ Greffée sur module enquetes/ existant (Etude/Formulaire/
+                   XLSForm/analyses qualitatives+quantitatives déjà présents).
+                   Valeur immédiate ONG/marketing/ESN — peut commencer
+                   AVANT Phase D si le marché Phase A-C valide bien.
+  Sprint 13+   : Phase D   (YukpoShop complet)                   [3-4 mois]
 
 QUALITÉ — BARÈME NON-NÉGOCIABLE
 ─────────────────────────────────
@@ -504,6 +789,13 @@ QUALITÉ — BARÈME NON-NÉGOCIABLE
   ✓ Logs structurés (logger.info pour succès, .warning pour anomalies)
   ✓ Erreurs HTTP propres (4xx pour client, 5xx pour serveur, jamais 500 silencieux)
   ✓ Coût LLM/IA débité via debiter_llm() (existant) — pas d'appel "gratuit"
+  ✓ Coût NON-LLM débité via debiter_forfait() avec entrée correspondante
+    dans COUTS_FORFAIT_FCFA — marge MULTIPLICATEUR_YUKPO=20 appliquée
+    automatiquement, jamais bypassée (cf. contrainte F)
+  ✓ Pré-check `_pre_check_credits(user_id, role)` AVANT chaque appel coûteux
+    pour retourner 402 propre si solde insuffisant (pas de 500 mid-pipeline)
+  ✓ Endpoints publics (leads form, storefront client) débitent le marchand
+    propriétaire du slug — pas le visiteur anonyme
 
 DÉMARRAGE — Premier commit attendu
 ─────────────────────────────────

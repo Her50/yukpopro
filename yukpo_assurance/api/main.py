@@ -87,6 +87,12 @@ from api.routes_rag import router as rag_router
 from api.routes_pro_profil import router as pro_profil_router
 from api.routes_pro_agent import router as pro_agent_router
 from api.routes_pro_generateurs import router as pro_generateurs_router
+from api.routes_landing_leads import (
+    router_public as landing_leads_public_router,
+    router_pro as landing_leads_pro_router,
+)
+from api.routes_tracking_settings import router as tracking_settings_router
+from api.routes_cost_advisor import router as cost_advisor_router
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_admin_cross import router as admin_cross_router
@@ -781,6 +787,26 @@ app.include_router(rag_router, prefix="/api/v1/rag", tags=["RAG Corpus Réglemen
 app.include_router(pro_profil_router, prefix="/api/v1/pro/profil", tags=["Plateforme Pro — Profil Métier"])
 app.include_router(pro_agent_router, prefix="/api/v1/pro/agent", tags=["Plateforme Pro — Agent IA"])
 app.include_router(pro_generateurs_router, prefix="/api/v1/pro", tags=["Plateforme Pro — Rapports & Slides"])
+app.include_router(
+    landing_leads_public_router,
+    prefix="/api/v1/landing-leads",
+    tags=["Landing Leads (public form capture)"],
+)
+app.include_router(
+    landing_leads_pro_router,
+    prefix="/api/v1/pro",
+    tags=["Plateforme Pro — Landing Leads & Publications"],
+)
+app.include_router(
+    tracking_settings_router,
+    prefix="/api/v1/pro",
+    tags=["Plateforme Pro — Tracking Analytics & Follow-up"],
+)
+app.include_router(
+    cost_advisor_router,
+    prefix="/api/v1",
+    tags=["Cost Advisor (alerte préventive crédits)"],
+)
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])
 app.include_router(admin_cross_router,    prefix="/api/v1/admin-cross",     tags=["Administration cross-app (Pro + Sec)"])

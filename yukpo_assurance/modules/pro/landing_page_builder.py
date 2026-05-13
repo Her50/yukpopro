@@ -675,3 +675,270 @@ async def generer_landing_page(
 
     html = construire_html_landing(spec, brand_kit=brand_kit)
     return html.encode("utf-8"), spec, usages
+
+
+# ── Patch publication (Phase A — Sprint 1) ────────────────────────────────────
+#
+# Le HTML produit par `construire_html_landing` contient un formulaire
+# `<form action="mailto:...">` et un footer générique. Lors de la
+# publication Netlify, on transforme ce HTML pour :
+#   1. Rediriger le form vers /api/v1/landing-leads/{slug} (POST JSON-form)
+#   2. Injecter un champ honeypot anti-bot caché
+#   3. Insérer la mention "Powered by Yukpo" obligatoire selon plan,
+#      OU remplacer par footer_custom (plan business/pro)
+#
+# Non-invasif : utilise des regex ciblées sur les marqueurs très stables du
+# template (id="contact" et balise </footer>). Si le HTML diffère
+# (versions futures), le fallback laisse le HTML inchangé et logger.warning.
+
+import re as _re
+
+
+_MENTIONS_FOOTER = {
+    "free":     'Site généré par <a href="https://yukpomnang.com" '
+                'target="_blank" rel="noopener" style="color:inherit;'
+                'text-decoration:underline">YukpoPro</a> · yukpomnang.com',
+    "pro":      'Powered by <a href="https://yukpomnang.com" '
+                'target="_blank" rel="noopener" style="color:inherit;'
+                'text-decoration:underline">YukpoPro</a>',
+    "business": "",  # masqué — pas de branding
+}
+
+
+def _construire_blocs_tracking(
+    *, tracking: Optional[dict] = None, plausible_script_url: str = "",
+) -> str:
+    """Compose les balises <script>/<noscript> à injecter dans <head>.
+
+    `tracking` est un dict (sérialisation de TrackingSettingsDB) :
+      {plausible_actif, fb_pixel_id, ga4_measurement_id,
+       tiktok_pixel_id, snap_pixel_id, clarity_project_id, ...}
+
+    `plausible_script_url` : URL du JS Plausible (défaut cloud,
+    surchargeable par env PLAUSIBLE_SCRIPT_URL pour self-hosted).
+    """
+    if not tracking:
+        return ""
+    blocks: list[str] = []
+
+    # Plausible
+    if tracking.get("plausible_actif") and plausible_script_url:
+        blocks.append(
+            f'<script defer src="{escape(plausible_script_url)}"></script>'
+        )
+
+    # Facebook / Meta Pixel
+    fb = (tracking.get("fb_pixel_id") or "").strip()
+    if fb and fb.isdigit():
+        blocks.append(
+            "<script>!function(f,b,e,v,n,t,s)"
+            "{if(f.fbq)return;n=f.fbq=function(){n.callMethod?"
+            "n.callMethod.apply(n,arguments):n.queue.push(arguments)};"
+            "if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';"
+            "n.queue=[];t=b.createElement(e);t.async=!0;"
+            "t.src=v;s=b.getElementsByTagName(e)[0];"
+            "s.parentNode.insertBefore(t,s)}(window,document,'script',"
+            "'https://connect.facebook.net/en_US/fbevents.js');"
+            f"fbq('init','{fb}');fbq('track','PageView');</script>"
+            f'<noscript><img height="1" width="1" style="display:none" '
+            f'src="https://www.facebook.com/tr?id={fb}&ev=PageView&noscript=1"/></noscript>'
+        )
+
+    # Google Analytics 4
+    ga = (tracking.get("ga4_measurement_id") or "").strip()
+    if ga.startswith("G-"):
+        blocks.append(
+            f'<script async src="https://www.googletagmanager.com/gtag/js?id={escape(ga)}"></script>'
+            "<script>window.dataLayer=window.dataLayer||[];"
+            "function gtag(){dataLayer.push(arguments);}"
+            f"gtag('js',new Date());gtag('config','{escape(ga)}');</script>"
+        )
+
+    # TikTok Pixel
+    tk = (tracking.get("tiktok_pixel_id") or "").strip()
+    if tk:
+        blocks.append(
+            "<script>!function (w, d, t) {w.TiktokAnalyticsObject=t;"
+            "var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify',"
+            "'instances','debug','on','off','once','ready','alias','group',"
+            "'enableCookie','disableCookie'],ttq.setAndDefer=function(t,e)"
+            "{t[e]=function(){t.push([e].concat(Array.prototype.slice.call("
+            "arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)"
+            "ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t)"
+            "{for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)"
+            "ttq.setAndDefer(e,ttq.methods[n]);return e};"
+            "ttq.load=function(e,n){var i='https://analytics.tiktok.com/i18n/pixel/events.js';"
+            "ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},"
+            "ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};"
+            "var o=document.createElement('script');o.type='text/javascript',"
+            "o.async=!0,o.src=i+'?sdkid='+e+'&lib='+t;"
+            "var a=document.getElementsByTagName('script')[0];"
+            "a.parentNode.insertBefore(o,a)};"
+            f"ttq.load('{escape(tk)}');ttq.page();}}(window,document,'ttq');</script>"
+        )
+
+    # Snap Pixel
+    sp = (tracking.get("snap_pixel_id") or "").strip()
+    if sp:
+        blocks.append(
+            "<script>(function(e,t,n){if(e.snaptr)return;"
+            "var a=e.snaptr=function(){a.handleRequest?"
+            "a.handleRequest.apply(a,arguments):a.queue.push(arguments)};"
+            "a.queue=[];var s='script';r=t.createElement(s);"
+            "r.async=!0;r.src=n;var u=t.getElementsByTagName(s)[0];"
+            "u.parentNode.insertBefore(r,u);})(window,document,"
+            "'https://sc-static.net/scevent.min.js');"
+            f"snaptr('init','{escape(sp)}');snaptr('track','PAGE_VIEW');</script>"
+        )
+
+    # Microsoft Clarity
+    cl = (tracking.get("clarity_project_id") or "").strip()
+    if cl:
+        blocks.append(
+            "<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function()"
+            "{(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);"
+            "t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;"
+            "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})"
+            f"(window,document,'clarity','script','{escape(cl)}');</script>"
+        )
+
+    return "\n".join(blocks)
+
+
+def injecter_publication(
+    html_bytes: bytes,
+    *,
+    slug: str,
+    plan: str = "free",
+    footer_custom: Optional[str] = None,
+    api_base: str = "",
+    tracking: Optional[dict] = None,
+    plausible_script_url: str = "",
+    newsletter_actif: bool = False,
+) -> bytes:
+    """Patch le HTML pour publication : form → API backend + footer plan
+    + tracking analytics (Phase B) + bouton newsletter (B3).
+
+    Args:
+        html_bytes           : HTML brut produit par `generer_landing_page`.
+        slug                 : slug de publication.
+        plan                 : "free" | "pro" | "business".
+        footer_custom        : footer HTML perso (plan pro/business).
+        api_base             : base URL backend.
+        tracking             : dict tracking_settings (Phase B2).
+        plausible_script_url : URL JS Plausible (cloud ou self-hosted).
+        newsletter_actif     : si True (Phase B3), ajoute bouton inscription
+                               newsletter qui POST sur /landing-leads/{slug}/newsletter.
+
+    Returns: bytes HTML modifiés. Si patch échoue, retourne html_bytes
+    inchangés et émet un warning.
+    """
+    try:
+        html = html_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        logger.warning("[Landing/inject] HTML non utf-8, abandon patch")
+        return html_bytes
+
+    action_url = (
+        f"{api_base.rstrip('/')}/api/v1/landing-leads/{slug}"
+        if api_base else f"/api/v1/landing-leads/{slug}"
+    )
+
+    # 1. Remplace action="mailto:..." et enctype/method par notre POST JSON
+    #    On capture la balise <form ...> entière dans #contact et la
+    #    reconstruit.
+    pattern_form = _re.compile(
+        r'<form\s+action="mailto:[^"]*"\s+method="post"\s+enctype="text/plain"([^>]*)>',
+        _re.IGNORECASE,
+    )
+    new_form_open = (
+        f'<form action="{action_url}" method="POST" '
+        f'data-yukpo-slug="{escape(slug)}"\\1>'
+        # Honeypot caché : un vrai humain ne le remplit jamais
+        f'<input type="text" name="_hp_bot" value="" tabindex="-1" '
+        f'autocomplete="off" style="position:absolute;left:-9999px;'
+        f'width:1px;height:1px;opacity:0" aria-hidden="true">'
+        f'<input type="hidden" name="source" value="form">'
+    )
+    html2, n_form = pattern_form.subn(new_form_open, html, count=1)
+    if n_form == 0:
+        logger.warning(
+            f"[Landing/inject] form mailto introuvable pour slug={slug} — "
+            "le HTML d'origine n'a peut-être pas de section contact"
+        )
+    else:
+        html = html2
+
+    # 2. Mention footer selon plan
+    mention = (footer_custom or "").strip() if plan in ("pro", "business") else ""
+    if not mention and plan != "business":
+        mention = _MENTIONS_FOOTER.get(plan, _MENTIONS_FOOTER["free"])
+    if mention:
+        # Insère juste avant </footer>
+        snippet = (
+            f'<div class="yukpo-pub-mention" '
+            f'style="width:100%;text-align:center;margin-top:1rem;'
+            f'font-size:0.75rem;opacity:0.7">{mention}</div>'
+        )
+        html3, n_footer = _re.subn(
+            r"</footer>", snippet + "</footer>", html, count=1,
+            flags=_re.IGNORECASE,
+        )
+        if n_footer == 0:
+            logger.warning(
+                f"[Landing/inject] </footer> introuvable pour slug={slug}"
+            )
+        else:
+            html = html3
+
+    # 3. Métadonnée slug pour debug/diagnostic Netlify
+    html = html.replace(
+        '<meta name="generator" content="Yukpo Landing Page Builder">',
+        f'<meta name="generator" content="Yukpo Landing Page Builder">\n'
+        f'<meta name="yukpo-slug" content="{escape(slug)}">\n'
+        f'<meta name="yukpo-plan" content="{escape(plan)}">',
+        1,
+    )
+
+    # 4. Phase B — Tracking (Plausible + pixels) dans <head>
+    tracking_html = _construire_blocs_tracking(
+        tracking=tracking, plausible_script_url=plausible_script_url,
+    )
+    if tracking_html:
+        html, n_head = _re.subn(
+            r"</head>", tracking_html + "\n</head>", html, count=1,
+            flags=_re.IGNORECASE,
+        )
+        if n_head == 0:
+            logger.warning(
+                f"[Landing/inject] </head> introuvable pour slug={slug} — "
+                "tracking non injecté"
+            )
+
+    # 5. Phase B3 — Bouton newsletter (juste avant </footer>)
+    if newsletter_actif:
+        nl_action = (
+            f"{api_base.rstrip('/')}/api/v1/landing-leads/{slug}/newsletter"
+            if api_base else f"/api/v1/landing-leads/{slug}/newsletter"
+        )
+        nl_html = (
+            f'<form class="yukpo-newsletter" action="{nl_action}" method="POST" '
+            f'style="text-align:center;padding:1rem;background:rgba(255,255,255,0.05)">'
+            f'<label style="display:block;font-size:0.875rem;'
+            f'margin-bottom:0.5rem;opacity:0.9">'
+            f"S'inscrire à la newsletter</label>"
+            f'<input type="email" name="email" required '
+            f'placeholder="email@exemple.com" '
+            f'style="padding:0.5rem;border:1px solid rgba(255,255,255,0.3);'
+            f'border-radius:0.375rem;margin-right:0.5rem;min-width:240px">'
+            f'<button type="submit" '
+            f'style="padding:0.5rem 1rem;background:var(--accent);'
+            f"color:#fff;border:0;border-radius:0.375rem;cursor:pointer\">"
+            f"S'inscrire</button></form>"
+        )
+        html, _ = _re.subn(
+            r"</footer>", nl_html + "</footer>", html, count=1,
+            flags=_re.IGNORECASE,
+        )
+
+    return html.encode("utf-8")

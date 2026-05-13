@@ -37,12 +37,15 @@ _DEFAULT_LOCAL_ROOT = Path(__file__).resolve().parent.parent / "data" / "generat
 # Catégorie → sous-dossier local + préfixe R2
 # (Mêmes noms côté local et R2 pour migration symétrique)
 _CATEGORIES = {
-    "bureau":       "bureau",        # PDFs freeform, infographie, livret, vidéos
-    "pro_reports":  "pro_reports",   # DOCX rapports Pro
-    "pro_slides":   "pro_slides",    # PPTX slides Pro
-    "pro_data":     "pro_data",      # XLSX analyses data
-    "attestations": "attestations",  # Attestations assurance
-    "contrats":     "contrats_generes",
+    "bureau":         "bureau",        # PDFs freeform, infographie, livret, vidéos
+    "pro_reports":    "pro_reports",   # DOCX rapports Pro
+    "pro_slides":     "pro_slides",    # PPTX slides Pro
+    "pro_data":       "pro_data",      # XLSX analyses data
+    "attestations":   "attestations",  # Attestations assurance
+    "contrats":       "contrats_generes",
+    # Phase A — Landing pages publiées : ZIP snapshot HTML + assets
+    # uploadés vers Netlify + copie persistée pour re-publish / audit.
+    "landing_sites":  "landing_sites",
 }
 
 

@@ -1,5 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { CostConfirmModalRoot, installCostInterceptor } from '@yukpo/leads-dashboard'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { httpRoot } from './api/client'
+
+installCostInterceptor(httpRoot as any)
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -11,6 +16,9 @@ import DevisPage from './pages/DevisPage'
 import CaissePage from './pages/CaissePage'
 import ClientsPage from './pages/ClientsPage'
 import MesDocumentsPage from './pages/MesDocumentsPage'
+import MesLeadsPage from './pages/MesLeadsPage'
+import PublierLandingPage from './pages/PublierLandingPage'
+import TrackingSettingsPage from './pages/TrackingSettingsPage'
 import AbonnementPage from './pages/AbonnementPage'
 import OrganisationPage from './pages/OrganisationPage'
 
@@ -53,6 +61,9 @@ function AppRoutes() {
         <Route path="slides"        element={<Navigate to="/chat" replace />} />
         <Route path="documents-ia"  element={<Navigate to="/chat" replace />} />
         <Route path="documents" element={<MesDocumentsPage />} />
+        <Route path="mes-leads" element={<MesLeadsPage />} />
+        <Route path="publier-landing/:fichierId" element={<PublierLandingPage />} />
+        <Route path="tracking-settings" element={<TrackingSettingsPage />} />
         <Route path="kanban" element={<KanbanPage />} />
         <Route path="devis" element={<DevisPage />} />
         <Route path="caisse" element={<CaissePage />} />
@@ -65,9 +76,15 @@ function AppRoutes() {
   )
 }
 
+function CostModalI18n() {
+  const { t } = useTranslation()
+  return <CostConfirmModalRoot t={t as any} hrefRecharge="/abonnement" />
+}
+
 export default function App() {
   return (
     <AuthProvider>
+      <CostModalI18n />
       <AppRoutes />
     </AuthProvider>
   )

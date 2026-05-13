@@ -226,6 +226,9 @@ class GenererLandingRequest(BaseModel):
         description="Si True, génère hero image + OG image + favicon vectoriel")
     brand_kit: Optional[dict] = Field(default=None,
         description="Si None, auto-load du BrandKit org")
+    confirmer_cout: bool = Field(default=False,
+        description="Mis à True par le frontend après affichage de la modale "
+                    "de confirmation déclenchée par CostAdvisor.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -682,6 +685,22 @@ async def generer_landing_page_endpoint(
     Retourne {ok, url_telechargement, html_id, nb_sections, spec_resumee}.
     """
     await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    # Cost advisor — alerte préventive si l'opération va consommer une grosse
+    # part du solde restant. Le frontend re-soumet avec confirmer_cout=True
+    # après la modale.
+    if not req.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        cout = estimer_cout_module(
+            "landing_page",
+            multiplicateur=1.5 if req.generer_images else 1.0,
+        )
+        v = await advisor.evaluer(
+            current_user.user_id, cout, module="landing_page",
+        )
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
     from modules.pro.landing_page_builder import generer_landing_page
 
     # Auto-load BrandKit org si pas fourni
@@ -770,6 +789,214 @@ async def generer_landing_page_endpoint(
         "sections_actives": sections_actives,
         "titre": (spec.get("meta") or {}).get("titre_seo"),
         "format": "html_landing_tailwind",
+    }
+
+
+# ── Publication Netlify (Phase A Sprint 1) ─────────────────────────────────
+
+
+class PublierLandingRequest(BaseModel):
+    fichier_id: str = Field(..., description="ID du HTML landing à publier "
+                            "(retourné par /landing-page/generer)")
+    slug: str = Field(..., min_length=3, max_length=40,
+                      pattern=r"^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$",
+                      description="Sous-domaine demandé "
+                                  "(ex: 'mashop-douala' → mashop-douala.yukpomnang.com)")
+    plan: str = Field("free", pattern=r"^(free|pro|business)$",
+                      description="Plan utilisateur : contrôle l'affichage du footer")
+    footer_custom: Optional[str] = Field(None, max_length=500,
+                                          description="Footer HTML perso (plan pro/business)")
+
+
+_SLUGS_RESERVES = {
+    "www", "api", "app", "admin", "support", "docs", "blog",
+    "yukpo", "yukpopro", "yukposec", "yukposecretariat",
+    "mail", "smtp", "ftp", "cdn", "static", "assets", "img",
+    "test", "staging", "prod", "production", "dev",
+}
+
+
+@router.post("/landing-page/publier",
+             summary="Publie une landing générée sur Netlify (sous-domaine custom)")
+async def publier_landing_endpoint(
+    req: PublierLandingRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Déploie une landing HTML sur Netlify + crée le lien public partageable.
+
+    Pipeline :
+      1. Lit le HTML source depuis data/generated/bureau/{fichier_id}
+      2. Patch le HTML : form mailto: → POST /api/v1/landing-leads/{slug},
+         honeypot, mention footer selon plan
+      3. Crée site Netlify (custom_domain {slug}.yukpomnang.com) + déploie ZIP
+      4. Persiste landing_publications (ou met à jour si slug déjà à ce user)
+      5. Génère QR code PNG + retourne url + qr_b64
+
+    Facturation :
+      • landing_publish_netlify (création) OU landing_republish_netlify (re-deploy)
+      • landing_qr_gen (génération QR)
+
+    Erreurs :
+      • 404 si fichier_id introuvable
+      • 409 si slug déjà pris par un autre user (ou réservé)
+      • 402 si crédits épuisés
+      • 503 si NETLIFY_API_TOKEN absent
+    """
+    from modules.pro.landing_publisher import (
+        publier_landing as _netlify_publier,
+        republier_landing as _netlify_republier,
+        is_active as _netlify_active,
+        NetlifyError,
+    )
+    from modules.pro.landing_page_builder import injecter_publication
+    from modules.pro.qr_generator import generer_qr_png, png_data_uri
+    from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+    from core.database import LandingPublicationDB, TrackingSettingsDB
+
+    if not _netlify_active():
+        raise HTTPException(
+            503,
+            "Publication landing indisponible : NETLIFY_API_TOKEN non configuré. "
+            "Cf. docs/INFRA_SCALING.md.",
+        )
+
+    slug = req.slug.lower().strip()
+    if slug in _SLUGS_RESERVES:
+        raise HTTPException(409, f"Slug réservé : {slug!r}")
+
+    # Pré-check crédits (suffisant pour publish + QR + future captures)
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    # 1. Lecture HTML source (vérifie aussi ownership implicite : on n'utilise
+    # que le fichier_id fourni — le user authentifié l'a forcément reçu de
+    # /generer, donc il en est propriétaire. Pas de fuite cross-user.)
+    fid = req.fichier_id.strip()
+    if "/" in fid or "\\" in fid or ".." in fid or not fid.endswith(".html"):
+        raise HTTPException(400, "fichier_id invalide")
+    html_path = _DATA_DIR / "bureau" / fid
+    if not html_path.exists():
+        raise HTTPException(404, f"Fichier landing introuvable : {fid}")
+    html_bytes = html_path.read_bytes()
+
+    # 2. Vérifie conflit slug (peut être ré-attribué au même user = re-publication)
+    existing = await db.execute(
+        select(LandingPublicationDB).where(LandingPublicationDB.slug == slug)
+    )
+    pub_existante = existing.scalar_one_or_none()
+    if pub_existante and pub_existante.user_id != current_user.user_id:
+        raise HTTPException(409, f"Slug déjà pris : {slug!r}")
+
+    # 3. Charge tracking_settings du user (Phase B)
+    tracking_row = (await db.execute(
+        select(TrackingSettingsDB).where(
+            TrackingSettingsDB.user_id == current_user.user_id
+        )
+    )).scalar_one_or_none()
+    tracking_dict = {
+        "plausible_actif": True,
+        "fb_pixel_id": None, "ga4_measurement_id": None,
+        "tiktok_pixel_id": None, "snap_pixel_id": None,
+        "clarity_project_id": None,
+    }
+    newsletter_actif = False
+    if tracking_row:
+        tracking_dict = {
+            "plausible_actif": tracking_row.plausible_actif,
+            "fb_pixel_id": tracking_row.fb_pixel_id,
+            "ga4_measurement_id": tracking_row.ga4_measurement_id,
+            "tiktok_pixel_id": tracking_row.tiktok_pixel_id,
+            "snap_pixel_id": tracking_row.snap_pixel_id,
+            "clarity_project_id": tracking_row.clarity_project_id,
+        }
+        newsletter_actif = bool(
+            tracking_row.newsletter_provider
+            and tracking_row.newsletter_api_key
+        )
+
+    # 4a. Patch HTML (form POST + footer plan + honeypot + tracking + newsletter)
+    api_base = os.getenv("YUKPO_PUBLIC_API_BASE", "").strip()
+    plausible_url = os.getenv(
+        "PLAUSIBLE_SCRIPT_URL", "https://plausible.io/js/script.js",
+    ).strip()
+    html_publie = injecter_publication(
+        html_bytes,
+        slug=slug,
+        plan=req.plan,
+        footer_custom=req.footer_custom,
+        api_base=api_base,
+        tracking=tracking_dict,
+        plausible_script_url=plausible_url,
+        newsletter_actif=newsletter_actif,
+    )
+
+    # 4b. Déploiement Netlify
+    #    Débit via forfaits EXISTANTS (pas de nouveau type créé) :
+    #      - publish/republish landing → `pdf_generation` (30 crédits)
+    #        = équivalent "rendu d'un document publié vers l'extérieur"
+    #      - QR code généré → `document_download` (5 crédits)
+    #    Le `_pre_check_credits` en amont coupe l'accès à 0 crédit
+    #    (redirection /abonnement côté frontend via intercepteur 402).
+    try:
+        if pub_existante:
+            await _netlify_republier(pub_existante.netlify_site_id, html_publie)
+            pub_existante.html_fichier_id = fid
+            pub_existante.plan = req.plan
+            pub_existante.footer_custom = req.footer_custom
+            pub_existante.derniere_modif = datetime.utcnow()
+            site_id = pub_existante.netlify_site_id
+            url_public = pub_existante.url_public
+            is_new = False
+        else:
+            res = await _netlify_publier(html_publie, slug)
+            site_id = res["site_id"]
+            url_public = res["url_public"]
+            new_pub = LandingPublicationDB(
+                user_id=current_user.user_id,
+                slug=slug,
+                netlify_site_id=site_id,
+                url_public=url_public,
+                html_fichier_id=fid,
+                plan=req.plan,
+                footer_custom=req.footer_custom,
+            )
+            db.add(new_pub)
+            is_new = True
+        await db.commit()
+    except NetlifyError as e:
+        logger.error(f"[Landing/publier] Netlify échec user={current_user.user_id}: {e}")
+        raise HTTPException(502, f"Erreur Netlify : {str(e)[:200]}")
+    except Exception as e:
+        logger.error(f"[Landing/publier] Erreur user={current_user.user_id}: {e}")
+        raise HTTPException(500, f"Erreur publication : {str(e)[:200]}")
+
+    # 5. Débit forfait publication (mapping vers forfait existant)
+    try:
+        await debiter_forfait_unifie(
+            current_user.user_id, "pdf_generation", module="landing_publish",
+        )
+    except Exception as _e:
+        logger.warning(f"[Landing/publier] débit publish non bloquant : {_e}")
+
+    # 6. QR code + débit (mapping → document_download = artefact léger)
+    try:
+        qr_png = generer_qr_png(url_public, taille=8, error_correction="M")
+        qr_b64 = png_data_uri(qr_png)
+        await debiter_forfait_unifie(
+            current_user.user_id, "document_download", module="landing_publish",
+        )
+    except Exception as e:
+        logger.warning(f"[Landing/publier] QR gen échec : {e}")
+        qr_b64 = ""
+
+    return {
+        "ok": True,
+        "site_id": site_id,
+        "slug": slug,
+        "url_public": url_public,
+        "qr_png_b64": qr_b64,
+        "plan": req.plan,
+        "is_new": is_new,
     }
 
 

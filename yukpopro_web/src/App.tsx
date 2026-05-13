@@ -4,6 +4,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { lazyWithRetry, clearChunkReloadMarker } from "@/utils/lazyWithRetry";
+import { CostConfirmModalRoot, installCostInterceptor } from "@yukpo/leads-dashboard";
+import { http } from "@/api/client";
+import { useTranslation } from "react-i18next";
+
+// Install l'interceptor 402 cost_confirm_required UNE SEULE FOIS au boot.
+installCostInterceptor(http as any);
 
 // lazyWithRetry : si un chunk JS échoue à charger (cas typique après un
 // déploiement où le SW PWA a précaché un index.html référençant des hash
@@ -21,6 +27,9 @@ const WalletPage = lazyWithRetry(() => import("@/pages/WalletPage").then(m => ({
 const ReunionsPage = lazyWithRetry(() => import("@/pages/ReunionsPage").then(m => ({ default: m.ReunionsPage })));
 const TranslateLivePage = lazyWithRetry(() => import("@/pages/TranslateLivePage").then(m => ({ default: m.TranslateLivePage })));
 const HistoriqueDocumentsPage = lazyWithRetry(() => import("@/pages/HistoriqueDocumentsPage").then(m => ({ default: m.HistoriqueDocumentsPage })));
+const MesLeadsPage = lazyWithRetry(() => import("@/pages/MesLeadsPage").then(m => ({ default: m.MesLeadsPage })));
+const PublierLandingPage = lazyWithRetry(() => import("@/pages/PublierLandingPage").then(m => ({ default: m.PublierLandingPage })));
+const TrackingSettingsPage = lazyWithRetry(() => import("@/pages/TrackingSettingsPage").then(m => ({ default: m.TrackingSettingsPage })));
 const EmploiPage = lazyWithRetry(() => import("@/pages/EmploiPage").then(m => ({ default: m.EmploiPage })));
 const MarchesPage = lazyWithRetry(() => import("@/pages/MarchesPage").then(m => ({ default: m.MarchesPage })));
 const EnquetesPage = lazyWithRetry(() => import("@/pages/EnquetesPage").then(m => ({ default: m.EnquetesPage })));
@@ -41,6 +50,11 @@ const PageFallback = () => (
   </div>
 );
 
+function CostModalI18n() {
+  const { t } = useTranslation();
+  return <CostConfirmModalRoot t={t as any} hrefRecharge="/abonnement" />;
+}
+
 export default function App() {
   // Si on est arrivé ici, l'app a démarré correctement → clear le marker
   // anti-boucle de lazyWithRetry pour ne pas bloquer un futur retry légitime.
@@ -48,6 +62,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CostModalI18n />
       <PWAInstallBanner />
       <BrowserRouter>
         <Suspense fallback={<PageFallback />}>
@@ -71,6 +86,9 @@ export default function App() {
               {/* Pages actives */}
               <Route path="/translate-live" element={<TranslateLivePage />} />
               <Route path="/mes-documents"  element={<HistoriqueDocumentsPage />} />
+              <Route path="/mes-leads"      element={<MesLeadsPage />} />
+              <Route path="/publier-landing/:fichierId" element={<PublierLandingPage />} />
+              <Route path="/tracking-settings" element={<TrackingSettingsPage />} />
               <Route path="/emploi"         element={<EmploiPage />} />
               <Route path="/marches"        element={<MarchesPage />} />
               <Route path="/enquetes"       element={<EnquetesPage />} />

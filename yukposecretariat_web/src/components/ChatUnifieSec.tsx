@@ -377,10 +377,15 @@ export default function ChatUnifieSec() {
             const url = baseUrl
               + (baseUrl.includes('?') ? '&' : '?')
               + 'token=' + encodeURIComponent(tok)
+            // Sprint A1 — Si landing, lien "Publier en ligne" vers page dédiée.
+            const fidSec: string | undefined = d?.fichier_genere || d?.html_id
+            const lienPublier = (!slidesWebMatch && fidSec)
+              ? `\n\n[🚀 Publier en ligne (sous-domaine yukpomnang.com)](/publier-landing/${encodeURIComponent(fidSec)})`
+              : ''
             const yukpoTurn: ChatTurn = {
               role: 'yukpo', ts: new Date().toISOString(),
               content: (slidesWebMatch ? '✓ Présentation web Reveal.js générée' : '✓ Landing page web générée') +
-                ` — ${d.size_kb} KB.\n[Ouvrir dans le navigateur](${url})`,
+                ` — ${d.size_kb} KB.\n[Ouvrir dans le navigateur](${url})${lienPublier}`,
               intent: slidesWebMatch ? 'slides_web' : 'landing_page',
               resultat: { type: slidesWebMatch ? 'slides_web' : 'landing_page', data: d },
             }

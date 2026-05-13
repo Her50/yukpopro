@@ -1272,6 +1272,118 @@ class BureauSessionDB(Base):
     cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+# ─── Phase A Sprint 1 — Landing pages publiées (Netlify) + leads capturés ────
+
+
+class LandingPublicationDB(Base):
+    """Landing HTML déployée sur Netlify, partageable par URL publique.
+
+    Crée à la première publication d'un fichier HTML landing. Le slug est
+    unique globalement (sous-domaine *.yukpomnang.com). Pour re-publier
+    une nouvelle version, on garde le même site_id Netlify.
+    """
+    __tablename__ = "landing_publications"
+
+    id              = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id         = Column(Integer, nullable=False, index=True)
+    slug            = Column(String(60), nullable=False, unique=True, index=True)
+    netlify_site_id = Column(String(64), nullable=False)
+    url_public      = Column(String(255), nullable=False)
+    html_fichier_id = Column(String(200), nullable=False,
+        comment="ID du fichier HTML source dans data/generated/bureau/")
+    plan            = Column(String(16), nullable=False, default="free",
+        comment="free | pro | business — contrôle l'affichage du footer Yukpo")
+    footer_custom   = Column(Text, nullable=True,
+        comment="HTML safe injecté dans le footer (plan pro/business uniquement)")
+    cree_le         = Column(DateTime, default=datetime.utcnow, nullable=False)
+    derniere_modif  = Column(DateTime, default=datetime.utcnow,
+                              onupdate=datetime.utcnow, nullable=False)
+
+
+class LandingLeadDB(Base):
+    """Lead capturé via le formulaire de contact d'une landing publiée.
+
+    Endpoint public POST /api/v1/landing-leads/{slug} (no auth).
+    Le marchand propriétaire du slug est débité à chaque capture +
+    notifié par WhatsApp + email selon ses préférences.
+    """
+    __tablename__ = "landing_leads"
+
+    id          = Column(BigInteger, primary_key=True, autoincrement=True)
+    slug        = Column(String(60),
+                         ForeignKey("landing_publications.slug",
+                                    ondelete="CASCADE"),
+                         nullable=False, index=True)
+    nom         = Column(String(120), nullable=True)
+    email       = Column(String(255), nullable=True)
+    telephone   = Column(String(40), nullable=True)
+    message     = Column(Text, nullable=True)
+    source      = Column(String(40), nullable=False, default="form",
+        comment="form | qr | api — provenance du lead")
+    ip_hash     = Column(String(64), nullable=True,
+        comment="sha256 IP visiteur — anti-spam rate-limit, RGPD-friendly")
+    user_agent  = Column(String(255), nullable=True)
+    statut      = Column(String(20), nullable=False, default="non_lu",
+        comment="non_lu | lu | contacte | converti | perdu")
+    notes       = Column(Text, nullable=True)
+    created_at  = Column(DateTime, default=datetime.utcnow,
+                         nullable=False, index=True)
+
+
+class TrackingSettingsDB(Base):
+    """Config tracking analytics + pixels + newsletter PAR USER (Phase B).
+
+    Une seule ligne par user. Injectée dans <head> des landings/sites
+    publiés via `injecter_publication` au moment du déploiement Netlify.
+    Plausible activation par user (script gratuit côté front), pixels
+    payants côté provider (Meta/Google/etc — pas de coût Yukpo).
+    """
+    __tablename__ = "tracking_settings"
+
+    user_id              = Column(Integer, primary_key=True)
+    plausible_actif      = Column(Boolean, default=True, nullable=False)
+    fb_pixel_id          = Column(String(40), nullable=True,
+        comment="Facebook/Meta Pixel ID (ex: 1234567890123)")
+    ga4_measurement_id   = Column(String(40), nullable=True,
+        comment="Google Analytics 4 Measurement ID (G-XXXXXXX)")
+    tiktok_pixel_id      = Column(String(40), nullable=True)
+    snap_pixel_id        = Column(String(40), nullable=True)
+    clarity_project_id   = Column(String(40), nullable=True,
+        comment="Microsoft Clarity Project ID (heatmaps + session replay)")
+    newsletter_provider  = Column(String(20), nullable=True,
+        comment="brevo | mailchimp | none")
+    newsletter_api_key   = Column(String(120), nullable=True,
+        comment="Stocké en clair MVP — chiffrer si besoin compliance")
+    newsletter_list_id   = Column(String(80), nullable=True)
+    modif_le             = Column(DateTime, default=datetime.utcnow,
+                                   onupdate=datetime.utcnow, nullable=False)
+
+
+class LandingFollowupSettingsDB(Base):
+    """Templates auto follow-up email post-lead par user (Phase B4).
+
+    Envoyés au VISITEUR qui a soumis le form (pas au marchand) :
+      • J+0 : auto-reply de confirmation (à la capture)
+      • J+3 : relance si le lead est toujours statut=non_lu côté marchand
+      • J+7 : dernière relance
+    Worker Celery quotidien scan les leads concernés.
+    """
+    __tablename__ = "landing_followup_settings"
+
+    user_id  = Column(Integer, primary_key=True)
+    j0_actif = Column(Boolean, default=False, nullable=False)
+    j0_sujet = Column(String(160), nullable=True)
+    j0_corps = Column(Text, nullable=True)
+    j3_actif = Column(Boolean, default=False, nullable=False)
+    j3_sujet = Column(String(160), nullable=True)
+    j3_corps = Column(Text, nullable=True)
+    j7_actif = Column(Boolean, default=False, nullable=False)
+    j7_sujet = Column(String(160), nullable=True)
+    j7_corps = Column(Text, nullable=True)
+    modif_le = Column(DateTime, default=datetime.utcnow,
+                       onupdate=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.5 — White-label (revendeurs / cabinets / agences) ──────────────
 
 
