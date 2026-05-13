@@ -3149,6 +3149,11 @@ async def geometric_placement(
                 brand_kit=brand_kit_effectif,
                 inspiration=demande.inspiration,
                 modele=demande.modele,
+                # Cohérence qualité : design_tokens utilise le même modèle que
+                # placement + audit. Sans ça, demande.modele="opus" produirait
+                # placement & audit sur Opus mais design_tokens sur Sonnet —
+                # palette/typo sous-évaluée alors qu'on attend qualité Opus.
+                modele_tokens=demande.modele,
                 langue=demande.langue,
                 dpi=demande.dpi,
                 max_iterations=demande.max_iterations_revision,

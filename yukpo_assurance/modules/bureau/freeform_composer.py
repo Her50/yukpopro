@@ -2802,18 +2802,18 @@ commentaire ni markdown.
             # livret cérémonie multi-page (faire-part 8p, programme 12p) +
             # densité élevée (20 cartes etc.). Très exigeant.
             max_tok = 16000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
         elif livret_ou_dense:
             # livret 4-8 pages OU N items répétés. Besoin large.
             max_tok = 12000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
         elif marketing_brief:
             # Visuel marketing/promo single-page : exige creative writing pro
             # (slogans, valeurs simulées, mentions légales). Sonnet 5000 tok
             # = "case-cocher" superficiel. Opus 8000 tok = vraie densité
             # marketing agence pro.
             max_tok = 8000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-4.1 (32k out)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 (top-tier creative) ou GPT-4.1 si besoin 32k out forcé
         else:
             # Visuel simple 1 page (poster, carte standalone, post social).
             max_tok = 5000
