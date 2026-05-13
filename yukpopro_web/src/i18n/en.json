@@ -1176,7 +1176,20 @@
       "needAnalysis": "Run an analysis (Analysis tab) before generating the report.",
       "themes": "Identified themes",
       "charts": "Charts"
-    }
+    },
+    "titre": "My surveys & studies",
+    "sous_titre": "XLSForm forms + conversational AI analytics. Generate a form for ANY domain by typing your request in the chat.",
+    "refresh": "Refresh",
+    "demarrer": "Describe your need in the chat",
+    "aide_demarrer": "The Opus 4.7 LLM composes a complete form adapted to your context. No domain limit, no rigid templates.",
+    "aller_chat": "Open chat",
+    "exemples_titre": "Examples to inspire you (click to copy)",
+    "exemples_aide": "These are NOT templates — just examples.",
+    "reponses": "responses",
+    "completion": "Completion",
+    "copier_lien": "Copy link",
+    "apercu": "Preview",
+    "analyser": "Analyze"
   },
   "wallet": {
     "title": "My Wallet",

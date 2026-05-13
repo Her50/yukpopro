@@ -11,7 +11,7 @@ from typing import Optional
 logger = logging.getLogger("yukpo_assurance.api.enquetes")
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
 
 from core.auth import TokenData, get_current_user
@@ -214,6 +214,434 @@ async def generer_par_prompt(
     }
 
 
+# ─── Phase E3 — Suivi temps réel + stats par étude ───────────────────────────
+
+
+@router.get(
+    "/mes-enquetes",
+    summary="Phase E3 — Liste détaillée des études du user avec stats temps réel",
+)
+async def lister_mes_enquetes(
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Pour chaque étude : nb_réponses, dernier_repondant, taux_completion,
+    sparkline (compte par jour sur 7 derniers jours), lien public."""
+    await charger_etudes_user(current_user.user_id)
+    from datetime import datetime, timedelta
+    from collections import Counter
+
+    out = []
+    for etude in ge.lister_etudes():
+        # ge.lister_etudes() retourne des dicts dans certaines versions →
+        # on supporte les 2 formats
+        if isinstance(etude, dict):
+            etude_obj = ge.get_etude(etude.get("etude_id"))
+            if not etude_obj:
+                continue
+        else:
+            etude_obj = etude
+
+        formulaire = etude_obj.formulaire
+        nb_reponses = 0
+        dernier_repondant = None
+        sparkline = []
+        if formulaire and formulaire.reponses:
+            reponses = formulaire.reponses
+            nb_reponses = len(reponses)
+            # Dernier répondant
+            dernier_repondant = max(
+                (r.get("_timestamp") or r.get("created_at") for r in reponses
+                 if isinstance(r, dict)),
+                default=None,
+            )
+            # Sparkline 7 derniers jours
+            today = datetime.utcnow().date()
+            counts = Counter()
+            for r in reponses:
+                ts = r.get("_timestamp") if isinstance(r, dict) else None
+                if ts:
+                    try:
+                        d = datetime.fromisoformat(ts.replace("Z", "")).date()
+                        if (today - d).days < 7:
+                            counts[d.isoformat()] += 1
+                    except Exception:
+                        pass
+            sparkline = [
+                {"date": (today - timedelta(days=i)).isoformat(),
+                 "n": counts.get((today - timedelta(days=i)).isoformat(), 0)}
+                for i in range(6, -1, -1)
+            ]
+
+        nb_questions = len(formulaire.questions) if formulaire else 0
+        taux_completion_moy = 0
+        if formulaire and formulaire.reponses and nb_questions:
+            total_complet = sum(
+                len([v for v in r.values() if v not in (None, "", [])])
+                / nb_questions
+                for r in formulaire.reponses if isinstance(r, dict)
+            )
+            taux_completion_moy = round(
+                100 * total_complet / len(formulaire.reponses), 1,
+            )
+
+        out.append({
+            "etude_id": etude_obj.etude_id,
+            "titre": etude_obj.titre,
+            "methodologie": getattr(etude_obj, "methodologie", "mixte"),
+            "formulaire_id": formulaire.formulaire_id if formulaire else None,
+            "nb_questions": nb_questions,
+            "nb_reponses": nb_reponses,
+            "dernier_repondant": dernier_repondant,
+            "taux_completion_pct": taux_completion_moy,
+            "sparkline_7j": sparkline,
+            "lien_public": (
+                f"/api/v1/enquetes/public/{formulaire.formulaire_id}/page"
+                if formulaire else None
+            ),
+            "has_analyse": (
+                etude_obj.analyse_qualitative is not None
+                or etude_obj.analyse_quantitative is not None
+            ),
+        })
+    out.sort(key=lambda e: e.get("nb_reponses", 0), reverse=True)
+    return {"enquetes": out}
+
+
+# ─── Phase E2 — PWA collecte publique (HTML responsive offline-first) ────────
+
+
+def _construire_html_formulaire_public(formulaire) -> str:
+    """Génère un HTML PWA mobile-first pour le formulaire public.
+
+    Caractéristiques :
+      • Mobile-first responsive Tailwind CDN
+      • IndexedDB queue offline → resync auto à la reconnexion
+      • Honeypot anti-spam + validation côté client
+      • Multi-section avec navigation prev/next
+      • Géoloc auto si question geopoint
+      • Capture photo si question image
+    """
+    import html as _html
+    questions_json = json.dumps([
+        {
+            "id":    q.id,
+            "label": q.label,
+            "hint":  getattr(q, "hint", ""),
+            "type":  q.type,
+            "required": q.required,
+            "section":  getattr(q, "section", ""),
+            "relevant": getattr(q, "relevant", ""),
+            "choices":  q.choices or [],
+            "constraint": getattr(q, "constraint", ""),
+        }
+        for q in formulaire.questions
+    ], ensure_ascii=False)
+    sections_json = json.dumps(formulaire.sections or [], ensure_ascii=False)
+    titre = _html.escape(formulaire.titre)
+    desc = _html.escape(formulaire.description or "")
+    fid = _html.escape(formulaire.formulaire_id)
+
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>{titre}</title>
+<meta name="description" content="{desc}">
+<meta name="theme-color" content="#7B3FE4">
+<link rel="manifest" href='data:application/manifest+json,{{"name":"{titre}","short_name":"Form","start_url":"./","display":"standalone","theme_color":"#7B3FE4","background_color":"#fff","icons":[]}}'>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc}}
+.input{{width:100%;padding:0.875rem;border:1px solid #cbd5e1;border-radius:0.625rem;font-size:1rem;min-height:48px}}
+.input:focus{{outline:0;border-color:#7B3FE4;box-shadow:0 0 0 3px rgba(123,63,228,0.15)}}
+.btn-primary{{background:#7B3FE4;color:#fff;padding:0.875rem 1.5rem;border:0;border-radius:0.625rem;font-weight:600;min-height:48px;width:100%;cursor:pointer}}
+.btn-secondary{{background:#f1f5f9;color:#0f172a;padding:0.875rem 1.5rem;border:0;border-radius:0.625rem;font-weight:600;min-height:48px;flex:1;cursor:pointer}}
+.choice{{display:flex;align-items:center;gap:0.5rem;padding:0.875rem;border:2px solid #e2e8f0;border-radius:0.625rem;margin-bottom:0.5rem;cursor:pointer;min-height:48px}}
+.choice:has(:checked){{border-color:#7B3FE4;background:#faf5ff}}
+.progress{{height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}}
+.progress-bar{{height:100%;background:#7B3FE4;transition:width 0.3s}}
+@media (max-width:640px){{body{{padding:0}}}}
+</style>
+</head>
+<body>
+<div class="max-w-2xl mx-auto p-4 md:p-8 min-h-screen">
+  <header class="mb-6">
+    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{titre}</h1>
+    <p class="text-slate-600">{desc}</p>
+    <div class="progress mt-4"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
+  </header>
+  <div id="offline-banner" class="hidden mb-4 p-3 rounded-lg bg-amber-100 text-amber-900 text-sm">
+    📡 Vous êtes hors-ligne. Vos réponses sont sauvegardées localement et seront envoyées dès la reconnexion.
+  </div>
+  <main id="form-container"></main>
+  <footer id="form-footer" class="flex gap-2 mt-6"></footer>
+</div>
+
+<script>
+const FID = "{fid}";
+const QUESTIONS = {questions_json};
+const SECTIONS = {sections_json};
+const API_BASE = window.location.origin;
+const reponses = {{}};
+let currentIdx = 0;
+
+// ── IndexedDB queue offline ──────────────────────────────────────────────
+const DB_NAME = "yukpo_form_queue";
+const STORE = "submissions";
+function openDB() {{
+  return new Promise((resolve, reject) => {{
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {{
+      req.result.createObjectStore(STORE, {{ keyPath: "id", autoIncrement: true }});
+    }};
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }});
+}}
+async function enqueue(payload) {{
+  try {{
+    const db = await openDB();
+    await new Promise((resolve, reject) => {{
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).add({{ payload, ts: Date.now() }});
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+    }});
+  }} catch (e) {{ console.warn("IndexedDB enqueue failed", e); }}
+}}
+async function flushQueue() {{
+  try {{
+    const db = await openDB();
+    const tx = db.transaction(STORE, "readwrite");
+    const store = tx.objectStore(STORE);
+    const items = await new Promise(r => {{
+      const req = store.getAll();
+      req.onsuccess = () => r(req.result || []);
+    }});
+    for (const it of items) {{
+      try {{
+        const r = await fetch(`${{API_BASE}}/api/v1/enquetes/public/${{FID}}/reponse`, {{
+          method: "POST",
+          headers: {{ "Content-Type": "application/json" }},
+          body: JSON.stringify(it.payload),
+        }});
+        if (r.ok) store.delete(it.id);
+      }} catch (e) {{ break; }} // network down → on garde
+    }}
+  }} catch (e) {{ console.warn("flushQueue failed", e); }}
+}}
+window.addEventListener("online", () => {{
+  document.getElementById("offline-banner").classList.add("hidden");
+  flushQueue();
+}});
+window.addEventListener("offline", () => {{
+  document.getElementById("offline-banner").classList.remove("hidden");
+}});
+if (!navigator.onLine) document.getElementById("offline-banner").classList.remove("hidden");
+
+// ── Render question courante ─────────────────────────────────────────────
+function evalRelevant(expr) {{
+  if (!expr) return true;
+  // Très simple : remplace ${{q_id}} par sa valeur, eval simple ==/!=/and/or
+  let e = expr.replace(/\\$\\{{([a-z0-9_]+)\\}}/gi, (_, id) => JSON.stringify(reponses[id] || ""));
+  e = e.replace(/=/g, "==").replace(/\\band\\b/g, "&&").replace(/\\bor\\b/g, "||");
+  try {{ return Function("return " + e)(); }} catch {{ return true; }}
+}}
+
+function renderQuestion() {{
+  // skip questions dont relevant=false
+  while (currentIdx < QUESTIONS.length && !evalRelevant(QUESTIONS[currentIdx].relevant)) {{
+    currentIdx++;
+  }}
+  if (currentIdx >= QUESTIONS.length) return renderFinal();
+  const q = QUESTIONS[currentIdx];
+  const ctn = document.getElementById("form-container");
+
+  document.getElementById("progress-bar").style.width =
+    ((currentIdx / QUESTIONS.length) * 100) + "%";
+
+  let inputHtml = "";
+  const val = reponses[q.id] || "";
+  if (q.type === "select_one") {{
+    inputHtml = q.choices.map(c =>
+      `<label class="choice"><input type="radio" name="${{q.id}}" value="${{c.value}}" ${{val === c.value ? "checked" : ""}}><span>${{c.label}}</span></label>`
+    ).join("");
+  }} else if (q.type === "select_multiple") {{
+    const vals = Array.isArray(val) ? val : [];
+    inputHtml = q.choices.map(c =>
+      `<label class="choice"><input type="checkbox" name="${{q.id}}" value="${{c.value}}" ${{vals.includes(c.value) ? "checked" : ""}}><span>${{c.label}}</span></label>`
+    ).join("");
+  }} else if (q.type === "integer" || q.type === "decimal") {{
+    inputHtml = `<input type="number" name="${{q.id}}" value="${{val}}" class="input" ${{q.type === "decimal" ? 'step="0.01"' : ""}}>`;
+  }} else if (q.type === "date") {{
+    inputHtml = `<input type="date" name="${{q.id}}" value="${{val}}" class="input">`;
+  }} else if (q.type === "time") {{
+    inputHtml = `<input type="time" name="${{q.id}}" value="${{val}}" class="input">`;
+  }} else if (q.type === "image") {{
+    inputHtml = `<input type="file" name="${{q.id}}" accept="image/*" capture="environment" class="input">`;
+  }} else if (q.type === "audio") {{
+    inputHtml = `<input type="file" name="${{q.id}}" accept="audio/*" capture="user" class="input">`;
+  }} else if (q.type === "geopoint") {{
+    inputHtml = `<button type="button" id="geo-btn" class="btn-secondary">📍 Capturer ma position</button><input type="hidden" name="${{q.id}}" id="geo-input" value="${{val}}">`;
+  }} else {{
+    inputHtml = `<textarea name="${{q.id}}" class="input" rows="4">${{val}}</textarea>`;
+  }}
+
+  ctn.innerHTML = `
+    <div class="bg-white rounded-xl shadow-md p-5 mb-4">
+      <p class="text-xs uppercase tracking-wider text-violet-600 font-semibold mb-1">${{q.section || "Question"}}</p>
+      <h2 class="text-xl font-bold text-slate-900 mb-2">${{q.label}}${{q.required ? ' <span class="text-rose-500">*</span>' : ""}}</h2>
+      ${{q.hint ? `<p class="text-sm text-slate-500 mb-3">${{q.hint}}</p>` : ""}}
+      <div class="mt-4">${{inputHtml}}</div>
+      <p class="text-xs text-slate-400 mt-3">Question ${{currentIdx + 1}}/${{QUESTIONS.length}}</p>
+    </div>
+  `;
+  document.getElementById("form-footer").innerHTML = `
+    ${{currentIdx > 0 ? '<button type="button" class="btn-secondary" id="btn-prev">← Précédent</button>' : ""}}
+    <button type="button" class="btn-primary" id="btn-next">${{currentIdx === QUESTIONS.length - 1 ? "Envoyer" : "Suivant →"}}</button>
+  `;
+  if (currentIdx > 0) document.getElementById("btn-prev").onclick = () => {{ currentIdx--; renderQuestion(); }};
+  document.getElementById("btn-next").onclick = onNext;
+
+  if (q.type === "geopoint") {{
+    document.getElementById("geo-btn").onclick = () => {{
+      if (!navigator.geolocation) return alert("Géolocalisation non disponible");
+      navigator.geolocation.getCurrentPosition(
+        p => {{
+          const v = `${{p.coords.latitude}},${{p.coords.longitude}}`;
+          document.getElementById("geo-input").value = v;
+          document.getElementById("geo-btn").textContent = `✓ ${{v}}`;
+        }},
+        err => alert("Erreur géolocalisation: " + err.message),
+        {{ enableHighAccuracy: true, timeout: 10000 }}
+      );
+    }};
+  }}
+}}
+
+function onNext() {{
+  const q = QUESTIONS[currentIdx];
+  let val;
+  if (q.type === "select_multiple") {{
+    val = [...document.querySelectorAll(`input[name="${{q.id}}"]:checked`)].map(i => i.value);
+  }} else if (q.type === "select_one") {{
+    const r = document.querySelector(`input[name="${{q.id}}"]:checked`);
+    val = r ? r.value : null;
+  }} else {{
+    const el = document.querySelector(`[name="${{q.id}}"]`);
+    val = el ? el.value : null;
+  }}
+  if (q.required && (val === null || val === "" || (Array.isArray(val) && !val.length))) {{
+    return alert("Cette question est obligatoire.");
+  }}
+  reponses[q.id] = val;
+  currentIdx++;
+  renderQuestion();
+}}
+
+async function renderFinal() {{
+  const ctn = document.getElementById("form-container");
+  document.getElementById("progress-bar").style.width = "100%";
+  ctn.innerHTML = `<div class="bg-white rounded-xl shadow-md p-8 text-center">
+    <div class="text-5xl mb-3">⏳</div>
+    <h2 class="text-xl font-bold mb-2">Envoi en cours…</h2></div>`;
+  document.getElementById("form-footer").innerHTML = "";
+
+  const payload = {{ formulaire_id: FID, reponses, _hp_bot: "" }};
+  try {{
+    if (navigator.onLine) {{
+      const r = await fetch(`${{API_BASE}}/api/v1/enquetes/public/${{FID}}/reponse`, {{
+        method: "POST",
+        headers: {{ "Content-Type": "application/json" }},
+        body: JSON.stringify(payload),
+      }});
+      if (!r.ok) throw new Error("HTTP " + r.status);
+    }} else {{
+      await enqueue(payload);
+    }}
+    ctn.innerHTML = `<div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-8 text-center">
+      <div class="text-5xl mb-3">✅</div>
+      <h2 class="text-2xl font-bold text-emerald-900 mb-2">Merci !</h2>
+      <p class="text-slate-700">Votre réponse a été enregistrée${{navigator.onLine ? "" : " hors-ligne (envoi automatique à la reconnexion)"}}.</p>
+    </div>`;
+  }} catch (e) {{
+    await enqueue(payload);
+    ctn.innerHTML = `<div class="bg-amber-50 rounded-xl p-8 text-center">
+      <div class="text-5xl mb-3">📡</div>
+      <h2 class="text-xl font-bold mb-2">Sauvegardé hors-ligne</h2>
+      <p class="text-slate-700">Pas de réseau actuellement — envoi automatique dès reconnexion.</p>
+    </div>`;
+  }}
+}}
+
+renderQuestion();
+flushQueue();
+</script>
+</body>
+</html>
+"""
+
+
+@router.get(
+    "/public/{formulaire_id}/page",
+    response_class=HTMLResponse,
+    summary="Phase E2 — HTML PWA mobile-first responsive offline-first du formulaire",
+)
+async def page_formulaire_public(formulaire_id: str):
+    """Sert le HTML PWA du formulaire. PUBLIC (pas d'auth)."""
+    formulaire = ge.get_formulaire_public(formulaire_id)
+    if not formulaire:
+        raise HTTPException(404, "Formulaire introuvable")
+    return HTMLResponse(_construire_html_formulaire_public(formulaire))
+
+
+class SoumettreReponseRequest(BaseModel):
+    formulaire_id: str
+    reponses: dict
+    _hp_bot: Optional[str] = ""
+
+
+@router.post(
+    "/public/{formulaire_id}/reponse",
+    summary="Phase E2 — Endpoint public d'ingestion réponses (no auth, honeypot)",
+)
+async def soumettre_reponse_publique(
+    formulaire_id: str,
+    payload: SoumettreReponseRequest,
+):
+    """Reçoit les réponses depuis le HTML public ou la queue IndexedDB."""
+    # Honeypot
+    if payload._hp_bot:
+        logger.info(f"[Enquetes/public] honeypot trigger {formulaire_id}")
+        return {"ok": True}
+
+    formulaire = ge.get_formulaire_public(formulaire_id)
+    if not formulaire:
+        raise HTTPException(404, "Formulaire introuvable")
+
+    success = ge.soumettre_reponse(formulaire_id, payload.reponses)
+    if not success:
+        raise HTTPException(400, "Réponse invalide")
+
+    # Débit forfait existant sur le marchand propriétaire (lookup via etude)
+    try:
+        etude = next(
+            (e for e in ge.lister_etudes()
+             if isinstance(e, dict) and e.get("formulaire_id") == formulaire_id),
+            None,
+        )
+        if etude and etude.get("user_id"):
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            await debiter_forfait_unifie(
+                etude["user_id"], "client_action",
+                module="enquete_reponse",
+            )
+    except Exception:
+        pass
+
+    return {"ok": True}
+
+
 # ─── Phase E4 — Analyse à la demande par PROMPT ──────────────────────────────
 
 
@@ -260,6 +688,29 @@ async def analyser_par_prompt_endpoint(
     except Exception as e:
         logger.error(f"[Enquetes/analyse-prompt] échec user={current_user.user_id}: {e}")
         raise HTTPException(500, f"Erreur analyse : {str(e)[:200]}")
+
+    # Phase E5 — stocke le résultat sur l'étude pour intégration au rapport final
+    try:
+        from datetime import datetime as _dt
+        etude_obj = ge.get_etude(etude_id)
+        if etude_obj is not None:
+            if not hasattr(etude_obj, "analyses_prompt_results") or etude_obj.analyses_prompt_results is None:
+                etude_obj.analyses_prompt_results = []
+            etude_obj.analyses_prompt_results.append({
+                "prompt": payload.prompt,
+                "ts": _dt.utcnow().isoformat(),
+                "titre": resultat.get("titre_analyse"),
+                "description": resultat.get("description"),
+                "tableaux": resultat.get("tableaux", []),
+                "graphiques_keys": list((resultat.get("graphiques") or {}).keys()),
+                "synthese_md": resultat.get("synthese_md"),
+                "n_reponses_analyses": resultat.get("n_reponses_analyses"),
+            })
+            # Fusionne les graphiques dans le store global de l'étude pour le rapport
+            for k, b64 in (resultat.get("graphiques") or {}).items():
+                etude_obj.graphiques[f"analyse_prompt_{k}"] = b64
+    except Exception as _e:
+        logger.debug(f"[Enquetes/analyse-prompt] storage analyse non bloquant : {_e}")
 
     # Débit forfait existant `pdf_generation` (sémantique : artefact analytique)
     try:

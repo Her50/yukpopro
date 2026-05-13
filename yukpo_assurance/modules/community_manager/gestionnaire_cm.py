@@ -211,12 +211,13 @@ class MoteurCommunityManager:
             except Exception as e:
                 print(f"[CM] Claude erreur : {e}")
 
-        # Fallback GPT-4o
+        # Fallback GPT modern : on utilise GPT-5 (équivalent qualité Opus, ~3×
+        # moins cher que gpt-4-turbo legacy). gpt-4o est obsolète (mai 2026).
         if not contenu_json and self.openai_api_key:
             try:
                 from openai import AsyncOpenAI
                 oai = AsyncOpenAI(api_key=self.openai_api_key)
-                modele = "gpt-4o"
+                modele = "gpt-5"
                 resp = await oai.chat.completions.create(
                     model=modele,
                     temperature=0.7,

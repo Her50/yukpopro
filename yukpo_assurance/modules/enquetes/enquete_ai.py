@@ -34,9 +34,33 @@ logger = logging.getLogger("yukpo_assurance.enquetes.ai")
 
 # ─── E1 — Génération étude + formulaire par prompt ───────────────────────────
 
-_PROMPT_SYSTEME_ENQUETE = """Tu es un expert en méthodologie d'enquête et \
-en collecte de données (XLSForm/KoboCollect). Tu reçois un brief utilisateur \
-et tu RENVOIES UN JSON strict (pas de texte avant/après) :
+_PROMPT_SYSTEME_ENQUETE = """Tu es un expert SENIOR en méthodologie d'enquête \
+et collecte de données (XLSForm/KoboCollect), capable de composer un \
+formulaire structuré pour N'IMPORTE QUEL domaine sans limite :
+
+  • Santé (maternelle, infantile, mentale, nutritionnelle, épidémiologique, hôpital)
+  • Droit / Audit (conformité OHADA, CIMA, ISO, RSE, sécurité sociale, fiscal)
+  • RH (recrutement, 360°, climat social, formation, départ, NPS employé, intégration)
+  • Marketing (satisfaction, NPS, étude marché, test produit, prix, brand awareness)
+  • ONG / humanitaire (recensement bénéficiaires, évaluation impact, suivi programme,
+    vulnérabilité, sécurité alimentaire, eau-hygiène-assainissement WASH, protection)
+  • Éducation (évaluation pédagogique, satisfaction parents, suivi élèves, absentéisme)
+  • Agriculture / élevage (recensement exploitants, accès intrants, post-récolte)
+  • Urbanisme / mobilité (déplacements, accès services, qualité de vie quartier)
+  • Gouvernance / opinion publique (sondages, consultations citoyennes, élections)
+  • Recherche académique (mémoires, thèses, enquêtes terrain qualitatives)
+  • Finance / microcrédit (scoring social, suivi remboursement, éducation financière)
+  • Tourisme (satisfaction visiteurs, attractivité destination)
+  • Industrie (sécurité, qualité, supply chain, audit fournisseur)
+  • Et TOUT autre domaine que l'utilisateur demande.
+
+Tu n'es JAMAIS limité par un catalogue prédéfini. Adapte la méthodologie, \
+les questions, les sections au contexte exact du brief utilisateur — y \
+compris contextes très spécifiques (étude ethnographique pêcheurs Sénégal, \
+audit conformité ISO 22000 unité agro-alimentaire CI, sondage politique \
+intercommunalité, suivi cohorte longitudinale d'élèves Bamako, etc.).
+
+Tu reçois un brief utilisateur et tu RENVOIES UN JSON strict (pas de texte avant/après) :
 
 {
   "etude": {
@@ -136,10 +160,17 @@ note, date, time, dateTime, geopoint, image, audio, barcode, calculate
 4. Sections groupent les questions thématiquement (begin_group côté XLSForm)
 5. IDs en snake_case, préfixés q1_/q2_/… pour ordre
 6. Choices courtes (max 60 chars) avec value snake_case ASCII
-7. Crédibilité Afrique francophone (FR/Cameroun/CI/Sénégal par défaut)
+7. Crédibilité géographique selon le brief — pas par défaut Afrique francophone, \
+   adapte au pays/zone mentionné par l'utilisateur (Maghreb, Europe, Asie, etc.)
 8. Si méthodologie = qualitatif → max 10 questions ouvertes courtes
-9. Si méthodologie = quantitatif → 20-40 questions, beaucoup de select_one
-10. Mixte → équilibré 15-25 questions
+9. Si méthodologie = quantitatif → 20-50 questions, beaucoup de select_one
+10. Mixte → équilibré 15-30 questions
+11. UTILISE TON EXPERTISE DOMAINE : si le brief mentionne "OHADA" → cite les \
+   articles pertinents en hint ; si "ISO 14001" → questions calées sur les \
+   clauses normatives ; si "OMS santé maternelle" → indicateurs OMS standard ; \
+   si "NPS" → échelle 0-10 standard.
+12. NE PAS sous-traiter : compose AUTANT de questions que nécessaire pour \
+    couvrir SÉRIEUSEMENT le sujet (pas de version light/superficielle).
 """
 
 
@@ -167,13 +198,18 @@ async def generer_etude_et_formulaire_par_prompt(
         user_prompt += f"PROFIL CIBLE : {profil_cible}\n"
     user_prompt += "\nProduis le JSON spec strict."
 
+    # Modèle PUISSANT (Opus 4.7 / gpt-4-turbo) + beaucoup de tokens pour
+    # composer un formulaire sérieux et adapté à n'importe quel domaine.
+    # L'universalité du système repose sur ce prompt système + ce modèle.
+    from core.ia_client import ModelePrioritaire
     rep = await ia_client.appeler(
         prompt=user_prompt,
         systeme=_PROMPT_SYSTEME_ENQUETE,
-        mode=ModeIA.REDACTION,
-        max_tokens_override=14000,
+        mode=ModeIA.RAISONNEMENT,
+        max_tokens_override=24000,
         json_attendu=True,
         utiliser_cache=False,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
     )
     texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
     m = re.search(r"\{[\s\S]*\}", texte)
@@ -317,13 +353,16 @@ async def analyser_par_prompt(
         f"DEMANDE D'ANALYSE :\n{prompt_analyse}"
     )
 
+    # Plan d'analyse → modèle puissant pour gérer la complexité statistique
+    from core.ia_client import ModelePrioritaire
     rep = await ia_client.appeler(
         prompt=user_prompt,
         systeme=_PROMPT_SYSTEME_ANALYSE,
-        mode=ModeIA.REDACTION,
-        max_tokens_override=4000,
+        mode=ModeIA.RAISONNEMENT,
+        max_tokens_override=6000,
         json_attendu=True,
         utiliser_cache=False,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
     )
     texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
     m = re.search(r"\{[\s\S]*\}", texte)

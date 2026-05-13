@@ -2961,14 +2961,15 @@ async def _convertir_vers_docx(contenu: bytes, nom: str, ext_src: str) -> bytes:
         texte = contenu.decode("utf-8", errors="replace")
 
     elif ext_src in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
-        # OCR via Claude Vision
+        # OCR Vision : tier élevé (CLAUDE_OPUS → GPT-5 si LLM_PRIMAIRE=gpt)
+        # GPT-5 supporte vision et bat gpt-4o legacy en qualité d'extraction.
         import base64
         from core.ia_client import ia_client, ModeIA, ModelePrioritaire
         b64 = base64.b64encode(contenu).decode()
         reponse = await ia_client.appeler(
             prompt="Extrait tout le texte visible dans cette image, en préservant la structure (titres, listes, tableaux).",
             mode=ModeIA.ANALYSE,
-            forcer_modele=ModelePrioritaire.GPT4O,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
             images_b64=[f"data:image/{ext_src.lstrip('.')};base64,{b64}"],
             max_tokens_override=4000,
         )

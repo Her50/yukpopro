@@ -298,7 +298,9 @@ async def _extraire_via_ia(content: bytes, filename: str, content_type: str) -> 
         client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         data_url = f"data:{media_type};base64,{b64}"
         resp = await client.chat.completions.create(
-            model="gpt-4o",
+            # Vision analyse paiement (preuve, RIB) : tier élevé GPT-5
+            # (vision + qualité supérieure à gpt-4o legacy)
+            model="gpt-5",
             max_tokens=4000,
             messages=[{
                 "role": "user",

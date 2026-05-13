@@ -1163,7 +1163,20 @@
       "needAnalysis": "Lancez une analyse (onglet Analyse) avant de générer le rapport.",
       "themes": "Thèmes identifiés",
       "charts": "Graphiques"
-    }
+    },
+    "titre": "Mes enquêtes & études",
+    "sous_titre": "Formulaires XLSForm + analyses IA conversationnelles. Génère un formulaire pour N'IMPORTE QUEL domaine en tapant ta demande dans le chat.",
+    "refresh": "Rafraîchir",
+    "demarrer": "Décrivez votre besoin dans le chat",
+    "aide_demarrer": "Le LLM Opus 4.7 compose un formulaire complet adapté à votre contexte. Aucune limite de domaine, aucun template figé.",
+    "aller_chat": "Ouvrir le chat",
+    "exemples_titre": "Exemples pour vous inspirer (cliquer pour copier)",
+    "exemples_aide": "Ce ne sont PAS des templates — juste des exemples.",
+    "reponses": "réponses",
+    "completion": "Complétion",
+    "copier_lien": "Copier lien",
+    "apercu": "Aperçu",
+    "analyser": "Analyser"
   },
   "wallet": {
     "title": "Mon Wallet",

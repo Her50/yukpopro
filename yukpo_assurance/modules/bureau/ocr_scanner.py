@@ -97,7 +97,9 @@ Retourne uniquement le texte transcrit, en Markdown."""
     reponse_ocr = await ia_client.appeler(
         prompt=prompt_ocr,
         mode=ModeIA.ANALYSE,
-        forcer_modele=ModelePrioritaire.GPT4O,   # GPT-4o vision = meilleur pour OCR images
+        # OCR vision : tier élevé. CLAUDE_OPUS → GPT-5 si LLM_PRIMAIRE=gpt
+        # (vision + qualité bien supérieure à gpt-4o legacy).
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
         images_b64=[f"data:{mime};base64,{image_b64}"],
     )
     texte_brut = reponse_ocr.contenu
@@ -181,7 +183,9 @@ Produis directement le document final, prêt à être utilisé."""
     reponse = await ia_client.appeler(
         prompt=prompt,
         mode=ModeIA.REDACTION,
-        forcer_modele=ModelePrioritaire.GPT4O,   # GPT-4o vision — lecture cursive africaine
+        # Lecture cursive africaine = tâche difficile (vision + interprétation
+        # langue locale) → tier élevé GPT-5/Opus
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
         images_b64=[f"data:{mime};base64,{image_b64}"],
     )
 

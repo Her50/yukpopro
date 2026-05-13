@@ -767,6 +767,110 @@ async def traduire_page(
     }
 
 
+class PreviewLoraABRequest(BaseModel):
+    """Phase C.5 — Body pour /brand-ai/preview-ab."""
+    prompt: str = Field(..., min_length=10, max_length=600,
+        description="Description de l'image à générer (EN recommandé, "
+                    "ex. 'modern office workspace in Douala, professionals "
+                    "collaborating, natural lighting')")
+    confirmer_cout: bool = Field(default=False)
+
+
+@router.post(
+    "/brand-ai/preview-ab",
+    summary="Phase C.5 — Génère 2 hero images comparatives (sans LoRA / avec LoRA brand)",
+)
+async def preview_lora_ab(
+    req: PreviewLoraABRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Génère DEUX images identiques pour comparer l'effet du Brand LoRA :
+      • Image A : sans LoRA (style générique fal.ai)
+      • Image B : avec LoRA actif de la compagnie (cohérence brand)
+
+    Le marchand visualise l'impact du LoRA avant de l'activer/désactiver
+    en prod. Si la compagnie n'a pas de LoRA actif, retourne uniquement
+    l'image A + message explicatif.
+    """
+    from api.routes_pro_generateurs import _pre_check_credits
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    if not req.confirmer_cout:
+        from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+        # 2 images premium → 2× le coût d'une image standard
+        cout = estimer_cout_module("designerpro_image_premium", multiplicateur=2.0)
+        v = await advisor.evaluer(current_user.user_id, cout,
+                                   module="brand_ai_preview_ab")
+        if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+            raise HTTPException(402, v.detail_pour_402())
+
+    compagnie_id = getattr(current_user, "compagnie_id", None) or 1
+    from modules.pro.site_builder import _resolve_brand_lora
+    lora_url, trigger_word = await _resolve_brand_lora(compagnie_id)
+
+    import base64
+    from modules.bureau import image_gen as _ig
+
+    # Image A — sans LoRA
+    try:
+        png_a = await _ig.generer_image(
+            prompt=req.prompt, mode="premium",
+            format_="landscape_16_9", timeout_s=120.0,
+            brand_lora_url=None, brand_lora_scale=0.0,
+        )
+        image_a_url = (
+            "data:image/png;base64," + base64.b64encode(png_a).decode()
+            if png_a else None
+        )
+    except Exception as e:
+        logger.warning(f"[Brand-AI/preview] image A échec : {e}")
+        image_a_url = None
+
+    # Image B — avec LoRA (si dispo)
+    image_b_url = None
+    if lora_url:
+        prompt_lora = f"{trigger_word} {req.prompt}" if trigger_word else req.prompt
+        try:
+            png_b = await _ig.generer_image(
+                prompt=prompt_lora, mode="premium",
+                format_="landscape_16_9", timeout_s=120.0,
+                brand_lora_url=lora_url, brand_lora_scale=0.85,
+            )
+            image_b_url = (
+                "data:image/png;base64," + base64.b64encode(png_b).decode()
+                if png_b else None
+            )
+        except Exception as e:
+            logger.warning(f"[Brand-AI/preview] image B échec : {e}")
+
+    # Débit forfait existant (2 × premium)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "designerpro_image_premium",
+            module="brand_ai_preview_ab",
+            multiplicateur=2.0 if image_b_url else 1.0,
+        )
+    except Exception:
+        pass
+
+    return {
+        "ok": True,
+        "image_a_url": image_a_url,
+        "image_b_url": image_b_url,
+        "has_brand_lora": bool(lora_url),
+        "trigger_word": trigger_word,
+        "lora_url": lora_url,
+        "message": (
+            "Brand LoRA actif — comparez la cohérence visuelle."
+            if lora_url else
+            "Aucun Brand LoRA configuré pour votre organisation. "
+            "Entraînez-en un dans Designer Pro pour activer cette comparaison."
+        ),
+    }
+
+
 @router.delete(
     "/sites/{slug}",
     summary="Supprime un site (DB + Netlify)",

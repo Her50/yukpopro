@@ -378,7 +378,10 @@ async def analyser_photo_vision(
             ia_client.appeler(
                 prompt=prompt,
                 mode=ModeIA.ANALYSE,
-                forcer_modele=ModelePrioritaire.GPT4O,  # vision capability
+                # Vision tier élevé : GPT-5 supporte vision et bat gpt-4o legacy.
+                # CLAUDE_SONNET → GPT-5-mini si LLM_PRIMAIRE=gpt (équilibre coût/qualité
+                # pour une analyse JSON courte 400 tokens).
+                forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
                 images_b64=[f"data:{mime};base64,{b64}"],
                 json_attendu=True,
                 max_tokens_override=400,

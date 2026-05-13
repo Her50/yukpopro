@@ -424,10 +424,15 @@ class IAClient:
         # traduit automatiquement vers le GPT équivalent — c'est la
         # source de vérité de la politique. Anthropic devient fallback
         # naturel via le circuit breaker.
-        # Politique mémoire `feedback_llm_routing.md` :
-        #   CLAUDE_OPUS  → gpt-4-turbo (raisonnement haut de gamme)
-        #   CLAUDE_SONNET → gpt-4o     (rédaction standard)
-        #   CLAUDE_HAIKU → gpt-4o-mini  (léger/rapide/JSON court)
+        # Mapping actuel (mai 2026) — cf. _CLAUDE_TO_GPT ligne 151 :
+        #   CLAUDE_OPUS   → GPT-5         (flagship raisonnement haut de gamme,
+        #                                  équivalent qualité Opus, ~3× moins cher)
+        #   CLAUDE_SONNET → GPT-5-mini    (mid-tier équilibre qualité/coût)
+        #   CLAUDE_HAIKU  → GPT-4.1-nano  (économique, classification rapide)
+        # Note : gpt-4-turbo est LEGACY (cap 4096 output, obsolète) — NE PAS
+        # utiliser pour les nouveaux usages. Pour rivaliser Opus en raisonnement,
+        # GPT-5 est le bon choix (talonne Opus en creative writing dense +
+        # long-context, et O3/O3-mini sont disponibles pour reasoning profond).
         if forcer_modele is not None and self._llm_primaire() == "gpt":
             if modele in (
                 ModelePrioritaire.CLAUDE_OPUS,

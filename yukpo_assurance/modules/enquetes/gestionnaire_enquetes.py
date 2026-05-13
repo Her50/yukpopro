@@ -102,6 +102,13 @@ class Etude:
 
     analyse_qualitative: Optional[dict] = None
     analyse_quantitative: Optional[dict] = None
+    # Phase E4 — résultats des analyses conversationnelles "à la demande"
+    # (1 entrée par appel /analyser-prompt) : prompt + titre + tableaux +
+    # graphiques + synthèse_md + n_reponses_analyses + ts.
+    analyses_prompt_results: list[dict] = field(default_factory=list)
+    # Phase E6 (post-revert) — analyses suggérées par le LLM à la génération
+    # par prompt : list de strings (pas un catalogue limitatif).
+    analyses_suggerees: list[str] = field(default_factory=list)
     graphiques: dict[str, str] = field(default_factory=dict)  # nom → base64 PNG
     rapport_genere: Optional[dict] = None
 
@@ -639,6 +646,8 @@ SYNTHÈSE QUALITATIVE :
 {"ANALYSES QUANTITATIVES DESCRIPTIVES :" + chr(10) + desc_str if desc_str else ""}
 
 {"TABLEAUX CROISÉS / TESTS STATISTIQUES :" + chr(10) + cr_str if cr_str else ""}
+
+{"ANALYSES À LA DEMANDE (Phase E4 — résultats des prompts d'analyse du marchand) :" + chr(10) + chr(10).join(("--- Analyse : " + (a.get("titre") or "(sans titre)") + chr(10) + "Prompt : " + (a.get("prompt") or "")[:300] + chr(10) + "Synthèse : " + (a.get("synthese_md") or "")[:1500] + chr(10) + "Réponses analysées : " + str(a.get("n_reponses_analyses") or 0)) for a in (getattr(etude, "analyses_prompt_results", None) or [])) if getattr(etude, "analyses_prompt_results", None) else ""}
 
 GRAPHIQUES DISPONIBLES (référence-les dans le texte par leur nom) :
 {", ".join(etude.graphiques.keys()) or "aucun"}

@@ -205,13 +205,18 @@ async def generer_specification_site(
         user_prompt += f"BRAND_KIT : {json.dumps(brand_kit, ensure_ascii=False)[:1500]}\n"
     user_prompt += "\nProduis le JSON spec strict."
 
+    # Composition site multi-pages 5-7 pages × N sections = volumineux.
+    # Tier élevé Opus / GPT-5 + 24k tokens pour produire du contenu dense
+    # et crédible en un seul appel.
+    from core.ia_client import ModelePrioritaire
     rep = await ia_client.appeler(
         prompt=user_prompt,
         systeme=_PROMPT_SYSTEME_SITE,
         mode=ModeIA.REDACTION,
-        max_tokens_override=14000,
+        max_tokens_override=24000,
         json_attendu=True,
         utiliser_cache=False,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
     )
     texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
     m = re.search(r"\{[\s\S]*\}", texte)
@@ -824,28 +829,39 @@ body {{ font-family: var(--font-corps); color: var(--text); background: var(--bg
 
 # ─── Génération d'article de blog AI-powered (Phase C5) ──────────────────────
 
-_PROMPT_ARTICLE = """Tu es un rédacteur expert qui rédige des articles \
-de blog SEO percutants pour des sites pros africains francophones.
+_PROMPT_ARTICLE = """Tu es un rédacteur SEO expert capable de produire des \
+articles de blog percutants dans N'IMPORTE QUELLE LANGUE :
 
-Tu reçois un sujet + nom de la marque + (optionnellement) angle/audience.
-Tu RENVOIES UN JSON strict :
+  • FR (français) — registre adapté Afrique francophone ou France selon contexte
+  • EN (anglais international ou anglais africain)
+  • AR (arabe — RTL, registre formel)
+  • PT (portugais — Portugal ou Brésil ou Mozambique selon contexte)
+  • ES, DE, IT, ZH, JA, RU, HI, SW (swahili), HA (haoussa), WO (wolof),
+    LN (lingala), AM (amharique), TR (turc)
+  • Et TOUTE autre langue demandée par l'utilisateur
+
+Tu reçois un sujet + nom de la marque + langue cible + (optionnellement)
+angle/audience/ton. Tu RENVOIES UN JSON strict (pas de texte avant/après) :
 
 {
-  "titre": "Titre accrocheur (max 80 chars)",
-  "slug": "slug-kebab-case-seo",
-  "resume": "Résumé teasing 2-3 phrases (max 280 chars)",
-  "contenu_md": "Article complet en markdown (1500-3000 mots) — H2/H3, paragraphes courts, listes, exemples concrets locaux Afrique francophone",
-  "hero_image_prompt": "Description EN 40-80 mots pour hero image photoréaliste",
-  "seo_titre": "Titre SEO 60 chars",
-  "seo_desc": "Description SEO 155 chars",
-  "seo_keywords": ["mot-clé 1", "mot-clé 2", ...8-12 keywords ciblés]
+  "titre": "Titre accrocheur (max 80 chars, dans la langue cible)",
+  "slug": "slug-kebab-case-seo-en-ascii-toujours",
+  "resume": "Résumé teasing 2-3 phrases (max 280 chars, langue cible)",
+  "contenu_md": "Article complet en markdown (1500-3000 mots) DANS LA LANGUE CIBLE — H2/H3, paragraphes courts, listes, exemples concrets ancrés dans le contexte géographique pertinent",
+  "hero_image_prompt": "Description EN 40-80 mots pour hero image photoréaliste (TOUJOURS en anglais, c'est le prompt fal.ai)",
+  "seo_titre": "Titre SEO 60 chars (langue cible)",
+  "seo_desc": "Description SEO 155 chars (langue cible)",
+  "seo_keywords": ["mot-clé 1", "mot-clé 2", ...8-12 keywords ciblés DANS LA LANGUE CIBLE]
 }
 
 Règles :
 1. Markdown VALIDE (## H2, ### H3, paragraphes, listes -)
-2. Exemples ANCRÉS Afrique francophone (Cameroun/CI/Sénégal selon le contexte)
-3. Pas d'invention de chiffres faux — utilise des termes qualitatifs si pas de source
-4. CTA implicite vers les services de la marque en fin d'article
+2. CONTENU 100% dans la langue cible (sauf hero_image_prompt qui reste EN)
+3. Slug toujours en ASCII kebab-case (pour URL valide)
+4. Exemples ancrés dans le contexte géographique adapté à la langue/marque
+5. Pas d'invention de chiffres faux — utilise des termes qualitatifs si pas de source
+6. CTA implicite vers les services de la marque en fin d'article
+7. Si AR/HE : contenu en RTL respecté côté texte (markdown se rend correctement)
 """
 
 
@@ -853,24 +869,28 @@ async def generer_article_blog(
     sujet: str, *, nom_marque: str, langue: str = "fr",
     cible: Optional[str] = None, ton: Optional[str] = None,
 ) -> tuple[dict, list[dict]]:
-    """LLM Sonnet → article complet + image hero prompt."""
-    from core.ia_client import ia_client, ModeIA
+    """LLM tier élevé → article complet + image hero prompt dans N'IMPORTE
+    QUELLE langue (FR/EN/AR/PT/ES/DE/IT/ZH/JA/RU/HI/SW/HA/WO/LN/AM/TR/…).
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
     user_prompt = (
         f"SUJET : {sujet}\n"
         f"MARQUE : {nom_marque}\n"
-        f"LANGUE : {langue}\n"
+        f"LANGUE CIBLE : {langue}\n"
     )
     if cible:
-        user_prompt += f"CIBLE : {cible}\n"
+        user_prompt += f"CIBLE LECTEUR : {cible}\n"
     if ton:
         user_prompt += f"TON : {ton}\n"
     user_prompt += "\nProduis le JSON article strict."
 
+    # Article 1500-3000 mots → tier élevé (CLAUDE_OPUS → GPT-5 si LLM=gpt)
     rep = await ia_client.appeler(
         prompt=user_prompt, systeme=_PROMPT_ARTICLE,
-        mode=ModeIA.REDACTION, max_tokens_override=10000,
+        mode=ModeIA.REDACTION, max_tokens_override=14000,
         json_attendu=True, utiliser_cache=False,
+        forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
     )
     texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
     m = re.search(r"\{[\s\S]*\}", texte)

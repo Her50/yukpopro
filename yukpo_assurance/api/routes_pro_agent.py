@@ -91,9 +91,12 @@ async def chat_agent_pro(
         # Incrémenter les stats + débiter crédits
         await incrementer_stat(current_user.user_id, "nb_requetes_agent", db, xp_gain=2)
         try:
+            # Débit pré-estimé avant exécution : on suit le tier mid (Sonnet/
+            # gpt-5-mini). Le débit réel post-exécution récupère le modele_utilise
+            # depuis ReponseIA et corrige automatiquement.
             from modules.pro.service_credits import verifier_et_debiter
             ok, _c, msg = await verifier_et_debiter(
-                user_id=current_user.user_id, modele="gpt-4o",
+                user_id=current_user.user_id, modele="gpt-5-mini",
                 tokens_input=1500, tokens_output=1000,
                 module="agent", db=db,
             )

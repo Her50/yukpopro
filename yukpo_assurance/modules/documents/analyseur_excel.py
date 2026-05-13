@@ -516,7 +516,9 @@ Réponds directement avec le commentaire, sans titre ni introduction répétant 
             import openai
             client = openai.AsyncOpenAI(api_key=openai_api_key)
             resp = await client.chat.completions.create(
-                model="gpt-4o",
+                # Analyse Excel : tier mid — pattern detection + commentaire,
+                # gpt-5-mini bat gpt-4o legacy en analyse structurée
+                model="gpt-5-mini",
                 max_tokens=1500,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,

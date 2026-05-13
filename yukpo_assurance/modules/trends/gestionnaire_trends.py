@@ -1090,7 +1090,9 @@ class MoteurTrends:
             try:
                 from openai import AsyncOpenAI
                 resp = await AsyncOpenAI(api_key=self.openai_api_key).chat.completions.create(
-                    model="gpt-4o", max_tokens=600,
+                    # Veille/trends : tier mid (résumé court, classification)
+                    # gpt-5-mini = équivalent Sonnet, mieux et moins cher que gpt-4o legacy
+                    model="gpt-5-mini", max_tokens=600,
                     messages=[{"role": "user", "content": prompt}],
                 )
                 return resp.choices[0].message.content or ""

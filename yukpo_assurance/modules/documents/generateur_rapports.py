@@ -917,7 +917,9 @@ Compagnie : {compagnie_nom}"""
             import openai, json, re
             client = openai.AsyncOpenAI(api_key=openai_api_key)
             resp = await client.chat.completions.create(
-                model="gpt-4o",
+                # Génération rapports/slides : tier élevé Opus / GPT-5
+                # (composition longue + qualité contenu)
+                model="gpt-5",
                 max_tokens=4096,
                 messages=[
                     {"role": "system", "content": system_prompt},
