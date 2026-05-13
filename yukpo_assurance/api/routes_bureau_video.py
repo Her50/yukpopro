@@ -7,6 +7,7 @@ Endpoint : POST /api/v1/bureau/video/generer
 from __future__ import annotations
 
 import logging
+import math
 import time
 from pathlib import Path
 from typing import Optional
@@ -26,16 +27,23 @@ _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 class DemandeVideo(BaseModel):
     prompt: str = Field(..., min_length=10, max_length=2000,
-                         description="Description scène (anglais recommandé pour qualité max)")
-    duree_s: int = Field(default=5, ge=5, le=10,
-                          description="Durée vidéo (5 ou 10 secondes)")
+                         description="Description scène (anglais recommandé pour qualité max). "
+                                     "Pour vidéos >10s, peut structurer avec 'Plan 1: ... Plan 2: ...' "
+                                     "pour contrôler chaque chunk ; sinon découpe narrative auto.")
+    duree_s: int = Field(default=5, ge=5, le=60,
+                          description="Durée vidéo (5 à 60 secondes). "
+                                      "5/10s = un seul appel Kling natif. "
+                                      "15-60s = stitching parallèle de N×10s + FFmpeg concat "
+                                      "avec crossfade 0.5s (~3 min latence pour 30s ultra).")
     mode: str = Field(default="standard",
                        pattern="^(standard|premium|ultra)$",
-                       description="standard=LTX-Video (60 FCFA) | premium=Kling 1.6 std (240 FCFA) | ultra=Kling 1.6 pro (600 FCFA)")
+                       description="standard=LTX-Video (60 FCFA/5s) | premium=Kling 1.6 std (240 FCFA/5s) | ultra=Kling 1.6 pro (600 FCFA/5s)")
     aspect_ratio: str = Field(default="16:9",
                                pattern="^(16:9|9:16|1:1|4:3)$",
                                description="16:9 desktop, 9:16 reels/stories, 1:1 Instagram feed, 4:3 classique")
     seed: Optional[int] = Field(default=None, ge=0, le=2_147_483_647)
+    crossfade_s: float = Field(default=0.5, ge=0.0, le=2.0,
+                                description="Durée fondu enchaîné entre clips stitchés (0=cut net). Ignoré si duree_s ≤ 10.")
 
 
 _FORFAITS_VIDEO_FCFA: dict[str, int] = {
@@ -50,12 +58,21 @@ async def generer_video_endpoint(
     demande: DemandeVideo,
     current_user: TokenData = Depends(get_current_user),
 ):
-    """Génère une vidéo MP4 5-10s via fal.ai (Kling/LTX) ou Replicate fallback.
-    Coût : forfait `bureau_video_<mode>` débité avant génération."""
+    """Génère une vidéo MP4 5-60s via fal.ai (Kling/LTX) ou Replicate fallback.
+
+    • 5-10s : un appel natif Kling, latence 15s (LTX) / 60s (Kling std) / 3min (Kling pro)
+    • 15-60s : stitching parallèle de N×10s clips + FFmpeg concat avec crossfade.
+              Le prompt peut être structuré en "Plan 1: ... Plan 2: ..." pour
+              contrôler chaque chunk ; sinon découpe narrative auto avec marqueurs
+              temporels (opening shot / main action / climax / concluding shot).
+
+    Coût : forfait `bureau_video_<mode>` × ceil(duree_s/5) débité avant génération.
+    """
     from modules.bureau.service_credits_bureau import (
         verifier_acces_module, verifier_solde, debiter_forfait,
     )
     from modules.bureau import video_gen
+    import math as _math
 
     autorise, plan, msg = await verifier_acces_module(
         current_user.user_id, "infographie"
@@ -64,7 +81,8 @@ async def generer_video_endpoint(
         raise HTTPException(403, msg)
 
     cout_fcfa = _FORFAITS_VIDEO_FCFA.get(demande.mode, 60)
-    multiplier = max(1, demande.duree_s // 5)  # 10s = 2× le coût
+    # Coût = ceil(duree_s / 5) × prix unitaire. Ex : 30s ultra = 6 × 600 = 3600 XAF.
+    multiplier = max(1, _math.ceil(demande.duree_s / 5))
     cout_total = cout_fcfa * multiplier
 
     ok_solde, restants, _ = await verifier_solde(current_user.user_id)
@@ -73,14 +91,26 @@ async def generer_video_endpoint(
 
     t0 = time.time()
     try:
-        mp4_bytes = await video_gen.generer_video(
-            prompt=demande.prompt,
-            duree_s=demande.duree_s,
-            mode=demande.mode,
-            aspect_ratio=demande.aspect_ratio,
-            seed=demande.seed,
-            timeout_s=240 if demande.mode != "ultra" else 480,
-        )
+        if demande.duree_s <= 10:
+            # Chemin natif : un seul appel API
+            mp4_bytes = await video_gen.generer_video(
+                prompt=demande.prompt,
+                duree_s=demande.duree_s,
+                mode=demande.mode,
+                aspect_ratio=demande.aspect_ratio,
+                seed=demande.seed,
+                timeout_s=240 if demande.mode != "ultra" else 480,
+            )
+        else:
+            # Stitching : N×10s clips parallèles + FFmpeg concat
+            mp4_bytes = await video_gen.generer_video_long(
+                prompt=demande.prompt,
+                duree_s=demande.duree_s,
+                mode=demande.mode,
+                aspect_ratio=demande.aspect_ratio,
+                seed=demande.seed,
+                crossfade_s=demande.crossfade_s,
+            )
     except video_gen.VideoGenNotConfigured:
         raise HTTPException(
             503,
@@ -116,12 +146,19 @@ async def generer_video_endpoint(
     return {
         "ok": True,
         "fichier": fichier_id,
-        "url_telechargement": f"/api/v1/bureau/video/fichier/{fichier_id}",
+        "fichier_id": fichier_id,
+        # Sert via /bureau/documents/ (inline pour MP4 → lecture native browser)
+        # Plus simple côté frontend que /bureau/video/fichier/ qui force download.
+        "url_telechargement": f"/api/v1/bureau/documents/{fichier_id}",
+        "size_kb": round(len(mp4_bytes) / 1024, 1),
         "taille_octets": len(mp4_bytes),
         "duree_generation_ms": duree_ms,
         "mode": demande.mode,
         "duree_video_s": demande.duree_s,
+        "duree_s": demande.duree_s,
+        "aspect_ratio": demande.aspect_ratio,
         "cout_fcfa": cout_total,
+        "nb_clips_stitches": max(1, math.ceil(demande.duree_s / 10)),
     }
 
 

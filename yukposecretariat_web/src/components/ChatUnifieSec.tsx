@@ -298,7 +298,31 @@ export default function ChatUnifieSec() {
         const videoMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|veux)[^.]*\bvid[ée]o\b|\bvid[ée]o\s+(promo|tv|pub|reels?|teaser)|\bteaser\b|\breel\b|short\s*video|clip\s*vid[ée]o|spot\s*(pub|tv|publicitaire)|motion\s*ad/i.test(txt)
         if (videoMatch) {
           try {
-            const duree_s: 5 | 10 = /\b10\s*s(?:ec(?:ondes?)?)?\b|\bdix\s*secondes?\b/.test(txt) ? 10 : 5
+            // Durée 5-60s : extraction depuis le prompt (voir ChatPage YPro
+            // pour la logique détaillée). 5/10s = appel natif ; 15-60s =
+            // stitching N×10s clips parallèles + FFmpeg concat crossfade.
+            let duree_s = 5
+            const mMin = txt.match(/\b(1|une?)\s*(min(?:ute)?s?)\b/)
+            if (mMin) {
+              duree_s = 60
+            } else {
+              const mSec = txt.match(/\b(\d{1,2})\s*s(?:ec(?:ondes?)?)?\b/)
+              if (mSec) {
+                duree_s = Math.max(5, Math.min(60, parseInt(mSec[1], 10)))
+              } else {
+                const motsToNum: Record<string, number> = {
+                  'cinq': 5, 'dix': 10, 'quinze': 15, 'vingt': 20,
+                  'trente': 30, 'quarante': 40, 'cinquante': 50, 'soixante': 60,
+                }
+                for (const [mot, n] of Object.entries(motsToNum)) {
+                  if (new RegExp(`\\b${mot}\\s*secondes?\\b`, 'i').test(txt)) {
+                    duree_s = n
+                    break
+                  }
+                }
+              }
+            }
+            duree_s = Math.max(5, Math.min(60, Math.round(duree_s / 5) * 5))
             const aspect_ratio: '9:16' | '1:1' | '4:3' | '16:9' =
               /\breel|story|tiktok|insta\s*story|9\s*:\s*16|vertical/.test(txt) ? '9:16'
               : /\binsta\s*(feed|post)?|carr[ée]|square|1\s*:\s*1/.test(txt) ? '1:1'

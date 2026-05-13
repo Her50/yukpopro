@@ -61,6 +61,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # commande `pdftoppm`. Sans ça, l'audit du pipeline freeform skippe
     # silencieusement et aucun feedback qualité n'est généré.
     poppler-utils \
+    # FFmpeg — stitching vidéos longues (15-60s) : N clips Kling 10s
+    # générés en parallèle puis concaténés avec crossfade xfade.
+    # Sans ffmpeg, video_gen.generer_video_long() échoue au stitching.
+    # Inclut libx264/aac codecs pour ré-encodage si filtres complexes.
+    ffmpeg \
     # pikepdf : la lib libqpdf est bundled statiquement dans le wheel
     # x86_64-linux du package pip ; aucun paquet apt requis.
     && rm -rf /var/lib/apt/lists/*

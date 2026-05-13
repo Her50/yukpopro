@@ -213,7 +213,34 @@ export const ChatPage = () => {
         const videoMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|veux)[^.]*\bvid[ée]o\b|\bvid[ée]o\s+(promo|tv|pub|reels?|teaser)|\bteaser\b|\breel\b|short\s*video|clip\s*vid[ée]o|spot\s*(pub|tv|publicitaire)|motion\s*ad/i.test(txt);
         if (videoMatch) {
           try {
-            const duree_s = /\b10\s*s(?:ec(?:ondes?)?)?\b|\bdix\s*secondes?\b/.test(txt) ? 10 : 5;
+            // Durée 5-60s : extraction depuis le prompt.
+            //   • "Ns / N sec / N secondes" → N (clamped 5-60)
+            //   • "1 min / 1 minute / 60 secondes / une minute" → 60
+            //   • "30 secondes / trente secondes" → 30
+            //   • défaut 5s
+            let duree_s = 5;
+            const mMin = txt.match(/\b(1|une?)\s*(min(?:ute)?s?)\b/);
+            if (mMin) {
+              duree_s = 60;
+            } else {
+              const mSec = txt.match(/\b(\d{1,2})\s*s(?:ec(?:ondes?)?)?\b/);
+              if (mSec) {
+                duree_s = Math.max(5, Math.min(60, parseInt(mSec[1], 10)));
+              } else {
+                const motsToNum: Record<string, number> = {
+                  "cinq": 5, "dix": 10, "quinze": 15, "vingt": 20, "vingt-cinq": 25,
+                  "trente": 30, "trente-cinq": 35, "quarante": 40, "quarante-cinq": 45,
+                  "cinquante": 50, "cinquante-cinq": 55, "soixante": 60,
+                };
+                for (const [mot, n] of Object.entries(motsToNum)) {
+                  if (new RegExp(`\\b${mot}\\s*secondes?\\b`, "i").test(txt)) {
+                    duree_s = n; break;
+                  }
+                }
+              }
+            }
+            // Arrondi à un multiple de 5 (granularité Kling)
+            duree_s = Math.max(5, Math.min(60, Math.round(duree_s / 5) * 5));
             const aspect_ratio: "9:16" | "1:1" | "4:3" | "16:9" =
               /\breel|story|tiktok|insta\s*story|9\s*:\s*16|vertical/.test(txt) ? "9:16"
               : /\binsta\s*(feed|post)?|carr[ée]|square|1\s*:\s*1/.test(txt) ? "1:1"
@@ -223,10 +250,17 @@ export const ChatPage = () => {
               /ultra|cin[ée]ma|broadcast|sora|sota|haute\s*qualit[ée]|tv\s*pro|professionnel|qualit[ée]\s*max/.test(txt) ? "ultra"
               : /rapide|standard|\b(eco|pas\s*cher|low[-\s]?cost)\b|ltx/.test(txt) ? "standard"
               : "premium";
-            const coutXAF = ({ standard: 60, premium: 240, ultra: 600 } as const)[mode] * (duree_s / 5);
+            const coutXAF = ({ standard: 60, premium: 240, ultra: 600 } as const)[mode] * Math.ceil(duree_s / 5);
+            const nbClips = Math.ceil(duree_s / 10);
+            // Latence : 1 clip = latence solo ; N clips parallèles ≈ latence solo
+            // (gather asyncio) + ~10s FFmpeg concat
+            const solo = mode === "standard" ? 15 : mode === "premium" ? 60 : 180;
+            const latStr = nbClips === 1 ? `~${solo}s` : `~${Math.round(solo / 60)}-${Math.round(solo / 60) + 1} min`;
             updateLastAssistantMessage(
               `🎥 Génération vidéo en cours (${duree_s}s · ${aspect_ratio} · ${mode}, ~${coutXAF} XAF)…\n` +
-              `_Latence estimée : ${mode === "standard" ? "~15s" : mode === "premium" ? "~60s" : "~3 min"}_`,
+              (nbClips > 1
+                ? `_${nbClips} clips × 10s générés en parallèle puis stitchés FFmpeg crossfade. Latence ${latStr}._`
+                : `_Latence estimée : ${latStr}._`),
               null,
             );
             const result = await generateurApi.video({
