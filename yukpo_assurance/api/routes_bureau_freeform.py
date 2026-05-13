@@ -110,16 +110,40 @@ def _slugifier(texte: str, max_len: int = 50) -> str:
 _WORKER_ID = os.getenv("FLY_MACHINE_ID") or os.getenv("HOSTNAME") or "local"
 _ZOMBIE_AGE_S = int(os.getenv("FREEFORM_JOB_ZOMBIE_AGE_S", "1800"))
 _INPROGRESS_STATUSES = {"pending", "composing", "running"}
+# Variable d'env injectée dans le process group `worker` (fly.toml) → cette
+# valeur sert à : (a) auto-tagger les updates avec via_celery=True (b) skip
+# la détection zombie worker_id côté web (web et worker ont des FLY_MACHINE_ID
+# différents en mode [processes]).
+_IS_CELERY_WORKER = os.getenv("CELERY_WORKER", "false").lower() == "true"
 
 
 async def _job_set(job_id: str, data: dict) -> None:
-    data = {**data, "_ts": time.time(), "worker_id": _WORKER_ID}
+    # Sol B : auto-tag via_celery=True quand on est dans le process worker.
+    # Sans ça, la 1re update du worker écraserait le flag posé par le web,
+    # et Sol A re-flaggerait le job comme zombie au prochain poll.
+    extra = {}
+    if _IS_CELERY_WORKER:
+        extra["via_celery"] = True
+    data = {**data, **extra, "_ts": time.time(), "worker_id": _WORKER_ID}
     _JOBS_LOCAL[job_id] = data
-    # Redis best-effort
+    # Redis best-effort — merge avec l'état Redis existant pour préserver
+    # via_celery entre updates web ↔ worker (process séparés, _JOBS_LOCAL
+    # différents).
     try:
         import redis.asyncio as aioredis
         from config.settings import settings
         r = aioredis.from_url(settings.REDIS_URL, socket_connect_timeout=0.5)
+        existing_raw = await r.get(f"freeform:job:{job_id}")
+        if existing_raw and "via_celery" not in data:
+            try:
+                existing = json.loads(
+                    existing_raw if isinstance(existing_raw, str)
+                    else existing_raw.decode()
+                )
+                if existing.get("via_celery"):
+                    data["via_celery"] = True
+            except Exception:
+                pass
         await r.set(f"freeform:job:{job_id}", json.dumps(data), ex=_JOB_TTL_S)
         await r.aclose()
     except Exception:
@@ -145,12 +169,19 @@ async def _job_get(job_id: str) -> Optional[dict]:
         return None
 
     # ── Sol A : détection zombie ───────────────────────────────────────────
+    # Skip worker_id check si la tâche tourne sous Celery (`via_celery=True`)
+    # car web et worker sont des process distincts (machines distinctes sur
+    # Fly avec [processes]). Le worker_id stocké est celui du worker Celery,
+    # ≠ celui du web qui poll → faux positif sans la garde via_celery.
+    # L'age-based check reste actif dans tous les cas.
     statut = data.get("statut")
+    via_celery = bool(data.get("via_celery"))
     if statut in _INPROGRESS_STATUSES:
         stored_worker = data.get("worker_id")
         age_s = time.time() - float(data.get("_ts") or 0)
         worker_mismatch = (
-            stored_worker is not None
+            not via_celery
+            and stored_worker is not None
             and stored_worker != _WORKER_ID
             and _WORKER_ID != "local"  # en dev local on n'a pas de FLY_MACHINE_ID stable
         )
@@ -288,14 +319,68 @@ async def generer_freeform(
         "nb_pages": 0,  # rempli après composition
         "duree_compose_ms": 0,
     })
-    asyncio.create_task(_compose_et_render_background(
-        job_id=job_id, fichier_id=fichier_id_prevu,
-        demande=demande, medias=medias,
-        descripteurs_medias=descripteurs_medias,
-        descripteur_vert=descripteur_vert, brand_kit=brand_kit,
-        export_cmyk=demande.export_cmyk,
-        user_id=current_user.user_id,
-    ))
+
+    # ── Sol B : Celery worker durable (broker Redis) ───────────────────────
+    # `CELERY_ENABLED=true` route les tâches longues vers le broker Redis :
+    # un worker dédié (process `worker` dans fly.toml) consomme la queue.
+    # Si le worker meurt (redeploy, OOM, kill), task_reject_on_worker_lost
+    # remet la tâche en queue → un autre worker reprend depuis le début.
+    # `CELERY_ENABLED=false` (ou non défini) → fallback `asyncio.create_task`
+    # (comportement historique, tâche meurt avec le process). Sol A
+    # (worker_id zombie detection) reste actif dans tous les cas.
+    use_celery = os.getenv("CELERY_ENABLED", "false").lower() == "true"
+    if use_celery:
+        try:
+            from tasks.freeform_tasks import freeform_compose_render, context_set
+            await context_set(job_id, {
+                "demande": demande.model_dump(),
+                "session_id": f"chat_{current_user.user_id}",
+                "user_id": current_user.user_id,
+                "fichier_id": fichier_id_prevu,
+                "descripteurs_medias": descripteurs_medias,
+                "descripteur_vert": descripteur_vert,
+                "brand_kit": brand_kit,
+                "export_cmyk": demande.export_cmyk,
+            })
+            # Marque le job comme exécuté par Celery → désactive le worker_id
+            # mismatch check de Sol A (sinon faux positif quand le worker
+            # met à jour le statut sur sa propre machine).
+            await _job_set(job_id, {
+                "statut": "pending",
+                "user_id": current_user.user_id,
+                "fichier_id": fichier_id_prevu,
+                "titre": titre_layout_provisoire,
+                "nb_pages": 0,
+                "duree_compose_ms": 0,
+                "via_celery": True,
+            })
+            freeform_compose_render.delay(job_id)
+            logger.info(
+                f"[Freeform] Job {job_id[:8]} enqueued via Celery "
+                f"(durable, survit aux redeploy)"
+            )
+        except Exception as e_celery:
+            logger.warning(
+                f"[Freeform] Celery enqueue échoué ({e_celery}) → "
+                f"fallback asyncio.create_task"
+            )
+            asyncio.create_task(_compose_et_render_background(
+                job_id=job_id, fichier_id=fichier_id_prevu,
+                demande=demande, medias=medias,
+                descripteurs_medias=descripteurs_medias,
+                descripteur_vert=descripteur_vert, brand_kit=brand_kit,
+                export_cmyk=demande.export_cmyk,
+                user_id=current_user.user_id,
+            ))
+    else:
+        asyncio.create_task(_compose_et_render_background(
+            job_id=job_id, fichier_id=fichier_id_prevu,
+            demande=demande, medias=medias,
+            descripteurs_medias=descripteurs_medias,
+            descripteur_vert=descripteur_vert, brand_kit=brand_kit,
+            export_cmyk=demande.export_cmyk,
+            user_id=current_user.user_id,
+        ))
     return {
         "ok": True,
         "async": True,

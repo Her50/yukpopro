@@ -84,6 +84,9 @@ RUN mkdir -p \
 # Copier le code applicatif
 COPY . .
 
+# Rendre l'entrypoint exécutable AVANT le switch d'utilisateur
+RUN chmod +x /app/entrypoint.sh
+
 # Utilisateur non-root (sécurité — principle of least privilege)
 RUN useradd --system --uid 1001 --no-create-home appuser \
     && mkdir -p /home/appuser \
@@ -97,21 +100,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
 
 EXPOSE ${PORT}
 
-# Commande de démarrage :
-# - Gunicorn gère les workers (process manager robuste)
-# - UvicornWorker = ASGI natif (asyncio complet)
-# - Workers : 2*CPU+1 est la règle gunicorn, ici configurable via WORKERS
-# - --graceful-timeout 30 : délai pour terminer les requêtes en cours
-# - --max-requests 1000 : recycle les workers après 1000 requêtes (évite les memory leaks)
-CMD gunicorn api.main:app \
-    --worker-class uvicorn.workers.UvicornWorker \
-    --workers ${WORKERS} \
-    --bind 0.0.0.0:${PORT} \
-    --timeout 360 \
-    --graceful-timeout 60 \
-    --worker-tmp-dir /tmp \
-    --max-requests 2000 \
-    --max-requests-jitter 200 \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level info
+# Sol B — entrypoint.sh orchestre web (gunicorn) + worker Celery dans le
+# même container (partage filesystem pour le volume PDF). Si CELERY_ENABLED
+# != "true", lance uniquement le web (compat legacy asyncio path).
+CMD ["/app/entrypoint.sh"]

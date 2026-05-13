@@ -20,6 +20,21 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
   PYTHONPATH = "/app"
   WORKERS = "2"
   PORT = "8080"
+  # Sol B — Active le routage Celery pour les jobs longs.
+  # Mettre à "false" pour fallback asyncio.create_task (legacy).
+  CELERY_ENABLED = "true"
+  CELERY_WORKER_CONCURRENCY = "2"
+  # Concurrence semaphore freeform_layout (par worker). Sur shared-cpu-1x → 1,
+  # performance-2x → 2, performance-4x → 3.
+  FREEFORM_RENDER_CONCURRENCY = "1"
+
+# Sol B — Web + Celery worker dans le MÊME container via supervisord.
+# Pourquoi pas [processes] Fly avec VMs séparées : les volumes Fly ne sont
+# attachables qu'à 1 machine, donc le worker écrirait des PDFs invisibles
+# pour le web. Avec supervisord, web + worker partagent le filesystem local
+# et donc le volume monté. Le worker survit toujours aux redeploys car
+# Celery `task_acks_late=True` re-publie les tâches en cas de crash du
+# container — un nouveau container post-deploy reprend les tâches en queue.
 
 [http_service]
   internal_port = 8080

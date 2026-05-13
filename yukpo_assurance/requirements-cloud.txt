@@ -30,6 +30,12 @@ alembic>=1.13.0
 # ─── Cache ─────────────────────────────────────────────────────────────────────
 redis>=5.0.0
 
+# ─── File de tâches durable (Sol B — survivent aux redeploy) ──────────────────
+# Celery 5.4+ : broker Redis + task_acks_late + task_reject_on_worker_lost
+# pour reprise automatique des jobs si un worker meurt mid-task.
+# `celery[redis]` tire kombu, billiard, vine (pur Python, pas de native deps).
+celery[redis]>=5.4.0
+
 # ─── Authentification & Sécurité ──────────────────────────────────────────────
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
