@@ -202,6 +202,96 @@ export const ChatPage = () => {
       if (files.length === 0 && content.trim()) {
         const txt = content.toLowerCase();
 
+        // ─── Pipeline GEOMETRIC PLACEMENT (visuel marketing single-page) ─
+        // LLM Vision + math précise + anti-collision + audit retry.
+        // Détection AVANT freeform/orchestrateur pour les briefs marketing
+        // qui demandent un single-page premium. Pour multi-page (livret,
+        // brochure, faire-part) → laisse passer à l'orchestrateur freeform.
+        //
+        // Patterns qui matchent (single-page marketing) :
+        //   • "génère/crée/fais un visuel marketing/promo/pub"
+        //   • "affiche/poster/flyer/bannière/banner"
+        //   • "promotion/concours/tirage/tombola/giveaway/cashback"
+        //   • "publicité/campagne/teaser/launch"
+        // Patterns qui NE matchent PAS (multi-page → freeform) :
+        //   • "faire-part" (livret cérémonie)
+        //   • "livret/brochure/catalogue/programme"
+        //   • "20 cartes / 100 cartes" (impression bulk)
+        //   • "rapport/cv" (document texte)
+        const visuelMarketingMatch =
+          /(g[ée]n[èe]re|cr[ée]e|fais|produis|conçois)[^.]*\b(visuel|affiche|poster|flyer|banni[èe]re|banner)\b/i.test(txt)
+          || /\b(visuel|affiche|poster|flyer)\s+(marketing|promo|pub|publicit[ée]|annonce|teaser|campagne)\b/i.test(txt)
+          || /(promotion|concours|tombola|tirage|giveaway|cashback|loterie)\b/i.test(txt);
+        const exclureMultiPage =
+          /\bfaire[- ]?part\b|\blivret\b|\bbrochure\b|\bcatalogue\b|\bprogramme\b/i.test(txt)
+          || /\b\d{1,3}\s*(cartes?\s+(de\s+)?visite|cartes?\b)/i.test(txt)
+          || /\brapport\b|\bcv\b|\bm[ée]mo\b/i.test(txt);
+        if (visuelMarketingMatch && !exclureMultiPage) {
+          try {
+            updateLastAssistantMessage(
+              "🎨 Génération du visuel marketing via **placement géométrique** "
+              + "(LLM Vision + math précise + audit qualité auto)…\n"
+              + "_Latence estimée : 2-4 min._",
+              null,
+            );
+            // Détection aspect ratio/format depuis le brief
+            // (reel/story = portrait 9:16, banner = landscape, défaut A4)
+            const isReel = /reel|story|tiktok|vertical|portrait\s*9\s*:\s*16/i.test(txt);
+            const isBanner = /banni[èe]re|banner|leaderboard|skyscraper|landscape/i.test(txt);
+            const isSquare = /carr[ée]|square|insta\s*post|1\s*:\s*1/i.test(txt);
+            let page_w_mm = 210, page_h_mm = 297; // A4 portrait défaut
+            if (isReel) { page_w_mm = 108; page_h_mm = 192; }       // 9:16
+            else if (isBanner) { page_w_mm = 297; page_h_mm = 105; } // 2.83:1
+            else if (isSquare) { page_w_mm = 200; page_h_mm = 200; } // 1:1
+
+            const result = await generateurApi.geometricPlacement({
+              brief: content,
+              page_w_mm, page_h_mm,
+              bleed_mm: 3,
+              modele: "opus",  // Opus pour creative writing pro marketing
+              dpi: 300,
+              revision_visuelle: true,   // audit Vision + retry auto
+              max_iterations_revision: 2,
+              score_seuil_ok: 7.5,
+              export_pdf: true,           // PDF/X-1a print-ready inclus
+              export_svg: false,
+            });
+            const fid = (result as any).png_id;
+            const tok = localStorage.getItem("yukpopro_token") || "";
+            const baseUrl = `/api/v1/bureau/documents/${fid}`;
+            const url = baseUrl + "?token=" + encodeURIComponent(tok);
+            const pdfUrl = (result as any).pdf_id
+              ? `/api/v1/bureau/documents/${(result as any).pdf_id}?token=${encodeURIComponent(tok)}`
+              : null;
+            const revisions = ((result as any).revisions_journal || []) as any[];
+            const finalScore = revisions.length > 0
+              ? (revisions[revisions.length - 1]?.audit?.score_qualite_sur_10 ?? "?")
+              : "?";
+            updateLastAssistantMessage(
+              `✓ Visuel marketing généré via placement géométrique\n`
+              + `**${result.nb_items}** éléments composés · score qualité : **${finalScore}/10** · ${revisions.length} itération${revisions.length > 1 ? "s" : ""} d'amélioration\n\n`
+              + `[🖼 Voir le PNG](${url})`
+              + (pdfUrl ? `   ·   [📄 PDF print-ready](${pdfUrl})` : ""),
+              null,
+              fid ? [fid] : undefined,
+            );
+            if (fid) {
+              addDocument({
+                titre: content.slice(0, 80),
+                type: "visuel",
+                fichier: fid,
+                contexteConversation: content,
+              });
+              toast.success("Visuel marketing prêt");
+            }
+            return;
+          } catch (e: any) {
+            // Fallback vers orchestrateur si geometric échoue
+            console.warn("[ChatPage] geometric-placement fallback :", e?.message);
+            // Continue le flow normal (orchestrateur → freeform)
+          }
+        }
+
         // ─── Pipeline vidéo IA (text-to-video Kling/LTX) ──────────────
         // Détection AVANT slides-web/landing : sinon "vidéo de présentation"
         // pourrait router vers présentation. Parsing intelligent du prompt :

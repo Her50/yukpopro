@@ -277,6 +277,30 @@ export const landingPageAPI = {
   }) => httpRoot.post('/pro/landing-page/publier', req, { timeout: 120_000 }),
 }
 
+// Visuel marketing single-page via GEOMETRIC PLACEMENT (LLM Vision + math)
+// LLM raisonne en composition pro (bbox, forme, mask, anti-collision) avec
+// audit Vision auto-critique + retry. Sortie PNG 300 DPI, option PDF/X-1a + SVG.
+export const geometricPlacementAPI = {
+  generer: (req: {
+    brief: string
+    page_w_mm?: number
+    page_h_mm?: number
+    bleed_mm?: number
+    medias_refs?: string[]
+    brand_kit?: any
+    inspiration?: string
+    langue?: string
+    modele?: 'sonnet' | 'opus' | 'haiku'
+    dpi?: number
+    revision_visuelle?: boolean
+    max_iterations_revision?: number
+    score_seuil_ok?: number
+    export_pdf?: boolean
+    profil_icc?: 'fogra39' | 'psocoated_v3' | 'gracol_us'
+    export_svg?: boolean
+  }) => api.post('/infographie-pro/geometric-placement', req, { timeout: 600_000 }),
+}
+
 // Vidéo IA text-to-video — Kling 1.6 std/pro + LTX-Video via fal.ai +
 // Wan2.1 Replicate fallback. Sortie MP4 5-10s, 4 aspect ratios.
 // Coûts user (par 5s, ×2 si 10s) : standard 60 XAF | premium 240 | ultra 600.

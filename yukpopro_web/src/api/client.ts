@@ -255,6 +255,50 @@ export const generateurApi = {
   },
 
   /**
+   * Visuel marketing single-page via GEOMETRIC PLACEMENT (LLM Vision + Python math).
+   *
+   * Différence vs freeform :
+   *   • LLM raisonne en VISION sémantique (bbox + forme + mask + focal_point)
+   *   • Anti-collision math intégrée
+   *   • Audit Vision auto-critique avec retry (jusqu'à 2 itérations)
+   *   • Logos vectoriels Recraft v3 SVG natifs
+   *   • Composition pro niveau Adobe InDesign / Figma
+   *
+   * Sortie : PNG haute résolution (300 DPI). Option PDF/X-1a + SVG export.
+   */
+  geometricPlacement: async (req: {
+    brief: string;
+    page_w_mm?: number;        // défaut A4 portrait 210
+    page_h_mm?: number;        // défaut A4 portrait 297
+    bleed_mm?: number;
+    medias_refs?: string[];
+    brand_kit?: Record<string, any> | null;
+    inspiration?: string;
+    langue?: string;
+    modele?: "sonnet" | "opus" | "haiku";
+    dpi?: number;
+    revision_visuelle?: boolean;
+    max_iterations_revision?: number;
+    score_seuil_ok?: number;
+    export_pdf?: boolean;
+    profil_icc?: "fogra39" | "psocoated_v3" | "gracol_us";
+    export_svg?: boolean;
+  }): Promise<{
+    ok: boolean; png_id: string; png_base64: string; size_kb: number;
+    pdf_id: string | null; pdf_size_kb: number | null;
+    svg_id: string | null; svg_size_kb: number | null;
+    placement_plan: any; nb_items: number;
+    medias_utilises: string[];
+    revisions_journal: any[];
+  }> => {
+    const { data } = await http.post(
+      "/bureau/infographie-pro/geometric-placement", req,
+      { timeout: 600_000 },
+    );
+    return data;
+  },
+
+  /**
    * Slides Web Interactives — Reveal.js HTML autonome partageable URL.
    * Plus léger que PPTX, animations fluides, mode présentateur, export PDF.
    */
