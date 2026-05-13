@@ -99,6 +99,7 @@ from api.routes_pro_shop import (
     router_public as pro_shop_public_router,
 )
 from api.routes_pro_shop_advanced import router as pro_shop_advanced_router
+from api.routes_chat_intent import router as chat_intent_router
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_admin_cross import router as admin_cross_router
@@ -842,6 +843,11 @@ app.include_router(
     pro_shop_advanced_router,
     prefix="/api/v1/pro",
     tags=["YukpoShop avancé (D6 social + D7 ROAS + D8 CRM + D9 livraison)"],
+)
+app.include_router(
+    chat_intent_router,
+    prefix="/api/v1",
+    tags=["Chat — Classifier d'intent sémantique LLM"],
 )
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])

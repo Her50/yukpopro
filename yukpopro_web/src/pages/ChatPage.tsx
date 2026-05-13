@@ -202,6 +202,79 @@ export const ChatPage = () => {
       if (files.length === 0 && content.trim()) {
         const txt = content.toLowerCase();
 
+        // ─── Classifier LLM sémantique (priorité sur regex) ──────────────
+        // Cf. memory feedback-llm-first-routing : la sémantique prime sur
+        // les mots-clés. Appel Haiku rapide ~1-2s qui classifie le brief
+        // en un intent fermé (site_multipage / landing / boutique / visuel
+        // /…). On l'utilise pour TRANCHER les cas ambigus que les regex
+        // peuvent rater.
+        //
+        // Best-effort : si l'appel échoue ou est lent (>4s), on fallback
+        // directement sur les regex (latence prime). Pas de blocage.
+        let llmIntent: { intent: string; confidence: number } | null = null;
+        try {
+          const llmCall = http.post("/chat/classify-intent",
+            { brief: content, has_files: false },
+            { timeout: 5_000 },
+          );
+          // race avec timeout 4s — on ne laisse pas le classifier ralentir
+          const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("classify-timeout")), 4_000));
+          const res: any = await Promise.race([llmCall, timeout]).catch(() => null);
+          if (res?.data?.intent && res.data.confidence >= 0.55) {
+            llmIntent = { intent: res.data.intent, confidence: res.data.confidence };
+          }
+        } catch { /* fallback silencieux sur regex */ }
+
+        // ─── Détection PRIORITAIRE site web multi-pages ──────────────────
+        // Placée TOUT EN HAUT pour éviter que "génère un visuel pour mon
+        // cabinet" (visuelMarketingMatch) ou "génère une landing" capturent
+        // un brief qui demande clairement un site web professionnel.
+        //
+        // Regex élargie : capte mon/le/un/notre site, site web/internet/
+        // professionnel/vitrine/business/pro, pour mon cabinet/entreprise/
+        // agence/boutique/société, multi-pages, mini-site, etc.
+        const siteWebMatchPrioritaire =
+          // Verbe action + "site"
+          /\b(g[ée]n[èe]re|cr[ée]e|fais|monte|construis|d[ée]veloppe|veux|conçois|produis)\b[^.]{0,80}\b(?:mon|le|un|notre|nouveau)?\s*(?:nouveau|petit)?\s*(?:mini[-\s]?)?site\b/i.test(txt)
+          // "site (web|internet|professionnel|pro|vitrine|complet)"
+          || /\bsite\s+(?:web|internet|professionnel|pro|vitrine|complet|business|d['']entreprise|de\s*(?:mon|notre|ma|son))/i.test(txt)
+          // "site pour mon/notre cabinet/entreprise/agence/boutique"
+          || /\bsite\s+(?:pour|de|du|pour\s+(?:mon|notre|ma|la|le))\s+\S+/i.test(txt)
+          // Mini-site, multi-pages explicite, X pages
+          || /\b(mini[-\s]?site|multi[-\s]?pages?|\d+\s*pages?|site\s+\d+\s+pages?)\b/i.test(txt);
+        // Exclusions : ne PAS catcher si clair single-page/landing
+        const exclureSite =
+          /\b(une\s*seule\s*page|une\s*page|one[-\s]?pager|landing\s*page)\b/i.test(txt)
+          && !/\bmulti[-\s]?pages?|\d+\s*pages?\b/i.test(txt);
+
+        // LLM sémantique gagne SAUF si regex exclut explicitement
+        const wantsSite = (
+          (siteWebMatchPrioritaire && !exclureSite)
+          || (llmIntent?.intent === "site_multipage" && !exclureSite)
+        );
+        if (wantsSite) {
+          try {
+            updateLastAssistantMessage(
+              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_LLM Opus 4.7 compose 7-9 sections par page + paragraphes narratifs denses + images IA hero._",
+              null,
+            );
+            const result = await generateurApi.genererSite({
+              brief: content, langue: "fr", generer_images: true,
+            });
+            updateLastAssistantMessage(
+              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n` +
+              `[🚀 Publier en ligne](/mes-sites) puis cliquer "Publier" — déploiement Netlify → \`${result.slug}.yukpomnang.com\``,
+              null,
+            );
+            toast.success("Site multi-pages prêt — à publier !");
+            return;
+          } catch (e: any) {
+            const detail = e?.response?.data?.detail || e?.message || "inconnue";
+            updateLastAssistantMessage(`❌ Erreur génération site : ${String(detail).slice(0, 200)}`, null);
+            return;
+          }
+        }
+
         // ─── Pipeline GEOMETRIC PLACEMENT (visuel marketing single-page) ─
         // LLM Vision + math précise + anti-collision + audit retry.
         // Détection AVANT freeform/orchestrateur pour les briefs marketing
@@ -225,7 +298,14 @@ export const ChatPage = () => {
         const exclureMultiPage =
           /\bfaire[- ]?part\b|\blivret\b|\bbrochure\b|\bcatalogue\b|\bprogramme\b/i.test(txt)
           || /\b\d{1,3}\s*(cartes?\s+(de\s+)?visite|cartes?\b)/i.test(txt)
-          || /\brapport\b|\bcv\b|\bm[ée]mo\b/i.test(txt);
+          || /\brapport\b|\bcv\b|\bm[ée]mo\b/i.test(txt)
+          // Garde-fou : si le brief mentionne "site web/internet/pro" ou
+          // une page de site (services/équipe/contact), ce n'est PAS un
+          // visuel A4 single-page mais un site multi-pages déjà capté
+          // plus haut. Permet d'éviter le mauvais routage observé.
+          || /\bsite\s+(web|internet|professionnel|pro|vitrine|complet|business)\b/i.test(txt)
+          || /\b(mini[-\s]?site|multi[-\s]?pages?|site\s+\d+\s+pages?)\b/i.test(txt)
+          || /\bpage\s+(services?|équipe|equipe|contact|tarifs?|blog|à\s*propos|mentions)\b/i.test(txt);
         if (visuelMarketingMatch && !exclureMultiPage) {
           try {
             updateLastAssistantMessage(
@@ -421,7 +501,7 @@ export const ChatPage = () => {
 
         // Phase D — détection intent boutique e-commerce AVANT site multi-pages
         const boutiqueMatch = /\b(g[ée]n[èe]re|cr[ée]e|fais|monte|ouvre|d[ée]marre)[^.]*\b(boutique|shop|magasin|e-?commerce|vendre\s+en\s+ligne)\b|\b(boutique\s+en\s+ligne|magasin\s+en\s+ligne|yukpo\s*shop)\b|\bimport\s+(?:ia|magique)\s+(?:de\s+)?(?:produits?|articles?)\b/i.test(txt);
-        if (boutiqueMatch) {
+        if (boutiqueMatch || llmIntent?.intent === "boutique_ecommerce") {
           updateLastAssistantMessage(
             `🛒 **Boutique e-commerce YukpoShop**\n\n` +
             `Pour démarrer :\n` +
@@ -438,7 +518,7 @@ export const ChatPage = () => {
         // (un brief "génère un questionnaire/sondage/formulaire" ne doit pas
         // capter dans site_multi).
         const enqueteMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|monte)[^.]*\b(formulaire|questionnaire|sondage|enqu[êe]te|étude|sondage|kobo|xlsform|collecte\s*de\s*donn[ée]es)\b|\b(formulaire|questionnaire|sondage|enqu[êe]te)\s*(de\s*)?(satisfaction|client|audit|conformit[ée]|terrain|sant[ée]|march[ée]|opinion)\b/i.test(txt);
-        if (enqueteMatch) {
+        if (enqueteMatch || llmIntent?.intent === "enquete_formulaire") {
           try {
             updateLastAssistantMessage(
               "📋 Génération de votre formulaire / étude en cours… (~20-40s)\n_LLM Sonnet compose 15-40 questions XLSForm + dictionnaire variables._",
