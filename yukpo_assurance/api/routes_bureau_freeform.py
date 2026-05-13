@@ -582,6 +582,13 @@ async def _render_background(
         except Exception as _e_sess:
             logger.warning(f"[Freeform/async] Job {jid8} session update : {_e_sess}")
 
+        # Raccourci top-level pour le frontend : questions ciblées que le chat
+        # doit poser à l'utilisateur après réception du PDF, pour itérer.
+        questions_amelioration = []
+        if isinstance(audit_qualite_freeform, dict):
+            questions_amelioration = (
+                audit_qualite_freeform.get("questions_amelioration") or []
+            )
         await _job_set(job_id, {
             "statut": "done", "user_id": user_id,
             "fichier_id": fichier_id, "titre": titre, "nb_pages": nb_pages,
@@ -593,6 +600,7 @@ async def _render_background(
             "taille_octets": len(pdf_bytes),
             "suggestions": suggestions,
             "audit_qualite": audit_qualite_freeform,
+            "questions_amelioration": questions_amelioration,
             "print_ready": "PDF/X-1a:2001",
         })
         logger.info(f"[Freeform/async] Job {job_id[:8]} done : {fichier_id} ({len(pdf_bytes)} bytes, {duree_render_ms}ms)")

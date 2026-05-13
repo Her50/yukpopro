@@ -963,11 +963,17 @@ class RevisionResult(BaseModel):
 # Pydantic), retourne juste une note qualité + suggestions textuelles.
 # ═══════════════════════════════════════════════════════════════════════
 
-PROMPT_AUDIT_GENERIQUE = """Tu es DIRECTEUR ARTISTIQUE SENIOR. Audite ce visuel
-PNG vs le brief utilisateur initial. Évalue 4 axes : conformité au brief
-(intention/contenu/format), couleurs (cohérence + pertinence + contraste WCAG),
-disposition (hiérarchie + alignement + équilibre), complexité géométrique
+PROMPT_AUDIT_GENERIQUE = """Tu es DIRECTEUR ARTISTIQUE SENIOR + UX RESEARCHER.
+Audite ce visuel PNG vs le brief utilisateur initial. Évalue 4 axes : conformité
+au brief (intention/contenu/format), couleurs (cohérence + pertinence + contraste
+WCAG), disposition (hiérarchie + alignement + équilibre), complexité géométrique
 (adaptation au registre demandé : minimaliste/festif/corporate/luxe/artistique).
+
+EN PLUS, propose 2-4 questions précises d'amélioration que l'application
+peut poser à l'utilisateur pour itérer. Chaque question doit :
+- Cibler UN point faible CONCRET observé sur le visuel (pas générique)
+- Offrir 2-4 propositions actionnables et MUTUELLEMENT EXCLUSIVES
+- Être formulée naturellement (« Tu veux qu'on remplace … par … ? »)
 
 Sortie JSON strict, AUCUN markdown :
 {
@@ -978,10 +984,31 @@ Sortie JSON strict, AUCUN markdown :
   "points_forts": ["...", "..."],
   "points_faibles": [{"axe": "couleurs", "description": "...",
                        "suggestion": "..."}],
-  "synthese": "1-2 phrases courtes feedback global"
+  "synthese": "1-2 phrases courtes feedback global",
+  "questions_amelioration": [
+    {
+      "axe": "images",
+      "question": "Les gains apparaissent en rectangles gris. Tu veux qu'on génère ?",
+      "propositions": [
+        "Générer 3 visuels IA réalistes (voiture/maison/terrain)",
+        "Tu uploades tes propres photos",
+        "Garder en illustration vectorielle"
+      ]
+    },
+    {
+      "axe": "couleurs",
+      "question": "Le contraste texte/fond est faible par endroits. On ajuste ?",
+      "propositions": [
+        "Foncer les zones texte pour gagner en lisibilité",
+        "Garder l'identité MTN intacte",
+        "Inverser fond/titre"
+      ]
+    }
+  ]
 }
 
-Sois honnête. Note objectivement vs un standard "agence pro".
+Sois honnête. Note objectivement vs un standard "agence pro". Si score ≥ 8 et
+aucun point faible significatif, retourne `questions_amelioration: []`.
 """
 
 

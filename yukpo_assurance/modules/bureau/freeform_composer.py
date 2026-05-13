@@ -2505,24 +2505,47 @@ filets ornements, blocs texte multiples, icônes décoratives 2-4 par
 page, cadres subtils, signatures, ornements de coins). Un page avec
 seulement « titre + 3 lignes + 1 icône » est INACCEPTABLE.
 
-**6. OBJETS CONCRETS VISUALISABLES → `prompt_ia` OBLIGATOIRE**
-Si le brief mentionne des OBJETS CONCRETS visualisables (lots de
-tombola/concours : voiture/maison/terrain/smartphone/moto ; produits :
-boissons/aliments/cosmétiques/électronique ; scènes : restaurant/
-boutique/atelier ; véhicules/biens immobiliers/paysages), et qu'AUCUN
-média n'est uploadé pour ces éléments :
-- Tu DOIS générer un élément `{"type":"image", "prompt_ia":"<EN 30-60 mots
-  description précise pour Flux Pro Ultra>"}` pour CHAQUE objet/scène.
-- Description en ANGLAIS, photo-réaliste, contexte adapté
-  (« Brand new sedan car parked outdoors, sunny day, professional product
-  shot, photorealistic, soft natural lighting »).
-- INACCEPTABLE : rectangle gris #EFEFEF avec juste un label texte sous-
-  jacent (anti-pattern PDF MTN MEGA mai 2026).
-- Max 3 prompt_ia par page (cap appliqué côté code pour temps de rendu).
-- Pour les LOGOS d'entreprises connues (MTN, Orange, Coca-Cola, etc.) sans
-  média uploadé : préfère composer le logo en élément graphique (texte
-  bold dans la couleur officielle de la marque) plutôt que prompt_ia (les
-  IA hallucinent les logos).
+**6. OBJETS / SCÈNES / PRODUITS VISUALISABLES → `prompt_ia` OBLIGATOIRE**
+Pour TOUT visuel, identifie les ÉLÉMENTS CONCRETS que le brief mentionne
+et qui doivent apparaître en image (pas seulement en texte) :
+- Lots de tombola, produits commercialisés, biens immobiliers, véhicules
+- Scènes contextuelles (boutique, restaurant, événement, paysage)
+- Personnages génériques (silhouette professionnelle, sportif, étudiant)
+- Tout ce qui rend le visuel plus narratif qu'un simple texte
+
+Pour CHAQUE élément concret identifié, si AUCUN média n'est uploadé
+pour cet élément, tu DOIS générer un `{"type":"image",
+"prompt_ia":"<EN 30-60 mots description précise pour Flux Pro Ultra>"}`
+décrivant ce qui doit être montré.
+- Description en ANGLAIS, photo-réaliste sauf intention illustrée
+- Contexte adapté au registre (haut de gamme, lifestyle, corporate…)
+- Max 3 prompt_ia par page (cap appliqué côté code pour temps de rendu)
+- INACCEPTABLE : rectangle gris #EFEFEF avec juste un label texte
+  sous-jacent → c'est l'antipattern « page vide promise mais jamais
+  livrée ». Si tu n'as pas d'idée précise, génère quand même un
+  prompt_ia neutre (« generic high-quality product shot, soft lighting »).
+
+Pour les LOGOS de marques connues (MTN, Orange, Coca-Cola, Tesla, etc.)
+sans média uploadé : préfère composer le logo en élément graphique
+(texte bold dans la couleur officielle de la marque) plutôt que
+prompt_ia — les IA hallucinent les logos.
+
+**7. PRINT-READY PRO PAR DÉFAUT**
+Tout visuel composé est destiné à un usage professionnel — print ou
+écran haute fidélité. Tu DOIS systématiquement :
+- Choisir un format STANDARD (A6/A5/A4/A3 mm, carré 21×21, DL 99×210
+  pour print ; 1080×1080, 1080×1920, 1080×1350 pour social).
+- Travailler en CMYK-safe : éviter les couleurs hors gamut imprimable
+  (cyan #00FFFF pur, magenta #FF00FF pur, vert #00FF00 saturé). Le
+  backend convertit en CMYK via Ghostscript, mais une couleur RGB pure
+  qui sort hors gamut s'écrasera visuellement.
+- Bleed 3mm (bleed_mm: 3 au niveau racine). Fonds plein-bord positionnés
+  à x=-3, y=-3, w=W+6, h=H+6.
+- Crop marks aux 4 coins du trim (le backend AJOUTE automatiquement
+  l'élément crop_marks si tu l'oublies, mais préfère l'inclure
+  explicitement avec couleur #000 ou registration).
+- Hiérarchie typographique pro (3 niveaux MAX titres/sous-titres/corps).
+- Marges sécuritaires : aucun texte à < 5mm du trim final.
 
 Compose maintenant le layout PARFAIT pour ce brief en respectant
 TOUTES les exigences ci-dessus. JSON STRICT uniquement, sans
@@ -2642,7 +2665,7 @@ commentaire ni markdown.
         data = _corriger_collisions_icones(data)
         data = _normaliser_pagination_livret(data, brief)
         data = _capper_images_ia_par_page(data, max_par_page=3)
-        data = _garantir_crop_marks_si_impression(data, brief)
+        data = _garantir_crop_marks_print_ready(data)
 
     return data
 
@@ -2793,21 +2816,23 @@ _MAX_PAGES_LIVRET = 16  # = 8 feuillets max (1 feuillet = 2 pages recto-verso).
 
 
 def _normaliser_pagination_livret(data: dict, brief: str) -> dict:
-    """Pour livrets/faire-part (≥4 pages) :
+    """Pour TOUT document multi-pages (≥4 pages), considéré comme livret
+    (le LLM ne produit pas 4+ pages identiques sans intention livret —
+    pour les planches multi-items il génère 1 grille A4 par planche, pas
+    4 pages distinctes) :
+
     1. Cap dur à _MAX_PAGES_LIVRET (16) — tronque les pages excédentaires.
        Bug v378 : LLM a généré 26 pages au lieu de 8 → ~53min de rendu.
     2. Force le total à un multiple de 4 (contrainte agrafage imprimeur).
-       Pad avec page sobre 'dos' si nécessaire."""
+       Pad avec page sobre 'dos' si nécessaire.
+
+    Approche LLM-first (pas de regex sur brief) : on agit sur la structure
+    du layout produit, pas sur des mots-clés du brief. brief reste dans la
+    signature pour usage potentiel futur mais n'est plus utilisé."""
+    del brief  # plus de regex keyword
     pages = data.get("pages") or []
     n = len(pages)
     if n < 4:
-        return data
-    import re as _re
-    if not _re.search(
-        r"\blivret|brochure|d[ée]pliant|plaquette|programme|faire[- ]?part|"
-        r"funeraille|obs[èe]ques|c[ée]r[ée]monie|hommage|magazine|portfolio",
-        (brief or "").lower(),
-    ):
         return data
 
     # 1. Cap dur : tronque mais GARDE la dernière page (= dos sobre)
@@ -2872,28 +2897,45 @@ def _normaliser_pagination_livret(data: dict, brief: str) -> dict:
     return data
 
 
-def _garantir_crop_marks_si_impression(data: dict, brief: str) -> dict:
-    """Ajoute automatiquement des crop_marks (4 coins) à chaque page si le
-    brief mentionne un usage d'impression et qu'aucun crop_marks n'est déjà
-    présent. Le renderer dessine les 4 coins, mais c'est le LLM qui décide
-    de mettre l'élément dans le JSON — il l'oublie souvent (cf PDF MTN MEGA
-    mai 2026 : 1 seul crop mark visible).
+def _est_format_ecran(W: float, H: float) -> bool:
+    """Détecte si un format est destiné à un écran/réseau social (non
+    print-ready). Critères : ratios sociaux courants (1:1, 9:16, 16:9, 4:5)
+    avec dimensions assez grandes (>=600 dans la dimension principale).
+    Pas de regex sur le brief, juste sur les dimensions du JSON."""
+    if W <= 0 or H <= 0:
+        return False
+    ratio = W / H
+    # Carré social (Instagram, LinkedIn post carré) : ~1:1 avec côté >= 800
+    if abs(ratio - 1.0) < 0.05 and max(W, H) >= 800:
+        return True
+    # 9:16 portrait (Stories, Reels, TikTok) : ~0.5625
+    if 0.55 <= ratio <= 0.58 and max(W, H) >= 1000:
+        return True
+    # 16:9 paysage (YouTube thumb, Twitter header) : ~1.78
+    if 1.75 <= ratio <= 1.80 and max(W, H) >= 1000:
+        return True
+    # 4:5 portrait Instagram : ~0.8
+    if 0.78 <= ratio <= 0.82 and max(W, H) >= 1000:
+        return True
+    # 1.91:1 Facebook OG/LinkedIn link preview : ~1.91
+    if 1.88 <= ratio <= 1.94 and max(W, H) >= 1000:
+        return True
+    return False
 
-    Mots-clés impression : flyer, affiche, brochure, livret, faire-part,
-    carte, ticket, badge, dépliant, plaquette, imprimer, impression."""
-    import re as _re
-    if not _re.search(
-        r"\bimpress(?:ion|er)|imprimer|flyer|affiche|brochure|livret|"
-        r"faire[- ]?part|dipl[oô]me|carte\s+(?:de\s+)?visite|ticket|"
-        r"billet|badge|d[ée]pliant|plaquette|tract|invitation|magazine|"
-        r"poster|enseigne|marque[- ]?place|programme|m[ée]daille|"
-        r"diplome|certificat|sticker|autocollant|[ée]tiquette",
-        (brief or "").lower(),
-    ):
-        return data
+
+def _garantir_crop_marks_print_ready(data: dict) -> dict:
+    """Tout visuel est print-ready par défaut → ajoute crop_marks aux 4
+    coins de chaque page sauf si le format est détecté comme écran/social
+    via `_est_format_ecran`. Idempotent : skip si crop_marks déjà présent.
+
+    Approche LLM-first : pas de regex sur le brief. La décision se prend
+    sur la STRUCTURE du layout produit (dimensions, ratio). Si le LLM
+    choisit un format A4/A5/carré-21cm/etc., on garantit l'impression pro.
+    Si le LLM choisit 1080×1080 ou 1080×1920, on respecte l'intention écran."""
     pages = data.get("pages") or []
     fmt_doc = data.get("format_mm") or [210, 297]
     nb_ajoutes = 0
+    nb_skip_ecran = 0
     for page in pages:
         if not isinstance(page, dict):
             continue
@@ -2905,7 +2947,13 @@ def _garantir_crop_marks_si_impression(data: dict, brief: str) -> dict:
         if deja:
             continue
         fmt_page = page.get("format_mm") or fmt_doc
-        W, H = float(fmt_page[0]), float(fmt_page[1])
+        try:
+            W, H = float(fmt_page[0]), float(fmt_page[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if _est_format_ecran(W, H):
+            nb_skip_ecran += 1
+            continue
         # crop_marks couvrant tout le trim de la page
         elements.append({
             "type": "crop_marks",
@@ -2918,7 +2966,12 @@ def _garantir_crop_marks_si_impression(data: dict, brief: str) -> dict:
     if nb_ajoutes:
         logger.warning(
             f"[FreeformComposer] Post-validation : crop_marks ajoutés à "
-            f"{nb_ajoutes} page(s) (brief impression sans crop_marks LLM)."
+            f"{nb_ajoutes} page(s) (print-ready par défaut)."
+        )
+    if nb_skip_ecran:
+        logger.info(
+            f"[FreeformComposer] Post-validation : {nb_skip_ecran} page(s) "
+            f"détectée(s) format écran → crop_marks skippés."
         )
     return data
 
