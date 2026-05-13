@@ -21,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import time
 import uuid
 from pathlib import Path
@@ -93,10 +94,26 @@ def _slugifier(texte: str, max_len: int = 50) -> str:
 
 
 # ─── Stockage statut jobs (Redis avec fallback mémoire) ──────────────────
+#
+# Sol A — Détection job zombie : chaque job stocke `worker_id` =
+# `FLY_MACHINE_ID`. Quand le polling /status arrive sur une nouvelle machine
+# (parce que rolling deploy ou crash a remplacé la précédente), `_job_get()`
+# détecte la divergence et marque le job en `failed` automatiquement avec
+# `erreur="worker_killed_by_deploy"`. Le frontend voit immédiatement l'échec
+# et peut proposer un retry au lieu d'attendre 1h le TTL Redis.
+#
+# Fallback age-based : si `_ts` est plus vieux que `_ZOMBIE_AGE_S`
+# (30 min par défaut, env `FREEFORM_JOB_ZOMBIE_AGE_S`) et le statut est
+# encore "in progress", on marque failed même si worker_id matche
+# (sécurité contre les hung tasks qui ne crashent pas).
+
+_WORKER_ID = os.getenv("FLY_MACHINE_ID") or os.getenv("HOSTNAME") or "local"
+_ZOMBIE_AGE_S = int(os.getenv("FREEFORM_JOB_ZOMBIE_AGE_S", "1800"))
+_INPROGRESS_STATUSES = {"pending", "composing", "running"}
 
 
 async def _job_set(job_id: str, data: dict) -> None:
-    data = {**data, "_ts": time.time()}
+    data = {**data, "_ts": time.time(), "worker_id": _WORKER_ID}
     _JOBS_LOCAL[job_id] = data
     # Redis best-effort
     try:
@@ -111,6 +128,7 @@ async def _job_set(job_id: str, data: dict) -> None:
 
 async def _job_get(job_id: str) -> Optional[dict]:
     # Redis prioritaire (multi-worker safe)
+    data: Optional[dict] = None
     try:
         import redis.asyncio as aioredis
         from config.settings import settings
@@ -118,11 +136,41 @@ async def _job_get(job_id: str) -> Optional[dict]:
         raw = await r.get(f"freeform:job:{job_id}")
         await r.aclose()
         if raw:
-            return json.loads(raw if isinstance(raw, str) else raw.decode())
+            data = json.loads(raw if isinstance(raw, str) else raw.decode())
     except Exception:
         pass
-    # Fallback mémoire local
-    return _JOBS_LOCAL.get(job_id)
+    if data is None:
+        data = _JOBS_LOCAL.get(job_id)
+    if data is None:
+        return None
+
+    # ── Sol A : détection zombie ───────────────────────────────────────────
+    statut = data.get("statut")
+    if statut in _INPROGRESS_STATUSES:
+        stored_worker = data.get("worker_id")
+        age_s = time.time() - float(data.get("_ts") or 0)
+        worker_mismatch = (
+            stored_worker is not None
+            and stored_worker != _WORKER_ID
+            and _WORKER_ID != "local"  # en dev local on n'a pas de FLY_MACHINE_ID stable
+        )
+        if worker_mismatch:
+            reason = (
+                f"worker_killed_by_deploy (job sur {stored_worker}, "
+                f"polling sur {_WORKER_ID})"
+            )
+            data = {**data, "statut": "failed", "erreur": reason}
+            logger.warning(f"[Freeform/zombie] Job {job_id[:8]} : {reason}")
+            await _job_set(job_id, data)
+        elif age_s > _ZOMBIE_AGE_S:
+            reason = (
+                f"timeout_no_progress (statut={statut} depuis "
+                f"{int(age_s)}s, seuil {_ZOMBIE_AGE_S}s)"
+            )
+            data = {**data, "statut": "failed", "erreur": reason}
+            logger.warning(f"[Freeform/zombie] Job {job_id[:8]} : {reason}")
+            await _job_set(job_id, data)
+    return data
 
 
 def _layout_a_images_ia(layout_json: dict) -> bool:
