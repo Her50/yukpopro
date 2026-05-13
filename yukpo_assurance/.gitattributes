@@ -1,0 +1,4 @@
+# Force LF line endings sur les shell scripts (sinon "command not found"
+# côté Linux à cause du \r dans le shebang).
+*.sh text eol=lf
+entrypoint.sh text eol=lf
