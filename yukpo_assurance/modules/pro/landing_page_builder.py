@@ -186,15 +186,16 @@ async def generer_specification_landing(
         user_prompt += f"BRAND_KIT : {json.dumps(brand_kit, ensure_ascii=False)[:1500]}\n"
     user_prompt += "\nProduis le JSON spec strict."
 
+    # Signature ia_client.appeler : prompt (str) + systeme (str). Pas de
+    # `messages=[...]` ni `temperature`. `forcer_modele` non passé → ia_client
+    # respecte LLM_PRIMAIRE env (GPT primaire sur Yukpo, Claude fallback).
     rep = await ia_client.appeler(
-        messages=[
-            {"role": "system", "content": _PROMPT_SYSTEME},
-            {"role": "user",   "content": user_prompt},
-        ],
-        mode=ModeIA.QUALITE,
-        modele_prioritaire=ModelePrioritaire.CLAUDE_SONNET,
-        max_tokens=10000,
-        temperature=0.7,
+        prompt=user_prompt,
+        systeme=_PROMPT_SYSTEME,
+        mode=ModeIA.REDACTION,
+        max_tokens_override=10000,
+        json_attendu=True,
+        utiliser_cache=False,
     )
     texte = rep.contenu if hasattr(rep, "contenu") else str(rep)
     m = re.search(r"\{[\s\S]*\}", texte)
