@@ -1,12 +1,21 @@
 # Configuration Fly.io pour yukpopro-backend
 # Déployer : fly deploy (depuis yukpo_assurance/)
 #
-# Autoscaling :
-#   - min_machines_running = 1  → 1 machine toujours chaude (0 cold-start pour les users)
-#   - soft_limit = 50           → Fly démarre une nouvelle machine dès 50 req simultanées
-#   - hard_limit = 100          → max 100 req/machine avant refus (protection)
-#   - auto_stop_machines = "stop" → machines supplémentaires s'arrêtent après 5 min d'inactivité
-#   - Plafond : 5 machines max (fly scale count) = ~500 simultanés confortables
+# Stratégie scale-to-zero (mai 2026) :
+#   - performance-4x : 4 vCPU dédiés + 8 GB RAM = $0.0988/h
+#   - min_machines_running = 0  → machine s'arrête complètement si pas de trafic
+#                                  Cold-start ~2-5s au premier appel (acceptable
+#                                  pour outils B2B non temps-réel)
+#   - auto_start_machines = true → wake automatique sur 1ère requête
+#   - auto_stop_machines  = "stop" → machine s'éteint après 5 min d'idle
+#   - soft_limit = 30           → seuil pour lancer machine supplémentaire
+#   - hard_limit = 60           → max req simultanées par machine
+#   - Plafond machines : ~10 perf-4x = 40 vCPU dédiés disponibles
+#
+# Économie attendue vs perf-4x 24/7 ($71/mois) :
+#   - Trafic 2h/jour actif → ~$6/mois (-91%)
+#   - Trafic 8h/jour       → ~$24/mois (-66%)
+#   - Trafic 24/7 saturé   → ~$71/mois (parité)
 
 app = "yukpopro-backend"
 primary_region = "cdg"  # Paris — plus proche du Cameroun
@@ -21,12 +30,14 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
   WORKERS = "2"
   PORT = "8080"
   # Sol B — Active le routage Celery pour les jobs longs.
-  # Mettre à "false" pour fallback asyncio.create_task (legacy).
+  # Override via secret `fly secrets set CELERY_ENABLED=false` pour fallback
+  # asyncio.create_task (legacy, utile si worker Celery a un bug en prod).
   CELERY_ENABLED = "true"
-  CELERY_WORKER_CONCURRENCY = "2"
-  # Concurrence semaphore freeform_layout (par worker). Sur shared-cpu-1x → 1,
-  # performance-2x → 2, performance-4x → 3.
-  FREEFORM_RENDER_CONCURRENCY = "1"
+  CELERY_WORKER_CONCURRENCY = "3"
+  # Semaphore freeform_layout (par worker) : sur perf-4x (4 vCPU dédiés),
+  # on peut gérer 3 renders ReportLab parallèles sans contention. Le 4e
+  # vCPU reste pour /health, /status polling, RAG scheduler, garbage collection.
+  FREEFORM_RENDER_CONCURRENCY = "3"
 
 # Sol B — Web + Celery worker dans le MÊME container via supervisord.
 # Pourquoi pas [processes] Fly avec VMs séparées : les volumes Fly ne sont
@@ -39,22 +50,33 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"   # machines excédentaires s'arrêtent si idle > 5 min
-  auto_start_machines = true    # démarrage automatique sous charge
-  min_machines_running = 1      # toujours 1 machine chaude (pas de cold-start)
+  # Scale-to-zero : machine s'éteint après 5 min d'idle. Cold-start au
+  # prochain trafic ~2-5s (acceptable B2B). Économie majeure : on ne paie
+  # plus la machine quand personne ne l'utilise (nuit, weekend, etc.).
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0     # ← 0 = scale-to-zero quand idle
 
   [http_service.concurrency]
     type = "requests"
-    hard_limit = 100   # limite dure par machine
-    soft_limit = 50    # seuil → Fly lance une machine supplémentaire
+    # Limites par machine perf-4x (4 vCPU dédiés) : avec gunicorn 2 workers
+    # × 4 vCPU = 8 reqs concurrents tolérés sans saturation. Soft 30 / hard
+    # 60 = headroom large pour absorber les bursts sans déclencher une
+    # 2e machine trop tôt (chaque scale-up coûte $0.10/h dédié).
+    hard_limit = 60
+    soft_limit = 30
 
   [http_service.http_options]
     response_timeout = 300  # 5 min — génération IA peut prendre 2-3 min (expert mode)
 
+# VM perf-4x : 4 vCPU dédiés (vs partagés sur shared-cpu-1x) + 8 GB RAM.
+# Gains observés : render PIL/ReportLab ×3-4 plus rapide, FFmpeg stitching
+# ×3, audit Vision Sonnet ×2 (CPU pour pdf2image rasterization).
+# LLM/IA calls (Claude/GPT/fal/Replicate) restent network-bound, pas de gain.
 [[vm]]
-  memory = "2gb"
-  cpu_kind = "shared"
-  cpus = 1
+  memory   = "8gb"
+  cpu_kind = "performance"
+  cpus     = 4
 
 [[mounts]]
   source = "bureau_data"
