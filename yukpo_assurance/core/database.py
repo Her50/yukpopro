@@ -1442,6 +1442,144 @@ class SiteArticleDB(Base):
     cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class ShopBoutiqueDB(Base):
+    """Phase D — Configuration boutique e-commerce (1 par user)."""
+    __tablename__ = "shop_boutiques"
+
+    id                    = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id               = Column(Integer, nullable=False, unique=True, index=True)
+    slug                  = Column(String(60), nullable=False, unique=True, index=True)
+    nom                   = Column(String(120), nullable=False)
+    description           = Column(Text, nullable=True)
+    logo_url              = Column(String(500), nullable=True)
+    brand_kit_json        = Column(JSON, nullable=True)
+    devise                = Column(String(8), nullable=False, default="XAF")
+    pays_principal        = Column(String(8), nullable=False, default="CM")
+    langues_actives_json  = Column(JSON, nullable=True)
+    netlify_site_id       = Column(String(64), nullable=True)
+    url_public            = Column(String(255), nullable=True)
+    plan                  = Column(String(16), nullable=False, default="free")
+    statut                = Column(String(20), nullable=False, default="brouillon")
+    settings_json         = Column(JSON, nullable=True)
+    cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
+    publie_le             = Column(DateTime, nullable=True)
+    derniere_modif        = Column(DateTime, default=datetime.utcnow,
+                                    onupdate=datetime.utcnow, nullable=False)
+
+
+class ShopCategorieDB(Base):
+    __tablename__ = "shop_categories"
+
+    id          = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id = Column(BigInteger,
+                          ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                          nullable=False, index=True)
+    nom         = Column(String(120), nullable=False)
+    slug        = Column(String(80), nullable=False)
+    parent_id   = Column(BigInteger,
+                          ForeignKey("shop_categories.id", ondelete="SET NULL"),
+                          nullable=True)
+    ordre       = Column(Integer, default=0, nullable=False)
+    description = Column(Text, nullable=True)
+    image_url   = Column(String(500), nullable=True)
+    cree_le     = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopProductDB(Base):
+    __tablename__ = "shop_products"
+
+    id                   = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id          = Column(BigInteger,
+                                   ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                   nullable=False, index=True)
+    sku                  = Column(String(64), nullable=True, index=True)
+    titre                = Column(String(200), nullable=False)
+    slug                 = Column(String(120), nullable=False)
+    description_courte   = Column(String(400), nullable=True)
+    description_longue   = Column(Text, nullable=True)
+    prix_unit            = Column(Float, nullable=False, default=0)
+    prix_unit_promo      = Column(Float, nullable=True)
+    devise               = Column(String(8), nullable=False, default="XAF")
+    tva_pct              = Column(Float, nullable=False, default=0)
+    stock                = Column(Integer, nullable=False, default=0)
+    stock_alerte         = Column(Integer, nullable=False, default=5)
+    photos_urls_json     = Column(JSON, nullable=True)
+    categorie_id         = Column(BigInteger,
+                                   ForeignKey("shop_categories.id", ondelete="SET NULL"),
+                                   nullable=True, index=True)
+    tags_json            = Column(JSON, nullable=True)
+    variantes_json       = Column(JSON, nullable=True)
+    seo_titre            = Column(String(120), nullable=True)
+    seo_desc             = Column(String(200), nullable=True)
+    seo_keywords_json    = Column(JSON, nullable=True)
+    statut               = Column(String(20), nullable=False, default="actif",
+        comment="actif | brouillon | archive | rupture")
+    source               = Column(String(20), nullable=False, default="manuel",
+        comment="manuel | import_ia | api | csv")
+    cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modif_le             = Column(DateTime, default=datetime.utcnow,
+                                   onupdate=datetime.utcnow, nullable=False)
+
+
+class ShopOrderDB(Base):
+    __tablename__ = "shop_orders"
+
+    id                       = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id              = Column(BigInteger,
+                                       ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                       nullable=False, index=True)
+    numero                   = Column(String(40), nullable=False, unique=True, index=True)
+    client_user_id           = Column(Integer, nullable=True, index=True)
+    client_nom               = Column(String(120), nullable=True)
+    client_email             = Column(String(255), nullable=True)
+    client_telephone         = Column(String(40), nullable=True, index=True)
+    adresse_livraison_json   = Column(JSON, nullable=True)
+    zone_livraison           = Column(String(80), nullable=True)
+    montant_produits         = Column(Float, nullable=False, default=0)
+    montant_livraison        = Column(Float, nullable=False, default=0)
+    montant_tva              = Column(Float, nullable=False, default=0)
+    montant_remise           = Column(Float, nullable=False, default=0)
+    montant_total            = Column(Float, nullable=False, default=0)
+    devise                   = Column(String(8), nullable=False, default="XAF")
+    code_promo               = Column(String(40), nullable=True)
+    statut                   = Column(String(20), nullable=False,
+                                       default="en_attente_paiement")
+    paiement_provider        = Column(String(40), nullable=True)
+    paiement_ref             = Column(String(120), nullable=True)
+    paiement_statut          = Column(String(20), nullable=False, default="en_attente")
+    paye_le                  = Column(DateTime, nullable=True)
+    expedie_le               = Column(DateTime, nullable=True)
+    livre_le                 = Column(DateTime, nullable=True)
+    tracking_url             = Column(String(500), nullable=True)
+    source                   = Column(String(40), nullable=False, default="storefront")
+    utm_source               = Column(String(80), nullable=True)
+    utm_campaign             = Column(String(120), nullable=True)
+    notes_marchand           = Column(Text, nullable=True)
+    notes_client             = Column(Text, nullable=True)
+    cree_le                  = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modif_le                 = Column(DateTime, default=datetime.utcnow,
+                                       onupdate=datetime.utcnow, nullable=False)
+
+
+class ShopOrderItemDB(Base):
+    __tablename__ = "shop_order_items"
+
+    id              = Column(BigInteger, primary_key=True, autoincrement=True)
+    order_id        = Column(BigInteger,
+                              ForeignKey("shop_orders.id", ondelete="CASCADE"),
+                              nullable=False, index=True)
+    product_id      = Column(BigInteger,
+                              ForeignKey("shop_products.id", ondelete="SET NULL"),
+                              nullable=True)
+    titre           = Column(String(200), nullable=False)
+    variante_label  = Column(String(120), nullable=True)
+    variante_json   = Column(JSON, nullable=True)
+    quantite        = Column(Integer, nullable=False, default=1)
+    prix_unit       = Column(Float, nullable=False)
+    photo_url       = Column(String(500), nullable=True)
+    cree_le         = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class LandingFollowupSettingsDB(Base):
     """Templates auto follow-up email post-lead par user (Phase B4).
 

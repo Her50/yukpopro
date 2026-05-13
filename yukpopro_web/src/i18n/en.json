@@ -1510,5 +1510,26 @@
       "publie": "Published",
       "brouillon": "Draft"
     }
+  },
+  "shop": {
+    "titre": "My shop",
+    "init_titre": "Create my online shop",
+    "init_aide": "Add products via AI magic import then publish your shop in 1 click.",
+    "init_nom": "Shop name",
+    "init_desc": "Description (optional)",
+    "init_creer": "Create my shop",
+    "publier": "Publish",
+    "republier": "Re-publish",
+    "magic_titre": "AI Magic Import — Photos → complete product",
+    "magic_aide": "Upload 1 to 10 photos. Opus Vision AI auto-composes title, description, price, category, tags, variants.",
+    "magic_brief": "Optional brief: e.g. 'premium Italian leather handbag'",
+    "magic_btn": "Select photos (max 10)",
+    "tab_produits": "Products",
+    "tab_commandes": "Orders",
+    "publier_prod": "Activate",
+    "depublier_prod": "Draft",
+    "confirm_delete_produit": "Delete this product?",
+    "vide_produits": "No products. Upload photos with AI Magic Import above.",
+    "vide_commandes": "No orders yet. Publish your shop to start selling."
   }
 }

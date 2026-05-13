@@ -94,6 +94,10 @@ from api.routes_landing_leads import (
 from api.routes_tracking_settings import router as tracking_settings_router
 from api.routes_cost_advisor import router as cost_advisor_router
 from api.routes_pro_sites import router as pro_sites_router
+from api.routes_pro_shop import (
+    router as pro_shop_router,
+    router_public as pro_shop_public_router,
+)
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_admin_cross import router as admin_cross_router
@@ -812,6 +816,16 @@ app.include_router(
     pro_sites_router,
     prefix="/api/v1/pro",
     tags=["Plateforme Pro — Mini-sites multi-pages (Phase C)"],
+)
+app.include_router(
+    pro_shop_router,
+    prefix="/api/v1/pro",
+    tags=["Plateforme Pro — YukpoShop e-commerce (Phase D)"],
+)
+app.include_router(
+    pro_shop_public_router,
+    prefix="/api/v1/shop/public",
+    tags=["YukpoShop — Storefront public (no auth)"],
 )
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])

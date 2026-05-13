@@ -276,6 +276,10 @@ _ESTIMATIONS_DEFAUT: dict[str, float] = {
     "site_page_modif":         150.0,   # LLM modif d'1 page (réduit vs régénération)
     "site_blog_article":       400.0,   # rédaction + image hero
     "site_traduction_page":    100.0,   # traduction d'1 page (Phase C4)
+    # Phase D — YukpoShop
+    "shop_magic_import":       500.0,   # Opus Vision + N photos + 16k tokens
+    "shop_publish":             80.0,   # storefront multi-fichiers Netlify
+    "shop_order":               10.0,   # capture commande (debit auto sur marchand)
     # Catch-all
     "default":                 100.0,
 }

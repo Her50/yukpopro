@@ -1250,5 +1250,26 @@
     "copier_lien": "Copier lien",
     "apercu": "Aperçu",
     "analyser": "Analyser"
+  },
+  "shop": {
+    "titre": "Ma boutique",
+    "init_titre": "Créer ma boutique en ligne",
+    "init_aide": "Vous pourrez ajouter vos produits via magic import IA puis publier votre boutique en 1 clic.",
+    "init_nom": "Nom de la boutique",
+    "init_desc": "Description (optionnelle)",
+    "init_creer": "Créer ma boutique",
+    "publier": "Publier",
+    "republier": "Re-publier",
+    "magic_titre": "Magic Import IA — Photos → produit complet",
+    "magic_aide": "Uploadez 1 à 10 photos. L'IA Opus Vision compose automatiquement titre, description, prix, catégorie, tags, variantes.",
+    "magic_brief": "Brief optionnel : ex. 'sac à main cuir Italie haut de gamme'",
+    "magic_btn": "Sélectionner photos (max 10)",
+    "tab_produits": "Produits",
+    "tab_commandes": "Commandes",
+    "publier_prod": "Activer",
+    "depublier_prod": "Brouillon",
+    "confirm_delete_produit": "Supprimer ce produit ?",
+    "vide_produits": "Aucun produit. Uploadez vos photos avec Magic Import IA ci-dessus.",
+    "vide_commandes": "Aucune commande pour l'instant. Publiez votre boutique pour commencer à vendre."
   }
 }

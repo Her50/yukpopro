@@ -386,6 +386,21 @@ export const ChatPage = () => {
           }
         }
 
+        // Phase D — détection intent boutique e-commerce AVANT site multi-pages
+        const boutiqueMatch = /\b(g[ée]n[èe]re|cr[ée]e|fais|monte|ouvre|d[ée]marre)[^.]*\b(boutique|shop|magasin|e-?commerce|vendre\s+en\s+ligne)\b|\b(boutique\s+en\s+ligne|magasin\s+en\s+ligne|yukpo\s*shop)\b|\bimport\s+(?:ia|magique)\s+(?:de\s+)?(?:produits?|articles?)\b/i.test(txt);
+        if (boutiqueMatch) {
+          updateLastAssistantMessage(
+            `🛒 **Boutique e-commerce YukpoShop**\n\n` +
+            `Pour démarrer :\n` +
+            `1. [Ouvrir ma boutique](/ma-boutique) — initialise + dashboard produits/commandes\n` +
+            `2. Upload 1-10 photos → Magic Import IA Opus Vision compose la fiche produit complète (titre/desc/prix/catégorie/tags/variantes)\n` +
+            `3. Publier → storefront déployé sur \`<slug>.yukpomnang.com\` avec catalogue + page produit + panier + checkout multi-provider (Orange Money, MTN MoMo, Stripe, cash)\n\n` +
+            `🎯 [→ Aller à ma boutique](/ma-boutique)`,
+            null,
+          );
+          return;
+        }
+
         // Phase E1 — détection génération de formulaire/enquête AVANT site multi-pages
         // (un brief "génère un questionnaire/sondage/formulaire" ne doit pas
         // capter dans site_multi).

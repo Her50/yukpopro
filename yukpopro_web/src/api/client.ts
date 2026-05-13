@@ -471,6 +471,96 @@ export const generateurApi = {
     return data;
   },
 
+  // ── Phase D — YukpoShop e-commerce ────────────────────────────────────────
+
+  shopInitialiser: async (req: {
+    nom: string; description?: string;
+    devise?: string; pays_principal?: string; slug_souhaite?: string;
+  }) => {
+    const { data } = await http.post("/pro/shop/initialiser", req);
+    return data;
+  },
+
+  shopMaBoutique: async () => {
+    const { data } = await http.get("/pro/shop");
+    return data;
+  },
+
+  shopPatchBoutique: async (req: any) => {
+    const { data } = await http.patch("/pro/shop", req);
+    return data;
+  },
+
+  shopListerProduits: async (params?: { statut?: string; limit?: number; offset?: number }) => {
+    const { data } = await http.get("/pro/shop/produits", { params });
+    return data;
+  },
+
+  shopCreerProduit: async (req: any) => {
+    const { data } = await http.post("/pro/shop/produits", req);
+    return data;
+  },
+
+  shopPatchProduit: async (id: number, req: any) => {
+    const { data } = await http.patch(`/pro/shop/produits/${id}`, req);
+    return data;
+  },
+
+  shopSupprimerProduit: async (id: number) => {
+    const { data } = await http.delete(`/pro/shop/produits/${id}`);
+    return data;
+  },
+
+  /**
+   * Phase D2 — Magic Import IA : upload N photos → fiche produit complète.
+   * Le backend utilise Opus Vision pour analyser les photos et compose
+   * titre/description/prix/catégorie/tags/variantes automatiquement.
+   */
+  shopMagicImport: async (
+    files: File[], opts: { brief?: string; categorie_hint?: string; auto_save?: boolean } = {},
+  ) => {
+    const form = new FormData();
+    files.forEach(f => form.append("photos", f));
+    if (opts.brief) form.append("brief", opts.brief);
+    if (opts.categorie_hint) form.append("categorie_hint", opts.categorie_hint);
+    form.append("auto_save", String(opts.auto_save !== false));
+    const { data } = await http.post("/pro/shop/produits/import-ia", form, {
+      timeout: 600_000,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
+  shopPublier: async () => {
+    const { data } = await http.post("/pro/shop/publier", {}, { timeout: 180_000 });
+    return data;
+  },
+
+  shopListerCommandes: async (params?: { statut?: string; limit?: number; offset?: number }) => {
+    const { data } = await http.get("/pro/shop/commandes", { params });
+    return data;
+  },
+
+  shopDetailCommande: async (id: number) => {
+    const { data } = await http.get(`/pro/shop/commandes/${id}`);
+    return data;
+  },
+
+  shopPatchCommande: async (id: number, req: { statut?: string; notes_marchand?: string; tracking_url?: string }) => {
+    const { data } = await http.patch(`/pro/shop/commandes/${id}`, req);
+    return data;
+  },
+
+  shopListerCategories: async () => {
+    const { data } = await http.get("/pro/shop/categories");
+    return data;
+  },
+
+  shopCreerCategorie: async (req: { nom: string; parent_id?: number; description?: string; image_url?: string; ordre?: number }) => {
+    const { data } = await http.post("/pro/shop/categories", req);
+    return data;
+  },
+
   /**
    * Sprint G1 — Auto-orchestrateur génération documents.
    * L'utilisateur tape un brief en langage naturel, le backend détecte

@@ -32,6 +32,7 @@ const PublierLandingPage = lazyWithRetry(() => import("@/pages/PublierLandingPag
 const TrackingSettingsPage = lazyWithRetry(() => import("@/pages/TrackingSettingsPage").then(m => ({ default: m.TrackingSettingsPage })));
 const MesSitesPage = lazyWithRetry(() => import("@/pages/MesSitesPage").then(m => ({ default: m.MesSitesPage })));
 const MesEnquetesPage = lazyWithRetry(() => import("@/pages/MesEnquetesPage").then(m => ({ default: m.MesEnquetesPage })));
+const MaBoutiquePage = lazyWithRetry(() => import("@/pages/MaBoutiquePage").then(m => ({ default: m.MaBoutiquePage })));
 const EmploiPage = lazyWithRetry(() => import("@/pages/EmploiPage").then(m => ({ default: m.EmploiPage })));
 const MarchesPage = lazyWithRetry(() => import("@/pages/MarchesPage").then(m => ({ default: m.MarchesPage })));
 const EnquetesPage = lazyWithRetry(() => import("@/pages/EnquetesPage").then(m => ({ default: m.EnquetesPage })));
@@ -93,6 +94,7 @@ export default function App() {
               <Route path="/tracking-settings" element={<TrackingSettingsPage />} />
               <Route path="/mes-sites"   element={<MesSitesPage />} />
               <Route path="/mes-enquetes" element={<MesEnquetesPage />} />
+              <Route path="/ma-boutique"  element={<MaBoutiquePage />} />
               <Route path="/emploi"         element={<EmploiPage />} />
               <Route path="/marches"        element={<MarchesPage />} />
               <Route path="/enquetes"       element={<EnquetesPage />} />
