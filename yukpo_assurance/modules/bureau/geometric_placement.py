@@ -170,21 +170,36 @@ class TextPlacement(BaseModel):
 
 class ImagePlacement(BaseModel):
     """
-    Image uploadée positionnée et adaptée géométriquement à sa zone cible.
+    Image positionnée et adaptée géométriquement à sa zone cible.
+
+    L'image peut être :
+      • UPLOADÉE par l'user (media_ref pointe sur la médiathèque session/compte)
+      • GÉNÉRÉE AUTO IA (prompt_ia → Flux Pro Ultra / Recraft v3 / Ideogram 2
+        à la volée si aucun media_ref fourni). Permet au LLM de placer des
+        photos produits, scènes terrain, illustrations métier sans que l'user
+        ait à les uploader. Essentiel pour visuels marketing où une photo
+        cinématique pertinente est nécessaire.
 
     Le LLM décide :
       - target_zone (où, forme, dimensions)
-      - fit_mode (comment l'image s'adapte au container : cover/contain/etc.)
-      - focal_point (point d'ancrage si smart_focus : ex 'visage en haut')
-      - mask_shape (silhouette finale : cercle, polygon, hexagone…)
+      - fit_mode (comment l'image s'adapte au container)
+      - focal_point (point d'ancrage si smart_focus)
+      - mask_shape (silhouette finale)
       - filters (recolor, opacity, blur, contraste)
-
-    Python implémente la math via PIL : crop exact pour fit_mode, masque alpha
-    pour mask_shape, ajustement sub-pixel, anti-aliasing des bords.
+      - prompt_ia (si pas de media_ref) : description anglaise 30-60 mots
+        ("Smartphone displaying mobile banking app, hand holding device,
+        modern office background, professional lighting, photorealistic")
     """
     kind: Literal["image"] = "image"
-    media_ref: str = Field(..., min_length=1,
-        description="Référence média uploadé (ex: 'session:abc' ou 'user_logo')")
+    media_ref: Optional[str] = Field(default=None,
+        description="Référence média uploadé. Si None, utilise prompt_ia pour génération auto.")
+    prompt_ia: Optional[str] = Field(default=None, max_length=1000,
+        description="Prompt EN 30-60 mots pour Flux/Recraft/Ideogram si media_ref absent")
+    mode_ia: Literal["standard", "premium", "ultra", "ultra_plus"] = Field(
+        default="premium",
+        description="Qualité génération IA : standard=Flux schnell rapide, "
+                    "premium=Flux dev (défaut), ultra=Flux Pro Ultra cinéma, "
+                    "ultra_plus=ensemble Flux+Recraft+Ideogram avec vision picker")
     target_zone: BBox
     fit_mode: FitMode = "cover"
     # Pour smart_focus : point d'ancrage en % de l'image source (0..1, 0=top-left)
@@ -229,6 +244,82 @@ class ShapePlacement(BaseModel):
     shape_extra: dict = Field(default_factory=dict)
     transform: Transform = Transform()
     z_index: int = Field(default=1)
+
+
+# ─── Primitives MARKETING NATIVES (visuels haute qualité direction marketing) ─
+
+ChartType = Literal["bar", "column", "pie", "donut", "line", "area"]
+
+
+class ChartPlacement(BaseModel):
+    """
+    Chart NATIF (bar / column / pie / donut / line / area) rendu vectoriel
+    via PIL — pas une image plate générée par IA. Essentiel pour visuels
+    marketing data-driven (rapport ROI, KPI campagne, comparaison perf,
+    funnel conversion, étude marché).
+
+    Le LLM fournit les données (labels + values + colors) ; Python rend en
+    pur géométrique pour qualité parfaite à toute échelle.
+    """
+    kind: Literal["chart"] = "chart"
+    chart_type: ChartType = "bar"
+    bbox: BBox
+    title: Optional[str] = Field(default=None, max_length=120)
+    labels: list[str] = Field(..., min_length=1, max_length=20)
+    values: list[float] = Field(..., min_length=1, max_length=20)
+    colors: Optional[list[Color]] = Field(default=None,
+        description="1 couleur par série, sinon palette brand auto")
+    show_values: bool = Field(default=True,
+        description="Affiche les valeurs sur les barres / parts de pie")
+    show_legend: bool = Field(default=True)
+    unit: str = Field(default="", max_length=10,
+        description="Suffixe affiché après les valeurs (%, FCFA, M, K, x, …)")
+    grid: bool = Field(default=False,
+        description="Grille horizontale pour bar/column/line")
+    transform: Transform = Transform()
+    z_index: int = Field(default=4)
+
+
+class MockupPlacement(BaseModel):
+    """
+    Mockup container marketing : smartphone / laptop / tablet / billboard
+    / poster_frame / business_card_holder. Le rendu dessine le device
+    en vectoriel et y embed l'image cible (capture d'app, photo produit,
+    visuel ad). Essentiel pour présentations campagne, landing page mockups,
+    catalogues produits.
+    """
+    kind: Literal["mockup"] = "mockup"
+    device: Literal[
+        "smartphone", "smartphone_landscape", "tablet", "laptop", "monitor",
+        "billboard", "poster_frame", "instagram_post_phone",
+        "business_card_holder", "tshirt", "tote_bag", "mug", "tv_screen",
+    ] = "smartphone"
+    bbox: BBox
+    inner_image_media_ref: Optional[str] = Field(default=None,
+        description="Image à embed dans le device (ex: 'session:capture_app')")
+    inner_image_b64: Optional[str] = Field(default=None,
+        description="Alternative : data URI base64 PNG/JPG")
+    device_color: Color = Color(r=20, g=20, b=20, a=1.0)
+    transform: Transform = Transform()
+    shadow: Optional[Shadow] = None
+    z_index: int = Field(default=5)
+
+
+class GradientMeshPlacement(BaseModel):
+    """
+    Gradient mesh cinématique (style background marketing premium :
+    Linear Cards, Stripe, Apple keynote). Effet bokeh/auroral via N blobs
+    de couleur soft-blurés. Idéal full-bleed backgrounds, hero sections,
+    posters tendance 2025-2026.
+    """
+    kind: Literal["gradient_mesh"] = "gradient_mesh"
+    bbox: BBox
+    blobs: list[dict] = Field(..., min_length=2, max_length=8,
+        description="[{x:0..1, y:0..1, radius:0..1, color:Color}, ...] positions en %")
+    blur_mm: float = Field(default=15.0, ge=0.0, le=50.0)
+    base_color: Color = Color(r=240, g=240, b=245, a=1.0)
+    transform: Transform = Transform()
+    z_index: int = Field(default=0)
 
 
 class PageBackground(BaseModel):
@@ -540,6 +631,12 @@ def render_placement_plan(
                 _render_text(canvas, item, bleed_px, dpi)
             elif isinstance(item, ShapePlacement):
                 _render_shape(canvas, item, bleed_px, dpi)
+            elif isinstance(item, ChartPlacement):
+                _render_chart(canvas, item, bleed_px, dpi)
+            elif isinstance(item, MockupPlacement):
+                _render_mockup(canvas, item, medias, bleed_px, dpi)
+            elif isinstance(item, GradientMeshPlacement):
+                _render_gradient_mesh(canvas, item, bleed_px, dpi)
         except Exception as e:
             logger.warning(f"[GeomPlacement] Item {item.kind} échoué : {e}")
 
@@ -554,17 +651,18 @@ def render_placement_plan(
 
 def _coerce_item(raw):
     """Coerce un item dict ou Pydantic vers le bon type."""
-    if isinstance(raw, (TextPlacement, ImagePlacement, ShapePlacement)):
+    if isinstance(raw, (TextPlacement, ImagePlacement, ShapePlacement,
+                         ChartPlacement, MockupPlacement, GradientMeshPlacement)):
         return raw
     if isinstance(raw, dict):
         kind = raw.get("kind", "")
         try:
-            if kind == "text":
-                return TextPlacement(**raw)
-            if kind == "image":
-                return ImagePlacement(**raw)
-            if kind == "shape":
-                return ShapePlacement(**raw)
+            if kind == "text":           return TextPlacement(**raw)
+            if kind == "image":          return ImagePlacement(**raw)
+            if kind == "shape":          return ShapePlacement(**raw)
+            if kind == "chart":          return ChartPlacement(**raw)
+            if kind == "mockup":         return MockupPlacement(**raw)
+            if kind == "gradient_mesh":  return GradientMeshPlacement(**raw)
         except Exception as e:
             logger.warning(f"[GeomPlacement] Item invalide ({kind}) : {e}")
     return None
@@ -579,12 +677,41 @@ def _load_image(data: bytes) -> "Image.Image":
 
 
 def _render_image(canvas, item: ImagePlacement, medias: dict, bleed_px: int, dpi: int):
-    """Render une image avec fit, masque, transforms, filtres."""
+    """Render une image avec fit, masque, transforms, filtres.
+    Si media_ref absent mais prompt_ia présent → génération auto IA via Flux."""
     from PIL import Image, ImageFilter, ImageEnhance
-    if item.media_ref not in medias:
-        logger.debug(f"[GeomPlacement] media_ref manquant : {item.media_ref}")
+    src = None
+    if item.media_ref and item.media_ref in medias:
+        src = _load_image(medias[item.media_ref])
+    elif item.prompt_ia:
+        # GÉNÉRATION AUTO IA — Flux/Recraft/Ideogram à la volée.
+        # Synchrone via asyncio.run dans un thread séparé pour rester
+        # dans la signature render_placement_plan() qui est sync.
+        try:
+            import asyncio as _aio
+            from . import image_gen as _ig
+            # Détermine le format approximatif depuis target_zone
+            ratio = item.target_zone.w / max(0.01, item.target_zone.h)
+            fmt = "square_hd" if 0.9 < ratio < 1.1 else (
+                "portrait_4_3" if ratio < 0.9 else "landscape_4_3"
+            )
+            png_ia = _aio.run(_ig.generer_image(
+                prompt=item.prompt_ia,
+                mode=item.mode_ia or "premium",
+                format_=fmt,
+                timeout_s=120.0,
+            ))
+            if png_ia:
+                src = _load_image(png_ia)
+                # Cache dans medias pour éviter re-génération si re-render
+                cache_key = f"ia_gen:{hash(item.prompt_ia) & 0xFFFFFFFF:08x}"
+                medias[cache_key] = png_ia
+                logger.info(f"[GeomPlacement] Image IA générée ({item.mode_ia}) : {len(png_ia)} bytes")
+        except Exception as e:
+            logger.warning(f"[GeomPlacement] Génération IA échouée : {e}")
+    if src is None:
+        logger.debug(f"[GeomPlacement] Image absente : media_ref={item.media_ref} prompt_ia={bool(item.prompt_ia)}")
         return
-    src = _load_image(medias[item.media_ref])
 
     # 1. Bbox cible en pixels (avec offset bleed)
     tx = mm_to_px(item.target_zone.x, dpi) + bleed_px
@@ -1047,3 +1174,406 @@ def _load_font(family: str, size_px: int, weight: int = 400, italic: bool = Fals
         except Exception:
             continue
     return ImageFont.load_default()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Render — Primitives marketing (chart, mockup, gradient_mesh)
+# ═══════════════════════════════════════════════════════════════════════
+
+def _render_chart(canvas, item: "ChartPlacement", bleed_px: int, dpi: int):
+    """
+    Render chart natif vectoriel via PIL (bar/column/pie/donut/line/area).
+    Pas d'image plate IA — qualité parfaite à toute échelle.
+    Idéal visuels marketing data (ROI, KPI campagne, comparaison perf).
+    """
+    from PIL import Image, ImageDraw
+    tx = mm_to_px(item.bbox.x, dpi) + bleed_px
+    ty = mm_to_px(item.bbox.y, dpi) + bleed_px
+    tw = mm_to_px(item.bbox.w, dpi)
+    th = mm_to_px(item.bbox.h, dpi)
+
+    layer = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+
+    # Couleurs : utilise palette fournie sinon palette défaut (Inter brand)
+    default_palette = [
+        Color(r=0x4F, g=0x46, b=0xE5, a=1.0),  # indigo
+        Color(r=0x10, g=0xB9, b=0x81, a=1.0),  # emerald
+        Color(r=0xF5, g=0x9E, b=0x0B, a=1.0),  # amber
+        Color(r=0xEF, g=0x44, b=0x44, a=1.0),  # red
+        Color(r=0x8B, g=0x5C, b=0xF6, a=1.0),  # violet
+        Color(r=0x06, g=0xB6, b=0xD4, a=1.0),  # cyan
+    ]
+    colors = item.colors or default_palette
+    n = min(len(item.labels), len(item.values))
+    if n == 0:
+        return
+
+    # Title (top, 12% de la hauteur réservé)
+    title_h = int(th * 0.12) if item.title else 0
+    legend_h = int(th * 0.08) if item.show_legend and item.chart_type in ("bar", "column", "line", "area") else 0
+    chart_top = ty + title_h
+    chart_h = th - title_h - legend_h
+    chart_w = tw
+
+    if item.title:
+        font_title = _load_font("Calibri Light", max(11, int(title_h * 0.55)),
+                                 weight=600)
+        d_canvas = ImageDraw.Draw(canvas)
+        try:
+            bbox = d_canvas.textbbox((0, 0), item.title, font=font_title)
+            tw_title = bbox[2] - bbox[0]
+        except Exception:
+            tw_title = len(item.title) * 6
+        d_canvas.text(
+            (tx + (tw - tw_title) // 2, ty),
+            item.title, font=font_title, fill=(40, 40, 50, 255),
+        )
+
+    if item.chart_type in ("bar", "column"):
+        # Bar = horizontal, column = vertical
+        is_vertical = (item.chart_type == "column")
+        max_v = max(item.values[:n]) if item.values else 1.0
+        if max_v <= 0:
+            max_v = 1.0
+        pad = max(6, int(chart_w * 0.04))
+        if is_vertical:
+            avail_w = chart_w - 2 * pad
+            bar_w = avail_w / n * 0.7
+            gap = avail_w / n * 0.3
+            label_font = _load_font("Calibri", max(8, int(chart_h * 0.05)))
+            value_font = _load_font("Calibri", max(8, int(chart_h * 0.06)), weight=600)
+            value_h = max(12, int(chart_h * 0.08))
+            for i in range(n):
+                v = item.values[i]
+                ratio = v / max_v
+                bh = int((chart_h - value_h - 16) * ratio)
+                bx = int(tx + pad + i * (bar_w + gap))
+                by = chart_top + chart_h - bh - 16
+                c = (colors[i % len(colors)]).to_rgba()
+                d_canvas = ImageDraw.Draw(canvas)
+                d_canvas.rectangle(
+                    [(bx, by), (bx + int(bar_w), by + bh)],
+                    fill=c,
+                )
+                if item.show_values:
+                    label_v = f"{v:g}{item.unit}"
+                    try:
+                        bbv = d_canvas.textbbox((0, 0), label_v, font=value_font)
+                        wv = bbv[2] - bbv[0]
+                    except Exception:
+                        wv = len(label_v) * 5
+                    d_canvas.text(
+                        (bx + int(bar_w) // 2 - wv // 2, by - value_h),
+                        label_v, font=value_font, fill=(40, 40, 50, 255),
+                    )
+                # Label dessous
+                lbl = item.labels[i][:14]
+                try:
+                    bbl = d_canvas.textbbox((0, 0), lbl, font=label_font)
+                    wl = bbl[2] - bbl[0]
+                except Exception:
+                    wl = len(lbl) * 5
+                d_canvas.text(
+                    (bx + int(bar_w) // 2 - wl // 2, chart_top + chart_h - 14),
+                    lbl, font=label_font, fill=(80, 80, 90, 255),
+                )
+        else:
+            # Bar horizontal
+            label_w = int(chart_w * 0.25)
+            chart_x = tx + label_w
+            avail_w_h = chart_w - label_w - pad
+            bar_h_each = chart_h / n * 0.7
+            gap_v = chart_h / n * 0.3
+            label_font = _load_font("Calibri", max(8, int(bar_h_each * 0.45)))
+            value_font = _load_font("Calibri", max(8, int(bar_h_each * 0.5)), weight=600)
+            d_canvas = ImageDraw.Draw(canvas)
+            for i in range(n):
+                v = item.values[i]
+                bw = int(avail_w_h * (v / max_v))
+                by = int(chart_top + i * (bar_h_each + gap_v))
+                c = (colors[i % len(colors)]).to_rgba()
+                d_canvas.rectangle(
+                    [(chart_x, by), (chart_x + bw, by + int(bar_h_each))],
+                    fill=c,
+                )
+                # Label gauche
+                lbl = item.labels[i][:18]
+                d_canvas.text(
+                    (tx + 4, by + int(bar_h_each * 0.2)),
+                    lbl, font=label_font, fill=(60, 60, 70, 255),
+                )
+                if item.show_values:
+                    label_v = f"{v:g}{item.unit}"
+                    d_canvas.text(
+                        (chart_x + bw + 4, by + int(bar_h_each * 0.2)),
+                        label_v, font=value_font, fill=(40, 40, 50, 255),
+                    )
+
+    elif item.chart_type in ("pie", "donut"):
+        # Pie / donut centré dans le bbox
+        total = sum(item.values[:n]) or 1.0
+        cx = tx + tw // 2
+        cy = chart_top + chart_h // 2
+        radius = min(tw, chart_h) // 2 - 6
+        inner_r = int(radius * 0.55) if item.chart_type == "donut" else 0
+        d_canvas = ImageDraw.Draw(canvas)
+        start = -90  # 12h
+        for i in range(n):
+            angle = item.values[i] / total * 360
+            end = start + angle
+            color_rgba = (colors[i % len(colors)]).to_rgba()
+            d_canvas.pieslice(
+                [(cx - radius, cy - radius), (cx + radius, cy + radius)],
+                start=start, end=end, fill=color_rgba,
+            )
+            start = end
+        if inner_r > 0:
+            d_canvas.ellipse(
+                [(cx - inner_r, cy - inner_r), (cx + inner_r, cy + inner_r)],
+                fill=(255, 255, 255, 255),
+            )
+
+    elif item.chart_type in ("line", "area"):
+        max_v = max(item.values[:n]) if item.values else 1.0
+        if max_v <= 0:
+            max_v = 1.0
+        pad = max(8, int(chart_w * 0.04))
+        avail_w = chart_w - 2 * pad
+        avail_h = chart_h - 20
+        step = avail_w / max(1, n - 1) if n > 1 else 0
+        points = []
+        for i in range(n):
+            px = int(tx + pad + i * step)
+            py = int(chart_top + 10 + (avail_h - avail_h * (item.values[i] / max_v)))
+            points.append((px, py))
+        d_canvas = ImageDraw.Draw(canvas)
+        line_color = (colors[0]).to_rgba()
+        if item.chart_type == "area":
+            poly = points + [(points[-1][0], chart_top + chart_h),
+                              (points[0][0], chart_top + chart_h)]
+            r, g, b, _ = line_color
+            d_canvas.polygon(poly, fill=(r, g, b, 80))
+        # Ligne
+        for i in range(len(points) - 1):
+            d_canvas.line([points[i], points[i + 1]], fill=line_color, width=3)
+        # Points
+        for p in points:
+            d_canvas.ellipse(
+                [(p[0] - 4, p[1] - 4), (p[0] + 4, p[1] + 4)],
+                fill=line_color,
+            )
+
+    # Légende (bar/column/line/area uniquement, sous le chart)
+    if item.show_legend and legend_h > 0:
+        d_canvas = ImageDraw.Draw(canvas)
+        legend_font = _load_font("Calibri", max(7, int(legend_h * 0.5)))
+        gx = tx + 6
+        gy = chart_top + chart_h + 4
+        for i, lbl in enumerate(item.labels[:n]):
+            c = (colors[i % len(colors)]).to_rgba()
+            d_canvas.rectangle([(gx, gy + 2), (gx + 10, gy + 10)], fill=c)
+            d_canvas.text((gx + 14, gy), lbl[:18], font=legend_font, fill=(60, 60, 70, 255))
+            try:
+                bb = d_canvas.textbbox((0, 0), lbl[:18], font=legend_font)
+                gx += 14 + (bb[2] - bb[0]) + 12
+            except Exception:
+                gx += 14 + len(lbl) * 5 + 12
+
+
+def _render_mockup(canvas, item: "MockupPlacement", medias: dict, bleed_px: int, dpi: int):
+    """
+    Render mockup container vectoriel + image embarquée.
+    9 devices supportés : smartphone, smartphone_landscape, tablet, laptop,
+    monitor, billboard, poster_frame, instagram_post_phone,
+    business_card_holder, tshirt, tote_bag, mug, tv_screen.
+    """
+    from PIL import Image, ImageDraw
+    tx = mm_to_px(item.bbox.x, dpi) + bleed_px
+    ty = mm_to_px(item.bbox.y, dpi) + bleed_px
+    tw = mm_to_px(item.bbox.w, dpi)
+    th = mm_to_px(item.bbox.h, dpi)
+    dev_color = item.device_color.to_rgba()
+    d = ImageDraw.Draw(canvas)
+
+    # Charge inner image si fourni
+    inner_img = None
+    if item.inner_image_b64:
+        try:
+            import base64 as _b64
+            payload = item.inner_image_b64.split(",", 1)[-1] if "," in item.inner_image_b64 else item.inner_image_b64
+            inner_img = _load_image(_b64.b64decode(payload + "=="))
+        except Exception:
+            pass
+    elif item.inner_image_media_ref and item.inner_image_media_ref in medias:
+        inner_img = _load_image(medias[item.inner_image_media_ref])
+
+    if item.device in ("smartphone", "instagram_post_phone"):
+        # Smartphone portrait : ratio 9:19.5 (iPhone-like)
+        ratio = 19.5 / 9
+        if th / tw < ratio:
+            phone_h = th
+            phone_w = int(phone_h / ratio)
+        else:
+            phone_w = tw
+            phone_h = int(phone_w * ratio)
+        px = tx + (tw - phone_w) // 2
+        py = ty + (th - phone_h) // 2
+        radius = int(phone_w * 0.12)
+        d.rounded_rectangle([(px, py), (px + phone_w, py + phone_h)],
+                             radius=radius, fill=dev_color)
+        # Écran (intérieur, marge ~5%)
+        screen_pad = int(phone_w * 0.05)
+        sx, sy = px + screen_pad, py + screen_pad
+        sw, sh = phone_w - 2 * screen_pad, phone_h - 2 * screen_pad
+        if inner_img:
+            inner_resized = inner_img.resize((sw, sh), Image.LANCZOS)
+            screen_radius = max(1, radius - screen_pad)
+            mask = make_mask(sw, sh, "rounded_rect", {"radius_mm": screen_radius / dpi * 25.4})
+            if inner_resized.mode != "RGBA":
+                inner_resized = inner_resized.convert("RGBA")
+            inner_resized.putalpha(mask)
+            canvas.paste(inner_resized, (sx, sy), inner_resized)
+        else:
+            d.rounded_rectangle([(sx, sy), (sx + sw, sy + sh)],
+                                 radius=max(1, radius - screen_pad),
+                                 fill=(245, 245, 250, 255))
+        # Encoche (notch) en haut centre
+        notch_w = int(phone_w * 0.3)
+        notch_h = int(phone_w * 0.045)
+        nx = px + (phone_w - notch_w) // 2
+        d.rounded_rectangle([(nx, py + screen_pad + 2),
+                              (nx + notch_w, py + screen_pad + 2 + notch_h)],
+                             radius=notch_h // 2, fill=dev_color)
+    elif item.device in ("laptop", "monitor", "tv_screen"):
+        # Écran 16:9 + base (laptop) / pied (monitor)
+        screen_ratio = 16 / 9
+        if item.device == "laptop":
+            screen_h = int(th * 0.85)
+            base_h = th - screen_h
+        else:
+            screen_h = int(th * 0.92)
+            base_h = th - screen_h
+        screen_w = int(screen_h * screen_ratio)
+        if screen_w > tw:
+            screen_w = tw - 8
+            screen_h = int(screen_w / screen_ratio)
+            base_h = th - screen_h
+        sx_o = tx + (tw - screen_w) // 2
+        sy_o = ty
+        bezel = max(4, int(screen_w * 0.025))
+        d.rounded_rectangle([(sx_o, sy_o), (sx_o + screen_w, sy_o + screen_h)],
+                             radius=8, fill=dev_color)
+        inner_x = sx_o + bezel
+        inner_y = sy_o + bezel
+        inner_w = screen_w - 2 * bezel
+        inner_h = screen_h - 2 * bezel
+        if inner_img:
+            inner_resized = inner_img.resize((inner_w, inner_h), Image.LANCZOS)
+            canvas.paste(inner_resized, (inner_x, inner_y))
+        else:
+            d.rectangle([(inner_x, inner_y),
+                          (inner_x + inner_w, inner_y + inner_h)],
+                         fill=(245, 245, 250, 255))
+        if item.device == "laptop":
+            # Base trapézoïdale
+            base_y = sy_o + screen_h
+            base_w_top = int(screen_w * 0.6)
+            base_w_bot = int(screen_w * 1.05)
+            base_cx = sx_o + screen_w // 2
+            d.polygon([
+                (base_cx - base_w_top // 2, base_y),
+                (base_cx + base_w_top // 2, base_y),
+                (base_cx + base_w_bot // 2, base_y + base_h),
+                (base_cx - base_w_bot // 2, base_y + base_h),
+            ], fill=dev_color)
+        elif item.device == "monitor":
+            # Pied vertical + socle
+            stand_w = int(screen_w * 0.1)
+            stand_h = int(base_h * 0.6)
+            stand_x = sx_o + (screen_w - stand_w) // 2
+            d.rectangle([(stand_x, sy_o + screen_h),
+                          (stand_x + stand_w, sy_o + screen_h + stand_h)], fill=dev_color)
+            socle_w = int(screen_w * 0.5)
+            socle_x = sx_o + (screen_w - socle_w) // 2
+            d.rounded_rectangle(
+                [(socle_x, sy_o + screen_h + stand_h),
+                 (socle_x + socle_w, ty + th - 2)],
+                radius=4, fill=dev_color,
+            )
+    elif item.device == "billboard":
+        # Panneau 4×3 + 2 poteaux
+        billboard_h = int(th * 0.75)
+        billboard_w = tw - 8
+        frame = max(4, int(billboard_w * 0.02))
+        bx = tx + 4
+        by = ty
+        d.rectangle([(bx, by), (bx + billboard_w, by + billboard_h)],
+                     fill=dev_color)
+        if inner_img:
+            inner_resized = inner_img.resize(
+                (billboard_w - 2 * frame, billboard_h - 2 * frame), Image.LANCZOS)
+            canvas.paste(inner_resized, (bx + frame, by + frame))
+        else:
+            d.rectangle([(bx + frame, by + frame),
+                          (bx + billboard_w - frame, by + billboard_h - frame)],
+                         fill=(240, 240, 245, 255))
+        # 2 poteaux
+        post_w = max(6, int(billboard_w * 0.025))
+        post1_x = bx + int(billboard_w * 0.2)
+        post2_x = bx + int(billboard_w * 0.75)
+        for px2 in (post1_x, post2_x):
+            d.rectangle([(px2, by + billboard_h), (px2 + post_w, ty + th)],
+                         fill=dev_color)
+    else:
+        # Devices simples : rectangle + image dedans
+        d.rounded_rectangle([(tx, ty), (tx + tw, ty + th)],
+                             radius=int(min(tw, th) * 0.05), fill=dev_color)
+        pad = int(min(tw, th) * 0.05)
+        if inner_img:
+            inner_resized = inner_img.resize((tw - 2 * pad, th - 2 * pad), Image.LANCZOS)
+            canvas.paste(inner_resized, (tx + pad, ty + pad))
+
+
+def _render_gradient_mesh(canvas, item: "GradientMeshPlacement", bleed_px: int, dpi: int):
+    """
+    Render gradient mesh cinématique (Linear Cards / Stripe / Apple keynote
+    style). N blobs de couleur soft-blurés sur un fond de base.
+    Idéal full-bleed backgrounds, hero sections, posters tendance 2025-2026.
+    """
+    from PIL import Image, ImageDraw, ImageFilter
+    tx = mm_to_px(item.bbox.x, dpi) + bleed_px
+    ty = mm_to_px(item.bbox.y, dpi) + bleed_px
+    tw = mm_to_px(item.bbox.w, dpi)
+    th = mm_to_px(item.bbox.h, dpi)
+
+    base = Image.new("RGBA", (tw, th), item.base_color.to_rgba())
+    blur_radius_px = max(1, mm_to_px(item.blur_mm, dpi))
+
+    for blob in item.blobs:
+        try:
+            bx_pct = float(blob.get("x", 0.5))
+            by_pct = float(blob.get("y", 0.5))
+            radius_pct = float(blob.get("radius", 0.4))
+            color_raw = blob.get("color", {"r": 100, "g": 100, "b": 200, "a": 0.8})
+            if isinstance(color_raw, dict):
+                color_rgba = (
+                    int(color_raw.get("r", 0)), int(color_raw.get("g", 0)),
+                    int(color_raw.get("b", 0)),
+                    int(round(float(color_raw.get("a", 0.8)) * 255)),
+                )
+            else:
+                color_rgba = color_raw.to_rgba()
+        except Exception:
+            continue
+        cx = int(bx_pct * tw)
+        cy = int(by_pct * th)
+        r = int(min(tw, th) * radius_pct)
+        blob_layer = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
+        dr = ImageDraw.Draw(blob_layer)
+        dr.ellipse([(cx - r, cy - r), (cx + r, cy + r)], fill=color_rgba)
+        # Blur lourd → effet auroral fondu
+        blob_blurred = blob_layer.filter(ImageFilter.GaussianBlur(radius=blur_radius_px))
+        base = Image.alpha_composite(base, blob_blurred)
+
+    canvas.alpha_composite(base, dest=(tx, ty))

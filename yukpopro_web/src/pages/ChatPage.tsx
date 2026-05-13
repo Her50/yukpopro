@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore, useProfilStore, useCopiloteStore, useDocsStore } from "@/store";
-import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, infographieProApi, http, type UploadedFile } from "@/api/client";
+import { chatApi, profilApi, copiloteApi, reunionsApi, generateurApi, infographieProApi, bureauSessionApi, http, type UploadedFile } from "@/api/client";
 import { acquireWakeLock, releaseWakeLock } from "@/utils/wakeLock";
 import { cn } from "@/components/ui";
 import type { CopiloteMessage, NavigationSuggestion, SuggestionSuite } from "@/types";
@@ -189,6 +189,45 @@ export const ChatPage = () => {
           }
         }
         files = otherFiles;
+      }
+
+      // R1-R5 — DÉTECTION MODIFICATION INCRÉMENTALE EN PREMIER
+      // Si l'user a un document précédent en session + son message classe
+      // 'modification', on route vers /modifier du pipeline mémorisé au lieu
+      // de regénérer from scratch via orchestrer + /generer. Évite perte
+      // de cohérence + coût LLM ×2.
+      // Pas de fichier joint = condition (un fichier joint = nouvelle intent).
+      if (files.length === 0 && content.trim()) {
+        try {
+          const intent = await bureauSessionApi.intent(content);
+          if (intent.intent === "modification" && intent.route_modifier && intent.dernier_fichier_id) {
+            const modData = await bureauSessionApi.executeModifier(
+              intent.route_modifier, intent.dernier_fichier_id, content,
+            );
+            const fichier_modif = (modData as any)?.fichier_id
+                                || (modData as any)?.fichier_genere
+                                || (modData as any)?.fichier;
+            updateLastAssistantMessage(
+              `✓ Modification appliquée sur le document précédent (${intent.pipeline}).` +
+              (fichier_modif ? `\n[Télécharger](${generateurApi.telecharger(fichier_modif)})` : ""),
+              null,
+              fichier_modif ? [fichier_modif] : undefined,
+            );
+            if (fichier_modif) {
+              addDocument({
+                titre: `Modification : ${content.slice(0, 60)}`,
+                type: intent.pipeline === "rapport" ? "rapport"
+                    : intent.pipeline === "slides" ? "slides" : "visuel",
+                fichier: fichier_modif,
+                contexteConversation: content,
+              });
+              toast.success("Modification appliquée");
+            }
+            return;
+          }
+        } catch (_e_intent) {
+          // Si /session/intent échoue → fallback flow standard orchestrer
+        }
       }
 
       // Sprint G1 — Orchestrateur silencieux (boîte noire) :

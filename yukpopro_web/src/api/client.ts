@@ -944,6 +944,17 @@ export const bureauSessionApi = {
   reset: async () => {
     await http.post("/bureau/session/reset", {});
   },
+  // Helper : exécute le /modifier suggéré par /session/intent. Le route
+  // backend renvoie un chemin ABSOLU (/api/v1/...) — on l'utilise tel quel
+  // (axios racine, auth héritée par l'intercepteur global).
+  executeModifier: async (routeModifier: string, fichier_id: string, instructions: string) => {
+    const { data } = await http.post(
+      routeModifier.replace(/^\/api\/v1/, ""),  // http.baseURL = "/api/v1"
+      { fichier_id, instructions },
+      { timeout: 180_000 },
+    );
+    return data;
+  },
 };
 
 export const reunionsApi = {

@@ -21,7 +21,7 @@ import {
 import toast from 'react-hot-toast'
 import {
   secChatAPI, redactionAPI, ocrAPI, audioAPI, traductionAPI, infographieAPI,
-  infographieProAPI,
+  infographieProAPI, bureauSessionAPI,
 } from '../api/client'
 import SuggestionsChips, { type Suggestion } from './SuggestionsChips'
 
@@ -288,6 +288,37 @@ export default function ChatUnifieSec() {
     setLoading(true)
 
     try {
+      // ── R1-R5 : DÉTECTION MODIFICATION INCRÉMENTALE EN PREMIER ─────────
+      // Si l'user a un document précédent en session + son message classe
+      // 'modification', on route vers /modifier du pipeline mémorisé au lieu
+      // de regénérer from scratch. Évite perte de cohérence + coût LLM ×2.
+      // Pas de fichier joint = condition requise (un fichier joint = nouvelle
+      // intention obligatoire genre OCR/audio/traduction).
+      if (atts.length === 0 && msg.trim()) {
+        try {
+          const intentRes = await bureauSessionAPI.intent(msg)
+          const i = intentRes.data as {
+            intent: string; pipeline: string | null;
+            dernier_fichier_id: string | null; route_modifier?: string | null;
+          }
+          if (i.intent === 'modification' && i.route_modifier && i.dernier_fichier_id) {
+            const modRes = await bureauSessionAPI.executeModifier(
+              i.route_modifier, i.dernier_fichier_id, msg,
+            )
+            const yukpoTurn: ChatTurn = {
+              role: 'yukpo', ts: new Date().toISOString(),
+              content: `✓ Modification appliquée sur le document précédent (${i.pipeline}).`,
+              intent: 'modification',
+              resultat: { type: i.pipeline || 'document', data: modRes.data },
+            }
+            setTurns(prev => [...prev, yukpoTurn])
+            return
+          }
+        } catch (_e_intent) {
+          // Si /session/intent échoue → fallback flow standard
+        }
+      }
+
       // 1. Détection d'intention
       const orch = await secChatAPI.message({
         message: msg || `[${atts.map(a => a.type).join(', ')} attaché(s)]`,

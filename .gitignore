@@ -39,3 +39,6 @@ tests/qa_agent/fixtures/*.xlsx
 tests/qa_agent/fixtures/*.png
 tests/qa_agent/fixtures/*.m4a
 tests/qa_agent/fixtures/*.mp3
+
+# Local Netlify folder
+.netlify

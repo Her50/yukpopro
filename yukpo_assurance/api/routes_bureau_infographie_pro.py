@@ -3048,6 +3048,13 @@ class DemandeGeometricPlacement(BaseModel):
     max_iterations_revision: int = Field(default=2, ge=1, le=4)
     score_seuil_ok: float = Field(default=7.5, ge=5.0, le=10.0,
         description="Score qualité ≥ ce seuil → arrêt révision (évite gains marginaux coûteux)")
+    export_pdf: bool = Field(default=False,
+        description="Si True, exporte AUSSI en PDF/X-1a:2001 print-ready "
+                    "(ICC FOGRA39 + TrimBox/BleedBox/ArtBox + XMP PDF/X). "
+                    "Utiliser pour impression pro chez un imprimeur. PNG reste "
+                    "toujours retourné pour preview écran.")
+    profil_icc: str = Field(default="fogra39",
+        description="fogra39 (Europe/Afrique) | psocoated_v3 | gracol_us (Amérique N.)")
 
 
 @router.post("/geometric-placement", tags=["Bureau — Designer Pro"])
@@ -3094,6 +3101,25 @@ async def geometric_placement(
         except Exception as e:
             logger.warning(f"[GeomPlacement] média {ref} non lu : {e}")
 
+    # ── AUTO-LOAD BrandKit org si pas fourni explicitement (MARKETING PRO) ──
+    # Le BrandKit configuré au niveau organisation est CHARGÉ AUTOMATIQUEMENT
+    # si l'utilisateur ne l'override pas dans la requête. C'est la règle
+    # non-négociable pour les directions marketing : tout visuel généré
+    # respecte la charte org (palette + polices + logos + ton + lexique).
+    # Sans ça, l'user devait re-fournir manuellement le brand_kit à chaque
+    # appel — incohérent avec freeform/infographe_pro qui auto-chargent.
+    brand_kit_effectif = demande.brand_kit
+    if not brand_kit_effectif:
+        try:
+            from api.routes_brand_kit import charger_overrides_brand_kit
+            cid = getattr(current_user, "compagnie_id", None) or 1
+            bk = await charger_overrides_brand_kit(int(cid))
+            if isinstance(bk, dict) and bk.get("brand_kit_active"):
+                brand_kit_effectif = bk
+                logger.info(f"[GeomPlacement] BrandKit org auto-chargé pour user={current_user.user_id}")
+        except Exception as _e_bk:
+            logger.debug(f"[GeomPlacement] auto-load BrandKit skip : {_e_bk}")
+
     # Phase 0 tokens (+1 LLM Haiku) → Phase 1 placement (+1 LLM Sonnet) →
     # Phase 2 render Python → Phase 3 audit (+1 LLM Sonnet Vision) +
     # éventuel re-render (1 LLM placement supplémentaire par révision).
@@ -3111,7 +3137,7 @@ async def geometric_placement(
                 bleed_mm=demande.bleed_mm,
                 medias_bytes=medias_bytes,
                 medias_manifest=manifests,
-                brand_kit=demande.brand_kit,
+                brand_kit=brand_kit_effectif,
                 inspiration=demande.inspiration,
                 modele=demande.modele,
                 langue=demande.langue,
@@ -3141,7 +3167,7 @@ async def geometric_placement(
                 page_w_mm=demande.page_w_mm,
                 page_h_mm=demande.page_h_mm,
                 medias=manifests,
-                brand_kit=demande.brand_kit,
+                brand_kit=brand_kit_effectif,
                 langue=demande.langue,
                 inspiration=demande.inspiration,
                 modele="sonnet",
@@ -3158,7 +3184,7 @@ async def geometric_placement(
                 page_h_mm=demande.page_h_mm,
                 bleed_mm=demande.bleed_mm,
                 medias=manifests,
-                brand_kit=demande.brand_kit,
+                brand_kit=brand_kit_effectif,
                 inspiration=demande.inspiration,
                 modele=demande.modele,
                 langue=demande.langue,
@@ -3203,6 +3229,59 @@ async def geometric_placement(
     fid = f"bureau_pdf_{current_user.user_id}_geometric_{int(time.time())}.png"
     (_DATA_DIR / fid).write_bytes(png_bytes)
 
+    # ── Export PDF/X-1a print-ready optionnel ──────────────────────────────
+    # Pour impression pro grande échelle chez un imprimeur. PNG reste retourné
+    # pour preview écran ; le PDF/X-1a est un second fichier (pdf_id).
+    # Conversion : PNG embarqué dans un PDF page taille trim+bleed, puis wrap
+    # PDF/X-1a via pikepdf (TrimBox/BleedBox + OutputIntent FOGRA39).
+    pdf_id: Optional[str] = None
+    pdf_size_kb: Optional[float] = None
+    if demande.export_pdf:
+        try:
+            from io import BytesIO as _BIO
+            from PIL import Image as _PIL_Image
+            from reportlab.pdfgen import canvas as _rl_canvas
+            from reportlab.lib.utils import ImageReader as _RL_ImageReader
+
+            mm_to_pt = 2.834645669
+            page_w_pt = (demande.page_w_mm + 2 * demande.bleed_mm) * mm_to_pt
+            page_h_pt = (demande.page_h_mm + 2 * demande.bleed_mm) * mm_to_pt
+
+            img = _PIL_Image.open(_BIO(png_bytes))
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img_buf = _BIO()
+            img.save(img_buf, format="PNG", optimize=True)
+            img_buf.seek(0)
+            img_reader = _RL_ImageReader(img_buf)
+
+            pdf_buf = _BIO()
+            c = _rl_canvas.Canvas(pdf_buf, pagesize=(page_w_pt, page_h_pt))
+            c.setTitle(f"Geometric placement #{fid}")
+            c.setCreator("Yukpo Designer Pro / Geometric Placement")
+            c.drawImage(img_reader, 0, 0, width=page_w_pt, height=page_h_pt,
+                        preserveAspectRatio=False, mask='auto')
+            c.showPage()
+            c.save()
+            raw_pdf = pdf_buf.getvalue()
+
+            from modules.bureau import pdf_print_ready as _pp
+            pdf_x1a = await asyncio.to_thread(
+                _pp.convertir_en_pdf_x1a,
+                raw_pdf,
+                f"Visuel geometric {fid}",
+                (demande.page_w_mm, demande.page_h_mm),
+                demande.bleed_mm,
+                "Yukpo Designer Pro",
+                demande.profil_icc,
+            )
+            pdf_id = fid.replace(".png", ".pdf")
+            (_DATA_DIR / pdf_id).write_bytes(pdf_x1a)
+            pdf_size_kb = round(len(pdf_x1a) / 1024, 1)
+            logger.info(f"[GeomPlacement] PDF/X-1a généré : {pdf_id} ({pdf_size_kb} KB, icc={demande.profil_icc})")
+        except Exception as e:
+            logger.warning(f"[GeomPlacement] Export PDF/X-1a échec (PNG conservé) : {e}")
+
     # R5 — Persiste le PlacementPlan + medias_refs en session pour /modifier
     try:
         from modules.bureau import bureau_session as _bs
@@ -3216,7 +3295,7 @@ async def geometric_placement(
                 "page_h_mm":      demande.page_h_mm,
                 "bleed_mm":       demande.bleed_mm,
                 "langue":         demande.langue,
-                "brand_kit":      demande.brand_kit,
+                "brand_kit":      brand_kit_effectif,
                 "modele":         demande.modele,
             },
         )
@@ -3228,6 +3307,8 @@ async def geometric_placement(
         "png_id": fid,
         "png_base64": base64.b64encode(png_bytes).decode(),
         "size_kb": round(len(png_bytes) / 1024, 1),
+        "pdf_id": pdf_id,
+        "pdf_size_kb": pdf_size_kb,
         "placement_plan": placement.model_dump(),
         "nb_items": len(placement.items),
         "medias_utilises": list(medias_bytes.keys()),

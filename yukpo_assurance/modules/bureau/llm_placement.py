@@ -131,12 +131,40 @@ PRINCIPES DE DESIGN :
    précise focal_point_x/y pour ancrer le sujet (visage, produit, mention clé).
 
 Pour CHAQUE image dans target_zone :
+  - 2 sources possibles :
+    A) media_ref (image uploadée par l'user, ex: "session:logo_org") — préfère
+       toujours si l'user a fourni un média pertinent.
+    B) prompt_ia (génération auto IA via Flux/Recraft/Ideogram) si AUCUN
+       média user adapté MAIS le brief décrit une image à inclure ("photo
+       produit cinématique", "scène terrain commercial", "fond auroral
+       coucher de soleil sur Douala", "illustration isométrique app").
+       Prompt EN 30-60 mots ultra-précis (sujet, environnement, éclairage,
+       style, composition). Mode : 'standard' (rapide), 'premium' (défaut,
+       Flux dev qualité), 'ultra' (Flux Pro Ultra cinéma), 'ultra_plus'
+       (ensemble multi-modèles avec vision picker).
   - Si le ratio source ≠ ratio cible, fit_mode='smart_focus' avec focal_point
     explicite (ex: portrait debout dans cercle → focal_y=0.2 pour visage en haut).
   - mask_shape adapté : portrait = circle ou rounded_rect, paysage = rect,
     logo = rect, illustration = blob ou polygon si organique.
-  - filters (recolor/grayscale/blur) si l'image distrait du message principal
-    (ex: fond de carte = grayscale + blur léger + opacity 0.3).
+  - filters (recolor/grayscale/blur) si l'image distrait du message principal.
+
+Pour les VISUELS MARKETING DATA (rapport campagne, KPI ROI, comparaison perf),
+utilise type='chart' (NATIF vectoriel — pas image plate) :
+  {kind:'chart', chart_type:'bar|column|pie|donut|line|area',
+   bbox, labels:[...], values:[...], colors?:[Color...], unit:'%|FCFA|M|K',
+   title?, show_values:true, show_legend:true, grid:false}
+
+Pour MOCKUPS produits / présentations campagne, utilise type='mockup' :
+  {kind:'mockup', device:'smartphone|laptop|monitor|billboard|tv_screen|tablet
+   |poster_frame|tshirt|tote_bag|mug', bbox, inner_image_media_ref?,
+   inner_image_b64?, device_color, shadow?} — Python dessine le device en
+  vectoriel et embed l'image cible (capture app, photo produit).
+
+Pour FONDS PREMIUM (hero section campagne, posters tendance Linear/Stripe
+style 2025-2026), utilise type='gradient_mesh' :
+  {kind:'gradient_mesh', bbox, base_color, blur_mm:15,
+   blobs:[{x:0..1,y:0..1,radius:0..1,color:Color}, ...2-8 blobs]}
+  → effet bokeh/auroral fondu pour visuels marketing premium.
 
 Pour CHAQUE texte (CRITIQUE — la typographie est 50% du design) :
   - bbox AVEC marge de respiration (pas collé au bord).

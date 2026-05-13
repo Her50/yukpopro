@@ -240,6 +240,18 @@ export const bureauSessionAPI = {
   intent:   (message: string) =>
     api.post('/session/intent', { message }),
   reset:    () => api.post('/session/reset', {}),
+  // Helper : exécute le /modifier suggéré par /session/intent. Le route
+  // backend renvoie un chemin ABSOLU (ex /api/v1/bureau/freeform/modifier
+  // OU /api/v1/pro/rapports/modifier). On utilise axios racine pour
+  // appeler n'importe quel chemin sous /api/v1, avec auth token héritée.
+  executeModifier: (routeModifier: string, fichier_id: string, instructions: string) => {
+    return axios.post(routeModifier, { fichier_id, instructions }, {
+      timeout: 180_000,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('bureau_token') || ''}`,
+      },
+    })
+  },
 }
 
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
