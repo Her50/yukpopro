@@ -101,6 +101,12 @@ async def telecharger_document(
         "pdf": "application/pdf",
         "png": "image/png",
         "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "svg": "image/svg+xml",
+        "html": "text/html; charset=utf-8",
+        "htm":  "text/html; charset=utf-8",
+        "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }
     media_type = mt_map.get(ext, "application/octet-stream")
 
@@ -110,10 +116,14 @@ async def telecharger_document(
     except Exception:
         pass
 
+    # HTML/SVG sont des contenus VISIBLES (landing page Reveal.js, slides web,
+    # visuel vectoriel) → inline pour ouverture directe dans le navigateur.
+    # Le reste (PDF/DOCX/PNG…) reste en attachment (téléchargement).
+    disposition = "inline" if ext in ("html", "htm", "svg") else "attachment"
     return Response(
         content=chemin.read_bytes(),
         media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{fichier_id}"'},
+        headers={"Content-Disposition": f'{disposition}; filename="{fichier_id}"'},
     )
 
 

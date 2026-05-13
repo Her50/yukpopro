@@ -213,12 +213,19 @@ export const ChatPage = () => {
             const result = slidesWebMatch
               ? await generateurApi.slidesWeb({ sujet: content })
               : await generateurApi.landingPage({ sujet: content });
-            const url = (result as any).url_telechargement;
+            const baseUrl = (result as any).url_telechargement;
             const fid = (result as any).fichier_genere;
+            // Le lien markdown est rendu en <a href> qui hit le backend SANS
+            // header Authorization (le browser ne propage pas axios defaults).
+            // Backend `get_current_user` accepte ?token=... en query (priorité
+            // 3, SSE-compat). On suffixe le JWT pour que l'ouverture marche
+            // sans re-auth.
+            const tok = localStorage.getItem("yukpopro_token") || "";
+            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
             updateLastAssistantMessage(
               (slidesWebMatch ? "✓ Présentation web Reveal.js générée"
                               : "✓ Landing page web générée") +
-              ` — ${result.size_kb} KB.\n[Télécharger / Ouvrir](${url})`,
+              ` — ${result.size_kb} KB.\n[Ouvrir dans le navigateur](${url})`,
               null,
               fid ? [fid] : undefined,
             );

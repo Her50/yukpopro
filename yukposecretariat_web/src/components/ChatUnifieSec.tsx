@@ -301,10 +301,17 @@ export default function ChatUnifieSec() {
               ? await slidesWebAPI.generer({ sujet: msg })
               : await landingPageAPI.generer({ sujet: msg })
             const d = res.data as any
+            // Le lien markdown est rendu en <a href> sans Bearer header.
+            // Backend get_current_user accepte ?token=... en query (SSE-compat).
+            const tok = localStorage.getItem('bureau_token') || ''
+            const baseUrl = d.url_telechargement || ''
+            const url = baseUrl
+              + (baseUrl.includes('?') ? '&' : '?')
+              + 'token=' + encodeURIComponent(tok)
             const yukpoTurn: ChatTurn = {
               role: 'yukpo', ts: new Date().toISOString(),
               content: (slidesWebMatch ? '✓ Présentation web Reveal.js générée' : '✓ Landing page web générée') +
-                ` — ${d.size_kb} KB.\n[Télécharger](${d.url_telechargement})`,
+                ` — ${d.size_kb} KB.\n[Ouvrir dans le navigateur](${url})`,
               intent: slidesWebMatch ? 'slides_web' : 'landing_page',
               resultat: { type: slidesWebMatch ? 'slides_web' : 'landing_page', data: d },
             }

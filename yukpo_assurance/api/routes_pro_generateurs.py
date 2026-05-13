@@ -607,9 +607,12 @@ async def generer_slides_web_endpoint(
         logger.error(f"[SlidesWeb] Erreur user={current_user.user_id}: {e}")
         raise HTTPException(500, f"Erreur slides web : {str(e)[:200]}")
 
-    # Sauvegarde HTML
+    # Sauvegarde HTML dans data/generated/bureau/ (servi par /bureau/documents/
+    # que le frontend utilise par défaut pour afficher/télécharger les sorties).
+    bureau_dir = _DATA_DIR / "bureau"
+    bureau_dir.mkdir(parents=True, exist_ok=True)
     fid = f"bureau_slides_web_{current_user.user_id}_{int(time.time())}.html"
-    (_DATA_DIR / fid).write_bytes(html_bytes)
+    (bureau_dir / fid).write_bytes(html_bytes)
 
     # Débit LLM
     for u in usages:
@@ -642,7 +645,9 @@ async def generer_slides_web_endpoint(
         "ok": True,
         "html_id": fid,
         "fichier_genere": fid,
-        "url_telechargement": f"/api/v1/pro/generateurs/fichier/{fid}",
+        # URL servie en `inline` (text/html charset=utf-8) → ouvre direct dans
+        # le navigateur, pas téléchargement.
+        "url_telechargement": f"/api/v1/bureau/documents/{fid}",
         "size_kb": round(len(html_bytes) / 1024, 1),
         "nb_slides": len(spec.get("slides", [])),
         "theme_used": spec.get("theme_pref", "corporate"),
@@ -708,8 +713,12 @@ async def generer_landing_page_endpoint(
         logger.error(f"[Landing] Erreur user={current_user.user_id}: {e}")
         raise HTTPException(500, f"Erreur landing : {str(e)[:200]}")
 
+    # Sauvegarde dans data/generated/bureau/ (servi par /bureau/documents/
+    # avec Content-Type text/html inline → ouverture directe navigateur).
+    bureau_dir = _DATA_DIR / "bureau"
+    bureau_dir.mkdir(parents=True, exist_ok=True)
     fid = f"bureau_landing_{current_user.user_id}_{int(time.time())}.html"
-    (_DATA_DIR / fid).write_bytes(html_bytes)
+    (bureau_dir / fid).write_bytes(html_bytes)
 
     for u in usages:
         try:
@@ -753,7 +762,9 @@ async def generer_landing_page_endpoint(
         "ok": True,
         "html_id": fid,
         "fichier_genere": fid,
-        "url_telechargement": f"/api/v1/pro/generateurs/fichier/{fid}",
+        # URL servie en `inline` (text/html charset=utf-8) → ouvre direct dans
+        # le navigateur. Mêmes credentials que /bureau/documents (Bearer).
+        "url_telechargement": f"/api/v1/bureau/documents/{fid}",
         "size_kb": round(len(html_bytes) / 1024, 1),
         "nb_sections": len(sections_actives),
         "sections_actives": sections_actives,
