@@ -838,6 +838,11 @@ app.include_router(
     prefix="/api/v1/shop/public",
     tags=["YukpoShop — Storefront public (no auth)"],
 )
+app.include_router(
+    pro_shop_advanced_router,
+    prefix="/api/v1/pro",
+    tags=["YukpoShop avancé (D6 social + D7 ROAS + D8 CRM + D9 livraison)"],
+)
 app.include_router(pro_copilote_router, prefix="/api/v1/pro/copilote", tags=["Plateforme Pro — Yukpo Copilote"])
 app.include_router(pro_admin_router,      prefix="/api/v1/pro/admin",       tags=["Plateforme Pro — Administration"])
 app.include_router(admin_cross_router,    prefix="/api/v1/admin-cross",     tags=["Administration cross-app (Pro + Sec)"])

@@ -561,6 +561,75 @@ export const generateurApi = {
     return data;
   },
 
+  // ── Phase D6 — Social (Meta Catalog, FB posts) ───────────────────────────
+  shopSocialList: async () => {
+    const { data } = await http.get("/pro/shop/social");
+    return data;
+  },
+  shopSocialOAuthUrl: async () => {
+    const { data } = await http.get("/pro/shop/social/connect-url");
+    return data;
+  },
+  shopSocialSyncCatalog: async () => {
+    const { data } = await http.post("/pro/shop/social/sync-catalog");
+    return data;
+  },
+
+  // ── Phase D7 — Ads ROAS ───────────────────────────────────────────────────
+  shopAdsDashboard: async (jours = 30) => {
+    const { data } = await http.get("/pro/shop/ads/dashboard", { params: { jours } });
+    return data;
+  },
+  shopAdsSync: async () => {
+    const { data } = await http.post("/pro/shop/ads/sync");
+    return data;
+  },
+  shopAdsRecommandations: async (jours = 30) => {
+    const { data } = await http.post(`/pro/shop/ads/recommandations?jours=${jours}`,
+      {}, { timeout: 300_000 });
+    return data;
+  },
+
+  // ── Phase D8 — CRM clients ────────────────────────────────────────────────
+  shopCrmClients: async (params?: { segment?: string; limit?: number; offset?: number }) => {
+    const { data } = await http.get("/pro/shop/crm/clients", { params });
+    return data;
+  },
+  shopCrmAgreger: async () => {
+    const { data } = await http.post("/pro/shop/crm/agreger");
+    return data;
+  },
+  shopCrmScorer: async (limit = 50) => {
+    const { data } = await http.post(`/pro/shop/crm/scorer?limit=${limit}`,
+      {}, { timeout: 600_000 });
+    return data;
+  },
+  shopCrmClientDetail: async (id: number) => {
+    const { data } = await http.get(`/pro/shop/crm/clients/${id}`);
+    return data;
+  },
+  shopCrmRelancer: async (id: number, message: string) => {
+    const { data } = await http.post(`/pro/shop/crm/clients/${id}/relancer`, { message });
+    return data;
+  },
+
+  // ── Phase D9 — Logistique ─────────────────────────────────────────────────
+  shopLivraisonZones: async () => {
+    const { data } = await http.get("/pro/shop/livraison/zones");
+    return data;
+  },
+  shopLivraisonCreerZone: async (req: any) => {
+    const { data } = await http.post("/pro/shop/livraison/zones", req);
+    return data;
+  },
+  shopLivraisonSupprimerZone: async (id: number) => {
+    const { data } = await http.delete(`/pro/shop/livraison/zones/${id}`);
+    return data;
+  },
+  shopGenererEtiquette: (orderId: number) =>
+    // Retourne URL avec token pour téléchargement direct PDF
+    `/api/v1/pro/shop/commandes/${orderId}/etiquette`,
+
   /**
    * Sprint G1 — Auto-orchestrateur génération documents.
    * L'utilisateur tape un brief en langage naturel, le backend détecte

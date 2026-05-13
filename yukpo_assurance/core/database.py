@@ -1580,6 +1580,179 @@ class ShopOrderItemDB(Base):
     cree_le         = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class ShopSocialIntegrationDB(Base):
+    """Phase D6 — Credentials OAuth Meta/TikTok par boutique."""
+    __tablename__ = "shop_social_integrations"
+
+    id                      = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id             = Column(BigInteger,
+                                      ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                      nullable=False, index=True)
+    platform                = Column(String(20), nullable=False,
+        comment="meta_fb | meta_ig | meta_wa_business | tiktok_shop | pinterest")
+    page_id                 = Column(String(64), nullable=True)
+    catalog_id              = Column(String(64), nullable=True)
+    access_token_chiffre    = Column(Text, nullable=True)
+    refresh_token_chiffre   = Column(Text, nullable=True)
+    expire_le               = Column(DateTime, nullable=True)
+    scope_json              = Column(JSON, nullable=True)
+    compte_username         = Column(String(120), nullable=True)
+    statut                  = Column(String(20), nullable=False, default="actif")
+    derniere_sync           = Column(DateTime, nullable=True)
+    derniere_erreur         = Column(Text, nullable=True)
+    cree_le                 = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modif_le                = Column(DateTime, default=datetime.utcnow,
+                                      onupdate=datetime.utcnow, nullable=False)
+
+
+class ShopSocialPublicationDB(Base):
+    __tablename__ = "shop_social_publications"
+
+    id                = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id       = Column(BigInteger,
+                                ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                nullable=False, index=True)
+    product_id        = Column(BigInteger,
+                                ForeignKey("shop_products.id", ondelete="SET NULL"),
+                                nullable=True)
+    platform          = Column(String(20), nullable=False)
+    type_post         = Column(String(20), nullable=False)
+    post_external_id  = Column(String(120), nullable=True)
+    post_url          = Column(String(500), nullable=True)
+    contenu_md        = Column(Text, nullable=True)
+    statut            = Column(String(20), nullable=False, default="publie")
+    statistiques_json = Column(JSON, nullable=True)
+    publie_le         = Column(DateTime, nullable=True)
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopAdsIntegrationDB(Base):
+    """Phase D7 — OAuth FB Ads / Google Ads / TikTok Ads / Snapchat Ads."""
+    __tablename__ = "shop_ads_integrations"
+
+    id                      = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id             = Column(BigInteger,
+                                      ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                      nullable=False, index=True)
+    platform                = Column(String(20), nullable=False)
+    ad_account_id           = Column(String(80), nullable=False)
+    access_token_chiffre    = Column(Text, nullable=True)
+    refresh_token_chiffre   = Column(Text, nullable=True)
+    expire_le               = Column(DateTime, nullable=True)
+    derniere_sync           = Column(DateTime, nullable=True)
+    derniere_erreur         = Column(Text, nullable=True)
+    statut                  = Column(String(20), nullable=False, default="actif")
+    cree_le                 = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopAdsMetricDB(Base):
+    __tablename__ = "shop_ads_metrics"
+
+    id                    = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id           = Column(BigInteger,
+                                    ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                    nullable=False, index=True)
+    platform              = Column(String(20), nullable=False)
+    campagne_id           = Column(String(80), nullable=False)
+    campagne_nom          = Column(String(200), nullable=True)
+    ad_set_id             = Column(String(80), nullable=True)
+    ad_id                 = Column(String(80), nullable=True)
+    jour                  = Column(Date, nullable=False, index=True)
+    depenses              = Column(Float, nullable=False, default=0)
+    impressions           = Column(BigInteger, nullable=False, default=0)
+    clics                 = Column(BigInteger, nullable=False, default=0)
+    conversions_externes  = Column(BigInteger, nullable=False, default=0)
+    conversions_locales   = Column(BigInteger, nullable=False, default=0)
+    revenu_local          = Column(Float, nullable=False, default=0)
+    devise                = Column(String(8), nullable=False, default="XAF")
+    derniere_maj          = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopClientDB(Base):
+    """Phase D8 — Profil 360° client final + scoring churn IA."""
+    __tablename__ = "shop_clients"
+
+    id                       = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id              = Column(BigInteger,
+                                       ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                       nullable=False, index=True)
+    telephone                = Column(String(40), nullable=True, index=True)
+    email                    = Column(String(255), nullable=True, index=True)
+    nom                      = Column(String(120), nullable=True)
+    ville                    = Column(String(120), nullable=True)
+    source_acquisition       = Column(String(40), nullable=True)
+    premiere_commande_le     = Column(DateTime, nullable=True)
+    derniere_commande_le     = Column(DateTime, nullable=True)
+    nb_commandes             = Column(Integer, nullable=False, default=0)
+    revenu_total             = Column(Float, nullable=False, default=0)
+    ltv_predite              = Column(Float, nullable=True)
+    score_churn_pct          = Column(Integer, nullable=True)
+    segment                  = Column(String(20), nullable=True)
+    recos_ia_json            = Column(JSON, nullable=True)
+    derniere_analyse_le      = Column(DateTime, nullable=True)
+    notes_marchand           = Column(Text, nullable=True)
+    cree_le                  = Column(DateTime, default=datetime.utcnow, nullable=False)
+    modif_le                 = Column(DateTime, default=datetime.utcnow,
+                                       onupdate=datetime.utcnow, nullable=False)
+
+
+class ShopClientEventDB(Base):
+    __tablename__ = "shop_client_events"
+
+    id            = Column(BigInteger, primary_key=True, autoincrement=True)
+    client_id     = Column(BigInteger,
+                            ForeignKey("shop_clients.id", ondelete="CASCADE"),
+                            nullable=False, index=True)
+    type_event    = Column(String(40), nullable=False)
+    product_id    = Column(BigInteger,
+                            ForeignKey("shop_products.id", ondelete="SET NULL"),
+                            nullable=True)
+    source        = Column(String(40), nullable=True)
+    metadata_json = Column(JSON, nullable=True)
+    created_at    = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class ShopLivraisonZoneDB(Base):
+    """Phase D9 — Zones livraison + tarifs."""
+    __tablename__ = "shop_livraison_zones"
+
+    id                  = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id         = Column(BigInteger,
+                                  ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                  nullable=False, index=True)
+    nom                 = Column(String(120), nullable=False)
+    villes_json         = Column(JSON, nullable=True)
+    regions_json        = Column(JSON, nullable=True)
+    pays_json           = Column(JSON, nullable=True)
+    tarif               = Column(Float, nullable=False, default=0)
+    devise              = Column(String(8), nullable=False, default="XAF")
+    delai_jours_min     = Column(Integer, nullable=False, default=1)
+    delai_jours_max     = Column(Integer, nullable=False, default=3)
+    transporteur_prefere = Column(String(40), nullable=True)
+    ordre               = Column(Integer, nullable=False, default=0)
+    actif               = Column(Boolean, nullable=False, default=True)
+    cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopLivraisonEtiquetteDB(Base):
+    __tablename__ = "shop_livraison_etiquettes"
+
+    id                  = Column(BigInteger, primary_key=True, autoincrement=True)
+    order_id            = Column(BigInteger,
+                                  ForeignKey("shop_orders.id", ondelete="CASCADE"),
+                                  nullable=False, index=True)
+    transporteur        = Column(String(40), nullable=False)
+    tracking_num        = Column(String(80), nullable=True, index=True)
+    etiquette_pdf_url   = Column(String(500), nullable=True)
+    etiquette_qr_url    = Column(String(500), nullable=True)
+    statut              = Column(String(20), nullable=False, default="creee")
+    cout_transport      = Column(Float, nullable=True)
+    date_enlevement     = Column(DateTime, nullable=True)
+    date_livraison      = Column(DateTime, nullable=True)
+    response_api_json   = Column(JSON, nullable=True)
+    cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class LandingFollowupSettingsDB(Base):
     """Templates auto follow-up email post-lead par user (Phase B4).
 
