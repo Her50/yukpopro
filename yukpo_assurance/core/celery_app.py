@@ -106,6 +106,20 @@ celery_app.conf.update(
     # Heartbeat broker pour détecter workers morts
     broker_heartbeat=10,
     broker_connection_retry_on_startup=True,
+    # ── Routing multi-queue : vidéo lourde séparée ────────────────────────
+    # Les tâches `bureau.video.*` (Kling stitching 30-60s, FFmpeg concat)
+    # consomment beaucoup de CPU/RAM et peuvent durer 5-10 min. Pour ne pas
+    # bloquer les tâches courtes (freeform 1-3 min, slides web, landing),
+    # on les route vers une queue dédiée `video_heavy`. Un worker dédié
+    # (machine perf-8x typiquement) consomme cette queue uniquement.
+    # Les autres tâches restent sur la queue `default`.
+    task_routes={
+        "bureau.video.*":           {"queue": "video_heavy"},
+        "freeform.compose_render":  {"queue": "default"},
+        # Pattern wildcard sur tasks futures (slides web background, etc.)
+        "bureau.heavy.*":           {"queue": "video_heavy"},
+    },
+    task_default_queue="default",
 )
 
 

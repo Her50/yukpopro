@@ -46,6 +46,55 @@ primary_region = "cdg"  # Paris — plus proche du Cameroun
 # et donc le volume monté. Le worker survit toujours aux redeploys car
 # Celery `task_acks_late=True` re-publie les tâches en cas de crash du
 # container — un nouveau container post-deploy reprend les tâches en queue.
+#
+# ════════════════════════════════════════════════════════════════════════════
+# ARCHITECTURE FUTURE — Multi-région + Worker vidéo dédié (À ACTIVER APRÈS R2)
+# ════════════════════════════════════════════════════════════════════════════
+# Pré-requis : Cloudflare R2 configuré (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID,
+# R2_SECRET_ACCESS_KEY, R2_BUCKET en fly secrets). Sans R2, le volume local
+# est region-specific → impossible de scale-out cross-region ou ajouter un
+# worker dédié sur autre machine.
+#
+# ── Étape 1 : multi-région (CDG + JNB) ──────────────────────────────────
+#
+# Une fois R2 actif :
+#   $ fly scale count 2 --region cdg --region jnb
+#
+# Latence depuis Lagos / Le Cap : 60-80 ms (JNB) vs 200-250 ms (CDG seul).
+# Coût supp : ~$36/mois (1 perf-4x JNB qui scale-to-zero quand idle).
+#
+# ── Étape 2 : worker dédié vidéo lourde (perf-8x) ───────────────────────
+#
+# Décommenter le bloc [processes] ci-dessous + adapter Dockerfile pour
+# routage process. Worker `video` traite SEULEMENT la queue `video_heavy`
+# (Celery routing déjà configuré dans core/celery_app.py). Avantage :
+# stitching vidéo 30-60s ne bloque plus les autres tâches (freeform,
+# slides web, landing) qui sortent en parallèle.
+#
+# [processes]
+#   web    = "/app/entrypoint.sh"                # default queue + video_heavy
+#   videow = "/app/entrypoint.sh"                # YUKPO_DISABLE_WEB=true forcé via env spécifique
+#
+# [[vm]]
+#   processes = ["web"]
+#   memory = "8gb"
+#   cpu_kind = "performance"
+#   cpus = 4
+#
+# [[vm]]
+#   processes = ["videow"]
+#   memory = "16gb"
+#   cpu_kind = "performance"
+#   cpus = 8                                     # perf-8x = 16 vCPU dédiés pour FFmpeg
+#
+# Variables d'env spécifiques au process videow (via fly secrets) :
+#   YUKPO_DISABLE_WEB=true             # entrypoint skip gunicorn
+#   CELERY_QUEUES=video_heavy          # consomme uniquement cette queue
+#   CELERY_WORKER_ROLE=video           # hostname celery (logs clairs)
+#   CELERY_WORKER_CONCURRENCY=2        # 2 jobs vidéo parallèles max
+#
+# Coût supp : ~$142/mois si 24/7. Avec auto-stop : ~$30-50/mois selon usage.
+# ════════════════════════════════════════════════════════════════════════════
 
 [http_service]
   internal_port = 8080

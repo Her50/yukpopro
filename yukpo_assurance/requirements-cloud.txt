@@ -36,6 +36,13 @@ redis>=5.0.0
 # `celery[redis]` tire kombu, billiard, vine (pur Python, pas de native deps).
 celery[redis]>=5.4.0
 
+# ─── Stockage objet S3-compatible (Cloudflare R2) ─────────────────────────────
+# boto3 + botocore pour core/storage.py. Activé uniquement si R2_* env vars
+# présentes ; sinon import paresseux, aucun overhead. ~10 MB installé.
+# R2 = $0.015/GB stockage + egress GRATUIT (Cloudflare) vs S3 $0.023/GB + $0.09/GB egress.
+# Économie massive à l'échelle (5000+ users) : ~$50/mois R2 vs ~$500 S3.
+boto3>=1.34.0
+
 # ─── Authentification & Sécurité ──────────────────────────────────────────────
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
