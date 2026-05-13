@@ -133,14 +133,25 @@ class ModelePrioritaire(str, Enum):
     GPT4O_MINI     = "gpt-4o-mini"              # 16k output - usage légacy léger
 
 # Mapping Claude → GPT équivalent (utilisé quand Claude est indisponible OU
-# quand LLM_PRIMAIRE=gpt). Politique 2026 : on bascule sur la famille GPT-4.1
-# pour le composer freeform (32k output cap, indispensable pour livrets riches
-# multi-pages) et GPT-4.1-mini pour les tâches Sonnet/standard.
-# GPT-4-turbo (cap 4096) est BANNI pour les générations structurées denses.
+# quand LLM_PRIMAIRE=gpt). Mise à jour mai 2026 :
+#
+#   Claude Opus 4.7   → GPT-5         (équivalent top-tier, ~3× moins cher
+#                                      que Opus, comparable qualité creative
+#                                      writing + reasoning + long-context)
+#   Claude Sonnet 4.6 → GPT-5-mini    (mid-tier équilibre qualité/coût)
+#   Claude Haiku 4.5  → GPT-4.1-nano  (économique, classification rapide)
+#
+# Pourquoi GPT-5 et pas GPT-4.1 pour Opus : GPT-4.1 (32k output, $2/$8) reste
+# excellent pour les longs documents structurés (livret 16 pages, freeform
+# 100 cartes) où le 32k OUT compte. Mais pour CREATIVE WRITING DENSE
+# (marketing/promo, slogans, simulation contenu riche) → GPT-5 dépasse
+# GPT-4.1 et talonne Opus.
+#
+# GPT-4-turbo (cap 4096) reste BANNI pour les générations structurées denses.
 _CLAUDE_TO_GPT: dict[str, str] = {
     ModelePrioritaire.CLAUDE_HAIKU.value:  ModelePrioritaire.GPT4_1_NANO.value,
-    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT4_1_MINI.value,
-    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT4_1.value,
+    ModelePrioritaire.CLAUDE_SONNET.value: ModelePrioritaire.GPT5_MINI.value,
+    ModelePrioritaire.CLAUDE_OPUS.value:   ModelePrioritaire.GPT5.value,
 }
 
 
