@@ -428,6 +428,79 @@ async def _render_background(
             except Exception as e_cmyk:
                 logger.warning(f"[Freeform/async] Job {jid8} CMYK skip : {e_cmyk}")
 
+        # ── PDF/X-1a:2001 (TrimBox + BleedBox + ICC FOGRA39 + XMP) ────────
+        # Convertit le PDF en PDF/X-1a strict pour conformité imprimerie
+        # (Heidelberg Prinect, EFI Fiery, Caldera RIPs). Sans cette étape,
+        # un imprimeur PRO refuse souvent le fichier (manque MediaBox/TrimBox
+        # déclarés explicitement + ICC OutputIntent obligatoire en PDF/X).
+        try:
+            from modules.bureau.pdf_print_ready import convertir_en_pdf_x1a
+            # Format trim = dimensions de la page sans bleed. Pour cartes
+            # de visite imposées sur planche A4, le trim de la PLANCHE est A4
+            # (210×297mm). C'est le bon TrimBox pour l'imposition livrée
+            # à l'imprimeur (qui rognera ensuite au massicot selon les
+            # crop marks dessinées dans le PDF).
+            fmt = layout_json.get("format_mm") or [210, 297]
+            bleed_mm_val = float(layout_json.get("bleed_mm", 3.0))
+            x1a_bytes = convertir_en_pdf_x1a(
+                pdf_bytes,
+                titre=titre,
+                format_trim_mm=(float(fmt[0]), float(fmt[1])),
+                bleed_mm=bleed_mm_val,
+                creator="Yukpo Designer Pro (freeform)",
+                profil_icc="fogra39",
+                surimpression_noir=True,
+            )
+            if x1a_bytes:
+                pdf_bytes = x1a_bytes
+                logger.info(f"[Freeform/async] Job {jid8} PDF/X-1a OK — {len(pdf_bytes)} bytes")
+        except Exception as e_x1a:
+            logger.warning(f"[Freeform/async] Job {jid8} PDF/X-1a skip : {e_x1a}")
+
+        # ── Audit Vision LLM (qualité couleurs + dispositions + chevauchements) ─
+        # Convertit la 1ère page PDF en PNG via pdf2image puis envoie à
+        # Sonnet Vision via auditer_visuel_generique. Pas de re-render auto
+        # (freeform = pipeline catalog, non-réversible depuis le JSON layout),
+        # mais l'audit est retourné en INFO à l'utilisateur pour décider.
+        audit_qualite_freeform = None
+        try:
+            from pdf2image import convert_from_bytes
+            from modules.bureau.llm_placement import auditer_visuel_generique
+            pages_pil = convert_from_bytes(pdf_bytes, dpi=150, first_page=1, last_page=1)
+            if pages_pil:
+                import io as _io
+                buf = _io.BytesIO()
+                pages_pil[0].save(buf, format="PNG", optimize=True)
+                png_audit = buf.getvalue()
+                audit_qualite_freeform, usage_audit = await auditer_visuel_generique(
+                    png_bytes=png_audit,
+                    brief=brief or "",
+                    langue=langue or "fr",
+                    contexte=f"Pipeline freeform — {nb_pages} pages, format {layout_json.get('format_mm')}",
+                )
+                if usage_audit.get("tokens_in") or usage_audit.get("tokens_out"):
+                    try:
+                        from modules.bureau.service_credits_bureau import debiter_llm
+                        await debiter_llm(
+                            user_id,
+                            modele=usage_audit.get("modele", "claude"),
+                            tokens_input=int(usage_audit.get("tokens_in", 0)),
+                            tokens_output=int(usage_audit.get("tokens_out", 0)),
+                            module="infographie",
+                        )
+                    except Exception as _e_dl:
+                        logger.warning(f"[Freeform/audit] débit LLM skip : {_e_dl}")
+                if audit_qualite_freeform:
+                    score = audit_qualite_freeform.get("score_qualite_sur_10", 0)
+                    verdict = audit_qualite_freeform.get("verdict", "?")
+                    nb_faibles = len(audit_qualite_freeform.get("points_faibles", []))
+                    logger.info(
+                        f"[Freeform/audit] Job {jid8} qualité : score={score}/10 "
+                        f"verdict={verdict} faibles={nb_faibles}"
+                    )
+        except Exception as e_audit:
+            logger.warning(f"[Freeform/audit] Job {jid8} audit skip : {e_audit}")
+
         chemin_pdf = _DATA_DIR / fichier_id
         chemin_pdf.write_bytes(pdf_bytes)
         logger.info(
@@ -504,6 +577,8 @@ async def _render_background(
             "duree_render_ms": duree_render_ms,
             "taille_octets": len(pdf_bytes),
             "suggestions": suggestions,
+            "audit_qualite": audit_qualite_freeform,
+            "print_ready": "PDF/X-1a:2001",
         })
         logger.info(f"[Freeform/async] Job {job_id[:8]} done : {fichier_id} ({len(pdf_bytes)} bytes, {duree_render_ms}ms)")
     except Exception as e:
