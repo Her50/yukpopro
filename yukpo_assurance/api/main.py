@@ -98,6 +98,7 @@ from api.routes_pro_shop import (
     router as pro_shop_router,
     router_public as pro_shop_public_router,
 )
+from api.routes_pro_shop_advanced import router as pro_shop_advanced_router
 from api.routes_pro_copilote import router as pro_copilote_router
 from api.routes_pro_admin import router as pro_admin_router
 from api.routes_admin_cross import router as admin_cross_router
@@ -248,6 +249,16 @@ async def rate_limit_ia_middleware(request: Request, call_next):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # ── Sentry monitoring (no-op si SENTRY_DSN absent) ────────────────────
+    # Init le plus tôt possible pour capturer les exceptions startup.
+    try:
+        from core.sentry_init import init_sentry_if_configured
+        sentry_actif = init_sentry_if_configured()
+        if sentry_actif:
+            logger.info("  [Sentry] ✅ Monitoring actif")
+    except Exception as _e_s:
+        logger.debug(f"  [Sentry] init skip : {_e_s}")
+
     logger.info("=" * 60)
     logger.info("  YukpoAssurance — Démarrage")
     logger.info(f"  Version {settings.APP_VERSION}")
@@ -1055,6 +1066,32 @@ async def tester_ia():
             "openai_key_present": bool(settings.OPENAI_API_KEY),
             "conseil": "Vérifiez OPENAI_API_KEY dans .env et redémarrez le backend.",
         }
+
+
+@app.get("/health/live", tags=["Santé"])
+async def health_live():
+    """Liveness ultra-rapide (5ms max) — utilisé par fly_deploy_safe.sh
+    post-deploy. Pas de DB/Redis check, juste 'le process Python répond'.
+
+    Différent de /health (qui touche DB+Redis, peut être lent en cold-start).
+    """
+    return {"alive": True, "ts": time.time()}
+
+
+@app.get("/health/lease-stats", tags=["Santé"])
+async def health_lease_stats():
+    """Stats sur les éventuels leases orphelins Fly détectés par le
+    middleware proxy_error_detector. Permet à un monitoring externe
+    (Sentry, Pingdom, etc.) de polling cet endpoint pour alerter.
+    """
+    from collections import deque
+    stats = getattr(app.state, "lease_stats", None) or {
+        "nb_PM01_errors_5min": 0,
+        "nb_PM01_errors_total": 0,
+        "dernier_PM01_ts": None,
+        "machine_id": __import__("os").getenv("FLY_MACHINE_ID", "local"),
+    }
+    return stats
 
 
 @app.get("/health/detailed", tags=["Santé"])

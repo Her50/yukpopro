@@ -43,6 +43,12 @@ celery[redis]>=5.4.0
 # Économie massive à l'échelle (5000+ users) : ~$50/mois R2 vs ~$500 S3.
 boto3>=1.34.0
 
+# ─── Sentry monitoring (no-op si SENTRY_DSN absent) ───────────────────────────
+# Capture exceptions backend + perf traces + lease orphelins Fly. Activé
+# uniquement si fly secrets set SENTRY_DSN="..." configuré (free tier
+# Sentry = 5k events/mois). Init dans core/sentry_init.py au startup.
+sentry-sdk[fastapi]>=2.0.0
+
 # ─── Authentification & Sécurité ──────────────────────────────────────────────
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
