@@ -1393,7 +1393,7 @@ pour cohérence du brand kit ultérieur). Retourne UNIQUEMENT le JSON, sans mark
             prompt=prompt,
             systeme=_PROMPT_SYSTEME,
             mode=ModeIA.ANALYSE,
-            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,  # → gpt-4.1 (32k output, JSON dense recto+verso)
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,  # → gpt-5 (top-tier, JSON dense recto+verso)
             json_attendu=True,
             max_tokens_override=4000,  # bumpé 2500→4000 pour recto+verso enrichi
             utiliser_cache=False,
@@ -2452,6 +2452,82 @@ async def composer_freeform_layout(
         "  • Une hiérarchie visuelle claire (titre > sous-titre > corps)\n"
         "  • Pas de zones vides béantes ni de zones blanches non assumées\n"
         "    par le design\n"
+        "\n"
+        "### R5 — ÉCHELLE TYPOGRAPHIQUE CHIFFRÉE (prescriptive)\n"
+        "Chaque élément Texte DOIT recevoir taille_pt, bold, interligne,\n"
+        "letter_spacing_pt, couleur EXPLICITES adaptés à son rôle. Ne laisse\n"
+        "JAMAIS les défauts (10pt regular interligne 1.2 noir partout) —\n"
+        "c'est ce qui produit un visuel « plat de stagiaire ».\n"
+        "\n"
+        "Échelle de référence (adapte ±20% au format de page) :\n"
+        "\n"
+        "  RÔLE        | taille_pt | bold  | interligne | letter_sp | couleur\n"
+        "  ------------|-----------|-------|------------|-----------|------------\n"
+        "  TITRE H1    | 28-48     | true  | 1.05-1.15  | -0.5 à 0  | primaire/accent\n"
+        "  TITRE H2    | 18-24     | true  | 1.15-1.25  | 0         | primaire 90%\n"
+        "  TITRE H3    | 12-15     | true  | 1.2        | +0.3 si CAPS | primaire 80%\n"
+        "  ACCROCHE    | 13-18     | false | 1.3        | 0         | accent ou 70%\n"
+        "  CORPS       | 9-11      | false | 1.4-1.55   | 0         | #1a1a1a ou 85%\n"
+        "  LISTE PUCE  | 9-11      | false | 1.5-1.6    | 0         | identique corps\n"
+        "  CAPTION     | 7-8       | false | 1.3        | 0         | #666 ou 60%\n"
+        "  MENTIONS    | 6-7       | false | 1.25       | 0         | 50-60% opacité\n"
+        "  CTA BUTTON  | 11-16     | true  | 1.1        | +0.5-1.5  | sur fond accent\n"
+        "  PRIX/CHIFFRE| 16-32     | true  | 1.0        | -0.3 à 0  | accent vif\n"
+        "\n"
+        "Règles supplémentaires :\n"
+        "  • Si TITRE en UPPERCASE → letter_spacing_pt +0.5 à +1.5 (sinon\n"
+        "    les lettres se touchent, illisible).\n"
+        "  • Si titre très long (>40pt et >15 chars) → letter_spacing -0.3\n"
+        "    à -0.8 (resserre l'allure, plus impactant).\n"
+        "  • Interligne corps de texte JAMAIS sous 1.35 (lecture difficile).\n"
+        "  • Interligne titre JAMAIS au-dessus de 1.25 (titre s'éparpille).\n"
+        "  • Sur fond sombre : corps en blanc cassé (#f5f5f5) jamais blanc pur,\n"
+        "    titre en blanc pur OK.\n"
+        "  • Sur fond clair : corps en #1a1a1a (presque noir) JAMAIS noir pur\n"
+        "    (#000) — trop dur à l'œil.\n"
+        "\n"
+        "### R6 — AÉRATION ET BOÎTES TEXTE BIEN DIMENSIONNÉES\n"
+        "Chaque bloc Texte doit avoir une h_mm qui laisse RESPIRER le texte :\n"
+        "\n"
+        "  h_mm minimum = nb_lignes_attendues × taille_pt × interligne × 0.42\n"
+        "                 + 4mm de marge interne (haut + bas combinées)\n"
+        "\n"
+        "Exemples concrets :\n"
+        "  • Titre H1 36pt sur 1 ligne, interligne 1.1 :\n"
+        "    h_mm ≈ 1 × 36 × 1.1 × 0.42 + 4 = 21mm minimum\n"
+        "  • Corps 10pt, 6 lignes, interligne 1.5 :\n"
+        "    h_mm ≈ 6 × 10 × 1.5 × 0.42 + 4 = 42mm minimum\n"
+        "  • Liste 5 items 10pt interligne 1.5 : h_mm ≈ 35mm\n"
+        "\n"
+        "Si tu colles 5 items de liste dans h_mm=15mm → texte tassé, illisible,\n"
+        "amateur. Préfère couper en 2 colonnes OU réduire taille_pt OU\n"
+        "augmenter h_mm.\n"
+        "\n"
+        "### R7 — DIFFÉRENCIATION VISUELLE OBLIGATOIRE ENTRE NIVEAUX\n"
+        "Si une page contient un titre, un sous-titre et du corps, les TROIS\n"
+        "doivent se distinguer par AU MOINS 2 critères parmi :\n"
+        "  (a) taille_pt (écart ≥ 4pt entre niveaux)\n"
+        "  (b) bold (titre bold, corps regular)\n"
+        "  (c) couleur (titre couleur primaire, corps noir/gris)\n"
+        "  (d) letter_spacing (titre uppercase +1pt, corps 0)\n"
+        "\n"
+        "Si tu écris un libellé d'entête (« Académique : », « Professionnel : »,\n"
+        "« Famille X : ») suivi de son contenu, le libellé DOIT être bold OU\n"
+        "d'une taille supérieure OU d'une couleur d'accent — JAMAIS identique\n"
+        "au corps. Sinon le lecteur ne voit pas la structure.\n"
+        "\n"
+        "### R8 — ALIGNEMENT ET POSITIONNEMENT PRÉCIS\n"
+        "Chaque élément a (x_mm, y_mm, w_mm, h_mm) qui doivent former une\n"
+        "composition cohérente :\n"
+        "  • Tous les blocs texte d'une même colonne ont le MÊME x_mm de gauche\n"
+        "    (alignement à gauche) ou le même centre (alignement centré).\n"
+        "  • Les y_mm successifs respectent un gap vertical CONSTANT entre\n"
+        "    blocs apparentés (ex: dans une liste, gap = 0 ; entre sections,\n"
+        "    gap = taille_pt × 1.5 mm).\n"
+        "  • alignement = \"center\" UNIQUEMENT pour titres/CTA/captions sous\n"
+        "    images, JAMAIS pour des paragraphes de plus de 2 lignes.\n"
+        "  • alignement = \"justify\" pour les corps longs (≥ 5 lignes) afin\n"
+        "    d'éviter le « drapeau » à droite et créer une boîte propre.\n"
     )
 
     prompt_user = f"""\
@@ -2846,14 +2922,12 @@ commentaire ni markdown.
         #   4096) → erreur 400 ou troncature JSON silencieuse → fallback
         #   page placeholder (cf bug observé sur le pdf 10 cartes).
         # ── Sélection modèle + tokens budget — règles 2026 ─────────────────
-        # Famille GPT-4.1 (avril 2025) : 32k output cap, 1M context — IDÉALE
-        # pour JSON structuré dense multi-pages. Le composer freeform a besoin
-        # de 8-16k tokens de sortie pour un livret riche, ce qui était impossible
-        # avec gpt-4-turbo (cap 4096) et limite avec gpt-4o (16k).
         # Mapping interne (cf core/ia_client.py:_CLAUDE_TO_GPT) :
-        #   CLAUDE_OPUS   → gpt-4.1       (32k out)
-        #   CLAUDE_SONNET → gpt-4.1-mini  (32k out, économique)
-        #   CLAUDE_HAIKU  → gpt-4.1-nano  (32k out, très économique)
+        #   CLAUDE_OPUS   → gpt-5        (flagship creative writing dense)
+        #   CLAUDE_SONNET → gpt-5-mini   (équilibre qualité/coût)
+        #   CLAUDE_HAIKU  → gpt-4.1-nano (économique, simulations massives)
+        # Le composer freeform a besoin de 10-16k tokens de sortie pour un
+        # visuel riche / livret. gpt-4-turbo (cap 4096) reste BANNI.
         livret_ou_dense = densite_elevee or bool(contexte_block) or bool(
             _re_d.search(
                 r"\blivret|brochure|d[ée]pliant|plaquette|programme|"
@@ -2872,17 +2946,17 @@ commentaire ni markdown.
         if densite_elevee and contexte_block:
             # Livret multi-page très exigeant (faire-part 8p + 20 cartes).
             max_tok = 16000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (32k out)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-5
         elif livret_ou_dense:
             # Livret 4-8 pages OU N items répétés.
             max_tok = 12000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (32k out)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-5
         else:
             # Visuel single-page (affiche, flyer, faire-part 1 page, carte,
             # menu, programme court, etc.). Tous bénéficient d'un budget
             # large pour simuler tout le contenu sans troncature JSON.
             max_tok = 10000
-            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → GPT-5 / GPT-4.1 (qualité creative writing)
+            _modele_compose = ModelePrioritaire.CLAUDE_OPUS   # → gpt-5
         logger.warning(
             f"[FreeformComposer] Composer LLM : modele={_modele_compose.value} "
             f"max_tokens={max_tok} (livret_ou_dense={livret_ou_dense}, "
