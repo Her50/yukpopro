@@ -22,12 +22,25 @@ api.interceptors.request.use(cfg => {
 
 api.interceptors.response.use(
   r => r,
-  err => {
-    if (err.response?.status === 401) {
+  async err => {
+    // Retry transparent sur erreurs transitoires (cold-start Fly machine,
+    // 502/503/504 ponctuels). Backend Fly scale-to-zero → 1re requête après
+    // pause >5min reçoit 502 pendant le boot ~5-10s. Avec retry exponential
+    // backoff (1.5s puis 3s), l'user ne voit pas l'erreur.
+    const cfg = err.config || {}
+    const status = err.response?.status
+    const isRetryable = !err.response || status === 502 || status === 503 || status === 504
+    const tries = (cfg as any)._yukpo_retry_count || 0
+    if (isRetryable && tries < 2 && cfg.url) {
+      ;(cfg as any)._yukpo_retry_count = tries + 1
+      await new Promise(r => setTimeout(r, 1500 * Math.pow(2, tries)))
+      return api(cfg)
+    }
+    if (status === 401) {
       localStorage.removeItem('bureau_token')
       window.location.href = '/login'
     }
-    if (err.response?.status === 402) {
+    if (status === 402) {
       const detail = err.response?.data?.detail
       const msg = typeof detail === 'object' ? detail?.message : (typeof detail === 'string' && detail.startsWith('CREDITS_EPUISES') ? 'Crédits épuisés — rechargez ou changez de plan.' : detail)
       import('react-hot-toast').then(({ default: toast }) => {

@@ -1,9 +1,31 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    // Composants Tailwind partagés (admin-dashboard cross-app) — sans ça
+    // Tailwind ne scanne pas les classes du package → CSS non généré →
+    // tous les onglets/boutons admin invisibles en prod.
+    '../packages/admin-dashboard/src/**/*.{ts,tsx}',
+  ],
   theme: {
     extend: {
       colors: {
+        // Mapping yukpo-* utilisé par le package admin-dashboard cross-app.
+        // Sans ce mapping côté Sec, les boutons/onglets admin n'ont pas de
+        // couleur (le package est partagé avec YPro qui définit yukpo).
+        yukpo: {
+          50:  '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+        },
         brand: {
           50:  '#eff6ff',
           100: '#dbeafe',

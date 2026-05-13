@@ -38,19 +38,39 @@ http.interceptors.request.use((config: any) => {
   return config;
 });
 
-// Gestion centralisée des erreurs
+// Gestion centralisée des erreurs + retry transparent sur les erreurs
+// transitoires (cold-start Fly machine, 502/503 ponctuels, network blips).
+// Le backend Fly utilise scale-to-zero : la 1re requête après une pause
+// >5min wake la machine en ~5-10s, et peut renvoyer 502 pendant le boot.
+// Sans retry, l'user voit "Erreur de connexion" et clic-retry manuel.
+// Avec retry : c'est transparent, latence +5-8s sur le 1er call après pause.
 http.interceptors.response.use(
   (res: any) => res,
-  (error: AxiosErrorLike<{ detail?: string }>) => {
-    if (error.response?.status === 401) {
+  async (error: AxiosErrorLike<{ detail?: string }> & { config?: any }) => {
+    const cfg = error.config || {};
+    const status = error.response?.status;
+    const isRetryable =
+      // Erreur réseau pure (pas de response = timeout, connexion refusée…)
+      !error.response
+      // Cold-start machine Fly
+      || status === 502 || status === 503 || status === 504;
+    const alreadyRetried = (cfg as any)._yukpo_retry_count || 0;
+    if (isRetryable && alreadyRetried < 2 && cfg && cfg.url) {
+      (cfg as any)._yukpo_retry_count = alreadyRetried + 1;
+      const delayMs = 1500 * Math.pow(2, alreadyRetried); // 1.5s puis 3s
+      await new Promise(r => setTimeout(r, delayMs));
+      return http(cfg);
+    }
+    if (status === 401) {
       localStorage.removeItem("yukpopro_token");
       localStorage.removeItem("yukpopro_user");
       window.location.href = "/login";
-    } else if (error.response?.status === 429) {
+    } else if (status === 429) {
       toast.error("Trop de requêtes — veuillez patienter.");
-    } else if (error.response?.status && error.response.status >= 500) {
-      const msg = error.response.data?.detail || "Erreur serveur inattendue.";
-      toast.error(msg.slice(0, 120));
+    } else if (status && status >= 500) {
+      const msg = error.response?.data?.detail || "Erreur serveur inattendue.";
+      const msgStr = typeof msg === "string" ? msg : "Erreur serveur inattendue.";
+      toast.error(msgStr.slice(0, 120));
     }
     return Promise.reject(error);
   }

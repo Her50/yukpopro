@@ -886,10 +886,13 @@ const GestionUsersTab = ({ api, scope }: { api: CrossApi; scope: AppScope }) => 
               {users.map((u, i) => {
                 const conso = u.conso_total || 0;
                 const restants = u.credits_restants || 0;
+                // Code couleur 3 paliers — neutre clair pour OK, ambre attention,
+                // rouge critique. Évite le vert qui se confond avec les autres
+                // emerald de l'UI (bouton actions). Lisibilité WCAG AA sur slate-900.
                 const restantsColor =
                   restants < 50 ? "text-red-300" :
                   restants < 200 ? "text-amber-300" :
-                  "text-emerald-300";
+                  "text-sky-300";
                 return (
                   <tr key={`${u.app}-${u.id}-${i}`} className={
                     "border-b border-slate-800/60 text-slate-200 " +
@@ -928,7 +931,7 @@ const GestionUsersTab = ({ api, scope }: { api: CrossApi; scope: AppScope }) => 
                       <div className="inline-flex gap-1.5">
                         <button
                           onClick={() => ouvrirBonus(u)}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-indigo-500/25 text-indigo-200 border border-indigo-500/40 hover:bg-indigo-500/40"
                           title="Ajouter des crédits bonus"
                         >
                           <Plus className="w-3 h-3" /> Crédits
