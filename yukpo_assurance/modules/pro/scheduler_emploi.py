@@ -73,11 +73,24 @@ def _info_pays(pays: str) -> dict:
 # ── Point d'entrée public ──────────────────────────────────────────────────────
 
 async def demarrer_scheduler_emploi():
+    """Démarrage scheduler — désactivé par défaut depuis mai 2026.
+
+    Mode prod = LAZY ON-DEMAND : la recherche n'est déclenchée que
+    lorsque l'utilisateur ouvre la page Emploi (cache stale > 24h) ou
+    clique "Rechercher". Économise ~95 % des appels Serper/Adzuna/etc.
+    sur des profils inactifs.
+
+    Pour réactiver le scheduler auto : `EMPLOI_SCHEDULER_AUTO=1` en env.
+    """
+    if os.getenv("EMPLOI_SCHEDULER_AUTO", "0") != "1":
+        logger.info("[SchedulerEmploi] Mode LAZY on-demand (scheduler auto désactivé). "
+                    "EMPLOI_SCHEDULER_AUTO=1 pour réactiver.")
+        return
     global _running
     if _running:
         return
     _running = True
-    logger.info("[SchedulerEmploi] Démarrage veille emploi v2 (multi-sources réelles)")
+    logger.info("[SchedulerEmploi] Démarrage veille emploi AUTO (override env)")
     asyncio.create_task(_boucle_veille_emploi(), name="scheduler_emploi")
 
 

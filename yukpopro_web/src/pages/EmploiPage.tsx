@@ -121,20 +121,55 @@ export const EmploiPage = () => {
         setFrequence(data.frequence_recherche_heures || 24);
         st.markHydrated();
       }
+      return data;
     } catch {
-      setConfig({
+      const empty: ConfigEmploi = {
         recherche_emploi_active: false,
         frequence_recherche_heures: 24,
         profil_recherche_emploi: "",
         derniere_recherche_emploi: null,
         offres_emploi_recentes: [],
-      });
+      };
+      setConfig(empty);
+      return empty;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { charger(); }, [charger]);
+  // Mode lazy on-demand (mai 2026) : scheduler auto désactivé côté backend
+  // pour économiser les crédits Serper sur profils inactifs. À l'ouverture
+  // de la page, on déclenche un fetch frais SI le profil emploi est rempli
+  // (sinon ça n'a aucun sens) ET si pas de cache récent (< 24h).
+  useEffect(() => {
+    let annule = false;
+    (async () => {
+      const cfg = await charger();
+      if (annule || !cfg) return;
+      const profilRempli = (cfg.profil_recherche_emploi || "").trim().length > 30;
+      const offres = cfg.offres_emploi_recentes || [];
+      const derniere = cfg.derniere_recherche_emploi
+        ? new Date(cfg.derniere_recherche_emploi).getTime()
+        : 0;
+      const stale = !derniere || (Date.now() - derniere) > 24 * 3600_000;
+      if (profilRempli && offres.length === 0 && stale) {
+        setSearching(true);
+        try {
+          const result = await emploiApi.lancerRecherche();
+          if (!annule) {
+            setConfig(prev => prev ? {
+              ...prev,
+              offres_emploi_recentes: result.offres,
+              derniere_recherche_emploi: new Date().toISOString(),
+            } : prev);
+          }
+        } catch { /* silencieux à l'auto-load */ }
+        finally { if (!annule) setSearching(false); }
+      }
+    })();
+    return () => { annule = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Toggle veille ────────────────────────────────────────────────────────────
 

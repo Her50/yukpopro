@@ -81,14 +81,42 @@ export const MarchesPage = () => {
     try {
       const data = await marchesApi.getRecents();
       setMarches(data);
+      return data;
     } catch {
       setMarches([]);
+      return [] as MarchePublic[];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { charger(); }, [charger]);
+  // Mode lazy on-demand : à l'ouverture de la page, on charge le cache DB ;
+  // si rien en cache, on déclenche automatiquement une recherche fraîche
+  // (Serper + DuckDuckGo fallback). Coûte 1 appel par utilisateur quand il
+  // ouvre vraiment la page — pas de scheduler permanent qui burn des crédits
+  // sur des profils inactifs.
+  useEffect(() => {
+    let annule = false;
+    (async () => {
+      const cache = await charger();
+      if (annule) return;
+      if ((cache || []).length === 0) {
+        setSearching(true);
+        try {
+          const result = await marchesApi.lancerRecherche();
+          if (!annule) {
+            setMarches(result.marches);
+            if (result.nb_marches > 0) {
+              showToast(`${result.nb_marches} appel(s) d'offres chargé(s)`);
+            }
+          }
+        } catch { /* silencieux à l'auto-load — l'user peut cliquer Rechercher */ }
+        finally { if (!annule) setSearching(false); }
+      }
+    })();
+    return () => { annule = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const lancerRecherche = async () => {
     setSearching(true);

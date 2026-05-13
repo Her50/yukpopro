@@ -183,11 +183,24 @@ def _mots_cles_fallback(profil) -> list[str]:
 # ── Point d'entrée public ──────────────────────────────────────────────────────
 
 async def demarrer_scheduler_marches():
+    """Démarrage scheduler — désactivé par défaut depuis mai 2026.
+
+    Mode prod = LAZY ON-DEMAND : la recherche n'est déclenchée que
+    lorsque l'utilisateur ouvre la page Marchés (cache stale > 24h) ou
+    clique "Rechercher". Économise ~95 % des appels Serper sur des
+    profils inactifs.
+
+    Pour réactiver le scheduler auto : `MARCHES_SCHEDULER_AUTO=1` en env.
+    """
+    if os.getenv("MARCHES_SCHEDULER_AUTO", "0") != "1":
+        logger.info("[SchedulerMarches] Mode LAZY on-demand (scheduler auto désactivé). "
+                    "MARCHES_SCHEDULER_AUTO=1 pour réactiver.")
+        return
     global _running
     if _running:
         return
     _running = True
-    logger.info("[SchedulerMarches] Démarrage veille marchés publics (Serper-only, 3 queries enrichies)")
+    logger.info("[SchedulerMarches] Démarrage veille marchés publics AUTO (override env)")
     asyncio.create_task(_boucle_veille_marches(), name="scheduler_marches")
 
 
@@ -280,8 +293,26 @@ async def rechercher_marches_pour_user(user_id: int, profil=None) -> int:
         elif isinstance(res, Exception):
             logger.warning(f"[SchedulerMarches] {nom} user={user_id} ERREUR: {res}")
 
+    # FALLBACK DuckDuckGo HTML si Serper a tout raté (souvent : quota dépassé).
+    # Source sans API key, scrape HTML SERP — pas aussi propre que Serper
+    # mais robuste et gratuit. Lancée seulement si rien ne remonte de Serper
+    # (donc 0 coût supplémentaire quand Serper marche).
     if not marches_bruts:
-        logger.info(f"[SchedulerMarches] user={user_id}: 0 avis sur les 3 queries — sauvegarde liste vide")
+        logger.info(f"[SchedulerMarches] user={user_id}: 0 avis Serper → fallback DuckDuckGo")
+        ddg_resultats = await asyncio.gather(
+            _ddg_query(f"appel d'offres {termes_fr[0] if termes_fr else 'audit'} {info['nom']}", pays, info, secteur=termes_fr[0] if termes_fr else ""),
+            _ddg_query(f"tender procurement {terme_en or 'audit'} {info['nom']}", pays, info, secteur=terme_en or ""),
+            return_exceptions=True,
+        )
+        for nom, res in zip(["DDG-fr", "DDG-en"], ddg_resultats):
+            if isinstance(res, list):
+                logger.info(f"[SchedulerMarches] {nom} user={user_id}: {len(res)} avis")
+                marches_bruts.extend(res)
+            elif isinstance(res, Exception):
+                logger.warning(f"[SchedulerMarches] {nom} user={user_id} ERREUR: {res}")
+
+    if not marches_bruts:
+        logger.info(f"[SchedulerMarches] user={user_id}: 0 avis sur toutes sources — sauvegarde liste vide")
         await _sauvegarder_marches(user_id, [])
         return 0
 
@@ -461,6 +492,100 @@ async def _sauvegarder_marches(user_id: int, marches: list[dict]):
             logger.error(f"[SchedulerMarches] user {user_id}: aucun profil mis à jour (introuvable ?)")
             raise RuntimeError(f"Profil user {user_id} introuvable lors de la sauvegarde des marchés")
     logger.info(f"[SchedulerMarches] {len(marches)} avis sauvegardés pour user {user_id}")
+
+
+# ── Fallback DuckDuckGo HTML (gratuit, sans clé) ──────────────────────────────
+# Scrape la page HTML lite de DDG. Pas aussi propre que Serper mais utilisable
+# en secours quand le crédit Serper est épuisé. Ne lit pas du JS donc on
+# utilise l'endpoint html.duckduckgo.com/html/ (SERP statique).
+
+_DDG_USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/122.0.0.0 Safari/537.36"
+)
+
+async def _ddg_query(query: str, pays: str, info: dict, secteur: str = "") -> list[dict]:
+    """Scrape DuckDuckGo HTML SERP — pas d'API key, gratuit, sans quota."""
+    import httpx
+    try:
+        from html.parser import HTMLParser
+    except ImportError:
+        return []
+
+    # Construit URL DDG HTML
+    params = {"q": query, "kl": f"{info.get('hl', 'fr')}-{info.get('gl', pays).lower()}"}
+    try:
+        async with httpx.AsyncClient(
+            timeout=20, follow_redirects=True,
+            headers={"User-Agent": _DDG_USER_AGENT, "Accept-Language": info.get("hl", "fr")},
+        ) as client:
+            resp = await client.get("https://html.duckduckgo.com/html/", params=params)
+    except Exception as e:
+        logger.warning(f"[SchedulerMarches] DDG network error q={query!r}: {e}")
+        return []
+    if resp.status_code != 200:
+        logger.warning(f"[SchedulerMarches] DDG HTTP {resp.status_code} q={query!r}")
+        return []
+
+    # Parse résultats DDG (structure stable depuis 2019)
+    #   <a class="result__a" href="…">titre</a>
+    #   <a class="result__snippet" href="…">…</a>
+    # On utilise regex tolérantes plutôt que BeautifulSoup pour éviter une
+    # dépendance lourde (lxml/bs4) dans le scheduler.
+    html = resp.text
+    results: list[dict] = []
+    # Capture (href, titre, snippet) — pattern non-greedy car SERP a beaucoup d'autres <a>
+    pattern = re.compile(
+        r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)</a>'
+        r'.*?<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>',
+        re.DOTALL | re.IGNORECASE,
+    )
+    for match in list(pattern.finditer(html))[:10]:
+        href_raw, titre_raw, snippet_raw = match.groups()
+        # DDG enveloppe les URLs : /l/?uddg=https%3A%2F%2F…&rut=…
+        href = _decode_ddg_url(href_raw)
+        titre = _strip_html(titre_raw).strip()
+        snippet = _strip_html(snippet_raw).strip()
+        if not titre or len(titre) < 8 or not href.startswith(("http://", "https://")):
+            continue
+        if any(d in href for d in ("facebook.com", "linkedin.com/in/", "twitter.com", "youtube.com")):
+            continue
+        plateformes = _PLATEFORMES_PAYS.get(pays, [])
+        source = next((p for p in plateformes if p in href), "DuckDuckGo")
+        results.append({
+            "titre":     titre[:200],
+            "organisme": _extraire_organisme(href, snippet),
+            "lieu":      info["nom"],
+            "resume":    snippet[:500],
+            "url":       href,
+            "source":    source,
+            "date_pub":  "Récent",
+            "secteur":   secteur,
+            "score":     0,
+        })
+    return results
+
+
+def _decode_ddg_url(href: str) -> str:
+    """DDG wrap les liens en /l/?uddg=URL&rut=...; on décode."""
+    import urllib.parse
+    if href.startswith("//duckduckgo.com/l/") or href.startswith("/l/"):
+        try:
+            qs = urllib.parse.urlparse(href).query
+            params = urllib.parse.parse_qs(qs)
+            return params.get("uddg", [href])[0]
+        except Exception:
+            return href
+    return href
+
+
+def _strip_html(s: str) -> str:
+    """Retire les tags HTML basiques + décode entités courantes."""
+    s = re.sub(r"<[^>]+>", "", s)
+    return (
+        s.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+         .replace("&quot;", '"').replace("&#x27;", "'").replace("&nbsp;", " ")
+    )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
