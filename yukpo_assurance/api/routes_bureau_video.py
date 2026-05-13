@@ -106,7 +106,7 @@ async def generer_video_endpoint(
     try:
         await debiter_forfait(
             current_user.user_id,
-            cle_forfait=f"bureau_video_{demande.mode}",
+            type_forfait=f"bureau_video_{demande.mode}",
             multiplicateur=multiplier,
             module="infographie",
         )

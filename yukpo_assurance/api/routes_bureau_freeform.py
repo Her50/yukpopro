@@ -302,7 +302,7 @@ async def _generer_sync(
     nb_pages = len(layout_json.get("pages") or [])
     try:
         await debiter_forfait(
-            current_user.user_id, cle_forfait="designerpro_creation",
+            current_user.user_id, type_forfait="designerpro_creation",
             multiplicateur=max(1, nb_pages * 5), module="infographie",
         )
     except Exception:
@@ -437,7 +437,7 @@ async def _render_background(
 
         try:
             await debiter_forfait(
-                user_id, cle_forfait="designerpro_creation",
+                user_id, type_forfait="designerpro_creation",
                 multiplicateur=max(1, nb_pages * 5), module="infographie",
             )
             logger.info(
