@@ -1239,6 +1239,39 @@ class DesignerProSessionDB(Base):
     cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class BureauSessionDB(Base):
+    """
+    Session UNIFIÉE de chat bureau : mémorise le DERNIER FICHIER produit par
+    n'importe quel pipeline (infographe mono, freeform, designer_pro, rapport,
+    slides, geometric_placement) pour permettre des MODIFICATIONS INCRÉMENTALES.
+
+    Cas d'usage : l'utilisateur reçoit un flyer A5 puis dit "change la couleur
+    du titre en bleu" → le chat détecte intent='modification', récupère
+    dernier_fichier_id depuis BureauSessionDB, route vers /modifier du
+    pipeline mémorisé (au lieu de regénérer from scratch).
+
+    TTL 30 min après dernière interaction. Une seule session active par
+    user à la fois (la plus récente).
+    """
+    __tablename__ = "bureau_sessions"
+
+    session_id           = Column(String(36), primary_key=True, index=True)
+    user_id              = Column(Integer, nullable=False, index=True)
+    pipeline             = Column(String(40), nullable=True,
+        comment="infographe | freeform | designer_pro | rapport | slides | geometric")
+    dernier_fichier_id   = Column(String(200), nullable=True,
+        comment="ID du dernier fichier produit (PDF/DOCX/PPTX/PNG)")
+    dernier_brief        = Column(String(2000), nullable=True,
+        comment="Brief original qui a produit le dernier fichier (contexte modif)")
+    dernier_layout_json  = Column(JSON, nullable=True,
+        comment="Layout JSON (freeform/geometric) ou meta (infographe/rapport) pour modifs sans LLM relance")
+    historique           = Column(JSON, default=list,
+        comment="[{role, ts, content, fichier_id?, pipeline?}] — last 30 msgs")
+    derniere_interaction = Column(DateTime, default=datetime.utcnow,
+                                   onupdate=datetime.utcnow, nullable=False, index=True)
+    cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 # ─── Sprint 2.5 — White-label (revendeurs / cabinets / agences) ──────────────
 
 

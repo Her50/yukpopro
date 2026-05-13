@@ -114,6 +114,7 @@ from api.routes_bureau_ocr import router as bureau_ocr_router
 from api.routes_bureau_audio import router as bureau_audio_router
 from api.routes_bureau_infographie import router as bureau_infographie_router
 from api.routes_bureau_infographie_pro import router as bureau_infographie_pro_router
+from api.routes_bureau_session import router as bureau_session_router
 # Sprint 2.1 — API publique + clés
 from api.routes_api_keys import router as api_keys_router
 from api.routes_public_designerpro import router as public_designerpro_router
@@ -875,6 +876,8 @@ app.include_router(bureau_ocr_router,        prefix="/api/v1/bureau/ocr",       
 app.include_router(bureau_audio_router,      prefix="/api/v1/bureau/audio",       tags=["Secrétariat — Audio → Document"])
 app.include_router(bureau_infographie_router,prefix="/api/v1/bureau/infographie", tags=["Secrétariat — Infographie Print"])
 app.include_router(bureau_infographie_pro_router, prefix="/api/v1/bureau/infographie-pro", tags=["Secrétariat — Infographie Pro (multi-page IA)"])
+# R1 — Session unifiée pour modifications incrémentales (chat YPro + YSec)
+app.include_router(bureau_session_router,     prefix="/api/v1/bureau",             tags=["Bureau — Session unifiée (modif incrémentale)"])
 # Sprint 2.1 — Gestion clés API (admin org via JWT) + API publique B2B (auth par clé)
 app.include_router(api_keys_router, prefix="/api/v1/api-keys", tags=["API Keys (admin org)"])
 app.include_router(public_designerpro_router, prefix="/api/v1/public/designerpro", tags=["Public API — Designer Pro"])

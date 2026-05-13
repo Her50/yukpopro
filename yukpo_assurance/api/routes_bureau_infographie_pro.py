@@ -2802,6 +2802,25 @@ Retourne UNIQUEMENT le nouveau JSON projet complet, sans markdown, sans commenta
     ts = int(time.time())
     artefacts = _persister_projet_pro(current_user.user_id, projet.cle_projet, ts, res)
 
+    # R5 — Sync vers BureauSessionDB unifiée (en plus de DesignerProSessionDB
+    # qui reste pour le sous-chat C1 dédié Designer Pro).
+    try:
+        from modules.bureau import bureau_session as _bs
+        fichier_id_pour_session = artefacts.get("pdf_id") or artefacts.get("projet_json_id")
+        if fichier_id_pour_session:
+            await _bs.update_session_apres_generation(
+                user_id=current_user.user_id, pipeline="designer_pro",
+                fichier_id=fichier_id_pour_session,
+                brief=f"[modif] {demande.instructions[:300]}",
+                layout_json={
+                    "projet_id": fichier_id_pour_session,
+                    "cle_projet": projet.cle_projet if projet else None,
+                    "modifie_depuis": demande.projet_id,
+                },
+            )
+    except Exception as _e_sess:
+        logger.debug(f"[Designer Pro/Modifier/Session] : {_e_sess}")
+
     return {
         "projet": _serialiser_projet_pour_reponse(projet),
         "modifie_depuis": demande.projet_id,
@@ -3184,6 +3203,26 @@ async def geometric_placement(
     fid = f"bureau_pdf_{current_user.user_id}_geometric_{int(time.time())}.png"
     (_DATA_DIR / fid).write_bytes(png_bytes)
 
+    # R5 — Persiste le PlacementPlan + medias_refs en session pour /modifier
+    try:
+        from modules.bureau import bureau_session as _bs
+        await _bs.update_session_apres_generation(
+            user_id=current_user.user_id, pipeline="geometric",
+            fichier_id=fid, brief=demande.brief,
+            layout_json={
+                "placement_plan": placement.model_dump(),
+                "medias_refs":    list(medias_bytes.keys()),
+                "page_w_mm":      demande.page_w_mm,
+                "page_h_mm":      demande.page_h_mm,
+                "bleed_mm":       demande.bleed_mm,
+                "langue":         demande.langue,
+                "brand_kit":      demande.brand_kit,
+                "modele":         demande.modele,
+            },
+        )
+    except Exception as _e_sess:
+        logger.debug(f"[GeomPlacement/Session] : {_e_sess}")
+
     return {
         "ok": True,
         "png_id": fid,
@@ -3193,4 +3232,147 @@ async def geometric_placement(
         "nb_items": len(placement.items),
         "medias_utilises": list(medias_bytes.keys()),
         "revisions_journal": journal_revisions,
+    }
+
+
+# ─── R5 — Modification incrémentale d'un PlacementPlan existant ─────────────
+
+class DemandeGeomModifier(BaseModel):
+    fichier_id: str = Field(..., min_length=5)
+    instructions: str = Field(..., min_length=3, max_length=4000)
+
+
+@router.post("/geometric-placement/modifier", tags=["Bureau — Designer Pro"])
+async def modifier_geometric_placement(
+    demande: DemandeGeomModifier,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Modifie un visuel geometric_placement existant via instructions ciblées.
+    Récupère le PlacementPlan précédent + médias depuis BureauSessionDB,
+    demande à Sonnet de produire le plan modifié, re-render PNG via Python PIL.
+    """
+    from modules.bureau import bureau_session as _bs, mediatheque_session as ms
+    from modules.bureau.geometric_placement import PlacementPlan, render_placement_plan
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import json as _json
+    import re as _re
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    sess = await _bs.get_or_create_session(current_user.user_id)
+    if not sess.dernier_layout_json or sess.pipeline != "geometric":
+        raise HTTPException(404,
+            "Pas de PlacementPlan précédent en session (TTL 30min expiré OU "
+            "dernier doc n'était pas geometric_placement).")
+
+    snap = sess.dernier_layout_json
+    plan_precedent = snap.get("placement_plan") or {}
+
+    prompt_modif = (
+        "Voici le PlacementPlan JSON ACTUEL d'un visuel rendu via PIL + LLM "
+        "vision géométrique. Applique les instructions de modification de "
+        "l'utilisateur et renvoie le PlacementPlan COMPLET modifié.\n\n"
+        f"PLACEMENT_PLAN ACTUEL :\n{_json.dumps(plan_precedent, ensure_ascii=False)[:50000]}\n\n"
+        f"INSTRUCTIONS :\n" + chr(34) * 3 + demande.instructions + chr(34) * 3 + "\n\n"
+        "RÈGLES :\n"
+        "1. Modifie uniquement les items concernés (par bbox/role).\n"
+        "2. Conserve page_w_mm, page_h_mm, bleed_mm, background.\n"
+        "3. z_index : background=0, formes=1-3, images=5-8, textes=10-15.\n"
+        "4. Pour modif couleur : applique sur tous textes/formes pertinents.\n"
+        "5. Renvoie le JSON COMPLET, pas un diff.\n\nJSON strict sans markdown."
+    )
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt_modif, mode=ModeIA.PRECISION,
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
+            json_attendu=True, max_tokens_override=16000, utiliser_cache=False,
+        )
+    except Exception as e:
+        raise HTTPException(502, f"Modification LLM échouée : {str(e)[:200]}")
+
+    try:
+        await debiter_llm(
+            current_user.user_id,
+            modele=getattr(rep, "modele_utilise", "claude"),
+            tokens_input=int(getattr(rep, "tokens_input", 0) or 0),
+            tokens_output=int(getattr(rep, "tokens_output", 0) or 0),
+            module="infographie",
+        )
+    except Exception:
+        pass
+
+    raw = (rep.contenu or "").strip()
+    try:
+        data = _json.loads(raw)
+    except _json.JSONDecodeError:
+        m = _re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            raise HTTPException(502, "Pas de JSON parseable")
+        data = _json.loads(m.group())
+
+    try:
+        plan_modifie = PlacementPlan(**data)
+    except Exception as e:
+        raise HTTPException(502, f"PlacementPlan modifié invalide : {str(e)[:200]}")
+
+    # Recharge les médias originaux pour re-render
+    session_id = f"chat_{current_user.user_id}"
+    medias_refs = snap.get("medias_refs", []) or []
+    medias_meta = ms.resoudre_refs(medias_refs, str(current_user.user_id), session_id)
+    medias_bytes_dict: dict[str, bytes] = {}
+    for ref in medias_refs:
+        if ref not in medias_meta:
+            continue
+        try:
+            medias_bytes_dict[ref] = (ms._BASE_DIR / medias_meta[ref].chemin).read_bytes()
+        except Exception:
+            pass
+
+    try:
+        png_bytes = render_placement_plan(
+            plan_modifie, medias_bytes_dict, dpi=300, include_bleed=True,
+        )
+    except Exception as e:
+        raise HTTPException(500, f"Rendu PIL échoué : {str(e)[:200]}")
+
+    try:
+        await debiter_forfait(
+            current_user.user_id, "designerpro_freeform_layout",
+            module="infographie", multiplicateur=0.7,
+        )
+    except Exception:
+        pass
+
+    fid = f"bureau_pdf_{current_user.user_id}_geometric_modif_{int(time.time())}.png"
+    (_DATA_DIR / fid).write_bytes(png_bytes)
+
+    try:
+        await _bs.update_session_apres_generation(
+            user_id=current_user.user_id, pipeline="geometric",
+            fichier_id=fid, brief=f"[modif] {demande.instructions[:300]}",
+            layout_json={
+                **snap,
+                "placement_plan": plan_modifie.model_dump(),
+            },
+        )
+    except Exception:
+        pass
+
+    return {
+        "ok": True,
+        "png_id": fid,
+        "modifie_depuis": demande.fichier_id,
+        "png_base64": base64.b64encode(png_bytes).decode(),
+        "size_kb": round(len(png_bytes) / 1024, 1),
+        "placement_plan": plan_modifie.model_dump(),
     }

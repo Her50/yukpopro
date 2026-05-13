@@ -567,6 +567,21 @@ async def _render_background(
         except Exception:
             suggestions = []
 
+        # R3 — Persiste le layout_json dans BureauSessionDB pour permettre
+        # modifications incrémentales ("change la couleur en bleu",
+        # "ajoute mon logo en bas") sans regénérer depuis le brief.
+        try:
+            from modules.bureau import bureau_session as _bs
+            await _bs.update_session_apres_generation(
+                user_id=user_id,
+                pipeline="freeform",
+                fichier_id=fichier_id,
+                brief=brief or "",
+                layout_json=layout_json,  # Le LAYOUT entier (peut être gros)
+            )
+        except Exception as _e_sess:
+            logger.warning(f"[Freeform/async] Job {jid8} session update : {_e_sess}")
+
         await _job_set(job_id, {
             "statut": "done", "user_id": user_id,
             "fichier_id": fichier_id, "titre": titre, "nb_pages": nb_pages,
@@ -630,3 +645,170 @@ async def freeform_status(
     if data.get("user_id") != current_user.user_id and current_user.role != "admin":
         raise HTTPException(403, "Accès refusé à ce job")
     return data
+
+
+# ─── R3 — Modification incrémentale d'un visuel freeform existant ───────────
+
+class DemandeFreeformModifier(BaseModel):
+    fichier_id: str = Field(..., min_length=5,
+        description="ID du fichier précédent à modifier (de BureauSessionDB)")
+    instructions: str = Field(..., min_length=3, max_length=4000,
+        description="Instructions de modification en langage naturel")
+
+
+@router.post("/modifier", tags=["Bureau — Freeform Layout"])
+async def modifier_freeform(
+    demande: DemandeFreeformModifier,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    Modifie un visuel freeform existant via instructions ciblées ("change la
+    couleur du titre en bleu", "ajoute le logo en haut", "supprime la 3e carte").
+
+    Récupère le layout_json précédent depuis BureauSessionDB, demande à Sonnet
+    Opus de produire le layout modifié, re-render via pipeline standard
+    (PDF/X-1a + CMYK + bleed).
+
+    SANS cet endpoint : l'user devait recommencer son brief from scratch pour
+    chaque retouche → perte cohérence + coût LLM ×2 + pas de "suite logique".
+    """
+    from modules.bureau import bureau_session as _bs, freeform_layout
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_llm, debiter_forfait,
+    )
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import json as _json
+    import re as _re
+    import time as _time
+
+    autorise, plan, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan}")
+
+    sess = await _bs.get_or_create_session(current_user.user_id)
+    layout_precedent = sess.dernier_layout_json
+    if not layout_precedent:
+        raise HTTPException(404,
+            "Layout précédent introuvable en session (TTL 30 min expiré). "
+            "Régénère le visuel depuis le brief.")
+
+    # Si layout très volumineux (100 cartes = JSON 50k+ chars), résume les
+    # pages répétitives (template recto/verso suffit à comprendre la structure).
+    layout_str = _json.dumps(layout_precedent, ensure_ascii=False)
+    if len(layout_str) > 60000:
+        pages = layout_precedent.get("pages", [])
+        layout_resume = dict(layout_precedent)
+        if len(pages) > 2:
+            layout_resume["pages"] = pages[:2] + [
+                {"_truncated": f"{len(pages) - 2} pages additionnelles (mêmes templates répétés)"}
+            ]
+        layout_str = _json.dumps(layout_resume, ensure_ascii=False)
+
+    prompt_modif = (
+        "Tu reçois un LAYOUT JSON existant + instructions de modification de "
+        "l'utilisateur. Renvoie le layout COMPLET avec uniquement les "
+        "modifications appliquées (conserve tout le reste).\n\n"
+        f"LAYOUT JSON ACTUEL :\n{layout_str}\n\n"
+        f"INSTRUCTIONS DE MODIFICATION :\n" + chr(34) * 3 + demande.instructions + chr(34) * 3 + "\n\n"
+        "RÈGLES :\n"
+        "1. Modifie UNIQUEMENT les éléments concernés.\n"
+        "2. Conserve structure générale (format_mm, bleed, palette globale).\n"
+        "3. Si modification couleur → mets à jour sur TOUS les éléments concernés.\n"
+        "4. Si ajout → place sans chevaucher l'existant (zones séparées).\n"
+        "5. Si suppression → retire l'élément du tableau elements.\n"
+        "6. Conserve z_index cohérent (fond=0, décor=1, texte=2-4, QR=3, etc.).\n\n"
+        "Renvoie UNIQUEMENT le JSON layout modifié complet, sans markdown."
+    )
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt_modif, mode=ModeIA.ANALYSE,
+            forcer_modele=ModelePrioritaire.CLAUDE_OPUS,
+            json_attendu=True, max_tokens_override=32000, utiliser_cache=False,
+        )
+    except Exception as e:
+        logger.error(f"[Freeform/Modifier] LLM échec : {e}")
+        raise HTTPException(502, f"Modification LLM échouée : {str(e)[:200]}")
+
+    try:
+        await debiter_llm(
+            current_user.user_id,
+            modele=getattr(rep, "modele_utilise", "claude"),
+            tokens_input=int(getattr(rep, "tokens_input", 0) or 0),
+            tokens_output=int(getattr(rep, "tokens_output", 0) or 0),
+            module="infographie",
+        )
+    except Exception:
+        pass
+
+    raw = (rep.contenu or "").strip()
+    try:
+        layout_modifie = _json.loads(raw)
+    except _json.JSONDecodeError:
+        m = _re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            raise HTTPException(502, "LLM n'a pas produit de JSON layout parseable")
+        try:
+            layout_modifie = _json.loads(m.group())
+        except Exception as e:
+            raise HTTPException(502, f"Layout modifié invalide : {str(e)[:200]}")
+
+    try:
+        pdf_bytes = await freeform_layout.rendre_pdf_depuis_json(layout_modifie, medias={})
+    except Exception as e:
+        logger.error(f"[Freeform/Modifier] Render échec : {e}")
+        raise HTTPException(500, f"Rendu PDF échoué : {str(e)[:200]}")
+
+    # CMYK + PDF/X-1a (mêmes utils que /generer)
+    try:
+        from modules.bureau.pdf_print_ready import convertir_rgb_to_cmyk, convertir_en_pdf_x1a
+        cmyk_bytes = convertir_rgb_to_cmyk(pdf_bytes, icc_name="fogra39")
+        if cmyk_bytes:
+            pdf_bytes = cmyk_bytes
+        fmt = layout_modifie.get("format_mm") or [210, 297]
+        x1a = convertir_en_pdf_x1a(
+            pdf_bytes, titre=layout_modifie.get("titre", "Visuel modifié"),
+            format_trim_mm=(float(fmt[0]), float(fmt[1])),
+            bleed_mm=float(layout_modifie.get("bleed_mm", 3.0)),
+            creator="Yukpo Freeform (modif)",
+            profil_icc="fogra39", surimpression_noir=True,
+        )
+        if x1a:
+            pdf_bytes = x1a
+    except Exception as _e_x1a:
+        logger.warning(f"[Freeform/Modifier] post-process échoué : {_e_x1a}")
+
+    fichier_id_nouveau = f"bureau_freeform_{current_user.user_id}_modif_{int(_time.time())}.pdf"
+    (_DATA_DIR / fichier_id_nouveau).write_bytes(pdf_bytes)
+
+    try:
+        await debiter_forfait(
+            current_user.user_id, type_forfait="designerpro_modification",
+            multiplicateur=1.5, module="infographie",
+        )
+    except Exception:
+        pass
+
+    # Maj session avec le NOUVEAU layout (l'user pourra modifier à nouveau)
+    try:
+        await _bs.update_session_apres_generation(
+            user_id=current_user.user_id, pipeline="freeform",
+            fichier_id=fichier_id_nouveau,
+            brief=f"[modif] {demande.instructions[:300]}",
+            layout_json=layout_modifie,
+        )
+    except Exception as _e_sess:
+        logger.debug(f"[Freeform/Modifier/Session] : {_e_sess}")
+
+    return {
+        "ok": True,
+        "fichier_id": fichier_id_nouveau,
+        "modifie_depuis": demande.fichier_id,
+        "nb_pages": len(layout_modifie.get("pages") or []),
+        "taille_octets": len(pdf_bytes),
+        "download_url": f"/api/v1/bureau/documents/{fichier_id_nouveau}",
+        "print_ready": "PDF/X-1a:2001",
+    }

@@ -900,6 +900,52 @@ export const marchesApi = {
   },
 };
 
+// ─── R1-R5 — Session unifiée bureau (modifications incrémentales) ──────────
+//
+// Permet au chat YukpoPro de proposer une "suite logique" sur le dernier
+// document généré ("change la couleur en bleu", "ajoute une page", "supprime
+// la section 3") → route vers /modifier du pipeline mémorisé au lieu de
+// régénérer from scratch via /pro/orchestrer + /generer.
+//
+// Workflow recommandé côté ChatPage :
+//   1. Au chargement : bureauSessionApi.courante()
+//   2. Pour chaque message user : bureauSessionApi.intent(message) → renvoie
+//      {intent, route_modifier?, dernier_fichier_id?}.
+//      Si intent === 'modification' + route_modifier → POST route_modifier
+//      avec {fichier_id: dernier_fichier_id, instructions: message}.
+//      Sinon → flow standard /pro/orchestrer + /pro/rapports/generer etc.
+//   3. Optionnel : reset() pour bouton "Nouvelle conversation".
+//
+// Pipelines supportés : infographe | freeform | designer_pro | rapport |
+// slides | geometric — TOUS visuels composites + documents bureau.
+export const bureauSessionApi = {
+  courante: async () => {
+    const { data } = await http.get("/bureau/session/courante");
+    return data as {
+      session_id: string;
+      pipeline: string | null;
+      dernier_fichier_id: string | null;
+      dernier_brief: string | null;
+      a_dernier_fichier: boolean;
+      derniere_interaction: string | null;
+    };
+  },
+  intent: async (message: string) => {
+    const { data } = await http.post("/bureau/session/intent", { message });
+    return data as {
+      intent: "modification" | "nouvelle_demande" | "ambigu";
+      confiance: number;
+      pipeline: string | null;
+      dernier_fichier_id: string | null;
+      route_modifier?: string | null;
+      recommandation?: string;
+    };
+  },
+  reset: async () => {
+    await http.post("/bureau/session/reset", {});
+  },
+};
+
 export const reunionsApi = {
   transcrireDirect: async (formData: FormData): Promise<{
     transcription: string;

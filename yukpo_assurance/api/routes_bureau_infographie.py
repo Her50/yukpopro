@@ -300,6 +300,28 @@ async def generer_depuis_brief(
         except Exception as _e_audit:
             logger.debug(f"[Infographie/Audit] non bloquant : {_e_audit}")
 
+    # R2 — Mémorise dans la session bureau pour modification incrémentale.
+    # Le prochain message du chat sera classé par /session/intent → si
+    # modification → route vers /bureau/infographie/modifier avec ce fichier_id.
+    try:
+        from modules.bureau import bureau_session as _bs
+        fichier_pour_session = artefacts.get("pdf_id") or artefacts.get("png_id")
+        if fichier_pour_session:
+            await _bs.update_session_apres_generation(
+                user_id=current_user.user_id,
+                pipeline="infographe",
+                fichier_id=fichier_pour_session,
+                brief=demande.brief,
+                layout_json={
+                    "type_gabarit": demande.type_gabarit,
+                    "pays": demande.pays,
+                    "langue": demande.langue,
+                    "specification": _serialiser_spec(spec),
+                },
+            )
+    except Exception as _e_sess:
+        logger.debug(f"[Infographie/Session] update non bloquant : {_e_sess}")
+
     return {
         "gabarit": demande.type_gabarit,
         "titre": spec.titre if spec else "",
@@ -754,6 +776,25 @@ async def modifier_infographie(
             )
     except Exception as _e:
         logger.warning(f"[Infographie/Modifier/Credits] {_e}")
+
+    # R2 — Maj session avec le NOUVEAU fichier (continuité chaînage modifs)
+    try:
+        from modules.bureau import bureau_session as _bs
+        fichier_pour_session = artefacts.get("pdf_id") or artefacts.get("png_id")
+        if fichier_pour_session:
+            await _bs.update_session_apres_generation(
+                user_id=current_user.user_id,
+                pipeline="infographe",
+                fichier_id=fichier_pour_session,
+                brief=f"[modif] {demande.instructions[:300]}",
+                layout_json={
+                    "type_gabarit": gabarit,
+                    "modification_depuis": demande.fichier_id,
+                    "specification": _serialiser_spec(resultat.specification),
+                },
+            )
+    except Exception as _e_sess:
+        logger.debug(f"[Infographie/Modifier/Session] update non bloquant : {_e_sess}")
 
     return {
         **artefacts,

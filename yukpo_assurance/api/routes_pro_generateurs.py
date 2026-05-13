@@ -340,6 +340,26 @@ async def generer_rapport(
             logger.debug(f"[Rapports/Suggestions] non bloquant : {_e_sug}")
             resultat["suggestions"] = []
 
+        # R4 — Persiste en session pour modifications incrémentales
+        try:
+            from modules.bureau import bureau_session as _bs
+            fichier_id_session = resultat.get("fichier_genere") or resultat.get("fichier")
+            if fichier_id_session:
+                await _bs.update_session_apres_generation(
+                    user_id=current_user.user_id, pipeline="rapport",
+                    fichier_id=fichier_id_session, brief=req.sujet,
+                    layout_json={
+                        "type_rapport": req.type_rapport,
+                        "mode": req.mode,
+                        "format_sortie": getattr(req, "format_sortie", "docx"),
+                        "tokens_max_output": getattr(req, "tokens_max_output", None),
+                        "contexte": (getattr(req, "contexte", "") or "")[:1500],
+                        "structure_externe": getattr(req, "structure_externe", None),
+                    },
+                )
+        except Exception as _e_sess:
+            logger.debug(f"[Rapports/Session] update non bloquant : {_e_sess}")
+
         return resultat
     except HTTPException:
         raise
@@ -468,6 +488,24 @@ async def generer_slides(
         except Exception as _e_sug:
             logger.debug(f"[Slides/Suggestions] non bloquant : {_e_sug}")
             resultat["suggestions"] = []
+
+        # R4 — Persiste en session pour modifications incrémentales
+        try:
+            from modules.bureau import bureau_session as _bs
+            fichier_id_session = resultat.get("fichier_genere") or resultat.get("fichier")
+            if fichier_id_session:
+                await _bs.update_session_apres_generation(
+                    user_id=current_user.user_id, pipeline="slides",
+                    fichier_id=fichier_id_session, brief=req.sujet,
+                    layout_json={
+                        "type_pres": req.type_pres,
+                        "mode": req.mode,
+                        "langue": "fr",
+                        "structure_externe": getattr(req, "structure_externe", None),
+                    },
+                )
+        except Exception as _e_sess:
+            logger.debug(f"[Slides/Session] update non bloquant : {_e_sess}")
 
         return resultat
     except HTTPException:
@@ -3621,3 +3659,102 @@ async def orchestrer_avec_fichiers(
             ]
 
     return resultat
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# R4 — Modifications incrémentales (rapports + slides)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class DemandeModifierDoc(BaseModel):
+    """Body partagé pour /rapports/modifier + /slides/modifier."""
+    fichier_id: str = Field(..., min_length=5,
+        description="ID du fichier précédent (depuis BureauSessionDB)")
+    instructions: str = Field(..., min_length=3, max_length=4000,
+        description="Instructions de modification en langage naturel")
+
+
+@router.post("/rapports/modifier", summary="R4 — Modifier un rapport DOCX existant via instructions")
+async def modifier_rapport(
+    demande: DemandeModifierDoc,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Modifie un rapport existant SANS regénération complète. Récupère le brief
+    + structure précédente depuis BureauSessionDB, augmente le brief avec les
+    instructions de modification, régénère via le même pipeline (ReportWriterPro).
+
+    Use cases :
+      • "Ajoute une section 'Perspectives 2027' à la fin"
+      • "Reformule l'introduction en ton plus formel"
+      • "Supprime la section 'Risques' qui n'est plus pertinente"
+      • "Change le ton général : plus académique"
+    """
+    from modules.bureau import bureau_session as _bs
+    sess = await _bs.get_or_create_session(current_user.user_id)
+    if not sess.dernier_layout_json or sess.pipeline != "rapport":
+        raise HTTPException(404,
+            "Pas de rapport précédent en session (TTL 30min expiré OU dernier "
+            "doc n'était pas un rapport). Refais un /rapports/generer.")
+
+    meta_precedent = sess.dernier_layout_json
+    # Augmente le brief avec les instructions de modification
+    brief_augmente = (
+        f"{sess.dernier_brief or ''}\n\n"
+        f"═══ INSTRUCTIONS DE MODIFICATION (sur le rapport précédent) ═══\n"
+        f"{demande.instructions}\n\n"
+        f"⚠ NE REPARS PAS DE ZÉRO : conserve la structure existante (mêmes "
+        f"sections sauf demande explicite de suppression/ajout) et applique "
+        f"UNIQUEMENT les modifications demandées."
+    )
+    # Réutilise /rapports/generer avec brief augmenté
+    req = GenererRapportRequest(
+        sujet=brief_augmente,
+        type_rapport=meta_precedent.get("type_rapport", "rapport_analyse"),
+        mode=meta_precedent.get("mode", "standard"),
+        format_sortie=meta_precedent.get("format_sortie", "docx"),
+        contexte=meta_precedent.get("contexte", ""),
+        tokens_max_output=meta_precedent.get("tokens_max_output"),
+        structure_externe=meta_precedent.get("structure_externe"),
+    )
+    res = await generer_rapport(req, current_user, db)
+    # La session est déjà mise à jour par generer_rapport en aval
+    res["modifie_depuis"] = demande.fichier_id
+    return res
+
+
+@router.post("/slides/modifier", summary="R4 — Modifier une présentation PPTX existante via instructions")
+async def modifier_slides(
+    demande: DemandeModifierDoc,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Modifie une présentation existante via instructions ("ajoute une slide
+    de conclusion", "change le thème en finance", "supprime les 2 dernières
+    slides", "fais-la plus courte / plus longue").
+    """
+    from modules.bureau import bureau_session as _bs
+    sess = await _bs.get_or_create_session(current_user.user_id)
+    if not sess.dernier_layout_json or sess.pipeline != "slides":
+        raise HTTPException(404,
+            "Pas de présentation précédente en session (TTL 30min expiré OU "
+            "dernier doc n'était pas une présentation). Refais un /slides/generer.")
+
+    meta_precedent = sess.dernier_layout_json
+    brief_augmente = (
+        f"{sess.dernier_brief or ''}\n\n"
+        f"═══ INSTRUCTIONS DE MODIFICATION (sur la présentation précédente) ═══\n"
+        f"{demande.instructions}\n\n"
+        f"⚠ NE REPARS PAS DE ZÉRO : conserve les slides existantes et applique "
+        f"uniquement les modifications demandées (ajout/suppression/édition ciblée)."
+    )
+    req = GenererSlidesRequest(
+        sujet=brief_augmente,
+        type_pres=meta_precedent.get("type_pres", "rapport_direction"),
+        mode=meta_precedent.get("mode", "detaille"),
+        structure_externe=meta_precedent.get("structure_externe"),
+    )
+    res = await generer_slides(req, current_user, db)
+    res["modifie_depuis"] = demande.fichier_id
+    return res

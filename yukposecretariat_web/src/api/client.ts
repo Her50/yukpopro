@@ -221,6 +221,27 @@ export const bureauAnalyticsAPI = {
   quality:   (last_minutes = 60) => httpRoot.get('/bureau-analytics/quality', { params: { last_minutes } }),
 }
 
+// ─── R1-R5 — Session unifiée bureau (modifications incrémentales) ──────────
+//
+// Permet au chat de proposer une "suite logique" sur le dernier document
+// généré : "change la couleur en bleu" → /bureau/X/modifier au lieu de
+// /bureau/X/generer (régen complet). Backend mémorise dernier_fichier_id +
+// pipeline + layout_json par user (TTL 30min).
+//
+// Workflow recommandé côté chat :
+//   1. Au chargement : sessionCourante() pour savoir s'il y a un dernier doc
+//   2. Pour chaque message user : sessionIntent(message) → renvoie
+//      {intent: 'modification'|'nouvelle_demande', route_modifier?}.
+//      Si modification → appel direct au /modifier du pipeline mémorisé.
+//      Sinon → flow standard /generer.
+//   3. Optionnel : sessionReset() pour bouton "Nouvelle conversation".
+export const bureauSessionAPI = {
+  courante: () => api.get('/session/courante'),
+  intent:   (message: string) =>
+    api.post('/session/intent', { message }),
+  reset:    () => api.post('/session/reset', {}),
+}
+
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
 // `api` a baseURL=/api/v1/bureau (normalisé). On appelle donc /chat/message
 // pour atteindre /api/v1/bureau/chat/message côté backend.
