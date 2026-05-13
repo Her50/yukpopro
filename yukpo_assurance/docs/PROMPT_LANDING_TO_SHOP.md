@@ -1,0 +1,556 @@
+# 🚀 Prompt de démarrage — Landing Pages production-ready → YukpoShop e-commerce
+
+> **Comment utiliser ce document** : copie l'intégralité de la section "PROMPT À COLLER" ci-dessous dans une nouvelle session Claude Code (ou Claude.ai). L'IA aura tout le contexte pour démarrer immédiatement sans poser de questions de cadrage.
+
+---
+
+## ⚡ PROMPT À COLLER
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+PROJET : Landing Pages production-ready (Phases A→C) + YukpoShop e-commerce (Phase D)
+PRODUIT PARENT : Yukpo (YukpoPro + YukpoSecrétariat)
+RÉPERTOIRE : c:\Users\23767\digitalisation_assurance
+═══════════════════════════════════════════════════════════════════════════════
+
+CONTEXTE PRODUIT (à lire AVANT de coder)
+────────────────────────────────────────
+
+Yukpo est une plateforme B2B SaaS pour les pros africains francophones :
+  • YukpoPro       → outils marketing/comptable/RH (yukpopro_web/)
+  • YukpoSecrétariat → secrétariat IA (yukposecretariat_web/)
+  • Backend partagé  → yukpo_assurance/ (Fly.io, FastAPI Python, Postgres,
+                       Redis, Celery, Anthropic Claude + OpenAI GPT,
+                       fal.ai + Replicate pour images/vidéos)
+
+Cible géographique : Cameroun, Côte d'Ivoire, Sénégal, Burkina, Mali +
+                     diaspora Afrique francophone.
+Devises principales : XAF (FCFA Afrique centrale), XOF (FCFA Ouest), MAD, NGN.
+Paiements opérationnels : Stripe, Flutterwave, Orange Money, MTN MoMo,
+                         Wave (Sénégal), Campay.
+SMS/WhatsApp : Twilio (déjà branché).
+i18n : 17 langues (FR/EN/AR/PT/ES/DE/IT/ZH/JA/RU/HI/SW/HA/WO/LN/AM/TR)
+       — système react-i18next déjà en place dans les 2 frontends.
+
+LECTURE OBLIGATOIRE AVANT DE COMMENCER
+──────────────────────────────────────
+
+1. yukpo_assurance/docs/INFRA_SCALING.md
+   → infra Fly + R2 + multi-région + Celery routing (déjà en place)
+
+2. yukpo_assurance/modules/pro/landing_page_builder.py
+   → état actuel du module Landing (génération HTML+Tailwind statique)
+
+3. yukpo_assurance/api/routes_pro_generateurs.py
+   → endpoints /pro/landing-page/generer, /pro/slides-web/generer
+
+4. yukpo_assurance/core/storage.py
+   → abstraction R2/local prête (à utiliser pour les nouveaux artefacts)
+
+5. yukpopro_web/src/pages/ChatPage.tsx (lignes 195-260)
+   → intent detection actuel pour landing/slides-web/video
+
+6. yukposecretariat_web/src/components/ChatUnifieSec.tsx (lignes 290-360)
+   → idem côté Sec
+
+7. yukpo_assurance/modules/paiement/v2/providers/
+   → Stripe, Flutterwave, Orange Money, MTN MoMo opérationnels
+
+8. yukpo_assurance/core/notifications.py
+   → WhatsApp Twilio fonctionnel (envoyer_whatsapp)
+
+9. yukpopro_web/src/i18n/ et yukposecretariat_web/src/i18n/
+   → fichiers de traduction 17 langues, react-i18next configuré
+
+10. packages/admin-dashboard/src/AdminDashboard.tsx
+    → dashboard admin cross-app partagé (pattern composant partagé)
+
+CONTRAINTES TECHNIQUES NON-NÉGOCIABLES
+──────────────────────────────────────
+
+A. Responsive Progressive Web App (PWA)
+   • TOUTES les nouvelles UIs (admin marchand, storefront client) doivent
+     être responsive mobile-first (Tailwind breakpoints sm/md/lg/xl).
+   • PWA manifest + service worker → installable iOS/Android.
+   • Capacité offline minimum : voir produits, brouillon panier, factures
+     téléchargées récemment.
+   • Touch-friendly (boutons 44px min, swipe gestures sur produits/photos).
+   • Configuration PWA déjà active sur YukpoPro + Sec (vite-plugin-pwa).
+     Étendre la précache list aux nouvelles routes.
+
+B. Internationalisation i18n
+   • Système react-i18next DÉJÀ opérationnel sur YukpoPro + Sec.
+   • Fichiers : yukpopro_web/src/i18n/*.json (et idem Sec).
+   • CHAQUE nouveau texte UI passe par t('clé.sous_clé', 'fallback FR').
+   • Ajouter les traductions au minimum FR + EN + AR (RTL) + WO (Wolof
+     Sénégal) + DOUALA (sabir camerounais commercial).
+   • Storefront public client → détection langue navigateur + override
+     manuel + persistance localStorage.
+
+C. Backend stack
+   • Python 3.11 + FastAPI async + SQLAlchemy async (Postgres).
+   • Migrations Alembic (yukpo_assurance/migrations/).
+   • Celery + Redis pour les tâches longues (génération sites,
+     scrapping market, batch import produits).
+   • Logging structuré avec logger.info/warning/error.
+   • Tests pytest dans tests/ (pas obligatoires sprint 1, mais bienvenus).
+
+D. Frontend stack
+   • React 18 + TypeScript + Vite.
+   • Tailwind CSS (config existante).
+   • TanStack Query pour data fetching.
+   • Zustand pour state global (déjà utilisé pour 10 modules).
+   • Routes via react-router-dom v6.
+   • Composants partagés réutilisables → packages/ si pertinent
+     (pattern admin-dashboard à suivre).
+
+E. Pas de breaking changes
+   • Tout endpoint existant continue de marcher comme avant.
+   • Toute modification de table existante = migration Alembic ascendante
+     uniquement, pas de drop column.
+
+ROADMAP — 4 PHASES SÉQUENTIELLES
+═════════════════════════════════
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE A — Landing pages production-ready et partageables
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJECTIF : Transformer la landing actuelle (HTML privé téléchargeable) en
+vrai site web publiable, partageable par URL, avec formulaire de contact
+fonctionnel et footer personnalisé.
+
+LIVRABLES
+─────────
+
+A1. Bouton "Publier" dans le chat YukpoPro + Sec après génération landing
+    • Apparaît automatiquement à la fin du message de succès.
+    • Click → POST /api/v1/pro/landing-page/publier {fichier_id, slug_souhaite}
+    • Backend déploie vers Netlify via API officielle Netlify (créer un
+      site avec sous-domaine custom) :
+        → Le slug devient mashop-douala.yukpomnang.com OU netlify.app
+        → Domaine yukpomnang.com déjà géré, ajouter wildcard *.yukpomnang.com
+          en DNS pointant vers Netlify
+    • Retourne l'URL publique partageable + QR code généré côté backend.
+    • Stocker en DB : table landing_publications
+      (user_id, slug, netlify_site_id, url_public, html_fichier_id,
+       cree_le, derniere_modif).
+
+A2. Footer personnalisé "Powered by Yukpo" (optionnel selon plan)
+    • Plan Pro : footer modifiable (mentions légales du cabinet user).
+    • Plan Free : "Site généré par YukpoPro · yukpomnang.com" obligatoire.
+    • Plan Business : footer 100% custom, branding masqué.
+
+A3. Formulaire de contact qui POST → backend Yukpo (non plus mailto)
+    • Côté HTML généré : <form action="/api/v1/landing-leads/{slug}">
+    • Backend : table landing_leads (slug, nom, email, telephone, message,
+       source, created_at, statut={non_lu, lu, contacté, converti, perdu}).
+    • Notif WhatsApp/email au marchand à chaque nouveau lead (Twilio +
+       SendGrid déjà branchés).
+    • Anti-spam : rate limit 5 leads/IP/heure + honeypot field.
+
+A4. Page "Mes Leads" dans YukpoPro
+    • Liste tous les leads par landing publiée.
+    • Filtres : statut, période, slug.
+    • Actions : marquer contacté, exporter CSV, envoyer WhatsApp/email
+       direct depuis l'UI (templates de réponse).
+    • Stats minimales : taux de conversion, valeur estimée.
+
+CRITÈRES DE SUCCÈS PHASE A
+──────────────────────────
+✓ Une landing générée peut être publiée en 1 clic
+✓ URL publique partageable par WhatsApp/LinkedIn fonctionne (200 OK)
+✓ Un visiteur peut soumettre le formulaire de contact
+✓ Le marchand reçoit notification WhatsApp + voit le lead dans son YukpoPro
+✓ Mobile responsive PWA (test sur iPhone Safari + Android Chrome)
+✓ i18n FR/EN minimum, autres langues actives via toggle
+
+ESTIMATION : 3-5 jours dev.
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE B — Sites vitrines intelligents : analytics + tracking pub
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJECTIF : Transformer les landings publiées en outils marketing pro avec
+analytics intégrés (Plausible/Umami self-hosted ou cloud) + slots pour
+Facebook Pixel, Google Analytics 4, TikTok Pixel, Snap Pixel.
+
+LIVRABLES
+─────────
+
+B1. Plausible Analytics self-hosted OU intégration Plausible cloud
+    • Recommandé self-hosted (Fly app séparée, ~$10/mois) → 0 abonnement,
+       respect RGPD, données sur ton infra.
+    • Script Plausible injecté dans <head> du HTML généré.
+    • Dashboard analytics dans YukpoPro → "Stats" sous chaque landing.
+    • Métriques : visites, source trafic, pays, device, taux rebond,
+       parcours utilisateur, conversions formulaire.
+
+B2. Slots Pixel/Tracking custom par utilisateur
+    • Dans Settings YukpoPro → "Tracking & Analytics" :
+       - Champ Facebook Pixel ID (ex 1234567890123)
+       - Champ Google Analytics 4 Measurement ID (G-XXXXXXX)
+       - Champ TikTok Pixel ID
+       - Champ Snap Pixel ID
+       - Champ Microsoft Clarity ID (heatmaps)
+    • Backend injecte les scripts dans <head> lors de publication landing.
+    • Évents auto-tracked :
+       - PageView (toutes pages)
+       - Lead (soumission formulaire contact)
+       - InitiateCheckout (futur Phase D)
+       - Purchase (futur Phase D)
+
+B3. Intégration newsletter (Brevo / Mailchimp)
+    • Champ API key dans Settings.
+    • Bouton "S'inscrire à la newsletter" sur les landings → ajoute
+       contact dans liste Brevo/Mailchimp via API.
+
+B4. Email automation simple
+    • Templates email : confirmation lead, follow-up J+3, follow-up J+7.
+    • Configurable par marchand dans YukpoPro.
+    • Envoyé via SendGrid (déjà branché).
+
+CRITÈRES DE SUCCÈS PHASE B
+──────────────────────────
+✓ Plausible Analytics tracke les visites de toutes les landings
+✓ Un marchand colle son FB Pixel ID dans Settings → tracking actif
+✓ Une campagne Facebook Ads pointant sur la landing remonte les conversions
+✓ Heatmaps Clarity visibles si configuré
+
+ESTIMATION : 4-6 jours dev.
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE C — Mini-sites multi-pages (vitrine pro 5 pages)
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJECTIF : Passer du single landing-page au mini-site multi-pages
+(Accueil, Services, Équipe, Blog, Contact). Navigation interne, SEO multi-
+pages, sitemap.xml auto.
+
+LIVRABLES
+─────────
+
+C1. Schema "Site" (multi-page) en plus de "Landing" (single page)
+    • Table sites (user_id, slug, theme, langue_principale, langues_actives,
+       cree_le, publie_le)
+    • Table pages (site_id, slug, type, titre, contenu_json, ordre)
+    • Types de pages : home, services, equipe, blog_index, blog_article,
+       contact, mentions_legales, cgv, confidentialite
+
+C2. Génération multi-page via chat
+    • "génère un site 5 pages pour mon cabinet d'expertise comptable Douala"
+    • LLM compose la structure : Accueil + Services + Équipe + Blog + Contact
+    • Chaque page a son hero image IA + sections + CTA
+    • Nav top fixe + footer commun + sitemap.xml + robots.txt auto
+
+C3. Modification incrémentale par page
+    • "ajoute une page Équipe avec 4 collaborateurs simulés crédibles"
+    • "remplace le hero de la page Services par une photo bureau Douala"
+    • Backend récupère le site depuis BureauSessionDB + modifie la page
+       concernée seulement (économie LLM + cohérence).
+
+C4. Multi-langue par page
+    • Chaque page peut être traduite en N langues actives.
+    • URL : /fr/services, /en/services, /ar/الخدمات.
+    • Détection navigateur + override toggle visible.
+    • Trad auto via Sonnet (déjà configuré dans modules/translate/).
+
+C5. Blog AI-powered
+    • "écris un article de blog sur la fiscalité OHADA 2026 pour mon site"
+    • LLM rédige, génère hero image, publie sur le site automatiquement
+    • SEO meta tags optimisés
+    • Schedule publication (article publié dans 3 jours)
+
+CRITÈRES DE SUCCÈS PHASE C
+──────────────────────────
+✓ Un site 5 pages est généré et publié en < 10 min
+✓ Sitemap.xml indexable par Google
+✓ Navigation interne fonctionnelle (mobile + desktop)
+✓ Au moins 2 langues actives sur le même site
+✓ Article de blog généré + publié via chat
+
+ESTIMATION : 2-3 semaines dev.
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE D — YukpoShop : e-commerce avec connexion sociale + import IA
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠ PRÉ-REQUIS : Phases A, B, C OPÉRATIONNELLES en prod et TESTÉES par de vrais
+   marchands. Ne PAS attaquer la Phase D avant d'avoir validé que les phases
+   précédentes apportent une vraie valeur à au moins 20-50 marchands payants.
+
+OBJECTIF : Boutique e-commerce complète, mais avec 4 DIFFÉRENCIATEURS MAJEURS
+qui n'existent NULLE PART ailleurs en 2026 sur le marché africain francophone :
+
+  1. CONNEXION SOCIALE INTELLIGENTE (Facebook, Instagram, WhatsApp Business,
+     TikTok Shop) : publication automatique des produits, gestion des
+     commandes reçues via DM/comments WhatsApp/Insta directement depuis
+     YukpoPro, virality engineering (templates de partage, reels auto).
+
+  2. IMPORT IA MAGIQUE : marchand upload 1-N photos d'un produit → l'app
+     génère AUTOMATIQUEMENT le produit complet (titre vendeur SEO, description
+     marketing, prix suggéré via scraping concurrence locale, catégorie,
+     tags, photos retouchées, variantes détectées).
+
+  3. ANALYTICS PUB INTÉGRÉES : tableau de bord unifié des performances
+     pub Facebook + Insta + TikTok + Google Ads + Snap → ROI par produit,
+     cible client lookalike, recommandations campagnes auto.
+
+  4. CRM CLIENT AVEC SCORING IA : profil 360° de chaque client (acheté,
+     visité, abandonné panier, vu produit, commenté), prédiction churn,
+     suggestion produit personnalisée, automation marketing (relance panier
+     abandonné WhatsApp, anniversaire avec code promo).
+
+LIVRABLES PHASE D — SOUS-PHASES
+────────────────────────────────
+
+D1. Catalogue produits + admin (2 semaines)
+
+   • Schema DB :
+       table shop_products (user_id, sku, titre, slug, description_courte,
+        description_longue, prix_unit_xaf, prix_unit_devise, devise, tva_pct,
+        stock, stock_alerte, photos_urls[], categorie, tags[], variantes_json,
+        seo_titre, seo_desc, seo_keywords[], statut, cree_le, modif_le)
+       table shop_categories (user_id, nom, slug, parent_id, ordre)
+       table shop_variantes (product_id, nom, valeur, prix_diff_xaf, stock)
+
+   • Onglet "Ma Boutique" dans YukpoPro + Sec (composant partagé dans
+     packages/shop-dashboard/ comme admin-dashboard).
+     Sous-onglets : Vue d'ensemble, Produits, Commandes, Clients,
+     Promotions, Paiements, Logistique, Stats, Réglages.
+
+   • CRUD produits via UI graphique ET via chat IA.
+
+D2. Import IA MAGIQUE (2 semaines) — LE GROS DIFFÉRENCIATEUR
+
+   • Endpoint POST /api/v1/shop/produits/import-ia (multipart)
+     Body : N photos (jusqu'à 10) + brief libre optionnel + catégorie hint.
+
+   • Pipeline :
+       a. Réception 1-10 photos produit
+       b. LLM Vision (Claude Sonnet ou GPT-4o) analyse chaque photo :
+          - Détecte objet principal, couleur dominante, matière
+          - Identifie variantes (tailles, couleurs visibles)
+          - Suggère catégorie (vêtements / maroquinerie / cosmétique /
+            électronique / artisanat / alimentaire)
+       c. LLM Sonnet rédige :
+          - Titre vendeur SEO 60 chars
+          - Description marketing 200-400 mots
+          - 10-15 tags SEO + hashtags réseaux sociaux
+          - Suggestion prix via scraping (Jumia CM/CI, Amazon, Alibaba)
+            adapté au pouvoir d'achat local
+          - Variantes structurées (tailles 36-46, couleurs disponibles)
+       d. Retouche photos auto (fond uni blanc/transparent via Flux Fill,
+          recadrage, color correction)
+       e. Création produit complet en base + photos uploadées vers R2
+
+   • UX cible : "upload + 1 clic → produit prêt à vendre". Aucune saisie
+     manuelle obligatoire. Le marchand peut ÉDITER après si besoin.
+
+   • Bulk : import de 20 photos = 20 produits créés en 5-10 min.
+
+D3. Storefront public client (2 semaines)
+
+   • Nouveau frontend React PWA : packages/shop-storefront/ OU app dédiée
+     yukposhop_web/.
+   • URL : <slug>.yukpomnang.com (ex: maroquinerie-douala.yukpomnang.com)
+   • Pages :
+       - Accueil (hero brand + featured products + categories)
+       - Catalogue avec filtres dynamiques
+       - Page produit (gallery, variantes, ajout panier, avis, partage)
+       - Panier (persistance localStorage + DB pour users connectés)
+       - Checkout (adresse, livraison, paiement multi-provider)
+       - Compte client (commandes, suivi, retours, favoris)
+       - Recherche full-text
+       - Wishlist
+       - Programme fidélité (points, badges)
+   • PWA installable (manifest + service worker offline cart)
+   • Multi-langue automatique (FR/EN/AR/WO/DOUALA min)
+   • Mobile-first responsive
+   • SEO : sitemap produits dynamique, schema.org Product/Offer/Review
+
+D4. Paiement multi-provider (1 semaine)
+
+   • Briques EXISTANTES à réutiliser :
+       - modules/paiement/v2/providers/stripe_provider.py
+       - modules/paiement/v2/providers/flutterwave.py
+       - modules/paiement/v2/providers/orange_money.py
+       - modules/paiement/v2/providers/mtn_momo.py
+   • Sélection provider par client final (en fonction du pays détecté).
+   • Webhooks de confirmation → maj statut commande automatique.
+   • Calcul TVA OHADA / CIMA automatique (RAG fiscal CI/CM déjà branché).
+   • Facture PDF générée auto post-paiement (briques infographe_pro
+     existantes).
+
+D5. Notifications WhatsApp + Email automatisées (3 jours)
+
+   • Marchand reçoit notif WhatsApp à chaque nouvelle commande.
+   • Client reçoit confirmation email + tracking WhatsApp (Twilio existe).
+   • Templates par étape : commande créée, payée, expédiée, livrée.
+   • Templates personnalisables par marchand dans Settings.
+
+D6. Connexion sociale INTELLIGENTE (3 semaines) — DIFFÉRENCIATEUR
+
+   • Facebook/Instagram Catalog Sync
+     - Marchand connecte son compte Meta Business via OAuth
+     - YukpoShop synchronise les produits vers Facebook Shops + Instagram
+       Shopping automatiquement (Meta Graph API)
+     - Posts auto-générés sur la page Facebook à chaque nouveau produit
+     - Stories Insta auto (Recraft v3 SVG visuels promo)
+     - Tags produits dans les photos
+   • WhatsApp Business
+     - Webhook réception messages WhatsApp → arrivent dans chat YukpoPro
+       du marchand
+     - Le marchand répond depuis YukpoPro, message envoyé via WhatsApp
+       Business API
+     - Détection commande dans le message ("je veux le sac à 35000")
+       → suggestion de créer commande automatiquement
+     - Liens produits cliquables WhatsApp (preview riche)
+   • TikTok Shop integration (si disponible API marché Cameroun/CI)
+   • Snap Shopping Lens (futur)
+   • Pinterest Business Pins shoppables
+
+D7. Analytics pub unifiées (2 semaines) — DIFFÉRENCIATEUR
+
+   • Onglet "Pubs & ROI" dans Ma Boutique :
+       - Connexion OAuth Facebook Ads API, Google Ads API, TikTok Ads,
+         Snapchat Ads
+       - Récupération automatique des dépenses pub + impressions + clics
+       - Croisement avec les commandes YukpoShop (UTM, fbclid, gclid)
+       - Calcul ROAS (Return On Ad Spend) par campagne, par produit
+       - Recommandations IA : "augmenter budget campagne X (ROAS 4.2)",
+         "couper campagne Y (ROAS 0.3)"
+       - Audience lookalike : suggestion de cibles à partir des meilleurs
+         clients
+   • Dashboard cross-canal (vue agrégée toutes les sources pub)
+
+D8. CRM client avec scoring IA (2 semaines) — DIFFÉRENCIATEUR
+
+   • Profil 360° par client final :
+       - Historique commandes
+       - Pages visitées (via Plausible)
+       - Produits vus, ajoutés panier, abandonnés
+       - Comments / DM reçus
+       - Source d'acquisition (campagne, organic, referral)
+   • Scoring IA :
+       - Probabilité de churn (% chance de ne plus acheter)
+       - Lifetime value prédit (LTV)
+       - Segment : VIP, récurrent, dormant, en risque, new
+   • Automation marketing :
+       - Relance panier abandonné WhatsApp J+1 + J+3 + J+7
+       - Email anniversaire avec code promo
+       - SMS rupture-stock-bientôt sur produit favorisé
+       - Cross-sell automatique (suggestions LLM basées sur historique)
+
+D9. Logistique & livraison (1 semaine)
+
+   • Zones de livraison configurables par marchand (par ville/quartier)
+   • Tarifs livraison par zone + délai estimé
+   • Transporteurs partenaires (interfaces) :
+       - DHL Cameroun / Côte d'Ivoire
+       - Speedaf
+       - Bolloré Africa
+       - Transporteurs locaux (intégration WhatsApp manuelle minimum)
+   • Génération étiquette PDF + QR de suivi
+
+D10. Mobile companion app (optionnel, 3-4 semaines)
+   • App native marchand iOS + Android (React Native expo)
+   • Gérer produits, commandes, scan code-barres pour réapprovisionnement
+   • Notifications push à chaque commande
+   • Mode caisse physique (POS mobile)
+
+CRITÈRES DE SUCCÈS PHASE D
+──────────────────────────
+✓ Un marchand peut uploader 10 photos → 10 produits prêts à vendre en 5 min
+✓ Une commande WhatsApp ("je veux le sac à 35000") crée auto un panier
+✓ Un client paye via Orange Money → commande validée → marchand notifié
+   WhatsApp → facture PDF générée → tracking expédition
+✓ Catalogue produit Facebook Shops + Instagram Shopping synchronisé auto
+✓ Dashboard ROAS pub unifié remonte les conversions cross-canal
+✓ CRM client avec scoring churn + suggestion lookalike Facebook
+✓ PWA installable mobile, fonctionne offline (panier brouillon)
+✓ Multi-langue FR/EN/AR/WO/DOUALA opérationnel
+
+ESTIMATION : 12-16 semaines dev focus (3-4 mois).
+
+═══════════════════════════════════════════════════════════════════════════════
+PRIORISATION SÉQUENTIELLE STRICTE
+═══════════════════════════════════════════════════════════════════════════════
+
+NE PAS commencer la Phase D avant que A, B, C soient :
+  • Déployées en production
+  • Validées par au moins 20 utilisateurs réels payants
+  • Sans bug bloquant remonté pendant 2 semaines consécutives
+
+Ordre :
+
+  Sprint 1-2  : Phase A (publication + leads + footer)        [3-5 jours]
+  Sprint 3-4  : Phase B (analytics + pixel + newsletter)      [4-6 jours]
+  Sprint 5-7  : Phase C (multi-pages + multi-langue + blog)   [2-3 semaines]
+  PAUSE     : Validation marché 4-8 semaines avec early adopters
+  Sprint 8+ : Phase D (YukpoShop complet)                     [3-4 mois]
+
+QUALITÉ — BARÈME NON-NÉGOCIABLE
+─────────────────────────────────
+
+À chaque sprint, livrer :
+  ✓ Code commité avec commits sémantiques (feat:/fix:/refactor:/chore:)
+  ✓ Migrations Alembic ascendantes uniquement
+  ✓ Endpoint backend documenté dans le docstring de la route
+  ✓ Composant frontend i18n-ready (toutes les chaînes via t('key'))
+  ✓ Responsive testé mobile + desktop (Chrome DevTools 375px et 1440px min)
+  ✓ Au moins 1 traduction FR + EN par défaut, autres langues activables
+  ✓ Migration auto si breaking change DB (pas de drop column, juste add/rename)
+  ✓ Logs structurés (logger.info pour succès, .warning pour anomalies)
+  ✓ Erreurs HTTP propres (4xx pour client, 5xx pour serveur, jamais 500 silencieux)
+  ✓ Coût LLM/IA débité via debiter_llm() (existant) — pas d'appel "gratuit"
+
+DÉMARRAGE — Premier commit attendu
+─────────────────────────────────
+
+Avant de coder, l'agent doit :
+  1. Lire les 10 fichiers de contexte listés ci-dessus
+  2. Confirmer la compréhension en 5-8 bullets dans sa première réponse
+  3. Proposer un plan détaillé du sprint 1 (Phase A1-A4) avec :
+     - Liste exacte des fichiers à créer/modifier
+     - Schema migration Alembic (DDL)
+     - Estimations heure par tâche
+  4. Attendre validation user AVANT premier commit
+  5. Une fois validé : commencer Phase A1 (bouton Publier + Netlify deploy)
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DU PROMPT — colle ce bloc dans ta nouvelle session
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## 📋 Comment l'utiliser
+
+1. **Ouvre une nouvelle session Claude Code** dans le même répertoire
+   `c:\Users\23767\digitalisation_assurance`
+2. **Copie tout le bloc "PROMPT À COLLER"** ci-dessus (entre les lignes
+   `═══════════`)
+3. **Colle dans le chat** comme premier message
+4. **Réponds aux confirmations** (étapes 1-5 du démarrage)
+5. **Laisse l'agent travailler par sprints validés**
+
+## ✅ Checklist contexte récupéré automatiquement par le prompt
+
+Le prompt fait référence à 10 fichiers de contexte que l'agent va lire :
+
+- [x] `yukpo_assurance/docs/INFRA_SCALING.md` (infra Fly + R2 prête)
+- [x] `yukpo_assurance/modules/pro/landing_page_builder.py`
+- [x] `yukpo_assurance/api/routes_pro_generateurs.py`
+- [x] `yukpo_assurance/core/storage.py` (R2/local prêt)
+- [x] `yukpopro_web/src/pages/ChatPage.tsx` (intent detection actuel)
+- [x] `yukposecretariat_web/src/components/ChatUnifieSec.tsx`
+- [x] `yukpo_assurance/modules/paiement/v2/providers/` (4 providers prod)
+- [x] `yukpo_assurance/core/notifications.py` (WhatsApp Twilio)
+- [x] `yukpopro_web/src/i18n/` (17 langues react-i18next)
+- [x] `packages/admin-dashboard/src/AdminDashboard.tsx` (pattern composant
+       partagé)
+
+L'agent aura tout pour démarrer sans poser de questions de cadrage. Il pourra
+poser des questions techniques précises pendant l'implémentation, mais le
+**quoi/pourquoi** est déjà cadré.
