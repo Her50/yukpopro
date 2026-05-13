@@ -3015,9 +3015,12 @@ class DemandeGeometricPlacement(BaseModel):
         description="sonnet (équilibre) | opus (complexité) | haiku (rapide)")
     dpi: int = Field(default=300, ge=72, le=600)
     debug_grid: bool = Field(default=False)
-    revision_visuelle: bool = Field(default=False,
-        description="Si True : boucle auto-critique LLM Vision (audit du rendu + "
-                    "révision du PlacementPlan si défauts détectés, max 2 itérations).")
+    revision_visuelle: bool = Field(default=True,
+        description="DÉFAUT True : boucle auto-critique LLM Vision (audit du "
+                    "rendu sur 5 axes : conformité brief + couleurs + disposition "
+                    "+ complexité géométrique + détails techniques) + révision "
+                    "du PlacementPlan si défauts détectés, max 2 itérations. "
+                    "False = skip audit (économise 1-2 appels LLM par visuel).")
     max_iterations_revision: int = Field(default=2, ge=1, le=4)
     score_seuil_ok: float = Field(default=7.5, ge=5.0, le=10.0,
         description="Score qualité ≥ ce seuil → arrêt révision (évite gains marginaux coûteux)")

@@ -40,10 +40,16 @@ class DemandeBrief(BaseModel):
     brief: str = Field(..., min_length=10, description="Description libre du besoin en langage naturel")
     type_gabarit: str = Field(..., description="Type de gabarit (ex: flyer_a5, carte_visite, diplome)")
     pays: str = Field(default="CM")
+    langue: str = Field(default="fr",
+        description="Code ISO langue cible des textes sur le visuel (fr/en/es/pt/de/ar/zh/sw/ha/wo/ln/am/tr)")
     profil: Optional[ProfilInfographie] = None
     export_cmyk: bool = Field(default=True, description="Générer aussi une version PDF CMJN (print offset)")
     export_svg: bool = Field(default=True, description="Générer aussi un export SVG vectoriel")
     dpi_preview: int = Field(default=300, ge=72, le=600, description="DPI du rendu PNG principal")
+    auditer_qualite: bool = Field(default=True,
+        description="DÉFAUT True : audit qualité LLM Vision du PNG (note /10 + suggestions). "
+                    "Pas de re-render auto pour ce pipeline catalog — feedback à l'utilisateur "
+                    "qui peut décider de relancer une variante. False = skip (économie 1 appel LLM).")
 
 
 class DemandeManuelle(BaseModel):
@@ -261,6 +267,27 @@ async def generer_depuis_brief(
     except Exception as _e_sug:
         logger.debug(f"[Infographie/Suggestions] non bloquant : {_e_sug}")
 
+    # ── Audit qualité LLM Vision (opt-in, défaut True) ────────────────────
+    audit_qualite: Optional[dict] = None
+    if demande.auditer_qualite and (resultat.png_bytes or resultat.png_preview_bytes):
+        try:
+            from modules.bureau.llm_placement import auditer_visuel_generique
+            png_pour_audit = resultat.png_preview_bytes or resultat.png_bytes
+            brand_kit_audit = (
+                {"couleur_primaire_hex": profil_dict.get("couleur_primaire_hex"),
+                 "couleurs_accents_hex": profil_dict.get("couleurs_accents_hex")}
+                if profil_dict else None
+            )
+            audit_qualite = await auditer_visuel_generique(
+                png_bytes=png_pour_audit,
+                brief=demande.brief,
+                langue=demande.langue,
+                brand_kit=brand_kit_audit,
+                contexte=f"Gabarit utilisé : {demande.type_gabarit}",
+            )
+        except Exception as _e_audit:
+            logger.debug(f"[Infographie/Audit] non bloquant : {_e_audit}")
+
     return {
         "gabarit": demande.type_gabarit,
         "titre": spec.titre if spec else "",
@@ -270,6 +297,7 @@ async def generer_depuis_brief(
         "prix_fcfa": resultat.meta.get("prix_fcfa", 0),
         "meta": resultat.meta,
         "suggestions": suggestions,
+        "audit_qualite": audit_qualite,
     }
 
 

@@ -366,39 +366,106 @@ async def generer_placement_plan(
 # Boucle auto-critique LLM Vision (audit + révision avant rendu final)
 # ═══════════════════════════════════════════════════════════════════════
 
-PROMPT_REVISION_SYSTEM = """Tu es DIRECTEUR ARTISTIQUE SENIOR. Tu reçois UN VISUEL
-DÉJÀ RENDU à auditer en VISION (image PNG attachée) AVEC le PlacementPlan JSON
-qui l'a produit. Ton job : repérer les défauts qu'un humain remarquerait au
-premier coup d'œil et proposer un plan corrigé.
+PROMPT_REVISION_SYSTEM = """Tu es DIRECTEUR ARTISTIQUE SENIOR au niveau cabinet
+top-tier (Adobe / Pentagram / Sagmeister). Tu reçois UN VISUEL DÉJÀ RENDU à
+auditer en VISION (image PNG attachée) AVEC le PlacementPlan JSON qui l'a
+produit et le BRIEF INITIAL utilisateur. Ton job : repérer les défauts qu'un
+humain remarquerait au premier coup d'œil ET les écarts par rapport à
+l'intention exprimée dans le brief, puis proposer un plan corrigé.
 
-DÉFAUTS À TRAQUER :
-1. Texte tronqué (ne rentre pas dans sa bbox), débordement, chevauchement avec
-   d'autres éléments.
-2. Image mal cadrée (sujet coupé, visage tronqué, focal_point décalé).
-3. Hiérarchie cassée (titre trop petit, sous-titre trop gros, parité visuelle).
-4. Espacement irrégulier (alignements ratés, marges incohérentes).
-5. Couleurs : contraste insuffisant texte/fond (ratio WCAG < 4.5 pour corps),
-   conflit palette charte.
-6. Zones vides disgracieuses ou densité visuelle déséquilibrée.
-7. Forme du masque inadaptée (cercle pour paysage, rect pour portrait carré, etc.).
-8. Police inadaptée au registre (formel/festif/sobre).
-9. Rotation/ombre/effet excessif ou absent là où il manque.
+═══════════════════════════════════════════════════════════════════════
+GRILLE D'AUDIT — 5 axes critiques (chaque axe noté de 0 à 10)
+═══════════════════════════════════════════════════════════════════════
 
-SORTIE JSON STRICT :
+1) CONFORMITÉ AU BRIEF (le visuel répond-il à l'intention ?)
+   - Ton/registre demandé respecté (formel / chaleureux / festif / sobre /
+     minimaliste / luxe / corporate / artistique) ?
+   - Tous les contenus exigés présents (titre, sous-titre, mention spéciale,
+     CTA, contact, date, etc.) ? Aucun ajout intempestif ?
+   - Format/orientation cohérent avec l'usage cité (carte de visite, flyer,
+     affiche, faire-part, etc.) ?
+   - Si brand_kit fourni : palette + polices RESPECTÉES (pas de couleur
+     hors charte).
+
+2) COULEURS — cohérence et pertinence
+   - Palette harmonique (max 3-4 couleurs dominantes, gammes complémentaires
+     ou analogues). Pas d'arc-en-ciel chaotique.
+   - Couleurs sémantiquement PERTINENTES (deuil = sombre/sobre ;
+     mariage = chaud/élégant ; corporate = sobre + accent vif ;
+     festif = vif + contrasté ; luxe = noir/or/blanc).
+   - Contraste texte/fond ≥ 4.5:1 (WCAG AA) pour le corps de texte,
+     ≥ 3:1 pour les titres ≥ 18pt.
+   - Pas de couleur saturée à 100% sur fond saturé à 100% (vibration
+     fatigante).
+   - Cohérence entre fond, texte, accents, illustrations (mêmes températures
+     ou contraste assumé).
+
+3) DISPOSITION DES ÉLÉMENTS — composition graphique
+   - Hiérarchie visuelle CLAIRE : 1 dominant, 2-3 secondaires, reste discret.
+   - Alignement implicite : centres optiques alignés, axes verticaux/
+     horizontaux respectés (grille mentale visible).
+   - Marges intérieures cohérentes (8-15mm depuis le trim sauf
+     full-bleed assumé). Pas de respiration cassée.
+   - Équilibre des masses (densité non-concentrée sur un côté sauf
+     intention asymétrique délibérée).
+   - Espacement régulier entre éléments répétés.
+   - Aucun chevauchement non-intentionnel.
+
+4) COMPLEXITÉ GÉOMÉTRIQUE vs BRIEF
+   - Brief "minimaliste / sobre / épuré" → 3-5 éléments max, beaucoup de
+     blanc, formes simples, pas d'ornement.
+   - Brief "riche / festif / décoré" → ornements présents, palette vivante,
+     formes variées (étoiles, blobs, polygons décoratifs).
+   - Brief "corporate / institutionnel" → formes rect/rounded_rect, palette
+     contenue, pas de forme organique (blob/star inappropriés).
+   - Brief "artistique / créatif" → asymétrie, rotations, blobs, mix de
+     formes audacieux.
+   - Si la complexité visuelle ne correspond PAS au registre demandé,
+     c'est un défaut MAJEUR.
+
+5) DÉTAILS TECHNIQUES
+   - Texte tronqué (ne rentre pas dans sa bbox), débordement, chevauchement.
+   - Image mal cadrée (sujet coupé, visage tronqué, focal_point décalé).
+   - Police inadaptée au registre ou à la langue (script non couvert).
+   - Rotation/ombre/effet excessif ou absent là où il manque pour la
+     lisibilité (texte sur image → ombre obligatoire).
+   - Forme du masque adaptée au contenu (portrait = circle, paysage = rect,
+     logo = rect aligné coin).
+   - Bordures et stroke cohérents.
+
+═══════════════════════════════════════════════════════════════════════
+SORTIE JSON STRICT
+═══════════════════════════════════════════════════════════════════════
 {
   "verdict": "ok" | "ameliorations_mineures" | "refonte_necessaire",
   "score_qualite_sur_10": 7.5,
+  "scores_par_axe": {
+    "conformite_brief": 8.5,
+    "couleurs": 7.0,
+    "disposition": 6.5,
+    "complexite_geometrique": 8.0,
+    "details_techniques": 7.5
+  },
   "issues": [
-    {"severite": "critique|majeur|mineur", "type": "texte_tronque|...",
-     "item_index": 2, "description": "Le titre déborde de 8mm à droite",
-     "correctif": "Réduire font_size_pt de 32 à 26 OU élargir bbox.w de 60 à 90"}
+    {"severite": "critique|majeur|mineur",
+     "axe": "couleurs|disposition|complexite|conformite|details",
+     "type": "texte_tronque|contraste_insuffisant|...",
+     "item_index": 2,
+     "description": "Description précise du défaut",
+     "correctif": "Action concrète : changer field X de A à B, OU élargir bbox.w"}
   ],
-  "plan_revise": null OU {PlacementPlan complet avec corrections appliquées}
+  "synthese": "1-2 phrases de feedback global qualité",
+  "plan_revise": null OU {PlacementPlan complet avec corrections}
 }
 
-Si verdict='ok' → plan_revise=null (pas de re-render nécessaire).
-Si verdict='ameliorations_mineures' OU 'refonte_necessaire' → fournis le
-PlacementPlan complet revisé conforme au schéma initial.
+Si verdict='ok' (score ≥ 8 ET aucune issue critique) → plan_revise=null.
+Si verdict='ameliorations_mineures' (score 6-8 OU issues mineures) →
+  fournis plan_revise corrigé.
+Si verdict='refonte_necessaire' (score < 6 OU issues critiques) → fournis
+  plan_revise complètement repensé.
+
+⚠ NE PAS halluciner des défauts pour justifier un re-render. Sois HONNÊTE :
+si c'est bon, dis-le et score haut.
 """
 
 
@@ -481,6 +548,8 @@ async def auditer_et_reviser_placement(
     verdict = data.get("verdict", "ok")
     issues = data.get("issues", [])
     score = float(data.get("score_qualite_sur_10", 5.0))
+    scores_par_axe = data.get("scores_par_axe", {}) or {}
+    synthese = str(data.get("synthese", "") or "")[:500]
     plan_revise = None
     raw_revise = data.get("plan_revise")
     if isinstance(raw_revise, dict):
@@ -491,7 +560,9 @@ async def auditer_et_reviser_placement(
             plan_revise = None
 
     return RevisionResult(
-        verdict=verdict, score=score, issues=issues, plan_revise=plan_revise,
+        verdict=verdict, score=score,
+        scores_par_axe=scores_par_axe, issues=issues, synthese=synthese,
+        plan_revise=plan_revise,
     )
 
 
@@ -500,8 +571,110 @@ class RevisionResult(BaseModel):
     verdict: str = Field(...,
         description="ok | ameliorations_mineures | refonte_necessaire")
     score: float = Field(..., ge=0.0, le=10.0)
+    scores_par_axe: dict = Field(default_factory=dict,
+        description="{conformite_brief, couleurs, disposition, complexite_geometrique, details_techniques}")
     issues: list[dict] = Field(default_factory=list)
+    synthese: str = ""
     plan_revise: Optional[PlacementPlan] = None
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Audit générique : pour TOUT pipeline visuel (catalog mono, multi-page,
+# bulk, etc.) — pas seulement /geometric-placement. Ne renvoie PAS de plan
+# révisé (les pipelines catalog ne sont pas re-renderable depuis un plan
+# Pydantic), retourne juste une note qualité + suggestions textuelles.
+# ═══════════════════════════════════════════════════════════════════════
+
+PROMPT_AUDIT_GENERIQUE = """Tu es DIRECTEUR ARTISTIQUE SENIOR. Audite ce visuel
+PNG vs le brief utilisateur initial. Évalue 4 axes : conformité au brief
+(intention/contenu/format), couleurs (cohérence + pertinence + contraste WCAG),
+disposition (hiérarchie + alignement + équilibre), complexité géométrique
+(adaptation au registre demandé : minimaliste/festif/corporate/luxe/artistique).
+
+Sortie JSON strict, AUCUN markdown :
+{
+  "score_qualite_sur_10": 8.0,
+  "scores_par_axe": {"conformite_brief": 8, "couleurs": 7.5,
+                     "disposition": 8, "complexite": 9},
+  "verdict": "excellent" | "bon" | "acceptable" | "ameliorations_recommandees" | "refonte_necessaire",
+  "points_forts": ["...", "..."],
+  "points_faibles": [{"axe": "couleurs", "description": "...",
+                       "suggestion": "..."}],
+  "synthese": "1-2 phrases courtes feedback global"
+}
+
+Sois honnête. Note objectivement vs un standard "agence pro".
+"""
+
+
+async def auditer_visuel_generique(
+    png_bytes: bytes,
+    brief: str,
+    langue: str = "fr",
+    brand_kit: Optional[dict] = None,
+    contexte: Optional[str] = None,
+    modele: str = "sonnet",
+) -> Optional[dict]:
+    """
+    Audite n'importe quel visuel PNG (peu importe le pipeline qui l'a produit)
+    contre le brief utilisateur initial. Retourne un dict de qualité ou None
+    si l'audit a échoué.
+
+    Idéal pour les pipelines catalog (/generer mono-page, /generer-auto multi)
+    où il n'y a pas de PlacementPlan structuré à réviser : on retourne juste
+    une NOTE QUALITÉ + SUGGESTIONS pour information à l'utilisateur (qui peut
+    décider de relancer une variante s'il n'est pas satisfait).
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import base64
+
+    forcer_modele = {
+        "sonnet": ModelePrioritaire.CLAUDE_SONNET,
+        "opus":   ModelePrioritaire.CLAUDE_OPUS,
+    }.get(modele, ModelePrioritaire.CLAUDE_SONNET)
+
+    brand_str = ""
+    if brand_kit:
+        brand_str = f"\n\nCHARTE DE MARQUE : {json.dumps(brand_kit, ensure_ascii=False)[:1500]}"
+    ctx_str = f"\n\nCONTEXTE ADDITIONNEL : {contexte}" if contexte else ""
+
+    user_prompt = (
+        f"BRIEF UTILISATEUR :\n\"\"\"{brief}\"\"\"\n\n"
+        f"LANGUE CIBLE DES TEXTES : {langue}{brand_str}{ctx_str}\n\n"
+        f"Audite le visuel PNG attaché et retourne le JSON de qualité."
+    )
+
+    image_b64 = base64.b64encode(png_bytes).decode()
+    try:
+        rep = await ia_client.appeler(
+            prompt=user_prompt,
+            systeme=PROMPT_AUDIT_GENERIQUE,
+            mode=ModeIA.PRECISION,
+            forcer_modele=forcer_modele,
+            json_attendu=True,
+            max_tokens_override=1200,
+            images=[{"data": image_b64, "mime": "image/png"}],
+        )
+    except TypeError:
+        # Sans vision : retourne None (le caller saura ignorer)
+        logger.info("[AuditGenerique] ia_client ne supporte pas images=, audit skip")
+        return None
+    except Exception as e:
+        logger.warning(f"[AuditGenerique] LLM échec : {e}")
+        return None
+
+    raw = (rep.contenu or "").strip()
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            return None
+        try:
+            data = json.loads(m.group())
+        except Exception:
+            return None
+    return data
 
 
 async def generer_visuel_avec_revision(
