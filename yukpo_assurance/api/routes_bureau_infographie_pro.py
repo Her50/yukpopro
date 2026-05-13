@@ -2972,3 +2972,135 @@ async def outpaint(
         "png_base64": base64.b64encode(png_bytes).decode(),
         "size_kb": round(len(png_bytes) / 1024, 1),
     }
+
+
+# ─── NEXT-GEN — Geometric Placement (LLM vision + Python math précis) ───────
+#
+# Pipeline :
+#   1. LLM (Sonnet) raisonne en VISION HUMAINE : place chaque texte/image/forme
+#      avec bbox mm exactes, focal_point pour recadrage, masques (cercle,
+#      polygon, blob, étoile, hexagone, losange), filtres (recolor, grayscale,
+#      blur, brightness, contrast), ombres portées.
+#   2. Python implémente en PIXELS PRÉCIS : object-fit cover/contain math,
+#      masques alpha arbitraires via PIL, transforms matriciels (rotation,
+#      scale), composite ordonné z-index, gradients linear/radial, debug grid.
+#
+# Différence vs /generer-auto (catalog-based) : pas de gabarit prédéfini —
+# le LLM CRÉE le layout from scratch selon la sémantique du brief et la nature
+# des médias uploadés. Pour chaque image, il choisit la zone, la forme, le
+# focal point, le filtre — comme un graphiste à l'œil nu.
+
+class DemandeGeometricPlacement(BaseModel):
+    brief: str = Field(..., min_length=10,
+        description="Intention visuelle en langage naturel")
+    page_w_mm: float = Field(..., gt=0, le=2000,
+        description="Largeur trim de la page (sans bleed)")
+    page_h_mm: float = Field(..., gt=0, le=3000,
+        description="Hauteur trim de la page")
+    bleed_mm: float = Field(default=3.0, ge=0.0, le=20.0)
+    medias_refs: list[str] = Field(default_factory=list,
+        description="Refs médiathèque ('session:abc'/'compte:def')")
+    media_tags: dict[str, list[str]] = Field(default_factory=dict,
+        description="Optionnel : tags sémantiques par ref (ex: {'session:abc':['portrait','visage']})")
+    media_roles: dict[str, str] = Field(default_factory=dict,
+        description="Optionnel : role_hint par ref")
+    brand_kit: Optional[dict] = Field(default=None,
+        description="Palette + polices BrandKit organisation")
+    inspiration: Optional[str] = Field(default=None,
+        description="Brief de style libre (ex: 'minimaliste japonais')")
+    modele: str = Field(default="sonnet",
+        description="sonnet (équilibre) | opus (complexité) | haiku (rapide)")
+    dpi: int = Field(default=300, ge=72, le=600)
+    debug_grid: bool = Field(default=False)
+
+
+@router.post("/geometric-placement", tags=["Bureau — Designer Pro"])
+async def geometric_placement(
+    demande: DemandeGeometricPlacement,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """
+    NEXT-GEN : LLM vision géométrique + Python rendu précis.
+    Retourne {png_id, png_base64, placement_plan, nb_items, medias_utilises}.
+    """
+    from modules.bureau import mediatheque_session as ms
+    from modules.bureau.llm_placement import generer_placement_plan, manifest_image
+    from modules.bureau.geometric_placement import render_placement_plan
+    from modules.bureau.service_credits_bureau import (
+        verifier_acces_module, verifier_solde, debiter_forfait,
+    )
+
+    autorise, plan_acces, msg = await verifier_acces_module(current_user.user_id, "infographie")
+    if not autorise:
+        raise HTTPException(403, msg)
+    ok_solde, restants, _ = await verifier_solde(current_user.user_id)
+    if not ok_solde:
+        raise HTTPException(402, f"CREDITS_EPUISES|restants={int(restants)}|plan={plan_acces}")
+
+    # Résolution médias + lecture bytes + manifest
+    session_id = f"chat_{current_user.user_id}"
+    medias_meta = ms.resoudre_refs(demande.medias_refs, str(current_user.user_id), session_id)
+    medias_bytes: dict[str, bytes] = {}
+    manifests: list[dict] = []
+    for ref in demande.medias_refs:
+        if ref not in medias_meta:
+            continue
+        media = medias_meta[ref]
+        try:
+            chemin_disque = ms._BASE_DIR / media.chemin
+            data = chemin_disque.read_bytes()
+            medias_bytes[ref] = data
+            manifests.append(manifest_image(
+                ref, data,
+                tags=demande.media_tags.get(ref),
+                role_hint=demande.media_roles.get(ref) or media.categorie,
+            ))
+        except Exception as e:
+            logger.warning(f"[GeomPlacement] média {ref} non lu : {e}")
+
+    # Phase 1 : LLM → PlacementPlan
+    try:
+        placement = await generer_placement_plan(
+            brief=demande.brief,
+            page_w_mm=demande.page_w_mm,
+            page_h_mm=demande.page_h_mm,
+            bleed_mm=demande.bleed_mm,
+            medias=manifests,
+            brand_kit=demande.brand_kit,
+            inspiration=demande.inspiration,
+            modele=demande.modele,
+        )
+    except Exception as e:
+        logger.error(f"[GeomPlacement] LLM échec : {e}")
+        raise HTTPException(502, f"LLM placement échoué : {str(e)[:200]}")
+    if placement is None:
+        raise HTTPException(502, "LLM n'a pas produit de PlacementPlan parseable")
+    placement.debug_grid = demande.debug_grid
+
+    # Phase 2 : Python render
+    try:
+        png_bytes = render_placement_plan(
+            placement, medias_bytes, dpi=demande.dpi, include_bleed=True,
+        )
+    except Exception as e:
+        logger.error(f"[GeomPlacement] Render échec : {e}")
+        raise HTTPException(500, f"Rendu géométrique échoué : {str(e)[:200]}")
+
+    try:
+        await debiter_forfait(current_user.user_id, "designerpro_freeform_layout",
+                              module="infographie", multiplicateur=1.0)
+    except Exception:
+        pass
+
+    fid = f"bureau_pdf_{current_user.user_id}_geometric_{int(time.time())}.png"
+    (_DATA_DIR / fid).write_bytes(png_bytes)
+
+    return {
+        "ok": True,
+        "png_id": fid,
+        "png_base64": base64.b64encode(png_bytes).decode(),
+        "size_kb": round(len(png_bytes) / 1024, 1),
+        "placement_plan": placement.model_dump(),
+        "nb_items": len(placement.items),
+        "medias_utilises": list(medias_bytes.keys()),
+    }
