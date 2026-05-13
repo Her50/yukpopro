@@ -786,18 +786,41 @@ export const ChatPage = () => {
           // download_url / url_telechargement de la réponse (l'endpoint
           // sait où il a stocké le fichier). Sinon on applique le
           // pattern fourni par le plan. Sinon fallback Pro hardcodé.
+          //
+          // CRITIQUE : suffixer ?token= sur les URLs qui pointent vers des
+          // endpoints nécessitant auth (/bureau/documents/*, /pro/generateurs/
+          // fichier/*). Sinon le markdown [Télécharger](url) rendu dans le
+          // chat crée un <a href> que le browser GET sans header
+          // Authorization → 401. Le backend get_current_user accepte
+          // ?token= en query (priorité 3, SSE-compat).
+          const _suffixToken = (url: string): string => {
+            if (!url) return url;
+            // Ne pas suffixer si déjà présent ou si URL externe (http*://)
+            if (url.includes("token=") || /^https?:\/\//.test(url)) return url;
+            // Suffixer seulement les URLs auth-protégées du backend Yukpo
+            const needsAuth = url.startsWith("/api/v1/bureau/documents/")
+              || url.startsWith("/api/v1/pro/generateurs/fichier/")
+              || url.startsWith("/api/v1/bureau/video/fichier/");
+            if (!needsAuth) return url;
+            const tok = localStorage.getItem("yukpopro_token") || "";
+            if (!tok) return url;
+            return url + (url.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
+          };
           const buildDownloadUrl = (fichier: string): string => {
-            if (typeof r.download_url === "string" && r.download_url) return r.download_url;
-            if (typeof r.url_telechargement === "string" && r.url_telechargement) return r.url_telechargement;
-            const pattern = plan?.download_url_pattern;
-            if (typeof pattern === "string" && pattern.includes("{fichier}")) {
-              return pattern.replace("{fichier}", fichier);
+            let base: string;
+            if (typeof r.download_url === "string" && r.download_url) base = r.download_url;
+            else if (typeof r.url_telechargement === "string" && r.url_telechargement) base = r.url_telechargement;
+            else {
+              const pattern = plan?.download_url_pattern;
+              if (typeof pattern === "string" && pattern.includes("{fichier}")) {
+                base = pattern.replace("{fichier}", fichier);
+              } else if (endpoint.startsWith("/api/v1/bureau/")) {
+                base = `/api/v1/bureau/documents/${fichier}`;
+              } else {
+                base = generateurApi.telecharger(fichier);
+              }
             }
-            // Fallback : essayer de déduire depuis l'endpoint exécuté
-            if (endpoint.startsWith("/api/v1/bureau/")) {
-              return `/api/v1/bureau/documents/${fichier}`;
-            }
-            return generateurApi.telecharger(fichier);
+            return _suffixToken(base);
           };
           const downloadUrl = fichiers.length > 0 ? buildDownloadUrl(fichiers[0]) : "";
 
