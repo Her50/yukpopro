@@ -255,6 +255,49 @@ export const generateurApi = {
   },
 
   /**
+   * Slides Web Interactives — Reveal.js HTML autonome partageable URL.
+   * Plus léger que PPTX, animations fluides, mode présentateur, export PDF.
+   */
+  slidesWeb: async (req: {
+    sujet: string;
+    type_pres?: string;
+    mode?: string;
+    contexte?: string;
+    langue?: string;
+    generer_images_hero?: boolean;
+    brand_kit?: Record<string, any> | null;
+  }): Promise<{
+    ok: boolean; html_id: string; fichier_genere: string;
+    url_telechargement: string; size_kb: number; nb_slides: number;
+    theme_used: string; titre: string; format: string;
+  }> => {
+    const { data } = await http.post("/pro/slides-web/generer", req, { timeout: 600_000 });
+    return data;
+  },
+
+  /**
+   * Landing Page Web statique — HTML+Tailwind production-ready single-file.
+   * Auto-sections (hero, features, stats, pricing, FAQ, etc.) + favicon SVG.
+   */
+  landingPage: async (req: {
+    sujet: string;
+    objectif?: string;
+    cible?: string;
+    ton?: string;
+    contexte?: string;
+    langue?: string;
+    generer_images?: boolean;
+    brand_kit?: Record<string, any> | null;
+  }): Promise<{
+    ok: boolean; html_id: string; fichier_genere: string;
+    url_telechargement: string; size_kb: number; nb_sections: number;
+    sections_actives: string[]; titre: string; format: string;
+  }> => {
+    const { data } = await http.post("/pro/landing-page/generer", req, { timeout: 600_000 });
+    return data;
+  },
+
+  /**
    * Sprint G1 — Auto-orchestrateur génération documents.
    * L'utilisateur tape un brief en langage naturel, le backend détecte
    * automatiquement le type d'output, le template, le mode et le format.

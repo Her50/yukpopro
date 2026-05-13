@@ -191,6 +191,54 @@ export const ChatPage = () => {
         files = otherFiles;
       }
 
+      // ─── Nouveaux pipelines : slides web + landing page (intent client-side) ─
+      // Détection keyword AVANT orchestrer LLM pour gain de latence + clarté.
+      // Patterns reconnus (FR + EN) :
+      //   • "slides web", "présentation web", "présentation interactive",
+      //     "reveal.js", "présentation partage url" → /slides-web/generer
+      //   • "landing page", "page d'accueil web", "site web une page",
+      //     "page web produit", "landing", "one-pager" → /landing-page/generer
+      // Si match, on appelle directement l'endpoint (ignore orchestrer).
+      if (files.length === 0 && content.trim()) {
+        const txt = content.toLowerCase();
+        const slidesWebMatch = /(slides?\s*web|pr[ée]sentation\s*(web|interactive|reveal|partage|en ligne)|reveal\.?js|html\s*pr[ée]sentation)/i.test(txt);
+        const landingMatch = /(landing\s*page|landing|one[-\s]?pager|page\s*(d'?accueil|produit|web\s*unique)|site\s*(web\s*)?une\s*page)/i.test(txt);
+        if (slidesWebMatch || landingMatch) {
+          try {
+            updateLastAssistantMessage(
+              slidesWebMatch ? "🎬 Génération de la présentation Reveal.js…"
+                             : "🌐 Génération de la landing page web…",
+              null,
+            );
+            const result = slidesWebMatch
+              ? await generateurApi.slidesWeb({ sujet: content })
+              : await generateurApi.landingPage({ sujet: content });
+            const url = (result as any).url_telechargement;
+            const fid = (result as any).fichier_genere;
+            updateLastAssistantMessage(
+              (slidesWebMatch ? "✓ Présentation web Reveal.js générée"
+                              : "✓ Landing page web générée") +
+              ` — ${result.size_kb} KB.\n[Télécharger / Ouvrir](${url})`,
+              null,
+              fid ? [fid] : undefined,
+            );
+            if (fid) {
+              addDocument({
+                titre: result.titre || content.slice(0, 80),
+                type: "visuel",
+                fichier: fid,
+                contexteConversation: content,
+              });
+              toast.success(slidesWebMatch ? "Présentation web prête" : "Landing prête");
+            }
+            return;
+          } catch (e: any) {
+            // Fallback flow normal si l'endpoint échoue
+            console.warn("[ChatPage] slides-web/landing fallback :", e?.message);
+          }
+        }
+      }
+
       // R1-R5 — DÉTECTION MODIFICATION INCRÉMENTALE EN PREMIER
       // Si l'user a un document précédent en session + son message classe
       // 'modification', on route vers /modifier du pipeline mémorisé au lieu

@@ -254,6 +254,25 @@ export const bureauSessionAPI = {
   },
 }
 
+// ─── Nouveaux pipelines : Slides Web (Reveal.js) + Landing Page ─────────────
+// Les endpoints sont sur /api/v1/pro/* → on utilise httpRoot (baseURL=/api/v1).
+export const slidesWebAPI = {
+  generer: (req: {
+    sujet: string; type_pres?: string; mode?: string;
+    contexte?: string; langue?: string;
+    generer_images_hero?: boolean; brand_kit?: any;
+  }) => httpRoot.post('/pro/slides-web/generer', req, { timeout: 600_000 }),
+}
+
+export const landingPageAPI = {
+  generer: (req: {
+    sujet: string; objectif?: string; cible?: string; ton?: string;
+    contexte?: string; langue?: string;
+    generer_images?: boolean; brand_kit?: any;
+  }) => httpRoot.post('/pro/landing-page/generer', req, { timeout: 600_000 }),
+}
+
+
 // ─── Sprint S1 — Chat Unifié Secrétariat (intent → routage auto) ────────────
 // `api` a baseURL=/api/v1/bureau (normalisé). On appelle donc /chat/message
 // pour atteindre /api/v1/bureau/chat/message côté backend.

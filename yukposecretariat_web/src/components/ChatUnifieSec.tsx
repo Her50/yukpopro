@@ -288,6 +288,34 @@ export default function ChatUnifieSec() {
     setLoading(true)
 
     try {
+      // ── Nouveaux pipelines web (slides Reveal.js + landing page) ──────
+      // Détection keyword AVANT orchestrer pour gain de latence + clarté.
+      if (atts.length === 0 && msg.trim()) {
+        const txt = msg.toLowerCase()
+        const slidesWebMatch = /(slides?\s*web|pr[ée]sentation\s*(web|interactive|reveal|partage|en ligne)|reveal\.?js|html\s*pr[ée]sentation)/i.test(txt)
+        const landingMatch = /(landing\s*page|landing|one[-\s]?pager|page\s*(d'?accueil|produit|web\s*unique)|site\s*(web\s*)?une\s*page)/i.test(txt)
+        if (slidesWebMatch || landingMatch) {
+          try {
+            const { slidesWebAPI, landingPageAPI } = await import('../api/client')
+            const res = slidesWebMatch
+              ? await slidesWebAPI.generer({ sujet: msg })
+              : await landingPageAPI.generer({ sujet: msg })
+            const d = res.data as any
+            const yukpoTurn: ChatTurn = {
+              role: 'yukpo', ts: new Date().toISOString(),
+              content: (slidesWebMatch ? '✓ Présentation web Reveal.js générée' : '✓ Landing page web générée') +
+                ` — ${d.size_kb} KB.\n[Télécharger](${d.url_telechargement})`,
+              intent: slidesWebMatch ? 'slides_web' : 'landing_page',
+              resultat: { type: slidesWebMatch ? 'slides_web' : 'landing_page', data: d },
+            }
+            setTurns(prev => [...prev, yukpoTurn])
+            return
+          } catch (_e_pw) {
+            // Fallback flow normal si échec
+          }
+        }
+      }
+
       // ── R1-R5 : DÉTECTION MODIFICATION INCRÉMENTALE EN PREMIER ─────────
       // Si l'user a un document précédent en session + son message classe
       // 'modification', on route vers /modifier du pipeline mémorisé au lieu
