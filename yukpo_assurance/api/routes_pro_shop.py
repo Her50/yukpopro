@@ -552,6 +552,93 @@ async def republier_produit_rust(
 
 
 @router.get(
+    "/shop/social/status",
+    summary="Piste 4 — État des comptes sociaux connectés via Yukpo Rust",
+)
+async def shop_social_status(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Retourne quels comptes Meta/IG/WA/TikTok/YouTube le commerçant a
+    connecté côté Yukpo (l'app principale Rust). Si rien, l'UI affiche
+    un bouton 'Connecter Meta' redirigeant vers le flow OAuth Rust."""
+    email, _ = await _user_email_nom(current_user.user_id, db)
+    from modules.pro.yukposhop_rust_social import get_social_status
+    res = await get_social_status(email)
+    return {
+        "ok": res.ok,
+        "vendeur_email": email,
+        "rust_user_id": res.rust_user_id,
+        "platforms": [
+            {"platform": p.platform, "account_name": p.account_name,
+             "is_active": p.is_active}
+            for p in res.platforms
+        ],
+        "connect_url": res.connect_url,
+        "error": res.error,
+    }
+
+
+class ShopSocialDistributeRequest(BaseModel):
+    produit_ids: list[int] = Field(..., min_length=1, max_length=50)
+    platforms: list[str] = Field(..., min_length=1, max_length=8,
+        description="ex: ['facebook', 'instagram', 'whatsapp']")
+    message_template: Optional[str] = Field(None, max_length=2000)
+
+
+@router.post(
+    "/shop/social/distribute",
+    summary="Piste 4 — Publie N produits YukpoShop vers les comptes sociaux via Yukpo Rust",
+)
+async def shop_social_distribute(
+    req: ShopSocialDistributeRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Déclenche une distribution sociale via Rust. Le caller doit fournir
+    les ID locaux YukpoShop (shop_products.id) — Rust les résout via
+    `external_product_links` (Piste 1).
+
+    Pré-requis : les produits doivent être sync vers Rust (Piste 1),
+    sinon Rust ne sait pas à quoi correspondent ces IDs.
+    """
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    # Vérifie ownership des produits
+    produits_owned = (await db.execute(
+        select(ShopProductDB.id)
+        .where(ShopProductDB.id.in_(req.produit_ids))
+        .where(ShopProductDB.boutique_id == b.id)
+    )).scalars().all()
+    if not produits_owned:
+        raise HTTPException(404, "Aucun de ces produits n'appartient à votre boutique")
+    if len(produits_owned) != len(req.produit_ids):
+        missing = set(req.produit_ids) - set(produits_owned)
+        raise HTTPException(403,
+            f"Produits non possédés ou inexistants : {sorted(missing)}")
+
+    email, _ = await _user_email_nom(current_user.user_id, db)
+    from modules.pro.yukposhop_rust_social import distribuer_produits
+    res = await distribuer_produits(
+        vendeur_email=email,
+        produit_ids=list(produits_owned),
+        platforms=req.platforms,
+        message_template=req.message_template,
+    )
+    if not res.success:
+        # 502 si Rust pas joignable, 400 si Rust a refusé
+        status = 502 if res.error and "réseau" in res.error else 400
+        raise HTTPException(status,
+            res.error or res.note or "Distribution échouée")
+    return {
+        "ok": True,
+        "jobs_created": res.jobs_created,
+        "products_resolved": res.products_resolved,
+        "platforms": res.platforms,
+        "note": res.note,
+    }
+
+
+@router.get(
     "/shop/cross-sell/preview",
     summary="Piste 2 — Preview des items cross-sell marketplace pour ma boutique",
 )
