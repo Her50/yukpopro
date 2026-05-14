@@ -339,12 +339,12 @@ $key = python -c "import secrets, base64; print(base64.b64encode(secrets.token_b
 echo "Bridge key: $key"
 
 # Pose côté Rust (NOM DE TON APP — adapter si différent)
-fly secrets set -a yukpomnang YUKPOSHOP_BRIDGE_HMAC_KEY="$key"
+fly secrets set -a yukpo-fly-backend YUKPOSHOP_BRIDGE_HMAC_KEY="$key"
 
 # Pose côté YukpoPro
 fly secrets set -a yukpopro-backend `
   RUST_BRIDGE_ENABLED=true `
-  RUST_BRIDGE_URL=https://yukpomnang.fly.dev/api/v1/integrations/yukposhop/sync `
+  RUST_BRIDGE_URL=https://yukpo-fly-backend.fly.dev/api/v1/integrations/yukposhop/sync `
   RUST_BRIDGE_HMAC_KEY="$key"
 ```
 

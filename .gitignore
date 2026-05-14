@@ -46,3 +46,6 @@ tests/qa_agent/fixtures/*.mp3
 # Plausible self-host — secrets locaux
 plausible_selfhost/.plausible-pg-pass.txt
 plausible_selfhost/.env
+
+# Piste 1 — clé HMAC partagée YukpoShop <-> Yukpo Rust (déjà posée sur Fly)
+.yukpo-bridge-hmac-key.txt
