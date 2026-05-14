@@ -189,8 +189,73 @@ def _construire_footer_storefront(boutique: dict) -> str:
     )
 
 
-def _page_accueil_html(boutique: dict, produits_featured: list[dict], categories: list[dict]) -> str:
-    """Page d'accueil : hero + grid produits featured + categories."""
+def _card_marketplace_item(item: dict) -> str:
+    """Piste 2 — Card pour un item externe (marketplace Yukpo Rust).
+
+    Diffère de `_card_produit` :
+    - Link en target=_blank vers la boutique externe (ou marketplace yukpo)
+    - Badge discret « via Yukpo marketplace »
+    - Affiche distance si dispo
+    """
+    titre = escape(item.get("titre") or "Service")
+    prix = item.get("prix") or 0
+    devise = escape(item.get("devise") or "XAF")
+    photo = item.get("photo_url")
+    vendeur = escape(item.get("vendeur_nom") or "")
+    boutique_url = item.get("boutique_url")
+    # Fallback URL : page marketplace publique si dispo
+    href = boutique_url or (
+        f"https://yukpomnang.com/services/{item.get('service_id')}"
+        if item.get("service_id") else "#"
+    )
+    distance = item.get("distance_km")
+    dist_html = (
+        f'<div class="text-xs opacity-60 mt-0.5">{int(distance)} km</div>'
+        if isinstance(distance, (int, float)) and distance > 0 else ""
+    )
+    prix_html = (
+        f'<span class="font-bold" style="color:var(--accent)">{int(prix)} {devise}</span>'
+        if prix else ""
+    )
+    return (
+        f'<a href="{escape(href)}" target="_blank" rel="noopener" '
+        f'class="block bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden relative">'
+        f'<div class="absolute top-2 right-2 z-10 bg-violet-600/90 text-white text-[10px] '
+        f'font-semibold px-2 py-0.5 rounded-full">Yukpo</div>'
+        + (f'<img src="{escape(photo)}" alt="" class="w-full aspect-square object-cover">'
+           if photo else
+           f'<div class="w-full aspect-square bg-slate-100 flex items-center justify-center text-slate-400 text-4xl">🌍</div>')
+        + f'<div class="p-3">'
+        f'<h3 class="font-semibold text-sm truncate" style="color:var(--primary)">{titre}</h3>'
+        + (f'<div class="text-xs opacity-70 truncate">{vendeur}</div>' if vendeur else "")
+        + f'<div class="mt-1 text-sm">{prix_html}</div>'
+        + dist_html
+        + f'</div></a>'
+    )
+
+
+def _section_cross_sell_html(items: list[dict], titre: str = "Autres marchands près de chez vous") -> str:
+    """Piste 2 — Section conditionnelle injectée dans home + pages produit.
+    Retourne chaîne vide si items=[] (pas de rendu visible)."""
+    if not items:
+        return ""
+    cards_html = "".join(_card_marketplace_item(it) for it in items[:6])
+    return (
+        f'<section class="py-8 bg-violet-50/40"><div class="max-w-6xl mx-auto px-4">'
+        f'<div class="flex items-center justify-between mb-4">'
+        f'<h2 class="text-xl font-bold" style="color:var(--primary)">{escape(titre)}</h2>'
+        f'<div class="text-xs opacity-60">via Yukpo marketplace</div>'
+        f'</div>'
+        f'<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">{cards_html}</div>'
+        f'</div></section>'
+    )
+
+
+def _page_accueil_html(
+    boutique: dict, produits_featured: list[dict], categories: list[dict],
+    cross_sell_items: Optional[list[dict]] = None,
+) -> str:
+    """Page d'accueil : hero + grid produits featured + categories + cross-sell."""
     desc = escape(boutique.get("description") or "")
     cats_html = "".join(
         f'<a href="/c/{escape(c["slug"])}" class="block bg-white rounded-xl p-4 shadow-md hover:shadow-xl text-center">'
@@ -215,6 +280,7 @@ def _page_accueil_html(boutique: dict, produits_featured: list[dict], categories
            f'<h2 class="text-2xl font-bold mb-6" style="color:var(--primary)">À la une</h2>'
            f'<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{prods_html}</div></div></section>'
            if produits_featured else "")
+        + _section_cross_sell_html(cross_sell_items or [])
     )
 
 
@@ -243,7 +309,10 @@ def _card_produit(p: dict, boutique: dict) -> str:
     )
 
 
-def _page_produit_html(p: dict, boutique: dict, autres_produits: list[dict]) -> str:
+def _page_produit_html(
+    p: dict, boutique: dict, autres_produits: list[dict],
+    cross_sell_items: Optional[list[dict]] = None,
+) -> str:
     """Page produit : galerie + variantes + add-to-cart + autres produits."""
     photos = p.get("photos_urls_json") or []
     photos_html = "".join(
@@ -315,6 +384,10 @@ def _page_produit_html(p: dict, boutique: dict, autres_produits: list[dict]) -> 
            f'<h2 class="text-xl font-bold mb-4" style="color:var(--primary)">Vous aimerez aussi</h2>'
            f'<div class="grid grid-cols-2 md:grid-cols-4 gap-4">{autres_html}</div></div></section>'
            if autres_html else "")
+        + _section_cross_sell_html(
+            cross_sell_items or [],
+            titre="D'autres marchands à découvrir",
+          )
     )
 
 
@@ -408,9 +481,15 @@ def construire_html_page_storefront(
     produits: Optional[list[dict]] = None,
     categories: Optional[list[dict]] = None,
     autres_produits: Optional[list[dict]] = None,
+    cross_sell_items: Optional[list[dict]] = None,
     api_base: str = "",
 ) -> str:
-    """Rend une page du storefront (home/produit/panier)."""
+    """Rend une page du storefront (home/produit/panier).
+
+    `cross_sell_items` : Piste 2 — liste des services marketplace Yukpo Rust
+    à afficher dans la section « Autres marchands près de chez vous ».
+    Si vide/None, la section n'est pas rendue.
+    """
     css_vars = _css_globale_storefront(boutique.get("brand_kit_json"))
     titre_seo = escape(
         boutique.get("nom", "Boutique") +
@@ -422,9 +501,13 @@ def construire_html_page_storefront(
     if type_page == "home":
         body = _page_accueil_html(
             boutique, produits or [], categories or [],
+            cross_sell_items=cross_sell_items,
         )
     elif type_page == "produit" and produit:
-        body = _page_produit_html(produit, boutique, autres_produits or [])
+        body = _page_produit_html(
+            produit, boutique, autres_produits or [],
+            cross_sell_items=cross_sell_items,
+        )
     elif type_page == "panier":
         body = _page_panier_checkout_html(boutique, api_base=api_base)
     else:
@@ -458,25 +541,34 @@ body {{ font-family: var(--font-corps); color: var(--text); background: var(--bg
 def construire_arborescence_storefront(
     boutique: dict, *, produits: list[dict],
     categories: list[dict], api_base: str = "",
+    cross_sell_items: Optional[list[dict]] = None,
 ) -> dict[str, bytes]:
     """Génère TOUTE l'arborescence ZIP du storefront pour Netlify multi-files.
 
     Routes :
-      /              → home (hero + featured + categories)
+      /              → home (hero + featured + categories + cross-sell)
       /panier        → checkout client-side (localStorage cart)
-      /p/<slug>      → page produit
+      /p/<slug>      → page produit + cross-sell
       /c/<slug>      → catalogue par catégorie
       /sitemap.xml + robots.txt
+
+    `cross_sell_items` : Piste 2 — items marketplace Yukpo Rust à afficher
+    dans home + pages produit. Caller doit fetcher via
+    `yukposhop_rust_search.chercher_services_marketplace()` AVANT d'appeler
+    (sync ici pour rester rétrocompat avec les anciens callers). Si None
+    ou [], aucun bloc cross-sell rendu (rétrocompat 100%).
     """
     files: dict[str, bytes] = {}
+    cs = cross_sell_items or []
 
     # Home (top 8 produits featured = les 8 plus récents actifs)
     featured = [p for p in produits if p.get("statut") == "actif"][:8]
     files["index.html"] = construire_html_page_storefront(
-        boutique, "home", produits=featured, categories=categories, api_base=api_base,
+        boutique, "home", produits=featured, categories=categories,
+        api_base=api_base, cross_sell_items=cs,
     ).encode("utf-8")
 
-    # Panier
+    # Panier (pas de cross-sell — l'user est dans le tunnel checkout)
     files["panier/index.html"] = construire_html_page_storefront(
         boutique, "panier", api_base=api_base,
     ).encode("utf-8")
@@ -488,14 +580,16 @@ def construire_arborescence_storefront(
         autres = [pp for pp in produits if pp.get("id") != p.get("id")
                    and pp.get("statut") == "actif"][:4]
         files[f"p/{p['slug']}/index.html"] = construire_html_page_storefront(
-            boutique, "produit", produit=p, autres_produits=autres, api_base=api_base,
+            boutique, "produit", produit=p, autres_produits=autres,
+            api_base=api_base, cross_sell_items=cs,
         ).encode("utf-8")
 
     for c in categories:
         cat_prods = [p for p in produits
                      if p.get("categorie_id") == c.get("id") and p.get("statut") == "actif"]
         files[f"c/{c['slug']}/index.html"] = construire_html_page_storefront(
-            boutique, "home", produits=cat_prods, categories=[], api_base=api_base,
+            boutique, "home", produits=cat_prods, categories=[],
+            api_base=api_base, cross_sell_items=cs,
         ).encode("utf-8")
 
     # Sitemap + robots

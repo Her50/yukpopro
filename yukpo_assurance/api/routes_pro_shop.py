@@ -144,6 +144,8 @@ class PatchBoutiqueRequest(BaseModel):
     settings_json: Optional[dict] = None
     # Piste 1 — toggle publication marketplace Yukpo Rust (opt-out par boutique)
     rust_sync_enabled: Optional[bool] = None
+    # Piste 2 — toggle bloc cross-sell "Autres marchands" dans storefront
+    cross_sell_enabled: Optional[bool] = None
 
 
 class ProduitCreateRequest(BaseModel):
@@ -550,6 +552,43 @@ async def republier_produit_rust(
 
 
 @router.get(
+    "/shop/cross-sell/preview",
+    summary="Piste 2 — Preview des items cross-sell marketplace pour ma boutique",
+)
+async def cross_sell_preview(
+    q: Optional[str] = None,
+    limit: int = 6,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Permet de tester ce que la search Rust marketplace renverra pour la
+    catégorie principale de la boutique. Utile pour valider l'intégration
+    avant de re-publier le storefront entier."""
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    if not getattr(b, "cross_sell_enabled", True):
+        return {
+            "ok": True, "boutique_id": b.id, "enabled": False,
+            "items": [],
+            "message": "Cross-sell désactivé pour cette boutique (PATCH /shop avec cross_sell_enabled=true)",
+        }
+    categories = (await db.execute(
+        select(ShopCategorieDB).where(ShopCategorieDB.boutique_id == b.id)
+        .order_by(ShopCategorieDB.ordre).limit(3)
+    )).scalars().all()
+    query = q or (", ".join([c.nom for c in categories]) or b.nom)
+    from modules.pro.yukposhop_rust_search import chercher_services_marketplace
+    items = await chercher_services_marketplace(
+        query=query, limit=max(1, min(limit, 20)),
+        categories="ecommerce,supermarche,mode,electronique,sport,maison",
+    )
+    return {
+        "ok": True, "boutique_id": b.id, "enabled": True,
+        "query_used": query, "nb_items": len(items),
+        "items": items,
+    }
+
+
+@router.get(
     "/shop/rust-sync/stats",
     summary="Piste 1 — Stats de publication marketplace Yukpo Rust",
 )
@@ -809,9 +848,37 @@ async def publier_shop(
 
     from modules.pro.shop_builder import construire_arborescence_storefront
     api_base = os.getenv("YUKPO_PUBLIC_API_BASE", "").strip()
+
+    # ── Piste 2 — fetch cross-sell marketplace Yukpo Rust (best-effort) ─
+    cross_sell_items: list[dict] = []
+    if getattr(b, "cross_sell_enabled", True):
+        try:
+            from modules.pro.yukposhop_rust_search import chercher_services_marketplace
+            # Query basée sur catégories de la boutique sinon nom boutique.
+            # Limite 6 cards (responsive grid 6 cols max).
+            query = ", ".join(
+                [c.nom for c in categories[:3]]
+            ) or b.nom
+            # GPS commerçant : pour l'instant on n'a pas la lat/lng dans
+            # shop_boutiques (seulement pays_principal). On laisse Rust
+            # ranker par recency+full-text. Une future migration ajoutera
+            # boutique.lat/lng pour rayon GPS précis.
+            cross_sell_items = await chercher_services_marketplace(
+                query=query, limit=6,
+                # Filtre sur catégories e-commerce pertinentes pour shop
+                categories="ecommerce,supermarche,mode,electronique,sport,maison",
+            )
+            logger.info(
+                f"[Shop/publier] cross-sell : {len(cross_sell_items)} items "
+                f"fetched (query={query[:50]!r})"
+            )
+        except Exception as _e:
+            logger.warning(f"[Shop/publier] cross-sell fetch échec (non bloquant) : {_e}")
+
     files = construire_arborescence_storefront(
         boutique_dict, produits=produits_dicts,
         categories=cats_dicts, api_base=api_base,
+        cross_sell_items=cross_sell_items,
     )
 
     try:

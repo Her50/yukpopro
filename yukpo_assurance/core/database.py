@@ -1464,6 +1464,9 @@ class ShopBoutiqueDB(Base):
     rust_sync_enabled     = Column(Boolean, nullable=False, default=True,
         comment="Si True, produits publiés sont aussi indexés dans le "
                 "marketplace Yukpo Rust pour trafic gratuit.")
+    cross_sell_enabled    = Column(Boolean, nullable=False, default=True,
+        comment="Si True, le storefront affiche un bloc 'Autres marchands "
+                "près de chez vous' alimenté par la search Rust marketplace.")
     cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
     publie_le             = Column(DateTime, nullable=True)
     derniere_modif        = Column(DateTime, default=datetime.utcnow,
