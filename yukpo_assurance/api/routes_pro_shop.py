@@ -49,7 +49,7 @@ import time
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,6 +72,34 @@ async def _get_db():
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
+
+
+async def _user_email_nom(user_id: int, db: AsyncSession) -> tuple[str, str]:
+    """Retourne (email, nom_affichage) pour un user. Utilisé par le bridge
+    Rust (Piste 1) qui a besoin de l'email pour mapper côté Yukpo Rust."""
+    from core.database import UtilisateurDB
+    u = (await db.execute(
+        select(UtilisateurDB).where(UtilisateurDB.id == user_id)
+    )).scalar_one_or_none()
+    if not u:
+        return (f"user{user_id}@yukpo.local", f"User {user_id}")
+    nom_aff = " ".join(
+        x for x in [getattr(u, "prenoms", None), getattr(u, "nom", None)] if x
+    ) or u.username or (u.email.split("@")[0] if u.email else f"User {user_id}")
+    return (u.email or f"user{user_id}@yukpo.local", nom_aff)
+
+
+def _schedule_rust_sync(bg: BackgroundTasks, produit_id: int,
+                        vendeur_email: str, vendeur_nom: str) -> None:
+    """Programme la publication marketplace Rust en background (non-bloquant).
+    Best-effort : aucune erreur ne remonte à l'utilisateur."""
+    from modules.pro.yukposhop_rust_bridge import publier_async_safe
+    bg.add_task(
+        publier_async_safe,
+        produit_id=produit_id,
+        vendeur_email=vendeur_email,
+        vendeur_nom=vendeur_nom,
+    )
 
 def _slugify(s: str, maxlen: int = 80) -> str:
     s = re.sub(r"[^a-zA-Z0-9-]+", "-", (s or "").lower().strip())
@@ -114,6 +142,8 @@ class PatchBoutiqueRequest(BaseModel):
     pays_principal: Optional[str] = None
     langues_actives_json: Optional[list[str]] = None
     settings_json: Optional[dict] = None
+    # Piste 1 — toggle publication marketplace Yukpo Rust (opt-out par boutique)
+    rust_sync_enabled: Optional[bool] = None
 
 
 class ProduitCreateRequest(BaseModel):
@@ -344,6 +374,7 @@ def _produit_to_dict(p: ShopProductDB) -> dict:
 @router.post("/shop/produits", summary="Crée un produit (manuel)")
 async def creer_produit(
     req: ProduitCreateRequest,
+    background_tasks: BackgroundTasks,
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(_get_db),
 ):
@@ -388,6 +419,15 @@ async def creer_produit(
         )
     except Exception:
         pass
+
+    # ── Piste 1 — publication marketplace Yukpo Rust (non-bloquant) ──────
+    if p.statut == "actif":
+        try:
+            email, nom = await _user_email_nom(current_user.user_id, db)
+            _schedule_rust_sync(background_tasks, p.id, email, nom)
+        except Exception as _e:
+            logger.debug(f"[RustBridge] schedule failed produit={p.id}: {_e}")
+
     return {"ok": True, "produit": _produit_to_dict(p)}
 
 
@@ -395,6 +435,7 @@ async def creer_produit(
 async def patch_produit(
     produit_id: int,
     req: ProduitPatchRequest,
+    background_tasks: BackgroundTasks,
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(_get_db),
 ):
@@ -410,7 +451,27 @@ async def patch_produit(
     for k, v in data.items():
         setattr(p, k, v)
     p.modif_le = datetime.utcnow()
+    # Si le statut bascule sur "actif" ou le contenu change, on re-marque
+    # pending pour ré-indexer côté Rust marketplace.
+    fields_qui_invalident_le_sync = {
+        "titre", "description_courte", "description_longue", "prix_unit",
+        "prix_unit_promo", "devise", "photos_urls_json", "tags_json",
+        "statut", "stock",
+    }
+    if fields_qui_invalident_le_sync & set(data.keys()):
+        p.rust_sync_status = "pending"
+        # On NE remet PAS attempts à 0 : un commerçant qui modifie 10 fois
+        # un produit cassé ne doit pas bypasser le cap MAX_ATTEMPTS.
     await db.commit()
+
+    # ── Piste 1 — re-publication marketplace si actif ────────────────────
+    if p.statut == "actif" and (fields_qui_invalident_le_sync & set(data.keys())):
+        try:
+            email, nom = await _user_email_nom(current_user.user_id, db)
+            _schedule_rust_sync(background_tasks, p.id, email, nom)
+        except Exception as _e:
+            logger.debug(f"[RustBridge] schedule failed produit={p.id}: {_e}")
+
     return {"ok": True, "produit": _produit_to_dict(p)}
 
 
@@ -433,6 +494,84 @@ async def supprimer_produit(
     )
     await db.commit()
     return {"ok": True}
+
+
+# ─── Piste 1 — Re-publication marketplace Yukpo Rust ────────────────────────
+
+@router.post(
+    "/shop/produits/{produit_id}/republier-rust",
+    summary="Piste 1 — Force la re-publication d'un produit dans le marketplace Yukpo Rust",
+)
+async def republier_produit_rust(
+    produit_id: int,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Sync manuel — utile si :
+    - la sync auto a échoué (rust_sync_status = 'failed')
+    - le marchand veut re-pousser après modif majeure (titre, prix, photos)
+    - le MAX_ATTEMPTS a été atteint et il faut forcer un retry
+
+    Reset rust_sync_attempts à 0 pour bypass le cap. Retourne le résultat
+    sync (synchrone — l'user voit l'erreur si Rust est down).
+    """
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    p = (await db.execute(
+        select(ShopProductDB)
+        .where(ShopProductDB.id == produit_id)
+        .where(ShopProductDB.boutique_id == b.id)
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+    if p.statut != "actif":
+        raise HTTPException(400, f"Produit doit être 'actif' (actuel : {p.statut})")
+    if not getattr(b, "rust_sync_enabled", True):
+        raise HTTPException(400, "Sync marketplace désactivée pour cette boutique. "
+                                  "Active-la via PATCH /shop avec rust_sync_enabled=true.")
+
+    # Reset le compteur pour autoriser un retry frais
+    p.rust_sync_attempts = 0
+    p.rust_sync_status = "pending"
+    p.rust_sync_error = None
+    await db.commit()
+
+    from modules.pro.yukposhop_rust_bridge import publier_produit_vers_rust
+    email, nom = await _user_email_nom(current_user.user_id, db)
+    result = await publier_produit_vers_rust(
+        produit_id=p.id, db=db, vendeur_email=email, vendeur_nom=nom,
+    )
+    return {
+        "ok": result.success,
+        "rust_service_id": result.rust_service_id,
+        "error": result.error,
+        "http_status": result.http_status,
+        "duration_ms": result.duration_ms,
+    }
+
+
+@router.get(
+    "/shop/rust-sync/stats",
+    summary="Piste 1 — Stats de publication marketplace Yukpo Rust",
+)
+async def rust_sync_stats(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Dashboard : combien de produits sont synced / failed / pending côté Rust."""
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    rows = (await db.execute(
+        select(ShopProductDB.rust_sync_status, func.count(ShopProductDB.id))
+        .where(ShopProductDB.boutique_id == b.id)
+        .group_by(ShopProductDB.rust_sync_status)
+    )).all()
+    stats = {row[0]: int(row[1]) for row in rows}
+    return {
+        "ok": True,
+        "boutique_id": b.id,
+        "rust_sync_enabled": bool(getattr(b, "rust_sync_enabled", True)),
+        "stats": stats,
+        "total": sum(stats.values()),
+    }
 
 
 # ─── D2 — Magic Import IA depuis photos ──────────────────────────────────────

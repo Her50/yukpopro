@@ -1461,6 +1461,9 @@ class ShopBoutiqueDB(Base):
     plan                  = Column(String(16), nullable=False, default="free")
     statut                = Column(String(20), nullable=False, default="brouillon")
     settings_json         = Column(JSON, nullable=True)
+    rust_sync_enabled     = Column(Boolean, nullable=False, default=True,
+        comment="Si True, produits publiés sont aussi indexés dans le "
+                "marketplace Yukpo Rust pour trafic gratuit.")
     cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
     publie_le             = Column(DateTime, nullable=True)
     derniere_modif        = Column(DateTime, default=datetime.utcnow,
@@ -1516,6 +1519,14 @@ class ShopProductDB(Base):
         comment="actif | brouillon | archive | rupture")
     source               = Column(String(20), nullable=False, default="manuel",
         comment="manuel | import_ia | api | csv")
+    # ── Piste 1 — bridge marketplace Yukpo Rust ─────────────────────────
+    rust_service_id      = Column(BigInteger, nullable=True,
+        comment="Service.id côté Rust si le produit a été publié dans le marketplace.")
+    rust_sync_status     = Column(String(20), nullable=False, default="pending",
+        comment="pending | synced | failed | disabled | skipped")
+    rust_sync_error      = Column(Text, nullable=True)
+    rust_synced_at       = Column(DateTime, nullable=True)
+    rust_sync_attempts   = Column(Integer, nullable=False, default=0)
     cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
     modif_le             = Column(DateTime, default=datetime.utcnow,
                                    onupdate=datetime.utcnow, nullable=False)
