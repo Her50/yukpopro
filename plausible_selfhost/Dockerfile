@@ -1,10 +1,11 @@
 # Plausible CE — image officielle Plausible/Community Edition v2+
-# Multi-service (Plausible + Postgres + Clickhouse) géré par docker-compose
-# mais Fly impose 1 process par machine → on délègue Postgres et Clickhouse
-# à des apps Fly séparées OU des managed Postgres (Neon) et Clickhouse Cloud.
 #
 # Cette image embarque UNIQUEMENT le Plausible Phoenix app. Postgres et
 # Clickhouse sont des dépendances externes (cf. fly.toml secrets).
+#
+# Le script deploy.ps1 exécute la migration UNE FOIS dans une machine
+# ephemere (fly machine run /app/migrate.sh) AVANT d'autoriser l'app
+# principale à démarrer. Du coup ici la CMD reste "run" (= start direct).
 
 FROM ghcr.io/plausible/community-edition:v2.1.4
 
