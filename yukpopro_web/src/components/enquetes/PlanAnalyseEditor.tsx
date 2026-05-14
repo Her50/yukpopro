@@ -59,7 +59,7 @@ export const PlanAnalyseEditor = ({ etude_id }: Props) => {
 
   const genererIA = async () => {
     setGenIA(true);
-    toast("Claude construit votre plan d'analyse…", { icon: "✨", duration: 30000 });
+    toast("Yukpo construit votre plan d'analyse…", { icon: "✨", duration: 30000 });
     try {
       const res = await enquetesApi.genererPlanAnalyseIa(etude_id);
       setPlan(res.plan_analyse || "");

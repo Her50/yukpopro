@@ -110,7 +110,7 @@ export const MesEnquetesPage = () => {
             </h2>
             <p className="text-sm text-violet-800 mb-4">
               {t("enquetes.aide_demarrer",
-                 "Le LLM Opus 4.7 compose un formulaire complet (15-50 questions "
+                 "Yukpo compose un formulaire complet (15-50 questions "
                  + "structurées XLSForm) adapté EXACTEMENT à votre contexte. "
                  + "Aucune limite de domaine, aucun template figé.")}
             </p>

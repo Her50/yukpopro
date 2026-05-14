@@ -228,6 +228,14 @@ async def generer_recraft_replicate(
     """Recraft v3 via Replicate (alt fal.ai) — SOTA illustrations vectorielles.
     Si svg_pur=True → recraft-v3-svg (renvoie un SVG, pas un PNG)."""
     model = _MODEL_RECRAFT_V3_SVG if svg_pur else _MODEL_RECRAFT_V3
+    # Recraft v3 SVG n'accepte qu'une liste fermée de styles (engraving,
+    # line_art, line_circuit, linocut, any). Toute autre valeur (ex.
+    # "vector_illustration" passé par image_gen.generer_svg_natif) déclenche
+    # un HTTP 422. On mappe les styles "humains" vers les styles valides.
+    if svg_pur:
+        _STYLES_SVG_VALIDES = {"any", "engraving", "line_art", "line_circuit", "linocut"}
+        if style not in _STYLES_SVG_VALIDES:
+            style = "any"
     payload = {
         "prompt": prompt[:1000],
         "size": "1024x1024" if format_ == "square_hd" else "1024x1365",

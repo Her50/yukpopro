@@ -3592,12 +3592,26 @@ REGLES :
      plan_action / compte_rendu / note_de_synthese : uniquement pour de
      vrais rapports d'analyse, JAMAIS pour des contrats ou conventions.
 
-2. type_sortie ∈ rapport | slides | visuel | traduction_texte | traduction_fichier | ocr.
+2. type_sortie ∈ rapport | slides | visuel | site_web | landing | traduction_texte | traduction_fichier | ocr.
    - "rapport" : DOCX (rapports d'analyse, contrats, lettres, attestations)
    - "slides" : PPTX (présentations direction/commercial/formation/projet)
    - "visuel" : PDF print-ready CMYK (visuels imprimables Designer Pro :
      cartes de visite, flyers, brochures, livrets, menus, CV graphique,
      invitations, packaging, posts réseaux sociaux, albums, etc.)
+   - "site_web" : MINI-SITE WEB MULTI-PAGES (HTML+Tailwind, déployé Netlify).
+     L'utilisateur veut une PRÉSENCE WEB COMPLÈTE pour son business :
+     plusieurs pages (accueil + services + équipe + contact + blog…),
+     navigation, identité de marque, SEO. Mots-clés : « site web »,
+     « site internet », « mini-site », « site vitrine », « site
+     professionnel », « portail web », « génère le site de mon
+     cabinet/agence/entreprise », « présence en ligne pour mon
+     business », « vitrine web ». Pas un seul écran : plusieurs pages
+     liées. C'est ICI qu'il faut router toute demande de SITE WEB.
+   - "landing" : LANDING PAGE one-pager (HTML statique single-page).
+     L'utilisateur veut UNE SEULE PAGE WEB (campagne, lancement
+     produit, event, formulaire d'inscription). Mots-clés :
+     « landing page », « one-pager », « page d'atterrissage »,
+     « page web pour ma promo/mon event », « page de lancement ».
    - "traduction_texte" : l'user demande de traduire un TEXTE saisi
      inline dans le chat (sans fichier attaché). Ex : "Traduis ceci en
      anglais : Bonjour, comment allez-vous ?". Préserve la structure
@@ -3656,8 +3670,8 @@ REGLES :
 
 FORMAT JSON STRICT :
 {{
-  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_visuel" | "traduction_texte" | "traduction_fichier" | "ocr" | "ambigu",
-  "type_sortie": "rapport" | "slides" | "visuel" | "traduction_texte" | "traduction_fichier" | "ocr",
+  "intent_detecte": "generation_rapport" | "generation_slides" | "generation_visuel" | "generation_site_web" | "generation_landing" | "traduction_texte" | "traduction_fichier" | "ocr" | "ambigu",
+  "type_sortie": "rapport" | "slides" | "visuel" | "site_web" | "landing" | "traduction_texte" | "traduction_fichier" | "ocr",
   "template_id": "id_du_catalogue OU 'custom' si rien ne convient",
   "template_label": "Label humain (ex: 'Manuel utilisateur logiciel ERP')",
   "structure_custom": ["Section 1", "Section 2", "..."],  // dimensionne LIBREMENT (3 à 30 sections selon le brief), obligatoire si template_id="custom"
@@ -3817,6 +3831,54 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         )
         type_sortie = "visuel"
         data["type_sortie"] = "visuel"
+
+    # FILET SITE WEB / LANDING — symétrique au filet visuel.
+    # Le LLM Opus orchestrateur DOIT classer correctement, mais ~1 cas /50
+    # rate (ex : "génère le portail web de mon cabinet d'études" classé en
+    # 'visuel' → tombe sur freeform A4 catastrophique). Garde-fou keyword
+    # qui force site_web / landing. Si déclenché → renforcer prompt few-shot.
+    _kw_site_force = _re_kw_v.search(
+        r"\bsite\s+(?:web|internet|vitrine|professionnel|d['e]?\s*entreprise|"
+        r"\s*pour\s+(?:mon|notre|le|la|les))|"
+        r"\bmini[- ]?site|\bportail\s+(?:web|en\s+ligne|d['e]?\s*entreprise)|"
+        r"\bvitrine\s+(?:web|en\s+ligne|num[ée]rique)|"
+        r"\bpr[ée]sence\s+(?:web|en\s+ligne|num[ée]rique|digitale)|"
+        r"\bsite\s+(?:de|du|de\s+la|de\s+l['e])\s+(?:cabinet|agence|"
+        r"entreprise|soci[ée]t[ée]|compagnie|bureau|cabinet\s+de|"
+        r"firme|startup|organisation|association|fondation|ONG|"
+        r"institut|consultant|consulting|conseil)|"
+        r"\b(?:g[ée]n[ée]r[eè]?|cr[ée]e?r?|monte?r?|fais|d[ée]ploie?r?)"
+        r"\s+(?:moi\s+)?(?:un|le|mon|notre)\s+site",
+        _brief_low_kw,
+    )
+    _kw_landing_force = _re_kw_v.search(
+        r"\blanding\s*(?:page)?|\bone[- ]?pager|"
+        r"\bpage\s+(?:d['e]?\s*atterrissage|de\s+lancement|de\s+promo|"
+        r"d['e]?\s*event|d['e]?\s*[ée]v[ée]nement|d['e]?\s*inscription)|"
+        r"\b(?:page|site)\s+(?:web|internet)\s+(?:pour|de)\s+(?:ma\s+|mon\s+|"
+        r"notre\s+|le\s+)?(?:promo|lancement|campagne|event|"
+        r"[ée]v[ée]nement)",
+        _brief_low_kw,
+    )
+    if _kw_landing_force and type_sortie not in ("landing", "site_web"):
+        logger.warning(
+            f"[Orchestrer] FILET LANDING déclenché : LLM avait classé "
+            f"type_sortie='{type_sortie}' alors que le brief contient le "
+            f"keyword landing {_kw_landing_force.group(0)!r}. Override → 'landing'."
+        )
+        type_sortie = "landing"
+        data["type_sortie"] = "landing"
+    elif _kw_site_force and type_sortie != "site_web":
+        logger.warning(
+            f"[Orchestrer] FILET SITE WEB déclenché : LLM avait classé "
+            f"type_sortie='{type_sortie}' alors que le brief contient le "
+            f"keyword site {_kw_site_force.group(0)!r}. Override → 'site_web'. "
+            f"Brief : {(demande.brief or '')[:200]!r}. "
+            f"→ Renforcer le prompt few-shot si récurrent."
+        )
+        type_sortie = "site_web"
+        data["type_sortie"] = "site_web"
+
     if type_sortie == "slides":
         endpoint_cible = "/api/v1/pro/slides/generer"
         payload_pret = {
@@ -3842,6 +3904,30 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
             "pays": "CM",
             "langue": data.get("langue") or "fr",
             "export_cmyk": True,
+        }
+    elif type_sortie == "site_web":
+        # Mini-site web multi-pages HTML+Tailwind (Phase C). LLM Sonnet/Opus
+        # compose 5-7 pages, génère images IA pour hero/services/équipe, sauve
+        # en brouillon DB. Publication Netlify séparée via /sites/{slug}/publier.
+        endpoint_cible = "/api/v1/pro/sites/generer"
+        payload_pret = {
+            "brief": demande.brief,
+            "langue": data.get("langue") or "fr",
+            "cible": (data.get("parametres_extraits") or {}).get("cible"),
+            "ton": (data.get("parametres_extraits") or {}).get("ton"),
+            "generer_images": True,
+        }
+    elif type_sortie == "landing":
+        # Landing page web one-pager (HTML+Tailwind single file).
+        endpoint_cible = "/api/v1/pro/landing-page/generer"
+        params_extr = data.get("parametres_extraits") or {}
+        payload_pret = {
+            "sujet": demande.brief,
+            "objectif": params_extr.get("objectif") or "conversion",
+            "cible": params_extr.get("cible"),
+            "ton": params_extr.get("ton"),
+            "langue": data.get("langue") or "fr",
+            "generer_images": True,
         }
     elif type_sortie == "traduction_texte":
         # Traduction d'un texte inline (sans fichier joint). Le brief
@@ -3986,6 +4072,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     type_resultat = (
         "pdf"  if type_sortie == "visuel"
         else "pptx" if type_sortie == "slides"
+        else "html" if type_sortie in ("site_web", "landing")
         else "txt"  if type_sortie == "traduction_texte" and (data.get("format_sortie") or "docx") == "texte"
         else "docx"  # rapport, traduction_*, ocr → DOCX par défaut
     )
@@ -3996,12 +4083,27 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
     upload_field_name = "fichier"  # nom du champ FormData attendu par les deux endpoints concernés
 
     # Pattern de téléchargement par type d'endpoint final
-    if endpoint_cible.startswith("/api/v1/pro/"):
+    if endpoint_cible == "/api/v1/pro/sites/generer":
+        # Mini-site multi-pages : pas un fichier téléchargeable mais une
+        # ressource navigable. Le frontend ouvre l'éditeur du site sur slug.
+        dl_pattern = "/pro/sites/{fichier}"
+    elif endpoint_cible.startswith("/api/v1/pro/"):
         dl_pattern = "/api/v1/pro/generateurs/fichier/{fichier}"
     elif endpoint_cible.startswith("/api/v1/bureau/ocr"):
         dl_pattern = "/api/v1/bureau/ocr/fichier/{fichier}"
     else:
         dl_pattern = "/api/v1/bureau/documents/{fichier}"
+
+    # Pour les sites multi-pages, le champ identifiant n'est PAS `fichier_genere`
+    # mais `slug` — on l'injecte en priorité dans les hints.
+    file_field_hints_list = (
+        ["slug", "site_id", "fichier_genere", "url_telechargement"]
+        if type_sortie == "site_web"
+        else [
+            "fichier_genere", "fichier", "pdf_id",
+            "fichier_id", "url_telechargement", "download_url",
+        ]
+    )
 
     plan = {
         "label": template_label,
@@ -4017,10 +4119,7 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "upload_field_name": upload_field_name,
         # Indices au frontend pour extraire le fichier de la réponse, dans
         # l'ordre de priorité. Le frontend essaye chaque clé jusqu'à hit.
-        "file_field_hints": [
-            "fichier_genere", "fichier", "pdf_id",
-            "fichier_id", "url_telechargement", "download_url",
-        ],
+        "file_field_hints": file_field_hints_list,
         # Construction de l'URL finale pour téléchargement direct (le
         # frontend peut concaténer si besoin).
         "download_url_pattern": dl_pattern,
@@ -4033,7 +4132,11 @@ Retourne UNIQUEMENT le JSON, sans commentaire, sans markdown."""
         "template_id":            template_id,
         "template_label":         template_label,
         "mode_recommande":        mode_rec,
-        "format_sortie":          data.get("format_sortie") or ("pptx" if type_sortie == "slides" else "docx"),
+        "format_sortie":          data.get("format_sortie") or (
+            "pptx" if type_sortie == "slides"
+            else "html" if type_sortie in ("site_web", "landing")
+            else "docx"
+        ),
         "langue":                 data.get("langue") or "fr",
         "parametres_extraits":    params_extraits,
         "credits_estimes":        credits_estimes,

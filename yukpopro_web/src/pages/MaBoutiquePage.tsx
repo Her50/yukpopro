@@ -85,7 +85,7 @@ export const MaBoutiquePage = () => {
     if (!files || files.length === 0) return;
     if (files.length > 10) return toast.error("Max 10 photos");
     setBusy("magic");
-    toast.loading(`Analyse de ${files.length} photo(s) par IA Opus Vision…`, { id: "magic" });
+    toast.loading(`Analyse de ${files.length} photo(s) par IA Yukpo Vision…`, { id: "magic" });
     try {
       const arr = Array.from(files);
       const res = await generateurApi.shopMagicImport(arr, {
@@ -244,7 +244,7 @@ export const MaBoutiquePage = () => {
         </h2>
         <p className="text-sm text-violet-800 mb-3">
           {t("shop.magic_aide",
-             "Uploadez 1 à 10 photos de votre produit. L'IA Opus Vision compose "
+             "Uploadez 1 à 10 photos de votre produit. L'IA Yukpo Vision compose "
              + "automatiquement : titre vendeur SEO, description, prix suggéré, "
              + "catégorie, tags, variantes détectées.")}
         </p>

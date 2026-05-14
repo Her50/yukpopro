@@ -25,8 +25,30 @@ import type {
 // Instance axios partagée — exposée pour les composants externes
 // (ex: @yukpo/admin-dashboard) qui ont besoin d'hériter de l'auth + baseURL
 // configurés ici (intercepteurs JWT + gestion 401 ci-dessous).
+//
+// baseURL :
+//   - DEV (vite serve)  : "/api/v1" → vite proxy vers backend local
+//   - PROD (build statique sur Netlify) : URL absolue Fly.io en bypass
+//     du proxy Netlify. Netlify a un timeout dur de 26 s sur les
+//     rewrites externes, ce qui 504-ait les générations longues
+//     (sites multi-pages, slides web, vidéos, magic import…). En
+//     pointant direct sur https://yukpopro-backend.fly.dev, on
+//     contourne ce plafond ; le backend Fly garde 5 min de timeout.
+//     CORS : déjà autorisé par regex *.yukpomnang.com côté backend.
+//
+//   Override possible via VITE_API_URL pour staging/preview Netlify.
+const _envBase =
+  (typeof import.meta !== "undefined" &&
+    (import.meta as any).env?.VITE_API_URL) || null;
+const _isProd =
+  typeof import.meta !== "undefined" &&
+  Boolean((import.meta as any).env?.PROD);
+const API_BASE_URL =
+  _envBase ||
+  (_isProd ? "https://yukpopro-backend.fly.dev/api/v1" : "/api/v1");
+
 export const http: any = axios.create({
-  baseURL: "/api/v1",
+  baseURL: API_BASE_URL,
   timeout: 120_000,  // 2 min — agents Yukpo peuvent être lents
   headers: { "Content-Type": "application/json" },
 });

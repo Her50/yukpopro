@@ -1,0 +1,24 @@
+<clickhouse>
+  <listen_host>0.0.0.0</listen_host>
+  <listen_try>1</listen_try>
+
+  <!-- Mémoire : laisse ~400 Mo au système, alloue le reste aux queries -->
+  <max_server_memory_usage>1610612736</max_server_memory_usage>
+  <max_memory_usage>1342177280</max_memory_usage>
+
+  <!-- Plausible CE écrit beaucoup en batch ; on tolère ces tailles -->
+  <max_insert_block_size>1048576</max_insert_block_size>
+  <max_concurrent_queries>16</max_concurrent_queries>
+
+  <!-- Logs : on garde l'essentiel pour debug Fly mais pas verbose -->
+  <logger>
+    <level>warning</level>
+    <console>1</console>
+  </logger>
+
+  <!-- Paths persistés sur le volume Fly -->
+  <path>/var/lib/clickhouse/</path>
+  <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
+  <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
+  <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
+</clickhouse>

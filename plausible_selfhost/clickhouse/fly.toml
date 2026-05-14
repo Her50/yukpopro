@@ -1,0 +1,59 @@
+# Clickhouse pour Plausible CE — self-hosted Fly.io
+#
+# Architecture : Clickhouse 24.3 (LTS) single-node, écoute en interne uniquement
+# (yukpo-plausible-ch.flycast). Le frontal Plausible se connecte par flycast.
+#
+# Image : clickhouse/clickhouse-server:24.3 (stable LTS pour 1 an)
+# Volume : 10 GB (suffisant pour <1M pageviews/mois ; agrandir si besoin)
+# RAM : 2 GB (Clickhouse a besoin de RAM pour les merges + queries)
+#
+# Pas d'auto-stop : Clickhouse ne supporte pas bien les redémarrages à froid
+# (warm-up ~30s sur grosse base). On garde min_machines_running=1.
+
+app = "yukpo-plausible-ch"
+primary_region = "cdg"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  CLICKHOUSE_DB = "plausible_events_db"
+  CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT = "1"
+  CLICKHOUSE_SKIP_USER_SETUP = "1"
+
+# Service interne uniquement — pas d'exposition publique.
+# Plausible accède via yukpo-plausible-ch.flycast:9000 (TCP natif) ou :8123 (HTTP).
+[[services]]
+  internal_port = 8123
+  protocol = "tcp"
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 8123
+    handlers = []
+
+[[services]]
+  internal_port = 9000
+  protocol = "tcp"
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 9000
+    handlers = []
+
+[[mounts]]
+  source = "clickhouse_data"
+  destination = "/var/lib/clickhouse"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 2
+  memory_mb = 2048

@@ -79,7 +79,7 @@ export const DictionnaireEditor = ({ etude_id }: Props) => {
 
   const genererIA = async () => {
     setGenIA(true);
-    toast("Claude analyse vos variables…", { icon: "✨", duration: 20000 });
+    toast("Yukpo analyse vos variables…", { icon: "✨", duration: 20000 });
     try {
       const res = await enquetesApi.genererDictionnaireIa(etude_id);
       setVars(res.variables || {});

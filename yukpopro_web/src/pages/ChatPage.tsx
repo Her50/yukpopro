@@ -255,7 +255,7 @@ export const ChatPage = () => {
         if (wantsSite) {
           try {
             updateLastAssistantMessage(
-              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_LLM Opus 4.7 compose 7-9 sections par page + paragraphes narratifs denses + images IA hero._",
+              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_Yukpo compose 7-9 sections par page + paragraphes narratifs denses + images IA hero._",
               null,
             );
             const result = await generateurApi.genererSite({
@@ -473,7 +473,7 @@ export const ChatPage = () => {
         if (modifSiteMatch) {
           try {
             updateLastAssistantMessage(
-              "🔧 Modification incrémentale en cours… (LLM Opus identifie la page concernée + applique)",
+              "🔧 Modification incrémentale en cours… (Yukpo identifie la page concernée et applique le changement)",
               null,
             );
             const res = await generateurApi.modifierSiteParChat(content);
@@ -506,7 +506,7 @@ export const ChatPage = () => {
             `🛒 **Boutique e-commerce YukpoShop**\n\n` +
             `Pour démarrer :\n` +
             `1. [Ouvrir ma boutique](/ma-boutique) — initialise + dashboard produits/commandes\n` +
-            `2. Upload 1-10 photos → Magic Import IA Opus Vision compose la fiche produit complète (titre/desc/prix/catégorie/tags/variantes)\n` +
+            `2. Upload 1-10 photos → Magic Import Yukpo Vision compose la fiche produit complète (titre/desc/prix/catégorie/tags/variantes)\n` +
             `3. Publier → storefront déployé sur \`<slug>.yukpomnang.com\` avec catalogue + page produit + panier + checkout multi-provider (Orange Money, MTN MoMo, Stripe, cash)\n\n` +
             `🎯 [→ Aller à ma boutique](/ma-boutique)`,
             null,
@@ -521,7 +521,7 @@ export const ChatPage = () => {
         if (enqueteMatch || llmIntent?.intent === "enquete_formulaire") {
           try {
             updateLastAssistantMessage(
-              "📋 Génération de votre formulaire / étude en cours… (~20-40s)\n_LLM Sonnet compose 15-40 questions XLSForm + dictionnaire variables._",
+              "📋 Génération de votre formulaire / étude en cours… (~20-40s)\n_Yukpo compose 15-40 questions XLSForm + dictionnaire variables._",
               null,
             );
             const { data } = await http.post(
@@ -557,7 +557,7 @@ export const ChatPage = () => {
         if (siteMultiMatch) {
           try {
             updateLastAssistantMessage(
-              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_LLM Sonnet compose 5-7 pages + images IA hero._",
+              "🌐 Génération du mini-site multi-pages en cours… (~30-90s)\n_Yukpo compose 5-7 pages + images IA hero._",
               null,
             );
             const result = await generateurApi.genererSite({

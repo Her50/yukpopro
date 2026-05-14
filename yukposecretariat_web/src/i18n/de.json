@@ -237,7 +237,7 @@
     "depthShortDesc": "1-2 Seiten · schnell",
     "depthStandardDesc": "3-5 Seiten",
     "depthLongDesc": "10+ Seiten · leistungsstarkes Modell",
-    "longModeNote": "Langer Modus: nutzt ein leistungsstärkeres Modell (Sonnet/Opus) mit 24K-Token-Kapazität. Die Erzeugung kann 30-60 Sek. dauern.",
+    "longModeNote": "Langer Modus: nutzt ein leistungsstärkeres Modell (Yukpo) mit 24K-Token-Kapazität. Die Erzeugung kann 30-60 Sek. dauern.",
     "transferredToText": "Text in den Reiter Text übertragen — geben Sie den erwarteten Dokumenttyp an",
     "sourceMarker": "Quelle: {{source}}",
     "sourceScan": "Scan OCR",

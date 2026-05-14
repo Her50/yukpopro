@@ -3031,6 +3031,10 @@ commentaire ni markdown.
         # Fix bug (2026-05-14) : texte jaune fluo sur fond clair illisible —
         # validateur WCAG contraste ratio ≥4.5, bascule blanc/noir si KO.
         data = _corriger_contraste_textes(data)
+        # Fix bug (2026-05-14) : badge "HLANAI" tronqué (au lieu de "HLANALYTIC") —
+        # boîte trop étroite vs taille_pt × len(contenu). Auto-fit en élargissant
+        # w_mm (si espace dispo) ou en réduisant taille_pt.
+        data = _corriger_textes_tronques(data)
         data = _normaliser_pagination_livret(data, brief)
         data = _capper_images_ia_par_page(data, max_par_page=3)
         data = _garantir_crop_marks_print_ready(data)
@@ -3298,6 +3302,98 @@ def _corriger_contraste_textes(data: dict) -> dict:
         logger.warning(
             f"[FreeformComposer] Anti-contraste : {nb_corrections} texte(s) "
             f"basculé(s) sur blanc/noir (ratio WCAG <4.5 détecté)."
+        )
+    return data
+
+
+def _corriger_textes_tronques(data: dict) -> dict:
+    """Bug observé prod (2026-05-14, brief HLANALYTIC) : badge « HLANAI »
+    tronqué au lieu de « HLANALYTIC » — boîte trop étroite (w_mm) face à la
+    taille_pt × len(contenu). ReportLab tronque sans avertir.
+
+    Pour chaque texte COURT (≤30 chars, sans saut de ligne — likely titre/
+    badge), on estime la largeur naturelle (char_w_mm × len). Si w_mm est
+    plus étroit que 90% de cette largeur naturelle :
+      A. On tente d'élargir w_mm en utilisant l'espace libre à droite
+         (jusqu'à marge de page).
+      B. Sinon, on réduit taille_pt progressivement (-1pt jusqu'à fit) sans
+         descendre sous 6pt (lisibilité minimale).
+
+    N'affecte pas les paragraphes longs (>30 chars) qui word-wrap proprement.
+    N'affecte pas les contenus avec '\\n' explicites (déjà multi-lignes).
+    """
+    pages = data.get("pages") or []
+    fmt_doc = data.get("format_mm") or [210, 297]
+    nb_widened = 0
+    nb_shrunk = 0
+    MARGE_MM = 3.0  # marge de sécurité bord de page
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        fmt_page = page.get("format_mm") or fmt_doc
+        W = float(fmt_page[0])
+        elements = page.get("elements") or []
+        # Liste des bboxes texte (pour ne pas écraser un voisin en élargissant)
+        autres_bbox = [
+            _estimer_bbox_texte(el)
+            for el in elements
+            if isinstance(el, dict) and el.get("type") == "texte"
+        ]
+        for el in elements:
+            if not isinstance(el, dict) or el.get("type") != "texte":
+                continue
+            contenu = str(el.get("contenu") or "").strip()
+            if not contenu or "\n" in contenu or len(contenu) > 30:
+                continue
+            try:
+                x = float(el.get("x_mm") or 0)
+                y = float(el.get("y_mm") or 0)
+                w = float(el.get("w_mm") or 0)
+                taille = float(el.get("taille_pt") or 10)
+            except (TypeError, ValueError):
+                continue
+            if w <= 0 or taille <= 0:
+                continue
+            # Largeur naturelle ≈ chars × char_w (Helvetica/Inter)
+            # Bold = facteur +1.1, italic = identique. On ajoute 4mm padding.
+            facteur = 1.10 if el.get("bold") or el.get("gras") else 1.0
+            char_w_mm = taille * 0.58 * 0.3528 * facteur
+            natural_w = len(contenu) * char_w_mm + 4.0
+            if w >= natural_w * 0.90:
+                continue  # rentre confortablement
+            # A. Tenter d'élargir w_mm vers la droite
+            new_w = min(natural_w, W - x - MARGE_MM)
+            if new_w > w + 2.0:
+                # Vérifier qu'on n'écrase pas un voisin
+                ma_bbox = (x, y, x + w, y + max(5, taille * 0.6))
+                new_bbox = (x, y, x + new_w, y + max(5, taille * 0.6))
+                conflit = False
+                for ob in autres_bbox:
+                    if ob == ma_bbox:
+                        continue
+                    if _bbox_overlap(new_bbox, ob) and not _bbox_overlap(ma_bbox, ob):
+                        conflit = True
+                        break
+                if not conflit:
+                    el["w_mm"] = round(new_w, 1)
+                    el["_w_auto_etendue"] = True
+                    nb_widened += 1
+                    continue
+            # B. Sinon, réduire taille_pt jusqu'à fit (plancher 6pt)
+            nouvelle_taille = taille
+            while nouvelle_taille > 6.5:
+                nouvelle_taille -= 0.5
+                cw = nouvelle_taille * 0.58 * 0.3528 * facteur
+                if len(contenu) * cw + 4.0 <= w:
+                    break
+            if nouvelle_taille < taille:
+                el["taille_pt"] = round(nouvelle_taille, 1)
+                el["_taille_auto_reduite"] = True
+                nb_shrunk += 1
+    if nb_widened or nb_shrunk:
+        logger.warning(
+            f"[FreeformComposer] Anti-troncature : {nb_widened} bloc(s) élargi(s) "
+            f"horizontalement, {nb_shrunk} bloc(s) réduit(s) en taille_pt."
         )
     return data
 
@@ -3742,14 +3838,21 @@ async def _remplir_sections_vides(
                 contenu2 = (el2.get("contenu") or "").strip()
                 if _texte_quasi_vide(contenu2) or len(contenu2) < 40:
                     continue
+                # Exclure le voisin s'il s'agit lui-même d'un autre label (sinon
+                # 2 labels orphelins voisins se "valident" mutuellement).
+                if _est_label_section(contenu2):
+                    continue
                 y2 = el2.get("y_mm") or 0
                 x2 = el2.get("x_mm") or 0
                 w2 = el2.get("w_mm") or 0
-                # Voisin sous le label, x recouvrant
-                if (
-                    el_y < y2 < el_y + 35
-                    and not (x2 + w2 < el_x or x2 > el_x + el_w)
-                ):
+                # Voisin sous le label, X recouvrant à ≥50% de la largeur du label
+                # (auparavant tout overlap X validait — un footer transverse
+                # validait n'importe quel label, d'où bug HLANALYTIC : sections
+                # « Secteurs couverts » et « Cas client » restées vides).
+                if not (el_y < y2 < el_y + 28):
+                    continue
+                ox = max(0.0, min(x2 + w2, el_x + el_w) - max(x2, el_x))
+                if el_w > 0 and ox / el_w >= 0.50:
                     voisin_rempli = True
                     break
             if voisin_rempli:

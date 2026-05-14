@@ -42,3 +42,7 @@ tests/qa_agent/fixtures/*.mp3
 
 # Local Netlify folder
 .netlify
+
+# Plausible self-host — secrets locaux
+plausible_selfhost/.plausible-pg-pass.txt
+plausible_selfhost/.env

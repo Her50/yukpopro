@@ -1131,7 +1131,7 @@ export default function DesignerProPanel() {
               {showMultilingual && (
                 <div className="mt-2 space-y-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
                   <p className="text-xs text-blue-800">
-                    Génère le même projet dans plusieurs langues (~24 FCFA/langue, traduction Sonnet).
+                    Génère le même projet dans plusieurs langues (~24 FCFA/langue, traduction IA Yukpo).
                   </p>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
                     {[

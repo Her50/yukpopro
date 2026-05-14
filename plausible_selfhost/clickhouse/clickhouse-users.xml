@@ -1,0 +1,38 @@
+<clickhouse>
+  <users>
+    <!-- User default sans mot de passe : accessible uniquement via flycast
+         (réseau privé Fly) — pas d'exposition publique. Plausible se
+         connecte avec ce user. -->
+    <default>
+      <password></password>
+      <profile>default</profile>
+      <quota>default</quota>
+      <networks>
+        <ip>::/0</ip>
+      </networks>
+      <access_management>1</access_management>
+    </default>
+  </users>
+
+  <profiles>
+    <default>
+      <max_memory_usage>1342177280</max_memory_usage>
+      <max_threads>4</max_threads>
+      <use_uncompressed_cache>0</use_uncompressed_cache>
+      <load_balancing>random</load_balancing>
+    </default>
+  </profiles>
+
+  <quotas>
+    <default>
+      <interval>
+        <duration>3600</duration>
+        <queries>0</queries>
+        <errors>0</errors>
+        <result_rows>0</result_rows>
+        <read_rows>0</read_rows>
+        <execution_time>0</execution_time>
+      </interval>
+    </default>
+  </quotas>
+</clickhouse>

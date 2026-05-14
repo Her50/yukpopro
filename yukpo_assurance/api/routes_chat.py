@@ -406,7 +406,7 @@ def _reponse_demo_cima(question: str) -> str:
             "- **15 jours** pour organiser la contre-expertise *(Art. 232 CIMA)*\n\n"
             "### Pénalités de retard\n"
             "- Dépassement du délai de paiement : **taux légal + 50% par mois** *(Art. 12-ter CIMA)*\n\n"
-            "_💡 Pour une analyse personnalisée de vos dossiers, configurez votre clé API Claude dans le fichier .env_"
+            "_💡 Pour une analyse personnalisée de vos dossiers, configurez la clé API Yukpo dans le fichier .env_"
         )
     if any(k in q for k in ["solvabilité", "solvabilite", "marge", "ratio"]):
         return (
@@ -423,7 +423,7 @@ def _reponse_demo_cima(question: str) -> str:
             "### Couverture provisions — Art. 335 CIMA\n"
             "- Actifs représentatifs ≥ **100%** des provisions techniques\n\n"
             "Votre ratio affiché de **142%** est conforme aux exigences CIMA.\n\n"
-            "_💡 Pour une analyse détaillée de vos ratios, configurez votre clé API Claude dans le fichier .env_"
+            "_💡 Pour une analyse détaillée de vos ratios, configurez la clé API Yukpo dans le fichier .env_"
         )
     if any(k in q for k in ["indemnité", "indemnite", "fracture", "ippe", "ipp", "corporel"]):
         return (
@@ -455,7 +455,7 @@ def _reponse_demo_cima(question: str) -> str:
             "• **Excel** : états C1-C20, tableaux de bord, balance OHADA\n"
             "• **PowerPoint** : présentations CA, analyses fraude\n\n"
             "👉 Utilisez l'onglet **Rapports & Documents** pour accéder aux templates.\n\n"
-            "_💡 Pour la génération IA avancée, configurez votre clé Claude API dans .env_"
+            "_💡 Pour la génération IA avancée, configurez la clé API Yukpo dans .env_"
         )
     return (
         f"🤖 **Yukpo IA — Mode démo CIMA**\n\n"

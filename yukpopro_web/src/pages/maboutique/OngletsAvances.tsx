@@ -175,7 +175,7 @@ export const OngletROAS = () => {
 
   const onRecos = async () => {
     setBusy("recos");
-    toast.loading("Analyse IA Opus…", { id: "recos" });
+    toast.loading("Analyse IA Yukpo…", { id: "recos" });
     try {
       const r = await generateurApi.shopAdsRecommandations(jours);
       setRecos(r.recommandations_md || "");
@@ -207,7 +207,7 @@ export const OngletROAS = () => {
         <button onClick={onRecos} disabled={busy === "recos" || !data?.par_campagne?.length}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium min-h-[44px] disabled:opacity-50">
           {busy === "recos" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {t("shop.ads_recos", "Recos IA Opus")}
+          {t("shop.ads_recos", "Recos IA Yukpo")}
         </button>
       </div>
 
@@ -244,7 +244,7 @@ export const OngletROAS = () => {
           {recos && (
             <div className="bg-violet-50 border border-violet-200 rounded-xl p-5 mb-6">
               <h3 className="font-bold text-violet-900 mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> {t("shop.ads_recos_titre", "Recommandations IA Opus")}
+                <Sparkles className="w-4 h-4" /> {t("shop.ads_recos_titre", "Recommandations IA Yukpo")}
               </h3>
               <div className="prose prose-sm max-w-none text-slate-800">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{recos}</ReactMarkdown>
@@ -376,7 +376,7 @@ export const OngletCRM = () => {
 
   const onScorer = async () => {
     setBusy("scorer");
-    toast.loading("Scoring IA Sonnet…", { id: "sc" });
+    toast.loading("Scoring IA Yukpo…", { id: "sc" });
     try {
       const r = await generateurApi.shopCrmScorer(50);
       toast.success(`✓ ${r.nb_clients_scores} clients scorés`, { id: "sc" });

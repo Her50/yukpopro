@@ -237,7 +237,7 @@
     "depthShortDesc": "1-2 páginas · rápido",
     "depthStandardDesc": "3-5 páginas",
     "depthLongDesc": "10+ páginas · modelo poderoso",
-    "longModeNote": "Modo longo: usa um modelo mais poderoso (Sonnet/Opus) com capacidade de 24 mil tokens. A geração pode levar 30-60s.",
+    "longModeNote": "Modo longo: usa um modelo mais poderoso (Yukpo) com capacidade de 24 mil tokens. A geração pode levar 30-60s.",
     "transferredToText": "Texto transferido para a aba Texto — especifique o tipo de documento esperado",
     "sourceMarker": "Origem: {{source}}",
     "sourceScan": "Scan OCR",
