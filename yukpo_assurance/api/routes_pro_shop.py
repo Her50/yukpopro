@@ -368,6 +368,15 @@ def _produit_to_dict(p: ShopProductDB) -> dict:
         "seo_titre": p.seo_titre, "seo_desc": p.seo_desc,
         "seo_keywords_json": p.seo_keywords_json,
         "statut": p.statut, "source": p.source,
+        # Piste 6a — enrichissement IA Yukpo Rust (exposé à l'UI)
+        "yukpo_category": getattr(p, "yukpo_category", None),
+        "yukpo_specialized_type": getattr(p, "yukpo_specialized_type", None),
+        "yukpo_tags_json": getattr(p, "yukpo_tags_json", None),
+        "yukpo_description_enriched": getattr(p, "yukpo_description_enriched", None),
+        "yukpo_quality_score": getattr(p, "yukpo_quality_score", None),
+        "yukpo_language_detected": getattr(p, "yukpo_language_detected", None),
+        "yukpo_enriched_at": (p.yukpo_enriched_at.isoformat()
+                              if getattr(p, "yukpo_enriched_at", None) else None),
         "cree_le": p.cree_le.isoformat(),
         "modif_le": p.modif_le.isoformat(),
     }

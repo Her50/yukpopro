@@ -1530,6 +1530,20 @@ class ShopProductDB(Base):
     rust_sync_error      = Column(Text, nullable=True)
     rust_synced_at       = Column(DateTime, nullable=True)
     rust_sync_attempts   = Column(Integer, nullable=False, default=0)
+    # ── Piste 6a — enrichissement IA renvoyé par Rust au moment du sync ──
+    yukpo_category               = Column(String(60), nullable=True,
+        comment="Catégorie auto-détectée par IA Yukpo Rust (electronique/mode/...)")
+    yukpo_specialized_type       = Column(String(80), nullable=True,
+        comment="Sous-type métier (smartphone, medicament_otc, chaussure_femme, ...)")
+    yukpo_tags_json              = Column(JSON, nullable=True,
+        comment="3-8 tags FR normalisés générés par Rust")
+    yukpo_description_enriched   = Column(Text, nullable=True,
+        comment="Description commerciale 120-200 mots générée si l'originale était <50 chars")
+    yukpo_language_detected      = Column(String(8), nullable=True)
+    yukpo_quality_score          = Column(Integer, nullable=True,
+        comment="0-100 — score qualité fiche (titre+desc+photos+prix)")
+    yukpo_enriched_at            = Column(DateTime, nullable=True)
+    yukpo_enrichment_cost_tokens = Column(Integer, nullable=True)
     cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
     modif_le             = Column(DateTime, default=datetime.utcnow,
                                    onupdate=datetime.utcnow, nullable=False)

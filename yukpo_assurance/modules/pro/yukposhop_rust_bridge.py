@@ -214,6 +214,7 @@ async def publier_produit_vers_rust(
     last_error = None
     last_status = None
     rust_service_id: Optional[int] = None
+    enrichment: Optional[dict] = None  # Piste 6a
 
     async with httpx.AsyncClient(timeout=cfg["timeout_s"]) as client:
         for attempt_idx in range(len(RETRY_BACKOFFS_S) + 1):
@@ -226,6 +227,10 @@ async def publier_produit_vers_rust(
                     if not isinstance(rust_service_id, int):
                         last_error = f"Réponse Rust sans service_id valide : {data}"
                         break
+                    # Piste 6a — récupération enrichissement IA (best-effort)
+                    enrich_payload = data.get("enrichment")
+                    if isinstance(enrich_payload, dict):
+                        enrichment = enrich_payload
                     last_error = None
                     break
                 elif 400 <= resp.status_code < 500 and resp.status_code != 429:
@@ -255,6 +260,30 @@ async def publier_produit_vers_rust(
         p.rust_sync_status = "synced"
         p.rust_synced_at = datetime.utcnow()
         p.rust_sync_error = None
+        # Piste 6a — store enrichment fields si dispo
+        if enrichment:
+            cat = enrichment.get("category")
+            if isinstance(cat, str) and cat:
+                p.yukpo_category = cat[:60]
+            st = enrichment.get("specialized_type")
+            if isinstance(st, str) and st and st != "null":
+                p.yukpo_specialized_type = st[:80]
+            tags = enrichment.get("tags_fr")
+            if isinstance(tags, list) and tags:
+                p.yukpo_tags_json = [str(t)[:60] for t in tags if isinstance(t, str)][:8]
+            desc = enrichment.get("description_enriched_fr")
+            if isinstance(desc, str) and desc and desc != "null":
+                p.yukpo_description_enriched = desc[:4000]
+            lang = enrichment.get("language_detected")
+            if isinstance(lang, str) and lang:
+                p.yukpo_language_detected = lang[:8]
+            qs = enrichment.get("quality_score")
+            if isinstance(qs, int):
+                p.yukpo_quality_score = max(0, min(100, qs))
+            ct = enrichment.get("cost_tokens")
+            if isinstance(ct, int):
+                p.yukpo_enrichment_cost_tokens = ct
+            p.yukpo_enriched_at = datetime.utcnow()
     else:
         p.rust_sync_status = "failed"
         p.rust_sync_error = (last_error or "Inconnu")[:1000]
