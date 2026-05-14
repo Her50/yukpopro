@@ -3024,6 +3024,13 @@ commentaire ni markdown.
         # icônes superposées au texte + livret 26 pages avec 8 images
         # IA/page → 53min de rendu impossible à attendre côté chat.
         data = _corriger_collisions_icones(data)
+        # Fix bug (2026-05-14) : 3 paragraphes Texte superposés —
+        # dédoublonnage par similarité contenu + repositionnement vertical
+        # des collisions résiduelles.
+        data = _corriger_collisions_textes(data)
+        # Fix bug (2026-05-14) : texte jaune fluo sur fond clair illisible —
+        # validateur WCAG contraste ratio ≥4.5, bascule blanc/noir si KO.
+        data = _corriger_contraste_textes(data)
         data = _normaliser_pagination_livret(data, brief)
         data = _capper_images_ia_par_page(data, max_par_page=3)
         data = _garantir_crop_marks_print_ready(data)
@@ -3168,6 +3175,250 @@ def _corriger_collisions_icones(data: dict) -> dict:
         logger.warning(
             f"[FreeformComposer] Post-validation : {nb_corrections} élément(s) "
             f"décoratif(s) repositionné(s)/redimensionné(s) (anti-collision texte)."
+        )
+    return data
+
+
+def _normaliser_contenu_pour_dedup(s: str) -> str:
+    """Normalise un contenu texte pour comparer les doublons : lowercase,
+    suppression ponctuation/espaces redondants. Utilisé pour détecter
+    les paragraphes LLM dupliqués qui s'affichent au même endroit."""
+    import re as _re
+    s = (s or "").lower()
+    s = _re.sub(r"[^\w\s]", " ", s)
+    s = _re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def _similarite_jaccard(a: str, b: str) -> float:
+    """Similarité Jaccard sur tokens (ratio mots communs / mots totaux).
+    Rapide, déterministe, pas de dépendance externe."""
+    sa = set(_normaliser_contenu_pour_dedup(a).split())
+    sb = set(_normaliser_contenu_pour_dedup(b).split())
+    if not sa and not sb:
+        return 1.0
+    if not sa or not sb:
+        return 0.0
+    return len(sa & sb) / len(sa | sb)
+
+
+def _hex_to_rgb01(hex_str: str) -> tuple[float, float, float]:
+    """Parse hex couleur → tuple RGB 0..1."""
+    s = (hex_str or "").lstrip("#")
+    if len(s) == 3:
+        s = "".join(c + c for c in s)
+    if len(s) != 6:
+        return (1.0, 1.0, 1.0)
+    try:
+        r = int(s[0:2], 16) / 255.0
+        g = int(s[2:4], 16) / 255.0
+        b = int(s[4:6], 16) / 255.0
+        return (r, g, b)
+    except ValueError:
+        return (1.0, 1.0, 1.0)
+
+
+def _luminance_relative(rgb: tuple[float, float, float]) -> float:
+    """WCAG 2.0 relative luminance. https://www.w3.org/TR/WCAG20/#relativeluminancedef"""
+    def _channel(c: float) -> float:
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (_channel(c) for c in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _ratio_contraste(c1: tuple, c2: tuple) -> float:
+    """WCAG ratio entre 2 couleurs RGB 0..1. ≥4.5 pour AA texte normal."""
+    l1 = _luminance_relative(c1)
+    l2 = _luminance_relative(c2)
+    light, dark = max(l1, l2), min(l1, l2)
+    return (light + 0.05) / (dark + 0.05)
+
+
+def _corriger_contraste_textes(data: dict) -> dict:
+    """Bug observé prod (2026-05-14) : Texte jaune fluo (#FFD700) sur fond
+    vert clair → contraste WCAG <2:1, illisible.
+
+    Pour chaque texte sur fond non-blanc, vérifie le contraste WCAG.
+    Si ratio < 4.5 (AA texte normal), bascule la couleur du texte sur
+    blanc (#FFFFFF) ou noir (#0F172A) selon la luminance du fond
+    (formule simple : fond clair → texte noir, fond sombre → texte blanc).
+    """
+    pages = data.get("pages") or []
+    nb_corrections = 0
+
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        # Couleur fond page : page.fond_couleur ou défaut blanc
+        fond_page_hex = page.get("fond_couleur") or "#FFFFFF"
+        fond_page_rgb = _hex_to_rgb01(fond_page_hex)
+
+        elements = page.get("elements") or []
+        # Identifie les rectangles "fond" qui peuvent servir de fond local
+        rects = [
+            el for el in elements
+            if isinstance(el, dict) and el.get("type") == "rectangle" and el.get("remplissage")
+        ]
+
+        for el in elements:
+            if not isinstance(el, dict) or el.get("type") != "texte":
+                continue
+            couleur_hex = el.get("couleur") or "#000000"
+            rgb_txt = _hex_to_rgb01(couleur_hex)
+
+            # Détermine le fond effectif sous ce texte
+            x = float(el.get("x_mm") or 0)
+            y = float(el.get("y_mm") or 0)
+            w = float(el.get("w_mm") or 50)
+            h_estim = max(5, float(el.get("taille_pt") or 10) * 0.6)  # h approx
+            cx, cy = x + w / 2, y + h_estim / 2
+            fond_eff_rgb = fond_page_rgb
+            for r in rects:
+                rx = float(r.get("x_mm") or 0)
+                ry = float(r.get("y_mm") or 0)
+                rw = float(r.get("w_mm") or 0)
+                rh = float(r.get("h_mm") or 0)
+                if rx <= cx <= rx + rw and ry <= cy <= ry + rh:
+                    fond_eff_rgb = _hex_to_rgb01(r.get("remplissage") or "#FFFFFF")
+                    # Pas de break — un texte peut être sur plusieurs rects empilés,
+                    # on garde le dernier (le plus au-dessus dans l'ordre Z naturel)
+
+            ratio = _ratio_contraste(rgb_txt, fond_eff_rgb)
+            if ratio >= 4.5:
+                continue  # contraste OK
+
+            # Bascule texte sur blanc/noir selon luminance du fond
+            l_fond = _luminance_relative(fond_eff_rgb)
+            nouvelle_couleur = "#FFFFFF" if l_fond < 0.5 else "#0F172A"
+            el["couleur"] = nouvelle_couleur
+            el["_contraste_corrige"] = round(ratio, 2)
+            nb_corrections += 1
+
+    if nb_corrections:
+        logger.warning(
+            f"[FreeformComposer] Anti-contraste : {nb_corrections} texte(s) "
+            f"basculé(s) sur blanc/noir (ratio WCAG <4.5 détecté)."
+        )
+    return data
+
+
+def _corriger_collisions_textes(data: dict) -> dict:
+    """Bug observé prod (2026-05-14) : 3 paragraphes Texte différents
+    superposés au même endroit sur fond vert — LLM Sonnet a halluciné
+    plusieurs versions de description, placeur math ne les a pas dédupliqués.
+
+    Stratégie en 2 temps :
+      A. DÉDUPLICATION : si 2 Textes ont bboxes en overlap >50% ET contenus
+         similaires (Jaccard ≥0.5), on garde celui avec le contenu le plus
+         long (le plus détaillé) et on supprime les autres.
+      B. REPOSITIONNEMENT : pour les Textes en collision SANS être doublons
+         (≥30% overlap, Jaccard <0.4), on déplace les blocs en conflit
+         vers la prochaine ligne libre verticalement (si dispo) ; sinon
+         on les sort de la page visible (`statut`=hors_page) pour
+         signaler une régénération nécessaire.
+
+    Critères :
+      • Seuil overlap surface : >=30% des surfaces individuelles
+      • Seuil Jaccard contenu similaire : >=0.5 → doublon
+      • Seuil Jaccard contenu différent : <0.4 → vraie collision
+    """
+    pages = data.get("pages") or []
+    nb_dedup = 0
+    nb_repositionne = 0
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        fmt = page.get("format_mm") or data.get("format_mm") or [210, 297]
+        W, H = float(fmt[0]), float(fmt[1])
+        elements = page.get("elements") or []
+        textes = [
+            (i, el) for i, el in enumerate(elements)
+            if isinstance(el, dict) and el.get("type") == "texte"
+        ]
+        if len(textes) < 2:
+            continue
+
+        # Calcule les bboxes une fois
+        bboxes = {i: _estimer_bbox_texte(el) for i, el in textes}
+
+        # A. Détection paires en collision
+        a_supprimer: set[int] = set()
+        a_repositionner: list[int] = []
+        for i_pos, (i, el_a) in enumerate(textes):
+            if i in a_supprimer:
+                continue
+            for j, el_b in textes[i_pos + 1:]:
+                if j in a_supprimer:
+                    continue
+                ba, bb = bboxes[i], bboxes[j]
+                if not _bbox_overlap(ba, bb):
+                    continue
+                # Calcule % overlap par rapport à la plus petite des deux
+                ow = min(ba[2], bb[2]) - max(ba[0], bb[0])
+                oh = min(ba[3], bb[3]) - max(ba[1], bb[1])
+                area_overlap = max(0.0, ow) * max(0.0, oh)
+                area_a = max(1e-3, (ba[2] - ba[0]) * (ba[3] - ba[1]))
+                area_b = max(1e-3, (bb[2] - bb[0]) * (bb[3] - bb[1]))
+                ratio_min = area_overlap / min(area_a, area_b)
+                if ratio_min < 0.30:
+                    continue  # collision marginale, on laisse
+                # Similarité contenu
+                sim = _similarite_jaccard(
+                    el_a.get("contenu") or "", el_b.get("contenu") or "",
+                )
+                if sim >= 0.5:
+                    # Doublon : garde le plus long
+                    len_a = len(el_a.get("contenu") or "")
+                    len_b = len(el_b.get("contenu") or "")
+                    a_supprimer.add(j if len_a >= len_b else i)
+                    nb_dedup += 1
+                    if (j if len_a >= len_b else i) == i:
+                        break  # i supprimé, plus la peine de continuer ses comparaisons
+                else:
+                    # Vraie collision sans similarité — repositionne le plus court
+                    len_a = len(el_a.get("contenu") or "")
+                    len_b = len(el_b.get("contenu") or "")
+                    a_repositionner.append(j if len_a >= len_b else i)
+
+        # B. Applique les suppressions
+        if a_supprimer:
+            page["elements"] = [
+                el for idx, el in enumerate(elements) if idx not in a_supprimer
+            ]
+            elements = page["elements"]
+            # Recalcule les bboxes restants
+            textes = [
+                (i, el) for i, el in enumerate(elements)
+                if isinstance(el, dict) and el.get("type") == "texte"
+            ]
+            bboxes = {i: _estimer_bbox_texte(el) for i, el in textes}
+
+        # C. Repositionne les blocs en collision restants
+        for idx in a_repositionner:
+            if idx in a_supprimer or idx >= len(elements):
+                continue
+            el = elements[idx]
+            if not isinstance(el, dict) or el.get("type") != "texte":
+                continue
+            bb = _estimer_bbox_texte(el)
+            h_bloc = bb[3] - bb[1]
+            # Trouve la prochaine zone Y libre verticalement (descend par pas de 5mm)
+            other_bboxes = [bboxes[i] for i, _ in textes if i != idx]
+            margin_y = 4.0
+            for offset in range(int(bb[1]) + 5, int(H - h_bloc - margin_y), 5):
+                cand = (bb[0], offset, bb[2], offset + h_bloc)
+                if not any(_bbox_overlap(cand, o) for o in other_bboxes):
+                    el["y_mm"] = round(offset, 1)
+                    nb_repositionne += 1
+                    break
+            else:
+                # Aucune zone libre → marque comme hors page (signal de régénération)
+                el["_overlap_non_resolu"] = True
+
+    if nb_dedup or nb_repositionne:
+        logger.warning(
+            f"[FreeformComposer] Anti-collision textes : {nb_dedup} doublon(s) "
+            f"supprimé(s), {nb_repositionne} bloc(s) repositionné(s) verticalement."
         )
     return data
 
