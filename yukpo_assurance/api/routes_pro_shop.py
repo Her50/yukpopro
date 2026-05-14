@@ -1146,6 +1146,8 @@ async def creer_order_public(
     db.add(order)
     await db.flush()
 
+    # ── Piste 5 : décrément stock local + collecte pour push Rust ────────
+    decrements_pour_rust: list[tuple[int, int]] = []  # (product_id, qte)
     for it in payload.items:
         db.add(ShopOrderItemDB(
             order_id=order.id, product_id=it.id,
@@ -1153,9 +1155,37 @@ async def creer_order_public(
             photo_url=it.photo, variante_label=it.variante_label,
             variante_json=it.variante_json,
         ))
+        # Décrément stock local (best-effort, n'empêche pas l'order)
+        if it.id and it.qte > 0:
+            try:
+                p = (await db.execute(
+                    select(ShopProductDB).where(ShopProductDB.id == it.id)
+                )).scalar_one_or_none()
+                if p:
+                    p.stock = max(0, (p.stock or 0) - it.qte)
+                    decrements_pour_rust.append((it.id, it.qte))
+            except Exception as _e:
+                logger.warning(f"[Order] décrément stock local échec produit={it.id}: {_e}")
 
     await db.commit()
     await db.refresh(order)
+
+    # Push décrément vers Rust marketplace (best-effort, non bloquant)
+    if decrements_pour_rust:
+        try:
+            from modules.pro.yukposhop_rust_inventory import decrementer_stock_rust
+            for produit_id, qte in decrements_pour_rust:
+                _r = await decrementer_stock_rust(
+                    produit_id=produit_id, quantite=qte,
+                    order_numero=numero,
+                )
+                if not _r.success:
+                    logger.info(
+                        f"[Order] sync inventaire Rust échec produit={produit_id} "
+                        f"event_id={_r.event_id} err={_r.error}"
+                    )
+        except Exception as _e:
+            logger.warning(f"[Order] push inventaire Rust échec global : {_e}")
 
     # Débit forfait sur le marchand pour la commande capturée
     try:

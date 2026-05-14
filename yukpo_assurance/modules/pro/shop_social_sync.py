@@ -1,28 +1,72 @@
 """Phase D6 — Connexion sociale (Meta Catalog Sync, FB/IG posts, WA Business).
 
+⚠️ DEPRECATED depuis Piste 4 Phase B (2026-05-14) ⚠️
+
+Ce module ré-implémentait à la main Meta Graph API + OAuth flow. Maintenu
+en parallèle de `yukposhop_rust_social.py` qui délègue à Yukpo Rust (qui
+possède déjà les credentials + workers de tous les vendeurs).
+
+Voie de migration recommandée :
+  - Nouveaux endpoints Python : `/pro/shop/social/status` + `/pro/shop/social/distribute`
+  - Nouvelles routes Rust : `/api/v1/integrations/yukposhop/social-status` +
+    `/api/v1/integrations/yukposhop/distribute`
+  - Worker Rust : services/yukposhop_distribution_worker.rs (poll queue)
+
+Ce module reste actif tant que :
+  - `YUKPOSHOP_LEGACY_SOCIAL_ENABLED != "false"` (défaut "true" pour compat)
+  - L'UI YukpoShop continue d'appeler les anciens endpoints
+    `/pro/shop/social/connect-url`, `/pro/shop/social/callback-meta`,
+    `/pro/shop/social/sync-catalog` (qui sont dans routes_pro_shop_advanced.py).
+
+Quand l'UI sera migrée vers les nouveaux endpoints :
+  1. Poser `fly secrets set -a yukpopro-backend YUKPOSHOP_LEGACY_SOCIAL_ENABLED=false`
+  2. Les anciens endpoints retourneront HTTP 410 Gone avec un message
+     de migration pointant vers les nouveaux endpoints.
+  3. Supprimer définitivement ce fichier + routes_pro_shop_advanced.py
+     blocs social-* dans une release ultérieure.
+
+Originale :
 Synchronise les produits YukpoShop vers :
   • Facebook Shops + Instagram Shopping (via Meta Commerce Catalog API)
   • Posts Facebook auto-générés à chaque nouveau produit
   • Stories Insta auto (SVG Recraft)
   • WhatsApp Business : webhook réception messages → arrive dans le chat
     YukpoPro du marchand (intégration future)
-
-OAuth flow simplifié — le user fait le consentement Meta Business → callback
-backend récupère l'access_token longue durée → stocké chiffré côté DB.
-
-NOTE : Meta Graph API exige une App Review pour la production (catalogue,
-catalog_management permission). Pour MVP : mode DEV testable avec tes
-propres Pages Meta uniquement.
 """
 from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any, Optional
 
 import httpx
 
 logger = logging.getLogger("yukpo_assurance.pro.shop_social_sync")
+
+
+def legacy_social_enabled() -> bool:
+    """Helper exposé pour les routes qui veulent gate cette logique.
+    Default = True (compat). Mettre `YUKPOSHOP_LEGACY_SOCIAL_ENABLED=false`
+    quand l'UI est migrée vers les nouveaux endpoints /pro/shop/social/*.
+    """
+    return (os.getenv("YUKPOSHOP_LEGACY_SOCIAL_ENABLED") or "true").lower() != "false"
+
+
+_DEPRECATION_LOGGED = False
+
+
+def _log_deprecation_once() -> None:
+    """Logue 1 fois par boot une mise en garde si quelqu'un appelle encore
+    ce module. Permet de détecter en prod les UI pas encore migrées."""
+    global _DEPRECATION_LOGGED
+    if not _DEPRECATION_LOGGED:
+        logger.warning(
+            "[shop_social_sync] DEPRECATED — migrer vers yukposhop_rust_social "
+            "(endpoints /pro/shop/social/status + /distribute). "
+            "Pour bloquer entièrement : YUKPOSHOP_LEGACY_SOCIAL_ENABLED=false"
+        )
+        _DEPRECATION_LOGGED = True
 
 
 # Meta Graph API v18+ — versions à mettre à jour annuellement

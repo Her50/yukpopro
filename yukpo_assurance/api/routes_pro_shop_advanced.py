@@ -72,10 +72,22 @@ async def get_social_integrations(
     }
 
 
-@router.get("/shop/social/connect-url", summary="URL OAuth pour connecter Meta")
+@router.get("/shop/social/connect-url", summary="URL OAuth pour connecter Meta (LEGACY)")
 async def get_oauth_url_meta(
     current_user: TokenData = Depends(get_current_user),
 ):
+    """⚠️ LEGACY (Phase B Piste 1) — voir `/pro/shop/social/status` côté nouveau bridge.
+
+    Gated via `YUKPOSHOP_LEGACY_SOCIAL_ENABLED` (défaut "true" pour compat).
+    Quand l'UI est migrée vers les nouveaux endpoints, mettre la variable à
+    "false" → renvoie 410 Gone avec instructions.
+    """
+    from modules.pro.shop_social_sync import legacy_social_enabled, _log_deprecation_once
+    if not legacy_social_enabled():
+        raise HTTPException(410,
+            "Endpoint legacy désactivé. Utilise GET /pro/shop/social/status "
+            "(retourne {platforms, connect_url}) qui délègue à Yukpo Rust.")
+    _log_deprecation_once()
     from modules.pro.shop_social_sync import url_oauth_meta
     app_id = os.getenv("META_FB_APP_ID", "").strip()
     if not app_id:
@@ -173,7 +185,14 @@ async def sync_meta_catalog(
         "photos_urls_json": p.photos_urls_json,
     } for p in produits]
 
-    from modules.pro.shop_social_sync import sync_produits_vers_meta_catalog
+    from modules.pro.shop_social_sync import (
+        sync_produits_vers_meta_catalog, legacy_social_enabled, _log_deprecation_once,
+    )
+    if not legacy_social_enabled():
+        raise HTTPException(410,
+            "Endpoint legacy désactivé. Utilise POST /pro/shop/social/distribute "
+            "(délègue à Yukpo Rust + worker consomme la queue).")
+    _log_deprecation_once()
     store_url = b.url_public or f"https://{b.slug}.yukpomnang.com"
     res = await sync_produits_vers_meta_catalog(
         integ.catalog_id, integ.access_token_chiffre,
