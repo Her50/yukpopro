@@ -166,6 +166,11 @@ class ProduitCreateRequest(BaseModel):
     seo_desc: Optional[str] = None
     seo_keywords_json: Optional[list[str]] = None
     statut: str = Field("actif", pattern=r"^(actif|brouillon|archive|rupture)$")
+    # Piste 6b — vidéo produit (optionnelle) pour VideoFeed mobile Yukpo
+    video_url: Optional[str] = Field(None, max_length=500,
+        description="URL d'une vidéo produit. Si fournie, le produit "
+                    "apparaît dans le VideoFeed mobile Yukpo (~100k users).")
+    video_thumbnail_url: Optional[str] = Field(None, max_length=500)
 
 
 class ProduitPatchRequest(BaseModel):
@@ -177,6 +182,8 @@ class ProduitPatchRequest(BaseModel):
     tva_pct: Optional[float] = None
     stock: Optional[int] = None
     photos_urls_json: Optional[list[str]] = None
+    video_url: Optional[str] = None  # Piste 6b
+    video_thumbnail_url: Optional[str] = None  # Piste 6b
     categorie_id: Optional[int] = None
     tags_json: Optional[list[str]] = None
     variantes_json: Optional[list[dict]] = None
@@ -276,9 +283,40 @@ async def initialiser_boutique(
     await db.commit()
     await db.refresh(boutique)
 
+    # ── Piste 6e — Google Places enrichment (best-effort, non bloquant) ──
+    try:
+        from modules.pro.yukposhop_rust_boutique import enrichir_boutique_google_places
+        # Heuristique : la "ville" n'est pas demandée dans req, donc on tente
+        # avec le pays_principal seul. Le marchand peut PATCH plus tard.
+        enrich = await enrichir_boutique_google_places(
+            nom_boutique=req.nom,
+            pays=req.pays_principal,
+        )
+        if enrich.success:
+            boutique.google_place_id = enrich.place_id
+            boutique.adresse_complete = enrich.adresse_complete
+            boutique.gps = enrich.gps
+            boutique.google_rating = enrich.rating
+            boutique.telephone = enrich.telephone
+            boutique.google_horaires_json = enrich.horaires_json
+            boutique.google_enriched_at = datetime.utcnow()
+            await db.commit()
+            logger.info(
+                f"[Shop/init] Google Places enriched : place_id={enrich.place_id} "
+                f"adresse={enrich.adresse_complete}"
+            )
+    except Exception as _e:
+        logger.info(f"[Shop/init] Google Places enrich skip ({_e})")
+
     return {
         "ok": True, "id": boutique.id, "slug": boutique.slug,
-        "nom": boutique.nom, "url_pressentie": f"https://{boutique.slug}.yukpomnang.com",
+        "nom": boutique.nom,
+        "url_pressentie": f"https://{boutique.slug}.yukpomnang.com",
+        "google_enriched": {
+            "adresse": getattr(boutique, "adresse_complete", None),
+            "gps": getattr(boutique, "gps", None),
+            "rating": getattr(boutique, "google_rating", None),
+        },
     }
 
 
@@ -377,6 +415,12 @@ def _produit_to_dict(p: ShopProductDB) -> dict:
         "yukpo_language_detected": getattr(p, "yukpo_language_detected", None),
         "yukpo_enriched_at": (p.yukpo_enriched_at.isoformat()
                               if getattr(p, "yukpo_enriched_at", None) else None),
+        # Piste 6b — vidéo VideoFeed
+        "video_url": getattr(p, "video_url", None),
+        "video_thumbnail_url": getattr(p, "video_thumbnail_url", None),
+        # Piste 6d — modération IA images
+        "yukpo_ai_moderation_status": getattr(p, "yukpo_ai_moderation_status", None),
+        "yukpo_ai_moderation_reason": getattr(p, "yukpo_ai_moderation_reason", None),
         "cree_le": p.cree_le.isoformat(),
         "modif_le": p.modif_le.isoformat(),
     }
@@ -418,6 +462,8 @@ async def creer_produit(
         seo_titre=req.seo_titre, seo_desc=req.seo_desc,
         seo_keywords_json=req.seo_keywords_json,
         statut=req.statut, source="manuel",
+        video_url=req.video_url,
+        video_thumbnail_url=req.video_thumbnail_url,
     )
     db.add(p)
     await db.commit()
@@ -644,6 +690,101 @@ async def shop_social_distribute(
         "products_resolved": res.products_resolved,
         "platforms": res.platforms,
         "note": res.note,
+    }
+
+
+@router.post(
+    "/shop/google-enrich",
+    summary="Piste 6e — Re-enrichit ma boutique avec Google Places (manuel)",
+)
+async def shop_google_enrich(
+    ville: Optional[str] = None,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Re-déclenche l'enrichissement Google Places — utile si le commerçant
+    a corrigé le nom de sa boutique ou ajoute la ville pour précision."""
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    from modules.pro.yukposhop_rust_boutique import enrichir_boutique_google_places
+    res = await enrichir_boutique_google_places(
+        nom_boutique=b.nom, ville=ville, pays=b.pays_principal,
+    )
+    if res.success:
+        b.google_place_id = res.place_id
+        b.adresse_complete = res.adresse_complete
+        b.gps = res.gps
+        b.google_rating = res.rating
+        if res.telephone:
+            b.telephone = res.telephone
+        if res.horaires_json:
+            b.google_horaires_json = res.horaires_json
+        b.google_enriched_at = datetime.utcnow()
+        await db.commit()
+    return {
+        "ok": res.success,
+        "place_id": res.place_id,
+        "adresse_complete": res.adresse_complete,
+        "gps": res.gps,
+        "rating": res.rating,
+        "telephone": res.telephone,
+        "photo_url": res.photo_url,
+        "error": res.error,
+    }
+
+
+@router.get(
+    "/shop/produits/{produit_id}/similar",
+    summary="Piste 6c — Produits similaires via marketplace Yukpo Rust (embeddings + catégorie)",
+)
+async def produit_similar(
+    produit_id: int,
+    limit: int = 6,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Retourne N produits similaires depuis le marketplace Yukpo Rust.
+
+    Stratégie :
+    - Si le produit a `yukpo_category` + `yukpo_specialized_type` (enrichis
+      via Piste 6a) : on les utilise comme query pour cibler finement.
+    - Sinon fallback sur le titre brut du produit.
+    - Exclut les produits venant de YukpoShop (filtre external_source).
+
+    À utiliser pour :
+    - section "Vous aimerez aussi" sur la page produit storefront
+    - dashboard commerçant "Produits similaires dans le marketplace"
+    """
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    p = (await db.execute(
+        select(ShopProductDB).where(ShopProductDB.id == produit_id)
+        .where(ShopProductDB.boutique_id == b.id)
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+
+    # Compose la query en priorisant les enrichissements IA
+    parts = []
+    if getattr(p, "yukpo_specialized_type", None):
+        parts.append(p.yukpo_specialized_type)
+    if getattr(p, "yukpo_category", None):
+        parts.append(p.yukpo_category)
+    if not parts:
+        parts.append(p.titre[:80])
+    query = " ".join(parts)[:200]
+
+    categories = getattr(p, "yukpo_category", None) or \
+                 "ecommerce,supermarche,mode,electronique,sport,maison"
+
+    from modules.pro.yukposhop_rust_search import chercher_services_marketplace
+    items = await chercher_services_marketplace(
+        query=query, limit=max(1, min(limit, 12)),
+        categories=categories,
+        # exclude_external_source par défaut = yukposhop → pas d'auto-reco
+    )
+    return {
+        "ok": True, "produit_id": produit_id,
+        "query_used": query, "category_used": categories,
+        "nb_items": len(items), "items": items,
     }
 
 

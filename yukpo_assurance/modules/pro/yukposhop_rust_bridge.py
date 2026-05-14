@@ -86,7 +86,7 @@ def _mapper_produit_pour_rust(
         tags = [str(t) for t in p.tags_json if isinstance(t, str)][:20]
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,  # 6b/d : video_url + boutique gps
         "source": "yukposhop",
         "external_id": str(p.id),                # idempotency key
         "external_updated_at": (p.modif_le or p.cree_le).isoformat() + "Z",
@@ -95,6 +95,9 @@ def _mapper_produit_pour_rust(
             "nom_affiche": vendeur_nom or b.nom,
             "boutique_slug": b.slug,
             "boutique_url": b.url_public,
+            "gps": getattr(b, "gps", None),   # Piste 6e — propage GPS boutique
+            "pays": b.pays_principal or "CM",
+            "telephone": getattr(b, "telephone", None),
         },
         "produit": {
             "titre": p.titre,
@@ -103,6 +106,8 @@ def _mapper_produit_pour_rust(
             "devise": p.devise or b.devise or "XAF",
             "stock": int(p.stock or 0),
             "photos_urls": photos,
+            "video_url": getattr(p, "video_url", None),     # Piste 6b
+            "video_thumbnail_url": getattr(p, "video_thumbnail_url", None),
             "tags": tags,
             "slug": p.slug,
             "categorie": None,  # Rust auto-classifie via IA
@@ -283,6 +288,20 @@ async def publier_produit_vers_rust(
             ct = enrichment.get("cost_tokens")
             if isinstance(ct, int):
                 p.yukpo_enrichment_cost_tokens = ct
+            # Piste 6d — modération IA
+            mod_status = enrichment.get("moderation_status")
+            if isinstance(mod_status, str) and mod_status in ("approved", "flagged", "rejected"):
+                p.yukpo_ai_moderation_status = mod_status
+                # Si rejected, auto-désactive le produit en local (sécurité)
+                if mod_status == "rejected" and p.statut == "actif":
+                    p.statut = "brouillon"
+                    logger.warning(
+                        f"[RustBridge] produit_id={produit_id} REJECTED par modération IA "
+                        f"-> statut basculé en 'brouillon'"
+                    )
+            mod_reason = enrichment.get("moderation_reason")
+            if isinstance(mod_reason, str) and mod_reason and mod_reason != "null":
+                p.yukpo_ai_moderation_reason = mod_reason[:1000]
             p.yukpo_enriched_at = datetime.utcnow()
     else:
         p.rust_sync_status = "failed"

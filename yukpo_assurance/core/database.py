@@ -1467,6 +1467,15 @@ class ShopBoutiqueDB(Base):
     cross_sell_enabled    = Column(Boolean, nullable=False, default=True,
         comment="Si True, le storefront affiche un bloc 'Autres marchands "
                 "près de chez vous' alimenté par la search Rust marketplace.")
+    # ── Piste 6e — Google Places enrichment auto (via Rust) ──────────────
+    gps                    = Column(String(60), nullable=True,
+        comment="'lat,lng' depuis Google Places (auto-enrich au /initialiser)")
+    adresse_complete       = Column(String(400), nullable=True)
+    google_place_id        = Column(String(120), nullable=True)
+    google_rating          = Column(Float, nullable=True)
+    google_horaires_json   = Column(JSON, nullable=True)
+    telephone              = Column(String(40), nullable=True)
+    google_enriched_at     = Column(DateTime, nullable=True)
     cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
     publie_le             = Column(DateTime, nullable=True)
     derniere_modif        = Column(DateTime, default=datetime.utcnow,
@@ -1544,6 +1553,16 @@ class ShopProductDB(Base):
         comment="0-100 — score qualité fiche (titre+desc+photos+prix)")
     yukpo_enriched_at            = Column(DateTime, nullable=True)
     yukpo_enrichment_cost_tokens = Column(Integer, nullable=True)
+    # ── Piste 6b — VideoFeed (vidéo produit pour app mobile Yukpo) ────────
+    video_url            = Column(String(500), nullable=True,
+        comment="URL vidéo produit (MP4 vertical 9:16 idéalement). Affichée "
+                "dans le VideoFeed mobile Yukpo.")
+    video_thumbnail_url  = Column(String(500), nullable=True)
+    # ── Piste 6d — Modération IA images (auto via Rust media table) ──────
+    yukpo_ai_moderation_status = Column(String(20), nullable=True,
+        comment="approved | flagged | pending | rejected (synthèse des "
+                "ai_category de toutes les photos via Rust media table)")
+    yukpo_ai_moderation_reason = Column(Text, nullable=True)
     cree_le              = Column(DateTime, default=datetime.utcnow, nullable=False)
     modif_le             = Column(DateTime, default=datetime.utcnow,
                                    onupdate=datetime.utcnow, nullable=False)
