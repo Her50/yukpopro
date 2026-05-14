@@ -77,9 +77,11 @@ http.interceptors.response.use(
       // Cold-start machine Fly
       || status === 502 || status === 503 || status === 504;
     const alreadyRetried = (cfg as any)._yukpo_retry_count || 0;
-    if (isRetryable && alreadyRetried < 2 && cfg && cfg.url) {
+    // 4 retries (1.5s + 3s + 6s + 12s = 22.5s) — couvre cold-start Python heavy
+    // (~15-25s pour FastAPI + scipy/sklearn/matplotlib) sans abandonner trop tôt.
+    if (isRetryable && alreadyRetried < 4 && cfg && cfg.url) {
       (cfg as any)._yukpo_retry_count = alreadyRetried + 1;
-      const delayMs = 1500 * Math.pow(2, alreadyRetried); // 1.5s puis 3s
+      const delayMs = 1500 * Math.pow(2, alreadyRetried);
       await new Promise(r => setTimeout(r, delayMs));
       return http(cfg);
     }
@@ -179,6 +181,10 @@ export interface ChatSendRequest {
     type_doc: string;
     contenu_genere?: string;
   };
+  /** Skip le classifier interne du chat quand la classification a déjà
+   *  été faite en amont par /pro/generateurs/orchestrer (qa_simple).
+   *  Économise ~1.5-2.5s par tour conversationnel. */
+  skip_orchestration?: boolean;
 }
 
 export interface ChatResponse {
@@ -446,10 +452,20 @@ export const generateurApi = {
     return data;
   },
 
-  publierSite: async (slug: string, plan: "free" | "pro" | "business" = "free") => {
+  publierSite: async (
+    slug: string,
+    plan: "free" | "pro" | "business" = "free",
+    confirmer_cout: boolean = true,
+  ): Promise<{
+    ok: boolean; site_id: number; slug: string;
+    url_public: string;
+    fallback_netlify_url?: string | null;
+    nb_pages: number; nb_articles: number;
+    is_new_netlify_site: boolean;
+  }> => {
     const { data } = await http.post(
       `/pro/sites/${encodeURIComponent(slug)}/publier`,
-      { plan }, { timeout: 180_000 },
+      { plan, confirmer_cout }, { timeout: 180_000 },
     );
     return data;
   },
@@ -569,6 +585,78 @@ export const generateurApi = {
   shopPublier: async () => {
     const { data } = await http.post("/pro/shop/publier", {}, { timeout: 180_000 });
     return data;
+  },
+
+  // ── Piste 6 — intégration Yukpo Rust ───────────────────────────────────
+  /** 6c — Liste de produits similaires depuis le marketplace Yukpo Rust. */
+  shopProduitsSimilaires: async (produitId: number, limit = 6) => {
+    const { data } = await http.get(`/pro/shop/produits/${produitId}/similar`, {
+      params: { limit },
+    });
+    return data as {
+      ok: boolean; produit_id: number; query_used: string;
+      category_used: string; nb_items: number; items: any[];
+    };
+  },
+
+  /** Piste 1 — Force le re-sync vers Rust marketplace pour un produit. */
+  shopRepublierRust: async (produitId: number) => {
+    const { data } = await http.post(
+      `/pro/shop/produits/${produitId}/republier-rust`, {},
+      { timeout: 30_000 },
+    );
+    return data as {
+      ok: boolean; rust_service_id: number | null;
+      error: string | null; http_status: number | null; duration_ms: number;
+    };
+  },
+
+  /** Piste 1 — Stats sync marketplace. */
+  shopRustSyncStats: async () => {
+    const { data } = await http.get("/pro/shop/rust-sync/stats");
+    return data as {
+      ok: boolean; boutique_id: number; rust_sync_enabled: boolean;
+      stats: Record<string, number>; total: number;
+    };
+  },
+
+  /** Piste 4 — État comptes sociaux connectés via Yukpo Rust. */
+  shopSocialStatus: async () => {
+    const { data } = await http.get("/pro/shop/social/status");
+    return data as {
+      ok: boolean; vendeur_email: string; rust_user_id: number | null;
+      platforms: { platform: string; account_name: string | null; is_active: boolean }[];
+      connect_url: string; error: string | null;
+    };
+  },
+
+  /** Piste 4 — Distribuer N produits vers M plateformes via Yukpo Rust. */
+  shopSocialDistribute: async (
+    produitIds: number[], platforms: string[], messageTemplate?: string,
+  ) => {
+    const { data } = await http.post("/pro/shop/social/distribute", {
+      produit_ids: produitIds,
+      platforms,
+      message_template: messageTemplate,
+    });
+    return data as {
+      ok: boolean; jobs_created: number; products_resolved: number;
+      platforms: string[]; note: string;
+    };
+  },
+
+  /** 6e — Re-enrichir manuellement la boutique via Google Places. */
+  shopGoogleEnrich: async (ville?: string) => {
+    const { data } = await http.post("/pro/shop/google-enrich", null, {
+      params: ville ? { ville } : undefined,
+      timeout: 15_000,
+    });
+    return data as {
+      ok: boolean; place_id: string | null;
+      adresse_complete: string | null; gps: string | null;
+      rating: number | null; telephone: string | null;
+      photo_url: string | null; error: string | null;
+    };
   },
 
   shopListerCommandes: async (params?: { statut?: string; limit?: number; offset?: number }) => {
