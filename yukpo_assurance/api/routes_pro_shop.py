@@ -751,17 +751,20 @@ async def generer_video_produit(
     produit_id: int,
     ton: Optional[str] = Form("dynamique"),
     duree_s: int = Form(15, ge=5, le=60),
+    aspect_ratio: str = Form("9:16"),
     confirmer_cout: bool = Form(False),
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(_get_db),
 ):
-    """Génère une vidéo publicitaire courte (5-60s) à partir des photos
-    du produit, via le pipeline Remotion + IA de Yukpo Rust. La vidéo
-    est sauvegardée et son URL est stockée dans `shop_products.video_url`,
-    rendant le produit éligible au VideoFeed mobile Yukpo (Piste 6b).
+    """Génère une vidéo publicitaire (5-60s) via le flux vidéo natif YukpoPro
+    (fal.ai Kling + Replicate fallback + stitching FFmpeg multi-clips).
 
-    Facturation : vidéo IA = opération lourde (CostAdvisor obligatoire si
-    >150 crédits) — débit `pdf_generation` mappé (équivalent rendu artefact)."""
+    URL stockée dans `shop_products.video_url` → éligible au VideoFeed mobile
+    Yukpo (Piste 6b) au prochain sync Rust.
+
+    Facturation : opération lourde, CostAdvisor déclenché si >150 crédits.
+    Débit `pdf_generation` (équivalent rendu artefact) — pas de double bill
+    via Rust (le flux est full Python interne maintenant)."""
     from api.routes_pro_generateurs import _pre_check_credits
     await _pre_check_credits(current_user.user_id, role=current_user.role)
 
@@ -786,38 +789,42 @@ async def generer_video_produit(
     )).scalar_one_or_none()
     if not p:
         raise HTTPException(404, "Produit introuvable")
-    if not p.photos_urls_json:
-        raise HTTPException(400, "Pas de photos sur ce produit — uploader d'abord 1-5 photos")
 
-    try:
-        from modules.pro.yukposhop_rust_video import generer_video_produit_via_rust
-        res = await generer_video_produit_via_rust(
-            produit=p, ton=ton or "dynamique", duree_s=duree_s,
-        )
-        if res.success and res.video_url:
-            p.video_url = res.video_url
-            if res.thumbnail_url:
-                p.video_thumbnail_url = res.thumbnail_url
-            await db.commit()
-            # Billing : débit forfait après succès uniquement
-            try:
-                from modules.bureau.service_credits_bureau import debiter_forfait_unifie
-                await debiter_forfait_unifie(
-                    current_user.user_id, "pdf_generation",
-                    module="shop_video_render",
-                )
-            except Exception:
-                pass
-            return {
-                "ok": True, "video_url": res.video_url,
-                "thumbnail_url": res.thumbnail_url, "duration_s": res.duration_s,
-                "duree_render_s": res.duree_render_s,
-            }
+    from modules.pro.shop_video_local import generer_video_produit_local
+    res = await generer_video_produit_local(
+        boutique_id=b.id, produit_id=p.id,
+        titre=p.titre or "",
+        description=(p.description_longue or p.description_courte or ""),
+        ton=ton or "dynamique",
+        duree_s=duree_s,
+        aspect_ratio=aspect_ratio,
+        devise=p.devise or b.devise or "XAF",
+        prix=float(p.prix_unit or 0),
+    )
+    if not res.success or not res.video_url:
         raise HTTPException(502, res.error or "Génération vidéo échouée")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, f"Erreur génération vidéo : {str(e)[:200]}")
+
+    p.video_url = res.video_url
+    if res.thumbnail_url:
+        p.video_thumbnail_url = res.thumbnail_url
+    await db.commit()
+
+    # Billing après succès uniquement
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "pdf_generation",
+            module="shop_video_render",
+        )
+    except Exception:
+        pass
+
+    return {
+        "ok": True, "video_url": res.video_url,
+        "thumbnail_url": res.thumbnail_url,
+        "duration_s": res.duration_s,
+        "duree_render_s": res.duree_render_s,
+    }
 
 
 @router.delete("/shop/produits/{produit_id}", summary="Supprime un produit")
