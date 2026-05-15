@@ -11,10 +11,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  ArrowLeft, BarChart3, Check, ExternalLink, Facebook, Image as ImageIcon,
+  ArrowLeft, BarChart3, Check, ExternalLink, Facebook, Flame, Gift, Image as ImageIcon,
   Loader2, Mail, MapPin, MessageSquare, Package, Palette, RefreshCw, Reply,
-  Send, Shield, ShoppingCart, Sparkles, Star, Trash2, Truck, Upload, Users,
-  Video, Wand2, Globe, AlertTriangle, ChevronRight, X,
+  Send, Shield, ShoppingCart, Sparkles, Star, Tag, Trash2, Truck, Upload, Users,
+  Video, Wand2, Globe, AlertTriangle, ChevronRight, X, Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { generateurApi } from "@/api/client";
@@ -92,7 +92,7 @@ export const MaBoutiquePage = () => {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"produits" | "commandes" | "social" | "roas" | "crm" | "livraison" | "marketplace" | "messages" | "avis" | "branding">("produits");
+  const [tab, setTab] = useState<"produits" | "commandes" | "social" | "roas" | "crm" | "livraison" | "marketplace" | "messages" | "avis" | "branding" | "promos">("produits");
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importBrief, setImportBrief] = useState("");
@@ -557,6 +557,8 @@ export const MaBoutiquePage = () => {
                 active={tab === "avis"} onClick={() => setTab("avis")} />
         <TabBtn icon={<Palette className="w-4 h-4" />} label={t("shop.tab_branding", "Branding")}
                 active={tab === "branding"} onClick={() => setTab("branding")} />
+        <TabBtn icon={<Tag className="w-4 h-4" />} label={t("shop.tab_promos", "Promos")}
+                active={tab === "promos"} onClick={() => setTab("promos")} />
         <TabBtn icon={<Globe className="w-4 h-4" />}
                 label={t("shop.tab_marketplace", "Marketplace Yukpo")}
                 active={tab === "marketplace"}
@@ -906,6 +908,9 @@ export const MaBoutiquePage = () => {
       {tab === "branding" && (
         <OngletBranding boutique={boutique} onUpdated={refresh} />
       )}
+
+      {/* Promos — coupons + flash sales + Black Friday Yukpo */}
+      {tab === "promos" && <OngletPromos produits={produits} />}
     </div>
   );
 };
@@ -1482,6 +1487,17 @@ const OngletMessages = () => {
     } finally { setBusy(false); }
   };
 
+  const suggererIA = async (mid: number) => {
+    setBusy(true);
+    try {
+      const r = await generateurApi.shopMessageSuggererReponse(mid);
+      if (r.draft) setReplyText(r.draft);
+      toast.success(r.cached ? "Brouillon récupéré" : "Réponse suggérée");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "IA indisponible");
+    } finally { setBusy(false); }
+  };
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4">
       <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -1527,13 +1543,17 @@ const OngletMessages = () => {
                 {openId === m.id && (
                   <div className="mt-2">
                     <textarea value={replyText} onChange={e => setReplyText(e.target.value)}
-                              rows={3} maxLength={4000}
+                              rows={4} maxLength={4000}
                               placeholder="Votre réponse (envoyée par WhatsApp au visiteur)…"
                               className="w-full px-3 py-2 border rounded-lg text-sm" />
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex gap-2 mt-1 flex-wrap">
                       <button disabled={busy} onClick={() => repondre(m.id)}
                               className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">
                         <Send className="w-3.5 h-3.5 inline mr-1" />Envoyer
+                      </button>
+                      <button disabled={busy} onClick={() => suggererIA(m.id)}
+                              className="px-3 py-1.5 rounded-lg border border-violet-300 bg-violet-50 text-violet-700 text-sm font-semibold disabled:opacity-50">
+                        <Sparkles className="w-3.5 h-3.5 inline mr-1" />Suggestion IA
                       </button>
                       <button onClick={() => { setOpenId(null); setReplyText(""); }}
                               className="px-3 py-1.5 rounded-lg border text-sm">Annuler</button>
@@ -1863,6 +1883,273 @@ const PushNotifSection = () => {
         </button>
       )}
       {statut === "granted" && <div className="text-emerald-700 font-semibold">✓ Notifications activées</div>}
+    </div>
+  );
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Promos — Coupons + Flash sales + Black Friday Yukpo
+// ═══════════════════════════════════════════════════════════════════════════
+
+const OngletPromos = ({ produits }: { produits: Produit[] }) => {
+  const [sub, setSub] = useState<"coupons" | "flash" | "global">("coupons");
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-1 border-b border-slate-200">
+        <SubTab label="Codes promo" icon={<Tag className="w-4 h-4" />} active={sub === "coupons"} onClick={() => setSub("coupons")} />
+        <SubTab label="Ventes flash" icon={<Zap className="w-4 h-4" />} active={sub === "flash"} onClick={() => setSub("flash")} />
+        <SubTab label="Événements Yukpo" icon={<Flame className="w-4 h-4" />} active={sub === "global"} onClick={() => setSub("global")} />
+      </div>
+      {sub === "coupons" && <CouponsSection />}
+      {sub === "flash" && <FlashSaleSection produits={produits} />}
+      {sub === "global" && <GlobalPromosSection produits={produits} />}
+    </div>
+  );
+};
+
+const SubTab = ({ label, icon, active, onClick }: any) => (
+  <button onClick={onClick}
+          className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium ${active ? "border-b-2 border-violet-600 text-violet-700" : "text-slate-600"}`}>
+    {icon}<span>{label}</span>
+  </button>
+);
+
+const CouponsSection = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ code: "", type: "pct", valeur: 10, min_panier: "", valable_au: "", usage_max: "", description: "", actif: true });
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try { const r = await generateurApi.shopListerCoupons(); setItems(r.items || []); }
+    catch (e: any) { toast.error(e?.response?.data?.detail || "Erreur"); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, []);
+
+  const creer = async () => {
+    if (!form.code.trim() || form.valeur <= 0) return toast.error("Code et valeur requis");
+    setBusy(true);
+    try {
+      await generateurApi.shopCreerCoupon({
+        code: form.code.trim().toUpperCase(),
+        type: form.type, valeur: form.valeur,
+        min_panier: form.min_panier ? Number(form.min_panier) : null,
+        valable_au: form.valable_au || null,
+        usage_max: form.usage_max ? Number(form.usage_max) : null,
+        description: form.description || null,
+        actif: form.actif,
+      });
+      toast.success("Coupon créé");
+      setForm({ code: "", type: "pct", valeur: 10, min_panier: "", valable_au: "", usage_max: "", description: "", actif: true });
+      load();
+    } catch (e: any) { toast.error(e?.response?.data?.detail || "Erreur"); }
+    finally { setBusy(false); }
+  };
+
+  const supprimer = async (id: number) => {
+    if (!confirm("Supprimer ce coupon ?")) return;
+    try { await generateurApi.shopSupprimerCoupon(id); toast.success("Supprimé"); load(); }
+    catch (e: any) { toast.error(e?.response?.data?.detail || "Erreur"); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <h3 className="font-bold mb-3">Nouveau code promo</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })}
+                 placeholder="CODE (ex: OFFRE10)" className="px-3 py-2 border rounded-lg text-sm uppercase" />
+          <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
+                  className="px-3 py-2 border rounded-lg text-sm">
+            <option value="pct">% réduction</option>
+            <option value="fixe">Montant fixe</option>
+          </select>
+          <input type="number" min={0} value={form.valeur} onChange={e => setForm({ ...form, valeur: Number(e.target.value) })}
+                 placeholder={form.type === "pct" ? "% (1-100)" : "Montant"}
+                 className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="number" min={0} value={form.min_panier} onChange={e => setForm({ ...form, min_panier: e.target.value })}
+                 placeholder="Panier min (optionnel)" className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="datetime-local" value={form.valable_au} onChange={e => setForm({ ...form, valable_au: e.target.value })}
+                 placeholder="Expire le" className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="number" min={1} value={form.usage_max} onChange={e => setForm({ ...form, usage_max: e.target.value })}
+                 placeholder="Usage max (optionnel)" className="px-3 py-2 border rounded-lg text-sm" />
+          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+                 placeholder="Description (visible client)" className="px-3 py-2 border rounded-lg text-sm md:col-span-2" />
+        </div>
+        <button disabled={busy} onClick={creer}
+                className="mt-3 px-4 py-2 rounded-lg bg-violet-600 text-white font-semibold disabled:opacity-50">
+          {busy ? <Loader2 className="w-4 h-4 inline animate-spin" /> : "Créer"}
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center mb-3">
+          <h3 className="font-bold flex-1">Coupons actifs ({items.length})</h3>
+          <button onClick={load} className="px-2 py-1 text-sm border rounded-lg">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+        {!loading && items.length === 0 && <div className="text-center py-8 text-slate-500">Aucun coupon.</div>}
+        <div className="space-y-2">
+          {items.map(c => (
+            <div key={c.id} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg">
+              <div className="font-mono font-bold text-violet-700">{c.code}</div>
+              <div className="flex-1 text-sm">
+                <div>{c.type === "pct" ? `-${c.valeur}%` : `-${c.valeur} fixe`}{c.min_panier ? ` (min ${c.min_panier})` : ""}</div>
+                <div className="text-xs text-slate-500">
+                  {c.description || "—"} · Usages : {c.usage_count}{c.usage_max ? `/${c.usage_max}` : ""}
+                  {c.valable_au && ` · expire ${new Date(c.valable_au).toLocaleDateString()}`}
+                </div>
+              </div>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${c.actif ? "bg-emerald-100 text-emerald-700" : "bg-slate-100"}`}>{c.actif ? "actif" : "inactif"}</span>
+              <button onClick={() => supprimer(c.id)} className="text-rose-500 hover:bg-rose-50 p-1.5 rounded">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const FlashSaleSection = ({ produits }: { produits: Produit[] }) => {
+  const [form, setForm] = useState({ produit_id: 0, prix_flash: 0, debut: "", fin: "", stock_target: 10 });
+  const [busy, setBusy] = useState(false);
+  const creer = async () => {
+    if (!form.produit_id || !form.debut || !form.fin || form.prix_flash <= 0) {
+      return toast.error("Tous les champs requis");
+    }
+    setBusy(true);
+    try {
+      await generateurApi.shopCreerFlashSale({
+        produit_id: form.produit_id, prix_flash: form.prix_flash,
+        debut: new Date(form.debut).toISOString(),
+        fin: new Date(form.fin).toISOString(),
+        stock_target: form.stock_target,
+      });
+      toast.success("Vente flash créée — visible sur marketplace Yukpo");
+      setForm({ produit_id: 0, prix_flash: 0, debut: "", fin: "", stock_target: 10 });
+    } catch (e: any) { toast.error(e?.response?.data?.detail || "Erreur"); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="space-y-4">
+      <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 text-sm text-violet-900">
+        <Zap className="w-5 h-5 inline mr-1" /><b>Vente flash</b> — apparaît dans le flux <i>flash sales</i> du marketplace mobile Yukpo + push notif aux abonnés. Idéal pour écouler du stock ou booster un produit.
+      </div>
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <h3 className="font-bold mb-3">Créer une vente flash</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <select value={form.produit_id} onChange={e => setForm({ ...form, produit_id: Number(e.target.value) })}
+                  className="px-3 py-2 border rounded-lg text-sm">
+            <option value={0}>— Choisir un produit —</option>
+            {produits.filter(p => p.statut === "actif").map(p => (
+              <option key={p.id} value={p.id}>{p.titre} ({p.prix_unit} {p.devise})</option>
+            ))}
+          </select>
+          <input type="number" min={1} value={form.prix_flash} onChange={e => setForm({ ...form, prix_flash: Number(e.target.value) })}
+                 placeholder="Prix flash" className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="datetime-local" value={form.debut} onChange={e => setForm({ ...form, debut: e.target.value })}
+                 placeholder="Début" className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="datetime-local" value={form.fin} onChange={e => setForm({ ...form, fin: e.target.value })}
+                 placeholder="Fin" className="px-3 py-2 border rounded-lg text-sm" />
+          <input type="number" min={1} value={form.stock_target} onChange={e => setForm({ ...form, stock_target: Number(e.target.value) })}
+                 placeholder="Stock à écouler" className="px-3 py-2 border rounded-lg text-sm md:col-span-2" />
+        </div>
+        <button disabled={busy} onClick={creer}
+                className="mt-3 px-4 py-2 rounded-lg bg-violet-600 text-white font-semibold disabled:opacity-50">
+          {busy ? <Loader2 className="w-4 h-4 inline animate-spin" /> : "Lancer la vente flash"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const GlobalPromosSection = ({ produits }: { produits: Produit[] }) => {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<string>("");
+  const [reduction, setReduction] = useState<number>(20);
+  const [selectedProduits, setSelectedProduits] = useState<Set<number>>(new Set());
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try { const r = await generateurApi.shopGlobalPromosDisponibles(); setEvents(r.items || []); }
+    catch { setEvents([]); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, []);
+
+  const inscrire = async () => {
+    if (!selectedEvent || selectedProduits.size === 0) return toast.error("Sélectionnez événement + produits");
+    setBusy(true);
+    try {
+      await generateurApi.shopJoindreGlobalPromo({
+        event_id: selectedEvent,
+        produit_ids: Array.from(selectedProduits),
+        reduction_pct: reduction,
+      });
+      toast.success("Produits inscrits à l'événement Yukpo");
+      setSelectedProduits(new Set());
+    } catch (e: any) { toast.error(e?.response?.data?.detail || "Erreur"); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
+        <Flame className="w-5 h-5 inline mr-1" /><b>Événements Yukpo</b> (Black Friday, soldes…) — visibilité maximale : listing dédié sur l'app mobile + push notif à tous les utilisateurs Yukpo. Yukpo gère la promotion globale, vous gérez vos produits.
+      </div>
+      {loading && <div className="text-center py-8 text-slate-500">Chargement…</div>}
+      {!loading && events.length === 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+          Aucun événement actif pour le moment. Reviens lors du prochain Black Friday Yukpo.
+        </div>
+      )}
+      {events.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="font-bold mb-3">Inscrire mes produits</h3>
+          <div className="space-y-2 mb-3">
+            <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg text-sm">
+              <option value="">— Choisir un événement —</option>
+              {events.map(ev => (
+                <option key={ev.id || ev.event_id} value={ev.id || ev.event_id}>
+                  {ev.nom || ev.name || "Événement"}
+                  {ev.debut && ` · ${new Date(ev.debut).toLocaleDateString()}`}
+                </option>
+              ))}
+            </select>
+            <input type="number" min={1} max={90} value={reduction}
+                   onChange={e => setReduction(Number(e.target.value))}
+                   placeholder="% réduction"
+                   className="w-full px-3 py-2 border rounded-lg text-sm" />
+            <div className="text-sm font-semibold mt-3 mb-1">Produits à inscrire :</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 max-h-60 overflow-y-auto">
+              {produits.filter(p => p.statut === "actif").map(p => (
+                <label key={p.id} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded">
+                  <input type="checkbox" checked={selectedProduits.has(p.id)}
+                         onChange={(e) => {
+                           const s = new Set(selectedProduits);
+                           if (e.target.checked) s.add(p.id); else s.delete(p.id);
+                           setSelectedProduits(s);
+                         }} />
+                  <span className="text-sm">{p.titre}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <button disabled={busy} onClick={inscrire}
+                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold disabled:opacity-50">
+            {busy ? <Loader2 className="w-4 h-4 inline animate-spin" /> : `Inscrire ${selectedProduits.size} produit(s)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

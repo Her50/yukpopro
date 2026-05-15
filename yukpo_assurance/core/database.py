@@ -1604,6 +1604,13 @@ class ShopOrderDB(Base):
     utm_campaign             = Column(String(120), nullable=True)
     notes_marchand           = Column(Text, nullable=True)
     notes_client             = Column(Text, nullable=True)
+    # Commission Yukpo prélevée sur la vente (modèle marketplace).
+    # Calculée au moment du paiement confirmé : commission_yukpo_pct * montant_total.
+    commission_yukpo_amount  = Column(Float, nullable=True)
+    commission_yukpo_pct     = Column(Float, nullable=True)
+    # Code promo appliqué + montant de réduction calculé (audit + analytics)
+    coupon_code              = Column(String(40), nullable=True)
+    coupon_reduction         = Column(Float, nullable=True)
     cree_le                  = Column(DateTime, default=datetime.utcnow, nullable=False)
     modif_le                 = Column(DateTime, default=datetime.utcnow,
                                        onupdate=datetime.utcnow, nullable=False)
@@ -1832,8 +1839,35 @@ class ShopMessageDB(Base):
         comment="non_lu | lu | repondu | archive | spam")
     reponse_marchand  = Column(Text, nullable=True)
     repondu_le        = Column(DateTime, nullable=True)
+    reponse_ia_draft  = Column(Text, nullable=True,
+        comment="Brouillon de réponse pré-rédigé par l'IA — gain temps marchand")
     ip_address        = Column(String(64), nullable=True)
     cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopCouponDB(Base):
+    """Codes promo locaux par boutique. Application au checkout.
+
+    type='pct'    → valeur = % de réduction (0-100)
+    type='fixe'   → valeur = montant fixe en devise boutique
+    """
+    __tablename__ = "shop_coupons"
+
+    id              = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id     = Column(BigInteger,
+                              ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                              nullable=False, index=True)
+    code            = Column(String(40), nullable=False)
+    type            = Column(String(20), nullable=False, default="pct")
+    valeur          = Column(Float, nullable=False, default=0)
+    min_panier      = Column(Float, nullable=True)
+    valable_du      = Column(DateTime, nullable=True)
+    valable_au      = Column(DateTime, nullable=True)
+    usage_max       = Column(Integer, nullable=True)
+    usage_count     = Column(Integer, nullable=False, default=0)
+    actif           = Column(Boolean, nullable=False, default=True)
+    description     = Column(String(200), nullable=True)
+    cree_le         = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 class ShopPushSubscriptionDB(Base):

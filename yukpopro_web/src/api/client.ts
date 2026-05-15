@@ -810,6 +810,47 @@ export const generateurApi = {
     const { data } = await http.get("/pro/shop/messages/unread-count");
     return data as { messages: number; commentaires_pending: number };
   },
+  shopMessageSuggererReponse: async (mid: number) => {
+    const { data } = await http.post(`/pro/shop/messages/${mid}/suggerer-reponse`);
+    return data as { ok: boolean; draft: string; cached: boolean };
+  },
+
+  // ── Coupons (locaux par boutique) ───────────────────────────────────────
+  shopListerCoupons: async () => {
+    const { data } = await http.get("/pro/shop/coupons");
+    return data as { ok: boolean; items: any[] };
+  },
+  shopCreerCoupon: async (req: any) => {
+    const { data } = await http.post("/pro/shop/coupons", req);
+    return data;
+  },
+  shopMajCoupon: async (id: number, req: any) => {
+    const { data } = await http.patch(`/pro/shop/coupons/${id}`, req);
+    return data;
+  },
+  shopSupprimerCoupon: async (id: number) => {
+    const { data } = await http.delete(`/pro/shop/coupons/${id}`);
+    return data;
+  },
+
+  // ── Flash sales + Black Friday (bridge Rust) ───────────────────────────
+  shopCreerFlashSale: async (req: {
+    produit_id: number; prix_flash: number;
+    debut: string; fin: string; stock_target: number;
+  }) => {
+    const { data } = await http.post("/pro/shop/flash-sale/creer", req);
+    return data;
+  },
+  shopGlobalPromosDisponibles: async () => {
+    const { data } = await http.get("/pro/shop/global-promos/disponibles");
+    return data as { ok: boolean; items: any[] };
+  },
+  shopJoindreGlobalPromo: async (req: {
+    event_id: string; produit_ids: number[]; reduction_pct: number;
+  }) => {
+    const { data } = await http.post("/pro/shop/global-promos/joindre", req);
+    return data;
+  },
   shopPushVapidKey: async () => {
     const { data } = await http.get("/pro/shop/push/vapid-key");
     return data as { public_key: string | null };

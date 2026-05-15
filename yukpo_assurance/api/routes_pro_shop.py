@@ -56,7 +56,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import TokenData, get_current_user
 from core.database import (
-    ShopBoutiqueDB, ShopCategorieDB, ShopMessageDB, ShopOrderDB,
+    ShopBoutiqueDB, ShopCategorieDB, ShopCouponDB, ShopMessageDB, ShopOrderDB,
     ShopOrderItemDB, ShopProductCommentDB, ShopProductDB,
     ShopLivraisonZoneDB, ShopPushSubscriptionDB, async_session_maker,
 )
@@ -1665,7 +1665,41 @@ async def creer_order_public(
 
     # Calcul montants
     montant_produits = sum(it.prix * it.qte for it in payload.items)
-    montant_total = montant_produits  # TODO : livraison + tva + promo
+
+    # ── Coupon : valide + applique réduction ──────────────────────────────
+    coupon_obj: Optional[ShopCouponDB] = None
+    coupon_reduction = 0.0
+    if payload.code_promo:
+        code = payload.code_promo.strip().upper()
+        coupon_obj = (await db.execute(
+            select(ShopCouponDB).where(
+                ShopCouponDB.boutique_id == b.id,
+                ShopCouponDB.code == code,
+                ShopCouponDB.actif == True,  # noqa: E712
+            )
+        )).scalar_one_or_none()
+        if coupon_obj:
+            now = datetime.utcnow()
+            ok = (
+                (not coupon_obj.valable_du or now >= coupon_obj.valable_du)
+                and (not coupon_obj.valable_au or now <= coupon_obj.valable_au)
+                and (not coupon_obj.usage_max or coupon_obj.usage_count < coupon_obj.usage_max)
+                and (not coupon_obj.min_panier or montant_produits >= float(coupon_obj.min_panier))
+            )
+            if ok:
+                coupon_reduction = (
+                    montant_produits * float(coupon_obj.valeur) / 100.0
+                    if coupon_obj.type == "pct"
+                    else min(montant_produits, float(coupon_obj.valeur))
+                )
+            else:
+                coupon_obj = None  # invalide → ignoré silencieusement
+
+    montant_total = max(0.0, montant_produits - coupon_reduction)
+
+    # ── Commission Yukpo (configurable par env, défaut 3 %) ───────────────
+    commission_pct = float(os.getenv("YUKPOSHOP_COMMISSION_PCT", "3.0"))
+    commission_amount = round(montant_total * commission_pct / 100.0, 2)
 
     numero = f"YK-{datetime.utcnow().year}-{int(time.time()) % 1000000:06d}"
 
@@ -1681,6 +1715,7 @@ async def creer_order_public(
         client_telephone=payload.client.client_telephone,
         adresse_livraison_json=adresse,
         montant_produits=montant_produits,
+        montant_remise=coupon_reduction,
         montant_total=montant_total,
         devise=b.devise,
         paiement_provider=payload.client.provider,
@@ -1688,7 +1723,13 @@ async def creer_order_public(
         utm_source=payload.utm_source,
         utm_campaign=payload.utm_campaign,
         code_promo=payload.code_promo,
+        coupon_code=coupon_obj.code if coupon_obj else None,
+        coupon_reduction=coupon_reduction if coupon_obj else None,
+        commission_yukpo_pct=commission_pct,
+        commission_yukpo_amount=commission_amount,
     )
+    if coupon_obj:
+        coupon_obj.usage_count = (coupon_obj.usage_count or 0) + 1
     db.add(order)
     await db.flush()
 
@@ -1741,6 +1782,19 @@ async def creer_order_public(
         )
     except Exception:
         pass
+
+    # ── Loyalty : crédite points fidélité Yukpo au client (1 pt / 100 unités) ─
+    try:
+        if payload.client.client_email:
+            points = max(1, int(montant_total / 100.0))
+            from modules.pro.yukposhop_rust_promo import crediter_loyalty_rust
+            await crediter_loyalty_rust(
+                user_email=payload.client.client_email,
+                points=points, motif="yukposhop_order",
+                reference_id=numero,
+            )
+    except Exception as _e:
+        logger.debug(f"[Order] loyalty credit échec : {_e}")
 
     # Notif marchand WA prioritaire + SMS fallback
     try:
@@ -2275,7 +2329,7 @@ async def admin_compter_messages_non_lus(
     db: AsyncSession = Depends(_get_db),
 ):
     b = (await db.execute(
-        select(ShopBoutiqueDB).where(ShopBoutiqueDB.user_id == user.id)
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.user_id == user.user_id)
     )).scalar_one_or_none()
     if not b:
         return {"messages": 0, "commentaires_pending": 0}
@@ -2845,6 +2899,435 @@ async def generer_banniere_ia(
         pass
 
     return {"ok": True, "url": url, "cost": 1}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Coupons / codes promo (locaux par boutique)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class CouponIn(BaseModel):
+    code: str = Field(..., min_length=2, max_length=40)
+    type: str = Field("pct", pattern=r"^(pct|fixe)$")
+    valeur: float = Field(..., ge=0)
+    min_panier: Optional[float] = Field(None, ge=0)
+    valable_du: Optional[datetime] = None
+    valable_au: Optional[datetime] = None
+    usage_max: Optional[int] = Field(None, ge=1)
+    actif: bool = True
+    description: Optional[str] = Field(None, max_length=200)
+
+
+@router.get("/shop/coupons", summary="Liste les coupons de ma boutique")
+async def lister_coupons(
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    rows = (await db.execute(
+        select(ShopCouponDB).where(ShopCouponDB.boutique_id == b.id)
+        .order_by(desc(ShopCouponDB.cree_le))
+    )).scalars().all()
+    return {"ok": True, "items": [{
+        "id": c.id, "code": c.code, "type": c.type,
+        "valeur": float(c.valeur), "min_panier": c.min_panier and float(c.min_panier),
+        "valable_du": c.valable_du and c.valable_du.isoformat(),
+        "valable_au": c.valable_au and c.valable_au.isoformat(),
+        "usage_max": c.usage_max, "usage_count": c.usage_count,
+        "actif": c.actif, "description": c.description,
+    } for c in rows]}
+
+
+@router.post("/shop/coupons", summary="Crée un coupon")
+async def creer_coupon(
+    payload: CouponIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    code = payload.code.strip().upper()
+    # Unicité (code, boutique)
+    exists = (await db.execute(
+        select(ShopCouponDB).where(
+            ShopCouponDB.boutique_id == b.id,
+            ShopCouponDB.code == code,
+        )
+    )).scalar_one_or_none()
+    if exists:
+        raise HTTPException(409, "Code déjà existant pour cette boutique")
+    if payload.type == "pct" and payload.valeur > 100:
+        raise HTTPException(400, "Pourcentage max 100")
+    c = ShopCouponDB(
+        boutique_id=b.id, code=code, type=payload.type,
+        valeur=payload.valeur, min_panier=payload.min_panier,
+        valable_du=payload.valable_du, valable_au=payload.valable_au,
+        usage_max=payload.usage_max, actif=payload.actif,
+        description=payload.description,
+    )
+    db.add(c)
+    await db.commit()
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_coupon_create",
+        )
+    except Exception:
+        pass
+    return {"ok": True, "id": c.id, "code": c.code}
+
+
+@router.patch("/shop/coupons/{cid}", summary="Modifie un coupon")
+async def patch_coupon(
+    cid: int, payload: CouponIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    c = (await db.execute(
+        select(ShopCouponDB).where(
+            ShopCouponDB.id == cid,
+            ShopCouponDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not c:
+        raise HTTPException(404, "Coupon introuvable")
+    c.type = payload.type
+    c.valeur = payload.valeur
+    c.min_panier = payload.min_panier
+    c.valable_du = payload.valable_du
+    c.valable_au = payload.valable_au
+    c.usage_max = payload.usage_max
+    c.actif = payload.actif
+    c.description = payload.description
+    await db.commit()
+    return {"ok": True}
+
+
+@router.delete("/shop/coupons/{cid}", summary="Supprime un coupon")
+async def supprimer_coupon(
+    cid: int,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    c = (await db.execute(
+        select(ShopCouponDB).where(
+            ShopCouponDB.id == cid,
+            ShopCouponDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not c:
+        raise HTTPException(404, "Coupon introuvable")
+    await db.delete(c)
+    await db.commit()
+    return {"ok": True}
+
+
+@router_public.get(
+    "/{slug}/coupon/valider",
+    summary="Storefront : valide un code coupon",
+)
+async def valider_coupon_public(
+    slug: str, code: str, montant: float = 0,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+    c = (await db.execute(
+        select(ShopCouponDB).where(
+            ShopCouponDB.boutique_id == b.id,
+            ShopCouponDB.code == code.strip().upper(),
+            ShopCouponDB.actif == True,  # noqa: E712
+        )
+    )).scalar_one_or_none()
+    now = datetime.utcnow()
+    if not c:
+        return {"ok": False, "error": "Code invalide"}
+    if c.valable_du and now < c.valable_du:
+        return {"ok": False, "error": "Code pas encore actif"}
+    if c.valable_au and now > c.valable_au:
+        return {"ok": False, "error": "Code expiré"}
+    if c.usage_max and c.usage_count >= c.usage_max:
+        return {"ok": False, "error": "Code épuisé"}
+    if c.min_panier and montant < float(c.min_panier):
+        return {
+            "ok": False,
+            "error": f"Panier min {int(c.min_panier)} {b.devise} requis",
+        }
+    reduction = (montant * c.valeur / 100.0) if c.type == "pct" else min(montant, float(c.valeur))
+    return {
+        "ok": True, "type": c.type, "valeur": float(c.valeur),
+        "reduction": round(reduction, 2), "description": c.description,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Flash sales + Black Friday (bridge Rust)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class FlashSaleIn(BaseModel):
+    produit_id: int
+    prix_flash: float = Field(..., gt=0)
+    debut: datetime
+    fin: datetime
+    stock_target: int = Field(..., ge=1)
+
+
+@router.post("/shop/flash-sale/creer", summary="Crée une vente flash via Rust")
+async def creer_flash_sale(
+    payload: FlashSaleIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    p = (await db.execute(
+        select(ShopProductDB).where(
+            ShopProductDB.id == payload.produit_id,
+            ShopProductDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+    if payload.fin <= payload.debut:
+        raise HTTPException(400, "Date fin doit être postérieure au début")
+
+    from modules.pro.yukposhop_rust_promo import creer_flash_sale_rust
+    email, _ = await _user_email_nom(current_user.user_id, db)
+    res = await creer_flash_sale_rust(
+        produit_id=p.id, prix_initial=float(p.prix_unit),
+        prix_flash=payload.prix_flash,
+        debut=payload.debut, fin=payload.fin,
+        stock_target=payload.stock_target,
+        vendeur_email=email, devise=p.devise or b.devise,
+    )
+    if not res.success:
+        raise HTTPException(502, res.error or "Création flash sale échouée")
+
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_flash_sale",
+        )
+    except Exception:
+        pass
+    return {"ok": True, "rust_id": res.rust_id}
+
+
+@router.get("/shop/global-promos/disponibles", summary="Black Friday Yukpo & autres événements globaux")
+async def lister_global_promos(
+    current_user: TokenData = Depends(get_current_user),
+):
+    from modules.pro.yukposhop_rust_promo import lister_global_promos_actives_rust
+    items = await lister_global_promos_actives_rust()
+    return {"ok": True, "items": items}
+
+
+class JoindreGlobalPromoIn(BaseModel):
+    event_id: str
+    produit_ids: list[int]
+    reduction_pct: int = Field(..., ge=1, le=90)
+
+
+@router.post("/shop/global-promos/joindre", summary="Inscrit mes produits à un événement Yukpo global")
+async def joindre_global_promo(
+    payload: JoindreGlobalPromoIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    owned = (await db.execute(
+        select(ShopProductDB.id).where(
+            ShopProductDB.id.in_(payload.produit_ids),
+            ShopProductDB.boutique_id == b.id,
+        )
+    )).scalars().all()
+    if not owned:
+        raise HTTPException(404, "Aucun produit valide")
+    from modules.pro.yukposhop_rust_promo import joindre_global_promo_rust
+    email, _ = await _user_email_nom(current_user.user_id, db)
+    res = await joindre_global_promo_rust(
+        event_id=payload.event_id, produit_ids=list(owned),
+        reduction_pct=payload.reduction_pct, vendeur_email=email,
+    )
+    if not res.success:
+        raise HTTPException(502, res.error or "Inscription échouée")
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_global_promo",
+        )
+    except Exception:
+        pass
+    return {"ok": True, "rust_id": res.rust_id, "produits_inscrits": len(owned)}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Cross-sell panier (bridge Rust SimilarProductsService)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@router_public.post(
+    "/{slug}/cart/similar",
+    summary="Cross-sell : produits similaires aux items du panier",
+)
+async def cart_similar_public(
+    slug: str,
+    payload: dict,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+    produit_ids = payload.get("produit_ids") or []
+    if not isinstance(produit_ids, list) or not produit_ids:
+        return {"ok": True, "items": []}
+    from modules.pro.yukposhop_rust_promo import chercher_similar_rust
+    items = await chercher_similar_rust(produit_ids=produit_ids, limit=6)
+    return {"ok": True, "items": items}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Abandoned cart trigger (bridge Rust social-ai)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@router_public.post(
+    "/{slug}/cart/abandon",
+    summary="Storefront : déclenche la relance panier abandonné",
+)
+async def cart_abandon_public(
+    slug: str, payload: dict,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+    visitor_tel = (payload.get("visitor_telephone") or "").strip()
+    if not visitor_tel:
+        return {"ok": False, "error": "Téléphone visiteur requis pour relance"}
+    cart_items = payload.get("cart_items") or []
+    total = float(payload.get("total") or 0)
+    from modules.pro.yukposhop_rust_promo import push_cart_abandoned_rust
+    from core.database import UtilisateurDB
+    marchand = (await db.execute(
+        select(UtilisateurDB).where(UtilisateurDB.id == b.user_id)
+    )).scalar_one_or_none()
+    email = marchand.email if marchand and marchand.email else f"user{b.user_id}@yukpo.local"
+    res = await push_cart_abandoned_rust(
+        vendeur_email=email, visitor_telephone=visitor_tel,
+        cart_items=cart_items, boutique_slug=slug,
+        total=total, devise=b.devise,
+    )
+    return {"ok": res.success, "error": res.error}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Loyalty (bridge Rust LoyaltyService)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@router_public.get(
+    "/{slug}/loyalty/balance",
+    summary="Storefront : solde points fidélité Yukpo du visiteur connecté",
+)
+async def loyalty_balance_public(
+    slug: str, email: str,
+    db: AsyncSession = Depends(_get_db),
+):
+    from modules.pro.yukposhop_rust_promo import get_balance_loyalty_rust
+    bal = await get_balance_loyalty_rust(email)
+    return {"ok": True, "balance": bal or 0}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Réponse IA suggérée pour messages visiteurs
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/shop/messages/{mid}/suggerer-reponse",
+    summary="IA : suggère une réponse au message visiteur",
+)
+async def suggerer_reponse_ia(
+    mid: int,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    m = (await db.execute(
+        select(ShopMessageDB).where(
+            ShopMessageDB.id == mid,
+            ShopMessageDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not m:
+        raise HTTPException(404, "Message introuvable")
+
+    if m.reponse_ia_draft:
+        return {"ok": True, "draft": m.reponse_ia_draft, "cached": True}
+
+    # Contexte produit (si message attaché)
+    produit_ctx = ""
+    if m.product_id:
+        p = (await db.execute(
+            select(ShopProductDB).where(ShopProductDB.id == m.product_id)
+        )).scalar_one_or_none()
+        if p:
+            produit_ctx = (
+                f"\nProduit concerné : {p.titre} — {int(p.prix_unit)} {p.devise}"
+                f"\nDescription : {(p.description_courte or '')[:200]}"
+            )
+
+    prompt = (
+        f"Rédige une réponse professionnelle, chaleureuse et concise (max 5 lignes) "
+        f"au message ci-dessous, du point de vue du vendeur de la boutique "
+        f"« {b.nom} ».\n\n"
+        f"Message du visiteur :\n"
+        f"De : {m.visitor_nom}\n"
+        f"Sujet : {m.sujet or '—'}\n"
+        f"Contenu : « {m.contenu[:1000]} »"
+        f"{produit_ctx}\n\n"
+        f"Contraintes : utiliser 'vous', signer avec le nom de la boutique, "
+        f"ne PAS mentionner que tu es une IA. Si la question demande un prix/dispo "
+        f"que tu ignores, demande poliment des précisions."
+    )
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+        rep = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.COPILOTE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            systeme=(
+                "Tu es un assistant qui rédige des réponses commerçant → client "
+                "pour une boutique e-commerce. Tu adoptes un ton humain, "
+                "professionnel et serviable. Tu ne te présentes JAMAIS comme une IA."
+            ),
+            utiliser_cache=False,
+        )
+        draft = (rep.contenu or "").strip()
+        if draft.startswith(("«", '"')) and draft.endswith(("»", '"')):
+            draft = draft[1:-1].strip()
+        m.reponse_ia_draft = draft
+        await db.commit()
+        # Billing
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            await debiter_forfait_unifie(
+                current_user.user_id, "client_action",
+                module="shop_message_ai_reply",
+            )
+        except Exception:
+            pass
+        return {"ok": True, "draft": draft, "cached": False}
+    except Exception as e:
+        raise HTTPException(502, f"IA indisponible : {str(e)[:200]}")
 
 
 async def _initier_paiement_v2(
