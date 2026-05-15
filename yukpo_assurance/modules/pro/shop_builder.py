@@ -285,7 +285,13 @@ def _page_accueil_html(
 
 
 def _card_produit(p: dict, boutique: dict) -> str:
-    """Card produit réutilisée sur home + catalogue + recherche."""
+    """Card produit réutilisée sur home + catalogue + recherche.
+
+    Affiche les badges enrichis par IA Yukpo Rust quand disponibles :
+      - 🎬 VideoFeed (video_url)
+      - ⭐ quality_score (badge bas-droite)
+      - tags inline (3 max)
+    """
     photo = ""
     if p.get("photos_urls_json"):
         photos = p["photos_urls_json"]
@@ -298,13 +304,40 @@ def _card_produit(p: dict, boutique: dict) -> str:
         if p.get("prix_unit_promo") else
         f'<span class="font-bold" style="color:var(--accent)">{int(p["prix_unit"])} {devise}</span>'
     )
+
+    # Badges enrichis (n'apparaissent que si la donnée existe)
+    badge_video = (
+        '<div class="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">'
+        '▶ Vidéo</div>'
+        if p.get("video_url") else ""
+    )
+    qs = p.get("yukpo_quality_score")
+    badge_quality = ""
+    if isinstance(qs, int) and qs >= 70:
+        badge_quality = (
+            f'<div class="absolute bottom-2 right-2 bg-white/95 backdrop-blur text-[10px] font-bold '
+            f'px-1.5 py-0.5 rounded-full shadow text-amber-700">★ {qs}/100</div>'
+        )
+
+    tags = p.get("yukpo_tags_json") or []
+    tags_html = ""
+    if isinstance(tags, list) and tags:
+        tags_html = (
+            '<div class="text-[10px] mt-0.5 text-slate-500 truncate">'
+            + "#" + " #".join(escape(str(t))[:20] for t in tags[:3])
+            + '</div>'
+        )
+
     return (
-        f'<a href="/p/{escape(p["slug"])}" class="block bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden">'
+        f'<a href="/p/{escape(p["slug"])}" class="block bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden relative">'
+        + badge_video
+        + badge_quality
         + (f'<img src="{escape(photo)}" alt="" class="w-full aspect-square object-cover">' if photo
            else f'<div class="w-full aspect-square bg-slate-100 flex items-center justify-center text-slate-400">📦</div>')
         + f'<div class="p-3">'
         f'<h3 class="font-semibold text-sm md:text-base truncate" style="color:var(--primary)">{escape(p.get("titre", ""))}</h3>'
-        f'<div class="mt-1 text-sm">{prix_aff}</div>'
+        + tags_html
+        + f'<div class="mt-1 text-sm">{prix_aff}</div>'
         f'</div></a>'
     )
 

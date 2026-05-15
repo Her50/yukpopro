@@ -645,6 +645,29 @@ export const generateurApi = {
     };
   },
 
+  /** Dupliquer un produit (clone en brouillon dans même boutique). */
+  shopDupliquerProduit: async (produitId: number) => {
+    const { data } = await http.post(`/pro/shop/produits/${produitId}/dupliquer`, {});
+    return data as { ok: boolean; produit: any };
+  },
+
+  /** Générer une vidéo pub IA via Yukpo Rust Remotion. */
+  shopGenererVideo: async (
+    produitId: number, ton: string = "dynamique", dureeS: number = 15,
+  ) => {
+    const form = new FormData();
+    form.append("ton", ton);
+    form.append("duree_s", String(dureeS));
+    const { data } = await http.post(
+      `/pro/shop/produits/${produitId}/generer-video`, form,
+      { timeout: 120_000, headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return data as {
+      ok: boolean; video_url?: string; thumbnail_url?: string;
+      duration_s?: number; duree_render_s?: number; error?: string;
+    };
+  },
+
   /** 6e — Re-enrichir manuellement la boutique via Google Places. */
   shopGoogleEnrich: async (ville?: string) => {
     const { data } = await http.post("/pro/shop/google-enrich", null, {

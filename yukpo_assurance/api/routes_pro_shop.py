@@ -532,6 +532,123 @@ async def patch_produit(
     return {"ok": True, "produit": _produit_to_dict(p)}
 
 
+@router.post(
+    "/shop/produits/{produit_id}/dupliquer",
+    summary="Duplique un produit (clone avec slug -copie-N, statut brouillon)",
+)
+async def dupliquer_produit(
+    produit_id: int,
+    background_tasks: BackgroundTasks,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Clone un produit dans la même boutique. Le nouveau produit hérite de
+    titre/desc/prix/photos/tags/variantes du parent. Statut forcé 'brouillon'
+    pour que le commerçant ajuste avant publication. Les champs yukpo_*
+    (enrichissement IA) sont VIDÉS — re-calculés au prochain sync Rust.
+
+    NOTE — pas un doublon avec Rust : Rust a aussi `duplicate_product` mais
+    il opère sur la table native `service_products` Rust. YukpoShop a sa
+    propre table `shop_products` (Python) qui est juste **miroir** côté Rust
+    via `external_product_links` (Piste 1). Le clone Python crée donc un
+    nouveau `shop_products.id` → BackgroundTask Piste 1 fera le sync vers
+    Rust qui créera un service miroir. Pas de duplication de logique.
+    """
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    src = (await db.execute(
+        select(ShopProductDB)
+        .where(ShopProductDB.id == produit_id)
+        .where(ShopProductDB.boutique_id == b.id)
+    )).scalar_one_or_none()
+    if not src:
+        raise HTTPException(404, "Produit source introuvable")
+
+    base_slug = re.sub(r"-copie(-\d+)?$", "", src.slug)
+    new_slug = f"{base_slug}-copie"
+    suffix = 0
+    while True:
+        c = (await db.execute(
+            select(ShopProductDB).where(ShopProductDB.boutique_id == b.id)
+            .where(ShopProductDB.slug == new_slug)
+        )).scalar_one_or_none()
+        if not c:
+            break
+        suffix += 1
+        new_slug = f"{base_slug}-copie-{suffix}"
+        if suffix > 20:
+            raise HTTPException(409, "Trop de duplicatas — renommer l'original")
+
+    clone = ShopProductDB(
+        boutique_id=b.id, slug=new_slug,
+        titre=f"{src.titre} (copie)"[:200],
+        description_courte=src.description_courte,
+        description_longue=src.description_longue,
+        prix_unit=src.prix_unit, prix_unit_promo=src.prix_unit_promo,
+        devise=src.devise,
+        tva_pct=src.tva_pct, stock=src.stock, stock_alerte=src.stock_alerte,
+        photos_urls_json=src.photos_urls_json,
+        video_url=src.video_url, video_thumbnail_url=src.video_thumbnail_url,
+        categorie_id=src.categorie_id, tags_json=src.tags_json,
+        variantes_json=src.variantes_json,
+        seo_titre=src.seo_titre, seo_desc=src.seo_desc,
+        seo_keywords_json=src.seo_keywords_json,
+        statut="brouillon",
+        source="dupliqué",
+    )
+    db.add(clone)
+    await db.commit()
+    await db.refresh(clone)
+    return {"ok": True, "produit": _produit_to_dict(clone)}
+
+
+@router.post(
+    "/shop/produits/{produit_id}/generer-video",
+    summary="Génère une vidéo pub IA pour un produit via Yukpo Rust Remotion",
+)
+async def generer_video_produit(
+    produit_id: int,
+    ton: Optional[str] = Form("dynamique"),
+    duree_s: int = Form(15, ge=5, le=60),
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    """Génère une vidéo publicitaire courte (5-60s) à partir des photos
+    du produit, via le pipeline Remotion + IA de Yukpo Rust. La vidéo
+    est sauvegardée et son URL est stockée dans `shop_products.video_url`,
+    rendant le produit éligible au VideoFeed mobile Yukpo (Piste 6b)."""
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    p = (await db.execute(
+        select(ShopProductDB)
+        .where(ShopProductDB.id == produit_id)
+        .where(ShopProductDB.boutique_id == b.id)
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+    if not p.photos_urls_json:
+        raise HTTPException(400, "Pas de photos sur ce produit — uploader d'abord 1-5 photos")
+
+    try:
+        from modules.pro.yukposhop_rust_video import generer_video_produit_via_rust
+        res = await generer_video_produit_via_rust(
+            produit=p, ton=ton or "dynamique", duree_s=duree_s,
+        )
+        if res.success and res.video_url:
+            p.video_url = res.video_url
+            if res.thumbnail_url:
+                p.video_thumbnail_url = res.thumbnail_url
+            await db.commit()
+            return {
+                "ok": True, "video_url": res.video_url,
+                "thumbnail_url": res.thumbnail_url, "duration_s": res.duration_s,
+                "duree_render_s": res.duree_render_s,
+            }
+        raise HTTPException(502, res.error or "Génération vidéo échouée")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Erreur génération vidéo : {str(e)[:200]}")
+
+
 @router.delete("/shop/produits/{produit_id}", summary="Supprime un produit")
 async def supprimer_produit(
     produit_id: int,

@@ -71,6 +71,9 @@ export const MaBoutiquePage = () => {
     { stats: Record<string, number>; total: number; rust_sync_enabled: boolean } | null
   >(null);
   const [similarItems, setSimilarItems] = useState<{ produitId: number; items: any[] } | null>(null);
+  // Gaps management — modals édition + partage
+  const [editProduit, setEditProduit] = useState<Produit | null>(null);
+  const [shareProduit, setShareProduit] = useState<Produit | null>(null);
 
   const refresh = async () => {
     setLoading(true);
@@ -143,6 +146,44 @@ export const MaBoutiquePage = () => {
     } catch (e: any) {
       toast.error(e?.response?.data?.detail || e?.message || "Erreur");
     }
+  };
+
+  const onDupliquer = async (id: number) => {
+    setBusy(`dup-${id}`);
+    try {
+      const res = await generateurApi.shopDupliquerProduit(id);
+      toast.success(`✓ Produit dupliqué : "${res.produit.titre}"`);
+      await refresh();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur duplication");
+    } finally { setBusy(null); }
+  };
+
+  const onGenererVideo = async (p: Produit) => {
+    if (!p.photos_urls_json?.length) {
+      toast.error("Ajoute au moins 1 photo avant de générer une vidéo");
+      return;
+    }
+    const ton = prompt(
+      "Ton de la vidéo (dynamique / luxueux / chaleureux / pro) :",
+      "dynamique",
+    ) || "dynamique";
+    const dureeStr = prompt("Durée en secondes (5-60) :", "15") || "15";
+    const duree = Math.max(5, Math.min(60, parseInt(dureeStr) || 15));
+    setBusy(`vid-${p.id}`);
+    toast.loading(`🎬 Génération vidéo pub IA (~${duree * 2}s)…`, { id: "vid" });
+    try {
+      const res = await generateurApi.shopGenererVideo(p.id, ton, duree);
+      if (res.ok && res.video_url) {
+        toast.success("✓ Vidéo générée — visible dans VideoFeed mobile Yukpo", { id: "vid" });
+        await refresh();
+      } else {
+        toast(res.error || "Génération non disponible (Rust Remotion en Phase B)",
+              { id: "vid", icon: "⚠️", duration: 8000 });
+      }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur génération", { id: "vid" });
+    } finally { setBusy(null); }
   };
 
   // Piste 6c — voir produits similaires dans le marketplace Yukpo
@@ -368,6 +409,27 @@ export const MaBoutiquePage = () => {
         />
       )}
 
+      {/* Modal édition produit complète */}
+      {editProduit && (
+        <EditProduitModal
+          produit={editProduit}
+          onClose={() => setEditProduit(null)}
+          onSaved={async () => {
+            setEditProduit(null);
+            await refresh();
+          }}
+        />
+      )}
+
+      {/* Modal partage produit (WA / email / SMS / copier lien) */}
+      {shareProduit && boutique && (
+        <ShareProduitModal
+          produit={shareProduit}
+          boutique={boutique}
+          onClose={() => setShareProduit(null)}
+        />
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-4 border-b border-slate-200 overflow-x-auto">
         <TabBtn icon={<Package className="w-4 h-4" />} label={`${t("shop.tab_produits", "Produits")} (${produits.length})`}
@@ -501,20 +563,47 @@ export const MaBoutiquePage = () => {
                   </div>
                 )}
 
-                <div className="flex gap-1 mt-2">
-                  <button onClick={() => onActiverProduit(p.id, p.statut)}
-                          className="flex-grow text-xs px-2 py-1.5 rounded bg-slate-100 hover:bg-slate-200 min-h-[36px]">
-                    {p.statut === "actif" ? t("shop.depublier_prod", "Brouillon") : t("shop.publier_prod", "Activer")}
-                  </button>
-                  <button onClick={() => onShowSimilar(p.id)}
-                          className="text-xs px-2 py-1.5 rounded bg-violet-100 hover:bg-violet-200 text-violet-700 min-h-[36px]"
-                          title="Voir produits similaires dans le marketplace Yukpo">
-                    <Globe className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => onSupprimerProduit(p.id)}
-                          className="text-xs px-2 py-1.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-700 min-h-[36px]">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                <div className="mt-auto pt-2">
+                  <div className="flex gap-1 mb-1">
+                    <button onClick={() => onActiverProduit(p.id, p.statut)}
+                            className="flex-grow text-xs px-2 py-1.5 rounded bg-slate-100 hover:bg-slate-200 min-h-[36px]">
+                      {p.statut === "actif" ? t("shop.depublier_prod", "Brouillon") : t("shop.publier_prod", "Activer")}
+                    </button>
+                    <button onClick={() => setEditProduit(p)}
+                            className="text-xs px-2 py-1.5 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 min-h-[36px]"
+                            title="Modifier (édition complète)">
+                      ✎
+                    </button>
+                    <button onClick={() => onSupprimerProduit(p.id)}
+                            className="text-xs px-2 py-1.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-700 min-h-[36px]"
+                            title="Supprimer">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    <button onClick={() => onDupliquer(p.id)}
+                            disabled={busy === `dup-${p.id}`}
+                            className="text-[10px] px-1.5 py-1.5 rounded bg-slate-50 hover:bg-slate-100 text-slate-700 disabled:opacity-50 inline-flex items-center justify-center"
+                            title="Dupliquer">
+                      {busy === `dup-${p.id}` ? <Loader2 className="w-3 h-3 animate-spin" /> : "⎘"}
+                    </button>
+                    <button onClick={() => setShareProduit(p)}
+                            className="text-[10px] px-1.5 py-1.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 inline-flex items-center justify-center"
+                            title="Partager (WA, email, SMS, lien)">
+                      <Send className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => onGenererVideo(p)}
+                            disabled={busy === `vid-${p.id}`}
+                            className="text-[10px] px-1.5 py-1.5 rounded bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 disabled:opacity-50 inline-flex items-center justify-center"
+                            title={p.video_url ? "Vidéo générée — VideoFeed Yukpo" : "Générer vidéo pub IA"}>
+                      {busy === `vid-${p.id}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
+                    </button>
+                    <button onClick={() => onShowSimilar(p.id)}
+                            className="text-[10px] px-1.5 py-1.5 rounded bg-violet-50 hover:bg-violet-100 text-violet-700 inline-flex items-center justify-center"
+                            title="Produits similaires marketplace">
+                      <Globe className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -969,6 +1058,264 @@ const ChatCreatorModal = ({
               </button>
             </>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/**
+ * EditProduitModal — édition complète d'un produit existant.
+ * Tous les champs de ShopProductDB modifiables sont exposés.
+ */
+const EditProduitModal = ({
+  produit, onClose, onSaved,
+}: {
+  produit: Produit;
+  onClose: () => void;
+  onSaved: () => void | Promise<void>;
+}) => {
+  const [titre, setTitre] = useState(produit.titre);
+  const [descCourte, setDescCourte] = useState((produit as any).description_courte || "");
+  const [descLongue, setDescLongue] = useState((produit as any).description_longue || "");
+  const [prix, setPrix] = useState(produit.prix_unit);
+  const [prixPromo, setPrixPromo] = useState((produit as any).prix_unit_promo || 0);
+  const [stock, setStock] = useState(produit.stock);
+  const [tva, setTva] = useState((produit as any).tva_pct || 0);
+  const [videoUrl, setVideoUrl] = useState(produit.video_url || "");
+  const [tagsStr, setTagsStr] = useState(
+    Array.isArray((produit as any).tags_json)
+      ? (produit as any).tags_json.join(", ")
+      : ""
+  );
+  const [saving, setSaving] = useState(false);
+
+  // Si l'IA Yukpo a généré une description enrichie, proposer de l'adopter
+  const hasIASuggestion = !!produit.yukpo_description_enriched &&
+                          produit.yukpo_description_enriched !== descLongue;
+
+  const onSave = async () => {
+    setSaving(true);
+    try {
+      await generateurApi.shopPatchProduit(produit.id, {
+        titre,
+        description_courte: descCourte || null,
+        description_longue: descLongue || null,
+        prix_unit: prix,
+        prix_unit_promo: prixPromo > 0 ? prixPromo : null,
+        stock,
+        tva_pct: tva,
+        video_url: videoUrl || null,
+        tags_json: tagsStr.split(",").map(s => s.trim()).filter(Boolean),
+      });
+      toast.success("Produit mis à jour");
+      await onSaved();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur");
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h3 className="font-bold text-lg">✎ Modifier le produit</h3>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="overflow-y-auto px-6 py-5 flex-grow space-y-3">
+          <div>
+            <label className="block text-sm font-semibold mb-1">Titre vendeur</label>
+            <input value={titre} onChange={e => setTitre(e.target.value)}
+                   className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:border-violet-500 focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1">Description courte</label>
+            <input value={descCourte} onChange={e => setDescCourte(e.target.value)}
+                   className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center justify-between">
+              <span>Description longue</span>
+              {hasIASuggestion && (
+                <button onClick={() => setDescLongue(produit.yukpo_description_enriched!)}
+                        className="text-[11px] text-violet-600 hover:underline">
+                  ✨ Adopter la description IA Yukpo
+                </button>
+              )}
+            </label>
+            <textarea value={descLongue} onChange={e => setDescLongue(e.target.value)} rows={6}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-semibold mb-1">Prix</label>
+              <input type="number" value={prix} onChange={e => setPrix(Number(e.target.value))}
+                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">Prix promo</label>
+              <input type="number" value={prixPromo} onChange={e => setPrixPromo(Number(e.target.value))}
+                     placeholder="0 = pas de promo"
+                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">Stock</label>
+              <input type="number" value={stock} onChange={e => setStock(Number(e.target.value))}
+                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-semibold mb-1">TVA %</label>
+              <input type="number" value={tva} onChange={e => setTva(Number(e.target.value))}
+                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">URL vidéo (VideoFeed)</label>
+              <input value={videoUrl} onChange={e => setVideoUrl(e.target.value)}
+                     placeholder="https://… ou laisse vide"
+                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1">Tags (séparés par virgule)</label>
+            <input value={tagsStr} onChange={e => setTagsStr(e.target.value)}
+                   placeholder="smartphone, 5G, écran amoled"
+                   className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm" />
+            {Array.isArray(produit.yukpo_tags_json) && produit.yukpo_tags_json.length > 0 && (
+              <button onClick={() => setTagsStr(produit.yukpo_tags_json!.join(", "))}
+                      className="mt-1 text-[11px] text-violet-600 hover:underline">
+                ✨ Utiliser les tags IA Yukpo : {produit.yukpo_tags_json.slice(0, 3).join(", ")}…
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 px-6 py-4 border-t bg-slate-50 rounded-b-2xl">
+          <button onClick={onClose}
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-sm hover:bg-slate-50">
+            Annuler
+          </button>
+          <button onClick={onSave} disabled={saving}
+                  className="px-5 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-50">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/**
+ * ShareProduitModal — partage externe d'un produit (WA / email / SMS / lien).
+ *
+ * Construit l'URL publique du storefront `https://<slug>.yukpomnang.com/p/<produit-slug>`
+ * + un message commercial pré-rempli. Le client peut copier ou cliquer
+ * directement sur WA Web/SMS/mailto pour ouvrir l'app native.
+ */
+const ShareProduitModal = ({
+  produit, boutique, onClose,
+}: {
+  produit: Produit;
+  boutique: any;
+  onClose: () => void;
+}) => {
+  const baseUrl = boutique?.url_public ||
+                  `https://${boutique?.slug}.yukpomnang.com`;
+  const lienPublic = `${baseUrl}/p/${produit.slug}`;
+  const prix = (produit as any).prix_unit_promo || produit.prix_unit;
+  const devise = produit.devise;
+
+  // Message commercial pré-rempli (utilisé pour WA/SMS/email)
+  const message =
+    `🛍 *${produit.titre}*\n` +
+    `💰 ${Math.round(prix)} ${devise}` +
+    ((produit as any).prix_unit_promo ? ` (promo !)` : "") + "\n" +
+    `📍 ${boutique?.nom || "Yukpo Shop"}\n\n` +
+    ((produit as any).description_courte
+      ? `${(produit as any).description_courte}\n\n`
+      : "") +
+    `👉 Commander : ${lienPublic}`;
+
+  const onCopy = () => {
+    navigator.clipboard.writeText(lienPublic);
+    toast.success("Lien copié dans le presse-papier");
+  };
+
+  const onCopyMsg = () => {
+    navigator.clipboard.writeText(message);
+    toast.success("Message copié dans le presse-papier");
+  };
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
+  const mailUrl = `mailto:?subject=${encodeURIComponent(
+    `${produit.titre} — ${Math.round(prix)} ${devise}`
+  )}&body=${encodeURIComponent(message)}`;
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(lienPublic)}`;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h3 className="font-bold text-lg inline-flex items-center gap-2">
+            <Send className="w-5 h-5 text-emerald-600" />
+            Partager ce produit
+          </h3>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="px-6 py-5 space-y-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs whitespace-pre-line max-h-32 overflow-y-auto">
+            {message}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <a href={waUrl} target="_blank" rel="noopener"
+               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm">
+              💬 WhatsApp
+            </a>
+            <a href={smsUrl}
+               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm">
+              📱 SMS
+            </a>
+            <a href={mailUrl}
+               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-slate-500 hover:bg-slate-600 text-white font-semibold text-sm">
+              📧 Email
+            </a>
+            <a href={fbUrl} target="_blank" rel="noopener"
+               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#1877F2] hover:opacity-90 text-white font-semibold text-sm">
+              <Facebook className="w-4 h-4" /> Facebook
+            </a>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">
+              Lien direct produit
+            </label>
+            <div className="flex gap-2">
+              <input value={lienPublic} readOnly
+                     className="flex-grow px-3 py-2 rounded-lg border border-slate-300 text-sm bg-slate-50" />
+              <button onClick={onCopy}
+                      className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold">
+                Copier
+              </button>
+            </div>
+            <button onClick={onCopyMsg}
+                    className="mt-2 text-xs text-violet-600 hover:underline">
+              📋 Copier le message complet
+            </button>
+          </div>
+
+          <div className="text-[11px] text-slate-500 italic">
+            💡 Chaque clic sur ce lien depuis un canal social peut être tracké
+            côté Yukpo Rust (`/api/social/track`) pour mesurer l'attribution.
+          </div>
         </div>
       </div>
     </div>

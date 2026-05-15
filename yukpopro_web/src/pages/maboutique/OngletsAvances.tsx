@@ -20,17 +20,46 @@ import { generateurApi } from "@/api/client";
 
 export const OngletSocial = () => {
   const { t } = useTranslation();
-  const [integrations, setIntegrations] = useState<any[]>([]);
+  // Piste 4 — état comptes connectés via Yukpo Rust (source de vérité unique)
+  const [statusRust, setStatusRust] = useState<{
+    platforms: { platform: string; account_name: string | null; is_active: boolean }[];
+    connect_url: string;
+    rust_user_id: number | null;
+    error: string | null;
+  } | null>(null);
+  // Legacy YukpoShop intégrations (mode rétrocompat tant que YUKPOSHOP_LEGACY_SOCIAL_ENABLED=true)
+  const [integrationsLegacy, setIntegrationsLegacy] = useState<any[]>([]);
+  const [legacyAvailable, setLegacyAvailable] = useState(true);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await generateurApi.shopSocialList();
-      setIntegrations(res.integrations || []);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.detail || e?.message || "Erreur");
+      // Piste 4 — voie principale : interroger Rust
+      try {
+        const rs = await generateurApi.shopSocialStatus();
+        setStatusRust({
+          platforms: rs.platforms || [],
+          connect_url: rs.connect_url || "",
+          rust_user_id: rs.rust_user_id,
+          error: rs.error,
+        });
+      } catch (e: any) {
+        setStatusRust({ platforms: [], connect_url: "", rust_user_id: null,
+          error: e?.response?.data?.detail || e?.message });
+      }
+      // Legacy — tenter en parallèle pour compat (410 si désactivé côté serveur)
+      try {
+        const res = await generateurApi.shopSocialList();
+        setIntegrationsLegacy(res.integrations || []);
+        setLegacyAvailable(true);
+      } catch (e: any) {
+        if (e?.response?.status === 410) {
+          setLegacyAvailable(false);  // legacy gating actif
+        }
+        setIntegrationsLegacy([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -38,14 +67,53 @@ export const OngletSocial = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  const onConnectMeta = async () => {
+  const onConnectViaRust = () => {
+    // Piste 4 — redirige vers le flow OAuth côté Rust qui gère Meta/IG/etc.
+    if (statusRust?.connect_url) {
+      window.location.href = statusRust.connect_url;
+    } else {
+      toast.error("URL de connexion Yukpo non disponible (Rust pas joignable)");
+    }
+  };
+
+  const onDistribuerActifs = async () => {
+    // Piste 4 — distribuer TOUS les produits actifs vers les plateformes connectées
+    if (!statusRust || statusRust.platforms.length === 0) {
+      toast.error("Aucun compte social connecté côté Yukpo");
+      return;
+    }
+    const platforms = statusRust.platforms.filter(p => p.is_active).map(p => p.platform);
+    if (platforms.length === 0) {
+      toast.error("Aucune plateforme active");
+      return;
+    }
+    setBusy(true);
+    try {
+      // On laisse le user choisir combien de produits propager : on prend les 20 plus récents
+      const lst = await generateurApi.shopListerProduits({ statut: "actif", limit: 20 });
+      const ids = (lst.produits || []).map((p: any) => p.id);
+      if (ids.length === 0) {
+        toast.error("Aucun produit actif à distribuer");
+        return;
+      }
+      const r = await generateurApi.shopSocialDistribute(ids, platforms);
+      toast.success(`✓ ${r.jobs_created} jobs créés (${r.products_resolved} produits × ${platforms.length} plateformes). Worker Rust prendra le relai.`,
+        { duration: 6000 });
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur distribution");
+    } finally { setBusy(false); }
+  };
+
+  const onLegacyConnectMeta = async () => {
     setBusy(true);
     try {
       const { oauth_url } = await generateurApi.shopSocialOAuthUrl();
       window.location.href = oauth_url;
     } catch (e: any) {
       const detail = e?.response?.data?.detail;
-      if (typeof detail === "string" && detail.includes("non configuré")) {
+      if (e?.response?.status === 410) {
+        toast.error("Endpoint legacy désactivé. Utilise « Connecter via Yukpo » ci-dessus.", { duration: 6000 });
+      } else if (typeof detail === "string" && detail.includes("non configuré")) {
         toast.error("META_FB_APP_ID non configuré côté serveur Yukpo. Configuration admin requise.", { duration: 8000 });
       } else {
         toast.error(detail || e?.message || "Erreur");
@@ -60,52 +128,128 @@ export const OngletSocial = () => {
       toast.success(`${r.nb_sync_ok || 0} produits synchronisés${r.nb_sync_erreur ? ` (${r.nb_sync_erreur} erreurs)` : ""}`);
       await refresh();
     } catch (e: any) {
-      toast.error(e?.response?.data?.detail || e?.message || "Erreur");
+      if (e?.response?.status === 410) {
+        toast.error("Endpoint legacy désactivé. Utilise « Distribuer via Yukpo » ci-dessus.", { duration: 6000 });
+      } else {
+        toast.error(e?.response?.data?.detail || e?.message || "Erreur");
+      }
     } finally { setBusy(false); }
   };
 
-  const hasMeta = integrations.find(i => i.platform === "meta_fb" && i.statut === "actif");
+  const hasMeta = integrationsLegacy.find(i => i.platform === "meta_fb" && i.statut === "actif");
+  const hasRustPlatforms = (statusRust?.platforms?.length || 0) > 0;
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue-50 to-pink-50 border border-blue-200 rounded-xl p-5 mb-6">
+      {/* Piste 4 — distribution unifiée via Yukpo Rust (voie principale) */}
+      <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 border border-violet-200 rounded-xl p-5 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold text-lg text-violet-900 flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
+            Distribution sociale via Yukpo
+          </h2>
+          {hasRustPlatforms && (
+            <span className="text-[10px] uppercase font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+              ✓ Connecté
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-violet-800 mb-3">
+          Connecte tes comptes Meta / Instagram / WhatsApp Business / TikTok / YouTube
+          UNE FOIS via Yukpo et publie vers toutes les plateformes en un clic.
+          Tous les commerçants Yukpo partagent le même flow OAuth (pas besoin
+          de re-créer des Apps Meta).
+        </p>
+        {hasRustPlatforms ? (
+          <>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {statusRust!.platforms.map(p => (
+                <span key={p.platform}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-violet-200 text-xs font-medium">
+                  {p.platform === "facebook" ? "📘" : p.platform === "instagram" ? "📸" :
+                   p.platform === "whatsapp" ? "💬" : p.platform === "tiktok" ? "🎵" :
+                   p.platform === "youtube" ? "▶️" : "🔗"}
+                  {p.platform}
+                  {p.account_name && <span className="opacity-60">· {p.account_name}</span>}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={onDistribuerActifs} disabled={busy}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold min-h-[44px] disabled:opacity-50">
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Publier mes 20 derniers produits actifs
+              </button>
+              <button onClick={onConnectViaRust} disabled={busy}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-violet-200 hover:bg-violet-50 text-violet-700 text-sm min-h-[44px]">
+                Gérer mes comptes connectés
+              </button>
+            </div>
+          </>
+        ) : (
+          <button onClick={onConnectViaRust} disabled={busy || !statusRust?.connect_url}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold min-h-[44px] disabled:opacity-50">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Connecter mes comptes sociaux via Yukpo
+          </button>
+        )}
+        {statusRust?.error && !hasRustPlatforms && (
+          <div className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+            ⚠️ Yukpo Rust pas encore joignable : {statusRust.error}.
+            Tu peux toujours utiliser le flow legacy ci-dessous.
+          </div>
+        )}
+      </div>
+
+      {/* Legacy — mode rétrocompat (visible uniquement si pas désactivé côté serveur) */}
+      {legacyAvailable && (
+      <details className="mb-6">
+        <summary className="cursor-pointer text-sm text-slate-600 hover:text-slate-900 select-none">
+          Voir ancien mode (Meta direct YukpoShop)
+        </summary>
+        <div className="mt-3 bg-gradient-to-br from-blue-50 to-pink-50 border border-blue-200 rounded-xl p-5">
         <h2 className="font-bold text-lg text-blue-900 mb-2 flex items-center gap-2">
           <Facebook className="w-5 h-5" /><Instagram className="w-5 h-5 text-pink-600" />
-          {t("shop.social_titre", "Connexion sociale (Meta + TikTok)")}
+          {t("shop.social_titre", "Connexion sociale (Meta direct — legacy)")}
         </h2>
         <p className="text-sm text-blue-800 mb-3">
-          {t("shop.social_aide",
-             "Connectez vos comptes pour synchroniser vos produits vers Facebook Shops + "
-             + "Instagram Shopping, publier automatiquement à chaque nouveau produit, "
-             + "et gérer les commandes WhatsApp Business depuis YukpoPro.")}
+          ⚠️ Ancien mode YukpoShop autonome. La nouvelle voie « Distribution via Yukpo »
+          ci-dessus est recommandée (zéro maintenance OAuth côté toi).
         </p>
         <div className="flex flex-wrap gap-2">
           {!hasMeta ? (
-            <button onClick={onConnectMeta} disabled={busy}
+            <button onClick={onLegacyConnectMeta} disabled={busy}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium min-h-[44px] disabled:opacity-50">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Facebook className="w-4 h-4" />}
-              {t("shop.social_connect_meta", "Connecter Meta Business")}
+              Connecter Meta Business (legacy)
             </button>
           ) : (
             <button onClick={onSyncCatalog} disabled={busy}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-medium min-h-[44px] disabled:opacity-50">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              {t("shop.social_sync_catalog", "Synchroniser catalogue Meta")}
+              Sync catalogue Meta (legacy)
             </button>
           )}
         </div>
-      </div>
+        </div>
+      </details>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-violet-600" /></div>
-      ) : integrations.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
-          <Facebook className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-          <p className="text-slate-500">{t("shop.social_vide", "Aucune intégration sociale connectée.")}</p>
-        </div>
+      ) : integrationsLegacy.length === 0 ? (
+        !hasRustPlatforms && (
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+            <Facebook className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+            <p className="text-slate-500">{t("shop.social_vide", "Aucune intégration sociale connectée.")}</p>
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {integrations.map(i => (
+          <h3 className="col-span-full text-sm font-semibold text-slate-700">
+            Intégrations legacy (Meta direct YukpoShop)
+          </h3>
+          {integrationsLegacy.map(i => (
             <div key={i.id} className="bg-white border border-slate-200 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <div className="text-3xl">
