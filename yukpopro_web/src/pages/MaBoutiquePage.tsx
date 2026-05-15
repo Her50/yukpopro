@@ -11,10 +11,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  ArrowLeft, BarChart3, ExternalLink, Facebook, Image as ImageIcon,
-  Loader2, MapPin, MessageSquare, Package, RefreshCw, Send, Shield,
-  ShoppingCart, Sparkles, Star, Trash2, Truck, Upload, Users, Video,
-  Wand2, Globe, AlertTriangle, ChevronRight, X,
+  ArrowLeft, BarChart3, Check, ExternalLink, Facebook, Image as ImageIcon,
+  Loader2, Mail, MapPin, MessageSquare, Package, Palette, RefreshCw, Reply,
+  Send, Shield, ShoppingCart, Sparkles, Star, Trash2, Truck, Upload, Users,
+  Video, Wand2, Globe, AlertTriangle, ChevronRight, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { generateurApi } from "@/api/client";
@@ -57,7 +57,7 @@ export const MaBoutiquePage = () => {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"produits" | "commandes" | "social" | "roas" | "crm" | "livraison" | "marketplace">("produits");
+  const [tab, setTab] = useState<"produits" | "commandes" | "social" | "roas" | "crm" | "livraison" | "marketplace" | "messages" | "avis" | "branding">("produits");
   const [busy, setBusy] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importBrief, setImportBrief] = useState("");
@@ -239,9 +239,32 @@ export const MaBoutiquePage = () => {
     );
   }
 
+  // Override transversal contraste : tous les inputs/selects/textareas de
+  // cette page (et de ses modals) hériteront de bg blanc + texte slate-900
+  // + placeholder slate-400. Évite de réécrire 20+ className individuels.
+  const _contrastFix = (
+    <style>{`
+      .maboutique-scope input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+      .maboutique-scope select,
+      .maboutique-scope textarea {
+        background-color: #ffffff;
+        color: #0f172a;            /* slate-900 */
+      }
+      .maboutique-scope input::placeholder,
+      .maboutique-scope textarea::placeholder { color: #94a3b8; }  /* slate-400 */
+      .maboutique-scope h1, .maboutique-scope h2, .maboutique-scope h3,
+      .maboutique-scope h4, .maboutique-scope label { color: #0f172a; }
+      /* Boutons "neutres" (bg-slate-100/200, bg-white) — couleur de texte par défaut */
+      .maboutique-scope button:not([class*="text-white"]):not([class*="text-violet-"]):not([class*="text-emerald-"]):not([class*="text-rose-"]):not([class*="text-amber-"]):not([class*="text-blue-"]):not([class*="text-fuchsia-"]):not([class*="text-sky-"]) {
+        color: #1e293b;            /* slate-800 */
+      }
+    `}</style>
+  );
+
   if (showInit) {
     return (
-      <div className="p-4 md:p-6 max-w-xl mx-auto">
+      <div className="ykp-page maboutique-scope p-4 md:p-6 max-w-xl mx-auto">
+        {_contrastFix}
         <Link to="/chat" className="inline-flex items-center gap-1 text-sm text-slate-600 mb-4">
           <ArrowLeft className="w-4 h-4" /> Retour au chat
         </Link>
@@ -258,15 +281,15 @@ export const MaBoutiquePage = () => {
           <div className="space-y-3">
             <input type="text" placeholder={t("shop.init_nom", "Nom de la boutique") as string}
                    value={initForm.nom} onChange={e => setInitForm({ ...initForm, nom: e.target.value })}
-                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 min-h-[44px]" />
+                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 min-h-[44px]" />
             <textarea placeholder={t("shop.init_desc", "Description (optionnelle)") as string}
                       value={initForm.description}
                       onChange={e => setInitForm({ ...initForm, description: e.target.value })}
-                      rows={3} className="w-full px-4 py-2.5 rounded-lg border border-slate-300" />
+                      rows={3} className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400" />
             <div className="grid grid-cols-2 gap-3">
               <select value={initForm.devise}
                       onChange={e => setInitForm({ ...initForm, devise: e.target.value })}
-                      className="px-4 py-2.5 rounded-lg border border-slate-300 min-h-[44px]">
+                      className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 min-h-[44px]">
                 <option value="XAF">XAF (FCFA Afrique centrale)</option>
                 <option value="XOF">XOF (FCFA Ouest)</option>
                 <option value="NGN">NGN (Naira)</option>
@@ -276,7 +299,7 @@ export const MaBoutiquePage = () => {
               </select>
               <select value={initForm.pays_principal}
                       onChange={e => setInitForm({ ...initForm, pays_principal: e.target.value })}
-                      className="px-4 py-2.5 rounded-lg border border-slate-300 min-h-[44px]">
+                      className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 min-h-[44px]">
                 <option value="CM">Cameroun</option>
                 <option value="CI">Côte d'Ivoire</option>
                 <option value="SN">Sénégal</option>
@@ -298,7 +321,8 @@ export const MaBoutiquePage = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <div className="ykp-page maboutique-scope p-4 md:p-6 max-w-6xl mx-auto">
+      {_contrastFix}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
         <div>
           <Link to="/chat" className="inline-flex items-center gap-1 text-sm text-slate-600 mb-2">
@@ -364,6 +388,20 @@ export const MaBoutiquePage = () => {
           </button>
         </div>
       </div>
+
+      {/* Suggestion identité visuelle si manquante */}
+      {boutique && !boutique.logo_url && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-3">
+          <Palette className="w-5 h-5 text-amber-700 flex-shrink-0" />
+          <div className="flex-1 text-sm text-amber-900">
+            <b>Ajoutez votre logo</b> — il sert d'icône PWA (écran d'accueil mobile des visiteurs) et de favicon. Vous pouvez l'uploader ou demander à l'IA de le générer.
+          </div>
+          <button onClick={() => setTab("branding")}
+                  className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold whitespace-nowrap">
+            Ouvrir Branding
+          </button>
+        </div>
+      )}
 
       {/* Création produit — paradigme conversationnel (aligné Yukpo Rust ChatModal) */}
       <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 border border-violet-200 rounded-xl p-5 mb-6">
@@ -444,6 +482,12 @@ export const MaBoutiquePage = () => {
                 active={tab === "crm"} onClick={() => setTab("crm")} />
         <TabBtn icon={<Truck className="w-4 h-4" />} label={t("shop.tab_livraison", "Livraison")}
                 active={tab === "livraison"} onClick={() => setTab("livraison")} />
+        <TabBtn icon={<MessageSquare className="w-4 h-4" />} label={t("shop.tab_messages", "Messages")}
+                active={tab === "messages"} onClick={() => setTab("messages")} />
+        <TabBtn icon={<Star className="w-4 h-4" />} label={t("shop.tab_avis", "Avis")}
+                active={tab === "avis"} onClick={() => setTab("avis")} />
+        <TabBtn icon={<Palette className="w-4 h-4" />} label={t("shop.tab_branding", "Branding")}
+                active={tab === "branding"} onClick={() => setTab("branding")} />
         <TabBtn icon={<Globe className="w-4 h-4" />}
                 label={t("shop.tab_marketplace", "Marketplace Yukpo")}
                 active={tab === "marketplace"}
@@ -782,6 +826,17 @@ export const MaBoutiquePage = () => {
 
       {/* Phase D9 — Livraison */}
       {tab === "livraison" && <OngletLivraison />}
+
+      {/* Q1 — Messages visiteurs */}
+      {tab === "messages" && <OngletMessages />}
+
+      {/* Q1 — Avis clients (modération) */}
+      {tab === "avis" && <OngletAvis />}
+
+      {/* Branding — logo + bannière + génération IA + PWA */}
+      {tab === "branding" && (
+        <OngletBranding boutique={boutique} onUpdated={refresh} />
+      )}
     </div>
   );
 };
@@ -1317,6 +1372,389 @@ const ShareProduitModal = ({
             côté Yukpo Rust (`/api/social/track`) pour mesurer l'attribution.
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Q1 — Onglet Messages visiteurs
+// ═══════════════════════════════════════════════════════════════════════════
+
+const OngletMessages = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<string>("");
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const r = await generateurApi.shopListerMessages(filter ? { statut: filter } : undefined);
+      setItems(r.items || []);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur de chargement");
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter]);
+
+  const repondre = async (mid: number) => {
+    if (!replyText.trim()) return;
+    setBusy(true);
+    try {
+      await generateurApi.shopRepondreMessage(mid, replyText, true);
+      toast.success("Réponse envoyée");
+      setReplyText(""); setOpenId(null); load();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <h3 className="text-lg font-bold text-slate-900 flex-1">Messages visiteurs</h3>
+        <select value={filter} onChange={e => setFilter(e.target.value)}
+                className="px-3 py-1.5 border rounded-lg text-sm">
+          <option value="">Tous</option>
+          <option value="non_lu">Non lus</option>
+          <option value="lu">Lus</option>
+          <option value="repondu">Répondus</option>
+          <option value="archive">Archivés</option>
+        </select>
+        <button onClick={load} className="px-3 py-1.5 rounded-lg border text-sm">
+          <RefreshCw className="w-3.5 h-3.5 inline mr-1" />Rafraîchir
+        </button>
+      </div>
+      {loading && <div className="text-center py-8 text-slate-500">Chargement…</div>}
+      {!loading && items.length === 0 && (
+        <div className="text-center py-12 text-slate-500">
+          <Mail className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+          Aucun message.
+        </div>
+      )}
+      <div className="space-y-2">
+        {items.map(m => (
+          <div key={m.id} className={`border rounded-lg p-3 ${m.statut === "non_lu" ? "bg-violet-50 border-violet-200" : "border-slate-200"}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap text-sm">
+                  <span className="font-semibold">{m.visitor_nom}</span>
+                  {m.visitor_telephone && <span className="text-slate-500">{m.visitor_telephone}</span>}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100">{m.statut}</span>
+                  <span className="text-xs text-slate-400">{new Date(m.cree_le).toLocaleString()}</span>
+                </div>
+                {m.sujet && <div className="text-sm font-medium mt-1">{m.sujet}</div>}
+                <div className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{m.contenu}</div>
+                {m.reponse_marchand && (
+                  <div className="mt-2 pl-3 border-l-2 border-emerald-400 text-sm">
+                    <div className="text-xs text-emerald-700 font-semibold">Votre réponse · {m.repondu_le && new Date(m.repondu_le).toLocaleString()}</div>
+                    <div className="text-slate-700 whitespace-pre-wrap">{m.reponse_marchand}</div>
+                  </div>
+                )}
+                {openId === m.id && (
+                  <div className="mt-2">
+                    <textarea value={replyText} onChange={e => setReplyText(e.target.value)}
+                              rows={3} maxLength={4000}
+                              placeholder="Votre réponse (envoyée par WhatsApp au visiteur)…"
+                              className="w-full px-3 py-2 border rounded-lg text-sm" />
+                    <div className="flex gap-2 mt-1">
+                      <button disabled={busy} onClick={() => repondre(m.id)}
+                              className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-sm font-semibold disabled:opacity-50">
+                        <Send className="w-3.5 h-3.5 inline mr-1" />Envoyer
+                      </button>
+                      <button onClick={() => { setOpenId(null); setReplyText(""); }}
+                              className="px-3 py-1.5 rounded-lg border text-sm">Annuler</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {openId !== m.id && (
+                <button onClick={() => setOpenId(m.id)} className="px-3 py-1.5 rounded-lg border text-sm whitespace-nowrap">
+                  <Reply className="w-3.5 h-3.5 inline mr-1" />Répondre
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Q1 — Onglet Avis (modération commentaires)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const OngletAvis = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<string>("pending");
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const r = await generateurApi.shopListerCommentaires(filter ? { statut: filter } : undefined);
+      setItems(r.items || []);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur");
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter]);
+
+  const moderer = async (cid: number, statut: "approved" | "rejected") => {
+    try {
+      await generateurApi.shopModererCommentaire(cid, statut);
+      toast.success(statut === "approved" ? "Avis approuvé" : "Avis rejeté");
+      load();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur");
+    }
+  };
+  const supprimer = async (cid: number) => {
+    if (!confirm("Supprimer définitivement cet avis ?")) return;
+    try {
+      await generateurApi.shopSupprimerCommentaire(cid);
+      toast.success("Avis supprimé"); load();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur");
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <h3 className="text-lg font-bold text-slate-900 flex-1">Avis clients</h3>
+        <select value={filter} onChange={e => setFilter(e.target.value)}
+                className="px-3 py-1.5 border rounded-lg text-sm">
+          <option value="pending">À modérer</option>
+          <option value="approved">Approuvés</option>
+          <option value="rejected">Rejetés</option>
+          <option value="">Tous</option>
+        </select>
+        <button onClick={load} className="px-3 py-1.5 rounded-lg border text-sm">
+          <RefreshCw className="w-3.5 h-3.5 inline mr-1" />Rafraîchir
+        </button>
+      </div>
+      {loading && <div className="text-center py-8 text-slate-500">Chargement…</div>}
+      {!loading && items.length === 0 && (
+        <div className="text-center py-12 text-slate-500">
+          <Star className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+          Aucun avis {filter ? `(${filter})` : ""}.
+        </div>
+      )}
+      <div className="space-y-2">
+        {items.map(c => (
+          <div key={c.id} className="border border-slate-200 rounded-lg p-3">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap text-sm">
+                  <span className="font-semibold">{c.author_nom}</span>
+                  {c.note && <span className="text-amber-500">{"⭐".repeat(c.note)}</span>}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100">{c.statut}</span>
+                  <span className="text-xs text-slate-400">produit #{c.product_id}</span>
+                  <span className="text-xs text-slate-400">{new Date(c.cree_le).toLocaleString()}</span>
+                </div>
+                <div className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{c.contenu}</div>
+                {(c.author_telephone || c.author_email) && (
+                  <div className="text-xs text-slate-500 mt-1">
+                    {c.author_telephone && <span>📞 {c.author_telephone}</span>}
+                    {c.author_email && <span className="ml-2">✉ {c.author_email}</span>}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                {c.statut !== "approved" && (
+                  <button onClick={() => moderer(c.id, "approved")}
+                          className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold">
+                    <Check className="w-3 h-3 inline mr-1" />Approuver
+                  </button>
+                )}
+                {c.statut !== "rejected" && (
+                  <button onClick={() => moderer(c.id, "rejected")}
+                          className="px-3 py-1 rounded-lg bg-amber-600 text-white text-xs font-semibold">
+                    <X className="w-3 h-3 inline mr-1" />Rejeter
+                  </button>
+                )}
+                <button onClick={() => supprimer(c.id)}
+                        className="px-3 py-1 rounded-lg border border-rose-300 text-rose-600 text-xs font-semibold">
+                  <Trash2 className="w-3 h-3 inline mr-1" />Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Branding — logo + bannière + génération IA (sert aussi d'icône PWA)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const OngletBranding = ({ boutique, onUpdated }: { boutique: any; onUpdated: () => Promise<void> }) => {
+  const [logoUrl, setLogoUrl] = useState<string>(boutique?.logo_url || "");
+  const [bannUrl, setBannUrl] = useState<string>(boutique?.banniere_url || "");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [briefLogo, setBriefLogo] = useState("");
+  const [styleLogo, setStyleLogo] = useState("");
+  const [briefBann, setBriefBann] = useState("");
+  const [styleBann, setStyleBann] = useState("");
+  const logoFile = useRef<HTMLInputElement>(null);
+  const bannFile = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setLogoUrl(boutique?.logo_url || "");
+    setBannUrl(boutique?.banniere_url || "");
+  }, [boutique]);
+
+  const uploaderLogo = async (f: File) => {
+    setBusy("upload_logo");
+    try {
+      const r = await generateurApi.shopUploaderLogo(f);
+      setLogoUrl(r.url); await onUpdated();
+      toast.success("Logo mis à jour");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur upload");
+    } finally { setBusy(null); }
+  };
+  const uploaderBanniere = async (f: File) => {
+    setBusy("upload_bann");
+    try {
+      const r = await generateurApi.shopUploaderBanniere(f);
+      setBannUrl(r.url); await onUpdated();
+      toast.success("Bannière mise à jour");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur upload");
+    } finally { setBusy(null); }
+  };
+  const genererLogo = async () => {
+    setBusy("gen_logo");
+    try {
+      const r = await generateurApi.shopGenererLogoIA({ brief: briefLogo, style: styleLogo });
+      setLogoUrl(r.url); await onUpdated();
+      toast.success("Logo généré par IA");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur génération");
+    } finally { setBusy(null); }
+  };
+  const genererBanniere = async () => {
+    setBusy("gen_bann");
+    try {
+      const r = await generateurApi.shopGenererBanniereIA({ brief: briefBann, style: styleBann });
+      setBannUrl(r.url); await onUpdated();
+      toast.success("Bannière générée par IA");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Erreur génération");
+    } finally { setBusy(null); }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 text-sm text-violet-900">
+        <div className="flex items-start gap-2">
+          <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold mb-1">Logo + Bannière = identité visuelle de votre boutique</div>
+            <div>Le <b>logo</b> sert d'icône PWA (écran d'accueil mobile de vos visiteurs) et de favicon dans le navigateur. La <b>bannière</b> est l'image hero sur la page d'accueil. Uploadez ou demandez à l'IA de les générer pour vous.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Logo */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <ImageIcon className="w-5 h-5 text-violet-600" />
+          <h3 className="text-lg font-bold">Logo</h3>
+          <span className="text-xs text-slate-500">(carré 1:1 · icône PWA · favicon)</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+              {logoUrl
+                ? <img src={logoUrl} alt="logo" className="w-full h-full object-contain" />
+                : <div className="text-slate-400 text-sm">Aucun logo</div>}
+            </div>
+            <input ref={logoFile} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                   className="hidden" onChange={e => e.target.files?.[0] && uploaderLogo(e.target.files[0])} />
+            <button onClick={() => logoFile.current?.click()} disabled={!!busy}
+                    className="w-full mt-2 px-4 py-2 rounded-lg border border-slate-300 font-semibold disabled:opacity-50">
+              {busy === "upload_logo"
+                ? <><Loader2 className="w-4 h-4 inline animate-spin mr-2" />Upload…</>
+                : <><Upload className="w-4 h-4 inline mr-2" />Uploader un logo</>}
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="text-sm font-semibold text-slate-700">Ou générer avec l'IA :</div>
+            <textarea value={briefLogo} onChange={e => setBriefLogo(e.target.value)}
+                      placeholder="Brief (optionnel) : « pharmacie moderne, croix verte stylisée »"
+                      rows={2} className="w-full px-3 py-2 border rounded-lg text-sm" />
+            <input value={styleLogo} onChange={e => setStyleLogo(e.target.value)}
+                   placeholder="Style (optionnel) : « minimaliste », « luxueux », « ludique »…"
+                   className="w-full px-3 py-2 border rounded-lg text-sm" />
+            <button onClick={genererLogo} disabled={!!busy}
+                    className="w-full px-4 py-2 rounded-lg bg-violet-600 text-white font-semibold disabled:opacity-50">
+              {busy === "gen_logo"
+                ? <><Loader2 className="w-4 h-4 inline animate-spin mr-2" />Génération…</>
+                : <><Wand2 className="w-4 h-4 inline mr-2" />Générer un logo par IA</>}
+            </button>
+            <div className="text-xs text-slate-500">~1 crédit par génération</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bannière */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <ImageIcon className="w-5 h-5 text-violet-600" />
+          <h3 className="text-lg font-bold">Bannière</h3>
+          <span className="text-xs text-slate-500">(format 16:9 · image hero de l'accueil)</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="aspect-video rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+              {bannUrl
+                ? <img src={bannUrl} alt="bannière" className="w-full h-full object-cover" />
+                : <div className="text-slate-400 text-sm">Aucune bannière</div>}
+            </div>
+            <input ref={bannFile} type="file" accept="image/png,image/jpeg,image/webp"
+                   className="hidden" onChange={e => e.target.files?.[0] && uploaderBanniere(e.target.files[0])} />
+            <button onClick={() => bannFile.current?.click()} disabled={!!busy}
+                    className="w-full mt-2 px-4 py-2 rounded-lg border border-slate-300 font-semibold disabled:opacity-50">
+              {busy === "upload_bann"
+                ? <><Loader2 className="w-4 h-4 inline animate-spin mr-2" />Upload…</>
+                : <><Upload className="w-4 h-4 inline mr-2" />Uploader une bannière</>}
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="text-sm font-semibold text-slate-700">Ou générer avec l'IA :</div>
+            <textarea value={briefBann} onChange={e => setBriefBann(e.target.value)}
+                      placeholder="Brief (optionnel) : « pharmacie chaleureuse, lumière du matin, ambiance accueillante »"
+                      rows={2} className="w-full px-3 py-2 border rounded-lg text-sm" />
+            <input value={styleBann} onChange={e => setStyleBann(e.target.value)}
+                   placeholder="Style (optionnel) : « photographique », « illustration », « cinématique »…"
+                   className="w-full px-3 py-2 border rounded-lg text-sm" />
+            <button onClick={genererBanniere} disabled={!!busy}
+                    className="w-full px-4 py-2 rounded-lg bg-violet-600 text-white font-semibold disabled:opacity-50">
+              {busy === "gen_bann"
+                ? <><Loader2 className="w-4 h-4 inline animate-spin mr-2" />Génération…</>
+                : <><Wand2 className="w-4 h-4 inline mr-2" />Générer une bannière par IA</>}
+            </button>
+            <div className="text-xs text-slate-500">~1 crédit par génération</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info PWA */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-900">
+        <div className="font-semibold mb-1">📱 PWA — Installation sur l'écran d'accueil</div>
+        <div>Dès que votre boutique est publiée et qu'un visiteur a un logo défini, Chrome / Safari proposent automatiquement « Ajouter à l'écran d'accueil ». L'icône utilisée est votre logo, le nom est celui de votre boutique. Aucune configuration supplémentaire requise.</div>
       </div>
     </div>
   );

@@ -46,6 +46,7 @@ _CATEGORIES = {
     # Phase A — Landing pages publiées : ZIP snapshot HTML + assets
     # uploadés vers Netlify + copie persistée pour re-publish / audit.
     "landing_sites":  "landing_sites",
+    "shop_branding":  "shop_branding",   # Logos, bannières, icônes PWA boutiques
 }
 
 

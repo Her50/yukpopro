@@ -772,9 +772,67 @@ export const generateurApi = {
     const { data } = await http.delete(`/pro/shop/livraison/zones/${id}`);
     return data;
   },
+  shopLivraisonMajZone: async (id: number, req: any) => {
+    const { data } = await http.patch(`/pro/shop/livraison/zones/${id}`, req);
+    return data;
+  },
   shopGenererEtiquette: (orderId: number) =>
     // Retourne URL avec token pour téléchargement direct PDF
     `/api/v1/pro/shop/commandes/${orderId}/etiquette`,
+
+  // ── Q1 — Commentaires + Messages visiteurs ───────────────────────────────
+  shopListerCommentaires: async (params?: { statut?: string; produit_id?: number; limit?: number }) => {
+    const { data } = await http.get("/pro/shop/comments", { params });
+    return data as { ok: boolean; items: any[] };
+  },
+  shopModererCommentaire: async (cid: number, statut: "approved" | "rejected" | "pending") => {
+    const { data } = await http.patch(`/pro/shop/comments/${cid}`, { statut });
+    return data;
+  },
+  shopSupprimerCommentaire: async (cid: number) => {
+    const { data } = await http.delete(`/pro/shop/comments/${cid}`);
+    return data;
+  },
+  shopListerMessages: async (params?: { statut?: string; limit?: number }) => {
+    const { data } = await http.get("/pro/shop/messages", { params });
+    return data as { ok: boolean; items: any[] };
+  },
+  shopRepondreMessage: async (mid: number, contenu: string, notifier_visiteur = true) => {
+    const { data } = await http.post(`/pro/shop/messages/${mid}/reply`, {
+      contenu, notifier_visiteur,
+    });
+    return data;
+  },
+  shopMajStatutMessage: async (mid: number, statut: "lu" | "non_lu" | "repondu" | "archive") => {
+    const { data } = await http.patch(`/pro/shop/messages/${mid}`, null, { params: { statut } });
+    return data;
+  },
+
+  // ── Branding (logo + bannière + génération IA) ──────────────────────────
+  shopUploaderLogo: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const { data } = await http.post("/pro/shop/branding/logo", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+  shopUploaderBanniere: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const { data } = await http.post("/pro/shop/branding/banniere", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+  shopGenererLogoIA: async (req: { brief?: string; style?: string }) => {
+    const { data } = await http.post("/pro/shop/branding/logo/generer-ia", req);
+    return data as { ok: boolean; url: string; cost: number };
+  },
+  shopGenererBanniereIA: async (req: { brief?: string; style?: string }) => {
+    const { data } = await http.post("/pro/shop/branding/banniere/generer-ia", req);
+    return data as { ok: boolean; url: string; cost: number };
+  },
 
   /**
    * Sprint G1 — Auto-orchestrateur génération documents.

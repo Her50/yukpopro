@@ -56,8 +56,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import TokenData, get_current_user
 from core.database import (
-    ShopBoutiqueDB, ShopCategorieDB, ShopOrderDB, ShopOrderItemDB,
-    ShopProductDB, async_session_maker,
+    ShopBoutiqueDB, ShopCategorieDB, ShopMessageDB, ShopOrderDB,
+    ShopOrderItemDB, ShopProductCommentDB, ShopProductDB,
+    ShopLivraisonZoneDB, async_session_maker,
 )
 
 logger = logging.getLogger("yukpo_assurance.api.pro_shop")
@@ -335,6 +336,7 @@ async def get_ma_boutique(
     return {
         "id": b.id, "slug": b.slug, "nom": b.nom,
         "description": b.description, "logo_url": b.logo_url,
+        "banniere_url": b.banniere_url,
         "brand_kit_json": b.brand_kit_json,
         "devise": b.devise, "pays_principal": b.pays_principal,
         "langues_actives": b.langues_actives_json or ["fr"],
@@ -1240,7 +1242,23 @@ async def publier_shop(
             files, b.slug, site_id_existant=b.netlify_site_id,
         )
     except NetlifyError as e:
-        raise HTTPException(502, f"Erreur Netlify : {str(e)[:200]}")
+        _msg = str(e)
+        # Rate-limit Netlify (free 100 sites/24h, pro 500/24h). L'utilisateur
+        # ne peut rien y faire à part attendre que le plafond se réinit (~24h).
+        # On retourne un 429 explicite + message FR clair.
+        if "429" in _msg or "rate limit" in _msg.lower():
+            logger.warning(
+                f"[Shop/publier] Netlify rate-limit atteint (user={current_user.user_id}, "
+                f"slug={b.slug}) → 429 frontend."
+            )
+            raise HTTPException(
+                429,
+                "Plafond quotidien Netlify atteint sur la plateforme "
+                "(100 sites/24h). La publication se relancera "
+                "automatiquement demain dès la réinitialisation. Tu peux "
+                "continuer à éditer ta boutique en brouillon en attendant.",
+            )
+        raise HTTPException(502, f"Erreur publication : {_msg[:200]}")
 
     if res.get("is_new"):
         b.netlify_site_id = res["site_id"]
@@ -1548,6 +1566,791 @@ async def creer_order_public(
         "montant_total": montant_total, "devise": b.devise,
         "paiement_url": paiement_url,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Q1 — Commentaires produits + Messages visiteur ↔ vendeur
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class CommentairePublicIn(BaseModel):
+    author_nom: str = Field(..., min_length=1, max_length=120)
+    author_telephone: Optional[str] = Field(None, max_length=40)
+    author_email: Optional[str] = Field(None, max_length=150)
+    contenu: str = Field(..., min_length=2, max_length=2000)
+    note: Optional[int] = Field(None, ge=1, le=5)
+
+
+@router_public.post(
+    "/{slug}/p/{prod_slug}/comment",
+    summary="Q1 — Visiteur dépose un avis/commentaire (modération requise)",
+)
+async def deposer_commentaire_public(
+    slug: str, prod_slug: str,
+    payload: CommentairePublicIn,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b or b.statut != "publie":
+        raise HTTPException(404, "Boutique introuvable")
+    p = (await db.execute(
+        select(ShopProductDB).where(
+            ShopProductDB.boutique_id == b.id,
+            ShopProductDB.slug == prod_slug,
+        )
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+
+    c = ShopProductCommentDB(
+        product_id=p.id, boutique_id=b.id,
+        author_nom=payload.author_nom.strip(),
+        author_telephone=payload.author_telephone,
+        author_email=payload.author_email,
+        contenu=payload.contenu.strip(),
+        note=payload.note,
+        statut="pending",
+    )
+    db.add(c)
+    await db.commit()
+    return {"ok": True, "id": c.id, "statut": "pending"}
+
+
+@router_public.get(
+    "/{slug}/p/{prod_slug}/comments",
+    summary="Q1 — Liste commentaires approuvés pour un produit (storefront)",
+)
+async def lister_commentaires_public(
+    slug: str, prod_slug: str,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+    p = (await db.execute(
+        select(ShopProductDB).where(
+            ShopProductDB.boutique_id == b.id,
+            ShopProductDB.slug == prod_slug,
+        )
+    )).scalar_one_or_none()
+    if not p:
+        raise HTTPException(404, "Produit introuvable")
+
+    rows = (await db.execute(
+        select(ShopProductCommentDB).where(
+            ShopProductCommentDB.product_id == p.id,
+            ShopProductCommentDB.statut == "approved",
+        ).order_by(desc(ShopProductCommentDB.cree_le)).limit(100)
+    )).scalars().all()
+
+    avg = None
+    if rows:
+        notes = [r.note for r in rows if r.note]
+        if notes:
+            avg = round(sum(notes) / len(notes), 2)
+
+    return {
+        "ok": True, "total": len(rows), "note_moyenne": avg,
+        "items": [{
+            "id": r.id, "author": r.author_nom, "contenu": r.contenu,
+            "note": r.note, "date": r.cree_le.isoformat(),
+        } for r in rows],
+    }
+
+
+@router.get("/shop/comments", summary="Q1 — Admin : liste commentaires (modération)")
+async def admin_lister_commentaires(
+    statut: Optional[str] = None,
+    produit_id: Optional[int] = None,
+    limit: int = 50,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    stmt = select(ShopProductCommentDB).where(ShopProductCommentDB.boutique_id == b.id)
+    if statut:
+        stmt = stmt.where(ShopProductCommentDB.statut == statut)
+    if produit_id:
+        stmt = stmt.where(ShopProductCommentDB.product_id == produit_id)
+    stmt = stmt.order_by(desc(ShopProductCommentDB.cree_le)).limit(min(limit, 200))
+    rows = (await db.execute(stmt)).scalars().all()
+    return {"ok": True, "items": [{
+        "id": r.id, "product_id": r.product_id,
+        "author_nom": r.author_nom, "author_telephone": r.author_telephone,
+        "author_email": r.author_email, "contenu": r.contenu,
+        "note": r.note, "statut": r.statut,
+        "cree_le": r.cree_le.isoformat(),
+    } for r in rows]}
+
+
+class CommentaireModerationIn(BaseModel):
+    statut: str = Field(..., pattern=r"^(approved|rejected|pending)$")
+
+
+@router.patch("/shop/comments/{cid}", summary="Q1 — Admin : modère un commentaire")
+async def admin_moderer_commentaire(
+    cid: int,
+    payload: CommentaireModerationIn,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    c = (await db.execute(
+        select(ShopProductCommentDB).where(
+            ShopProductCommentDB.id == cid,
+            ShopProductCommentDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not c:
+        raise HTTPException(404, "Commentaire introuvable")
+    c.statut = payload.statut
+    await db.commit()
+    return {"ok": True, "id": c.id, "statut": c.statut}
+
+
+@router.delete("/shop/comments/{cid}", summary="Q1 — Admin : supprime un commentaire")
+async def admin_supprimer_commentaire(
+    cid: int,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    c = (await db.execute(
+        select(ShopProductCommentDB).where(
+            ShopProductCommentDB.id == cid,
+            ShopProductCommentDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not c:
+        raise HTTPException(404, "Commentaire introuvable")
+    await db.delete(c)
+    await db.commit()
+    return {"ok": True}
+
+
+# ─── Messages visiteur → vendeur (chat asynchrone) ─────────────────────────
+
+
+class MessagePublicIn(BaseModel):
+    visitor_nom: str = Field(..., min_length=1, max_length=120)
+    visitor_telephone: Optional[str] = Field(None, max_length=40)
+    visitor_email: Optional[str] = Field(None, max_length=150)
+    sujet: Optional[str] = Field(None, max_length=200)
+    contenu: str = Field(..., min_length=2, max_length=4000)
+    product_id: Optional[int] = None
+
+
+@router_public.post(
+    "/{slug}/message",
+    summary="Q1 — Visiteur envoie un message au vendeur (notif WhatsApp)",
+)
+async def envoyer_message_public(
+    slug: str,
+    payload: MessagePublicIn,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b or b.statut != "publie":
+        raise HTTPException(404, "Boutique introuvable")
+
+    if payload.product_id:
+        p = (await db.execute(
+            select(ShopProductDB).where(
+                ShopProductDB.id == payload.product_id,
+                ShopProductDB.boutique_id == b.id,
+            )
+        )).scalar_one_or_none()
+        if not p:
+            payload.product_id = None
+
+    m = ShopMessageDB(
+        boutique_id=b.id, product_id=payload.product_id,
+        visitor_nom=payload.visitor_nom.strip(),
+        visitor_telephone=payload.visitor_telephone,
+        visitor_email=payload.visitor_email,
+        sujet=(payload.sujet or "").strip() or None,
+        contenu=payload.contenu.strip(),
+        statut="non_lu",
+    )
+    db.add(m)
+    await db.commit()
+    await db.refresh(m)
+
+    # Notif marchand (WhatsApp prioritaire, SMS fallback)
+    try:
+        from core.notifications import notifier_telephone
+        from core.database import UtilisateurDB
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        marchand = (await db.execute(
+            select(UtilisateurDB).where(UtilisateurDB.id == b.user_id)
+        )).scalar_one_or_none()
+        if marchand and marchand.telephone:
+            sujet = payload.sujet or "Sans objet"
+            contenu = (
+                f"💬 Nouveau message visiteur boutique\n\n"
+                f"De : {payload.visitor_nom}\n"
+                f"Tel : {payload.visitor_telephone or '—'}\n"
+                f"Sujet : {sujet}\n\n"
+                f"« {payload.contenu[:300]} »\n\n"
+                f"Répondre : https://yukpopro.yukpomnang.com/ma-boutique?tab=messages&id={m.id}"
+            )
+            await notifier_telephone(
+                marchand.telephone, contenu,
+                metadata={"type": "shop_message", "message_id": m.id},
+                prefer="whatsapp",
+            )
+            await debiter_forfait_unifie(
+                b.user_id, "whatsapp_message", module="shop_message_notif",
+            )
+    except Exception as _e:
+        logger.warning(f"[Shop/message] notif échec : {_e}")
+
+    return {"ok": True, "id": m.id}
+
+
+@router.get("/shop/messages", summary="Q1 — Admin : inbox messages visiteurs")
+async def admin_lister_messages(
+    statut: Optional[str] = None,
+    limit: int = 50,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    stmt = select(ShopMessageDB).where(ShopMessageDB.boutique_id == b.id)
+    if statut:
+        stmt = stmt.where(ShopMessageDB.statut == statut)
+    stmt = stmt.order_by(desc(ShopMessageDB.cree_le)).limit(min(limit, 200))
+    rows = (await db.execute(stmt)).scalars().all()
+    return {"ok": True, "items": [{
+        "id": r.id, "product_id": r.product_id,
+        "visitor_nom": r.visitor_nom, "visitor_telephone": r.visitor_telephone,
+        "visitor_email": r.visitor_email,
+        "sujet": r.sujet, "contenu": r.contenu,
+        "statut": r.statut,
+        "reponse_marchand": r.reponse_marchand,
+        "repondu_le": r.repondu_le.isoformat() if r.repondu_le else None,
+        "cree_le": r.cree_le.isoformat(),
+    } for r in rows]}
+
+
+class MessageReplyIn(BaseModel):
+    contenu: str = Field(..., min_length=1, max_length=4000)
+    notifier_visiteur: bool = True
+
+
+@router.post("/shop/messages/{mid}/reply", summary="Q1 — Admin : répond au visiteur")
+async def admin_repondre_message(
+    mid: int,
+    payload: MessageReplyIn,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    m = (await db.execute(
+        select(ShopMessageDB).where(
+            ShopMessageDB.id == mid,
+            ShopMessageDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not m:
+        raise HTTPException(404, "Message introuvable")
+
+    m.reponse_marchand = payload.contenu.strip()
+    m.repondu_le = datetime.utcnow()
+    m.statut = "repondu"
+    await db.commit()
+
+    # Notif visiteur (best-effort)
+    if payload.notifier_visiteur and (m.visitor_telephone or m.visitor_email):
+        try:
+            from core.notifications import notifier_telephone
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            if m.visitor_telephone:
+                contenu = (
+                    f"💬 {b.nom} a répondu à votre message\n\n"
+                    f"« {payload.contenu[:400]} »\n\n"
+                    f"Boutique : https://{b.slug}.yukpomnang.com"
+                )
+                await notifier_telephone(
+                    m.visitor_telephone, contenu,
+                    metadata={"type": "shop_message_reply", "message_id": m.id},
+                    prefer="whatsapp",
+                )
+                await debiter_forfait_unifie(
+                    b.user_id, "whatsapp_message", module="shop_message_reply",
+                )
+        except Exception as _e:
+            logger.warning(f"[Shop/message] notif visiteur échec : {_e}")
+
+    return {"ok": True, "id": m.id, "statut": m.statut}
+
+
+@router.patch("/shop/messages/{mid}", summary="Q1 — Admin : maj statut (lu/non_lu)")
+async def admin_maj_statut_message(
+    mid: int,
+    statut: str,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    if statut not in ("lu", "non_lu", "repondu", "archive"):
+        raise HTTPException(400, "Statut invalide")
+    b = await _get_boutique_du_user(user.id, db)
+    m = (await db.execute(
+        select(ShopMessageDB).where(
+            ShopMessageDB.id == mid,
+            ShopMessageDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not m:
+        raise HTTPException(404, "Message introuvable")
+    m.statut = statut
+    await db.commit()
+    return {"ok": True, "id": m.id, "statut": m.statut}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Q2 — Livraison intelligente : zones GPS + devis automatique
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Distance haversine en kilomètres."""
+    import math
+    R = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlmb = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlmb / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def _parse_gps_centre(gps: Optional[str]) -> Optional[tuple[float, float]]:
+    """Parse 'lat,lng' ou 'lat;lng' → (lat, lng) ou None."""
+    if not gps:
+        return None
+    try:
+        parts = re.split(r"[,;]", gps.strip())
+        if len(parts) < 2:
+            return None
+        return (float(parts[0]), float(parts[1]))
+    except (ValueError, IndexError):
+        return None
+
+
+class LivraisonZoneIn(BaseModel):
+    nom: str = Field(..., min_length=1, max_length=120)
+    ville: Optional[str] = Field(None, max_length=80)
+    frais: float = Field(0.0, ge=0)
+    frais_par_km: Optional[float] = Field(None, ge=0)
+    rayon_max_km: Optional[float] = Field(None, ge=0)
+    gps_centre: Optional[str] = Field(None, max_length=60)
+    delai_jours: Optional[int] = Field(None, ge=0, le=90)
+    actif: bool = True
+
+
+@router.get("/shop/livraison/zones", summary="Q2 — Liste zones de livraison")
+async def lister_zones_livraison(
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    rows = (await db.execute(
+        select(ShopLivraisonZoneDB)
+        .where(ShopLivraisonZoneDB.boutique_id == b.id)
+        .order_by(ShopLivraisonZoneDB.nom)
+    )).scalars().all()
+    return {"ok": True, "items": [{
+        "id": r.id, "nom": r.nom, "ville": r.ville,
+        "frais": float(r.frais or 0),
+        "frais_par_km": float(r.frais_par_km) if r.frais_par_km is not None else None,
+        "rayon_max_km": float(r.rayon_max_km) if r.rayon_max_km is not None else None,
+        "gps_centre": r.gps_centre,
+        "delai_jours": r.delai_jours, "actif": r.actif,
+    } for r in rows]}
+
+
+@router.post("/shop/livraison/zones", summary="Q2 — Crée une zone de livraison")
+async def creer_zone_livraison(
+    payload: LivraisonZoneIn,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    z = ShopLivraisonZoneDB(
+        boutique_id=b.id,
+        nom=payload.nom.strip(), ville=payload.ville,
+        frais=payload.frais,
+        frais_par_km=payload.frais_par_km,
+        rayon_max_km=payload.rayon_max_km,
+        gps_centre=payload.gps_centre,
+        delai_jours=payload.delai_jours, actif=payload.actif,
+    )
+    db.add(z)
+    await db.commit()
+    await db.refresh(z)
+    return {"ok": True, "id": z.id}
+
+
+@router.patch("/shop/livraison/zones/{zid}", summary="Q2 — Maj zone livraison")
+async def maj_zone_livraison(
+    zid: int,
+    payload: LivraisonZoneIn,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    z = (await db.execute(
+        select(ShopLivraisonZoneDB).where(
+            ShopLivraisonZoneDB.id == zid,
+            ShopLivraisonZoneDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not z:
+        raise HTTPException(404, "Zone introuvable")
+    z.nom = payload.nom.strip()
+    z.ville = payload.ville
+    z.frais = payload.frais
+    z.frais_par_km = payload.frais_par_km
+    z.rayon_max_km = payload.rayon_max_km
+    z.gps_centre = payload.gps_centre
+    z.delai_jours = payload.delai_jours
+    z.actif = payload.actif
+    await db.commit()
+    return {"ok": True}
+
+
+@router.delete("/shop/livraison/zones/{zid}", summary="Q2 — Supprime zone")
+async def supprimer_zone_livraison(
+    zid: int,
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(user.id, db)
+    z = (await db.execute(
+        select(ShopLivraisonZoneDB).where(
+            ShopLivraisonZoneDB.id == zid,
+            ShopLivraisonZoneDB.boutique_id == b.id,
+        )
+    )).scalar_one_or_none()
+    if not z:
+        raise HTTPException(404, "Zone introuvable")
+    await db.delete(z)
+    await db.commit()
+    return {"ok": True}
+
+
+class DeliveryQuoteIn(BaseModel):
+    items: list[dict] = Field(..., description="[{product_id, qte}, ...]")
+    destination_lat: Optional[float] = Field(None, ge=-90, le=90)
+    destination_lng: Optional[float] = Field(None, ge=-180, le=180)
+    destination_ville: Optional[str] = Field(None, max_length=80)
+
+
+@router_public.post(
+    "/{slug}/delivery/quote",
+    summary="Q2 — Devis livraison : calcule frais selon GPS / ville / zone",
+)
+async def devis_livraison_public(
+    slug: str,
+    payload: DeliveryQuoteIn,
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+
+    zones = (await db.execute(
+        select(ShopLivraisonZoneDB).where(
+            ShopLivraisonZoneDB.boutique_id == b.id,
+            ShopLivraisonZoneDB.actif == True,  # noqa: E712
+        )
+    )).scalars().all()
+
+    if not zones:
+        return {
+            "ok": True, "frais": 0.0, "devise": b.devise,
+            "methode": "aucune_zone", "zone": None,
+            "delai_jours": None, "distance_km": None,
+            "message": "Aucune zone de livraison configurée — contactez le vendeur.",
+        }
+
+    best_zone = None
+    best_frais = None
+    best_methode = None
+    best_distance = None
+    best_delai = None
+
+    # 1) Tentative GPS si destination fournie
+    if payload.destination_lat is not None and payload.destination_lng is not None:
+        for z in zones:
+            centre = _parse_gps_centre(z.gps_centre)
+            if not centre:
+                continue
+            d = _haversine_km(centre[0], centre[1],
+                              payload.destination_lat, payload.destination_lng)
+            if z.rayon_max_km and d > float(z.rayon_max_km):
+                continue
+            base = float(z.frais or 0)
+            par_km = float(z.frais_par_km or 0)
+            frais = base + par_km * d
+            if best_frais is None or frais < best_frais:
+                best_frais = frais
+                best_zone = z
+                best_methode = "gps"
+                best_distance = round(d, 2)
+                best_delai = z.delai_jours
+
+    # 2) Fallback ville si rien trouvé via GPS
+    if best_frais is None and payload.destination_ville:
+        ville_norm = payload.destination_ville.strip().lower()
+        for z in zones:
+            if z.ville and z.ville.strip().lower() == ville_norm:
+                best_frais = float(z.frais or 0)
+                best_zone = z
+                best_methode = "ville"
+                best_delai = z.delai_jours
+                break
+
+    # 3) Fallback zone par défaut (sans ville ni GPS)
+    if best_frais is None:
+        zdefault = next((z for z in zones if not z.ville and not z.gps_centre), None)
+        if zdefault:
+            best_frais = float(zdefault.frais or 0)
+            best_zone = zdefault
+            best_methode = "default"
+            best_delai = zdefault.delai_jours
+
+    if best_frais is None:
+        return {
+            "ok": False, "frais": None, "devise": b.devise,
+            "methode": "non_livrable", "zone": None,
+            "delai_jours": None, "distance_km": None,
+            "message": "Destination hors zone de livraison — contactez le vendeur.",
+        }
+
+    return {
+        "ok": True,
+        "frais": round(best_frais, 2),
+        "devise": b.devise,
+        "methode": best_methode,
+        "zone": {"id": best_zone.id, "nom": best_zone.nom} if best_zone else None,
+        "delai_jours": best_delai,
+        "distance_km": best_distance,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Branding — logo + bannière (upload manuel ou génération IA)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+_BRANDING_MIME_OK = {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/svg+xml"}
+_BRANDING_MAX_BYTES = 8 * 1024 * 1024  # 8 MB
+
+
+async def _persister_image_branding(
+    *, boutique_id: int, kind: str, content: bytes, ext: str,
+    content_type: str,
+) -> str:
+    """Sauvegarde image branding (logo/banniere/icon) et renvoie URL publique."""
+    from core.storage import save_artifact
+    name = f"boutique_{boutique_id}_{kind}_{int(time.time())}.{ext}"
+    info = save_artifact(
+        category="shop_branding", name=name,
+        content=content, content_type=content_type,
+    )
+    if info.get("storage") == "r2":
+        public_base = os.getenv("R2_PUBLIC_BASE_URL", "").rstrip("/")
+        if public_base:
+            return f"{public_base}/{info['key']}"
+        return f"/api/v1/storage/shop_branding/{name}"
+    return f"/api/v1/storage/shop_branding/{name}"
+
+
+@router.post("/shop/branding/logo", summary="Branding — upload logo")
+async def uploader_logo(
+    file: UploadFile = File(...),
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    if file.content_type not in _BRANDING_MIME_OK:
+        raise HTTPException(400, f"Type fichier non supporté : {file.content_type}")
+    content = await file.read()
+    if len(content) > _BRANDING_MAX_BYTES:
+        raise HTTPException(400, "Fichier trop volumineux (>8 Mo)")
+    ext = (file.filename or "logo.png").rsplit(".", 1)[-1].lower() or "png"
+    if ext not in ("png", "jpg", "jpeg", "webp", "svg"):
+        ext = "png"
+    url = await _persister_image_branding(
+        boutique_id=b.id, kind="logo", content=content, ext=ext,
+        content_type=file.content_type,
+    )
+    b.logo_url = url
+    b.derniere_modif = datetime.utcnow()
+    await db.commit()
+    return {"ok": True, "url": url}
+
+
+@router.post("/shop/branding/banniere", summary="Branding — upload bannière")
+async def uploader_banniere(
+    file: UploadFile = File(...),
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    if file.content_type not in _BRANDING_MIME_OK:
+        raise HTTPException(400, f"Type fichier non supporté : {file.content_type}")
+    content = await file.read()
+    if len(content) > _BRANDING_MAX_BYTES:
+        raise HTTPException(400, "Fichier trop volumineux (>8 Mo)")
+    ext = (file.filename or "banniere.png").rsplit(".", 1)[-1].lower() or "png"
+    if ext not in ("png", "jpg", "jpeg", "webp"):
+        ext = "png"
+    url = await _persister_image_branding(
+        boutique_id=b.id, kind="banniere", content=content, ext=ext,
+        content_type=file.content_type,
+    )
+    b.banniere_url = url
+    b.derniere_modif = datetime.utcnow()
+    await db.commit()
+    return {"ok": True, "url": url}
+
+
+class BrandingGenerationIn(BaseModel):
+    brief: Optional[str] = Field(None, max_length=2000)
+    style: Optional[str] = Field(None, max_length=200)
+
+
+def _construire_prompt_logo(boutique: ShopBoutiqueDB, brief: Optional[str], style: Optional[str]) -> str:
+    nom = boutique.nom or "Boutique"
+    desc = boutique.description or ""
+    style_part = f"Style: {style}. " if style else ""
+    brief_part = f"{brief}. " if brief else ""
+    return (
+        f"Professional brand logo for '{nom}', an e-commerce shop. "
+        f"{brief_part}{style_part}"
+        f"Context: {desc[:300]}. "
+        f"Requirements: clean modern flat design, vector-style, centered, "
+        f"square 1:1 ratio, white or transparent background, "
+        f"high contrast, suitable as app icon and website header, "
+        f"NO text unless it is a short stylized monogram, NO photo, NO photorealism. "
+        f"Output: a single iconic emblem/wordmark."
+    )
+
+
+def _construire_prompt_banniere(boutique: ShopBoutiqueDB, brief: Optional[str], style: Optional[str]) -> str:
+    nom = boutique.nom or "Boutique"
+    desc = boutique.description or ""
+    style_part = f"Style: {style}. " if style else ""
+    brief_part = f"{brief}. " if brief else ""
+    return (
+        f"E-commerce hero banner for '{nom}'. "
+        f"{brief_part}{style_part}"
+        f"Context: {desc[:300]}. "
+        f"Requirements: wide cinematic 16:9 composition, vibrant colors, "
+        f"warm welcoming atmosphere, professional photography style, "
+        f"clear empty space on the left for text overlay, "
+        f"high quality marketing visual, NO embedded text."
+    )
+
+
+@router.post("/shop/branding/logo/generer-ia", summary="Branding — génère logo IA")
+async def generer_logo_ia(
+    payload: BrandingGenerationIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    # Pré-check crédits (génération image = ~150 crédits)
+    try:
+        from modules.bureau.service_credits_bureau import (
+            _pre_check_credits, debiter_forfait_unifie,
+        )
+        await _pre_check_credits(current_user.user_id, "pdf_generation")
+    except Exception:
+        pass
+
+    prompt = _construire_prompt_logo(b, payload.brief, payload.style)
+    try:
+        from modules.bureau.image_gen import generer_image
+        png = await generer_image(
+            prompt=prompt, mode="standard", format_="square_1_1",
+        )
+    except Exception as e:
+        logger.warning(f"[Shop/branding] gen logo IA échec : {e}")
+        raise HTTPException(502, f"Génération logo IA indisponible : {e}")
+
+    url = await _persister_image_branding(
+        boutique_id=b.id, kind="logo_ia", content=png, ext="png",
+        content_type="image/png",
+    )
+    b.logo_url = url
+    b.derniere_modif = datetime.utcnow()
+    await db.commit()
+
+    # Débit forfait
+    try:
+        await debiter_forfait_unifie(
+            current_user.user_id, "pdf_generation", module="shop_logo_ia",
+        )
+    except Exception:
+        pass
+
+    return {"ok": True, "url": url, "cost": 1}
+
+
+@router.post("/shop/branding/banniere/generer-ia", summary="Branding — génère bannière IA")
+async def generer_banniere_ia(
+    payload: BrandingGenerationIn,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = await _get_boutique_du_user(current_user.user_id, db)
+    try:
+        from modules.bureau.service_credits_bureau import (
+            _pre_check_credits, debiter_forfait_unifie,
+        )
+        await _pre_check_credits(current_user.user_id, "pdf_generation")
+    except Exception:
+        pass
+
+    prompt = _construire_prompt_banniere(b, payload.brief, payload.style)
+    try:
+        from modules.bureau.image_gen import generer_image
+        png = await generer_image(
+            prompt=prompt, mode="standard", format_="landscape_16_9",
+        )
+    except Exception as e:
+        logger.warning(f"[Shop/branding] gen bannière IA échec : {e}")
+        raise HTTPException(502, f"Génération bannière IA indisponible : {e}")
+
+    url = await _persister_image_branding(
+        boutique_id=b.id, kind="banniere_ia", content=png, ext="png",
+        content_type="image/png",
+    )
+    b.banniere_url = url
+    b.derniere_modif = datetime.utcnow()
+    await db.commit()
+
+    try:
+        await debiter_forfait_unifie(
+            current_user.user_id, "pdf_generation", module="shop_banniere_ia",
+        )
+    except Exception:
+        pass
+
+    return {"ok": True, "url": url, "cost": 1}
 
 
 async def _initier_paiement_v2(

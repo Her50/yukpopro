@@ -396,6 +396,147 @@ def _page_produit_html(
     desc_html = "".join(desc_html_lines)
 
     autres_html = "".join(_card_produit(a, boutique) for a in autres_produits[:4])
+    prod_slug = escape(p.get("slug") or "")
+    boutique_slug = escape(boutique.get("slug") or "")
+
+    # ── Q1 : Contact vendeur + commentaires ──────────────────────────────
+    contact_modal = (
+        '<div id="contact-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">'
+        '<div class="bg-white rounded-xl max-w-md w-full p-6">'
+        '<h3 class="text-xl font-bold mb-4" style="color:var(--primary)">Contacter le vendeur</h3>'
+        '<form id="contact-form" class="space-y-3">'
+        '<input name="visitor_nom" required maxlength="120" placeholder="Votre nom *" class="w-full px-3 py-2 border rounded-lg">'
+        '<input name="visitor_telephone" maxlength="40" placeholder="Téléphone (WhatsApp)" class="w-full px-3 py-2 border rounded-lg">'
+        '<input name="visitor_email" maxlength="150" placeholder="Email" class="w-full px-3 py-2 border rounded-lg">'
+        '<input name="sujet" maxlength="200" placeholder="Sujet" class="w-full px-3 py-2 border rounded-lg">'
+        '<textarea name="contenu" required minlength="2" maxlength="4000" rows="4" placeholder="Votre message *" class="w-full px-3 py-2 border rounded-lg"></textarea>'
+        '<div id="contact-status" class="text-sm"></div>'
+        '<div class="flex gap-2">'
+        '<button type="button" onclick="document.getElementById(\'contact-modal\').classList.add(\'hidden\')" class="flex-1 px-4 py-2 border rounded-lg">Annuler</button>'
+        '<button type="submit" class="flex-1 px-4 py-2 rounded-lg text-white font-semibold" style="background:var(--accent)">Envoyer</button>'
+        '</div></form></div></div>'
+    )
+    commentaires_section = (
+        '<section class="py-8 bg-white border-t"><div class="max-w-4xl mx-auto px-4">'
+        '<h2 class="text-xl font-bold mb-4" style="color:var(--primary)">Avis clients</h2>'
+        '<div id="comments-list" class="space-y-3 mb-6"><p class="text-slate-500 text-sm">Chargement…</p></div>'
+        '<details class="bg-slate-50 rounded-lg p-4">'
+        '<summary class="cursor-pointer font-semibold">Laisser un avis</summary>'
+        '<form id="comment-form" class="mt-3 space-y-3">'
+        '<input name="author_nom" required maxlength="120" placeholder="Votre nom *" class="w-full px-3 py-2 border rounded-lg">'
+        '<input name="author_telephone" maxlength="40" placeholder="Téléphone" class="w-full px-3 py-2 border rounded-lg">'
+        '<input name="author_email" maxlength="150" placeholder="Email" class="w-full px-3 py-2 border rounded-lg">'
+        '<select name="note" class="w-full px-3 py-2 border rounded-lg"><option value="">Note (optionnel)</option>'
+        '<option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option>'
+        '<option value="2">⭐⭐</option><option value="1">⭐</option></select>'
+        '<textarea name="contenu" required minlength="2" maxlength="2000" rows="3" placeholder="Votre avis *" class="w-full px-3 py-2 border rounded-lg"></textarea>'
+        '<div id="comment-status" class="text-sm"></div>'
+        '<button type="submit" class="px-4 py-2 rounded-lg text-white font-semibold" style="background:var(--accent)">Publier l\'avis</button>'
+        '</form></details></div></section>'
+    )
+
+    # ── Q2 : Devis livraison ─────────────────────────────────────────────
+    livraison_section = (
+        '<section class="py-6 bg-slate-50 border-t"><div class="max-w-4xl mx-auto px-4">'
+        '<h3 class="font-bold mb-3" style="color:var(--primary)">📦 Calcul des frais de livraison</h3>'
+        '<div class="flex flex-col md:flex-row gap-2">'
+        '<input id="liv-ville" placeholder="Votre ville" class="flex-1 px-3 py-2 border rounded-lg">'
+        '<button onclick="calculerLivraison()" class="px-4 py-2 rounded-lg text-white font-semibold" style="background:var(--accent)">Estimer</button>'
+        '<button onclick="utiliserGPSLivraison()" class="px-4 py-2 border rounded-lg">📍 Ma position</button>'
+        '</div><div id="liv-resultat" class="mt-3 text-sm"></div>'
+        '</div></section>'
+    )
+
+    # Scripts JS pour Q1+Q2
+    js_block = f"""
+<script>
+(function(){{
+  const API='/api/v1/pro/shop/public/{boutique_slug}';
+  const prodSlug='{prod_slug}';
+  const prodId={p["id"]};
+
+  // Charger commentaires
+  fetch(API+'/p/'+prodSlug+'/comments').then(r=>r.json()).then(data=>{{
+    const list=document.getElementById('comments-list');
+    if(!data.items || !data.items.length){{ list.innerHTML='<p class="text-slate-500 text-sm">Aucun avis pour le moment. Soyez le premier !</p>'; return; }}
+    list.innerHTML=(data.note_moyenne?'<div class="font-semibold mb-2">⭐ '+data.note_moyenne+'/5 ('+data.total+' avis)</div>':'')+data.items.map(c=>(
+      '<div class="border-l-4 pl-3 py-2" style="border-color:var(--accent)">'+
+      '<div class="font-semibold text-sm">'+(c.author||'Anonyme')+(c.note?' · '+'⭐'.repeat(c.note):'')+'</div>'+
+      '<div class="text-slate-700 text-sm">'+(c.contenu||'').replace(/[<>]/g,'')+'</div></div>'
+    )).join('');
+  }}).catch(()=>{{document.getElementById('comments-list').innerHTML='<p class="text-red-500 text-sm">Erreur de chargement</p>';}});
+
+  // Submit commentaire
+  document.getElementById('comment-form').addEventListener('submit',async(e)=>{{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const body={{}};
+    fd.forEach((v,k)=>{{ if(v) body[k]=k==='note'?parseInt(v):v; }});
+    const st=document.getElementById('comment-status');
+    st.textContent='Envoi…';
+    try{{
+      const r=await fetch(API+'/p/'+prodSlug+'/comment',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify(body)}});
+      if(r.ok){{ st.textContent='✓ Merci ! Votre avis sera publié après modération.'; st.className='text-sm text-green-600'; e.target.reset(); }}
+      else{{ st.textContent='Erreur — réessayez.'; st.className='text-sm text-red-600'; }}
+    }}catch(_){{ st.textContent='Erreur réseau'; }}
+  }});
+
+  // Bouton contact
+  document.getElementById('btn-contact-vendeur').addEventListener('click',()=>{{
+    document.getElementById('contact-modal').classList.remove('hidden');
+  }});
+
+  // Submit contact
+  document.getElementById('contact-form').addEventListener('submit',async(e)=>{{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const body={{product_id: prodId}};
+    fd.forEach((v,k)=>{{ if(v) body[k]=v; }});
+    const st=document.getElementById('contact-status');
+    st.textContent='Envoi…';
+    try{{
+      const r=await fetch(API+'/message',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify(body)}});
+      if(r.ok){{ st.textContent='✓ Message envoyé ! Le vendeur vous répondra rapidement.'; st.className='text-sm text-green-600'; e.target.reset(); setTimeout(()=>document.getElementById('contact-modal').classList.add('hidden'),2000); }}
+      else{{ st.textContent='Erreur — réessayez.'; st.className='text-sm text-red-600'; }}
+    }}catch(_){{ st.textContent='Erreur réseau'; }}
+  }});
+
+  // Devis livraison
+  window.calculerLivraison=async function(){{
+    const ville=document.getElementById('liv-ville').value.trim();
+    const res=document.getElementById('liv-resultat');
+    if(!ville){{ res.textContent='Saisissez votre ville ou cliquez sur Ma position.'; return; }}
+    res.textContent='Calcul…';
+    try{{
+      const r=await fetch(API+'/delivery/quote',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{items:[{{product_id:prodId,qte:1}}],destination_ville:ville}})}});
+      const d=await r.json();
+      afficherDevis(d);
+    }}catch(_){{ res.textContent='Erreur de calcul'; }}
+  }};
+  window.utiliserGPSLivraison=function(){{
+    const res=document.getElementById('liv-resultat');
+    if(!navigator.geolocation){{ res.textContent='GPS non disponible'; return; }}
+    res.textContent='Localisation…';
+    navigator.geolocation.getCurrentPosition(async(pos)=>{{
+      try{{
+        const r=await fetch(API+'/delivery/quote',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{items:[{{product_id:prodId,qte:1}}],destination_lat:pos.coords.latitude,destination_lng:pos.coords.longitude}})}});
+        afficherDevis(await r.json());
+      }}catch(_){{ res.textContent='Erreur de calcul'; }}
+    }},()=>{{ res.textContent='Refus de géolocalisation'; }});
+  }};
+  function afficherDevis(d){{
+    const res=document.getElementById('liv-resultat');
+    if(!d.ok||d.frais===null){{ res.innerHTML='<span class="text-orange-600">'+(d.message||'Hors zone — contactez le vendeur')+'</span>'; return; }}
+    let html='<div class="bg-white p-3 rounded-lg border"><div class="font-semibold">Frais : '+Math.round(d.frais)+' '+d.devise+'</div>';
+    if(d.zone) html+='<div class="text-xs text-slate-600">Zone : '+d.zone.nom+'</div>';
+    if(d.delai_jours!=null) html+='<div class="text-xs text-slate-600">Délai : '+d.delai_jours+' jour(s)</div>';
+    if(d.distance_km!=null) html+='<div class="text-xs text-slate-600">Distance : '+d.distance_km+' km</div>';
+    html+='</div>';
+    res.innerHTML=html;
+  }}
+}})();
+</script>
+"""
 
     return (
         f'<section class="py-8"><div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">'
@@ -405,14 +546,18 @@ def _page_produit_html(
         f'<p class="text-slate-600 mb-4">{escape(p.get("description_courte") or "")}</p>'
         f'<div class="mb-4">{prix_aff}</div>'
         f'{variantes_html}'
-        f'<div class="flex gap-2 mb-6">'
+        f'<div class="flex gap-2 mb-3">'
         f'<input type="number" id="qte" value="1" min="1" max="{p.get("stock", 99)}" '
         f'class="w-20 px-3 py-2 border border-slate-300 rounded-lg">'
         f'<button onclick="ajouterAuPanier({p["id"]}, {json.dumps(p.get("titre"))}, {p.get("prix_unit_promo") or p.get("prix_unit", 0)}, {json.dumps((p.get("photos_urls_json") or [None])[0] or "")})" '
         f'class="flex-grow px-6 py-3 rounded-lg text-white font-semibold shadow-lg" style="background:var(--accent)">'
         f'🛒 Ajouter au panier</button></div>'
+        f'<button id="btn-contact-vendeur" type="button" class="w-full mb-6 px-4 py-2 border-2 rounded-lg font-semibold hover:bg-slate-50" style="border-color:var(--primary);color:var(--primary)">💬 Contacter le vendeur</button>'
         f'<div class="prose max-w-none">{desc_html}</div>'
         f'</div></div></section>'
+        + livraison_section
+        + commentaires_section
+        + contact_modal
         + (f'<section class="py-8 bg-slate-50"><div class="max-w-6xl mx-auto px-4">'
            f'<h2 class="text-xl font-bold mb-4" style="color:var(--primary)">Vous aimerez aussi</h2>'
            f'<div class="grid grid-cols-2 md:grid-cols-4 gap-4">{autres_html}</div></div></section>'
@@ -421,6 +566,7 @@ def _page_produit_html(
             cross_sell_items or [],
             titre="D'autres marchands à découvrir",
           )
+        + js_block
     )
 
 
@@ -577,6 +723,53 @@ def construire_html_page_storefront(
         else f"{base_url}/{'panier' if type_page == 'panier' else ''}"
     )
 
+    # ── PWA : manifest + service worker + apple-touch-icon + install prompt
+    brand_color = "#7B3FE4"
+    bk = boutique.get("brand_kit_json") or {}
+    if isinstance(bk, dict):
+        brand_color = bk.get("couleur_primaire") or brand_color
+    pwa_head = (
+        '<link rel="manifest" href="/manifest.webmanifest">'
+        + (f'<link rel="apple-touch-icon" href="{escape(favicon)}">' if favicon else "")
+        + f'<meta name="apple-mobile-web-app-capable" content="yes">'
+        f'<meta name="apple-mobile-web-app-title" content="{escape(boutique.get("nom","Boutique"))}">'
+        f'<meta name="mobile-web-app-capable" content="yes">'
+    )
+    pwa_install_js = """
+<script>
+(function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+  }
+  let _deferredPrompt = null;
+  const KEY = 'yk_pwa_install_dismissed_v1';
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    _deferredPrompt = e;
+    if (localStorage.getItem(KEY) && (Date.now() - parseInt(localStorage.getItem(KEY))) < 7*24*3600*1000) return;
+    showInstallBanner();
+  });
+  function showInstallBanner(){
+    if (document.getElementById('pwa-install-banner')) return;
+    const div = document.createElement('div');
+    div.id = 'pwa-install-banner';
+    div.style.cssText = 'position:fixed;bottom:16px;left:16px;right:16px;max-width:420px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);z-index:9999;display:flex;gap:12px;align-items:center;font-family:system-ui,sans-serif';
+    div.innerHTML = '<div style="flex:1"><div style="font-weight:700">Installer la boutique</div><div style="font-size:13px;color:#64748b">Ajoutez à votre écran d\\'accueil pour un accès rapide.</div></div><button id="pwa-install-yes" style="background:var(--accent,#7B3FE4);color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer">Installer</button><button id="pwa-install-no" style="background:transparent;border:0;color:#64748b;cursor:pointer">✕</button>';
+    document.body.appendChild(div);
+    document.getElementById('pwa-install-yes').onclick = async () => {
+      if (!_deferredPrompt) return;
+      _deferredPrompt.prompt();
+      try { await _deferredPrompt.userChoice; } catch(_) {}
+      _deferredPrompt = null; div.remove();
+    };
+    document.getElementById('pwa-install-no').onclick = () => {
+      localStorage.setItem(KEY, String(Date.now())); div.remove();
+    };
+  }
+})();
+</script>
+"""
+
     return f"""<!DOCTYPE html>
 <html lang="{escape(boutique.get('langue_principale') or 'fr')}">
 <head>
@@ -586,7 +779,8 @@ def construire_html_page_storefront(
 <meta name="description" content="{escape(boutique.get('description') or '')}">
 <link rel="canonical" href="{canonical_url}">
 {f'<link rel="icon" href="{escape(favicon)}">' if favicon else ""}
-<meta name="theme-color" content="#7B3FE4">
+{pwa_head}
+<meta name="theme-color" content="{escape(brand_color)}">
 {og_extra}
 {seo_extra}
 <script src="https://cdn.tailwindcss.com"></script>
@@ -600,6 +794,7 @@ body {{ font-family: var(--font-corps); color: var(--text); background: var(--bg
 {_construire_nav_storefront(boutique)}
 <main>{body}</main>
 {_construire_footer_storefront(boutique)}
+{pwa_install_js}
 </body>
 </html>
 """
@@ -695,5 +890,43 @@ def construire_arborescence_storefront(
     except Exception as _e:
         # Best-effort : si génération échoue, on n'empêche pas le publish
         pass
+
+    # ── PWA : manifest + service worker (install écran d'accueil mobile) ───
+    bk = boutique.get("brand_kit_json") or {}
+    brand_color = (bk.get("couleur_primaire") if isinstance(bk, dict) else None) or "#7B3FE4"
+    logo_url = boutique.get("logo_url") or ""
+    icons = []
+    if logo_url:
+        # Le logo unique sert pour toutes les tailles (le browser scale).
+        icons = [
+            {"src": logo_url, "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": logo_url, "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ]
+    manifest = {
+        "name": boutique.get("nom") or "Boutique",
+        "short_name": (boutique.get("nom") or "Boutique")[:12],
+        "description": boutique.get("description") or "",
+        "start_url": "/",
+        "scope": "/",
+        "display": "standalone",
+        "orientation": "portrait",
+        "background_color": "#ffffff",
+        "theme_color": brand_color,
+        "icons": icons,
+        "lang": (boutique.get("langue_principale") or "fr"),
+    }
+    import json as _json
+    files["manifest.webmanifest"] = _json.dumps(
+        manifest, ensure_ascii=False, indent=2
+    ).encode("utf-8")
+
+    # Service worker minimal : cache-first pour navigation + assets clés.
+    files["sw.js"] = (
+        f"const CACHE='yk-shop-{boutique.get('slug','shop')}-v1';\n"
+        "const URLS=['/','/panier','/manifest.webmanifest'];\n"
+        "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS).catch(()=>{})));self.skipWaiting();});\n"
+        "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});\n"
+        "self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET')return;if(u.pathname.startsWith('/api/'))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{const cp=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});return resp;}).catch(()=>caches.match('/'))));});\n"
+    ).encode("utf-8")
 
     return files

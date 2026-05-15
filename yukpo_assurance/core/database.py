@@ -1452,6 +1452,7 @@ class ShopBoutiqueDB(Base):
     nom                   = Column(String(120), nullable=False)
     description           = Column(Text, nullable=True)
     logo_url              = Column(String(500), nullable=True)
+    banniere_url          = Column(String(500), nullable=True)
     brand_kit_json        = Column(JSON, nullable=True)
     devise                = Column(String(8), nullable=False, default="XAF")
     pays_principal        = Column(String(8), nullable=False, default="CM")
@@ -1778,7 +1779,61 @@ class ShopLivraisonZoneDB(Base):
     transporteur_prefere = Column(String(40), nullable=True)
     ordre               = Column(Integer, nullable=False, default=0)
     actif               = Column(Boolean, nullable=False, default=True)
+    # Piste Q2 — extensions livraison intelligente
+    frais_par_km        = Column(Float, nullable=True,
+        comment="Si défini, ajoute frais_par_km × distance_km au tarif fixe")
+    rayon_max_km        = Column(Float, nullable=True,
+        comment="Distance max acceptée pour cette zone (au-delà = zone refuse)")
+    gps_centre          = Column(String(60), nullable=True,
+        comment="'lat,lng' du centre de la zone (pour calcul haversine)")
     cree_le             = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopProductCommentDB(Base):
+    """Q1 — Avis/commentaires laissés par visiteurs sur les produits."""
+    __tablename__ = "shop_product_comments"
+
+    id                = Column(BigInteger, primary_key=True, autoincrement=True)
+    product_id        = Column(BigInteger,
+                                ForeignKey("shop_products.id", ondelete="CASCADE"),
+                                nullable=False, index=True)
+    boutique_id       = Column(BigInteger,
+                                ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                nullable=False, index=True)
+    author_nom        = Column(String(120), nullable=False)
+    author_telephone  = Column(String(40), nullable=True)
+    author_email      = Column(String(150), nullable=True)
+    contenu           = Column(Text, nullable=False)
+    note              = Column(Integer, nullable=True,
+        comment="1-5 étoiles, optionnel")
+    statut            = Column(String(20), nullable=False, default="pending",
+        comment="pending | approved | rejected | spam")
+    ip_address        = Column(String(64), nullable=True)
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ShopMessageDB(Base):
+    """Q1 — Messages asynchrones visiteur ↔ vendeur (chat simplifié)."""
+    __tablename__ = "shop_messages"
+
+    id                = Column(BigInteger, primary_key=True, autoincrement=True)
+    boutique_id       = Column(BigInteger,
+                                ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                nullable=False, index=True)
+    product_id        = Column(BigInteger,
+                                ForeignKey("shop_products.id", ondelete="SET NULL"),
+                                nullable=True)
+    visitor_nom       = Column(String(120), nullable=False)
+    visitor_telephone = Column(String(40), nullable=True)
+    visitor_email     = Column(String(150), nullable=True)
+    sujet             = Column(String(200), nullable=True)
+    contenu           = Column(Text, nullable=False)
+    statut            = Column(String(20), nullable=False, default="non_lu",
+        comment="non_lu | lu | repondu | archive | spam")
+    reponse_marchand  = Column(Text, nullable=True)
+    repondu_le        = Column(DateTime, nullable=True)
+    ip_address        = Column(String(64), nullable=True)
+    cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 class ShopLivraisonEtiquetteDB(Base):
