@@ -1261,10 +1261,48 @@ async def publier_shop(
     except Exception:
         pass
 
+    # ── SEO référencement automatique : ping IndexNow ────────────────────
+    # Soumet l'URL home + toutes les URLs produits aux moteurs IndexNow
+    # (Bing, Yandex, Naver, Seznam). Indexation typiquement 2-7 jours.
+    # Google ne supporte pas officiellement IndexNow mais ses crawlers
+    # peuvent capter le signal indirect. Best-effort, jamais bloquant.
+    indexnow_result = None
+    try:
+        from modules.pro.seo_referencing import ping_indexnow, get_indexnow_key
+        if get_indexnow_key():
+            host = (b.url_public or f"https://{b.slug}.yukpomnang.com").replace("https://", "").replace("http://", "").strip("/")
+            base = b.url_public or f"https://{b.slug}.yukpomnang.com"
+            urls = [base + "/"]
+            urls += [f"{base}/p/{p.slug}" for p in produits if p.statut == "actif"][:50]
+            urls += [f"{base}/c/{c.slug}" for c in categories][:20]
+            indexnow_result = await ping_indexnow(host, urls)
+            if indexnow_result.get("ok"):
+                logger.info(
+                    f"[Shop/publier] IndexNow {len(urls)} URLs soumises "
+                    f"({indexnow_result['status']}) → indexation 2-7j Bing/Yandex/Naver"
+                )
+            else:
+                logger.info(f"[Shop/publier] IndexNow KO : {indexnow_result.get('error')}")
+        else:
+            indexnow_result = {"ok": False,
+                "error": "INDEXNOW_KEY non configurée (configure-la pour activer auto-indexation Bing/Yandex)"}
+    except Exception as _e:
+        logger.warning(f"[Shop/publier] IndexNow non bloquant : {_e}")
+
     return {
         "ok": True, "slug": b.slug, "url_public": b.url_public,
         "nb_produits": len(produits_dicts),
         "nb_categories": len(cats_dicts),
+        "seo": {
+            "indexnow": indexnow_result,
+            "sitemap_url": f"{b.url_public or f'https://{b.slug}.yukpomnang.com'}/sitemap.xml",
+            "google_merchant_feed_url": f"{b.url_public or f'https://{b.slug}.yukpomnang.com'}/feed/google.xml",
+            "instructions": {
+                "google_search_console": "Soumets le sitemap_url dans Google Search Console (1 fois) → indexation Google ~7-30j",
+                "google_merchant": "Soumets google_merchant_feed_url dans Google Merchant Center → onglet Shopping Google",
+                "indexnow_status": indexnow_result.get("ok") if indexnow_result else False,
+            },
+        },
     }
 
 

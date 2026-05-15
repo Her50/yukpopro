@@ -546,6 +546,37 @@ def construire_html_page_storefront(
     else:
         body = "<section class='p-8 text-center'>Page introuvable</section>"
 
+    # ── Référencement automatique (Piste 6 SEO) ────────────────────────────
+    # JSON-LD Schema.org + OpenGraph product + Twitter Card pour rich snippets
+    # Google + previews FB/WhatsApp/LinkedIn/X au moment du partage.
+    from modules.pro.seo_referencing import (
+        build_jsonld_product, build_jsonld_organization, build_og_product,
+    )
+    base_url = (boutique.get("url_public")
+                or f"https://{boutique.get('slug', 'boutique')}.yukpomnang.com").rstrip("/")
+    seo_extra = ""
+    og_extra = ""
+    if type_page == "produit" and produit:
+        seo_extra = build_jsonld_product(produit, boutique, base_url)
+        og_extra = build_og_product(produit, boutique, base_url)
+    else:
+        seo_extra = build_jsonld_organization(boutique, base_url)
+        # OG home/catalogue : minimal
+        og_extra = (
+            f'<meta property="og:type" content="website">'
+            f'<meta property="og:title" content="{titre_seo}">'
+            f'<meta property="og:description" content="{escape(boutique.get("description") or "")[:300]}">'
+            f'<meta property="og:url" content="{escape(base_url)}">'
+            f'<meta property="og:locale" content="fr_FR">'
+            f'<meta name="twitter:card" content="summary_large_image">'
+            + (f'<meta property="og:image" content="{escape(boutique.get("logo_url", ""))}">'
+               if boutique.get("logo_url") else "")
+        )
+    canonical_url = (
+        f"{base_url}/p/{escape(produit.get('slug', ''))}" if (type_page == "produit" and produit)
+        else f"{base_url}/{'panier' if type_page == 'panier' else ''}"
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="{escape(boutique.get('langue_principale') or 'fr')}">
 <head>
@@ -553,8 +584,11 @@ def construire_html_page_storefront(
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{titre_seo}</title>
 <meta name="description" content="{escape(boutique.get('description') or '')}">
+<link rel="canonical" href="{canonical_url}">
 {f'<link rel="icon" href="{escape(favicon)}">' if favicon else ""}
 <meta name="theme-color" content="#7B3FE4">
+{og_extra}
+{seo_extra}
 <script src="https://cdn.tailwindcss.com"></script>
 <style>:root {{ {css_vars} }}
 body {{ font-family: var(--font-corps); color: var(--text); background: var(--bg); margin: 0; }}
@@ -642,5 +676,24 @@ def construire_arborescence_storefront(
     files["robots.txt"] = (
         f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n"
     ).encode("utf-8")
+
+    # ── SEO référencement automatique (Piste 6 SEO) ─────────────────────────
+    # 1. Clé IndexNow hostée sur le domaine (vérification par les moteurs)
+    from modules.pro.seo_referencing import (
+        get_indexnow_key, build_google_merchant_feed,
+    )
+    indexnow_key = get_indexnow_key()
+    if indexnow_key:
+        files[f"{indexnow_key}.txt"] = indexnow_key.encode("utf-8")
+
+    # 2. Feed Google Merchant Center (à soumettre dans Google Merchant Center
+    #    par le commerçant : Produits → Flux → URL `/feed/google.xml`)
+    try:
+        files["feed/google.xml"] = build_google_merchant_feed(
+            boutique, produits, base_url
+        ).encode("utf-8")
+    except Exception as _e:
+        # Best-effort : si génération échoue, on n'empêche pas le publish
+        pass
 
     return files
