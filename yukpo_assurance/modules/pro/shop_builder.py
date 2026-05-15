@@ -155,18 +155,57 @@ def _css_globale_storefront(brand_kit: Optional[dict]) -> str:
 
 
 def _construire_nav_storefront(boutique: dict, panier_url: str = "/panier") -> str:
-    """Nav top sticky commune (logo + cherche + panier)."""
+    """Nav top sticky : logo + recherche + panier."""
     nom = escape(boutique.get("nom") or "Boutique")
     logo = boutique.get("logo_url", "")
+    slug = escape(boutique.get("slug") or "")
     logo_html = (
         f'<img src="{escape(logo)}" alt="" class="h-10 w-auto rounded-lg">'
         if logo else f'<span class="text-xl font-bold" style="color:var(--primary)">{nom}</span>'
     )
+    search_box = (
+        '<div class="flex-1 max-w-md relative">'
+        '<input id="shop-search-input" type="search" placeholder="Rechercher un produit…" '
+        'class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:border-violet-400 focus:outline-none">'
+        '<svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+        '<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'
+        '<div id="shop-search-results" class="hidden absolute top-full left-0 right-0 mt-1 bg-white shadow-xl rounded-lg max-h-96 overflow-y-auto border border-slate-200 z-50"></div>'
+        '</div>'
+        f'<script>'
+        f'(function(){{'
+        f' const API="/api/v1/pro/shop/public/{slug}/search";'
+        f' const inp=document.getElementById("shop-search-input");'
+        f' const out=document.getElementById("shop-search-results");'
+        f' let t=null;'
+        f' inp.addEventListener("input",()=>{{'
+        f'  const q=inp.value.trim();'
+        f'  if(t) clearTimeout(t);'
+        f'  if(q.length<2){{ out.classList.add("hidden"); return; }}'
+        f'  t=setTimeout(async()=>{{'
+        f'   try{{'
+        f'    const r=await fetch(API+"?q="+encodeURIComponent(q));'
+        f'    const d=await r.json();'
+        f'    if(!d.items||!d.items.length){{ out.innerHTML="<div class=\\"p-3 text-sm text-slate-500\\">Aucun résultat</div>"; out.classList.remove("hidden"); return; }}'
+        f'    out.innerHTML=d.items.map(it=>('
+        f'     `<a href="${{it.url}}" class="flex items-center gap-3 p-2 hover:bg-slate-50 border-b border-slate-100">`+'
+        f'     `${{it.photo?`<img src="${{it.photo}}" class="w-12 h-12 rounded object-cover">`:`<div class="w-12 h-12 rounded bg-slate-100"></div>`}}`+'
+        f'     `<div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">${{it.titre}}</div>`+'
+        f'     `<div class="text-xs text-violet-600">${{Math.round(it.prix_unit)}} ${{it.devise}}</div></div></a>`'
+        f'    )).join("");'
+        f'    out.classList.remove("hidden");'
+        f'   }}catch(_){{}}'
+        f'  }},250);'
+        f' }});'
+        f' document.addEventListener("click",(e)=>{{ if(!e.target.closest("#shop-search-input,#shop-search-results")) out.classList.add("hidden"); }});'
+        f'}})();'
+        f'</script>'
+    )
     return (
         f'<nav class="sticky top-0 z-50 backdrop-blur-md bg-white/95 shadow-sm">'
         f'<div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-4">'
-        f'<a href="/" class="flex items-center gap-2">{logo_html}</a>'
-        f'<a href="{panier_url}" id="cart-link" class="relative p-2 rounded-lg hover:bg-slate-100">'
+        f'<a href="/" class="flex items-center gap-2 flex-shrink-0">{logo_html}</a>'
+        f'{search_box}'
+        f'<a href="{panier_url}" id="cart-link" class="relative p-2 rounded-lg hover:bg-slate-100 flex-shrink-0">'
         f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
         f'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>'
         f'<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
@@ -800,6 +839,46 @@ body {{ font-family: var(--font-corps); color: var(--text); background: var(--bg
 """
 
 
+async def _traduire_storefront_data(
+    boutique: dict, produits: list[dict], categories: list[dict],
+    target_lang: str,
+) -> tuple[dict, list[dict], list[dict]]:
+    """Traduit titres + descriptions + nom catégorie pour 1 langue cible.
+    Best-effort : si traduction échoue par item, garde le texte source.
+    Coût ≈ 1 appel LLM léger par champ → caching natif de ia_client (24h).
+    """
+    try:
+        from modules.translate_live.translator import traduire_texte
+    except Exception:
+        return boutique, produits, categories
+
+    async def tr(t: Optional[str]) -> str:
+        if not t or not t.strip():
+            return t or ""
+        try:
+            return await traduire_texte(t, target_lang=target_lang)
+        except Exception:
+            return t
+
+    b2 = dict(boutique)
+    b2["nom"] = await tr(b2.get("nom"))
+    b2["description"] = await tr(b2.get("description"))
+    b2["langue_principale"] = target_lang
+    prods2 = []
+    for p in produits:
+        p2 = dict(p)
+        p2["titre"] = await tr(p2.get("titre"))
+        p2["description_courte"] = await tr(p2.get("description_courte"))
+        p2["description_longue"] = await tr(p2.get("description_longue"))
+        prods2.append(p2)
+    cats2 = []
+    for c in categories:
+        c2 = dict(c)
+        c2["nom"] = await tr(c2.get("nom"))
+        cats2.append(c2)
+    return b2, prods2, cats2
+
+
 def construire_arborescence_storefront(
     boutique: dict, *, produits: list[dict],
     categories: list[dict], api_base: str = "",
@@ -835,14 +914,31 @@ def construire_arborescence_storefront(
         boutique, "panier", api_base=api_base,
     ).encode("utf-8")
 
-    # Pages produits + catalogues
+    # Pages produits + catalogues + OG image dynamique par produit
+    from modules.pro.shop_og_image import generer_og_image_produit
+    base_url = (boutique.get("url_public") or f"https://{boutique['slug']}.yukpomnang.com").rstrip("/")
     for p in produits:
         if p.get("statut") != "actif":
             continue
         autres = [pp for pp in produits if pp.get("id") != p.get("id")
                    and pp.get("statut") == "actif"][:4]
+        # OG image dynamique (best-effort, fallback photo brute si échec)
+        og_bytes = None
+        try:
+            og_bytes = generer_og_image_produit(p, boutique, base_url)
+        except Exception as _e:
+            logger.debug(f"[OG] gen fail produit {p.get('slug')}: {_e}")
+        og_url_inject = None
+        if og_bytes:
+            og_filename = f"og/{p['slug']}.png"
+            files[og_filename] = og_bytes
+            og_url_inject = f"{base_url}/{og_filename}"
+        # Injecte og_image_dyn pour que _page_produit_html / SEO l'utilise
+        p_with_og = dict(p)
+        if og_url_inject:
+            p_with_og["_og_image_dyn"] = og_url_inject
         files[f"p/{p['slug']}/index.html"] = construire_html_page_storefront(
-            boutique, "produit", produit=p, autres_produits=autres,
+            boutique, "produit", produit=p_with_og, autres_produits=autres,
             api_base=api_base, cross_sell_items=cs,
         ).encode("utf-8")
 
@@ -891,6 +987,10 @@ def construire_arborescence_storefront(
         # Best-effort : si génération échoue, on n'empêche pas le publish
         pass
 
+    # ── Hreflang sitemap multi-langue (si arbo i18n présente en post-step) ──
+    # Le wrapper async `construire_arborescence_storefront_multilingue` ajoutera
+    # les variantes /{lang}/... et rebâtira sitemap.xml avec balises hreflang.
+
     # ── PWA : manifest + service worker (install écran d'accueil mobile) ───
     bk = boutique.get("brand_kit_json") or {}
     brand_color = (bk.get("couleur_primaire") if isinstance(bk, dict) else None) or "#7B3FE4"
@@ -920,13 +1020,87 @@ def construire_arborescence_storefront(
         manifest, ensure_ascii=False, indent=2
     ).encode("utf-8")
 
-    # Service worker minimal : cache-first pour navigation + assets clés.
+    # Service worker minimal : cache-first pour navigation + assets clés + push.
     files["sw.js"] = (
-        f"const CACHE='yk-shop-{boutique.get('slug','shop')}-v1';\n"
+        f"const CACHE='yk-shop-{boutique.get('slug','shop')}-v2';\n"
         "const URLS=['/','/panier','/manifest.webmanifest'];\n"
         "self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS).catch(()=>{})));self.skipWaiting();});\n"
         "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});\n"
         "self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET')return;if(u.pathname.startsWith('/api/'))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{const cp=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});return resp;}).catch(()=>caches.match('/'))));});\n"
+        "self.addEventListener('push',e=>{let d={};try{d=e.data?e.data.json():{};}catch(_){d={title:'Yukpo',body:e.data?e.data.text():''};}"
+        "const opts={body:d.body||'',icon:d.icon||'/icon-192.png',badge:d.icon||'/icon-192.png',tag:d.tag||'yukpo',data:{url:d.url||'/'}};"
+        "e.waitUntil(self.registration.showNotification(d.title||'Yukpo',opts));});\n"
+        "self.addEventListener('notificationclick',e=>{e.notification.close();const url=(e.notification.data&&e.notification.data.url)||'/';"
+        "e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(ws=>{for(const w of ws){if(w.url.includes(url)&&'focus' in w)return w.focus();}return clients.openWindow(url);}));});\n"
+    ).encode("utf-8")
+
+    return files
+
+
+async def construire_arborescence_storefront_multilingue(
+    boutique: dict, *, produits: list[dict], categories: list[dict],
+    api_base: str = "", cross_sell_items: Optional[list[dict]] = None,
+    langues_supp: Optional[list[str]] = None,
+) -> dict[str, bytes]:
+    """Wrapper async qui :
+       1. Build l'arbo dans la langue principale (racine /)
+       2. Pour chaque langue supplémentaire, build une copie traduite à /{lang}/...
+       3. Réécrit sitemap.xml avec balises hreflang pointant vers chaque version.
+
+    Best-effort : si traduction LLM échoue, conserve texte source.
+    Coût : ~3-5 crédits par langue × nb_produits (cache 24h via ia_client).
+    """
+    files = construire_arborescence_storefront(
+        boutique, produits=produits, categories=categories,
+        api_base=api_base, cross_sell_items=cross_sell_items,
+    )
+    langue_pp = (boutique.get("langue_principale") or "fr").lower()
+    cibles = [lg.lower() for lg in (langues_supp or [])
+              if lg and lg.lower() != langue_pp]
+    if not cibles:
+        return files
+
+    for lang in cibles:
+        try:
+            b_tr, prods_tr, cats_tr = await _traduire_storefront_data(
+                boutique, produits, categories, target_lang=lang,
+            )
+        except Exception as _e:
+            logger.warning(f"[Shop/i18n] traduction {lang} échoué : {_e}")
+            continue
+        b_tr["url_public"] = (
+            (boutique.get("url_public") or f"https://{boutique['slug']}.yukpomnang.com")
+            .rstrip("/") + f"/{lang}"
+        )
+        sub_files = construire_arborescence_storefront(
+            b_tr, produits=prods_tr, categories=cats_tr,
+            api_base=api_base, cross_sell_items=cross_sell_items,
+        )
+        # On garde uniquement les HTML traduits sous /{lang}/...
+        # (sitemap / robots / manifest / sw / feed restent à la racine)
+        for path, content in sub_files.items():
+            if path.endswith(".html"):
+                files[f"{lang}/{path}"] = content
+
+    # Réécrit sitemap avec hreflang multi-langue
+    base_url = (boutique.get("url_public") or f"https://{boutique['slug']}.yukpomnang.com").rstrip("/")
+    all_langs = [langue_pp] + cibles
+    def _alt_links(rel_path: str) -> str:
+        links = []
+        for lg in all_langs:
+            href = f"{base_url}/{rel_path}" if lg == langue_pp else f"{base_url}/{lg}/{rel_path}"
+            links.append(f'<xhtml:link rel="alternate" hreflang="{lg}" href="{href}"/>')
+        return "".join(links)
+    urls_xml = []
+    for rel in ([""] + [f"p/{p['slug']}" for p in produits if p.get("statut") == "actif"]
+                + [f"c/{c['slug']}" for c in categories]):
+        loc = f"{base_url}/{rel}" if rel else f"{base_url}/"
+        urls_xml.append(f"<url><loc>{loc}</loc>{_alt_links(rel)}</url>")
+    files["sitemap.xml"] = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+        + "\n".join(urls_xml) + "\n</urlset>\n"
     ).encode("utf-8")
 
     return files

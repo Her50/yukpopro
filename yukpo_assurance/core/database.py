@@ -1836,6 +1836,26 @@ class ShopMessageDB(Base):
     cree_le           = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class ShopPushSubscriptionDB(Base):
+    """Push notifications web pour marchand (VAPID).
+
+    Une row par device. Triggered sur new_order + new_message + new_comment.
+    """
+    __tablename__ = "shop_push_subscriptions"
+
+    id                    = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id               = Column(Integer, nullable=False, index=True)
+    boutique_id           = Column(BigInteger,
+                                    ForeignKey("shop_boutiques.id", ondelete="CASCADE"),
+                                    nullable=True, index=True)
+    endpoint              = Column(Text, nullable=False, unique=True)
+    p256dh                = Column(Text, nullable=False)
+    auth                  = Column(Text, nullable=False)
+    user_agent            = Column(String(400), nullable=True)
+    cree_le               = Column(DateTime, default=datetime.utcnow, nullable=False)
+    derniere_utilisation  = Column(DateTime, nullable=True)
+
+
 class ShopLivraisonEtiquetteDB(Base):
     __tablename__ = "shop_livraison_etiquettes"
 

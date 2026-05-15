@@ -49,7 +49,7 @@ import time
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, Request, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,7 +58,7 @@ from core.auth import TokenData, get_current_user
 from core.database import (
     ShopBoutiqueDB, ShopCategorieDB, ShopMessageDB, ShopOrderDB,
     ShopOrderItemDB, ShopProductCommentDB, ShopProductDB,
-    ShopLivraisonZoneDB, async_session_maker,
+    ShopLivraisonZoneDB, ShopPushSubscriptionDB, async_session_maker,
 )
 
 logger = logging.getLogger("yukpo_assurance.api.pro_shop")
@@ -244,6 +244,116 @@ class PatchCommandeRequest(BaseModel):
 # ─── Boutique CRUD ────────────────────────────────────────────────────────────
 
 
+class SuggererInitRequest(BaseModel):
+    brief: str = Field(..., min_length=3, max_length=2000,
+        description="Brief utilisateur du chat ('ouvre ma boutique de bijoux à Douala')")
+
+
+@router.post("/shop/suggerer-init",
+             summary="LLM Haiku : déduit nom + description + devise + pays depuis le brief chat")
+async def suggerer_init_boutique(
+    req: SuggererInitRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Pré-remplit le formulaire d'initialisation boutique à partir du brief
+    chat de l'utilisateur. L'user peut ensuite modifier librement avant
+    de confirmer. LLM Haiku (~0.5-1s, ~1 FCFA absorbé).
+    """
+    from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    import json as _json
+    import re as _re
+
+    # Profil pour deviser/pays par défaut si LLM hésite
+    profil = None
+    try:
+        async with async_session_maker() as _db:
+            from modules.pro.service_profil import get_or_create as _get_profil
+            profil, _ = await _get_profil(current_user.user_id, _db)
+    except Exception:
+        pass
+
+    pays_profil = (getattr(profil, "pays", None) or "CM").upper()[:2] if profil else "CM"
+    devise_defaut = {
+        "CM": "XAF", "CG": "XAF", "GA": "XAF", "TD": "XAF", "CF": "XAF", "GQ": "XAF",
+        "SN": "XOF", "CI": "XOF", "BJ": "XOF", "BF": "XOF", "ML": "XOF",
+        "NE": "XOF", "TG": "XOF", "GW": "XOF",
+        "FR": "EUR", "BE": "EUR", "DE": "EUR", "ES": "EUR", "IT": "EUR",
+        "GB": "GBP", "US": "USD", "CA": "USD",
+        "MA": "USD", "DZ": "USD", "TN": "USD",  # fallback USD si pas dans liste
+    }.get(pays_profil, "XAF")
+
+    prompt = f"""Tu es un assistant qui pré-remplit le formulaire d'ouverture
+d'une boutique e-commerce sur Yukpo, à partir du brief utilisateur du chat.
+
+BRIEF UTILISATEUR :
+\"\"\"{req.brief}\"\"\"
+
+PROFIL UTILISATEUR (contexte) :
+- Pays : {pays_profil}
+- Devise par défaut du pays : {devise_defaut}
+
+Retourne UNIQUEMENT un JSON STRICT avec ces 4 champs :
+{{
+  "nom": "Nom commercial de la boutique (3-60 caractères, percutant, mémorable, sans \"Boutique de X\" générique sauf si l'user n'a rien suggéré)",
+  "description": "Description marketing courte (80-180 caractères) qui résume CE QUE VEND la boutique + son positionnement / sa promesse / son territoire si pertinent. PAS de \"Bienvenue\" générique.",
+  "devise": "{devise_defaut}",
+  "pays_principal": "{pays_profil}"
+}}
+
+RÈGLES :
+- Si le brief contient un nom propre (« ma boutique HLANALYTIC »), utilise-le tel quel.
+- Sinon invente un nom court inspiré du métier/produit ou du prénom propriétaire détecté.
+- La devise et le pays viennent du profil sauf si l'user mentionne explicitement
+  un autre pays (« boutique au Sénégal » → SN/XOF).
+- Description = PROMESSE DE VENTE, pas une auto-présentation. Cite les produits
+  ou la catégorie (« Bijoux artisanaux fait-main de Douala — création, sur-mesure et livraison Cameroun »).
+- Tout en {("français" if pays_profil in {"CM","CG","SN","CI","BJ","BF","ML","NE","TG","GA","TD","CF","GQ","FR","BE"} else "anglais")}.
+
+Retourne UNIQUEMENT le JSON, sans markdown, sans commentaire."""
+
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt,
+            mode=ModeIA.PRECISION,
+            json_attendu=True,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            max_tokens_override=400,
+        )
+        contenu = (rep.contenu or "{}").strip()
+        try:
+            data = _json.loads(contenu)
+        except _json.JSONDecodeError:
+            m = _re.search(r"\{.*\}", contenu, _re.DOTALL)
+            data = _json.loads(m.group()) if m else {}
+    except Exception as e:
+        logger.warning(f"[Shop/suggerer-init] LLM échec : {e}")
+        data = {}
+
+    # Garde-fous + fallback
+    nom = (data.get("nom") or "")[:60].strip()
+    description = (data.get("description") or "")[:300].strip()
+    devise = (data.get("devise") or devise_defaut).upper()[:3]
+    pays = (data.get("pays_principal") or pays_profil).upper()[:2]
+
+    if not nom:
+        # Fallback minimaliste sans LLM : extrait premier mot significatif
+        _mots = [m for m in _re.findall(r"\b[A-Za-zÀ-ÿ]{3,}\b", req.brief)
+                 if m.lower() not in {"une", "mon", "ma", "notre", "boutique", "shop",
+                                      "magasin", "ouvre", "crée", "genere", "génère",
+                                      "fais", "pour", "avec", "des", "les", "yukpo"}]
+        nom = (_mots[0] if _mots else "Ma Boutique")[:60].title()
+
+    if not description:
+        description = "Boutique en ligne propulsée par Yukpo."
+
+    return {
+        "nom": nom,
+        "description": description,
+        "devise": devise,
+        "pays_principal": pays,
+    }
+
+
 @router.post("/shop/initialiser", summary="Crée la boutique du user (1 par user)")
 async def initialiser_boutique(
     req: InitBoutiqueRequest,
@@ -308,6 +418,15 @@ async def initialiser_boutique(
             )
     except Exception as _e:
         logger.info(f"[Shop/init] Google Places enrich skip ({_e})")
+
+    # Billing : initialisation boutique = client_action (1 fois par user)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_initialiser",
+        )
+    except Exception:
+        pass
 
     return {
         "ok": True, "id": boutique.id, "slug": boutique.slug,
@@ -517,6 +636,7 @@ async def patch_produit(
         "prix_unit_promo", "devise", "photos_urls_json", "tags_json",
         "statut", "stock",
     }
+    bascule_actif = (data.get("statut") == "actif" and p.statut == "actif")
     if fields_qui_invalident_le_sync & set(data.keys()):
         p.rust_sync_status = "pending"
         # On NE remet PAS attempts à 0 : un commerçant qui modifie 10 fois
@@ -530,6 +650,16 @@ async def patch_produit(
             _schedule_rust_sync(background_tasks, p.id, email, nom)
         except Exception as _e:
             logger.debug(f"[RustBridge] schedule failed produit={p.id}: {_e}")
+
+    # Billing : 1 débit par MAJ produit (équivalent activation/republication)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action",
+            module="shop_produit_activation" if bascule_actif else "shop_produit_patch",
+        )
+    except Exception:
+        pass
 
     return {"ok": True, "produit": _produit_to_dict(p)}
 
@@ -600,6 +730,16 @@ async def dupliquer_produit(
     db.add(clone)
     await db.commit()
     await db.refresh(clone)
+
+    # Billing : duplication = client_action (équivalent création produit)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_produit_dupliquer",
+        )
+    except Exception:
+        pass
+
     return {"ok": True, "produit": _produit_to_dict(clone)}
 
 
@@ -611,13 +751,33 @@ async def generer_video_produit(
     produit_id: int,
     ton: Optional[str] = Form("dynamique"),
     duree_s: int = Form(15, ge=5, le=60),
+    confirmer_cout: bool = Form(False),
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(_get_db),
 ):
     """Génère une vidéo publicitaire courte (5-60s) à partir des photos
     du produit, via le pipeline Remotion + IA de Yukpo Rust. La vidéo
     est sauvegardée et son URL est stockée dans `shop_products.video_url`,
-    rendant le produit éligible au VideoFeed mobile Yukpo (Piste 6b)."""
+    rendant le produit éligible au VideoFeed mobile Yukpo (Piste 6b).
+
+    Facturation : vidéo IA = opération lourde (CostAdvisor obligatoire si
+    >150 crédits) — débit `pdf_generation` mappé (équivalent rendu artefact)."""
+    from api.routes_pro_generateurs import _pre_check_credits
+    await _pre_check_credits(current_user.user_id, role=current_user.role)
+
+    # CostAdvisor : prévient si la vidéo dépasse seuil de crédits
+    if not confirmer_cout:
+        try:
+            from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+            cout = estimer_cout_module("video_render", duree_s=duree_s)
+            v = await advisor.evaluer(current_user.user_id, cout, module="shop_video")
+            if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+                raise HTTPException(402, v.detail_pour_402())
+        except HTTPException:
+            raise
+        except Exception:
+            pass
+
     b = await _get_boutique_du_user(current_user.user_id, db)
     p = (await db.execute(
         select(ShopProductDB)
@@ -639,6 +799,15 @@ async def generer_video_produit(
             if res.thumbnail_url:
                 p.video_thumbnail_url = res.thumbnail_url
             await db.commit()
+            # Billing : débit forfait après succès uniquement
+            try:
+                from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+                await debiter_forfait_unifie(
+                    current_user.user_id, "pdf_generation",
+                    module="shop_video_render",
+                )
+            except Exception:
+                pass
             return {
                 "ok": True, "video_url": res.video_url,
                 "thumbnail_url": res.thumbnail_url, "duration_s": res.duration_s,
@@ -716,6 +885,16 @@ async def republier_produit_rust(
     result = await publier_produit_vers_rust(
         produit_id=p.id, db=db, vendeur_email=email, vendeur_nom=nom,
     )
+    # Billing : republication marketplace = client_action
+    if result.success:
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            await debiter_forfait_unifie(
+                current_user.user_id, "client_action",
+                module="shop_republier_rust",
+            )
+        except Exception:
+            pass
     return {
         "ok": result.success,
         "rust_service_id": result.rust_service_id,
@@ -803,6 +982,18 @@ async def shop_social_distribute(
         status = 502 if res.error and "réseau" in res.error else 400
         raise HTTPException(status,
             res.error or res.note or "Distribution échouée")
+
+    # Billing : 1 débit par job créé (distribution sociale = whatsapp_message)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        for _ in range(max(1, int(res.jobs_created or 1))):
+            await debiter_forfait_unifie(
+                current_user.user_id, "whatsapp_message",
+                module="shop_social_distribute",
+            )
+    except Exception:
+        pass
+
     return {
         "ok": True,
         "jobs_created": res.jobs_created,
@@ -839,6 +1030,14 @@ async def shop_google_enrich(
             b.google_horaires_json = res.horaires_json
         b.google_enriched_at = datetime.utcnow()
         await db.commit()
+        # Billing : appel API Google Places + enrichissement = client_action
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            await debiter_forfait_unifie(
+                current_user.user_id, "client_action", module="shop_google_enrich",
+            )
+        except Exception:
+            pass
     return {
         "ok": res.success,
         "place_id": res.place_id,
@@ -1202,7 +1401,10 @@ async def publier_shop(
         for c in categories
     ]
 
-    from modules.pro.shop_builder import construire_arborescence_storefront
+    from modules.pro.shop_builder import (
+        construire_arborescence_storefront,
+        construire_arborescence_storefront_multilingue,
+    )
     api_base = os.getenv("YUKPO_PUBLIC_API_BASE", "").strip()
 
     # ── Piste 2 — fetch cross-sell marketplace Yukpo Rust (best-effort) ─
@@ -1231,11 +1433,32 @@ async def publier_shop(
         except Exception as _e:
             logger.warning(f"[Shop/publier] cross-sell fetch échec (non bloquant) : {_e}")
 
-    files = construire_arborescence_storefront(
-        boutique_dict, produits=produits_dicts,
-        categories=cats_dicts, api_base=api_base,
-        cross_sell_items=cross_sell_items,
-    )
+    # Multilingue : si > 1 langue activée, build les versions traduites
+    langues_actives = b.langues_actives_json or ["fr"]
+    if len(langues_actives) > 1:
+        langues_supp = [lg for lg in langues_actives[1:] if lg]
+        files = await construire_arborescence_storefront_multilingue(
+            boutique_dict, produits=produits_dicts,
+            categories=cats_dicts, api_base=api_base,
+            cross_sell_items=cross_sell_items,
+            langues_supp=langues_supp,
+        )
+        # Billing : 1 débit traduction par langue supplémentaire
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            for _ in langues_supp:
+                await debiter_forfait_unifie(
+                    current_user.user_id, "pdf_generation",
+                    module="shop_storefront_i18n",
+                )
+        except Exception:
+            pass
+    else:
+        files = construire_arborescence_storefront(
+            boutique_dict, produits=produits_dicts,
+            categories=cats_dicts, api_base=api_base,
+            cross_sell_items=cross_sell_items,
+        )
 
     try:
         res = await publier_site_multipage(
@@ -1551,6 +1774,20 @@ async def creer_order_public(
     except Exception as _e:
         logger.warning(f"[Shop/order] notif échec : {_e}")
 
+    # Push notif PWA marchand (best-effort)
+    try:
+        from modules.pro.shop_webpush import envoyer_push_user
+        await envoyer_push_user(
+            db, user_id=b.user_id,
+            title=f"🛒 Commande {numero}",
+            body=f"{payload.client.client_nom} · {int(montant_total)} {b.devise}",
+            url=f"/ma-boutique/commandes/{order.id}",
+            icon=b.logo_url,
+            tag=f"order-{order.id}",
+        )
+    except Exception:
+        pass
+
     # Démarrage paiement (si pas cash) — branchement paiement v2 existant
     paiement_url = None
     if payload.client.provider != "cash":
@@ -1569,6 +1806,77 @@ async def creer_order_public(
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Push notifications PWA (VAPID) — marchand
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class PushSubscriptionIn(BaseModel):
+    endpoint: str = Field(..., min_length=10, max_length=2048)
+    keys: dict
+
+
+@router.get("/shop/push/vapid-key", summary="Push — clé publique VAPID")
+async def push_vapid_key(
+    current_user: TokenData = Depends(get_current_user),
+):
+    from modules.pro.shop_webpush import get_vapid_public_key
+    return {"public_key": get_vapid_public_key() or None}
+
+
+@router.post("/shop/push/subscribe", summary="Push — enregistre une subscription device")
+async def push_subscribe(
+    payload: PushSubscriptionIn,
+    request: Request,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    p256dh = (payload.keys or {}).get("p256dh") or ""
+    auth = (payload.keys or {}).get("auth") or ""
+    if not p256dh or not auth:
+        raise HTTPException(400, "Clés p256dh/auth requises")
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.user_id == current_user.user_id)
+    )).scalar_one_or_none()
+    # Upsert (endpoint unique)
+    existing = (await db.execute(
+        select(ShopPushSubscriptionDB).where(ShopPushSubscriptionDB.endpoint == payload.endpoint)
+    )).scalar_one_or_none()
+    if existing:
+        existing.p256dh = p256dh
+        existing.auth = auth
+        existing.user_id = current_user.user_id
+        existing.boutique_id = b.id if b else None
+    else:
+        ua = (request.headers.get("user-agent", "")[:400]) if hasattr(request, "headers") else None
+        db.add(ShopPushSubscriptionDB(
+            user_id=current_user.user_id,
+            boutique_id=b.id if b else None,
+            endpoint=payload.endpoint, p256dh=p256dh, auth=auth,
+            user_agent=ua,
+        ))
+    await db.commit()
+    return {"ok": True}
+
+
+@router.post("/shop/push/unsubscribe", summary="Push — désenregistre une subscription")
+async def push_unsubscribe(
+    endpoint: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    sub = (await db.execute(
+        select(ShopPushSubscriptionDB).where(
+            ShopPushSubscriptionDB.endpoint == endpoint,
+            ShopPushSubscriptionDB.user_id == current_user.user_id,
+        )
+    )).scalar_one_or_none()
+    if sub:
+        await db.delete(sub)
+        await db.commit()
+    return {"ok": True}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Q1 — Commentaires produits + Messages visiteur ↔ vendeur
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -1581,9 +1889,70 @@ class CommentairePublicIn(BaseModel):
     note: Optional[int] = Field(None, ge=1, le=5)
 
 
+async def _moderer_commentaire_llm(
+    contenu: str, note: Optional[int], boutique_user_id: int,
+) -> tuple[str, Optional[str]]:
+    """Modération IA légère pré-pending. Retourne (statut, raison).
+
+    statut: 'pending' (review humain), 'rejected' (spam/insulte évident),
+            'approved' (auto-approuvé si très propre + note positive).
+    Best-effort : si LLM indisponible → 'pending' par défaut (comportement legacy).
+    Facturation : débit forfait sur le marchand (client_action — mappé existant),
+    marge ×20 incluse via COUTS_FORFAIT_FCFA (cf. principe billing Yukpo).
+    """
+    try:
+        from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+    except Exception:
+        return ("pending", None)
+    prompt = (
+        f"Modère ce commentaire client sur un produit e-commerce.\n"
+        f"Note donnée : {note or '—'}/5\n"
+        f"Texte : « {contenu[:1000]} »\n\n"
+        f"Réponds STRICTEMENT en une ligne au format :\n"
+        f"DECISION|RAISON\n\n"
+        f"DECISION ∈ {{APPROVE, REVIEW, REJECT}} :\n"
+        f"- APPROVE : avis légitime, propre, pertinent (auto-publication)\n"
+        f"- REVIEW : doute, contenu commercial, ambigu (modération humaine)\n"
+        f"- REJECT : spam, insulte, contenu pornographique, lien malveillant\n"
+        f"RAISON : 5 mots max."
+    )
+    try:
+        rep = await ia_client.appeler(
+            prompt=prompt, mode=ModeIA.COPILOTE,
+            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+            systeme="Tu es un modérateur de commentaires e-commerce. Sois strict mais juste.",
+            utiliser_cache=False,
+        )
+        texte = (rep.contenu or "").strip()
+        if "|" in texte:
+            decision, raison = texte.split("|", 1)
+            decision = decision.strip().upper()
+            raison = raison.strip()[:200]
+        else:
+            decision = texte.upper(); raison = None
+        # Débit forfait marchand (best-effort, marge ×20 incluse via mapping
+        # sémantique client_action — voir feedback_billing_every_feature)
+        try:
+            from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+            await debiter_forfait_unifie(
+                boutique_user_id, "client_action", module="shop_comment_moderation",
+            )
+        except Exception:
+            pass
+
+        if "REJECT" in decision:
+            return ("rejected", raison or "modération IA")
+        if "APPROVE" in decision:
+            return ("approved", raison or "modération IA")
+        return ("pending", raison)
+    except Exception as _e:
+        logger.warning(f"[Comment/moderation] LLM échec, fallback pending : {_e}")
+        return ("pending", None)
+
+
 @router_public.post(
     "/{slug}/p/{prod_slug}/comment",
-    summary="Q1 — Visiteur dépose un avis/commentaire (modération requise)",
+    summary="Q1 — Visiteur dépose un avis/commentaire (modération IA)",
 )
 async def deposer_commentaire_public(
     slug: str, prod_slug: str,
@@ -1604,6 +1973,11 @@ async def deposer_commentaire_public(
     if not p:
         raise HTTPException(404, "Produit introuvable")
 
+    # Modération IA pré-pending (best-effort, fallback pending si LLM down)
+    statut, _raison = await _moderer_commentaire_llm(
+        payload.contenu, payload.note, b.user_id,
+    )
+
     c = ShopProductCommentDB(
         product_id=p.id, boutique_id=b.id,
         author_nom=payload.author_nom.strip(),
@@ -1611,11 +1985,78 @@ async def deposer_commentaire_public(
         author_email=payload.author_email,
         contenu=payload.contenu.strip(),
         note=payload.note,
-        statut="pending",
+        statut=statut,
     )
     db.add(c)
     await db.commit()
-    return {"ok": True, "id": c.id, "statut": "pending"}
+
+    # Push notif au marchand (uniquement pour pending/approved)
+    if statut != "rejected":
+        try:
+            from modules.pro.shop_webpush import envoyer_push_user
+            await envoyer_push_user(
+                db, user_id=b.user_id,
+                title=f"⭐ Avis sur {p.titre[:40]}",
+                body=f"{payload.author_nom} : {payload.contenu[:100]}",
+                url=f"/ma-boutique?tab=avis",
+                icon=b.logo_url,
+                tag=f"comment-{c.id}",
+            )
+        except Exception:
+            pass
+
+    return {"ok": True, "id": c.id, "statut": statut}
+
+
+@router_public.get(
+    "/{slug}/search",
+    summary="Recherche dans le storefront (produits locaux + marketplace Rust)",
+)
+async def rechercher_storefront(
+    slug: str,
+    q: str = "",
+    limit: int = 20,
+    db: AsyncSession = Depends(_get_db),
+):
+    if not q or len(q.strip()) < 2:
+        return {"ok": True, "q": q, "items": [], "cross": []}
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.slug == slug)
+    )).scalar_one_or_none()
+    if not b:
+        raise HTTPException(404, "Boutique introuvable")
+
+    q_norm = q.strip().lower()
+    pattern = f"%{q_norm}%"
+    rows = (await db.execute(
+        select(ShopProductDB).where(
+            ShopProductDB.boutique_id == b.id,
+            ShopProductDB.statut == "actif",
+            (
+                func.lower(ShopProductDB.titre).like(pattern) |
+                func.lower(ShopProductDB.description_courte).like(pattern) |
+                func.lower(ShopProductDB.description_longue).like(pattern)
+            ),
+        ).limit(min(limit, 50))
+    )).scalars().all()
+
+    items = [{
+        "id": p.id, "titre": p.titre, "slug": p.slug,
+        "prix_unit": float(p.prix_unit), "devise": p.devise or b.devise,
+        "photo": (p.photos_urls_json or [None])[0] if isinstance(p.photos_urls_json, list) else None,
+        "url": f"/p/{p.slug}",
+    } for p in rows]
+
+    # Cross-sell : marketplace Rust (best-effort, optionnel)
+    cross = []
+    try:
+        from modules.pro.yukposhop_rust_search import chercher_services_marketplace
+        cs = await chercher_services_marketplace(query=q, limit=6, gps=b.gps)
+        cross = cs or []
+    except Exception:
+        pass
+
+    return {"ok": True, "q": q, "items": items, "cross": cross}
 
 
 @router_public.get(
@@ -1811,7 +2252,46 @@ async def envoyer_message_public(
     except Exception as _e:
         logger.warning(f"[Shop/message] notif échec : {_e}")
 
+    # Push notification PWA (best-effort)
+    try:
+        from modules.pro.shop_webpush import envoyer_push_user
+        await envoyer_push_user(
+            db, user_id=b.user_id,
+            title=f"💬 Message de {payload.visitor_nom}",
+            body=(payload.contenu or "")[:120],
+            url=f"/ma-boutique?tab=messages&id={m.id}",
+            icon=b.logo_url,
+            tag=f"msg-{m.id}",
+        )
+    except Exception as _e:
+        logger.warning(f"[Shop/message] push échec : {_e}")
+
     return {"ok": True, "id": m.id}
+
+
+@router.get("/shop/messages/unread-count", summary="Q1 — Compteurs sidebar")
+async def admin_compter_messages_non_lus(
+    user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(_get_db),
+):
+    b = (await db.execute(
+        select(ShopBoutiqueDB).where(ShopBoutiqueDB.user_id == user.id)
+    )).scalar_one_or_none()
+    if not b:
+        return {"messages": 0, "commentaires_pending": 0}
+    msg_count = (await db.execute(
+        select(func.count(ShopMessageDB.id)).where(
+            ShopMessageDB.boutique_id == b.id,
+            ShopMessageDB.statut == "non_lu",
+        )
+    )).scalar() or 0
+    com_count = (await db.execute(
+        select(func.count(ShopProductCommentDB.id)).where(
+            ShopProductCommentDB.boutique_id == b.id,
+            ShopProductCommentDB.statut == "pending",
+        )
+    )).scalar() or 0
+    return {"messages": int(msg_count), "commentaires_pending": int(com_count)}
 
 
 @router.get("/shop/messages", summary="Q1 — Admin : inbox messages visiteurs")
@@ -2199,6 +2679,13 @@ async def uploader_logo(
     b.logo_url = url
     b.derniere_modif = datetime.utcnow()
     await db.commit()
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_logo_upload",
+        )
+    except Exception:
+        pass
     return {"ok": True, "url": url}
 
 
@@ -2224,6 +2711,13 @@ async def uploader_banniere(
     b.banniere_url = url
     b.derniere_modif = datetime.utcnow()
     await db.commit()
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        await debiter_forfait_unifie(
+            current_user.user_id, "client_action", module="shop_banniere_upload",
+        )
+    except Exception:
+        pass
     return {"ok": True, "url": url}
 
 

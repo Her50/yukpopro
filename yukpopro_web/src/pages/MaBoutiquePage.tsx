@@ -51,6 +51,41 @@ type Commande = {
   statut: string; cree_le: string;
 };
 
+function urlBase64ToUint8Array(b64: string): Uint8Array {
+  const padding = "=".repeat((4 - b64.length % 4) % 4);
+  const base64 = (b64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+async function activerPushNotifications(): Promise<boolean> {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+  if (Notification.permission === "denied") return false;
+  try {
+    const { public_key } = await generateurApi.shopPushVapidKey();
+    if (!public_key) return false;
+    if (Notification.permission !== "granted") {
+      const p = await Notification.requestPermission();
+      if (p !== "granted") return false;
+    }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(public_key),
+      });
+    }
+    await generateurApi.shopPushSubscribe(sub);
+    return true;
+  } catch (e) {
+    console.warn("[Push] subscribe échec", e);
+    return false;
+  }
+}
+
 export const MaBoutiquePage = () => {
   const { t } = useTranslation();
   const [boutique, setBoutique] = useState<any>(null);
@@ -93,6 +128,40 @@ export const MaBoutiquePage = () => {
   };
 
   useEffect(() => { refresh(); }, []);
+
+  // Auto-subscribe push (permission déjà accordée) au montage de MaBoutique.
+  // Le 1er prompt de permission se fait via le bouton dans Branding.
+  useEffect(() => {
+    if (boutique && typeof Notification !== "undefined" && Notification.permission === "granted") {
+      activerPushNotifications().catch(() => {});
+    }
+  }, [boutique?.id]);
+
+  // Pré-remplissage du formulaire init depuis sessionStorage si l'user
+  // vient du chat avec un brief (ex : "ouvre ma boutique de bijoux à Douala").
+  // ChatPage stocke {nom, description, devise, pays_principal} sous
+  // 'yukposhop_init_suggestions' avec TTL 30 min. On lit ces valeurs dès
+  // que showInit passe à true.
+  useEffect(() => {
+    if (!showInit) return;
+    try {
+      const raw = sessionStorage.getItem("yukposhop_init_suggestions");
+      if (!raw) return;
+      const sug = JSON.parse(raw);
+      if (sug?.expires_at && Date.now() > sug.expires_at) {
+        sessionStorage.removeItem("yukposhop_init_suggestions");
+        return;
+      }
+      setInitForm(prev => ({
+        nom: prev.nom || sug.nom || "",
+        description: prev.description || sug.description || "",
+        devise: sug.devise || prev.devise,
+        pays_principal: sug.pays_principal || prev.pays_principal,
+      }));
+      toast.success("Yukpo a pré-rempli le formulaire — modifie si besoin");
+      sessionStorage.removeItem("yukposhop_init_suggestions");
+    } catch { /* silencieux : sessionStorage indispo / JSON corrompu */ }
+  }, [showInit]);
 
   const onInit = async () => {
     if (!initForm.nom.trim()) return toast.error("Nom requis");
@@ -1756,6 +1825,44 @@ const OngletBranding = ({ boutique, onUpdated }: { boutique: any; onUpdated: () 
         <div className="font-semibold mb-1">📱 PWA — Installation sur l'écran d'accueil</div>
         <div>Dès que votre boutique est publiée et qu'un visiteur a un logo défini, Chrome / Safari proposent automatiquement « Ajouter à l'écran d'accueil ». L'icône utilisée est votre logo, le nom est celui de votre boutique. Aucune configuration supplémentaire requise.</div>
       </div>
+
+      {/* Push notifications marchand */}
+      <PushNotifSection />
+    </div>
+  );
+};
+
+
+const PushNotifSection = () => {
+  const [statut, setStatut] = useState<"unsupported" | "granted" | "denied" | "default" | "loading">("loading");
+  useEffect(() => {
+    if (typeof Notification === "undefined" || !("PushManager" in window)) {
+      setStatut("unsupported"); return;
+    }
+    setStatut(Notification.permission as any);
+  }, []);
+  const activer = async () => {
+    const ok = await activerPushNotifications();
+    setStatut(ok ? "granted" : (Notification.permission as any));
+    if (ok) toast.success("Notifications activées — vous recevrez commandes/messages instantanément");
+    else toast.error("Permission refusée ou navigateur non compatible");
+  };
+  if (statut === "loading") return null;
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900">
+      <div className="font-semibold mb-1">🔔 Notifications instantanées (PWA)</div>
+      <div className="mb-2">
+        Recevez commandes, messages et avis en temps réel sur votre téléphone — même app fermée. Aucun coût SMS, fonctionne via la PWA installée.
+      </div>
+      {statut === "unsupported" && <div className="text-blue-700">Navigateur non compatible Web Push.</div>}
+      {statut === "denied" && <div className="text-rose-700">Permission refusée — débloquez-la dans les paramètres du site.</div>}
+      {statut === "default" && (
+        <button onClick={activer}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+          Activer les notifications
+        </button>
+      )}
+      {statut === "granted" && <div className="text-emerald-700 font-semibold">✓ Notifications activées</div>}
     </div>
   );
 };

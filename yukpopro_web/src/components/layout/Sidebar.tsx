@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { generateurApi } from "@/api/client";
 import {
   LayoutDashboard, MessageSquare, User, LogOut,
   ChevronLeft, ChevronRight, Sparkles, Shield, CreditCard,
   Users, FolderOpen, Briefcase, Gavel, ClipboardList, Radio,
   Sun, Moon, Settings, Wallet, Building2,
+  ShoppingCart, Globe, MapPin,
 } from "lucide-react";
 import { cn, YukpoLogo, Badge } from "@/components/ui";
 import { useAuthStore, useProfilStore, useUIStore } from "@/store";
@@ -23,6 +25,10 @@ const NAV_KEYS = [
   { path: "/enquetes",       icon: ClipboardList,   key: "enquetes",       badge: null,  adminOnly: false },
   { path: "/emploi",         icon: Briefcase,       key: "emploi",         badge: null,  adminOnly: false },
   { path: "/marches",        icon: Gavel,           key: "marches",        badge: null,  adminOnly: false },
+  // Mes créations publiques (gérer après avoir créé via le chat)
+  { path: "/ma-boutique",    icon: ShoppingCart,    key: "maBoutique",     badge: null,  adminOnly: false },
+  { path: "/mes-sites",      icon: Globe,           key: "mesSites",       badge: null,  adminOnly: false },
+  { path: "/mes-leads",      icon: MapPin,          key: "mesLeads",       badge: null,  adminOnly: false },
   { path: "/dashboard",      icon: LayoutDashboard, key: "dashboard",      badge: null,  adminOnly: false },
   { path: "/profil",         icon: User,            key: "profil",         badge: null,  adminOnly: false },
   { path: "/parametres",     icon: Settings,        key: "parametres",     badge: null,  adminOnly: false },
@@ -58,6 +64,22 @@ export const Sidebar = () => {
 
   const handleLogout = () => { logout(); navigate("/login"); };
   const handleNavClick = () => { if (window.innerWidth < 640) setMobileSidebarOpen(false); };
+
+  // ── Badge live "Ma boutique" : messages non lus + commentaires à modérer ─
+  const [shopUnread, setShopUnread] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const r = await generateurApi.shopMessagesUnreadCount();
+        if (!cancelled) setShopUnread((r.messages || 0) + (r.commentaires_pending || 0));
+      } catch { /* boutique non créée → silencieux */ }
+    };
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [user]);
 
   return (
     <>
@@ -159,8 +181,12 @@ export const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 py-2 overflow-y-auto" aria-label="Navigation principale">
         <ul className="space-y-0.5 px-2">
-          {NAV_KEYS.filter((item) => !item.adminOnly || isAdmin).map(({ path, icon: Icon, key, badge }) => {
+          {NAV_KEYS.filter((item) => !item.adminOnly || isAdmin).map(({ path, icon: Icon, key, badge: rawBadge }) => {
             const label = t(`nav.${key}`);
+            // Override : badge dynamique pour Ma boutique (messages non lus + avis pending)
+            const badge = (key === "maBoutique" && shopUnread > 0)
+              ? String(shopUnread > 99 ? "99+" : shopUnread)
+              : rawBadge;
             return (
               <li key={path}>
                 <NavLink
@@ -190,15 +216,20 @@ export const Sidebar = () => {
                       {showLabels && (
                         <>
                           <span className="flex-1 truncate">{label}</span>
-                          {badge && (
-                            <span style={{
-                              fontSize: 10, fontWeight: 700, letterSpacing: "0.05em",
-                              padding: "2px 7px", borderRadius: 999,
-                              background: badge === "ADM" ? "rgba(239,68,68,0.22)" : badge === "NEW" ? "rgba(0,176,240,0.22)" : "rgba(0,84,166,0.28)",
-                              color: badge === "ADM" ? "#fca5a5" : "#00B0F0",
-                              border: `1px solid ${badge === "ADM" ? "rgba(239,68,68,0.35)" : "rgba(0,176,240,0.35)"}`,
-                            }}>{badge}</span>
-                          )}
+                          {badge && (() => {
+                            const isNumeric = /^\d+\+?$/.test(badge);
+                            return (
+                              <span style={{
+                                fontSize: 10, fontWeight: 700, letterSpacing: "0.05em",
+                                padding: "2px 7px", borderRadius: 999,
+                                background: isNumeric ? "rgba(239,68,68,0.85)" :
+                                  badge === "ADM" ? "rgba(239,68,68,0.22)" : badge === "NEW" ? "rgba(0,176,240,0.22)" : "rgba(0,84,166,0.28)",
+                                color: isNumeric ? "#fff" :
+                                  badge === "ADM" ? "#fca5a5" : "#00B0F0",
+                                border: `1px solid ${isNumeric ? "rgba(239,68,68,0.6)" : badge === "ADM" ? "rgba(239,68,68,0.35)" : "rgba(0,176,240,0.35)"}`,
+                              }}>{badge}</span>
+                            );
+                          })()}
                         </>
                       )}
                       {!showLabels && (

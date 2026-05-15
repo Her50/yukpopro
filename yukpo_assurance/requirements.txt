@@ -113,5 +113,8 @@ torch>=2.0.0                   # Backend sentence-transformers (CPU-only suffisa
 # ─── Serveur WSGI/ASGI production ─────────────────────────────────────────────
 gunicorn>=22.0.0               # Process manager multi-workers pour uvicorn en production
 
+# ─── Web Push notifications (PWA YukpoShop marchands) ────────────────────────
+pywebpush>=2.0.0               # Envoi push VAPID natif Web Push Protocol
+
 # ─── Tests (voir requirements-dev.txt pour l'environnement de développement) ──
 # pytest, pytest-asyncio, pytest-cov → requirements-dev.txt

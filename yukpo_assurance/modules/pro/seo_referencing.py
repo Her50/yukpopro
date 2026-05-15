@@ -223,6 +223,11 @@ def build_og_product(p: dict, boutique: dict, base_url: str) -> str:
         next((str(x) for x in photos if isinstance(x, str) and x), "")
         if photos else ""
     )
+    # OG image dynamique (générée au publish : photo + prix + logo en watermark)
+    # — préférée à la photo brute pour CTR +40% sur partages sociaux.
+    og_dyn = p.get("_og_image_dyn")
+    if og_dyn:
+        photo = og_dyn
 
     prix = p.get("prix_unit_promo") or p.get("prix_unit") or 0
     devise = (p.get("devise") or boutique.get("devise") or "XAF")[:3]
@@ -247,10 +252,11 @@ def build_og_product(p: dict, boutique: dict, base_url: str) -> str:
         f'<meta property="og:locale" content="fr_FR">',
     ]
     if photo:
+        h = 630 if og_dyn else 1200
         parts += [
             f'<meta property="og:image" content="{escape(photo)}">',
             f'<meta property="og:image:width" content="1200">',
-            f'<meta property="og:image:height" content="1200">',
+            f'<meta property="og:image:height" content="{h}">',
             f'<meta property="og:image:alt" content="{titre}">',
         ]
     parts += [

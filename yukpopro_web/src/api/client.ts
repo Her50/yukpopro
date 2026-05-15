@@ -532,6 +532,19 @@ export const generateurApi = {
     return data;
   },
 
+  /** LLM Haiku : déduit nom + description + devise + pays depuis le brief
+   *  chat de l'user, pour pré-remplir le formulaire d'init boutique. */
+  shopSuggererInit: async (brief: string): Promise<{
+    nom: string; description: string;
+    devise: string; pays_principal: string;
+  }> => {
+    const { data } = await http.post(
+      "/pro/shop/suggerer-init",
+      { brief }, { timeout: 30_000 },
+    );
+    return data;
+  },
+
   shopMaBoutique: async () => {
     const { data } = await http.get("/pro/shop");
     return data;
@@ -791,6 +804,18 @@ export const generateurApi = {
   },
   shopSupprimerCommentaire: async (cid: number) => {
     const { data } = await http.delete(`/pro/shop/comments/${cid}`);
+    return data;
+  },
+  shopMessagesUnreadCount: async () => {
+    const { data } = await http.get("/pro/shop/messages/unread-count");
+    return data as { messages: number; commentaires_pending: number };
+  },
+  shopPushVapidKey: async () => {
+    const { data } = await http.get("/pro/shop/push/vapid-key");
+    return data as { public_key: string | null };
+  },
+  shopPushSubscribe: async (subscription: PushSubscription) => {
+    const { data } = await http.post("/pro/shop/push/subscribe", subscription.toJSON());
     return data;
   },
   shopListerMessages: async (params?: { statut?: string; limit?: number }) => {
