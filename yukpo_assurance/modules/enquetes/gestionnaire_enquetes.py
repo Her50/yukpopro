@@ -49,6 +49,13 @@ class QuestionFormulaire:
     # text | number | select_one | select_multiple | rating | likert | date | oui_non
     # geopoint | image | note | calculate | begin_group | end_group | begin_repeat | end_repeat
     options: list[str] = field(default_factory=list)
+    # Métadonnées options (value/label distincts) — source de vérité pour
+    # les expressions `relevant` qui référencent les VALUES, pas les labels.
+    # `options` reste rempli avec les labels (rétrocompat affichage). Le LLM
+    # E1 fournit `choices: [{value, label}]` → on stocke ici tel quel.
+    # Si absent (legacy / formulaire simple), un value = slug(label) est
+    # généré au besoin par `option_value_pour_label` / `slug_from_options`.
+    choices_meta: list[dict] = field(default_factory=list)
     obligatoire: bool = True
     ordre: int = 0
     # ── Champs XLSForm étendus ──────────────────────────────────────────────────
@@ -66,6 +73,11 @@ class QuestionFormulaire:
     is_matrix_row: bool = False     # Question dans une matrice table-list
     matrix_list_name: str = ""      # Liste de choix partagée dans une matrice
     name_xlsform: str = ""          # Nom ODK court (slug) pour les références ${...} dans relevant
+    # Mapping value↔label pour conserver les `value` courts attendus par les
+    # expressions `relevant` LLM-générées (ex : `${q3} = '1'`) tout en
+    # affichant le label humain ("Très insatisfait"). Si vide, on fallback
+    # sur `options` (value = label).
+    choices_meta: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -120,6 +132,46 @@ class Etude:
 # ─── Cache en mémoire (remplacé par DB en production) ─────────────────────────
 _etudes: dict[str, Etude] = {}
 _formulaires_publics: dict[str, str] = {}  # formulaire_id → etude_id
+# Index ownership : etude_id → user_id propriétaire. Alimenté à la création
+# et au chargement DB. Source de vérité pour l'autorisation aux endpoints
+# authentifiés. Le _etudes dict reste partagé (cache RAM) mais ne peut
+# plus être consulté sans vérifier l'ownership via `_etude_owner`.
+_etude_owner: dict[str, int] = {}
+# TTL chargement par user — évite reloader la DB à chaque requête.
+_user_charge_ts: dict[int, float] = {}
+_USER_CHARGE_TTL_SEC = 60.0
+
+
+def get_etude_user(user_id: int, etude_id: str) -> Optional["Etude"]:
+    """Récupère une étude SI elle appartient au user, sinon None.
+
+    À utiliser dans tous les endpoints authentifiés. `get_etude` reste
+    accessible pour les flows publics (PWA collecte, soumission) qui
+    n'ont pas de user_id et passent par `_formulaires_publics`.
+    """
+    owner = _etude_owner.get(etude_id)
+    if owner is not None and owner != user_id:
+        return None
+    return _etudes.get(etude_id)
+
+
+def lister_etudes_user(user_id: int) -> list[dict]:
+    """Liste les études du user uniquement (filtrage ownership)."""
+    return [
+        {
+            "etude_id": e.etude_id,
+            "titre": e.titre,
+            "mode": e.mode,
+            "methodologie": e.methodologie,
+            "terrain": e.terrain,
+            "n_transcriptions": len(e.transcriptions),
+            "n_reponses": len(e.formulaire.reponses) if e.formulaire else 0,
+            "statut": e.statut,
+            "created_at": e.created_at,
+        }
+        for eid, e in _etudes.items()
+        if _etude_owner.get(eid) == user_id
+    ]
 
 
 # ─── Transcription audio ───────────────────────────────────────────────────────
@@ -195,6 +247,51 @@ async def analyser_qualitatif(etude_id: str) -> dict:
     n_transcriptions = len(etude.transcriptions)
     questions_str = "\n".join(f"- {q}" for q in etude.questions_recherche) or "Non spécifiées"
 
+    # Si corpus > 12000 chars, map-reduce : analyser chaque transcription
+    # séparément (Opus garde le contexte), puis merger les thèmes. Avant
+    # ce fix, on tronquait silencieusement à [:12000] = perte massive sur
+    # une étude de 30h d'audio (30 transcriptions → 1 prise en compte).
+    CORPUS_LIMIT = 12000
+    avertissement_troncature = ""
+    if len(corpus) > CORPUS_LIMIT and n_transcriptions > 1:
+        from core.ia_client import ModeIA as _M, ModelePrioritaire as _MP, ia_client as _ia
+        # Pré-réduire : analyse partielle de chaque transcription, merge ensuite
+        themes_partiels: list[dict] = []
+        for t in etude.transcriptions:
+            extrait = t.transcription[:8000]
+            try:
+                rep_p = await _ia.appeler(
+                    prompt=(
+                        f"Extrait les thèmes principaux de cet entretien "
+                        f"({t.locuteur}, {t.date_collecte}). Retourne UNIQUEMENT un "
+                        "JSON {\"themes\": [{\"code\":\"...\",\"libelle\":\"...\","
+                        "\"citations\":[\"verbatim 1\"],\"sentiment\":\"positif|"
+                        "négatif|neutre|mixte\"}]}.\n\n"
+                        f"ENTRETIEN :\n{extrait}"
+                    ),
+                    mode=_M.ANALYSE,
+                    forcer_modele=_MP.CLAUDE_SONNET,
+                    json_attendu=True,
+                    max_tokens_override=2000,
+                )
+                raw_p = (getattr(rep_p, "contenu", "") or "")
+                _d = raw_p.find("{"); _f = raw_p.rfind("}") + 1
+                dp = json.loads(raw_p[_d:_f]) if _d >= 0 else {}
+                themes_partiels.extend(dp.get("themes", []))
+            except Exception as e:
+                logger.warning(f"[Map-reduce] entretien {t.locuteur} échec : {e}")
+
+        # Le corpus pour Opus devient un agrégat des thèmes partiels (~80%
+        # de réduction tout en gardant l'info dense). Plus de troncature.
+        corpus = "PRÉ-ANALYSES PAR ENTRETIEN :\n" + json.dumps(
+            themes_partiels, ensure_ascii=False, indent=2,
+        )[:CORPUS_LIMIT]
+        avertissement_troncature = (
+            f"⚠ Corpus > {CORPUS_LIMIT} chars : map-reduce appliqué "
+            f"({n_transcriptions} pré-analyses Sonnet → synthèse Opus)."
+        )
+        logger.info(f"[Analyse] {avertissement_troncature}")
+
     prompt = f"""Tu es un expert senior en analyse qualitative francophone, spécialisé en méthode {etude.methodologie} et adaptable à tout domaine (santé publique, marketing, évaluation de programmes, sciences sociales, gestion de projets).
 
 CONTEXTE DE L'ÉTUDE :
@@ -242,6 +339,10 @@ Extrait des citations TEXTUELLES du corpus. Sois rigoureux, précis, analytique.
         analyse = json.loads(raw[debut:fin])
     except Exception:
         analyse = {"synthese_analytique": raw, "themes_principaux": []}
+
+    # Tracer le map-reduce sur l'analyse pour transparence user
+    if avertissement_troncature:
+        analyse["avertissement_corpus"] = avertissement_troncature
 
     # Reconstruire les objets ThemeQualitatif
     etude.themes = [
@@ -860,33 +961,7 @@ def creer_formulaire(
     if not etude:
         raise ValueError(f"Étude {etude_id} introuvable")
 
-    questions_obj = []
-    for i, q in enumerate(questions):
-        section_id = q.get("section_id", "")
-        if not section_id:
-            raw = q.get("section", "") or q.get("section_label", "")
-            if raw:
-                section_id = re.sub(r"[^a-z0-9_]", "_", raw.lower().strip())[:30].strip("_") or f"s{i}"
-
-        questions_obj.append(QuestionFormulaire(
-            libelle=q.get("libelle", ""),
-            type_question=q.get("type_question", "text"),
-            options=q.get("options", []),
-            obligatoire=q.get("obligatoire", True),
-            ordre=q.get("ordre", i),
-            hint=q.get("hint", ""),
-            section_id=section_id,
-            section_label=q.get("section_label", q.get("section", "")),
-            relevant=q.get("relevant", ""),
-            constraint=q.get("constraint", ""),
-            constraint_message=q.get("constraint_message", ""),
-            appearance=q.get("appearance", ""),
-            parameters=q.get("parameters", ""),
-            is_repeat_group=q.get("is_repeat_group", False),
-            repeat_count=q.get("repeat_count", ""),
-            calculation=q.get("calculation", ""),
-            name_xlsform=q.get("name", "") or q.get("name_xlsform", ""),
-        ))
+    questions_obj = [_question_dict_to_obj(q, i) for i, q in enumerate(questions)]
 
     form = Formulaire(
         titre=titre,
@@ -899,6 +974,88 @@ def creer_formulaire(
     if etude.mode == "qualitatif":
         etude.mode = "mixte"
     return form
+
+
+# Mapping types XLSForm (LLM E1) → types internes QuestionFormulaire
+_XLSFORM_TO_INTERNE: dict[str, str] = {
+    "select_one":      "select_one",
+    "select_multiple": "select_multiple",
+    "integer":         "number",
+    "decimal":         "number",
+    "text":            "text",
+    "note":            "note",
+    "date":            "date",
+    "time":            "text",
+    "dateTime":        "date",
+    "geopoint":        "geopoint",
+    "image":           "image",
+    "audio":           "text",
+    "barcode":         "text",
+    "calculate":       "calculate",
+    "range":           "rating",
+}
+
+
+def _question_dict_to_obj(q: dict, i: int) -> QuestionFormulaire:
+    """Convertit un dict question en QuestionFormulaire, en acceptant à la
+    fois le schéma legacy `{libelle, type_question, options, obligatoire,
+    name_xlsform}` et le schéma LLM E1 `{id, label, type, required, choices,
+    section, hint, relevant, constraint}`.
+
+    `choices` (E1) peut être une liste de dicts `{value, label}` ou de strings.
+    """
+    libelle = q.get("libelle") or q.get("label") or ""
+    type_brut = q.get("type_question") or q.get("type") or "text"
+    type_question = _XLSFORM_TO_INTERNE.get(type_brut, type_brut)
+
+    opts_brutes = q.get("options")
+    if opts_brutes is None:
+        opts_brutes = q.get("choices") or []
+    options: list[str] = []
+    choices_meta: list[dict] = []
+    for c in opts_brutes:
+        if isinstance(c, dict):
+            label = str(c.get("label") or c.get("value") or "")
+            value = str(c.get("value") or label)
+            options.append(label)
+            choices_meta.append({"value": value, "label": label})
+        else:
+            s = str(c)
+            options.append(s)
+            choices_meta.append({"value": s, "label": s})
+
+    obligatoire = q.get("obligatoire")
+    if obligatoire is None:
+        obligatoire = q.get("required", True)
+
+    section_id = q.get("section_id", "")
+    if not section_id:
+        raw = q.get("section", "") or q.get("section_label", "")
+        if raw:
+            section_id = re.sub(r"[^a-z0-9_]", "_", raw.lower().strip())[:30].strip("_") or f"s{i}"
+
+    name = q.get("name_xlsform") or q.get("name") or q.get("id") or ""
+
+    return QuestionFormulaire(
+        libelle=libelle,
+        type_question=type_question,
+        options=options,
+        obligatoire=bool(obligatoire),
+        ordre=q.get("ordre", i),
+        hint=q.get("hint", ""),
+        section_id=section_id,
+        section_label=q.get("section_label", q.get("section", "")),
+        relevant=q.get("relevant", ""),
+        constraint=q.get("constraint", ""),
+        constraint_message=q.get("constraint_message", ""),
+        appearance=q.get("appearance", ""),
+        parameters=q.get("parameters", ""),
+        is_repeat_group=q.get("is_repeat_group", False),
+        repeat_count=q.get("repeat_count", ""),
+        calculation=q.get("calculation", ""),
+        name_xlsform=name,
+        choices_meta=choices_meta,
+    )
 
 
 def mettre_a_jour_formulaire(
@@ -925,30 +1082,7 @@ def mettre_a_jour_formulaire(
         form.actif = actif
 
     if questions is not None:
-        questions_obj = []
-        for i, q in enumerate(questions):
-            section_id = q.get("section_id", "")
-            if not section_id:
-                raw = q.get("section", "") or q.get("section_label", "")
-                if raw:
-                    section_id = re.sub(r"[^a-z0-9_]", "_", raw.lower().strip())[:30].strip("_") or f"s{i}"
-            questions_obj.append(QuestionFormulaire(
-                libelle=q.get("libelle", ""),
-                type_question=q.get("type_question", "text"),
-                options=q.get("options", []),
-                obligatoire=q.get("obligatoire", True),
-                ordre=q.get("ordre", i),
-                hint=q.get("hint", ""),
-                section_id=section_id,
-                section_label=q.get("section_label", q.get("section", "")),
-                relevant=q.get("relevant", ""),
-                constraint=q.get("constraint", ""),
-                constraint_message=q.get("constraint_message", ""),
-                appearance=q.get("appearance", ""),
-                parameters=q.get("parameters", ""),
-                name_xlsform=q.get("name_xlsform", "") or q.get("name", ""),
-            ))
-        form.questions = questions_obj
+        form.questions = [_question_dict_to_obj(q, i) for i, q in enumerate(questions)]
 
     etude.updated_at = datetime.now(timezone.utc).isoformat()
     return form
@@ -964,6 +1098,63 @@ def soumettre_reponse(formulaire_id: str, reponses: dict) -> bool:
     reponses["_soumis_le"] = datetime.now(timezone.utc).isoformat()
     etude.formulaire.reponses.append(reponses)
     return True
+
+
+def dupliquer_etude(etude_id_source: str, nouveau_titre: Optional[str] = None) -> Optional["Etude"]:
+    """Duplique une étude (vague 2 d'un NPS, audit annuel répété, etc.).
+
+    Copie : titre, contexte, méthodologie, population, terrain, mode, le
+    formulaire complet (questions, sections, dictionnaire variables, plan
+    d'analyse). Reset : reponses, transcriptions, analyses, rapport.
+    Nouveaux IDs : etude_id et formulaire_id.
+    """
+    src = _etudes.get(etude_id_source)
+    if not src:
+        return None
+
+    clone = Etude(
+        titre=(nouveau_titre or f"{src.titre} — copie")[:120],
+        contexte=src.contexte,
+        questions_recherche=list(src.questions_recherche),
+        methodologie=src.methodologie,
+        population_cible=src.population_cible,
+        terrain=src.terrain,
+        mode=src.mode,
+        analyses_suggerees=list(src.analyses_suggerees),
+    )
+
+    if src.formulaire:
+        # Recopier les questions sans muter la source — passer par dicts
+        # pour que `_question_dict_to_obj` régénère des UUID question_id
+        # uniques (sinon collision PWA / analyse pandas).
+        questions_dicts = []
+        for q in src.formulaire.questions:
+            questions_dicts.append({
+                "libelle": q.libelle, "type_question": q.type_question,
+                "options": list(q.options),
+                "choices_meta": [dict(c) for c in q.choices_meta],
+                "obligatoire": q.obligatoire, "ordre": q.ordre, "hint": q.hint,
+                "section_id": q.section_id, "section_label": q.section_label,
+                "relevant": q.relevant, "constraint": q.constraint,
+                "constraint_message": q.constraint_message,
+                "appearance": q.appearance, "parameters": q.parameters,
+                "is_repeat_group": q.is_repeat_group, "repeat_count": q.repeat_count,
+                "calculation": q.calculation, "name_xlsform": q.name_xlsform,
+            })
+        new_form = Formulaire(
+            titre=src.formulaire.titre,
+            description=src.formulaire.description,
+            questions=[_question_dict_to_obj(d, i) for i, d in enumerate(questions_dicts)],
+            sections=[dict(s) for s in (src.formulaire.sections or [])],
+            metadata_auto=src.formulaire.metadata_auto,
+            dictionnaire_variables=dict(src.formulaire.dictionnaire_variables),
+            plan_analyse=src.formulaire.plan_analyse,
+        )
+        clone.formulaire = new_form
+        _formulaires_publics[new_form.formulaire_id] = clone.etude_id
+
+    _etudes[clone.etude_id] = clone
+    return clone
 
 
 def lister_etudes() -> list[dict]:
@@ -1117,26 +1308,35 @@ def generer_xlsform_bytes(etude_id: str) -> bytes:
         params    = q.parameters or ""
         appear    = q.appearance or ""
 
+        # Priorise choices_meta (mapping value↔label fidèle au LLM E1) sinon
+        # fallback sur options + slug du label.
+        def _pairs():
+            if q.choices_meta:
+                return [(_to_slug(c.get("value") or c.get("label", "")),
+                         c.get("label", c.get("value", "")))
+                        for c in q.choices_meta]
+            return [(_to_slug(opt), opt) for opt in q.options]
+
         if q.type_question == "select_one":
             xlstype = f"select_one {list_name}"
             if not appear:
                 appear = "horizontal" if len(q.options) <= 4 else "minimal"
-            for opt in q.options:
-                choices_rows.append((list_name, _to_slug(opt), opt))
+            for val, lbl in _pairs():
+                choices_rows.append((list_name, val, lbl))
 
         elif q.type_question == "likert":
             xlstype = f"select_one {list_name}"
             if not appear:
                 appear = "likert"
-            for opt in q.options:
-                choices_rows.append((list_name, _to_slug(opt), opt))
+            for val, lbl in _pairs():
+                choices_rows.append((list_name, val, lbl))
 
         elif q.type_question == "select_multiple":
             xlstype = f"select_multiple {list_name}"
             if not appear:
                 appear = "horizontal" if len(q.options) <= 4 else "minimal"
-            for opt in q.options:
-                choices_rows.append((list_name, _to_slug(opt), opt))
+            for val, lbl in _pairs():
+                choices_rows.append((list_name, val, lbl))
 
         elif q.type_question == "oui_non":
             xlstype = "select_one oui_non"

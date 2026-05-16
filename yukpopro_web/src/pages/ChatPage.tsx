@@ -101,6 +101,45 @@ export const ChatPage = () => {
     inputRef.current?.focus();
   }, [activeSessionId]);
 
+  // Helper transversal : réécrit les URLs auth-protégées Yukpo dans un
+  // texte markdown (réponse chat) pour suffixer ?token=JWT. Sans ça, les
+  // liens [Télécharger](https://yukpopro-backend.fly.dev/api/v1/pro/
+  // generateurs/fichier/xxx.docx) sont GET par le browser SANS header
+  // Authorization → 401. Le backend get_current_user accepte ?token= en
+  // query (priorité 3 SSE-compat).
+  const _rewriteDocumentLinks = useCallback((text: string): string => {
+    if (!text) return text;
+    const tok = localStorage.getItem("yukpopro_token") || "";
+    if (!tok) return text;
+    // Match URLs auth-protégées dans le markdown : couvre relatives ET absolues
+    return text.replace(
+      /(https?:\/\/[^\s)]+)?(\/api\/v1\/(?:bureau\/documents|pro\/generateurs\/fichier|bureau\/video\/fichier)\/[^\s)]+)/g,
+      (full) => {
+        if (full.includes("token=")) return full;
+        return full + (full.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
+      },
+    );
+  }, []);
+
+  // Pre-warm backend Fly (scale-to-zero) — un GET /health/live silencieux au
+  // mount + à chaque retour de focus onglet réveille la machine en parallèle
+  // de la composition utilisateur, évitant un 504 sur la 1ʳᵉ requête lourde
+  // (sites/generer, freeform, vidéo) après une pause >5min.
+  // /health/live est root-level (pas sous /api/v1) et touche aucun store →
+  // réveille la machine en ~5-10s sans charger DB/Redis.
+  useEffect(() => {
+    const base = (http as any).defaults?.baseURL || "";
+    const wakeUrl = base.replace(/\/api\/v\d+\/?$/, "") + "/health/live";
+    const wake = () => {
+      try { fetch(wakeUrl, { method: "GET", mode: "cors" }).catch(() => {}); }
+      catch { /* noop */ }
+    };
+    wake();
+    const onFocus = () => wake();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
+
   // BATCH-4 — Flush queue dès que isLoading repasse à false et qu'il y a
   // des items en attente. Déclenche sendMessage avec le 1er item de la file.
   useEffect(() => {
@@ -213,8 +252,20 @@ export const ChatPage = () => {
         // directement sur les regex (latence prime). Pas de blocage.
         let llmIntent: { intent: string; confidence: number } | null = null;
         try {
+          // On passe le contexte session (dernier livrable généré) pour que
+          // le LLM puisse arbitrer correctement qa_simple vs modification :
+          // une même question peut être pure curiosité OU vouloir enrichir
+          // le doc existant — seul le LLM peut trancher sémantiquement.
+          const _docsList = useDocsStore.getState().documents;
+          const _dernierDoc = _docsList && _docsList.length > 0
+            ? _docsList[0] : null;
           const llmCall = http.post("/chat/classify-intent",
-            { brief: content, has_files: false },
+            {
+              brief: content,
+              has_files: files.length > 0,
+              dernier_doc_titre: _dernierDoc?.titre || null,
+              dernier_doc_type:  _dernierDoc?.type  || null,
+            },
             { timeout: 5_000 },
           );
           // race avec timeout 4s — on ne laisse pas le classifier ralentir
@@ -224,6 +275,36 @@ export const ChatPage = () => {
             llmIntent = { intent: res.data.intent, confidence: res.data.confidence };
           }
         } catch { /* fallback silencieux sur regex */ }
+
+        // 🔴 SHORT-CIRCUIT qa_simple — décision 100% sémantique côté LLM :
+        // si le classifier a tranché qa_simple, on bascule direct sur
+        // chatApi.send sans passer par les détecteurs de modification/
+        // site/visuel/etc. Le LLM (cf. /chat/classify-intent) a accès au
+        // contexte session ET sait distinguer une vraie question
+        // ("pourquoi Taiwan est important ?") d'une modif formulée en
+        // question ("tu peux ajouter une section sur Taiwan ?"). On lui
+        // fait confiance — pas de regex sur la forme interrogative.
+        if (llmIntent?.intent === "qa_simple") {
+          try {
+            updateLastAssistantMessage("💬 …", null);
+            const res = await chatApi.send({
+              message: content.trim(),
+              pays: profil?.pays,
+              fichiers: files.map(f => ({ nom: f.name, contenu: f.content || "", type: f.type })),
+              skip_orchestration: true,
+            });
+            updateLastAssistantMessage(
+              _rewriteDocumentLinks(res.reponse), res.agent_utilise ?? null,
+              res.fichiers_generes ?? undefined,
+              res.cout_llm ?? null,
+              res.navigation_suggestions ?? [],
+            );
+          } catch (err: any) {
+            const msg = err?.response?.data?.detail || t("chat.connectionError");
+            updateLastAssistantMessage(`⚠️ ${typeof msg === "string" ? msg : "Erreur"}`, null);
+          }
+          return;
+        }
 
         // ─── Détection PRIORITAIRE site web multi-pages ──────────────────
         // Placée TOUT EN HAUT pour éviter que "génère un visuel pour mon
@@ -247,10 +328,13 @@ export const ChatPage = () => {
           /\b(une\s*seule\s*page|une\s*page|one[-\s]?pager|landing\s*page)\b/i.test(txt)
           && !/\bmulti[-\s]?pages?|\d+\s*pages?\b/i.test(txt);
 
-        // LLM sémantique gagne SAUF si regex exclut explicitement
-        const wantsSite = (
-          (siteWebMatchPrioritaire && !exclureSite)
-          || (llmIntent?.intent === "site_multipage" && !exclureSite)
+        // LLM Sonnet décide en PRIMAIRE (sémantique forte), regex en fallback
+        // uniquement si LLM indispo/timeout (>4s). Garde-fou exclureSite
+        // s'applique aux 2 (évite "une seule page / one-pager / landing").
+        const wantsSite = !exclureSite && (
+          llmIntent
+            ? llmIntent.intent === "site_multipage"
+            : siteWebMatchPrioritaire
         );
         if (wantsSite) {
           try {
@@ -262,11 +346,37 @@ export const ChatPage = () => {
               brief: content, langue: "fr", generer_images: true,
             });
             updateLastAssistantMessage(
-              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n` +
-              `[🚀 Publier en ligne](/mes-sites) puis cliquer "Publier" — déploiement Netlify → \`${result.slug}.yukpomnang.com\``,
+              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n🌍 Publication Netlify en cours…`,
               null,
             );
-            toast.success("Site multi-pages prêt — à publier !");
+            // Auto-publication — l'utilisateur a demandé "génère un site web",
+            // pas "génère un brouillon". On enchaîne le deploy Netlify pour
+            // qu'il obtienne une URL live immédiatement.
+            try {
+              const pub = await generateurApi.publierSite(result.slug, "free", true);
+              const customUrl = (pub.url_public || `https://${result.slug}.yukpomnang.com`).replace(/^http:/, "https:");
+              const fallbackUrl = pub.fallback_netlify_url || null;
+              let msg = `✓ Site **${result.nom}** publié (${result.nb_pages} pages).\n\n`;
+              // URL .netlify.app fonctionne immédiatement (SSL Netlify natif).
+              // Custom domain *.yukpomnang.com a un délai de 5-15 min pour
+              // provisionner son cert Let's Encrypt → afficher les deux.
+              if (fallbackUrl && pub.is_new_netlify_site) {
+                msg += `🌐 **URL accessible maintenant** : [${fallbackUrl}](${fallbackUrl})\n\n`;
+                msg += `🔗 **URL personnalisée** (active dans ~5-15 min, le temps du certificat SSL) : ${customUrl}`;
+              } else {
+                msg += `🌐 [Ouvrir le site](${customUrl})`;
+              }
+              updateLastAssistantMessage(msg, null);
+              toast.success("Site publié !");
+            } catch (pubErr: any) {
+              const d = pubErr?.response?.data?.detail || pubErr?.message || "inconnue";
+              updateLastAssistantMessage(
+                `✓ Site **${result.nom}** généré (${result.nb_pages} pages).\n\n` +
+                `⚠ Publication automatique échouée : ${String(d).slice(0, 200)}\n\n` +
+                `[🚀 Publier manuellement](/mes-sites)`,
+                null,
+              );
+            }
             return;
           } catch (e: any) {
             const detail = e?.response?.data?.detail || e?.message || "inconnue";
@@ -380,6 +490,110 @@ export const ChatPage = () => {
         //              "insta feed/carré/1:1" → 1:1, "4:3" → 4:3, sinon 16:9
         //   • mode : "ultra/cinéma/broadcast/sora/haute qualité" → ultra,
         //            "rapide/eco/pas cher/ltx" → standard, sinon premium
+        // ── Modification vidéo précédente — passe AVANT generation vidéo ──
+        // Si la session contient un dernier doc vidéo et que l'user demande
+        // une modif (audio, segment, trim, regen), on route vers
+        // /bureau/video/modifier (in_place=true → écrase l'original, pas
+        // de brouillons multiples dans /mes-documents).
+        const _docsList2 = useDocsStore.getState().documents;
+        const _dernierVideo = (_docsList2 || []).find(d =>
+          (d.type === "video" || d.type === "visuel")
+          && /\.(mp4|webm|mov)$/i.test(d.fichier || "")
+        );
+        // LLM Sonnet décide en PRIMAIRE — il sait que "refais la vidéo"
+        // = modification. Regex utilisée UNIQUEMENT si LLM indispo/timeout.
+        // Le filtre objet (/vid[ée]o|son|audio|voix/) garde la discrimination
+        // entre modification vidéo vs modification site/visuel.
+        const veutModifVideo = !!_dernierVideo && (
+          llmIntent
+            ? (llmIntent.intent === "modification" && /vid[ée]o|son|audio|voix/i.test(txt))
+            : (/\b(refais|refait|change|remplace|modifie|coupe|trim|raccourci|enl[èe]ve|supprime|ajoute|met)\b[^.]*\b(la\s*)?(vid[ée]o|audio|son|voix(?:[- ]?off)?|narration|extrait|segment|portion|partie|d[ée]but|fin)\b/i.test(txt)
+               || /\b(voix\s*(?:plus|homme|femme|grave|aigu[eë]|f[ée]minine|masculine)|narrateur|narratrice)\b/i.test(txt))
+        );
+        if (veutModifVideo && _dernierVideo) {
+          try {
+            // Analyse rapide du brief pour décider de l'action (LLM-first
+            // possible mais ici signal sémantique fort → décision claire).
+            const wantsAudioOnly = /\b(voix|audio|son|narration|narrateur|narratrice|voix[- ]?off)\b/i.test(txt)
+                                && !/\b(vid[ée]o|image|s[ée]quence)\b/i.test(txt);
+            const wantsVideoOnly = /\b(refais\s*la\s*vid[ée]o|regen[ée]re\s*la\s*vid[ée]o|change\s*la\s*vid[ée]o|nouvelle\s*vid[ée]o|autre\s*angle)\b/i.test(txt)
+                                && !/\b(audio|son|voix)\b/i.test(txt);
+            const wantsTrim = /\b(coupe|trim|raccourci|garde\s*seulement|les\s*\d+\s*premi[èe]res?)\b/i.test(txt);
+            const wantsEffaceAudio = /\b(enl[èe]ve|supprime|retire|coupe)\s*(le\s*)?(son|audio|voix)\b|\bsans\s*(son|audio|voix)\b|\bmuet\b/i.test(txt);
+
+            let actionVideo: "replacer_audio" | "regenerer_video" | "regenerer_avec_audio" | "trim" | "effacer_audio";
+            if (wantsEffaceAudio) actionVideo = "effacer_audio";
+            else if (wantsTrim) actionVideo = "trim";
+            else if (wantsVideoOnly) actionVideo = "regenerer_video";
+            else if (wantsAudioOnly) actionVideo = "replacer_audio";
+            else actionVideo = "regenerer_avec_audio";
+
+            const voixMod: "male" | "female" | undefined =
+              /\bvoix\s*(?:d['e]?)?\s*homme|man['s']*\s*voice|male\s*voice|narrateur\s*homme|voix\s*masculine/i.test(txt) ? "male"
+              : /\bvoix\s*(?:d['e]?\s*)?femme|woman['s']*\s*voice|female\s*voice|narratrice|voix\s*f[ée]minine/i.test(txt) ? "female"
+              : undefined;
+
+            // Extraction intervalle "de Xs à Ys" / "entre X et Y"
+            let tDeb: number | undefined, tFin: number | undefined;
+            const mInt = txt.match(/\b(?:de|entre|à\s*partir\s*de)\s*(\d+)\s*(?:s|sec(?:ondes?)?)?\s*(?:à|jusqu['e]?\s*à|et)\s*(\d+)\s*s?/i);
+            if (mInt) {
+              tDeb = parseFloat(mInt[1]); tFin = parseFloat(mInt[2]);
+            } else {
+              const mGarde = txt.match(/\b(?:garde|coupe\s*à|trim\s*à)\s*(\d+)\s*s/i);
+              if (mGarde) { tDeb = 0; tFin = parseFloat(mGarde[1]); }
+            }
+
+            updateLastAssistantMessage(
+              `🎬 Modification vidéo en cours (${actionVideo}${voixMod ? ", voix " + voixMod : ""}` +
+              (tDeb !== undefined && tFin !== undefined ? `, [${tDeb}s→${tFin}s]` : "") +
+              `)…\n_La même vidéo sera mise à jour (pas de nouveau brouillon)._`,
+              null,
+            );
+
+            const tok = localStorage.getItem("yukpopro_token") || "";
+            const { data: modifResult } = await http.post(
+              "/bureau/video/modifier",
+              {
+                fichier_id: _dernierVideo.fichier,
+                action: actionVideo,
+                prompt: content,
+                voix: voixMod,
+                t_debut: tDeb,
+                t_fin: tFin,
+                in_place: true,
+              },
+              { timeout: 600_000 },
+            );
+            const fidMod = modifResult.fichier_id;
+            const baseUrl = modifResult.url_telechargement;
+            // ?v=ts pour bust le cache navigateur (même fichier_id mais nouveau contenu)
+            const cacheBust = `&v=${Date.now()}`;
+            const urlMod = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok) + cacheBust;
+            updateLastAssistantMessage(
+              `✓ Vidéo mise à jour (${actionVideo}${modifResult.audio_meta?.voix ? `, voix ${modifResult.audio_meta.voix}` : ""}, ${modifResult.size_kb} KB) — ${_dernierVideo.fichier}\n` +
+              `[▶ Lire / Télécharger MP4](${urlMod})`,
+              null,
+              fidMod ? [fidMod] : undefined,
+            );
+            // Met à jour le doc existant côté store (pas de nouveau brouillon)
+            try {
+              const { useDocsStore: _useDocs } = await import("@/store");
+              const _d = _useDocs.getState().documents.find(x => x.fichier === _dernierVideo.fichier);
+              if (_d) {
+                _useDocs.getState().updateDocument(_d.id, {
+                  titre: (_dernierVideo.titre || "Vidéo") + " (modifiée)",
+                });
+              }
+            } catch { /* non bloquant */ }
+            toast.success("Vidéo modifiée");
+            return;
+          } catch (eMod: any) {
+            const det = eMod?.response?.data?.detail || eMod?.message || "inconnue";
+            updateLastAssistantMessage(`❌ Modification vidéo échouée : ${String(det).slice(0, 200)}`, null);
+            return;
+          }
+        }
+
         const videoMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|veux)[^.]*\bvid[ée]o\b|\bvid[ée]o\s+(promo|tv|pub|reels?|teaser)|\bteaser\b|\breel\b|short\s*video|clip\s*vid[ée]o|spot\s*(pub|tv|publicitaire)|motion\s*ad/i.test(txt);
         if (videoMatch) {
           try {
@@ -420,28 +634,44 @@ export const ChatPage = () => {
               /ultra|cin[ée]ma|broadcast|sora|sota|haute\s*qualit[ée]|tv\s*pro|professionnel|qualit[ée]\s*max/.test(txt) ? "ultra"
               : /rapide|standard|\b(eco|pas\s*cher|low[-\s]?cost)\b|ltx/.test(txt) ? "standard"
               : "premium";
+            // Voix-off : détection "avec son / avec voix / avec audio /
+            // narration / voix-off / sans son". Et homme/femme si précisé.
+            const avecSon = /\b(avec\s*(?:du\s*)?(?:son|audio|voix)|\bvoix[- ]?off\b|narration|with\s*(?:audio|sound|voice)|sonoris[ée]e?|narr[ée]e?)\b/i.test(txt)
+              && !/\bsans\s*(?:son|audio|voix)\b|silencieux|silent|muet/i.test(txt);
+            const voix: "male" | "female" | undefined =
+              /\bvoix\s*(?:d['e]?)?\s*homme|man['s']*\s*voice|male\s*voice|narrateur\s*homme/i.test(txt) ? "male"
+              : /\bvoix\s*(?:d['e]?\s*)?femme|woman['s']*\s*voice|female\s*voice|narratrice|voix\s*f[ée]minine/i.test(txt) ? "female"
+              : undefined;
             const coutXAF = ({ standard: 60, premium: 240, ultra: 600 } as const)[mode] * Math.ceil(duree_s / 5);
+            const coutAudio = avecSon ? Math.max(5, Math.round(duree_s * 0.7)) : 0;
             const nbClips = Math.ceil(duree_s / 10);
-            // Latence : 1 clip = latence solo ; N clips parallèles ≈ latence solo
-            // (gather asyncio) + ~10s FFmpeg concat
             const solo = mode === "standard" ? 15 : mode === "premium" ? 60 : 180;
             const latStr = nbClips === 1 ? `~${solo}s` : `~${Math.round(solo / 60)}-${Math.round(solo / 60) + 1} min`;
             updateLastAssistantMessage(
-              `🎥 Génération vidéo en cours (${duree_s}s · ${aspect_ratio} · ${mode}, ~${coutXAF} XAF)…\n` +
+              `🎥 Génération vidéo en cours (${duree_s}s · ${aspect_ratio} · ${mode}` +
+              (avecSon ? ` + 🎙️ voix-off${voix ? " " + voix : " auto"}` : "") +
+              `, ~${coutXAF + coutAudio} XAF)…\n` +
               (nbClips > 1
-                ? `_${nbClips} clips × 10s générés en parallèle puis stitchés FFmpeg crossfade. Latence ${latStr}._`
-                : `_Latence estimée : ${latStr}._`),
+                ? `_${nbClips} clips × 10s générés en parallèle puis stitchés FFmpeg crossfade. Latence ${latStr}` +
+                  (avecSon ? " + ~3s TTS ElevenLabs." : ".") +
+                  `_`
+                : `_Latence estimée : ${latStr}` + (avecSon ? " + ~3s TTS." : ".") + `_`),
               null,
             );
             const result = await generateurApi.video({
               prompt: content, duree_s, mode, aspect_ratio,
+              avec_son: avecSon, voix,
             });
             const fid = result.fichier_id;
             const tok = localStorage.getItem("yukpopro_token") || "";
             const baseUrl = result.url_telechargement;
             const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
+            const audioOk = !!(result.avec_son && result.audio_meta?.tts_ok && result.audio_meta?.mux_ok);
+            const audioLabel = audioOk
+              ? ` 🎙️ ${result.audio_meta?.voix || "auto"} (${result.audio_meta?.langue || "fr"})`
+              : (avecSon ? " ⚠️ audio non disponible (TTS indispo)" : "");
             updateLastAssistantMessage(
-              `✓ Vidéo ${duree_s}s ${aspect_ratio} (${mode}, ${result.size_kb} KB) — ${result.cout_fcfa} XAF\n` +
+              `✓ Vidéo ${duree_s}s ${aspect_ratio} (${mode}${audioLabel}, ${result.size_kb} KB) — ${result.cout_fcfa} XAF\n` +
               `[▶ Lire / Télécharger MP4](${url})`,
               null,
               fid ? [fid] : undefined,
@@ -449,7 +679,10 @@ export const ChatPage = () => {
             if (fid) {
               addDocument({
                 titre: content.slice(0, 80),
-                type: "visuel",
+                // Type "video" dédié → onglet filtre "Vidéos" dans
+                // /mes-documents. Différencié de "visuel" (cartes,
+                // flyers, livrets PDF) pour faciliter la recherche.
+                type: "video",
                 fichier: fid,
                 contexteConversation: content,
               });
@@ -500,25 +733,65 @@ export const ChatPage = () => {
         }
 
         // Phase D — détection intent boutique e-commerce AVANT site multi-pages
+        // LLM Sonnet décide en PRIMAIRE ; regex en fallback uniquement si LLM
+        // indispo (sémantique forte > liste de mots-clés).
         const boutiqueMatch = /\b(g[ée]n[èe]re|cr[ée]e|fais|monte|ouvre|d[ée]marre)[^.]*\b(boutique|shop|magasin|e-?commerce|vendre\s+en\s+ligne)\b|\b(boutique\s+en\s+ligne|magasin\s+en\s+ligne|yukpo\s*shop)\b|\bimport\s+(?:ia|magique)\s+(?:de\s+)?(?:produits?|articles?)\b/i.test(txt);
-        if (boutiqueMatch || llmIntent?.intent === "boutique_ecommerce") {
-          updateLastAssistantMessage(
-            `🛒 **Boutique e-commerce YukpoShop**\n\n` +
-            `Pour démarrer :\n` +
-            `1. [Ouvrir ma boutique](/ma-boutique) — initialise + dashboard produits/commandes\n` +
-            `2. Upload 1-10 photos → Magic Import Yukpo Vision compose la fiche produit complète (titre/desc/prix/catégorie/tags/variantes)\n` +
-            `3. Publier → storefront déployé sur \`<slug>.yukpomnang.com\` avec catalogue + page produit + panier + checkout multi-provider (Orange Money, MTN MoMo, Stripe, cash)\n\n` +
-            `🎯 [→ Aller à ma boutique](/ma-boutique)`,
-            null,
-          );
+        const wantsBoutique = llmIntent
+          ? llmIntent.intent === "boutique_ecommerce"
+          : boutiqueMatch;
+        if (wantsBoutique) {
+          // Pré-suggestion LLM (~1s Haiku) : nom + description + devise + pays
+          // déduits du brief chat → MaBoutiquePage les lit depuis sessionStorage
+          // et pré-remplit le formulaire d'init. L'user peut tout modifier.
+          updateLastAssistantMessage("🛒 Préparation de ta boutique YukpoShop…", null);
+          try {
+            const sug = await generateurApi.shopSuggererInit(content);
+            sessionStorage.setItem("yukposhop_init_suggestions", JSON.stringify({
+              ...sug, brief_origine: content, expires_at: Date.now() + 30 * 60_000,
+            }));
+            updateLastAssistantMessage(
+              `🛒 **Boutique e-commerce YukpoShop**\n\n` +
+              `J'ai pré-rempli le formulaire d'ouverture avec ces suggestions (modifiable) :\n` +
+              `• **Nom** : ${sug.nom}\n` +
+              `• **Description** : ${sug.description}\n` +
+              `• **Devise** : ${sug.devise} · **Pays** : ${sug.pays_principal}\n\n` +
+              `Vérifie / ajuste puis confirme la création :\n` +
+              `🎯 [→ Ouvrir ma boutique](/ma-boutique)\n\n` +
+              `_Tu pourras ensuite ajouter des produits via **Magic Import IA** (1-10 photos → fiche produit complète auto)._`,
+              null,
+            );
+          } catch {
+            // Fallback silencieux si LLM indispo : ancien message statique
+            updateLastAssistantMessage(
+              `🛒 **Boutique e-commerce YukpoShop**\n\n` +
+              `Pour démarrer :\n` +
+              `1. [Ouvrir ma boutique](/ma-boutique) — initialise + dashboard\n` +
+              `2. Upload 1-10 photos → Magic Import Yukpo Vision compose la fiche produit complète\n` +
+              `3. Publier → storefront sur \`<slug>.yukpomnang.com\`\n\n` +
+              `🎯 [→ Aller à ma boutique](/ma-boutique)`,
+              null,
+            );
+          }
           return;
         }
 
         // Phase E1 — détection génération de formulaire/enquête AVANT site multi-pages
         // (un brief "génère un questionnaire/sondage/formulaire" ne doit pas
         // capter dans site_multi).
-        const enqueteMatch = /(g[ée]n[èe]re|cr[ée]e|fais|produis|monte)[^.]*\b(formulaire|questionnaire|sondage|enqu[êe]te|étude|sondage|kobo|xlsform|collecte\s*de\s*donn[ée]es)\b|\b(formulaire|questionnaire|sondage|enqu[êe]te)\s*(de\s*)?(satisfaction|client|audit|conformit[ée]|terrain|sant[ée]|march[ée]|opinion)\b/i.test(txt);
-        if (enqueteMatch || llmIntent?.intent === "enquete_formulaire") {
+        // LLM Sonnet décide en PRIMAIRE — il sait que "je souhaite faire une
+        // étude de marché pour mon nouveau produit" = enquete_formulaire,
+        // même avec typos ou formulation non-impérative. Regex en fallback
+        // uniquement si Sonnet timeout/indispo (>4s).
+        // 4 branches OR car \b ne fonctionne pas avant 'é' en JS (boundary ASCII)
+        const enqueteMatch =
+          /(g[ée]n[èe]re|cr[ée]e|fais|produis|monte|lance|m[èe]ne|r[ée]alise|souhaite|veux|aimerais|besoin\s+d['e])[^.]*\b(formulaire|questionnaire|sondage|enqu[êe]te|kobo|xlsform|collecte\s*de\s*donn[ée]es)\b/i.test(txt)
+          || /(g[ée]n[èe]re|cr[ée]e|fais|produis|monte|lance|m[èe]ne|r[ée]alise|souhaite|veux|aimerais|besoin\s+d['e])[^.]*[ée]tude\b/i.test(txt)
+          || /\b(formulaire|questionnaire|sondage|enqu[êe]te)\s*(de\s*)?(satisfaction|client|audit|conformit[ée]|terrain|sant[ée]|march[ée]|opinion|consommateurs?|produit|acceptabilit[ée]|prix|usage)\b/i.test(txt)
+          || /[ée]tude\s+(de\s+|du\s+|sur\s+)?(march[ée]|consommateurs?|produit|acceptabilit[ée]|prix|usage|client[èe]le|cible|opinion|terrain)/i.test(txt);
+        const wantsEnquete = llmIntent
+          ? llmIntent.intent === "enquete_formulaire"
+          : enqueteMatch;
+        if (wantsEnquete) {
           try {
             updateLastAssistantMessage(
               "📋 Génération de votre formulaire / étude en cours… (~20-40s)\n_Yukpo compose 15-40 questions XLSForm + dictionnaire variables._",
@@ -564,11 +837,37 @@ export const ChatPage = () => {
               brief: content, langue: "fr", generer_images: true,
             });
             updateLastAssistantMessage(
-              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n` +
-              `[🚀 Publier en ligne](/mes-sites) puis cliquer "Publier" — déploiement Netlify → \`${result.slug}.yukpomnang.com\``,
+              `✓ Site **${result.nom}** généré (${result.nb_pages} pages : ${result.types_pages.join(", ")}).\n\n🌍 Publication Netlify en cours…`,
               null,
             );
-            toast.success("Site multi-pages prêt — à publier !");
+            // Auto-publication — l'utilisateur a demandé "génère un site web",
+            // pas "génère un brouillon". On enchaîne le deploy Netlify pour
+            // qu'il obtienne une URL live immédiatement.
+            try {
+              const pub = await generateurApi.publierSite(result.slug, "free", true);
+              const customUrl = (pub.url_public || `https://${result.slug}.yukpomnang.com`).replace(/^http:/, "https:");
+              const fallbackUrl = pub.fallback_netlify_url || null;
+              let msg = `✓ Site **${result.nom}** publié (${result.nb_pages} pages).\n\n`;
+              // URL .netlify.app fonctionne immédiatement (SSL Netlify natif).
+              // Custom domain *.yukpomnang.com a un délai de 5-15 min pour
+              // provisionner son cert Let's Encrypt → afficher les deux.
+              if (fallbackUrl && pub.is_new_netlify_site) {
+                msg += `🌐 **URL accessible maintenant** : [${fallbackUrl}](${fallbackUrl})\n\n`;
+                msg += `🔗 **URL personnalisée** (active dans ~5-15 min, le temps du certificat SSL) : ${customUrl}`;
+              } else {
+                msg += `🌐 [Ouvrir le site](${customUrl})`;
+              }
+              updateLastAssistantMessage(msg, null);
+              toast.success("Site publié !");
+            } catch (pubErr: any) {
+              const d = pubErr?.response?.data?.detail || pubErr?.message || "inconnue";
+              updateLastAssistantMessage(
+                `✓ Site **${result.nom}** généré (${result.nb_pages} pages).\n\n` +
+                `⚠ Publication automatique échouée : ${String(d).slice(0, 200)}\n\n` +
+                `[🚀 Publier manuellement](/mes-sites)`,
+                null,
+              );
+            }
             return;
           } catch (e: any) {
             const detail = e?.response?.data?.detail || e?.message || "inconnue";
@@ -765,17 +1064,35 @@ export const ChatPage = () => {
           //    non-audio (audio = déjà transcrit en amont), on reconstruit
           //    la requête en FormData et on injecte le fichier.
           let r: any;
-          if (plan?.needs_file_upload === true && files.length > 0) {
-            const fd = new FormData();
-            const af = files[0];   // l'endpoint cible traite 1 fichier
-            // Reconstituer un Blob à partir du base64 stocké côté frontend
-            if (af.content) {
-              const bytes = atob(af.content.includes(",") ? af.content.split(",")[1] : af.content);
-              const arr = new Uint8Array(bytes.length);
-              for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-              const blob = new Blob([arr], { type: af.type || "application/octet-stream" });
-              fd.append(plan.upload_field_name || "fichier", blob, af.name);
+          if (plan?.needs_file_upload === true) {
+            // L'endpoint exige un fichier joint (OCR, traduction de fichier,
+            // conversion PDF→Word…). Si l'user a oublié de l'attacher OU si
+            // le base64 n'est pas encore prêt, on rejette explicitement
+            // plutôt que d'envoyer un payload malformé → backend 422 +
+            // chat LLM qui hallucine un faux succès.
+            if (files.length === 0) {
+              updateLastAssistantMessage(
+                `📎 **Fichier requis** — pour réaliser cette opération (« ${label} »), ` +
+                `joins ton document via l'icône trombone, puis renvoie ta demande.`,
+                null,
+              );
+              return;
             }
+            const af = files[0];
+            if (!af.content) {
+              updateLastAssistantMessage(
+                `⏳ **Fichier en cours de lecture…** réessaie dans 1 seconde ` +
+                `(le téléchargement local de **${af.name}** n'est pas encore terminé).`,
+                null,
+              );
+              return;
+            }
+            const fd = new FormData();
+            const bytes = atob(af.content.includes(",") ? af.content.split(",")[1] : af.content);
+            const arr = new Uint8Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+            const blob = new Blob([arr], { type: af.type || "application/octet-stream" });
+            fd.append(plan.upload_field_name || "fichier", blob, af.name);
             // Tous les autres champs du payload deviennent des Form fields
             for (const [k, v] of Object.entries(payload || {})) {
               if (v !== undefined && v !== null) fd.append(k, String(v));
@@ -875,13 +1192,28 @@ export const ChatPage = () => {
           // ?token= en query (priorité 3, SSE-compat).
           const _suffixToken = (url: string): string => {
             if (!url) return url;
-            // Ne pas suffixer si déjà présent ou si URL externe (http*://)
-            if (url.includes("token=") || /^https?:\/\//.test(url)) return url; // EXAMPLE param JWT, pas un secret
-            // Suffixer seulement les URLs auth-protégées du backend Yukpo
-            const needsAuth = url.startsWith("/api/v1/bureau/documents/")
-              || url.startsWith("/api/v1/pro/generateurs/fichier/")
-              || url.startsWith("/api/v1/bureau/video/fichier/");
+            if (url.includes("token=")) return url;
+            // Détection : URL contient un chemin auth-protégé Yukpo, qu'elle
+            // soit relative ("/api/v1/...") ou absolue ("https://yukpopro-
+            // backend.fly.dev/api/v1/..."). En prod le frontend appelle
+            // l'absolu (cf. API_BASE_URL=https://...) donc startsWith("/api/v1")
+            // ne match jamais → token jamais ajouté → 401 sur download.
+            // Solution : utiliser .includes() sur les segments du chemin.
+            const needsAuth =
+              url.includes("/api/v1/bureau/documents/")
+              || url.includes("/api/v1/pro/generateurs/fichier/")
+              || url.includes("/api/v1/bureau/video/fichier/");
             if (!needsAuth) return url;
+            // Si URL externe (autre domaine), ne pas exposer le token Yukpo
+            try {
+              if (/^https?:\/\//.test(url)) {
+                const u = new URL(url);
+                if (!u.hostname.endsWith("yukpomnang.com")
+                    && !u.hostname.endsWith("fly.dev")) {
+                  return url;
+                }
+              }
+            } catch { /* URL parsing échoué : on continue */ }
             const tok = localStorage.getItem("yukpopro_token") || "";
             if (!tok) return url;
             return url + (url.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(tok);
@@ -967,13 +1299,38 @@ export const ChatPage = () => {
           }
           return;
         } catch (genErr: any) {
-          // Si l'endpoint cible échoue → fallback chat normal pour ne pas bloquer
+          // ⚠️ NE PAS fallback sur chat conversationnel : le LLM hallucinerait
+          // un faux succès avec un lien de téléchargement bidon (vu en prod :
+          // OCR scanner 400 → chat répond "Conversion effectuée avec succès"
+          // + lien 401). Afficher l'erreur explicite à l'utilisateur.
           // eslint-disable-next-line no-console
-          console.warn("[ChatPage/G1] génération échouée, fallback chat:", genErr);
+          console.warn("[ChatPage/G1] génération échouée:", genErr);
+          const status = genErr?.response?.status;
+          const detail = genErr?.response?.data?.detail
+                       || genErr?.message
+                       || "Erreur inconnue";
+          let msg = `❌ La génération a échoué`;
+          if (status === 400) {
+            msg += ` — requête invalide.\n\n_Détail :_ ${String(detail).slice(0, 200)}\n\n` +
+                   `Vérifie le format du fichier joint ou reformule ton brief.`;
+          } else if (status === 402) {
+            msg = `⚠️ Crédits insuffisants pour cette opération.\n\n[→ Recharger mon compte](/abonnement)`;
+          } else if (status === 503) {
+            msg += ` — service temporairement indisponible.\n\nRéessaie dans 1-2 minutes.`;
+          } else {
+            msg += ` (HTTP ${status || "?"}).\n\n_Détail :_ ${String(detail).slice(0, 200)}`;
+          }
+          updateLastAssistantMessage(msg, null);
+          return;  // pas de fallback — message d'erreur clair affiché
         }
       }
 
       // Cas 3 (par défaut) : conversationnel/ambigu → chatApi.send normal
+      // Optim : si l'orchestrateur (au-dessus) a déjà tranché qa_simple
+      // (route_to_chat=true), on passe skip_orchestration=true pour bypass
+      // le classifier interne du chat (gpt-4o-mini ~1.5-2s). Le LLM principal
+      // est appelé directement → tour de chat -1.5 à -2.5s.
+      const orchSaidQa = orch && (orch as any).route_to_chat === true;
       const res = await chatApi.send({
         message: content.trim(),
         pays: profil?.pays,
@@ -984,10 +1341,11 @@ export const ChatPage = () => {
           type_doc: activeDoc.type_doc,
           contenu_genere: activeDoc.contenu_genere,
         } : undefined,
+        skip_orchestration: orchSaidQa || undefined,
       });
 
       updateLastAssistantMessage(
-        res.reponse,
+        _rewriteDocumentLinks(res.reponse),
         res.agent_utilise ?? null,
         res.fichiers_generes ?? undefined,
         res.cout_llm ?? null,
@@ -2007,7 +2365,41 @@ const MessageBubble = ({
               prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700
               prose-blockquote:border-yukpo-500 prose-blockquote:text-slate-300
               prose-a:text-yukpo-400 prose-li:text-slate-300">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content as string}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Renderer custom pour <a> : injection automatique du JWT
+                  // sur les URLs auth-protégées Yukpo (téléchargements
+                  // DOCX/PDF/MP4 servis par /api/v1/bureau/documents/* et
+                  // /api/v1/pro/generateurs/fichier/*). Robuste aux vieux
+                  // liens générés AVANT le déploiement du token-injection
+                  // côté code : on intercepte au RENDU, pas à la création.
+                  a: ({ href, children, ...rest }) => {
+                    let finalHref = href || "";
+                    try {
+                      if (finalHref && !finalHref.includes("token=")) {
+                        const needsAuth =
+                          finalHref.includes("/api/v1/bureau/documents/")
+                          || finalHref.includes("/api/v1/pro/generateurs/fichier/")
+                          || finalHref.includes("/api/v1/bureau/video/fichier/")
+                          || finalHref.includes("/api/v1/bureau/ocr/fichier/");
+                        if (needsAuth) {
+                          const tok = localStorage.getItem("yukpopro_token") || "";
+                          if (tok) {
+                            finalHref += (finalHref.includes("?") ? "&" : "?")
+                              + "token=" + encodeURIComponent(tok);
+                          }
+                        }
+                      }
+                    } catch { /* fallback : on garde href brut */ }
+                    return (
+                      <a {...rest} href={finalHref} target="_blank" rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    );
+                  },
+                }}
+              >{message.content as string}</ReactMarkdown>
             </div>
             <div className="mt-2 flex justify-end">
               <button
@@ -2098,10 +2490,23 @@ const MessageBubble = ({
                 // du filename (les fichiers Bureau Freeform / Designer Pro / OCR /
                 // Audio / Redaction / Slides Sec sont stockés sous /bureau/documents,
                 // les rapports/slides Pro sous /pro/generateurs/fichier).
+                // CRITIQUE : on suffixe ?token=JWT car un <a href> classique
+                // fait un GET SANS header Authorization → 401. Le backend
+                // get_current_user accepte token= en query (priorité 3 SSE-compat).
+                // En prod, on pointe sur l'URL ABSOLUE backend Fly (les routes
+                // /api/v1/* ne sont pas proxifiées par Netlify, cf. API_BASE_URL).
                 const isBureauFile = /^bureau_/i.test(nomFichier);
-                const downloadUrl = isBureauFile
-                  ? `/api/v1/bureau/documents/${encodeURIComponent(nomFichier)}`
-                  : `/api/v1/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`;
+                const _envBase = (typeof import.meta !== "undefined" &&
+                  (import.meta as any).env?.VITE_API_URL) || null;
+                const _isProd = typeof import.meta !== "undefined" &&
+                  Boolean((import.meta as any).env?.PROD);
+                const _apiBase = _envBase ||
+                  (_isProd ? "https://yukpopro-backend.fly.dev/api/v1" : "/api/v1");
+                const _path = isBureauFile
+                  ? `/bureau/documents/${encodeURIComponent(nomFichier)}`
+                  : `/pro/generateurs/fichier/${encodeURIComponent(nomFichier)}`;
+                const _tok = localStorage.getItem("yukpopro_token") || "";
+                const downloadUrl = _apiBase + _path + (_tok ? `?token=${encodeURIComponent(_tok)}` : "");
                 return (
                   <div
                     key={i}

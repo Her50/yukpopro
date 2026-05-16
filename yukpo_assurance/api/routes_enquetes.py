@@ -10,7 +10,7 @@ from typing import Optional
 
 logger = logging.getLogger("yukpo_assurance.api.enquetes")
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
 
@@ -40,6 +40,49 @@ PROTOCOLE_MIMES = {
 
 _BUREAU_DIR = Path(__file__).parent.parent / "data" / "generated" / "bureau"
 _BUREAU_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# ─── Rate-limit IP simple en mémoire (P2 #7) ───────────────────────────────
+# Pour la prod multi-instances → Redis (déjà en deps), mais en mono-instance
+# un dict in-memory suffit largement à bloquer un bot naïf.
+from collections import deque as _dq
+from datetime import datetime  # noqa: E402  (used in soumettre_reponse_publique)
+import time as _rl_time
+
+_rl_buckets: dict[str, _dq] = {}  # clé "ip|formulaire_id" → deque[timestamps]
+_RL_MAX_PER_MIN = 20
+_RL_WINDOW_SEC = 60.0
+
+
+def _rate_limit_ok(ip: str, formulaire_id: str) -> bool:
+    """True si la soumission peut passer ; False si >20 dans la dernière minute."""
+    key = f"{ip}|{formulaire_id}"
+    now = _rl_time.monotonic()
+    bucket = _rl_buckets.get(key)
+    if bucket is None:
+        bucket = _dq()
+        _rl_buckets[key] = bucket
+    # Purge fenêtre
+    while bucket and (now - bucket[0]) > _RL_WINDOW_SEC:
+        bucket.popleft()
+    if len(bucket) >= _RL_MAX_PER_MIN:
+        return False
+    bucket.append(now)
+    return True
+
+
+def _etude_owner_ou_404(etude_id: str, user_id: int):
+    """Récupère une étude SI elle appartient au user, sinon lève 404.
+
+    Centralise l'autorisation : tout endpoint authentifié qui prend
+    `etude_id` en URL DOIT passer par ici, pas par `ge.get_etude` direct
+    (qui ne filtre pas par ownership). Le 404 (au lieu de 403) ne révèle
+    pas l'existence d'études d'autres users.
+    """
+    etude = ge.get_etude_user(user_id, etude_id)
+    if not etude:
+        raise HTTPException(404, "Étude introuvable")
+    return etude
 
 
 def _slug(s: str, n: int = 40) -> str:
@@ -142,6 +185,94 @@ class GenererParPromptRequest(BaseModel):
 
 
 @router.post(
+    "/generer-par-prompt/stream",
+    summary="Phase E1 — Génération étude/formulaire en streaming SSE (~30-60s sans UI gelée)",
+)
+async def generer_par_prompt_stream(
+    payload: GenererParPromptRequest,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Version SSE de `/generer-par-prompt`. Le client reçoit :
+      • `data: {"step": "advisor"}` puis `{"step": "llm"}` puis
+        `{"step": "saving"}` puis `{"step": "done", "etude_id": "..."}`.
+      • En cas d'erreur : `{"step": "error", "detail": "..."}` puis close.
+
+    Évite le timeout perçu (60s d'attente UI gelée) — front affiche une
+    barre de progression réactive. Le LLM Opus n'est pas streamé token-par-
+    token (génération JSON structurée), mais les étapes pipeline le sont.
+    """
+    import asyncio as _aio
+
+    async def _gen():
+        try:
+            yield {"event": "step", "data": json.dumps({"step": "precheck"})}
+            await fact.precheck(current_user.user_id)
+            await charger_etudes_user(current_user.user_id)
+
+            if not payload.confirmer_cout:
+                yield {"event": "step", "data": json.dumps({"step": "advisor"})}
+                from core.cost_advisor import advisor, estimer_cout_module, AdvisorAction
+                cout = estimer_cout_module(
+                    "enquete_generer",
+                    multiplicateur=(payload.nb_questions_cible or 20) / 20.0,
+                )
+                v = await advisor.evaluer(
+                    current_user.user_id, cout, module="enquete_generer",
+                )
+                if v.action in (AdvisorAction.BLOCK, AdvisorAction.CONFIRM):
+                    yield {"event": "step", "data": json.dumps({"step": "error", "code": 402, "detail": v.detail_pour_402()})}
+                    return
+
+            yield {"event": "step", "data": json.dumps({"step": "llm", "estimation_s": 30})}
+            from modules.enquetes.enquete_ai import generer_etude_et_formulaire_par_prompt
+            etude, formulaire, usages = await generer_etude_et_formulaire_par_prompt(
+                brief=payload.brief,
+                nb_questions_cible=payload.nb_questions_cible,
+                profil_cible=payload.profil_cible,
+                langue=payload.langue,
+            )
+
+            yield {"event": "step", "data": json.dumps({"step": "saving"})}
+            try:
+                await sauvegarder_etude(etude, current_user.user_id)
+            except Exception as e:
+                logger.warning(f"[Enquetes/stream] sauvegarde non bloquante : {e}")
+
+            try:
+                from modules.bureau.service_credits_bureau import debiter_llm_unifie
+                for u in usages:
+                    await debiter_llm_unifie(
+                        user_id=current_user.user_id,
+                        modele=u.get("modele", "claude-sonnet-4-6"),
+                        tokens_input=int(u.get("tokens_in", 0)),
+                        tokens_output=int(u.get("tokens_out", 0)),
+                        module="enquetes_prompt",
+                    )
+            except Exception:
+                pass
+
+            yield {"event": "step", "data": json.dumps({
+                "step": "done",
+                "etude_id": etude.etude_id,
+                "formulaire_id": formulaire.formulaire_id,
+                "titre": etude.titre,
+                "nb_questions": len(formulaire.questions),
+                "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}",
+                "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/xlsform.xlsx",
+                "analyses_suggerees": getattr(etude, "analyses_suggerees", []),
+            })}
+        except Exception as e:
+            logger.error(f"[Enquetes/stream] échec user={current_user.user_id}: {e}")
+            yield {"event": "step", "data": json.dumps({"step": "error", "detail": str(e)[:300]})}
+
+    # ping=15s pour garder la connexion ouverte derrière les proxies.
+    # Import paresseux : sse_starlette est dans requirements.txt mais
+    # absent en dev léger, évite de casser les autres routes au boot.
+    from sse_starlette.sse import EventSourceResponse
+    return EventSourceResponse(_gen(), ping=15)
+
+
+@router.post(
     "/generer-par-prompt",
     summary="Phase E1 — Génère une étude+formulaire complet depuis un brief en langage naturel",
 )
@@ -225,21 +356,20 @@ async def lister_mes_enquetes(
     current_user: TokenData = Depends(get_current_user),
 ):
     """Pour chaque étude : nb_réponses, dernier_repondant, taux_completion,
-    sparkline (compte par jour sur 7 derniers jours), lien public."""
+    sparkline (compte par jour sur 7 derniers jours), lien public.
+
+    Filtré strictement aux études dont current_user est propriétaire
+    (cf `lister_etudes_user`) — ne fuit aucune étude tierce.
+    """
     await charger_etudes_user(current_user.user_id)
     from datetime import datetime, timedelta
     from collections import Counter
 
     out = []
-    for etude in ge.lister_etudes():
-        # ge.lister_etudes() retourne des dicts dans certaines versions →
-        # on supporte les 2 formats
-        if isinstance(etude, dict):
-            etude_obj = ge.get_etude(etude.get("etude_id"))
-            if not etude_obj:
-                continue
-        else:
-            etude_obj = etude
+    for etude_meta in ge.lister_etudes_user(current_user.user_id):
+        etude_obj = ge.get_etude_user(current_user.user_id, etude_meta["etude_id"])
+        if not etude_obj:
+            continue
 
         formulaire = etude_obj.formulaire
         nb_reponses = 0
@@ -322,17 +452,32 @@ def _construire_html_formulaire_public(formulaire) -> str:
       • Capture photo si question image
     """
     import html as _html
+
+    # Mapping type interne QuestionFormulaire → type attendu par le JS PWA
+    _TYPE_PWA = {
+        "text": "text", "note": "text",
+        "number": "integer", "rating": "integer",
+        "select_one": "select_one", "likert": "select_one", "oui_non": "select_one",
+        "select_multiple": "select_multiple",
+        "date": "date", "geopoint": "geopoint",
+        "image": "image",
+    }
+
     questions_json = json.dumps([
         {
-            "id":    q.id,
-            "label": q.label,
-            "hint":  getattr(q, "hint", ""),
-            "type":  q.type,
-            "required": q.required,
-            "section":  getattr(q, "section", ""),
-            "relevant": getattr(q, "relevant", ""),
-            "choices":  q.choices or [],
-            "constraint": getattr(q, "constraint", ""),
+            # Clé pandas/CSV/relevant : name_xlsform si dispo, sinon question_id
+            "id":    q.name_xlsform or q.question_id,
+            "label": q.libelle,
+            "hint":  q.hint,
+            "type":  _TYPE_PWA.get(q.type_question, "text"),
+            "required": q.obligatoire,
+            "section":  q.section_label,
+            "relevant": q.relevant,
+            # Priorise choices_meta (value↔label propre du LLM E1).
+            # Fallback options legacy si choices_meta vide.
+            "choices":  (q.choices_meta if q.choices_meta else
+                         [{"value": str(o), "label": str(o)} for o in (q.options or [])]),
+            "constraint": q.constraint,
         }
         for q in formulaire.questions
     ], ensure_ascii=False)
@@ -349,7 +494,9 @@ def _construire_html_formulaire_public(formulaire) -> str:
 <title>{titre}</title>
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#7B3FE4">
-<link rel="manifest" href='data:application/manifest+json,{{"name":"{titre}","short_name":"Form","start_url":"./","display":"standalone","theme_color":"#7B3FE4","background_color":"#fff","icons":[]}}'>
+<link rel="manifest" href="/api/v1/enquetes/public/{fid}/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/api/v1/enquetes/public/{fid}/icon.svg">
+<link rel="apple-touch-icon" href="/api/v1/enquetes/public/{fid}/icon.svg">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc}}
@@ -440,12 +587,105 @@ window.addEventListener("offline", () => {{
 if (!navigator.onLine) document.getElementById("offline-banner").classList.remove("hidden");
 
 // ── Render question courante ─────────────────────────────────────────────
+// Mini-parser whitelist XLSForm. Remplace Function() pour éliminer le
+// XSS stocké : un propriétaire d'étude malveillant pouvait injecter du
+// JS arbitraire dans `relevant` exécuté chez chaque répondant.
+// Tokens supportés : ${{nom}}, 'literal', "literal", number, true/false,
+// == != > >= < <=, and or not, ( ). Tout autre token → faux conservateur.
 function evalRelevant(expr) {{
   if (!expr) return true;
-  // Très simple : remplace ${{q_id}} par sa valeur, eval simple ==/!=/and/or
-  let e = expr.replace(/\\$\\{{([a-z0-9_]+)\\}}/gi, (_, id) => JSON.stringify(reponses[id] || ""));
-  e = e.replace(/=/g, "==").replace(/\\band\\b/g, "&&").replace(/\\bor\\b/g, "||");
-  try {{ return Function("return " + e)(); }} catch {{ return true; }}
+  try {{
+    const toks = tokenize(expr);
+    if (!toks.length) return true;
+    const p = {{ i: 0, t: toks }};
+    const v = parseOr(p);
+    return p.i === toks.length ? !!v : true;
+  }} catch (e) {{ return true; }}
+}}
+function tokenize(s) {{
+  const out = [];
+  let i = 0;
+  const isDigit = c => c >= '0' && c <= '9';
+  const isIdStart = c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
+  const isIdPart = c => isIdStart(c) || isDigit(c);
+  while (i < s.length) {{
+    const c = s[i];
+    if (c === ' ' || c === '\\t' || c === '\\n') {{ i++; continue; }}
+    if (c === '(' || c === ')') {{ out.push({{ k: c }}); i++; continue; }}
+    if (c === '$' && s[i+1] === '{{') {{
+      let j = i + 2; while (j < s.length && s[j] !== '}}') j++;
+      const name = s.slice(i + 2, j);
+      if (!/^[a-zA-Z0-9_]+$/.test(name)) throw 0;
+      out.push({{ k: 'var', v: name }});
+      i = j + 1; continue;
+    }}
+    if (c === '\\'' || c === '"') {{
+      let j = i + 1; while (j < s.length && s[j] !== c) j++;
+      out.push({{ k: 'lit', v: s.slice(i + 1, j) }});
+      i = j + 1; continue;
+    }}
+    if (isDigit(c) || (c === '-' && isDigit(s[i+1]))) {{
+      let j = i + 1; while (j < s.length && (isDigit(s[j]) || s[j] === '.')) j++;
+      out.push({{ k: 'lit', v: parseFloat(s.slice(i, j)) }});
+      i = j; continue;
+    }}
+    if (c === '=' || c === '!' || c === '<' || c === '>') {{
+      let op = c;
+      if (s[i+1] === '=') {{ op += '='; i += 2; }} else {{ i++; }}
+      if (op === '=') op = '==';
+      out.push({{ k: 'op', v: op }});
+      continue;
+    }}
+    if (isIdStart(c)) {{
+      let j = i + 1; while (j < s.length && isIdPart(s[j])) j++;
+      const w = s.slice(i, j).toLowerCase();
+      if (w === 'and' || w === 'or' || w === 'not') out.push({{ k: w }});
+      else if (w === 'true')  out.push({{ k: 'lit', v: true }});
+      else if (w === 'false') out.push({{ k: 'lit', v: false }});
+      else throw 0;
+      i = j; continue;
+    }}
+    throw 0;
+  }}
+  return out;
+}}
+function peek(p, k) {{ return p.i < p.t.length && p.t[p.i].k === k; }}
+function eat(p, k) {{ if (!peek(p, k)) throw 0; return p.t[p.i++]; }}
+function parseOr(p) {{
+  let v = parseAnd(p);
+  while (peek(p, 'or')) {{ p.i++; v = parseAnd(p) || v; }}
+  return v;
+}}
+function parseAnd(p) {{
+  let v = parseCmp(p);
+  while (peek(p, 'and')) {{ p.i++; const r = parseCmp(p); v = v && r; }}
+  return v;
+}}
+function parseCmp(p) {{
+  const a = parseAtom(p);
+  if (peek(p, 'op')) {{
+    const op = eat(p, 'op').v;
+    const b = parseAtom(p);
+    if (op === '==') return a == b;
+    if (op === '!=') return a != b;
+    if (op === '>')  return Number(a) >  Number(b);
+    if (op === '>=') return Number(a) >= Number(b);
+    if (op === '<')  return Number(a) <  Number(b);
+    if (op === '<=') return Number(a) <= Number(b);
+    throw 0;
+  }}
+  return a;
+}}
+function parseAtom(p) {{
+  if (peek(p, 'not')) {{ p.i++; return !parseAtom(p); }}
+  if (peek(p, '(')) {{ p.i++; const v = parseOr(p); eat(p, ')'); return v; }}
+  if (peek(p, 'lit')) return p.t[p.i++].v;
+  if (peek(p, 'var')) {{
+    const name = p.t[p.i++].v;
+    const v = reponses[name];
+    return Array.isArray(v) ? v.join(',') : (v == null ? '' : v);
+  }}
+  throw 0;
 }}
 
 function renderQuestion() {{
@@ -576,6 +816,13 @@ async function renderFinal() {{
 
 renderQuestion();
 flushQueue();
+
+// Enregistre le service worker — cache HTML+assets pour vrai offline
+// (les POST réponses restent gérées par la queue IndexedDB ci-dessus).
+if ("serviceWorker" in navigator) {{
+  navigator.serviceWorker.register("/api/v1/enquetes/public/{fid}/sw.js")
+    .catch(e => console.warn("SW register failed", e));
+}}
 </script>
 </body>
 </html>
@@ -595,6 +842,109 @@ async def page_formulaire_public(formulaire_id: str):
     return HTMLResponse(_construire_html_formulaire_public(formulaire))
 
 
+# ─── P2 #6 — PWA assets (manifest + icons SVG + service worker) ────────────
+# Chrome accepte SVG comme icon depuis 2021 (purpose="any maskable"). Pas
+# besoin de générer du PNG. Le SW est minimal (cache GET HTML + assets pour
+# vrai offline-first ; les POST passent par IndexedDB queue déjà en place).
+
+_PWA_ICON_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
+    '<rect width="512" height="512" fill="#7B3FE4" rx="80"/>'
+    '<text x="256" y="335" text-anchor="middle" font-family="system-ui,sans-serif" '
+    'font-size="280" font-weight="700" fill="white">Y</text>'
+    '</svg>'
+)
+
+
+@router.get(
+    "/public/{formulaire_id}/manifest.json",
+    summary="PWA manifest (installable Android Chrome / iOS Safari)",
+)
+async def manifest_pwa(formulaire_id: str):
+    """Manifest installable. Icons SVG (any + maskable) — Chrome OK."""
+    formulaire = ge.get_formulaire_public(formulaire_id)
+    if not formulaire:
+        raise HTTPException(404, "Formulaire introuvable")
+    icon_url = f"/api/v1/enquetes/public/{formulaire_id}/icon.svg"
+    return {
+        "name": formulaire.titre or "Formulaire Yukpo",
+        "short_name": (formulaire.titre or "Form")[:12],
+        "start_url": f"/api/v1/enquetes/public/{formulaire_id}/page",
+        "scope": f"/api/v1/enquetes/public/{formulaire_id}/",
+        "display": "standalone",
+        "orientation": "portrait",
+        "theme_color": "#7B3FE4",
+        "background_color": "#ffffff",
+        "icons": [
+            {"src": icon_url, "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+            {"src": icon_url, "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"},
+        ],
+    }
+
+
+@router.get(
+    "/public/{formulaire_id}/icon.svg",
+    summary="Icône PWA SVG (cachable 1 an)",
+)
+async def icon_pwa(formulaire_id: str):
+    return Response(
+        content=_PWA_ICON_SVG,
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
+
+
+@router.get(
+    "/public/{formulaire_id}/sw.js",
+    summary="Service worker minimal (cache HTML + assets pour vrai offline)",
+)
+async def service_worker(formulaire_id: str):
+    """SW : cache GET (page HTML, manifest, icon, Tailwind CDN) → ouvre la
+    page hors-ligne. Les POST réponses passent par IndexedDB queue déjà en
+    place dans le HTML PWA.
+    """
+    page_url = f"/api/v1/enquetes/public/{formulaire_id}/page"
+    manifest_url = f"/api/v1/enquetes/public/{formulaire_id}/manifest.json"
+    icon_url = f"/api/v1/enquetes/public/{formulaire_id}/icon.svg"
+    sw = f"""
+const CACHE = "yukpo-form-{formulaire_id}-v1";
+const ASSETS = [
+  "{page_url}",
+  "{manifest_url}",
+  "{icon_url}",
+  "https://cdn.tailwindcss.com",
+];
+self.addEventListener("install", e => {{
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>null)));
+  self.skipWaiting();
+}});
+self.addEventListener("activate", e => {{
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+}});
+self.addEventListener("fetch", e => {{
+  if (e.request.method !== "GET") return; // POST passent direct (queue IDB)
+  e.respondWith(
+    caches.match(e.request).then(hit =>
+      hit || fetch(e.request).then(r => {{
+        if (r.ok) {{
+          const clone = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone)).catch(()=>null);
+        }}
+        return r;
+      }}).catch(() => hit || new Response("Offline", {{ status: 503 }}))
+    )
+  );
+}});
+"""
+    return Response(
+        content=sw, media_type="application/javascript",
+        headers={"Cache-Control": "no-cache"},
+    )
+
+
 class SoumettreReponseRequest(BaseModel):
     formulaire_id: str
     reponses: dict
@@ -608,32 +958,69 @@ class SoumettreReponseRequest(BaseModel):
 async def soumettre_reponse_publique(
     formulaire_id: str,
     payload: SoumettreReponseRequest,
+    request: Request,
 ):
-    """Reçoit les réponses depuis le HTML public ou la queue IndexedDB."""
+    """Reçoit les réponses depuis le HTML public ou la queue IndexedDB.
+
+    INSERT atomique dans `enquetes_reponses` (P2 #4) — pas de race
+    read-modify-write sur le JSON blob de EtudeDB.data. Le cache RAM
+    `etude.formulaire.reponses` est aussi mis à jour pour cohérence
+    avec les analyses en cours (qui lisent encore depuis la RAM).
+    """
     # Honeypot
     if payload._hp_bot:
         logger.info(f"[Enquetes/public] honeypot trigger {formulaire_id}")
         return {"ok": True}
 
+    # Rate-limit IP : 20 réponses/min/IP (un répondant honnête en soumet 1).
+    # Le honeypot seul est trivial à contourner ; combiner avec un quota IP
+    # bloque les bots qui essaient de noyer les analyses.
+    client_ip = request.client.host if request.client else "anon"
+    if not _rate_limit_ok(client_ip, formulaire_id):
+        raise HTTPException(429, "Trop de soumissions. Patientez 1 minute.")
+
     formulaire = ge.get_formulaire_public(formulaire_id)
     if not formulaire:
         raise HTTPException(404, "Formulaire introuvable")
 
-    success = ge.soumettre_reponse(formulaire_id, payload.reponses)
+    etude_id_for_form = ge._formulaires_publics.get(formulaire_id)
+    if not etude_id_for_form:
+        raise HTTPException(404, "Formulaire introuvable")
+
+    # Hash IP (pas IP brute — anti-spam analytics sans tracking nominatif)
+    import hashlib as _hl
+    ip_hash = _hl.sha256(client_ip.encode()).hexdigest()[:32]
+    ua = (request.headers.get("user-agent") or "")[:300]
+
+    # INSERT atomique table dédiée
+    reponses_data = dict(payload.reponses)
+    reponses_data["_soumis_le"] = datetime.utcnow().isoformat()
+    try:
+        from core.database import async_session_maker, EnqueteReponseDB
+        async with async_session_maker() as session:
+            session.add(EnqueteReponseDB(
+                formulaire_id=formulaire_id,
+                etude_id=etude_id_for_form,
+                reponses=reponses_data,
+                ip_hash=ip_hash,
+                user_agent=ua,
+            ))
+            await session.commit()
+    except Exception as e:
+        logger.warning(f"[Enquetes/public] INSERT DB échoué (fallback RAM): {e}")
+
+    # Mirror RAM pour les analyses en cours dans la même process
+    success = ge.soumettre_reponse(formulaire_id, reponses_data)
     if not success:
         raise HTTPException(400, "Réponse invalide")
 
-    # Débit forfait existant sur le marchand propriétaire (lookup via etude)
+    # Débit forfait sur le marchand propriétaire (lookup direct via ownership)
     try:
-        etude = next(
-            (e for e in ge.lister_etudes()
-             if isinstance(e, dict) and e.get("formulaire_id") == formulaire_id),
-            None,
-        )
-        if etude and etude.get("user_id"):
+        owner_id = ge._etude_owner.get(etude_id_for_form)
+        if owner_id:
             from modules.bureau.service_credits_bureau import debiter_forfait_unifie
             await debiter_forfait_unifie(
-                etude["user_id"], "client_action",
+                owner_id, "client_action",
                 module="enquete_reponse",
             )
     except Exception:
@@ -648,6 +1035,10 @@ async def soumettre_reponse_publique(
 class AnalyserParPromptRequest(BaseModel):
     prompt: str
     confirmer_cout: bool = False
+    # True → injecter l'historique des analyses précédentes de l'étude
+    # dans le prompt LLM. UX : "compare maintenant par genre" → Sonnet sait
+    # à quoi se réfère "compare" sans qu'on répète tout le contexte.
+    avec_historique: bool = False
 
 
 @router.post(
@@ -667,6 +1058,8 @@ async def analyser_par_prompt_endpoint(
     """
     await fact.precheck(current_user.user_id)
     await charger_etudes_user(current_user.user_id)
+    # Garde-fou ownership AVANT toute opération coûteuse / LLM
+    _etude_owner_ou_404(etude_id, current_user.user_id)
 
     # CostAdvisor — coût varie selon complexité (simple vs complexe)
     if not payload.confirmer_cout:
@@ -681,8 +1074,12 @@ async def analyser_par_prompt_endpoint(
             raise HTTPException(402, v.detail_pour_402())
 
     from modules.enquetes.enquete_ai import analyser_par_prompt
+    historique = None
+    if payload.avec_historique:
+        etude_ref = ge.get_etude(etude_id)
+        historique = getattr(etude_ref, "analyses_prompt_results", None) or []
     try:
-        resultat = await analyser_par_prompt(etude_id, payload.prompt)
+        resultat = await analyser_par_prompt(etude_id, payload.prompt, historique=historique)
     except ValueError as e:
         raise HTTPException(404, str(e))
     except Exception as e:
@@ -758,19 +1155,134 @@ async def creer_etude(
     }
 
 
+class DupliquerEtudeRequest(BaseModel):
+    nouveau_titre: Optional[str] = None
+
+
+class InviterRepondantsRequest(BaseModel):
+    """Diffusion du lien public d'un formulaire à une liste de contacts."""
+    telephones: list[str] = []  # numéros WhatsApp internationaux (+237...)
+    emails: list[str] = []
+    message: Optional[str] = None  # texte personnalisé optionnel
+
+
+@router.post(
+    "/{etude_id}/inviter",
+    summary="Diffuser le lien public du formulaire par WhatsApp / Email (infra Yukpo)",
+)
+async def inviter_repondants(
+    etude_id: str,
+    payload: InviterRepondantsRequest,
+    request: Request,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Envoie le lien public à N contacts (WhatsApp + email). Utilise
+    l'infra notifications Yukpo existante (Twilio + SendGrid).
+    Retourne le compte par canal et les destinataires en échec.
+    """
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
+    if not etude.formulaire:
+        raise HTTPException(400, "Cette étude n'a pas de formulaire — créez-en un d'abord.")
+    await fact.precheck(current_user.user_id)
+
+    base = str(request.base_url).rstrip("/")
+    lien_public = f"{base}/api/v1/enquetes/public/{etude.formulaire.formulaire_id}/page"
+    texte = payload.message or (
+        f"Bonjour, votre avis nous intéresse pour l'étude « {etude.titre} ». "
+        f"Répondez en ~3 minutes : {lien_public}"
+    )
+    # S'assurer que le lien est dans le texte même si l'user le sort
+    if lien_public not in texte:
+        texte = texte.rstrip(".!? ") + f"\n\n{lien_public}"
+
+    from core.notifications import envoyer_whatsapp, _envoyer_email
+
+    wa_ok, wa_fail = 0, []
+    for tel in payload.telephones:
+        tel = (tel or "").strip()
+        if not tel:
+            continue
+        try:
+            if await envoyer_whatsapp(tel, texte, metadata={"etude_id": etude_id}):
+                wa_ok += 1
+            else:
+                wa_fail.append(tel)
+        except Exception as e:
+            logger.warning(f"[Enquetes/inviter] WhatsApp {tel} : {e}")
+            wa_fail.append(tel)
+
+    em_ok, em_fail = 0, []
+    sujet = f"Enquête « {etude.titre[:60]} » — votre avis compte"
+    for em in payload.emails:
+        em = (em or "").strip()
+        if not em:
+            continue
+        try:
+            if await _envoyer_email(em, texte, sujet=sujet):
+                em_ok += 1
+            else:
+                em_fail.append(em)
+        except Exception as e:
+            logger.warning(f"[Enquetes/inviter] Email {em} : {e}")
+            em_fail.append(em)
+
+    # Débit forfait par invitation envoyée (sémantique : whatsapp_message
+    # pour les WA, client_action pour les emails — cohérent avec les autres
+    # modules de notif Yukpo)
+    try:
+        from modules.bureau.service_credits_bureau import debiter_forfait_unifie
+        for _ in range(wa_ok):
+            await debiter_forfait_unifie(current_user.user_id, "whatsapp_message", module="enquete_invitation")
+        for _ in range(em_ok):
+            await debiter_forfait_unifie(current_user.user_id, "client_action", module="enquete_invitation_email")
+    except Exception:
+        pass
+
+    return {
+        "lien_public": lien_public,
+        "whatsapp_ok": wa_ok, "whatsapp_echecs": wa_fail,
+        "email_ok": em_ok, "email_echecs": em_fail,
+        "message": f"{wa_ok + em_ok} invitation(s) envoyée(s).",
+    }
+
+
+@router.post("/{etude_id}/dupliquer", summary="Dupliquer une étude (wave 2 NPS, audit répété)")
+async def dupliquer_etude_endpoint(
+    etude_id: str,
+    payload: Optional[DupliquerEtudeRequest] = None,
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Crée une copie de l'étude (formulaire + dictionnaire + plan d'analyse)
+    avec un nouveau etude_id et un formulaire_id frais. Les réponses,
+    transcriptions et analyses NE sont PAS copiées (campagne neuve).
+    """
+    _etude_owner_ou_404(etude_id, current_user.user_id)
+    await fact.precheck(current_user.user_id)
+    clone = ge.dupliquer_etude(etude_id, payload.nouveau_titre if payload else None)
+    if not clone:
+        raise HTTPException(404, "Étude introuvable")
+    await sauvegarder_etude(clone, current_user.user_id)
+    await fact.debiter(current_user.user_id, "etude_create")
+    return {
+        "etude_id": clone.etude_id,
+        "titre": clone.titre,
+        "formulaire_id": clone.formulaire.formulaire_id if clone.formulaire else None,
+        "n_questions": len(clone.formulaire.questions) if clone.formulaire else 0,
+        "message": "Étude dupliquée — campagne prête à diffuser.",
+    }
+
+
 @router.get("/", summary="Lister toutes les études")
 async def lister_etudes(current_user: TokenData = Depends(get_current_user)):
     # Charger les études de cet utilisateur depuis la DB si pas encore en RAM
     await charger_etudes_user(current_user.user_id)
     await fact.debiter(current_user.user_id, "etude_list")
-    return {"etudes": ge.lister_etudes()}
+    return {"etudes": ge.lister_etudes_user(current_user.user_id)}
 
 
 @router.get("/{etude_id}", summary="Détails d'une étude")
 async def get_etude(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.debiter(current_user.user_id, "etude_get")
     return {
         "etude_id": etude.etude_id,
@@ -802,9 +1314,7 @@ async def uploader_audio(
     langue: str = Form("fr"),
     current_user: TokenData = Depends(get_current_user),
 ):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
 
     contenu = await audio.read()
@@ -842,9 +1352,7 @@ async def uploader_audio(
 
 @router.get("/{etude_id}/transcriptions", summary="Lister les transcriptions d'une étude")
 async def lister_transcriptions(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.debiter(current_user.user_id, "transcription_list")
     return {
         "etude_id": etude_id,
@@ -867,9 +1375,7 @@ async def lister_transcriptions(etude_id: str, current_user: TokenData = Depends
 
 @router.post("/{etude_id}/analyser", summary="Lancer l'analyse qualitative IA (codage thématique)")
 async def analyser(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
 
     try:
@@ -956,9 +1462,7 @@ async def generer_rapport(
 
 @router.get("/{etude_id}/rapport", summary="Récupérer le dernier rapport généré")
 async def get_rapport(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     if not etude.rapport_genere:
         raise HTTPException(404, "Aucun rapport généré — POST /rapport d'abord")
     await fact.debiter(current_user.user_id, "rapport_get")
@@ -1090,9 +1594,7 @@ async def soumettre_reponses(formulaire_id: str, reponses: dict):
 
 @router.get("/{etude_id}/formulaire/donnees", summary="Voir les données collectées")
 async def donnees_formulaire(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     if not etude.formulaire:
         raise HTTPException(404, "Aucun formulaire créé pour cette étude")
     await fact.debiter(current_user.user_id, "formulaire_donnees")
@@ -1111,9 +1613,7 @@ async def donnees_formulaire(etude_id: str, current_user: TokenData = Depends(ge
 async def exporter_donnees_csv(etude_id: str, current_user: TokenData = Depends(get_current_user)):
     import csv
     import io
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     if not etude.formulaire:
         raise HTTPException(404, "Aucun formulaire créé pour cette étude")
     await fact.precheck(current_user.user_id)
@@ -1153,9 +1653,7 @@ async def exporter_donnees_csv(etude_id: str, current_user: TokenData = Depends(
     response_class=Response,
 )
 async def telecharger_xlsform(etude_id: str, current_user: TokenData = Depends(get_current_user)):
-    etude = ge.get_etude(etude_id)
-    if not etude:
-        raise HTTPException(404, "Étude introuvable")
+    etude = _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         xlsx_bytes = ge.generer_xlsform_bytes(etude_id)
@@ -1219,19 +1717,39 @@ async def upload_protocole(
     if len(texte.strip()) < 50:
         raise HTTPException(400, "Texte extrait trop court — vérifiez le fichier")
 
-    # Extraire objectif / population si non fournis (heuristique rapide)
-    if not objectif:
-        for keyword in ("objectif", "objectifs", "finalité", "problématique"):
-            idx = texte.lower().find(keyword)
-            if idx >= 0:
-                objectif = texte[idx:idx + 300].replace("\n", " ").strip()
-                break
-    if not population:
-        for keyword in ("population", "échantillon", "cible", "répondants"):
-            idx = texte.lower().find(keyword)
-            if idx >= 0:
-                population = texte[idx:idx + 200].replace("\n", " ").strip()
-                break
+    # Extraction sémantique objectif/population par LLM Haiku (~1s) plutôt
+    # qu'un `find()` sur mot-clé : "absence d'objectif" matchait avant,
+    # un titre "Objectifs annexes" tronquait à 300 chars hors contexte, etc.
+    # Le LLM lit le protocole en entier et sort 2 phrases précises.
+    if not objectif or not population:
+        try:
+            from core.ia_client import ia_client, ModeIA, ModelePrioritaire
+            import json as _json, re as _re
+            extraction_prompt = (
+                "Lis ce protocole d'enquête et extrait UNIQUEMENT en JSON :\n"
+                '{"objectif": "...", "population": "..."}\n'
+                "- objectif : 1-2 phrases (finalité de l'étude)\n"
+                "- population : 1 phrase (cible/échantillon)\n"
+                "Si pas mentionné, mets \"\". Pas de markdown, pas de texte autour.\n\n"
+                f"PROTOCOLE :\n{texte[:6000]}"
+            )
+            rep = await ia_client.appeler(
+                prompt=extraction_prompt,
+                mode=ModeIA.PRECISION,
+                json_attendu=True,
+                forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,
+                max_tokens_override=300,
+                utiliser_cache=True, cache_ttl=3600,
+            )
+            raw = (getattr(rep, "contenu", "") or "").strip()
+            m = _re.search(r"\{[\s\S]*\}", raw)
+            data = _json.loads(m.group(0)) if m else {}
+            if not objectif:
+                objectif = (data.get("objectif") or "").strip()[:500]
+            if not population:
+                population = (data.get("population") or "").strip()[:300]
+        except Exception as _e:
+            logger.debug(f"[Enquetes/protocole] extraction LLM non bloquante : {_e}")
 
     try:
         resultat = await ge.generer_formulaire_ia(

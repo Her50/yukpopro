@@ -1111,6 +1111,10 @@ class EtudeDB(Base):
     """
     Persistance complète d'une étude + formulaire + transcriptions + analyses.
     Sérialisée en JSON pour éviter ~20 tables relationnelles et rester simple.
+    Note : les RÉPONSES collectées (formulaire.reponses) ont leur propre table
+    `EnqueteReponseDB` depuis le fix P2 #4 pour éviter la race condition write
+    sur le JSON blob — un INSERT atomique par soumission au lieu d'un upsert
+    entier de la colonne `data`.
     """
     __tablename__ = "enquetes_etudes"
 
@@ -1121,6 +1125,28 @@ class EtudeDB(Base):
     data        = Column(JSON, nullable=False)  # Dump complet du dataclass Etude
     cree_le     = Column(DateTime, default=datetime.utcnow, nullable=False)
     modifie_le  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class EnqueteReponseDB(Base):
+    """
+    Une ligne = une soumission de répondant sur un formulaire public.
+    Table séparée (au lieu d'un append dans EtudeDB.data) pour :
+      • INSERT atomique → pas de race read-modify-write entre N répondants
+        concurrents (campagne marketing, 500 personnes sur 1h).
+      • Pagination DB-side pour les études avec milliers de réponses (au
+        lieu de charger tout le JSON en RAM).
+      • Soft delete possible sans toucher le blob principal.
+    """
+    __tablename__ = "enquetes_reponses"
+
+    id              = Column(Integer, primary_key=True, autoincrement=True)
+    formulaire_id   = Column(String(36), nullable=False, index=True)
+    etude_id        = Column(String(36), nullable=False, index=True)
+    reponses        = Column(JSON, nullable=False)        # dict name_xlsform → value
+    soumis_le       = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    # Métadonnées facultatives pour anti-spam / analytics (hash IP, pas IP brute)
+    ip_hash         = Column(String(64), nullable=True)
+    user_agent      = Column(String(300), nullable=True)
 
 
 # ─── Phase 4.1 — Bulk async jobs (CSV/XLSX > 50 lignes) ─────────────────────

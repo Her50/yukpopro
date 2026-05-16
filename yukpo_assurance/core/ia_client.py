@@ -104,11 +104,12 @@ TARIFS_OUTPUT = {
 
 
 class ModeIA(str, Enum):
-    PRECISION  = "precision"    # États CIMA, calculs réglementaires — temp 0.1
-    ANALYSE    = "analyse"      # Fraude, souscription, sinistres — temp 0.3
-    REDACTION  = "redaction"    # Rapports, courriers — temp 0.4
-    COPILOTE   = "copilote"     # Assistant quotidien — temp 0.5
-    COMMERCIAL = "commercial"   # Offres, communication client — temp 0.7
+    PRECISION    = "precision"      # États CIMA, calculs réglementaires — temp 0.1
+    ANALYSE      = "analyse"        # Fraude, souscription, sinistres — temp 0.3
+    REDACTION    = "redaction"      # Rapports, courriers — temp 0.4
+    COPILOTE     = "copilote"       # Assistant quotidien — temp 0.5
+    COMMERCIAL   = "commercial"     # Offres, communication client — temp 0.7
+    RAISONNEMENT = "raisonnement"   # Compositions structurées Opus (questionnaires, Magic Import) — temp 0.2
 
 
 class ModelePrioritaire(str, Enum):
@@ -870,11 +871,12 @@ class IAClient:
 
     def _temperature_par_mode(self, mode: ModeIA) -> float:
         mapping = {
-            ModeIA.PRECISION:  settings.IA_TEMPERATURE_PRECISION,
-            ModeIA.ANALYSE:    0.3,
-            ModeIA.REDACTION:  settings.IA_TEMPERATURE_REDACTION,
-            ModeIA.COPILOTE:   0.5,
-            ModeIA.COMMERCIAL: settings.IA_TEMPERATURE_CREATIVE,
+            ModeIA.PRECISION:    settings.IA_TEMPERATURE_PRECISION,
+            ModeIA.ANALYSE:      0.3,
+            ModeIA.REDACTION:    settings.IA_TEMPERATURE_REDACTION,
+            ModeIA.COPILOTE:     0.5,
+            ModeIA.COMMERCIAL:   settings.IA_TEMPERATURE_CREATIVE,
+            ModeIA.RAISONNEMENT: 0.2,
         }
         return mapping[mode]
 

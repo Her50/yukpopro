@@ -36,10 +36,24 @@ class ClassifierIntentRequest(BaseModel):
         description="Texte libre du user (message chat)")
     has_files: bool = Field(default=False,
         description="True si des fichiers sont attachés au message")
+    # Contexte session : titre du DERNIER livrable généré dans la conversation
+    # courante (chat de session). Permet au LLM de bien arbitrer entre
+    # qa_simple ("c'est quoi Taiwan ?" sans lien direct au doc) et
+    # modification ("tu peux ajouter une section sur Taiwan ?" qui veut
+    # enrichir le rapport existant).
+    dernier_doc_titre: Optional[str] = Field(
+        default=None, max_length=300,
+        description="Titre du dernier livrable généré en session (si existant)",
+    )
+    dernier_doc_type: Optional[str] = Field(
+        default=None, max_length=80,
+        description="Type du dernier livrable (rapport/visuel/site/...)",
+    )
 
 
 # Liste fermée d'intents que le LLM doit choisir
 _INTENTS_VALIDES = [
+    "qa_simple",             # question pure / curiosité / explication / conversation (PRIORITÉ)
     "site_multipage",        # mini-site web complet (home + services + équipe + …)
     "landing_singlepage",    # landing one-pager (campagne, event, produit unique)
     "boutique_ecommerce",    # YukpoShop (catalogue produits + checkout)
@@ -62,8 +76,54 @@ _INTENTS_VALIDES = [
 
 _PROMPT_SYSTEME = """Tu es un classifieur d'intent pour une plateforme \
 SaaS B2B africaine (Yukpo). Tu analyses un brief utilisateur libre et tu \
-retournes UN SEUL intent parmi cette liste fermée :
+retournes UN SEUL intent parmi cette liste fermée.
 
+🔴 ARBITRAGE qa_simple vs modification — c'est TOI qui décides
+   sémantiquement, pas une règle rigide :
+
+   La forme interrogative seule ne suffit PAS à trancher. Tu dois lire
+   l'INTENTION de l'utilisateur :
+
+   → qa_simple : l'utilisateur demande à COMPRENDRE / S'INFORMER /
+     DISCUTER sur un sujet, sans intention de toucher au livrable
+     existant. Curiosité intellectuelle pure.
+     Ex : « pourquoi Taiwan est important pour les Chinois ? »
+        « c'est quoi Yukpo Pro ? »
+        « comment fonctionne la TVA ? »
+        « parle-moi de l'OHADA »
+        « que penses-tu de l'IA en Afrique ? »
+
+   → modification : l'utilisateur demande à CHANGER / ENRICHIR / CORRIGER
+     un livrable déjà généré dans la session. Même formulée en question
+     polie, c'est une INSTRUCTION sur le document.
+     Indices typiques (présence d'un VERBE D'ACTION sur le doc, OU
+     reproche/correction implicite) :
+     Ex : « tu peux ajouter une section sur Taiwan dans le rapport ? »
+        « et si on rajoutait des chiffres économiques ? »
+        « pourquoi tu n'as pas parlé de la position US ? »
+        « modifie l'introduction »
+        « change le titre »
+        « remplace X par Y »
+        « complète la partie 2 »
+        « régénère avec plus de profondeur »
+        « tu as oublié de citer Y »
+
+   Heuristique en cas d'ambiguïté :
+   • Si la question porte sur **le SUJET** du document (curiosité sur
+     Taiwan, la TVA, OHADA...) → qa_simple
+   • Si la question porte sur **le DOCUMENT lui-même** (son contenu, ses
+     manques, sa structure, son ton) → modification
+   • Si aucun document n'existe dans la session : aucune raison de
+     classer en modification — par défaut qa_simple ou production.
+
+Liste fermée :
+
+  • qa_simple : QUESTION pure / curiosité / explication / opinion /
+    discussion conversationnelle sur un SUJET. AUCUN livrable à
+    produire ni à modifier. Exemples : "pourquoi Taiwan est important ?",
+    "c'est quoi Yukpo Pro ?", "comment fonctionne la TVA ?", "parle-moi
+    de l'OHADA", "tu connais le SaaS ?", "bonjour", "explique-moi le
+    SYSCOHADA", "que penses-tu de l'IA en Afrique ?".
   • site_multipage : l'user veut un MINI-SITE WEB avec plusieurs pages
     (accueil + services + équipe + contact + blog…) — ex. "fais le site
     de mon cabinet d'expertise comptable", "génère mon site internet",
@@ -88,9 +148,13 @@ retournes UN SEUL intent parmi cette liste fermée :
     "spot pub vidéo", "teaser"
   • rapport_docx : rapport Word/PDF long structuré — ex. "rapport
     annuel", "DOCX 20 pages", "audit DSF"
-  • enquete_formulaire : formulaire collecte de données (XLSForm) —
-    ex. "questionnaire satisfaction", "sondage", "audit conformité",
-    "formulaire d'enquête"
+  • enquete_formulaire : étude / formulaire collecte de données
+    (XLSForm) — ex. "questionnaire satisfaction", "sondage NPS",
+    "audit conformité", "formulaire d'enquête", "étude de marché
+    pour lancement produit", "test acceptabilité prix consommateur",
+    "enquête terrain bénéficiaires ONG", "étude consommateur jus
+    corossol". Une demande commençant par "je souhaite faire / lancer
+    / mener une étude / une enquête / un sondage" tombe ici.
   • article_blog : article de blog long SEO — ex. "rédige un article",
     "blog sur la fiscalité"
   • modification : modification INCRÉMENTALE d'un contenu existant —
@@ -99,8 +163,9 @@ retournes UN SEUL intent parmi cette liste fermée :
     ces ventes", "graphique des résultats"
   • traduction : traduction d'un texte/document
   • ocr_audio_transcription : extraction texte image OU transcription audio
-  • agent_recherche : question simple / recherche / chat conversationnel
-    sans génération de fichier — ex. "que pense-tu de…", "explique-moi…"
+  • agent_recherche : recherche métier qui doit déclencher un agent
+    spécialisé (juriste/comptable/RH/…), pas une question généraliste —
+    réserve qa_simple aux questions sans besoin d'agent vertical.
   • autre : ne correspond clairement à aucune catégorie
 
 RÈGLES IMPORTANTES :
@@ -149,9 +214,70 @@ async def classifier_intent(
     """
     from core.ia_client import ia_client, ModeIA, ModelePrioritaire
 
+    # Contexte session : si un livrable a été généré récemment, on l'expose
+    # au LLM pour qu'il puisse trancher entre qa_simple et modification en
+    # fonction de l'INTENTION sémantique (ajouter/modifier vs simple curiosité).
+    contexte_session = ""
+    if payload.has_files:
+        # Principe pur, pas de keyword listing — le LLM Sonnet a la
+        # capacité sémantique de comprendre l'INTENTION sans lexique fermé.
+        contexte_session = (
+            "\n\n📎 has_files = True (un fichier est joint).\n"
+            "L'utilisateur a uploadé un fichier ; tu dois identifier ce qu'il "
+            "veut FAIRE de ce fichier. qa_simple ne s'applique presque jamais "
+            "ici : un fichier est joint pour être TRAITÉ, pas pour engager "
+            "une conversation philosophique.\n"
+            "\n"
+            "Mappe l'INTENTION sémantique vers l'intent technique.\n"
+            "\n"
+            "⚠️ DISTINCTION CRITIQUE traduction vs conversion :\n"
+            "  - TRADUIRE = changer la LANGUE du contenu. Le format de "
+            "sortie reste identique à l'entrée. Verbes : traduire, "
+            "translate, traduis, mettre en anglais, passer en arabe… "
+            "→ **traduction**\n"
+            "  - CONVERTIR / TRANSFORMER + format cible explicite (Word, "
+            "docx, Excel, pptx) = changer le FORMAT bureautique, langue "
+            "identique. → **ocr_audio_transcription**\n"
+            "  Si le brief combine les deux (« traduis ce PDF en Word »), "
+            "traduction prime — l'endpoint de traduction sait déjà gérer "
+            "le format de sortie.\n"
+            "\n"
+            "Autres intents :\n"
+            "  - exploiter les DONNÉES du fichier (statistiques, "
+            "graphiques, insights) → analyse_donnees\n"
+            "  - retoucher / enrichir / corriger un livrable précédent → "
+            "modification\n"
+            "  - condenser le contenu (résumé, synthèse, points-clés) → "
+            "rapport_docx\n"
+            "  - extraire le texte d'image/audio (lire, transcrire) → "
+            "ocr_audio_transcription\n"
+            "\n"
+            "Tu connais la sémantique du français mieux qu'une regex — "
+            "décide à partir du verbe et de l'objet, pas d'une liste."
+        )
+    if payload.dernier_doc_titre:
+        contexte_session += (
+            f"\n\n📎 CONTEXTE SESSION — dernier livrable généré :\n"
+            f"  • Titre : {payload.dernier_doc_titre[:200]}\n"
+            f"  • Type  : {payload.dernier_doc_type or 'document'}\n"
+            f"\nSi le brief courant fait référence à CE livrable (l'enrichir, "
+            f"corriger, ajouter une section, demander pourquoi tel point manque), "
+            f"classe en 'modification'. Si le brief est une question d'info sur "
+            f"le SUJET du livrable mais SANS vouloir le modifier (ex : "
+            f"l'utilisateur veut juste comprendre, discuter), classe en 'qa_simple'."
+        )
+    if not payload.has_files and not payload.dernier_doc_titre:
+        contexte_session = (
+            "\n\nAucun fichier joint ni livrable précédent dans la session. "
+            "Si le brief n'est pas une commande de production explicite "
+            "(verbe impératif + objet livrable), c'est probablement qa_simple "
+            "(chat conversationnel)."
+        )
+
     user_prompt = (
         f"BRIEF UTILISATEUR :\n{payload.brief[:2000]}\n\n"
-        f"has_files = {payload.has_files}\n\n"
+        f"has_files = {payload.has_files}"
+        f"{contexte_session}\n\n"
         f"Classifie cet intent."
     )
     try:
@@ -163,7 +289,14 @@ async def classifier_intent(
             json_attendu=True,
             utiliser_cache=True,
             cache_ttl=1800,  # 30 min — un même brief = même intent
-            forcer_modele=ModelePrioritaire.CLAUDE_HAIKU,  # rapide + pas cher
+            # Sonnet, pas Haiku : la classification d'intent demande de la
+            # nuance sémantique (« convertit ce PDF en Word » avec PDF
+            # joint = conversion de format = ocr, pas qa_simple). Haiku
+            # 4.5 et GPT-4.1-nano misclassifient sur ces cas → routages
+            # ratés et frustration utilisateur. Sonnet 4.6 résout ça
+            # naturellement sans liste de mots-clés. Cache 30 min reste
+            # actif pour économiser sur les briefs répétés.
+            forcer_modele=ModelePrioritaire.CLAUDE_SONNET,
         )
     except Exception as e:
         logger.warning(f"[Chat/intent] LLM échec : {e}")

@@ -1,9 +1,11 @@
 /**
  * SurveyAnalytics — Tableau de bord des réponses collectées.
- * KPIs + distribution par question + table brute + export CSV.
+ * KPIs + distribution par question + table brute + export CSV +
+ * analyses conversationnelles à la demande (Phase E4) avec
+ * suggestions cliquables (P3 #9).
  */
-import { useMemo } from "react";
-import { Download, Users, CheckSquare, Clock, BarChart3 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Download, Users, CheckSquare, Clock, BarChart3, Sparkles, Send, Loader2 } from "lucide-react";
 import { enquetesApi } from "@/api/client";
 
 export interface AnalyticsQuestion {
@@ -15,11 +17,23 @@ export interface AnalyticsQuestion {
   ordre?: number;
 }
 
+interface PromptAnalysisResult {
+  prompt: string;
+  titre_analyse?: string;
+  synthese_md?: string;
+  tableaux?: { titre: string; donnees: any[][] }[];
+  graphiques?: Record<string, string>;
+  n_reponses_analyses?: number;
+}
+
 interface Props {
   etude_id: string;
   formulaireTitre?: string;
   questions: AnalyticsQuestion[];
   reponses: Record<string, any>[];
+  // Phase E1 — suggestions générées par le LLM à la création de l'étude.
+  // Affichées comme boutons 1-clic qui déclenchent /analyser-prompt.
+  analyses_suggerees?: string[];
 }
 
 const CHART_COLORS = ["#0054A6", "#0A7BC4", "#3B9FE0", "#6AB8F7", "#94D1FF", "#C4E5FF"];
@@ -56,7 +70,39 @@ const computeDistribution = (q: AnalyticsQuestion, reponses: Record<string, any>
 const isCategorical = (q: AnalyticsQuestion) =>
   ["select_one", "select_multiple", "oui_non", "likert", "rating"].includes(q.type_question);
 
-export const SurveyAnalytics = ({ etude_id, formulaireTitre, questions, reponses }: Props) => {
+export const SurveyAnalytics = ({ etude_id, formulaireTitre, questions, reponses, analyses_suggerees }: Props) => {
+  // État conversation analyse (multi-tour côté front, multi-tour côté
+  // backend via `avec_historique: true` qui injecte l'historique stocké).
+  const [promptDraft, setPromptDraft] = useState("");
+  const [history, setHistory] = useState<PromptAnalysisResult[]>([]);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+
+  const lancerAnalyse = async (prompt: string) => {
+    const p = (prompt || "").trim();
+    if (!p || analyzing) return;
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    try {
+      const res = await enquetesApi.analyserPrompt(etude_id, p, {
+        avec_historique: history.length > 0,
+      });
+      setHistory(h => [...h, {
+        prompt: p,
+        titre_analyse: res.titre_analyse,
+        synthese_md: res.synthese_md,
+        tableaux: res.tableaux,
+        graphiques: res.graphiques,
+        n_reponses_analyses: res.n_reponses_analyses,
+      }]);
+      setPromptDraft("");
+    } catch (e: any) {
+      const detail = e?.response?.data?.detail || e?.message || "Erreur";
+      setAnalyzeError(typeof detail === "string" ? detail : JSON.stringify(detail).slice(0, 200));
+    } finally {
+      setAnalyzing(false);
+    }
+  };
   const sorted = useMemo(() => [...questions].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0)), [questions]);
   const catQuestions = sorted.filter(isCategorical);
   const completionRate = useMemo(() => {
@@ -158,6 +204,74 @@ export const SurveyAnalytics = ({ etude_id, formulaireTitre, questions, reponses
             </div>
           );
         })}
+      </div>
+
+      {/* Phase E4 — Analyses conversationnelles à la demande */}
+      <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-400/20 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-4 h-4 text-violet-300" />
+          <h4 className="text-sm font-semibold text-white">Analyses conversationnelles</h4>
+        </div>
+        {analyses_suggerees && analyses_suggerees.length > 0 && history.length === 0 && (
+          <div className="mb-3">
+            <p className="text-xs text-gray-400 mb-2">Suggestions Yukpo (1 clic = 1 analyse) :</p>
+            <div className="flex flex-wrap gap-1.5">
+              {analyses_suggerees.map((s, i) => (
+                <button
+                  key={i}
+                  disabled={analyzing}
+                  onClick={() => lancerAnalyse(s)}
+                  className="text-xs px-2.5 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.10] text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-left max-w-[280px]"
+                  title={s}
+                >
+                  {s.length > 60 ? s.slice(0, 57) + "…" : s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={promptDraft}
+            onChange={e => setPromptDraft(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !analyzing) lancerAnalyse(promptDraft); }}
+            placeholder={history.length > 0 ? "Question de suivi (« et par âge maintenant ? »)…" : "Pose une question d'analyse (ex. : « score NPS par genre »)"}
+            className="flex-1 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.10] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-400/50"
+            disabled={analyzing}
+          />
+          <button
+            onClick={() => lancerAnalyse(promptDraft)}
+            disabled={analyzing || !promptDraft.trim()}
+            className="px-3 py-2 rounded-lg bg-violet-500 hover:bg-violet-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          </button>
+        </div>
+        {analyzeError && <p className="text-xs text-rose-400 mt-2">{analyzeError}</p>}
+        {history.length > 0 && (
+          <div className="mt-4 space-y-3">
+            {history.map((h, i) => (
+              <div key={i} className="rounded-lg bg-black/20 border border-white/[0.05] p-3">
+                <p className="text-xs text-violet-300 font-medium mb-1">{h.prompt}</p>
+                {h.titre_analyse && <h5 className="text-sm font-semibold text-white mb-1">{h.titre_analyse}</h5>}
+                {h.synthese_md && (
+                  <div className="text-xs text-gray-200 whitespace-pre-wrap leading-relaxed">{h.synthese_md}</div>
+                )}
+                {h.graphiques && Object.keys(h.graphiques).length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                    {Object.entries(h.graphiques).map(([nom, b64]) => (
+                      <img key={nom} src={`data:image/png;base64,${b64}`} alt={nom} className="rounded border border-white/[0.05] w-full" />
+                    ))}
+                  </div>
+                )}
+                {h.n_reponses_analyses != null && (
+                  <p className="text-[10px] text-gray-500 mt-1">{h.n_reponses_analyses} réponses analysées</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">

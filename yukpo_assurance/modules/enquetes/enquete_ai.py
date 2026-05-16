@@ -305,6 +305,7 @@ Règles :
 
 async def analyser_par_prompt(
     etude_id: str, prompt_analyse: str,
+    historique: Optional[list[dict]] = None,
 ) -> dict:
     """LLM Sonnet → plan JSON → exécution sandbox pandas → graphiques + synthèse.
 
@@ -334,23 +335,40 @@ async def analyser_par_prompt(
             "plan_execute": [],
         }
 
-    # 1. Schéma compact pour Sonnet
+    # 1. Schéma compact pour Sonnet — utiliser name_xlsform comme clé pandas
+    # (cohérent avec la PWA collecte et les expressions `relevant`). Exposer
+    # les VALUES des choix (pas les labels) car le DataFrame stocke ce que
+    # la PWA a soumis, qui sont les `value`. Les labels sont pour humanizer
+    # les graphiques mais Sonnet doit raisonner sur les valeurs réelles.
     schema = []
     for q in etude.formulaire.questions:
+        if q.choices_meta:
+            choices = [c.get("value") for c in q.choices_meta][:8]
+        elif q.options:
+            choices = q.options[:8]
+        else:
+            choices = None
         schema.append({
-            "id":    q.id,
-            "label": q.label[:80],
-            "type":  q.type,
-            "choices": (
-                [c.get("value") for c in (q.choices or [])][:8]
-                if q.choices else None
-            ),
+            "id":    q.name_xlsform or q.question_id,
+            "label": q.libelle[:80],
+            "type":  q.type_question,
+            "choices": choices,
         })
     schema_str = json.dumps(schema, ensure_ascii=False)
+    # Historique conversationnel : permet "et maintenant par genre" /
+    # "compare au tour précédent". Chaque entrée : {prompt, titre, synthese_md}.
+    historique_str = ""
+    if historique:
+        last = historique[-5:]
+        historique_str = "\n\nHISTORIQUE ANALYSES PRÉCÉDENTES (résumées) :\n" + "\n".join(
+            f"- Q{i+1}: {h.get('prompt','')[:200]}\n  Insight: {(h.get('synthese_md') or '')[:300]}"
+            for i, h in enumerate(last)
+        )
     user_prompt = (
         f"SCHÉMA :\n{schema_str}\n\n"
-        f"NOMBRE DE RÉPONSES : {len(reponses)}\n\n"
-        f"DEMANDE D'ANALYSE :\n{prompt_analyse}"
+        f"NOMBRE DE RÉPONSES : {len(reponses)}"
+        f"{historique_str}\n\n"
+        f"DEMANDE D'ANALYSE COURANTE :\n{prompt_analyse}"
     )
 
     # Plan d'analyse → modèle puissant pour gérer la complexité statistique
@@ -500,7 +518,10 @@ async def analyser_par_prompt(
                 systeme="Tu es un analyste de données. Sois concis, pointu, "
                         "concret. Pas de blabla méthodologique.",
                 mode=ModeIA.REDACTION,
-                max_tokens_override=1500,
+                # 3000 tokens : permet 6-10 bullets d'insights actionnables
+                # sur des analyses N=500+ avec écarts notables détaillés,
+                # pas une synthèse expéditive de 4 lignes.
+                max_tokens_override=3000,
                 utiliser_cache=False,
             )
             synthese_md = rep_s.contenu if hasattr(rep_s, "contenu") else str(rep_s)

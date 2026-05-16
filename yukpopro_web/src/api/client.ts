@@ -382,10 +382,17 @@ export const generateurApi = {
     mode?: "standard" | "premium" | "ultra";
     aspect_ratio?: "16:9" | "9:16" | "1:1" | "4:3";
     seed?: number;
+    /** Voix-off narrative ElevenLabs (Adam/Sarah). Coût additionnel ~10 FCFA/15s. */
+    avec_son?: boolean;
+    /** Force la voix : "male" (Adam) ou "female" (Sarah). Sinon le LLM choisit. */
+    voix?: "male" | "female";
   }): Promise<{
     ok: boolean; fichier_id: string; url_telechargement: string;
     duree_s: number; mode: string; aspect_ratio: string;
     size_kb: number; cout_fcfa: number;
+    avec_son?: boolean;
+    audio_meta?: { voix?: string; langue?: string; script?: string;
+                   tts_ok?: boolean; mux_ok?: boolean; raison?: string } | null;
   }> => {
     const { data } = await http.post("/bureau/video/generer", req, { timeout: 600_000 });
     return data;
@@ -1971,6 +1978,40 @@ export const enquetesApi = {
 
   analyserCommentaires: async (etude_id: string): Promise<any> => {
     const { data } = await http.post(`/enquetes/${etude_id}/analyser-commentaires`, {}, { timeout: 180_000 });
+    return data;
+  },
+
+  // Phase E4 — Analyse conversationnelle "à la demande" (LLM plan + pandas
+  // sandbox + charts + synthèse). Renvoie {titre_analyse, tableaux,
+  // graphiques: {nom: b64}, synthese_md, plan_execute, n_reponses_analyses}.
+  analyserPrompt: async (
+    etude_id: string,
+    prompt: string,
+    opts: { avec_historique?: boolean; confirmer_cout?: boolean } = {},
+  ): Promise<any> => {
+    const { data } = await http.post(
+      `/enquetes/${etude_id}/analyser-prompt`,
+      { prompt, avec_historique: opts.avec_historique ?? false, confirmer_cout: opts.confirmer_cout ?? false },
+      { timeout: 180_000 },
+    );
+    return data;
+  },
+
+  // P3 #11 — Dupliquer une étude (wave 2 NPS, audit annuel). Le formulaire
+  // est cloné avec nouveau formulaire_id, les réponses ne sont PAS copiées.
+  dupliquer: async (etude_id: string, nouveau_titre?: string): Promise<any> => {
+    const { data } = await http.post(
+      `/enquetes/${etude_id}/dupliquer`,
+      nouveau_titre ? { nouveau_titre } : {},
+    );
+    return data;
+  },
+
+  // P3 #12 — Diffusion du lien public via WhatsApp + Email (infra Yukpo).
+  inviter: async (etude_id: string, payload: {
+    telephones?: string[]; emails?: string[]; message?: string;
+  }): Promise<any> => {
+    const { data } = await http.post(`/enquetes/${etude_id}/inviter`, payload);
     return data;
   },
 

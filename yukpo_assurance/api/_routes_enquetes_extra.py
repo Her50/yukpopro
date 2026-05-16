@@ -12,10 +12,25 @@ from modules.enquetes.persistence import sauvegarder_etude
 extra_router = APIRouter()
 
 
+def _etude_owner_ou_404(etude_id: str, user_id: int):
+    """Garde-fou ownership identique à routes_enquetes._etude_owner_ou_404.
+
+    Dupliqué ici pour éviter un import circulaire (routes_enquetes inclut
+    déjà extra_router). Tout endpoint extra qui prend etude_id en URL
+    DOIT passer par ici avant d'appeler hdp.* (qui lit _etudes direct
+    sans filtrage ownership).
+    """
+    etude = ge.get_etude_user(user_id, etude_id)
+    if not etude:
+        raise HTTPException(404, "Étude introuvable")
+    return etude
+
+
 # ─── Dictionnaire des variables ────────────────────────────────────────────────
 
 @extra_router.get("/{etude_id}/dictionnaire", summary="Récupérer le dictionnaire des variables")
 async def get_dictionnaire(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     try:
         res = hdp.get_dictionnaire_variables(etude_id)
     except ValueError as e:
@@ -30,6 +45,7 @@ async def put_dictionnaire(
     payload: dict = Body(...),
     current_user: TokenData = Depends(get_current_user),
 ):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         variables = payload.get("variables") if isinstance(payload, dict) else None
@@ -50,6 +66,7 @@ async def put_dictionnaire(
     summary="Générer automatiquement le dictionnaire des variables via IA",
 )
 async def post_dictionnaire_ia(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         res = await hdp.generer_dictionnaire_ia(etude_id)
@@ -69,6 +86,7 @@ async def post_dictionnaire_ia(etude_id: str, current_user: TokenData = Depends(
 
 @extra_router.get("/{etude_id}/plan-analyse", summary="Récupérer le plan d'analyse")
 async def get_plan(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     try:
         res = hdp.get_plan_analyse(etude_id)
     except ValueError as e:
@@ -83,6 +101,7 @@ async def put_plan(
     payload: dict = Body(...),
     current_user: TokenData = Depends(get_current_user),
 ):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         res = hdp.set_plan_analyse(etude_id, payload.get("plan_analyse", ""))
@@ -100,6 +119,7 @@ async def put_plan(
     summary="Générer le plan d'analyse automatiquement via IA",
 )
 async def post_plan_ia(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         res = await hdp.generer_plan_analyse_ia(etude_id)
@@ -123,6 +143,7 @@ async def post_plan_ia(etude_id: str, current_user: TokenData = Depends(get_curr
     response_class=Response,
 )
 async def export_questionnaire_docx(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         content = hdp.generer_questionnaire_docx_bytes(etude_id)
@@ -148,6 +169,7 @@ async def export_questionnaire_docx(etude_id: str, current_user: TokenData = Dep
     response_class=Response,
 )
 async def export_plan_docx(etude_id: str, current_user: TokenData = Depends(get_current_user)):
+    _etude_owner_ou_404(etude_id, current_user.user_id)
     await fact.precheck(current_user.user_id)
     try:
         content = hdp.generer_plan_analyse_docx_bytes(etude_id)
