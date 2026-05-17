@@ -266,10 +266,13 @@ export const ChatPage = () => {
               dernier_doc_titre: _dernierDoc?.titre || null,
               dernier_doc_type:  _dernierDoc?.type  || null,
             },
-            { timeout: 5_000 },
+            { timeout: 10_000 },
           );
-          // race avec timeout 4s — on ne laisse pas le classifier ralentir
-          const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("classify-timeout")), 4_000));
+          // race avec timeout 8s — couvre les cold starts Fly (Sonnet ~3-5s
+          // à froid). Cf. incident 2026-05-17 : timeout 4s tuait la réponse
+          // classify-intent (conf=0.95 arrivée trop tard), fallback regex
+          // ne sauvait pas les briefs avec typos → routage raté.
+          const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("classify-timeout")), 8_000));
           const res: any = await Promise.race([llmCall, timeout]).catch(() => null);
           if (res?.data?.intent && res.data.confidence >= 0.55) {
             llmIntent = { intent: res.data.intent, confidence: res.data.confidence };
@@ -284,6 +287,12 @@ export const ChatPage = () => {
         // ("pourquoi Taiwan est important ?") d'une modif formulée en
         // question ("tu peux ajouter une section sur Taiwan ?"). On lui
         // fait confiance — pas de regex sur la forme interrogative.
+        // 100% LLM-first : aucune regex de bypass. Le classifier Sonnet
+        // côté backend doit décider seul (cf. memory feedback_llm_first_
+        // routing). Les fautes de frappe, formulations polies, intentions
+        // implicites — tout est géré par la sémantique LLM. Si la
+        // classification est mauvaise, on AMÉLIORE LE PROMPT, jamais
+        // n'ajoute de keyword matching côté frontend.
         if (llmIntent?.intent === "qa_simple") {
           try {
             updateLastAssistantMessage("💬 …", null);
@@ -802,12 +811,27 @@ export const ChatPage = () => {
               { brief: content, langue: "fr" },
               { timeout: 180_000 },
             );
+            // URLs absolues backend + token JWT pour les téléchargements
+            // auth-protégés (XLSForm). Le lien public formulaire est servi
+            // côté Netlify (proxy /api/v1/* → Fly) donc une URL avec
+            // window.location.origin marche (HTML public sans auth).
+            const _tokE = localStorage.getItem("yukpopro_token") || "";
+            const _isProdE = typeof import.meta !== "undefined" &&
+              Boolean((import.meta as any).env?.PROD);
+            const _envBaseE = (typeof import.meta !== "undefined" &&
+              (import.meta as any).env?.VITE_API_URL) || null;
+            const _apiAbsE = _envBaseE
+              ? _envBaseE.replace(/\/api\/v\d+\/?$/, "")
+              : (_isProdE ? "https://yukpopro-backend.fly.dev" : window.location.origin);
+            const lienPublicAbs = `${window.location.origin}${data.lien_public}`;
+            const xlsformAbs = `${_apiAbsE}${data.lien_xlsform_download}`
+              + (_tokE ? `?token=${encodeURIComponent(_tokE)}` : "");
             updateLastAssistantMessage(
               `✓ **${data.titre}** — ${data.nb_questions} questions générées.\n\n` +
-              `🔗 **Lien public de collecte** : copie/colle ce lien pour récolter des réponses :\n` +
-              `\`${window.location.origin}${data.lien_public}\`\n\n` +
+              `🔗 **Lien public de collecte** (formulaire mobile-first) :\n` +
+              `[${lienPublicAbs}](${lienPublicAbs})\n\n` +
               `📊 [Voir l'étude et analyser les réponses](/enquetes/${data.etude_id})\n` +
-              `📥 [Télécharger XLSForm](${data.lien_xlsform_download})\n\n` +
+              `📥 [Télécharger XLSForm](${xlsformAbs})\n\n` +
               (data.analyses_suggerees?.length
                 ? `_Analyses suggérées une fois les réponses collectées :_\n` +
                   data.analyses_suggerees.map((a: string) => `- ${a}`).join("\n")
