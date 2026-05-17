@@ -1178,12 +1178,50 @@ def get_etude(etude_id: str) -> Optional[Etude]:
     return _etudes.get(etude_id)
 
 
-def get_formulaire_public(formulaire_id: str) -> Optional[Formulaire]:
+async def get_formulaire_public(formulaire_id: str) -> Optional[Formulaire]:
+    """Cherche un formulaire public — RAM d'abord, DB en fallback.
+
+    Async pour permettre le fallback DB sans bloquer l'event loop. Si
+    la machine vient de redémarrer (scale-to-zero) et que le warm-up
+    complet `charger_toutes_etudes()` n'a pas encore eu lieu, on charge
+    juste l'étude qui contient ce formulaire_id depuis Postgres.
+    """
     etude_id = _formulaires_publics.get(formulaire_id)
-    if not etude_id:
-        return None
-    etude = _etudes.get(etude_id)
-    return etude.formulaire if etude else None
+    if etude_id:
+        etude = _etudes.get(etude_id)
+        if etude and etude.formulaire:
+            return etude.formulaire
+    # Fallback DB async
+    try:
+        from core.database import async_session_maker, EtudeDB
+        from modules.enquetes.persistence import _dict_to_etude
+        from sqlalchemy import select as _sel
+        async with async_session_maker() as session:
+            rows = (await session.execute(_sel(EtudeDB))).scalars().all()
+        for row in rows:
+            d = row.data or {}
+            if not isinstance(d, dict):
+                continue
+            form_d = d.get("formulaire") or {}
+            fid_db = form_d.get("formulaire_id") if isinstance(form_d, dict) else None
+            if fid_db == formulaire_id:
+                etude = _dict_to_etude(d)
+                # Repopule la RAM pour accélérer les prochains appels
+                _etudes[etude.etude_id] = etude
+                _etude_owner[etude.etude_id] = row.user_id
+                if etude.formulaire:
+                    _formulaires_publics[etude.formulaire.formulaire_id] = etude.etude_id
+                return etude.formulaire
+    except Exception as e:
+        # Silent fallback : DB indisponible → on retourne None
+        try:
+            import logging as _lg
+            _lg.getLogger("yukpo_assurance.enquetes").warning(
+                f"[get_formulaire_public] fallback DB échec : {e}"
+            )
+        except Exception:
+            pass
+    return None
 
 
 # ─── XLSForm — export KoBoCollect / ODK / SurveyCTO ──────────────────────────

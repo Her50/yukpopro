@@ -2,6 +2,7 @@
 Routes Enquêtes & Études — Analyse qualitative IA + collecte quantitative (KoBoCollect-like)
 """
 import base64
+import json
 import logging
 import re
 import time as _time
@@ -257,8 +258,8 @@ async def generer_par_prompt_stream(
                 "formulaire_id": formulaire.formulaire_id,
                 "titre": etude.titre,
                 "nb_questions": len(formulaire.questions),
-                "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}",
-                "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/xlsform.xlsx",
+                "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}/page",
+                "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/formulaire/xlsform",
                 "analyses_suggerees": getattr(etude, "analyses_suggerees", []),
             })}
         except Exception as e:
@@ -314,9 +315,12 @@ async def generer_par_prompt(
         logger.error(f"[Enquetes/prompt] LLM échec user={current_user.user_id}: {e}")
         raise HTTPException(500, f"Erreur génération : {str(e)[:200]}")
 
-    # Persistance + débit LLM
+    # Persistance + débit LLM. Signature : (etude, user_id) — NE PAS
+    # inverser : précédemment l'inversion provoquait des erreurs silencieuses
+    # (try/except non bloquant) → études perdues après redémarrage machine
+    # scale-to-zero → 404 sur le XLSForm download et le lien public.
     try:
-        await sauvegarder_etude(current_user.user_id, etude)
+        await sauvegarder_etude(etude, current_user.user_id)
     except Exception as e:
         logger.warning(f"[Enquetes/prompt] sauvegarde non bloquante : {e}")
 
@@ -339,8 +343,11 @@ async def generer_par_prompt(
         "formulaire_id": formulaire.formulaire_id,
         "titre": etude.titre,
         "nb_questions": len(formulaire.questions),
-        "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}",
-        "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/xlsform.xlsx",
+        # Lien public HTML PWA (sert /public/{fid}/page qui rend le formulaire
+        # mobile-first responsive offline-first). Le /page final est OBLIGATOIRE
+        # — sans lui c'est un 404.
+        "lien_public": f"/api/v1/enquetes/public/{formulaire.formulaire_id}/page",
+        "lien_xlsform_download": f"/api/v1/enquetes/{etude.etude_id}/formulaire/xlsform",
         "analyses_suggerees": getattr(etude, "analyses_suggerees", []),
     }
 
@@ -836,7 +843,7 @@ if ("serviceWorker" in navigator) {{
 )
 async def page_formulaire_public(formulaire_id: str):
     """Sert le HTML PWA du formulaire. PUBLIC (pas d'auth)."""
-    formulaire = ge.get_formulaire_public(formulaire_id)
+    formulaire = await ge.get_formulaire_public(formulaire_id)
     if not formulaire:
         raise HTTPException(404, "Formulaire introuvable")
     return HTMLResponse(_construire_html_formulaire_public(formulaire))
@@ -862,7 +869,7 @@ _PWA_ICON_SVG = (
 )
 async def manifest_pwa(formulaire_id: str):
     """Manifest installable. Icons SVG (any + maskable) — Chrome OK."""
-    formulaire = ge.get_formulaire_public(formulaire_id)
+    formulaire = await ge.get_formulaire_public(formulaire_id)
     if not formulaire:
         raise HTTPException(404, "Formulaire introuvable")
     icon_url = f"/api/v1/enquetes/public/{formulaire_id}/icon.svg"
@@ -979,7 +986,7 @@ async def soumettre_reponse_publique(
     if not _rate_limit_ok(client_ip, formulaire_id):
         raise HTTPException(429, "Trop de soumissions. Patientez 1 minute.")
 
-    formulaire = ge.get_formulaire_public(formulaire_id)
+    formulaire = await ge.get_formulaire_public(formulaire_id)
     if not formulaire:
         raise HTTPException(404, "Formulaire introuvable")
 
@@ -1503,7 +1510,7 @@ async def creer_formulaire(
 @router.get("/formulaire/{formulaire_id}", summary="Afficher un formulaire (public — sans auth)")
 async def afficher_formulaire(formulaire_id: str):
     """Endpoint public — les répondants accèdent sans authentification."""
-    form = ge.get_formulaire_public(formulaire_id)
+    form = await ge.get_formulaire_public(formulaire_id)
     if not form or not form.actif:
         raise HTTPException(404, "Formulaire introuvable ou fermé")
     return {
